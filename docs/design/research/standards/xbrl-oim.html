@@ -1,0 +1,1053 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns:s="http://xbrl.org/specification/2007" xmlns:diff="http://xbrl.org/specification/2007/diff"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Open Information Model 1.0</title><link rel="stylesheet" type="text/css" href="styles.css"></head><body><div class="head">
+<h1><a name="title" id="title"></a>Open Information Model 1.0</h1>
+<h2>Recommendation 13 October 2021</h2><p>Copyright ©  XBRL International Inc., All Rights Reserved.</p><dl><dt>This version:</dt><dd><a href="http://www.xbrl.org/Specification/oim/REC-2021-10-13/oim-REC-2021-10-13.html">&lt;http://www.xbrl.org/Specification/oim/REC-2021-10-13/oim-REC-2021-10-13.html&gt;</a></dd><dt>Editors:</dt><dd><a name="p-pdw" id="p-pdw"></a>
+        Paul Warren, 
+         
+          <span>XBRL International Inc.</span>
+        
+         <a href="mailto:pdw@xbrl.org">&lt;<span>pdw@xbrl.org</span>&gt;</a>
+      </dd><dd><a name="p-hf" id="p-hf"></a>
+        Herm Fischer, 
+         
+          <span>Mark V Systems Limited</span>
+        
+         <a href="mailto:fischer@markv.com">&lt;<span>fischer@markv.com</span>&gt;</a>
+      </dd><dd><a name="p-mrg" id="p-mrg"></a>
+        Mark Goodhand, 
+         
+          <span>CoreFiling</span>
+        
+         <a href="mailto:mrg@corefiling.com">&lt;<span>mrg@corefiling.com</span>&gt;</a>
+      </dd><dt>Contributors:</dt><dd><a name="p-djd" id="p-djd"></a>
+        Daniel Dracott, 
+         
+          <span>CoreFiling</span>
+        
+         <a href="mailto:djd@corefiling.com">&lt;<span>djd@corefiling.com</span>&gt;</a>
+      </dd><dd><a name="p-ejj" id="p-ejj"></a>
+        Eleanor Joslin, 
+         
+          <span>CoreFiling</span>
+        
+         <a href="mailto:ejj@corefiling.com">&lt;<span>ejj@corefiling.com</span>&gt;</a>
+      </dd></dl><hr><div><h2><a name="status" id="status"></a>Status</h2><p>Circulation of this Recommendation is unrestricted. This document is normative. 
+            Recipients are invited to submit comments to
+          <a href="mailto:oim@xbrl.org">oim@xbrl.org</a>,
+          
+            and to submit notification of any relevant patent rights 
+            of which they are aware and provide supporting 
+            documentation.
+          </p></div><div>
+<h2><a name="abstract" id="abstract"></a>Abstract</h2>
+      <p>
+
+This document describes a syntax-independent model for business reports that
+conform to the XBRL v2.1 and XBRL Dimensions v1.0 specifications.  The model is
+intended to enable easy and lossless transformation of a well defined set of
+semantics between a variety of different syntactic representations, including
+the XML syntax defined in the above specifications.
+    
+      </p>
+
+    </div></div><div class="toc">
+<h2><a name="contents" id="contents"></a>Table of Contents</h2><p class="toc"><span>1 <a href="#sec-intro">Introduction</a><br>
+<span>   1.1 <a href="#sec-scope">Scope</a><br>
+</span><span>   1.2 <a href="#sec-terminology">Terminology</a><br>
+<span>      1.2.1 <a href="#sec-collections">Collections</a><br>
+</span></span><span>   1.3 <a href="#sec-namespaces">Namespaces and namespace prefixes</a><br>
+</span></span><span>2 <a href="#sec-processor">Processors</a><br>
+</span><span>3 <a href="#sec-report-model">XBRL Report Model</a><br>
+<span>   3.1 <a href="#sec-datatypes">Datatypes</a><br>
+<span>      3.1.1 <a href="#sec-data-types-registry">Data Type Registry</a><br>
+</span></span><span>   3.2 <a href="#sec-report">Reports</a><br>
+</span><span>   3.3 <a href="#sec-dts-facts">Facts</a><br>
+</span><span>   3.4 <a href="#d1e1187">Dimensions</a><br>
+</span><span>   3.5 <a href="#d1e2007">Links</a><br>
+<span>      3.5.1 <a href="#sec-footnotes">Footnotes</a><br>
+<span>         3.5.1.1 <a href="#sec-xbrl-note-element">The xbrl:note concept</a><br>
+</span></span></span></span><span>4 <a href="#sec-prefixed-content">Prefixed content</a><br>
+</span><span>5 <a href="#sec-equality-and-equivalence">Equality and equivalence</a><br>
+<span>   5.1 <a href="#sec-equality-definitions">Equality definitions</a><br>
+<span>      5.1.1 <a href="#sec-fact-value-equality">Fact value equality</a><br>
+</span><span>      5.1.2 <a href="#sec-td-dimension-value-equality">Taxonomy-defined dimension value equality</a><br>
+</span><span>      5.1.3 <a href="#sec-relative-uri-comparison">URI comparison</a><br>
+</span><span>      5.1.4 <a href="#sec-note-comparison">Comparison of xbrl:note facts </a><br>
+</span><span>      5.1.5 <a href="#sec-canonical-language-value">Canonical language value</a><br>
+</span></span><span>   5.2 <a href="#sec-equivalence-definitions">Equivalence definitions</a><br>
+</span></span><span>6 <a href="#sec-duplicate-facts">Duplicate and alternative facts</a><br>
+<span>   6.1 <a href="#sec-complete-duplicates">Complete duplicates</a><br>
+</span><span>   6.2 <a href="#sec-consistent-duplicates">Consistent duplicates</a><br>
+<span>      6.2.1 <a href="#sec-numeric-value-consistency">Numeric value consistency</a><br>
+</span></span><span>   6.3 <a href="#sec-inconsistent-duplicates">Inconsistent duplicates</a><br>
+</span><span>   6.4 <a href="#sec-multi-language-alternatives">Multi-language alternatives</a><br>
+</span><span>   6.5 <a href="#sec-multi-unit-alternatives">Multi-unit alternatives</a><br>
+</span></span></p>
+<h3><a name="appendices" id="appendices"></a>Appendices</h3><p class="toc"><span>A <a href="#sec-references">References</a><br>
+</span><span>B <a href="#sec-ip-status">Intellectual property status (non-normative)</a><br>
+</span><span>C <a href="#sec-history"> Document History (non-normative)</a><br>
+</span><span>D <a href="#sec-errata">Errata Corrections incorporated in this document</a><br>
+</span></p><h3><a name="examples" id="examples"></a>Table</h3><p class="toc">1 <a href="#table-namespaces">Namespaces and namespace prefixes</a><br></p>
+<h3><a name="definitions" id="definitions"></a>Definitions</h3><p class="toc"><a href="#term-canonical-language-value">Canonical language value</a><br><a href="#term-complete-duplicates">Complete duplicates</a><br><a href="#term-component">Component</a><br><a href="#component-concept-core-dimension">Concept Core Dimension (Component)</a><br><a href="#term-conformant-processor">Conformant processor</a><br><a href="#term-consistent-duplicates">Consistent duplicates</a><br><a href="#term-core-dimension">Core Dimension</a><br><a href="#term-dimension">Dimension</a><br><a href="#term-duplicate-facts">Duplicate facts</a><br><a href="#component-entity-core-dimension">Entity Core Dimension (Component)</a><br><a href="#term-enumeration-fact">Enumeration fact</a><br><a href="#term-equal-dimension-value">Equal dimension value</a><br><a href="#term-equal-fact-property">Equal fact property</a><br><a href="#term-equal-facts">Equal facts</a><br><a href="#term-equal-reports">Equal reports</a><br><a href="#term-equivalent-fact-property">Equivalent fact property</a><br><a href="#term-equivalent-facts">Equivalent facts</a><br><a href="#term-equivalent-reports">Equivalent reports</a><br><a href="#component-fact">Fact (Component)</a><br><a href="#term-fact-base-datatype">Fact base datatype</a><br><a href="#term-fact-datatype">Fact datatype</a><br><a href="#term-fact-period-type">Fact period type</a><br><a href="#term-fact-value-equality">Fact value equality</a><br><a href="#term-inconsistent-duplicates">Inconsistent duplicates</a><br><a href="#component-language-core-dimension">Language Core Dimension (Component)</a><br><a href="#component-linkgroup">Link group (Component)</a><br><a href="#term-list">List</a><br><a href="#term-multi-language-alternatives">Multi-language alternatives</a><br><a href="#term-multi-unit-alternatives">Multi-unit alternatives</a><br><a href="#term-fact-nillable">Nillable</a><br><a href="#term-non-numeric-fact">Non-numeric fact</a><br><a href="#term-non-text-fact">Non-text fact</a><br><a href="#component-note-id-core-dimension">Note ID core dimension (Component)</a><br><a href="#term-numeric-fact">Numeric fact</a><br><a href="#component-period-core-dimension">Period Core Dimension (Component)</a><br><a href="#term-prefixed-content">Prefixed content</a><br><a href="#term-property">Property</a><br><a href="#component-report">Report (Component)</a><br><a href="#term-set">Set</a><br><a href="#term-supported-dtr-types">Supported DTR types</a><br><a href="#term-supported-specification">Supported specification</a><br><a href="#component-taxonomy-defined-dimension">Taxonomy-defined Dimension (Component)</a><br><a href="#term-td-dimension-value-equality">Taxonomy-defined dimension value equality</a><br><a href="#term-text-fact">Text fact</a><br><a href="#term-typed-dimension-base-datatype">Typed dimension base datatype</a><br><a href="#component-unit-core-dimension">Unit Core Dimension (Component)</a><br><a href="#term-unordered-collection">Unordered collection</a><br><a href="#term-validating-conformant-processor">Validating conformant processor</a><br><a href="#term-xhtml-fragment">XHTML fragment</a><br></p>
+<h3><a name="error_codes" id="error_codes"></a>Error codes</h3><p class="toc"><a href="#disallowedDuplicateFacts">oime:disallowedDuplicateFacts</a> <br><a href="#duplicateFactDimension">oime:duplicateFactDimension</a> <br><a href="#duplicateFactId">oime:duplicateFactId</a> <br><a href="#illegalMultiLanguageAlternatives">oime:illegalMultiLanguageAlternatives</a> <br><a href="#illegalMultiUnitAlternatives">oime:illegalMultiUnitAlternatives</a> <br><a href="#illegalPureUnit">oime:illegalPureUnit</a> <br><a href="#illegalStandardFootnoteTarget">oime:illegalStandardFootnoteTarget</a> <br><a href="#invalidBaseURL">oime:invalidBaseURL</a> <br><a href="#invalidDimensionValue">oime:invalidDimensionValue</a> <a href="#invalidDimensionValue">2</a> <br><a href="#invalidFactId">oime:invalidFactId</a> <br><a href="#invalidFactValue">oime:invalidFactValue</a> <a href="#invalidFactValue">2</a> <br><a href="#invalidLanguage">oime:invalidLanguage</a> <br><a href="#invalidNoteIDValue">oime:invalidNoteIDValue</a> <br><a href="#invalidPeriodDimension">oime:invalidPeriodDimension</a> <a href="#invalidPeriodDimension2">2</a> <br><a href="#invalidUseOfReservedIdentifier">oime:invalidUseOfReservedIdentifier</a> <br><a href="#invalidXHTMLFragment">oime:invalidXHTMLFragment</a> <br><a href="#misplacedDecimalsProperty">oime:misplacedDecimalsProperty</a> <br><a href="#misplacedLanguageDimension">oime:misplacedLanguageDimension</a> <br><a href="#d1e2230">oime:misplacedNoteFactDimension</a> <a href="#misplacedNoteFactDimension">2</a> <br><a href="#misplacedNoteIDDimension">oime:misplacedNoteIDDimension</a> <br><a href="#misplacedUnitDimension">oime:misplacedUnitDimension</a> <br><a href="#missingConceptDimension">oime:missingConceptDimension</a> <br><a href="#missingFactId">oime:missingFactId</a> <br><a href="#missingLanguageForNoteFact">oime:missingLanguageForNoteFact</a> <br><a href="#missingNoteIDDimension">oime:missingNoteIDDimension</a> <br><a href="#missingPeriodDimension">oime:missingPeriodDimension</a> <br><a href="#noTaxonomy">oime:noTaxonomy</a> <br><a href="#unknownConcept">oime:unknownConcept</a> <br><a href="#unknownDimension">oime:unknownDimension</a> <br><a href="#unsupportedConceptDataType">oime:unsupportedConceptDataType</a> <a href="#unsupportedConceptDataType">2</a> <br><a href="#unsupportedDimensionDataType">oime:unsupportedDimensionDataType</a> <br><a href="#unusedNoteFact">oime:unusedNoteFact</a> <br><a href="#valueForAbstractConcept">oime:valueForAbstractConcept</a> <br><a href="#xhtmlElementInNonDefaultNamespace">oime:xhtmlElementInNonDefaultNamespace</a> <br></p></div><hr><div class="body">
+    <div class="div1"><a name="sec-intro" id="sec-intro"></a> 
+      <h1>1 Introduction</h1> 
+      <p>
+
+The XBRL v2.1 <a href="#XBRL">[XBRL 2.1]</a> and XBRL Dimensions v1.0 <a href="#DIMENSIONS">[DIMENSIONS]</a> specifications define an XML-based syntax for business
+reports, and accompanying metadata definitions known as taxonomies.  It is
+appealing to work with XBRL data in a variety of different formats such as
+JSON, relational and other databases and CSVs.  Such use is hampered by the
+lack of a clear definition of the information that may be considered
+significant in an XBRL report, as distinct from that which is syntactic detail.
+This leads to inconsistencies in the data that is understood and how it is
+represented, and often to the exposure of unnecessary syntactic detail to end
+users.
+
+      </p>
+      <p>
+
+This specification defines a syntax-independent model for an XBRL report, which
+allows different syntactic formats to be used to represent the same data.  The
+model captures a subset of the information that can be represented in the XML
+syntax defined by XBRL v2.1, in order to provide a simple and portable model.
+
+      </p>
+      <div class="div2"><a name="sec-scope" id="sec-scope"></a>
+        <h2>1.1 Scope</h2>
+        <p>
+
+This document provides a model for an XBRL report (or <span class="term">XBRL
+  instance</span>) that conforms to the set of <a href="#term-supported-specification">supported specifications</a>.  It
+does not attempt to model the metadata information defined in an XBRL
+taxonomy.  The Working Group recognises the importance of taxonomy information
+when working with XBRL data, but believes that there is considerable value in a
+model that is restricted in scope to XBRL report on its own, and thus has
+chosen to address this requirement first.
+
+        </p>
+        <p>
+
+Taxonomy information is expected to form the basis of future specifications
+that expose such information either in a separate model, or as layers of
+additional information that augment the model defined in this specification.
+
+        </p>
+        <span class="definition"><a name="term-supported-specification" id="term-supported-specification" title="Supported specification"></a>
+            <p>
+              The <span class="term">supported specifications</span> are:
+            </p>
+            <ul>
+              <li>XBRL v2.1 <a href="#XBRL">[XBRL 2.1]</a></li>  
+              <li>XBRL Dimensions v1.0 <a href="#DIMENSIONS">[DIMENSIONS]</a></li>  
+              <li>Extensible Enumerations v2.0 <a href="#ENUM2">[EXTENSIBLE ENUMERATIONS 2.0]</a></li>  
+            </ul>
+        </span>
+        
+      </div>
+      <div class="div2"><a name="sec-terminology" id="sec-terminology"></a>
+        <h2>1.2 Terminology</h2>
+        <p>
+    The key words <span class="term">MUST</span>, <span class="term">MUST NOT</span>, <span class="term">REQUIRED</span>, <span class="term">SHALL</span>, <span class="term">SHALL NOT</span>, 
+    <span class="term">SHOULD</span>, <span class="term">SHOULD NOT</span>, <span class="term">RECOMMENDED</span>, <span class="term">MAY</span>, and <span class="term">OPTIONAL</span>, in this
+    specification, are to be interpreted as described in <a href="#RFC2119">[IETF RFC 2119]</a>.
+</p>
+        <p>
+        The keywords
+          <span class="term">concept</span>, 
+          <span class="term">fact</span>,
+          <span class="term">footnote</span>,
+          and
+          <span class="term">taxonomy</span>,
+          as well as the terms <span class="term">nillable</span> and <span class="term">abstract</span> as applied to <span class="term">concept</span>s,
+          are to be interpreted as described in the XBRL specification <a href="#XBRL">[XBRL 2.1]</a>.
+        </p>
+        <p>
+          The keywords <span class="term">dimension</span>, <span class="term">hypercube</span>, <span class="term">typed dimension</span>, <span class="term">explicit dimension</span> and <span class="term">dimension default</span> are to be interpreted as described in the XBRL Dimensions specification <a href="#DIMENSIONS">[DIMENSIONS]</a>.
+        </p>
+
+        <p>
+            The keywords <span class="term">time interval</span>, <span class="term">local time</span> and <span class="term">zone designator</span>
+            are to be interpreted as defined in ISO 8601 <a href="#ISO8601">[ISO8601]</a>.
+        </p>
+        <div class="div3"><a name="sec-collections" id="sec-collections"></a>
+            <h3>1.2.1 Collections</h3>
+            <p>
+
+            This specification uses the following terms to refer to
+            collections.  The use of these terms indicates whether the order
+            and uniqueness of members is significant under the model, and thus
+            whether these properties need to be preserved when transforming 
+            <a href="#component-report">reports</a>.
+
+            </p>
+            <p>
+                <span class="definition"><a name="term-list" id="term-list" title="List"></a>A <span class="term">list</span> is an ordered sequence of members.  Members may be repeated within the list.</span> 
+            </p>
+            <p>
+                <span class="definition"><a name="term-unordered-collection" id="term-unordered-collection" title="Unordered collection"></a>An <span class="term">unordered collection</span> is a collection that may contain repeated members.  The number of times that each member appears is significant, but the order between them is not.  Also known as a <span class="term">bag</span> or <span class="term">multi-set</span>.</span> 
+            </p>
+            <p>
+                <span class="definition"><a name="term-set" id="term-set" title="Set"></a>A <span class="term">set</span> is an <a href="#term-unordered-collection">unordered collection</a> that contains no repeated members.</span> 
+            </p>
+        </div>
+      </div>
+
+      <div class="div2"><a name="sec-namespaces" id="sec-namespaces"></a>
+        <h2>1.3 Namespaces and namespace prefixes</h2>
+        <p>
+          Namespace prefixes <a href="#XMLNAMES">[XML Names]</a> will be used 
+          for elements and attributes in
+          the form <code>ns:name</code> where <code class="value">ns</code> is the 
+          namespace prefix and <code class="value">name</code> is the local name. 
+          Throughout this specification, the mappings
+          from namespace prefixes to actual namespaces are consistent
+          with <a href="#table-namespaces"><b> Table 1</b></a>.
+        </p>
+        
+        <p>
+          The prefix column in <a href="#table-namespaces"><b> Table 1</b></a> is non normative. 
+          The namespace URI column is normative.
+        </p>
+        <div class="chunkHeading"><a name="table-namespaces" id="table-namespaces"></a>Table 1: Namespaces and namespace prefixes</div><table class="namespaces">
+          
+          <thead>
+            <tr>
+              <th>Prefix</th>
+              <th>Namespace URI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>dtr-type</td>
+              <td>http://www.xbrl.org/dtr/type/*</td>
+            </tr>
+            <tr>
+              <td>xbrl</td>
+              <td>https://xbrl.org/2021</td>
+            </tr>
+            <tr>
+              <td>xbrli</td>
+              <td>http://www.xbrl.org/2003/instance</td>
+            </tr>
+            <tr>
+              <td>xs</td>
+              <td>http://www.w3.org/2001/XMLSchema</td>
+            </tr>
+            <tr>
+              <td>enum2</td>
+              <td>http://xbrl.org/2020/extensible-enumerations-2.0</td>
+            </tr>
+            <tr><td><code>oime</code></td><td><code>http://www.xbrl.org/2021/oim/error</code></td></tr>
+          </tbody>
+        </table>
+        <p>
+The prefix <code>dtr-type</code> denotes any namespace that is the namespace for a type defined in the Data Types Registry <a href="#DTR-STRUCTURE-1.1">[DTR STRUCTURE]</a>.
+        </p>
+      </div>
+
+    </div>
+    <div class="div1"><a name="sec-processor" id="sec-processor"></a>
+        <h1>2 Processors</h1>
+
+        <p>
+
+This specification defines two classes of processors:
+
+        </p>
+        <ul>
+
+            <li><span class="definition"><a name="term-conformant-processor" id="term-conformant-processor" title="Conformant processor"></a>A <span class="term">conformant processor</span> is any software that consumes data that conforms to the model defined in this document.</span> A <a href="#term-conformant-processor">conformant processor</a>&nbsp;<strong>MUST</strong> apply the constraints defined within this specification and raise an error with the specified code if any of the constraints are not satisfied.</li>
+
+            <li><span class="definition"><a name="term-validating-conformant-processor" id="term-validating-conformant-processor" title="Validating conformant processor"></a>A <span class="term">validating conformant processor</span> is a <a href="#term-conformant-processor">conformant processor</a> which additionally applies all constraints defined by the <a href="#term-supported-specification">supported specifications</a> and <a href="#term-supported-dtr-types">supported DTR types</a> for an xBRL-XML <a href="#XBRL-XML">[xBRL-XML]</a> representation of the data in a successfully-created model.</span>  The appropriate error codes from those specifications <strong>MUST</strong> be raised if it is not possible to construct an xBRL-XML representation that satisfies all such constraints.</li>
+        </ul>
+
+    </div>
+    <div class="div1"><a name="sec-report-model" id="sec-report-model"></a>
+      <h1>3 XBRL Report Model</h1>
+      <p>
+
+The report model is defined as a series of <span class="definition"><a name="term-component" id="term-component" title="Component"></a><span class="term">components</span></span>, each having a <a href="#term-set">set</a>
+of named <span class="definition"><a name="term-property" id="term-property" title="Property"></a><span class="term">properties</span></span>.  These components,
+and their associated properties are defined in the tables shown below.
+Components may also have constraints associated with them which all
+instantiations of these components must adhere to.
+
+      </p>
+      <div class="div2"><a name="sec-datatypes" id="sec-datatypes"></a>
+        <h2>3.1 Datatypes</h2>
+        <p>
+
+          The report model uses the XML Schema datatypes system <a href="#XMLSCHEMA-DATATYPES">[XML Schema Datatypes]</a> for defining the datatype of values.  
+          It does not make use of the XML Schema structures system <a href="#XMLSCHEMA-STRUCTURES">[XML Schema Structures]</a>, as this does not make sense outside of the context of an XML document.
+
+        </p>
+        <p>
+            Values in the <a href="#component-report">report model</a> refer to the value within the <a href="http://www.w3.org/TR/xmlschema-2/#value-space">value space</a>.  The lexical representation does not form part of the model.  
+        </p>
+        <div class="nonNormativeNote" id="d1e533">
+            <p>
+                For example, <code>1</code>, <code>1.0</code> and <code>1.00</code> are all alternative lexical representations of the same <code>xs:decimal</code> value.  An OIM processor must treat all these values as equal, and is not required to retain the lexical representation from which the value was obtained.
+            </p>
+        </div>
+        <p>
+
+          It should be noted that there are some references in this document to
+          XBRL "item types", such as <code>dtr-type:domainItemType</code>.
+          References to these item types are primarily to identify classes of
+          facts, based on their datatypes.  
+        </p>
+        <p>
+          Item types are technically XML schema complex types, as they contain
+          definitions of allowed XML attributes.  These attribute definitions
+          are not applicable to the report model, and values in the report model are only
+          required to comply with the "simple content" portions of these
+          datatypes (see <a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/#element-anyAttribute">complex type definitions with simple
+          content</a> <a href="#XMLSCHEMA-STRUCTURES">[XML Schema Structures]</a>).
+        </p>
+        <div class="div3"><a name="sec-data-types-registry" id="sec-data-types-registry"></a>
+            <h3>3.1.1 Data Type Registry</h3>
+            <p>
+
+            The Data Types Registry (DTR) <a href="#DTR-STRUCTURE-1.1">[DTR STRUCTURE]</a>
+            defines a set of additional datatypes which XBRL Processors may
+            optionally support.  A number of DTR types are referenced
+            directly by this specification, and are referred to as <a href="#term-supported-dtr-types">supported DTR types</a>.
+
+            </p>
+            <span class="definition"><a name="term-supported-dtr-types" id="term-supported-dtr-types" title="Supported DTR types"></a>
+                <p>
+                    The supported DTR types are:
+                </p>
+                <ul>
+                        <li><code>dtr-type:domainItemType</code></li>
+                        <li><code>dtr-type:noLangTokenItemType</code></li>
+                        <li><code>dtr-type:noLangStringItemType</code></li>
+                        <li><code>dtr-type:prefixedContentItemType</code></li>
+                        <li><code>dtr-type:prefixedContentType</code></li>
+                        <li><code>dtr-type:SQNameType</code></li>
+                        <li><code>dtr-type:SQNameItemType</code></li>
+                        <li><code>dtr-type:SQNamesType</code></li>
+                        <li><code>dtr-type:SQNamesItemType</code></li>
+                </ul>
+            </span>
+            <p>
+                Some DTR types include additional validation rules as part
+                of their registry definition.  <a href="#term-validating-conformant-processor">Validating conformant processors</a> are required to apply such rules to <a href="#term-supported-dtr-types">supported DTR types</a> (see <a href="#sec-processor"><b> Section 2</b></a>).
+            </p>
+        </div>
+      </div>
+      <div class="div2"><a name="sec-report" id="sec-report"></a>
+        <h2>3.2 Reports</h2>
+        <p>
+
+  The top-level <a href="#term-component">component</a> is a <a href="#component-report">report</a>.
+
+        </p>
+        <a name="component-report"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Report</span></div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{taxonomy}</dt><dd>A <a href="#term-list">list</a> of URLs to XML Schema document that together identify the taxonomy for the report.  The list <strong>MUST NOT</strong> be empty (<span class="errordefinition"><a name="noTaxonomy" id="noTaxonomy"></a>oime:noTaxonomy</span>).</dd><dt class="">{facts}</dt><dd>
+                <p>
+                    A <a href="#term-set">set</a> of <a href="#component-fact">facts</a>.  
+                
+                </p>
+            </dd><dt class="">{base-url}</dt><dd>
+                <p>
+                    An optional URL recording the location from which the
+                    <a href="#component-report">report</a> was loaded
+                    (or an explicitly specified alternative base URL).   {base-url} <strong>MUST</strong> 
+                    be an absolute URL (<span class="errordefinition"><a name="invalidBaseURL" id="invalidBaseURL"></a>oime:invalidBaseURL</span>).
+                </p>
+                    
+                <p>
+                    This
+                    URL <strong>MAY</strong> be used for resolving relative
+                    URLs appearing as <a href="#component-fact">fact</a> and <a href="#term-dimension">dimension</a>
+                    values within the <a href="#component-report">report</a>, 
+                    although such resolution will depend on the definition of
+                    the <a href="#component-concept-core-dimension">concepts</a> and <a href="#term-dimension">dimensions</a> involved and is not prescribed by this
+                    specification.
+                </p>
+            </dd></div></div>
+        <p>
+            Processors <strong>MUST</strong> support <code>http</code>, <code>https</code> and <code>file</code> scheme URLs in the <span class="term">{taxonomy}</span> property.  Processors <strong>MAY</strong> support other schemes, but such use is discouraged as they may not be supported in all processors.  Use of absolute <code>file</code> URLs is also discouraged, as reports using this are unlikely to be portable.
+        </p>
+        <div class="nonNormativeNote" id="d1e762">
+            <p>
+                This model simplifies the mechanism for identifying a taxonomy to a <a href="#term-list">list</a> of references to XML Schema documents.  The xBRL-XML syntax permits references to both schema and linkbase files, and also references in the form of links to the definition of role and arcrole types.  References to linkbases are not supported, and  <code class="element"> &lt;roleRef&gt; </code> and <code class="element"> &lt;arcroleRef&gt; </code> in the xBRL-XML syntax are subject to special treatment.  See <a href="#XBRL-XML">[xBRL-XML]</a> for full details.
+            </p>
+        </div>
+      </div>
+
+      <div class="div2"><a name="sec-dts-facts" id="sec-dts-facts"></a>
+          <h2>3.3 Facts</h2>
+
+
+          <a name="component-fact"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Fact</span></div><div class="property-table-body">
+              A fact is a discrete piece of information in an XBRL Report. All facts have the following properties.
+            </div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{id}</dt><dd>
+                  <p>A unique identifier for the fact.  The value <strong>MUST</strong> be an NCName (<span class="errordefinition"><a name="invalidFactId" id="invalidFactId"></a>oime:invalidFactId</span>), and <strong>MUST</strong> be unique across all <a href="#component-fact">facts</a> within the <a href="#component-report">report</a> (<span class="errordefinition"><a name="duplicateFactId" id="duplicateFactId"></a>oime:duplicateFactId</span>). This property <strong>MUST</strong> be present on all <a href="#component-fact">facts</a> (<span class="errordefinition"><a name="missingFactId" id="missingFactId"></a>oime:missingFactId</span>).
+                  </p>
+                  <p>
+            {id} attributes can be useful in providing traceability of facts through different syntactic representations, but do not form part of the semantic information provided by a <a href="#component-report">report</a>.
+                  </p>
+              
+              </dd><dt class="">{dimensions}</dt><dd>A <a href="#term-set">set</a> of <a href="#term-dimension">dimensions</a>.  The <a href="#term-set">set</a> may contain at most one of each <a href="#term-core-dimension">core dimension</a>.  The <a href="#term-set">set</a> may contain multiple <a href="#component-taxonomy-defined-dimension">taxonomy defined dimensions</a>, but their {name} properties <strong>MUST</strong> be unique within the <a href="#term-set">set</a>  <span class="errordefinition"><a name="duplicateFactDimension" id="duplicateFactDimension"></a>oime:duplicateFactDimension</span>. </dd><dt class="">{links}</dt><dd>A <a href="#term-set">set</a> of <a href="#component-linkgroup">link groups</a> associated with the fact.  
+              </dd><dt class="">{value}</dt><dd>The value associated with this fact.  This may be the special value "nil".  The meaning of a fact reported as "nil", the distinction between this and a fact that is not reported, or a fact reported with an empty, or zero, value (where applicable) is implementation dependent.</dd><dt class="">{decimals}</dt><dd>The precision of the value, expressed as a number of decimal places, or "infinity", indicating that the value is infinitely precise.</dd></div><div class="property-table-body"><span class="title">Constraints:</span><p>If the fact's {value} is "nil", the fact <strong>MUST</strong> be <a href="#term-fact-nillable">nillable</a>; otherwise, the {value} <strong>MUST</strong> be in the value space of the <a href="#term-fact-base-datatype">fact's base datatype</a> (<span class="errordefinition"><a name="invalidFactValue" id="invalidFactValue"></a>oime:invalidFactValue</span>).  Note that full validation against the <a href="#term-fact-datatype">fact's datatype</a> and, in the case of <a href="#term-supported-dtr-types">supported DTR types</a>, the DTR definition, is only required of <a href="#term-validating-conformant-processor">validating conformant processors</a>.  The <span class="errordefinition"><a name="invalidFactValue" id="invalidFactValue"></a>oime:invalidFactValue</span> <strong>MAY</strong> be used for such full validation.
+              </p><p>The {decimals} property <strong>MUST</strong> be present on, and <strong>MUST</strong> only be present on, non-nil <a href="#term-numeric-fact">numeric facts</a> (<span class="errordefinition"><a name="misplacedDecimalsProperty" id="misplacedDecimalsProperty"></a>oime:misplacedDecimalsProperty</span>).</p><p>A <a href="#term-fact-datatype">fact's datatype</a> <strong>MUST NOT</strong> be a <a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/#Complex_Type_Definition_details">complex type with complex content</a> (<span class="errordefinition"><a name="unsupportedConceptDataType" id="unsupportedConceptDataType"></a>oime:unsupportedConceptDataType</span>).</p><p>If the <a href="#term-fact-datatype">fact's datatype</a> is <code>dtr-type:prefixedContentItemType</code>, or a type derived from <code>dtr-type:prefixedContentItemType</code> that is not supported by the processor, the processor <strong>MUST</strong> raise <span class="errordefinition"><a name="unsupportedConceptDataType" id="unsupportedConceptDataType"></a>oime:unsupportedConceptDataType</span>.</p></div></div>
+
+          <p>
+              <span class="definition"><a name="term-fact-datatype" id="term-fact-datatype" title="Fact datatype"></a>A <span class="term">fact's datatype</span> is the XML Schema type of the <span class="term">concept</span> identified by the <a href="#component-fact">fact's</a> <a href="#component-concept-core-dimension">concept core dimension</a>.</span>
+        </p>
+
+          <p>
+              <span class="definition"><a name="term-fact-base-datatype" id="term-fact-base-datatype" title="Fact base datatype"></a>A <span class="term">fact's base datatype</span> is the XML Schema <a href="http://www.w3.org/TR/xmlschema-2/#built-in-primitive-datatypes">primitive type</a> from which the <a href="#term-fact-datatype">fact's datatype</a> is derived.</span>
+        </p>
+
+          <p>
+              <span class="definition"><a name="term-fact-nillable" id="term-fact-nillable" title="Nillable"></a>A fact is <span class="term">nillable</span> if the <span class="term">concept</span> identified by the <a href="#component-fact">fact's</a> <a href="#component-concept-core-dimension">concept core dimension</a> is <span class="term">nillable</span>.</span>
+        </p>
+
+          <p>
+              <span class="definition"><a name="term-numeric-fact" id="term-numeric-fact" title="Numeric fact"></a>A <span class="term">numeric fact</span> is a <a href="#component-fact">fact</a> with a <a href="#term-fact-datatype">datatype</a> that is derived from the XML Schema types of <code>xs:decimal</code>, <code>xs:double</code> or <code>xs:float</code>.</span> 
+          </p>
+
+          <p>
+              <span class="definition"><a name="term-non-numeric-fact" id="term-non-numeric-fact" title="Non-numeric fact"></a>A <span class="term">non-numeric fact</span> is any <a href="#component-fact">fact</a> that is not a <a href="#term-numeric-fact">numeric fact</a>.</span>
+          </p>
+
+          <span class="definition"><a name="term-text-fact" id="term-text-fact" title="Text fact"></a>
+          <p>
+    A <span class="term">text fact</span> is a <a href="#component-fact">fact</a> with a <a href="#term-fact-datatype">datatype</a> that is derived from the XML Schema type of <code>xs:string</code>, but which is not one of, or a type derived from one of, the following types:
+            <ul>
+                <li><code>xs:language</code></li>
+                <li><code>xs:Name</code></li>
+                <li><code>dtr-type:domainItemType</code></li>
+                <li><code>dtr-type:noLangTokenItemType</code></li>
+                <li><code>dtr-type:noLangStringItemType</code></li>
+            </ul>
+            </p>
+        </span>
+
+        <span class="definition"><a name="term-non-text-fact" id="term-non-text-fact" title="Non-text fact"></a>
+            <p>
+    A <span class="term">non-text fact</span> is any <a href="#component-fact">fact</a> that is not a <a href="#term-text-fact">text fact</a>.
+            </p>
+        </span>
+
+          <p>
+        <span class="definition"><a name="term-enumeration-fact" id="term-enumeration-fact" title="Enumeration fact"></a>
+    An <span class="term">enumeration fact</span> is a <a href="#component-fact">fact</a> with a <a href="#component-concept-core-dimension">concept core dimension</a> that identifies an <a href="https://www.xbrl.org/Specification/extensible-enumerations-2.0/CR-2018-04-23/extensible-enumerations-2.0-CR-2018-04-23.html#term-enumeration-concept">enumeration concept</a>.   
+        </span>  An <a href="#term-enumeration-fact">enumeration fact</a> has a value that is either a single <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> or a set of <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded names</a>.
+          </p>
+
+          <p>Note that in the above definitions, "derived from" includes indirect derivation via intermediate types.</p>
+
+          <p>The <a href="#term-text-fact">text fact</a> definition identifies those facts to which the <a href="#component-language-core-dimension">language core dimension</a> is applicable.
+          </p>
+      </div>
+
+
+
+      <div class="div2"><a name="d1e1187" id="d1e1187"></a>
+        <h2>3.4 Dimensions</h2>
+        <p>
+          <span class="definition"><a name="term-dimension" id="term-dimension" title="Dimension"></a>A <span class="term">dimension</span> is a piece of additional information that serves to uniquely identify a fact.
+A dimension may either be one of the <a href="#term-core-dimension">core dimensions</a> listed below or a <a href="#component-taxonomy-defined-dimension">taxonomy-defined dimension</a>.</span>
+        </p>
+        <p>
+          <span class="definition"><a name="term-core-dimension" id="term-core-dimension" title="Core Dimension"></a>A <span class="term">core dimension</span> is a <a href="#term-dimension">dimension</a> that is defined by the XBRL v2.1 specification, as distinct from those which are defined in a taxonomy using the XBRL Dimensions specification <a href="#DIMENSIONS">[DIMENSIONS]</a> .</span>
+        </p>
+
+        <a name="component-concept-core-dimension"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Concept Core Dimension</span></div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{name}</dt><dd>The <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> corresponding to <code>xbrl:concept</code></dd><dt class="">{value}</dt><dd>An <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> identifying an XBRL <span class="term">concept</span>.</dd></div><div class="property-table-body"><span class="title">Constraints:</span><p>
+              The concept core dimension <strong>MUST</strong> be present on all <a href="#component-fact">facts</a> (<span class="errordefinition"><a name="missingConceptDimension" id="missingConceptDimension"></a>oime:missingConceptDimension</span>).
+          </p><p>
+              The concept core dimension <strong>MUST</strong> identify a <span class="term">concept</span> from the <span class="term">taxonomy</span> (<span class="errordefinition"><a name="unknownConcept" id="unknownConcept"></a>oime:unknownConcept</span>).
+          </p><p>
+              The identified <span class="term">concept</span> <strong>MUST NOT</strong> be <span class="term">abstract</span> (<span class="errordefinition"><a name="valueForAbstractConcept" id="valueForAbstractConcept"></a>oime:valueForAbstractConcept</span>).
+          </p></div></div>
+
+        <a name="component-entity-core-dimension"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Entity Core Dimension</span></div><div class="property-table-body">
+
+The entity core dimension represents the primary legal entity (person or
+organisation) associated with a fact.  
+
+
+          </div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{name}</dt><dd>The <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> corresponding to <code>xbrl:entity</code></dd><dt class="">{scheme}</dt><dd>A URI denoting the scheme from which an identifier is drawn.</dd><dt class="">{identifier}</dt><dd>A string identifying the entity to which the fact relates.</dd></div><div class="property-table-body"><span class="title">Constraints:</span><p>
+              <p>
+                  The entity core dimension <strong>MUST NOT</strong> have a scheme of '<code>https://xbrl.org/2021/entities</code>' with an identifier of '<code>NA</code>' (<span class="errordefinition"><a name="invalidUseOfReservedIdentifier" id="invalidUseOfReservedIdentifier"></a>oime:invalidUseOfReservedIdentifier</span>).
+              </p>
+              <p>
+            The entity core dimension is optional, and <strong>MAY</strong> be omitted 
+if there is no primary legal entity associated with a fact, either because the fact does not relate to a legal entity, or because
+the fact captures a transaction or relationship between two or more legal
+entities with equal standing.  
+              </p>
+              <div class="nonNormativeNote" id="d1e1363">
+                  <p>
+
+                      As defined in <a href="#XBRL-XML">[xBRL-XML]</a>, the special entity with scheme of '<code>https://xbrl.org/2021/entities</code>' and identifier <code>'NA'</code> is used to represent the absence of this dimension in xBRL-XML syntax.
+                  </p>
+              </div>
+          </p></div></div>
+
+        <a name="component-period-core-dimension"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Period Core Dimension</span></div><div class="property-table-body">
+The period core dimension represents the period of time, or instant, to which a
+fact is applicable.  Whilst the xBRL-XML representation uses different elements
+to represent instants and durations, this specification uses a common model for
+both in the form of an <span class="term">time interval</span> as defined in ISO 8601 <a href="#ISO8601">[ISO8601]</a>, with
+instants being represented using a zero-length <span class="term">time interval</span>.
+
+          </div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{name}</dt><dd>The <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> corresponding to <code>xbrl:period</code></dd><dt class="">{interval}</dt><dd>
+
+A <span class="term">time interval</span>, as defined in ISO 8601.  The <span class="term">time
+    interval</span> <strong>MAY</strong> be zero-length (i.e. start and end
+at the same <span class="term">instant</span>), denoting an instant in time.  The <span class="term">time interval</span> <strong>MAY</strong> be defined in <span class="term">local time</span> (i.e. without a time <span class="term">zone designator</span>) in which case processors <strong>MUST NOT</strong> assume a particular time zone, but <strong>MUST</strong> preserve the information that the <span class="term">time interval</span> is in <span class="term">local time</span>.
+
+            <div class="nonNormativeNote" id="d1e1455">
+                <p>
+This specification, being a syntax-independent model, does not make use of the representations defined in ISO 8601, but as ISO 8601 is the representation used in xBRL-XML and in other representations based on this specification, the model draws on the terms and definitions used in ISO 8601 in order to ensure that the {interval} property can be represented using formats defined in ISO 8601.
+                </p>
+            </div>
+            </dd></div><div class="property-table-body"><span class="title">Constraints:</span><p>
+            <p>
+                If the <a href="#term-fact-period-type">fact's period type</a> is <code>duration</code>, the <span class="term">period code dimension</span> is optional, and if present {interval} <strong>MUST</strong> be a non-zero length <span class="term">time interval</span> (<span class="errordefinition"><a name="invalidPeriodDimension" id="invalidPeriodDimension"></a>oime:invalidPeriodDimension</span>).
+            </p>
+            <p>
+                If the <a href="#term-fact-period-type">fact's period type</a> is <code>instant</code>, the <span class="term">period code dimension</span> <strong>MUST</strong> be present (<span class="errordefinition"><a name="missingPeriodDimension" id="missingPeriodDimension"></a>oime:missingPeriodDimension</span>) and {interval} <strong>MUST</strong> be a zero-length <span class="term">time interval</span> (<span class="errordefinition"><a name="invalidPeriodDimension2" id="invalidPeriodDimension2"></a>oime:invalidPeriodDimension</span>).
+
+            </p>
+            <p>
+                Note that as defined in <a href="#XBRL-XML">[xBRL-XML]</a>, the absence of the <span class="term">period core dimension</span> is represented by the special value of "forever" in xBRL-XML syntax.
+            </p>
+          </p></div></div>
+
+        <p>
+            <span class="definition"><a name="term-fact-period-type" id="term-fact-period-type" title="Fact period type"></a>A <span class="term">fact's period type</span> is the value of the <code class="attribute"> @periodType</code> attribute on the schema definition of the <span class="term">concept</span> identified by the <a href="#component-fact">fact's</a> <a href="#component-concept-core-dimension">concept core dimension</a>, and is either <code>duration</code> or <code>instant</code>.</span>
+        </p>
+
+        <a name="component-unit-core-dimension"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Unit Core Dimension</span></div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{name}</dt><dd>The <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> corresponding to <code>xbrl:unit</code></dd><dt class="">{numerators}</dt><dd>An <a href="#term-unordered-collection">unordered collection</a> of <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded names</a>, identifying individual measures.</dd><dt class="">{denominators}</dt><dd>An optional, unordered collection of <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded names</a>, identifying individual measures.</dd></div><div class="property-table-body"><span class="title">Constraints:</span><p>
+              <p>
+                  The unit core dimension <strong>MUST</strong> only be present on <a href="#term-numeric-fact">numeric facts</a> (<span class="errordefinition"><a name="misplacedUnitDimension" id="misplacedUnitDimension"></a>oime:misplacedUnitDimension</span>).  The unit core dimension is optional on <a href="#term-numeric-fact">numeric facts</a>.
+              </p>
+              <p>
+                  The unit core dimension <strong>MUST NOT</strong> have a single numerator of <code>xbrli:pure</code> with no denominators (<span class="errordefinition"><a name="illegalPureUnit" id="illegalPureUnit"></a>oime:illegalPureUnit</span>).  The <code>xbrli:pure</code> measure used in xBRL-XML is mapped to a fact with an absent unit core dimension in this model (see <a href="#XBRL-XML">[xBRL-XML]</a>).
+              </p>
+          </p></div></div>
+
+        <a name="component-language-core-dimension"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Language Core Dimension</span></div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{name}</dt><dd>The <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> corresponding to <code>xbrl:language</code></dd><dt class="">{language}</dt><dd>A string specifying the language in which the fact is reported.  The string <strong>MUST</strong> be a valid BCP 47 <a href="#BCP47">[BCP47]</a> language code <span class="errordefinition"><a name="invalidLanguage" id="invalidLanguage"></a>oime:invalidLanguage</span>.</dd></div><div class="property-table-body"><span class="title">Constraints:</span><p>
+              The language core dimension <strong>MUST</strong> only be present on <a href="#term-text-fact">text facts</a> (<span class="errordefinition"><a name="misplacedLanguageDimension" id="misplacedLanguageDimension"></a>oime:misplacedLanguageDimension</span>) and is optional on such facts. 
+          </p></div></div>
+
+        <div class="nonNormativeNote" id="d1e1685">
+            <p>
+                Note that BCP 47 language codes are case insensitive, and whilst there are conventions for the capitalisation of these strings, differences in capitalisation do not convey different codes.  See <a href="#sec-equivalence-definitions"><b> Section 5.2</b></a>.
+            </p>
+        </div>
+
+
+        <a name="component-note-id-core-dimension"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Note ID core dimension</span></div><div class="property-table-body">
+              The <span class="term">note ID</span> core dimension is used on <code>xbrl:note</code> <a href="#component-fact">facts</a> in order to prevent multiple occurrences of such facts in a report from being classified as <span class="term">duplicates</span>. <code>xbrl:note</code> <a href="#component-fact">facts</a> are used to represent text <span class="term">footnotes</span> (see <a href="#sec-xbrl-note-element"><b> Section 3.5.1.1</b></a>).
+          </div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{name}</dt><dd>The <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> corresponding to <code>xbrl:noteId</code></dd><dt class="">{id}</dt><dd>A unique identifier for a fact.</dd></div><div class="property-table-body"><span class="title">Constraints:</span><p>
+            <p>
+The {id} property <strong>MUST</strong> be the same as the <a href="#component-fact">fact's</a> {id} property (<span class="errordefinition"><a name="invalidNoteIDValue" id="invalidNoteIDValue"></a>oime:invalidNoteIDValue</span>).
+            </p>
+            <p>
+              This dimension <strong>MUST NOT</strong> be present on <a href="#component-fact">facts</a> with a <a href="#component-concept-core-dimension">concept core dimension</a> that is not <code>xbrl:note</code> (<span class="errordefinition"><a name="misplacedNoteIDDimension" id="misplacedNoteIDDimension"></a>oime:misplacedNoteIDDimension</span>).
+            </p>
+            <p>
+                See also <a href="#sec-xbrl-note-element"><b> Section 3.5.1.1</b></a>.
+            </p>
+          </p></div></div>
+
+        <a name="component-taxonomy-defined-dimension"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Taxonomy-defined Dimension</span></div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{name}</dt><dd>The <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a> identifying the dimension.</dd><dt class="">{value}</dt><dd>The value for the dimension.  Values for taxonomy-defined dimensions do not have any associated language information.</dd></div><div class="property-table-body"><span class="title">Constraints:</span><p>
+          The {name} of a taxonomy-defined dimension <strong>MUST</strong> identify a <span class="term">dimension</span> in the <span class="term">taxonomy</span> (<span class="errordefinition"><a name="unknownDimension" id="unknownDimension"></a>oime:unknownDimension</span>).
+          </p><p>
+              If the identified dimension is an <span class="term">explicit dimension</span>, the {value} <strong>MUST</strong> be a valid <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded name</a>; otherwise, if {value} is the special value "nil", the typed dimension <strong>MUST</strong> be <span class="term">nillable</span>; otherwise, {value} <strong>MUST</strong> be in the value space for the <a href="#term-typed-dimension-base-datatype">base datatype</a> of the <span class="term">typed dimension</span> (<span class="errordefinition"><a name="invalidDimensionValue" id="invalidDimensionValue"></a>oime:invalidDimensionValue</span>).  Note that full validation against the <span class="term">typed dimension's</span> datatype and, in the case of <a href="#term-supported-dtr-types">supported DTR types</a>, the DTR definition, is only required of <a href="#term-validating-conformant-processor">validating conformant processors</a>.  The <span class="errordefinition"><a name="invalidDimensionValue" id="invalidDimensionValue"></a>oime:invalidDimensionValue</span> <strong>MAY</strong> be used for such full validation.  
+          </p><p>
+              <p>
+                  If the identified dimension is a <span class="term">typed dimension</span> then the dimension <strong>MUST NOT</strong>
+                  (<span class="errordefinition"><a name="unsupportedDimensionDataType" id="unsupportedDimensionDataType"></a>oime:unsupportedDimensionDataType</span>):
+              </p>
+              <ul>
+                  <li> have a <a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/#Complex_Type_Definitions">complex type</a>;</li>
+
+                  <li> have a type of, or derived from:
+                      <ul>
+                          <li><code>xs:ENTITY</code></li>
+                          <li><code>xs:ENTITIES</code></li>
+                          <li><code>xs:ID</code></li>
+                          <li><code>xs:IDREF</code></li>
+                          <li><code>xs:IDREFS</code></li>
+                          <li><code>xs:NMTOKEN</code></li>
+                          <li><code>xs:NMTOKENS</code></li>
+                          <li><code>xs:NOTATION</code></li>
+                      </ul></li>
+                  <li>
+                      have a type that is derived by <a href="http://www.w3.org/TR/xmlschema-2/#atomic-vs-list">list or union</a>, other than <code>xbrli:dateUnion</code> or a type derived by restriction from <code>xbrli:dateUnion</code>; or
+                  </li>
+                  <li> have a type of <code>dtr-type:prefixedContentType</code> or a type derived from <code>dtr-type:prefixedContentType</code> that is not supported by the processor.</li>
+              </ul>
+          </p></div></div>
+        <p>
+Explicit dimensions will have a datatype of <code>xs:QName</code>, but it should be noted that a datatype of xs:QName does not imply that the dimension is explicit; it may be a QName <span class="term">typed dimension</span>.  The actual nature of the <span class="term">dimension</span> can be determined from the <span class="term">taxonomy</span>.  
+        </p>
+        <p>
+          The <a href="#term-set">set</a> of <a href="#component-taxonomy-defined-dimension">taxonomy-defined dimensions</a> associated with a fact does not include any <span class="term">explicit dimensions</span> using a <span class="term">dimension default</span>.
+        </p>
+        <p>
+            <span class="definition"><a name="term-typed-dimension-base-datatype" id="term-typed-dimension-base-datatype" title="Typed dimension base datatype"></a>The <span class="term">base datatype of a typed dimension</span> is the XML Schema <a href="http://www.w3.org/TR/xmlschema-2/#built-in-primitive-datatypes">primitive type</a> from which the <span class="term">typed dimension's</span> datatype is derived.</span>
+        </p>
+      </div>
+      <div class="div2"><a name="d1e2007" id="d1e2007"></a>
+        <h2>3.5 Links</h2>
+        <p>
+
+Links represent relationships between <a href="#component-fact">facts</a> in a <a href="#component-report">report</a>.  
+Links are a generalisation of the <span class="term">footnote</span> mechanism defined in XBRL v2.1.  
+    
+        </p>
+
+        <a name="component-linkgroup"></a><div class="property-table "><div class="property-table-title"><span class="type">Component: </span><span class="title">Link group</span></div><div class="property-table-body">A <span class="term">link group</span> is a collection of relationships between <a href="#component-fact">facts</a> in a <a href="#component-report">report</a>.  The group is uniquely identified by the combination of the {group} and {link type} properties.  The relationships in a <a href="#component-linkgroup">link group</a> have a common source fact, which is the <a href="#component-fact">fact</a> on which the link group is defined.  The target facts for the relationships are defined by the {target facts} property.</div><div class="property-table-body"><span class="title">Properties:</span><dt class="">{group}</dt><dd>A URI identifying a grouping of links between <a href="#component-fact">facts</a>.</dd><dt class="">{link type}</dt><dd>A URI identifying the type of the relationships between the facts in the group.</dd><dt class="">{target facts}</dt><dd>A <a href="#term-list">list</a> of <a href="#component-fact">facts</a> which are the target of the links in the group.</dd></div></div>
+        <div class="div3"><a name="sec-footnotes" id="sec-footnotes"></a>
+            <h3>3.5.1 Footnotes</h3>
+            <p>
+
+This specification prescribes special behaviour for the standard link type of
+<code>http://www.xbrl.org/2003/arcrole/fact-footnote</code>.  The {target facts} for any <a href="#component-linkgroup">link group</a> with this {link type} <strong>MUST</strong> have a <a href="#component-concept-core-dimension">concept core dimension</a> of <code>xbrl:note</code> (<span class="errordefinition"><a name="illegalStandardFootnoteTarget" id="illegalStandardFootnoteTarget"></a>oime:illegalStandardFootnoteTarget</span>).
+
+            </p>
+
+            <p>
+The mapping between links and footnotes as defined in XBRL v2.1 is described in xBRL-XML <a href="#XBRL-XML">[xBRL-XML]</a>.
+            </p>
+
+            <div class="div4"><a name="sec-xbrl-note-element" id="sec-xbrl-note-element"></a>
+                <h4>3.5.1.1 The xbrl:note concept</h4>
+                <p>
+                    This specification defines the <code>xbrl:note</code> concept, which is used to represent text footnotes as defined in XBRL v2.1, and for which specific handling is prescribed in xBRL-XML <a href="#XBRL-XML">[xBRL-XML]</a>.  The <code>xbrl:note</code> concept has a datatype of <code>xbrli:stringItemType</code>.
+                </p>
+                <p>
+                    The value of the <code>xbrl:note</code> concept <strong>MUST</strong> be a string containing a serialisation of an <a href="#term-xhtml-fragment">XHTML fragment</a> (<span class="errordefinition"><a name="invalidXHTMLFragment" id="invalidXHTMLFragment"></a>oime:invalidXHTMLFragment</span>).  The serialisation assumes a default namespace of <code>http://www.w3.org/1999/xhtml</code>, and any elements in that namespace <strong>MUST</strong> use the default namespace (<span class="errordefinition"><a name="xhtmlElementInNonDefaultNamespace" id="xhtmlElementInNonDefaultNamespace"></a>oime:xhtmlElementInNonDefaultNamespace</span>).
+                </p>
+                <p>
+                <span class="definition"><a name="term-xhtml-fragment" id="term-xhtml-fragment" title="XHTML fragment"></a>An <span class="term">XHTML fragment</span> is an XML fragment in which any top-level element nodes are in the <code>http://www.w3.org/1999/xhtml</code> namespace.</span>
+                </p>
+                <p>
+                    <a href="#component-fact">Facts</a> with a <a href="#component-concept-core-dimension">concept core dimension</a> of <code>xbrl:note</code>:
+                </p>
+                <ul>
+                    <li><strong>MUST</strong> be included in the {target facts} property of at least one <a href="#component-linkgroup">link group</a> (<span class="errordefinition"><a name="unusedNoteFact" id="unusedNoteFact"></a>oime:unusedNoteFact</span>);</li>
+                    <li><strong>MUST</strong> have the  <a href="#component-language-core-dimension">language core dimension</a> (<span class="errordefinition"><a name="missingLanguageForNoteFact" id="missingLanguageForNoteFact"></a>oime:missingLanguageForNoteFact</span>); </li>
+                    <li><strong>MUST</strong> have the <a href="#component-note-id-core-dimension">note ID core dimension</a> (<span class="errordefinition"><a name="missingNoteIDDimension" id="missingNoteIDDimension"></a>oime:missingNoteIDDimension</span>).</li>
+                    <li><strong>MUST NOT</strong> have the <a href="#component-entity-core-dimension">entity core dimension</a> or <a href="#component-period-core-dimension">period core dimension</a> (<span class="errordefinition"><a name="" id=""></a>oime:misplacedNoteFactDimension</span>); and</li>
+                    <li><strong>MUST NOT</strong> have any <a href="#component-taxonomy-defined-dimension">taxonomy-defined dimensions</a> (<span class="errordefinition"><a name="misplacedNoteFactDimension" id="misplacedNoteFactDimension"></a>oime:misplacedNoteFactDimension</span>).</li>
+                </ul>
+                <p>
+                    Note that as <a href="#term-text-fact">text facts</a>, <code>xbrl:note</code> facts cannot have the {decimals} property or <a href="#component-unit-core-dimension">unit core dimension</a>.
+                </p>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="div1"><a name="sec-prefixed-content" id="sec-prefixed-content"></a>
+        <h1>4 Prefixed content</h1>
+        <p>
+            Some datatypes make use of prefixes as a shorthand notation for namespace URIs.  Values for these datatypes make use of a map of prefix to namespace URI bindings that are in scope for the location in which the value appears.  Neither the prefixes, nor the maps to which they refer form part of the model, and as such, special handling of these values is required in order to ensure that the model contains the referenced URIs rather than prefixes.  Values for which this is required are referred to as <a href="#term-prefixed-content">prefixed content.</a>.
+        </p>
+        <p>
+            In an XML document, the map of prefixes to namespace URIs is provided by namespace bindings (see <a href="#XMLNAMES">[XML Names]</a>).  Other formats based on this model typically use a <a href="https://specifications.xbrl.org/release-history-open-information-model-oim-common.html">prefix map</a>.
+        </p>
+        <span class="definition"><a name="term-prefixed-content" id="term-prefixed-content" title="Prefixed content"></a>
+            <p>Under this model, <span class="term">prefixed content</span> is the value of any <a href="#component-fact">fact</a> or <a href="#component-taxonomy-defined-dimension">taxonomy defined dimension</a> with a datatype of, or derived from: </p>
+            <ul>
+                <li><code>xs:QName</code></li>
+                <li><code>xbrli:QNameItemType</code></li>
+                <li><code>dtr-type:SQNameType</code></li>
+                <li><code>dtr-type:SQNameItemType</code></li>
+                <li><code>dtr-type:SQNamesType</code></li>
+                <li><code>dtr-type:SQNamesItemType</code></li>
+                <li><code>dtr-type:PrefixedContentType</code></li>
+                <li><code>dtr-type:PrefixedContentItemType</code></li>
+             </ul>
+        </span>
+        <div class="nonNormativeNote" id="d1e2332">
+            <p>
+                Processors cannot support arbitrary formats that may contain prefixed values, as it is necessary to know the details of the format in order to be able to reliably identify the prefixes.  The <code>dtr-type:PrefixedContentType</code> and <code>dtr-type:PrefixedContentItemType</code> types exist to signal the presence of values that contain prefixes.  These types may not be used directly, but processors <strong>MAY</strong> support specific types derived from them.  Processors are required to signal an error if they encounter content using a derived type that they do not support (see the constraints on <a href="#component-fact">facts</a> and <a href="#component-taxonomy-defined-dimension">taxonomy-defined dimensions</a>).
+            </p>
+        </div>
+    </div>
+    <div class="div1"><a name="sec-equality-and-equivalence" id="sec-equality-and-equivalence"></a>
+        <h1>5 Equality and equivalence</h1>
+        <p>
+
+            This specification provides separate definitions of equality and equivalence for <a href="#component-fact">facts</a> and <a href="#component-report">reports</a>.  <a href="#term-equivalent-reports">Equivalent reports</a> can be considered to convey the same semantic information.  The stricter definition of <a href="#term-equal-reports">equal reports</a> additionally requires <a href="#component-fact">fact</a> {id} properties to be equal.  
+            
+
+        </p>
+        <div class="div2"><a name="sec-equality-definitions" id="sec-equality-definitions"></a>
+            <h2>5.1 Equality definitions</h2>
+            <span class="definition"><a name="term-equal-reports" id="term-equal-reports" title="Equal reports"></a>
+            <p>
+                Two reports, <strong>A</strong> and <strong>B</strong>, are <span class="term">equal</span> under this model if:
+            </p>
+            <ul>
+                <li>For every fact in <strong>A</strong>, there is an <a href="#term-equal-facts">equal fact</a> in <strong>B</strong>, and vice versa; and</li>
+                <li>The {taxonomy} component of <strong>A</strong> is equal to the {taxonomy} component of <strong>B</strong>.</li>
+            </ul>
+            
+            </span>
+            <p>
+                <span class="definition"><a name="term-equal-facts" id="term-equal-facts" title="Equal facts"></a>Two <a href="#component-fact">facts</a>, <strong>a</strong> and <strong>b</strong>, are <span class="term">equal</span> if, for each property present on <strong>a</strong>, there is an <a href="#term-equal-fact-property">equal fact property</a> present on <strong>b</strong> and vice versa.</span>
+            </p>
+            <p>
+                <span class="definition"><a name="term-equal-fact-property" id="term-equal-fact-property" title="Equal fact property"></a>Two fact properties are <span class="term">equal</span> if they meet the relevant criterion defined below:</span>
+                <ul>
+                    <li>Two {id} properties are equal if they have the same string value.</li>
+                    <li>Two {dimensions} properties, <strong>a</strong> and <strong>b</strong>, are equal if, for every dimension in <strong>a</strong> the same dimension is present in <strong>b</strong> with an <a href="#term-equal-dimension-value">equal dimension value</a> and vice versa.  </li>
+                    <li>Two {value} properties are equal if they satisfy the criteria for <a href="#term-fact-value-equality">fact value equality</a>. </li>
+
+
+                    <li>Two {decimals} properties are equal if they have the same integer value.</li>
+                    <li>Two {links} properties, <strong>a</strong> and <strong>b</strong>, are equal if, for every <a href="#component-linkgroup">link group</a> in <strong>a</strong> there is a <a href="#component-linkgroup">link group</a> in <strong>b</strong> with the equal {group}, {link type} and {target facts} properties, and vice versa.  Two {target fact} properties, <strong>tfa</strong> and <strong>tfb</strong> are equal if each fact in <strong>tfa</strong> is <a href="#term-equal-fact-property">equal</a> to the corresponding fact in <strong>tfb</strong>.</li>
+                </ul>
+            </p>
+            <p>
+                <span class="definition"><a name="term-equal-dimension-value" id="term-equal-dimension-value" title="Equal dimension value"></a>Two dimension values are equal if they meet the relevant criterion defined below:</span>
+                <ul>
+                    <li>Two <a href="#component-concept-core-dimension">concept core dimension</a> values are equal if the <span class="term">namespace name</span> and <span class="term">local name</span> for both values are equal.</li>
+                    <li>Two <a href="#component-entity-core-dimension">entity core dimension</a> values are equal if the {scheme} and {identifier} properties have the same string values.</li>
+                    <li>Two <a href="#component-period-core-dimension">period core dimension</a> values are equal if they denote the same <span class="term">time interval</span> as defined in ISO 8601.</li>
+                    <li>Two <a href="#component-unit-core-dimension">unit core dimension</a> values are equal if the collection of {numerators} measures for both are equal, and the {denominators} property is either absent for both, or is the same collection of measures.  Two measures are equal if they have the same <span class="term">namespace name</span> and <span class="term">local name</span>.  Both {numerators} and {denominators} are <a href="#term-unordered-collection">unordered collections</a>.</li>
+                    <li>Two <a href="#component-language-core-dimension">language core dimension</a> values are equal if they have the same <a href="#term-canonical-language-value">canonical language value</a>.</li>
+                    <li>Two <a href="#component-note-id-core-dimension">note id core dimension</a> values are equal if they have the same string value.</li>
+                    <li>Two <a href="#component-taxonomy-defined-dimension">taxonomy-defined dimension</a> values if they satisfy the criteria for <a href="#term-td-dimension-value-equality">taxonomy-defined dimension value equality</a>.</li>
+                </ul>
+            </p>
+
+            <div class="div3"><a name="sec-fact-value-equality" id="sec-fact-value-equality"></a>
+                <h3>5.1.1 Fact value equality</h3>
+                <span class="definition"><a name="term-fact-value-equality" id="term-fact-value-equality" title="Fact value equality"></a>
+                    <p>The {value} properties of two facts are equal if they have the same <a href="#term-fact-datatype">datatype</a> and:</p>
+                    <ul>
+                        <li>Both values are nil; or</li>
+                        <li>They meet the relevant criterion below based on their <a href="#term-fact-datatype">datatype</a>:
+                            <ul>
+                                <li>For <a href="#term-enumeration-fact">enumeration facts</a>, the two values are the same <a href="#term-set">set</a> of <a href="http://www.w3.org/TR/2009/REC-xml-names-20091208#dt-expname">expanded names</a>.</li>
+                                <li>For <a href="#term-prefixed-content">prefixed content</a>, the values are the same after resolving prefixes to namespace URIs.  In the case of <code>dtr-type:SQNamesItemType</code>, the collection of values is treated as a <a href="#term-list">list</a>.
+                                </li>
+                                <li>For <a href="#component-fact">facts</a> with a <a href="#term-fact-datatype">datatype</a> of, or derived from, <code>xbrli:languageItemType</code> the values are equal if they have the same <a href="#term-canonical-language-value">canonical language value</a>.</li>
+                                <li>For all other <a href="#term-fact-datatype">datatypes</a>, the values are equal if
+                                    they have the same <a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/#key-vv">actual value</a> based on the <a href="#term-fact-datatype">facts' datatype</a> (see also <a href="#sec-relative-uri-comparison"><b> Section 5.1.3</b></a> and <a href="#sec-note-comparison"><b> Section 5.1.4</b></a>).</li>
+                            </ul></li>
+                    </ul>
+                </span>
+            </div>
+
+            <div class="div3"><a name="sec-td-dimension-value-equality" id="sec-td-dimension-value-equality"></a>
+                <h3>5.1.2 Taxonomy-defined dimension value equality</h3>
+                <span class="definition"><a name="term-td-dimension-value-equality" id="term-td-dimension-value-equality" title="Taxonomy-defined dimension value equality"></a>
+                    <p>Two <a href="#component-taxonomy-defined-dimension">taxonomy-defined dimension</a> values are equal if they have the same datatype and:</p>
+                    <ul>
+                        <li>Both values are nil; or</li>
+                        <li>They meet the relevant criterion below based on their datatype:
+                            <ul>
+                                <li>For <a href="#term-prefixed-content">prefixed content</a>, the values are the same after resolving prefixes to namespace URIs.  In the case of <code>dtr-type:SQNamesType</code>, the collection of values is treated as a <a href="#term-set">list</a>.
+                                </li>
+                                <li>For values with a datatype of, or derived from, <code>xs:language</code> the values are equal if they have the same <a href="#term-canonical-language-value">canonical language value</a>.</li>
+                                <li>For all other <a href="#term-fact-datatype">datatypes</a>, the values are equal if
+                                    they have the same <a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/#key-vv">actual value</a> based on the dimension's datatype (see also <a href="#sec-relative-uri-comparison"><b> Section 5.1.3</b></a>).</li>
+                            </ul></li>
+                    </ul>
+                </span>
+            </div>
+
+            <div class="div3"><a name="sec-relative-uri-comparison" id="sec-relative-uri-comparison"></a>
+                <h3>5.1.3 URI comparison</h3>
+                <p>
+
+                    Values for datatypes of, or derived from, <code>xs:anyURI</code> that are relative URIs are not absolutized prior to comparison.  This means that two relative URIs with same value will be considered equal even though they appear in different documents with different locations.  This specification does not specify where relative URIs appearing in <a href="#component-fact">fact</a> and <a href="#component-taxonomy-defined-dimension">taxonomy-defined dimension</a> values should be resolved relative to.
+
+                </p>
+            </div>
+            <div class="div3"><a name="sec-note-comparison" id="sec-note-comparison"></a>
+                <h3>5.1.4 Comparison of xbrl:note facts </h3>
+                <p>
+                    <code>xbrl:note</code> facts (see <a href="#sec-xbrl-note-element"><b> Section 3.5.1.1</b></a>) are compared according to their datatype, which is derived from <code>xsd:string</code>.  Under this model, the value is a serialisation of an <a href="#term-xhtml-fragment">XHTML fragment</a>.  It should be noted that when creating a model from an xBRL-XML <a href="#XBRL-XML">[xBRL-XML]</a> report, there is more than one valid serialisation of the same <a href="#term-xhtml-fragment">XHTML fragment</a> (for example, attributes may be reordered), which could lead to equivalent XHTML not being considered equal under this model.  This is only an issue when working with data derived from xBRL-XML, as other formats based on this model must treat the value as a simple string.
+                </p>
+            </div>
+            <div class="div3"><a name="sec-canonical-language-value" id="sec-canonical-language-value"></a>
+                <h3>5.1.5 Canonical language value</h3>
+                <p>
+                    <span class="definition"><a name="term-canonical-language-value" id="term-canonical-language-value" title="Canonical language value"></a>A <span class="term">canonical language value</span> is a BCP 47 language code whitespace normalised according to the requirements for <code>xs:language</code> and represented with all letters in lowercase.</span>
+                </p>
+                <div class="nonNormativeNote" id="d1e2808">
+                    <p>
+                        BCP 47 language codes are case-insensitive.  XBRL usage of language codes is based on the XML Schema <code>xs:language</code> datatype, which does not prescribe a case convention for the canonical lexical representation, which means that comparison of values in their XML Schema canonical lexical representation is not sufficient for establishing equality.  It should be note that all-lowercase is not the conventional form for BCP 47 codes, but it is used here to avoid the need for parsing of BCP 47 codes. 
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="div2"><a name="sec-equivalence-definitions" id="sec-equivalence-definitions"></a>
+            <h2>5.2 Equivalence definitions</h2>
+
+
+            <p>
+                <span class="definition"><a name="term-equivalent-reports" id="term-equivalent-reports" title="Equivalent reports"></a>Two reports, <strong>A</strong> and <strong>B</strong>, are <span class="term">equivalent</span> under this model if, for every fact in <strong>A</strong>, there is at least one <a href="#term-equivalent-facts">equivalent fact</a> in <strong>B</strong>, and vice versa.</span>
+            </p>
+            <p>
+                <span class="definition"><a name="term-equivalent-facts" id="term-equivalent-facts" title="Equivalent facts"></a>Two <a href="#component-fact">facts</a>, <strong>a</strong> and <strong>b</strong>, are <span class="term">equivalent</span> if, for each property on <strong>a</strong>, there is an <a href="#term-equivalent-fact-property">equivalent fact property</a> present on <strong>b</strong> and vice versa.</span>
+            </p>
+
+            <p>
+                <span class="definition"><a name="term-equivalent-fact-property" id="term-equivalent-fact-property" title="Equivalent fact property"></a>Two fact properties are <span class="term">equivalent</span> if they meet the relevant criterion for <a href="#term-equal-fact-property">equal fact properties</a> with the following modifications:</span>
+                <ul>
+                    <li>Two {id} property values are always considered equivalent (i.e. they are ignored for the purposes of establishing equivalence).</li>
+                    <li>Similarly, when considering the equivalence of {dimensions} properties, two <a href="#component-note-id-core-dimension">note id core dimensions</a> are always considered equivalent.</li>
+                    <li>Facts in the {target facts} properties of each <a href="#component-linkgroup">link group</a> in the {links} properties need only meet the requirements of <a href="#term-equivalent-facts">equivalent facts</a>.</li>
+                </ul>
+            </p>
+            <div class="nonNormativeNote" id="d1e2910">
+                <p>
+                    The above definition does not require equivalent reports to have the same number of facts.  Multiple equivalent facts in one report can be considered equivalent to a single fact in the other.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="div1"><a name="sec-duplicate-facts" id="sec-duplicate-facts"></a>
+        <h1>6 Duplicate and alternative facts</h1>
+        <p>
+            This specification provides a number of definitions relating to
+            facts which may be considered duplicates or alternatives for certain
+            purposes.  
+            
+        </p>
+        <p><span class="definition"><a name="term-duplicate-facts" id="term-duplicate-facts" title="Duplicate facts"></a>Two facts, <strong>a</strong> and <strong>b</strong>, are <span class="term">duplicate facts</span> if for every dimension in the {dimensions} property of <strong>a</strong>, the same dimension is present in <strong>b</strong> with an <a href="#term-equal-dimension-value">equal dimension value</a> and vice versa.</span></p>
+        <p>
+            <a href="#term-duplicate-facts">Duplicate facts</a> are
+            permitted under the model, but users may wish to prohibit some or
+            all classes of duplicates in specific applications.
+        </p>
+        <p>
+            Alternative facts are facts that are distinguished by only the
+            <a href="#component-language-core-dimension">language</a>
+            or <a href="#component-unit-core-dimension">unit</a> core
+            dimensions.  Unlike <a href="#term-duplicate-facts">duplicate
+            facts</a>, alternative facts are dimensionally distinct,
+            but users may wish to restrict their use as they may provide
+            alternative, and potentially inconsistent, values for the same data
+            point.
+        </p>
+        <p>
+            Neither duplicates nor alternative facts are considered an error by
+            this specification.  Specifications based on this model
+            <strong>MAY</strong> prohibit certain classes of duplicates and
+            alternative facts.  This specification defines the standard error code, <span class="errordefinition"><a name="disallowedDuplicateFacts" id="disallowedDuplicateFacts"></a>oime:disallowedDuplicateFacts</span>, 
+            that <strong>MAY</strong> be used when prohibited duplicate facts are present in a report.
+        </p>
+        <div class="div2"><a name="sec-complete-duplicates" id="sec-complete-duplicates"></a>
+            <h2>6.1 Complete duplicates</h2>
+            <span class="definition"><a name="term-complete-duplicates" id="term-complete-duplicates" title="Complete duplicates"></a>
+                <p>Two <a href="#term-duplicate-facts">duplicate facts</a> are <span class="term">complete duplicates</span> if:</p>
+                <ul>
+                    <li>they have satisfy the requirements for <a href="#term-fact-value-equality">fact value equality</a>; and</li>
+                    <li>either:
+                        <ul>
+                            <li>the {decimals} property is absent from both facts; or</li>
+                            <li>the {decimals} property has the same integer value.</li>
+
+                        </ul></li>
+                </ul>
+            </span>
+        </div>
+        <div class="div2"><a name="sec-consistent-duplicates" id="sec-consistent-duplicates"></a>
+            <h2>6.2 Consistent duplicates</h2>
+            <span class="definition"><a name="term-consistent-duplicates" id="term-consistent-duplicates" title="Consistent duplicates"></a>
+                <p>Two <a href="#term-duplicate-facts">duplicate facts</a> are <span class="term">consistent duplicates</span> if they are <a href="#term-complete-duplicates">complete duplicates</a>, or:</p> 
+                <ul>
+                    <li>they are <a href="#term-numeric-fact">numeric facts</a>; and</li>
+                    <li>they have reported values and precisions that are consistent with having been rounded from a single actual value, as described below.</li>
+                </ul>
+            </span>
+            <div class="div3"><a name="sec-numeric-value-consistency" id="sec-numeric-value-consistency"></a>
+                <h3>6.2.1 Numeric value consistency</h3>
+                <p>
+                Consistency of numeric values is established by considering the interval represented by each reported fact, and ensuring that there is overlap between all intervals.  The interval used should be inclusive ("closed"), with the additional constraint that values reported to the same precision are only considered consistent if they have the same reported value.  For more details on this approach, see Handling Duplicate Facts in XBRL and Inline XBRL <a href="#DUPLICATES-WGN">[DUPLICATES-WGN]</a>.
+                </p>
+            </div>
+            <p>
+                <a href="#term-numeric-fact">Numeric facts</a> that are <a href="#term-complete-duplicates">complete duplicates</a> are also considered to be <a href="#term-consistent-duplicates">consistent duplicates</a>.
+            </p>
+            <div class="nonNormativeNote">
+                <p>
+                    It should be noted that the definition of consistency is not transitive;  a fact <strong>A</strong> being consistent with both <strong>B</strong> and <strong>C</strong> does not imply that <strong>B</strong> and <strong>C</strong> are consistent. 
+                </p>
+            </div>
+        </div>
+        <div class="div2"><a name="sec-inconsistent-duplicates" id="sec-inconsistent-duplicates"></a>
+            <h2>6.3 Inconsistent duplicates</h2>
+            <span class="definition"><a name="term-inconsistent-duplicates" id="term-inconsistent-duplicates" title="Inconsistent duplicates"></a>
+                <p>
+            Two <a href="#term-duplicate-facts">duplicate facts</a> are <span class="term">inconsistent duplicates</span> if:
+                </p> 
+                <ul>
+                    <li>they are <a href="#term-numeric-fact">numeric facts</a> but are not <a href="#term-consistent-duplicates">consistent duplicates</a>; or </li>
+                    <li>they are <a href="#term-non-numeric-fact">non-numeric facts</a> but do not satisfy the requirements for <a href="#term-fact-value-equality">fact value equality</a>.</li>
+                </ul>
+            </span>
+        </div>
+        <div class="div2"><a name="sec-multi-language-alternatives" id="sec-multi-language-alternatives"></a>
+            <h2>6.4 Multi-language alternatives</h2>
+            <span class="definition"><a name="term-multi-language-alternatives" id="term-multi-language-alternatives" title="Multi-language alternatives"></a>
+                <p>Two facts, <strong>a</strong> and <strong>b</strong>, are <span class="term">multi-language alternatives</span> if:</p>
+                <ul>
+                    <li> both facts are <a href="#term-text-fact">text facts</a>;</li>
+                    <li> for every dimension except the <a href="#component-language-core-dimension">language core dimension</a> in the {dimensions} property of <strong>a</strong>, the same dimension is present in <strong>b</strong> with an <a href="#term-equal-dimension-value">equal dimension value</a> and vice versa; and </li>
+                    <li> the facts have distinct values for the <a href="#component-language-core-dimension">language core dimension</a>.</li>
+                </ul>
+                    
+                </span>
+            <p>The error code <span class="errordefinition"><a name="illegalMultiLanguageAlternatives" id="illegalMultiLanguageAlternatives"></a>oime:illegalMultiLanguageAlternatives</span> <strong>MAY</strong> be used by applications that prohibit <a href="#term-multi-language-alternatives">multi-language alternatives</a>.</p>
+        </div>
+        <div class="div2"><a name="sec-multi-unit-alternatives" id="sec-multi-unit-alternatives"></a>
+            <h2>6.5 Multi-unit alternatives</h2>
+            <span class="definition"><a name="term-multi-unit-alternatives" id="term-multi-unit-alternatives" title="Multi-unit alternatives"></a>
+                <p>Two facts, <strong>a</strong> and <strong>b</strong>, are <span class="term">multi-unit alternatives</span> if:</p>
+                <ul>
+                    <li> both facts are <a href="#term-numeric-fact">numeric facts</a>;</li>
+                    <li> for every dimension except the <a href="#component-unit-core-dimension">unit core dimension</a> in the {dimensions} property of <strong>a</strong>, the same dimension is present in <strong>b</strong> with an <a href="#term-equal-dimension-value">equal dimension value</a> and vice versa; and </li>
+                    <li> the facts have distinct values for the <a href="#component-unit-core-dimension">unit core dimension</a>.</li>
+                </ul>
+                    
+                </span>
+            <p>The error code <span class="errordefinition"><a name="illegalMultiUnitAlternatives" id="illegalMultiUnitAlternatives"></a>oime:illegalMultiUnitAlternatives</span> <strong>MAY</strong> be used by applications that prohibit <a href="#term-multi-unit-alternatives">multi-unit alternatives</a>.</p>
+        </div>
+    </div>
+  </div><div class="back">
+    <div class="div1"><a name="sec-references" id="sec-references"></a>
+      <h1>Appendix A References</h1>
+      <dl>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      <dt class="label"><a name="BCP47" id="BCP47"></a>BCP47</dt><dd>IETF.<br><a href="https://tools.ietf.org/html/bcp47"> "
+         BCP47: Tags for Identifying Languages
+	"</a></dd><dt class="label"><a name="DIMENSIONS" id="DIMENSIONS"></a>DIMENSIONS</dt><dd>XBRL International Inc..<br><a href="http://www.xbrl.org/Specification/XDT-REC-2006-09-18.htm"> "XBRL Dimensions 1.0"</a><span><br>Ignacio Hernández-Ros</span><span>, and Hugh Wallis.</span></dd><dt class="label"><a name="DTR-STRUCTURE-1.1" id="DTR-STRUCTURE-1.1"></a>DTR STRUCTURE</dt><dd>XBRL International Inc.<br><a href="https://www.xbrl.org/Specification/dtr/CR-2018-01-17/dtr-structure-1.1-CR-2018-01-17.html"> "Data Types Registry - Structure 1.1"</a><span><br>Mark GoodhandHugh WallisPaul Warren.</span></dd><dt class="label"><a name="DUPLICATES-WGN" id="DUPLICATES-WGN"></a>DUPLICATES-WGN</dt><dd>XBRL International Inc..<br><a href="https://www.xbrl.org/WGN/xbrl-duplicates/WGN-2018-04-19/xbrl-duplicates-WGN-2018-04-19.html"> "Handling Duplicate Facts in XBRL and Inline XBRL 1.0"</a><span><br>Paul Warren.</span></dd><dt class="label"><a name="ENUM2" id="ENUM2"></a>EXTENSIBLE ENUMERATIONS 2.0</dt><dd>XBRL International Inc..<br><a href="https://www.xbrl.org/Specification/extensible-enumerations-2.0/CR-2018-04-23/extensible-enumerations-2.0-CR-2018-04-23.html"> "Extensible Enumerations 2.0"</a><span><br>Mark Goodhand</span><span>, and Paul Warren.</span></dd><dt class="label"><a name="RFC2119" id="RFC2119"></a>IETF RFC 2119</dt><dd>IETF (Internet Engineering Task Force).<br><a href="http://www.ietf.org/rfc/rfc2119.txt"> "RFC 2119: Key words for use in RFCs to  Indicate Requirement Levels"</a><span><br>Scott Bradner.</span></dd><dt class="label"><a name="ISO8601" id="ISO8601"></a>ISO8601</dt><dd>International Standards Organisation.<br><a href="http://www.iso.ch/"> "
+		ISO 8601 international standard numeric date and time representations.
+	"</a></dd><dt class="label"><a name="OIMCOMMON" id="OIMCOMMON"></a>OIMCOMMON</dt><dd>XBRL International Inc..<br><a href="https://specifications.xbrl.org/release-history-open-information-model-oim-common.html"> "XBRL Open Information Model Common Definitions"</a><span><br>Herm Fischer</span><span>, Mark Goodhand</span><span>, and Paul Warren.</span></dd><dt class="label"><a name="XBRL" id="XBRL"></a>XBRL 2.1</dt><dd>XBRL International Inc..<br><a href="http://www.xbrl.org/Specification/XBRL-2.1/REC-2003-12-31/XBRL-2.1-REC-2003-12-31+corrected-errata-2013-02-20.html"> "Extensible Business Reporting Language (XBRL) 2.1 Includes Corrected Errata Up To 2013-02-20"</a><span><br>Phillip Engel</span><span>, Walter Hamscher</span><span>, Geoff Shuetrim</span><span>, David vun Kannon</span><span>, and Hugh Wallis.</span></dd><dt class="label"><a name="XMLNAMES" id="XMLNAMES"></a>XML Names</dt><dd>W3C (World Wide Web Consortium).<br><a href="http://www.w3.org/TR/2009/REC-xml-names-20091208"> "Namespaces in XML 1.0 (Third Edition)"</a></dd><dt class="label"><a name="XMLSCHEMA-DATATYPES" id="XMLSCHEMA-DATATYPES"></a>XML Schema Datatypes</dt><dd>W3C (World Wide Web Consortium).<br><a href="http://www.w3.org/TR/xmlschema-2/"> "XML Schema Part 2: Datatypes Second Edition"</a><span><br>Paul V. Biron</span><span>, and Ashok Malhotra.</span></dd><dt class="label"><a name="XMLSCHEMA-STRUCTURES" id="XMLSCHEMA-STRUCTURES"></a>XML Schema Structures</dt><dd>W3C (World Wide Web Consortium).<br><a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/"> "XML Schema Part 1: Structures Second Edition"</a><span><br>Henry S. Thompson</span><span>, David Beech</span><span>, Murray Maloney</span><span>, and Noah Mendelsohn.</span></dd><dt class="label"><a name="XBRL-XML" id="XBRL-XML"></a>xBRL-XML</dt><dd>XBRL International Inc..<br><a href="../../xbrl-xml/REC-2021-10-13/xbrl-xml-REC-2021-10-13.html"> "xBRL-XML: XML Mappings for the Open Information Model 1.0"</a><span><br>Paul Warren</span><span>, and Herm Fischer.</span></dd></dl>
+    </div>
+    <div class="div1"><a name="sec-ip-status" id="sec-ip-status"></a>
+  <h1>Appendix B Intellectual property status (non-normative)</h1>
+  
+  <p>
+    This document and translations of it may be copied and
+    furnished to others, and derivative works that comment on or
+    otherwise explain it or assist in its implementation may be
+    prepared, copied, published and distributed, in whole or in
+    part, without restriction of any kind, provided that the above
+    copyright notice and this paragraph are included on all such
+    copies and derivative works. However, this document itself may
+    not be modified in any way, such as by removing the copyright
+    notice or references to XBRL International or XBRL
+    organizations, except as required to translate it into
+    languages other than English. Members of XBRL International
+    agree to grant certain licenses under the XBRL International
+    Intellectual Property Policy 
+    (<a href="http://www.xbrl.org/legal">www.xbrl.org/legal</a>).
+  </p>
+
+
+  <p>
+    This document and the information contained herein is provided
+    on an "AS IS" basis and XBRL INTERNATIONAL DISCLAIMS ALL
+    WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+    ANY WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT
+    INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+    MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+  </p>
+
+  <p>
+    The attention of users of this document is directed to the
+    possibility that compliance with or adoption of XBRL
+    International specifications may require use of an invention
+    covered by patent rights. XBRL International shall not be
+    responsible for identifying patents for which a license may be
+    required by any XBRL International specification, or for
+    conducting legal inquiries into the legal validity or scope of
+    those patents that are brought to its attention. XBRL
+    International specifications are prospective and advisory
+    only. Prospective users are responsible for protecting
+    themselves against liability for infringement of patents. XBRL
+    International takes no position regarding the validity or
+    scope of any intellectual property or other rights that might
+    be claimed to pertain to the implementation or use of the
+    technology described in this document or the extent to which
+    any license under such rights might or might not be available;
+    neither does it represent that it has made any effort to
+    identify any such rights. Members of XBRL International agree
+    to grant certain licenses under the XBRL International
+    Intellectual Property Policy 
+    (<a href="http://www.xbrl.org/legal">www.xbrl.org/legal</a>).
+  </p>
+</div>
+    <div class="div1"><a name="sec-history" id="sec-history"></a>
+      <h1>Appendix C  Document History (non-normative)</h1>
+      <table class="revisions"><tr><th>Date</th><th>Author</th><th>Details</th></tr>
+        <tr><td>13 January 2016</td><td>Paul Warren</td><td>
+          <p class="revision">First Public Working Draft</p>
+        </td></tr>
+        <tr><td>14 December 2016</td><td>Paul Warren</td><td>
+          <p class="revision">Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>02 May 2017</td><td>Paul Warren</td><td>
+          <p class="revision">Second Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>12 December 2018</td><td>Paul Warren</td><td>
+          <p class="revision">Third Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>12 June 2019</td><td>Paul Warren</td><td>
+          <p class="revision">Fourth Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>07 May 2020</td><td>Paul Warren</td><td>
+          <p class="revision">Fifth Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>14 October 2020</td><td>Paul Warren</td><td>
+          <p class="revision">Sixth Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>03 February 2021</td><td>Paul Warren</td><td>
+          <p class="revision">Seventh Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>16 February 2021</td><td>Paul Warren</td><td>
+          <p class="revision">Eighth Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>07 July 2021</td><td>Paul Warren</td><td>
+          <p class="revision">Nineth Candidate Recommendation</p>
+        </td></tr>
+        <tr><td>04 August 2021</td><td>Paul Warren</td><td>
+          <p class="revision">Proposed Recommendation</p>
+        </td></tr>
+        <tr><td>13 October 2021</td><td>Paul Warren</td><td>
+          <p class="revision">Recommendation</p>
+        </td></tr>
+      </table>
+    </div>
+    <div class="div1"><a name="sec-errata" id="sec-errata"></a>
+      <h1>Appendix D Errata Corrections incorporated in this document</h1>
+      <p> This appendix contains a list of the errata that have been incorporated into this document. This represents
+        all those errata corrections that have been approved by the XBRL International Specification Maintenance Working
+        Group (SWG) up to and including 13 October 2021. Hyperlinks to relevant e-mail threads may only
+        be followed by those who have access to the relevant mailing lists. Access to internal XBRL mailing lists is
+        restricted to members of XBRL International Inc. </p>
+      <p>No errata have been incorporated into this document.</p>
+
+    </div>
+  </div></body></html>

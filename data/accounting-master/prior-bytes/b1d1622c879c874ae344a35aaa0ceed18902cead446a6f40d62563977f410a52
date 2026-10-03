@@ -1,0 +1,269 @@
+"""Declared-template reconstruction and bounded uncertainty operations, version 1."""
+from copy import deepcopy
+from fractions import Fraction as F
+import hashlib
+import json
+import z3
+from rational_solver_v1 import (Problem, Budget, UnsupportedFragment, q, rational, domain_formula,
+                                disclosure_domain, half_even, solve)
+
+
+ADMISSION_FIELDS = {
+    'ExtractionReading': ('source', 'locator', 'review_decision'),
+    'HistoricalFact': ('evidence', 'reason'),
+    'AccountingElection': ('package', 'permitted_treatments', 'election'),
+    'MeasurementEstimate': ('method', 'measurement_date', 'inputs'),
+    'BehaviourPolicy': ('policy', 'information_set', 'decision_time'),
+    'FutureInnovation': ('driver', 'future_period', 'scenario'),
+}
+
+
+def admit(record):
+    kind = record.get('kind')
+    if kind not in ADMISSION_FIELDS:
+        raise ValueError('unknown uncertainty category')
+    for key in ('id', 'scope', 'provenance', 'dependencies') + ADMISSION_FIELDS[kind]:
+        if key not in record or (key != 'dependencies' and not record[key]):
+            raise ValueError('missing admission field: ' + key)
+    if kind == 'ExtractionReading' and record['review_decision'] != 'Accept':
+        raise ValueError('extraction reading is not accepted')
+    if kind == 'AccountingElection' and record['election'] not in record['permitted_treatments']:
+        raise ValueError('treatment not permitted by declared package')
+    return deepcopy(record)
+
+
+def expression(node, env):
+    if isinstance(node, bool):
+        return z3.BoolVal(node)
+    if isinstance(node, (str, int, F)):
+        return env[node] if isinstance(node, str) and node in env else q(node)
+    if not isinstance(node, list) or not node:
+        raise ValueError('expression must be exact scalar, reference or operation list')
+    op, *args = node
+    args = [expression(x, env) for x in args]
+    ops = {'+': lambda a,b:a+b, '-': lambda a,b:a-b, '*': lambda a,b:a*b,
+           '/': lambda a,b:a/b, '==': lambda a,b:a==b, '<=': lambda a,b:a<=b,
+           '>=': lambda a,b:a>=b, '<': lambda a,b:a<b, '>': lambda a,b:a>b,
+           'and': lambda *a:z3.And(*a), 'or': lambda *a:z3.Or(*a),
+           'not': lambda a:z3.Not(a), 'implies': lambda a,b:z3.Implies(a,b)}
+    if op not in ops:
+        raise UnsupportedFragment('unknown operation: ' + op)
+    return ops[op](*args)
+
+
+def construct(spec):
+    if spec.get('schema_version') != 'accdsl.reconstruction.input.v1':
+        raise ValueError('unsupported reconstruction schema')
+    p = Problem(spec['scope'], spec['evidence_view'], exclusions=list(spec['exclusions']),
+                obligations=list(spec['obligations']), rounding_stage=spec['rounding_stage'])
+    context = spec['context']; env = {}
+    records = [admit(a) for a in spec['admissions']]
+    if len({r['id'] for r in records}) != len(records):
+        raise ValueError('duplicate admission')
+    p.provenance = {'input_sha256': hashlib.sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest(),
+                    'admissions': records, 'context': context, 'observation_sources': {}}
+    def variable(name, kind, limits=None):
+        if name in env:
+            raise ValueError('duplicate economic identifier: ' + name)
+        v = z3.Bool(name) if kind == 'Bool' else z3.Int(name) if kind == 'Int' else z3.Real(name)
+        env[name] = v; p.variables[name] = v
+        if kind == 'Bool':
+            p.finite[name] = [False, True]
+        elif kind == 'Int':
+            if limits is None:
+                p.unsupported.append('unbounded integer domain: ' + name)
+            else:
+                lo, hi = limits
+                if type(lo) is not int or type(hi) is not int or lo > hi:
+                    raise ValueError('invalid integer bounds')
+                p.finite[name] = range(lo, hi+1)
+        return v
+    for c in spec['choices']:
+        if not c['values'] or any(type(v) is not int for v in c['values']) or len(set(c['values'])) != len(c['values']):
+            raise ValueError('finite choices need distinct integer codes')
+        variable(c['id'], 'Int', [0,0]); p.finite[c['id']] = list(c['values'])
+    for s in spec['symbols']:
+        if s['kind'] not in ('Real', 'Int'):
+            raise ValueError('unsupported symbol kind')
+        v = variable(s['id'], s['kind'], s.get('integer_bounds'))
+        p.add('domain:'+s['id'], domain_formula(v, s['domain']))
+    registry = spec['templates']
+    slots = []
+    for row in spec['slots']:
+        if row['template'] not in registry:
+            raise ValueError('unregistered template')
+        template = registry[row['template']]
+        if not template['provenance']:
+            raise ValueError('template provenance required')
+        if sum(rational(v) for v in template['postings'].values()) != 0:
+            raise ValueError('posting incidence must balance')
+        amount = variable(row['id'], row['kind'], row.get('integer_bounds'))
+        p.add('nonnegative:'+row['id'], amount >= 0)
+        if row['active'] == 'choice':
+            active = variable(row['id']+':active', 'Bool')
+            p.add('activation:'+row['id'], z3.Implies(z3.Not(active), amount == 0))
+        elif type(row['active']) is bool:
+            if not row['active']:
+                p.add('activation:'+row['id'], amount == 0)
+        else:
+            raise ValueError('explicit activation required')
+        slots.append((row, template, amount))
+    p.slots = len(slots)
+    accounts = dict(spec['opening']); states = dict(spec['economic_opening'])
+    for date in spec['dates']:
+        for account, start in accounts.items():
+            env[f'balance:{date}:{account}'] = q(start) + sum((q(t['postings'].get(account,0))*a for r,t,a in slots if r['date'] <= date), q(0))
+        for state, start in states.items():
+            env[f'state:{date}:{state}'] = q(start) + sum((q(t['state'].get(state,0))*a for r,t,a in slots if r['date'] <= date), q(0))
+    for r,t,a in slots:
+        if r['date'] not in spec['dates'] or set(t['postings'])-set(accounts) or set(t['state'])-set(states):
+            raise ValueError('slot date/account/state outside declared scope')
+    try:
+        for name, node in spec['mappings'].items():
+            env[name] = expression(node, env); p.outputs[name] = env[name]
+        seen = {}
+        for obs in spec['observations']:
+            if obs['context'] != context or obs['action'] != 'Accept' or not obs['source']:
+                raise ValueError('observation context/admission mismatch')
+            if obs['id'] in seen:
+                if obs != seen[obs['id']]:
+                    raise ValueError('conflicting reuse of observation identity')
+                continue
+            seen[obs['id']] = obs
+            if obs['mapping'] not in p.outputs:
+                p.obligations.append('unmatched observation:'+obs['id']); continue
+            domain = obs['domain']
+            if domain.get('kind') == 'rounded':
+                if domain.get('convention') is None:
+                    p.obligations.append('unresolved rounding:'+obs['id']); continue
+                domain = disclosure_domain(domain['displayed'], domain['quantum'], domain['convention'])
+            p.add('observation:'+obs['id'], domain_formula(p.outputs[obs['mapping']], domain))
+            p.provenance['observation_sources'][obs['id']] = obs['source']
+        for row in spec['constraints']:
+            p.add(row['id'], expression(row['expression'], env))
+        for name, node in spec['views'].items():
+            p.views[name] = expression(node, env)
+    except UnsupportedFragment as exc:
+        p.unsupported.append(str(exc))
+    return p
+
+
+def from_p03(ir, bindings, template_bindings):
+    from core0_ir_v1 import validate_ir
+    valid = validate_ir(ir, bindings)
+    if not valid.valid:
+        raise ValueError('P03 IR failed validation: ' + str(valid.diagnostics))
+    if set(template_bindings) != {'DemoDebt@1/DebtMix'} or template_bindings['DemoDebt@1/DebtMix'] != 'fixed-floating-amounts-v1':
+        raise ValueError('explicit supported template binding required')
+    family = ir['historyFamilies'][0]; scope = ir['modelScopes'][0]
+    p = Problem(scope['id'], family['evidence_view'], exclusions=scope['exclusions'], obligations=scope['obligations'])
+    p.provenance = {'p03_ir_sha256': hashlib.sha256(json.dumps(ir,sort_keys=True).encode()).hexdigest(),
+                    'template_bindings': dict(template_bindings), 'observation_ids': [x['id'] for x in ir['observations']],
+                    'source_refs': ir['contracts'][0]['source_refs']}
+    for row in ir['symbols']:
+        v = z3.Real(row['id']); p.variables[row['id']] = v
+        p.add('domain:'+row['id'],domain_formula(v,row['domain']))
+    observations = {r['id']: r for r in ir['observations']}
+    exprs = {r['id']:r for r in ir['expressions']}
+    def lower(name):
+        row=exprs[name]; op=row['op']
+        if op=='literal':
+            if row['type']=='Bool': return z3.BoolVal(row['text']=='true')
+            return q(row['rational'])
+        if op=='ref':
+            if row['target'] in p.variables:return p.variables[row['target']]
+            return lower(row['target'])
+        if op=='value':
+            target=exprs[row['args'][0]]['target'] if row['args'] else row['target']
+            return q(observations[target]['domain']['lower'])
+        if op=='call' and row['target']=='builtin:value@1':
+            return q(observations[exprs[row['args'][0]]['target']]['domain']['lower'])
+        args=[lower(a) for a in row['args']]
+        if op=='call' and row['target']=='builtin:constant@1':return args[0]
+        if op in ('constant','neg','not'):
+            return args[0] if op=='constant' else -args[0] if op=='neg' else z3.Not(args[0])
+        operations={'add':lambda a,b:a+b,'sub':lambda a,b:a-b,'mul':lambda a,b:a*b,'div':lambda a,b:a/b,
+                    'eq':lambda a,b:a==b,'lt':lambda a,b:a<b,'le':lambda a,b:a<=b,
+                    'gt':lambda a,b:a>b,'ge':lambda a,b:a>=b,'and':lambda *a:z3.And(*a),'or':lambda *a:z3.Or(*a)}
+        if op not in operations:raise UnsupportedFragment('P03 operation: '+op)
+        return operations[op](*args)
+    try:
+        rows={r['id']:r for r in ir['constraints']}
+        for cid in family['constraints']: p.add(cid,lower(rows[cid]['expression']))
+        for view in ir['alternatives']:
+            if view['choice_group'] is not None:raise UnsupportedFragment('P03 choice group requires explicit partition')
+            p.views[view['id']]=z3.And(*[lower(rows[c]['expression']) for c in view['constraints']])
+        fields={f['name']:lower(f['expression']) for f in ir['contracts'][0]['fields']}
+        from rational_solver_v1 import fraction
+        principal=fraction(fields['principal'])
+        if principal<=0:raise UnsupportedFragment('amount/fraction adapter requires positive exact principal')
+        fixed=z3.Real('amount:fixed'); floating=z3.Real('amount:floating')
+        p.variables.update({'amount:fixed':fixed,'amount:floating':floating})
+        p.add('template:principal', fixed+floating==q(principal))
+        p.add('template:fixed', fixed==q(principal)*fields['fixed_fraction'])
+        p.add('template:amounts',z3.And(fixed>=0,floating>=0))
+        rate=lower(ir['scenarios'][0]['drivers'][0]['expression'])
+        p.outputs={'interest':fields['fixed_rate']*fixed+rate*floating,
+                   'fixed':fixed,'floating':floating,'principal':fixed+floating}
+        p.slots=1
+    except UnsupportedFragment as exc:p.unsupported.append(str(exc))
+    return p
+
+
+class FiniteMeasure:
+    def __init__(self, atoms, justification, used=()):
+        if not justification:raise ValueError('explicit joint-measure justification required')
+        self.atoms=deepcopy(atoms);self.justification=justification;self.used=set(used)
+        ids=[a['id'] for a in atoms]
+        if len(ids)!=len(set(ids)) or not atoms:raise ValueError('distinct joint atoms required')
+        weights=[rational(a['weight']) for a in atoms]
+        if any(w<0 for w in weights) or sum(weights)!=1:raise ValueError('joint weights must sum to one')
+    def update(self, likelihood, information_blocks):
+        blocks=set(information_blocks)
+        if not blocks or blocks & self.used:raise ValueError('repeated/missing information block')
+        if set(likelihood)!={a['id'] for a in self.atoms}:raise ValueError('likelihood must cover every atom')
+        ls={k:rational(v) for k,v in likelihood.items()}
+        if any(v<0 or v>1 for v in ls.values()):raise ValueError('invalid event likelihood')
+        weights=[rational(a['weight'])*ls[a['id']] for a in self.atoms]; total=sum(weights)
+        if total==0:raise ValueError('zero-probability conditioning')
+        new=[dict(a,weight=str(w/total)) for a,w in zip(self.atoms,weights)]
+        return FiniteMeasure(new,self.justification,self.used|blocks)
+    def event(self, ids):
+        ids=set(ids)
+        if ids-{a['id'] for a in self.atoms}:raise ValueError('unknown atom')
+        return sum((rational(a['weight']) for a in self.atoms if a['id'] in ids),F(0))
+    def summary(self):
+        mass={};mean=F(0);available=True
+        for a in self.atoms:
+            w=rational(a['weight']); status=a['status'];mass[status]=mass.get(status,F(0))+w
+            if a.get('outcome') is None:
+                if w:available=False
+            else:mean+=w*rational(a['outcome'])
+        return {'mass':{k:str(v) for k,v in mass.items()},'mean':str(mean) if available else None,
+                'normalised_over_successful_only':False}
+
+
+def weighted_summary(measure):
+    if not isinstance(measure,FiniteMeasure):raise ValueError('unweighted families have no mean')
+    return measure.summary()
+
+
+def group_contracts(contracts, scenario, horizon, previous=None):
+    """Exact additive simple-debt grouping; retain full constituent memory."""
+    request={'contracts':contracts,'scenario':scenario,'horizon':horizon}
+    signature=hashlib.sha256(json.dumps(request,sort_keys=True).encode()).hexdigest()
+    if previous and previous['signature']!=signature:raise ValueError('grouping requires revalidation')
+    if not contracts or horizon[0]>=horizon[1]:raise ValueError('invalid grouping request')
+    keys=('rate','reset','maturity','hedge')
+    if any(tuple(c[k] for k in keys)!=tuple(contracts[0][k] for k in keys) for c in contracts):
+        raise UnsupportedFragment('different contract memory keys')
+    if any(c['maturity']<=horizon[1] for c in contracts):raise UnsupportedFragment('maturity inside horizon')
+    rate=rational(scenario['rate'] if contracts[0]['reset']=='floating' else contracts[0]['rate'])
+    year_fraction=rational(scenario['year_fraction'])
+    principal=sum((rational(c['principal']) for c in contracts),F(0))
+    individual=sum((rational(c['principal'])*rate*year_fraction for c in contracts),F(0))
+    grouped=principal*rate*year_fraction
+    if individual!=grouped:raise ValueError('additivity check failed')
+    return {'signature':signature,'status':'ExactForDeclaredAdditiveProfile','memory':deepcopy(contracts),
+            'scenario':deepcopy(scenario),'horizon':list(horizon),'principal':str(principal),
+            'interest':str(grouped),'transition_preserved':True,'report_preserved':True}

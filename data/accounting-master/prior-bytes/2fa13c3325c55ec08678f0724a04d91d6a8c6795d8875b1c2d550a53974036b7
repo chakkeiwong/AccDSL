@@ -1,0 +1,1005 @@
+#!/usr/bin/env python3
+"""Bounded, source-bound Apple case. No acquisition or forecasting at build time.
+
+Mappings below are annotations; numbers are read from pinned source bytes.
+All amounts used by the arithmetic engine are exact rational USD amounts.
+Revalidation rebuilds from sources, so editing an observation's metadata cannot
+change its source meaning. This is a case adapter, not a general XBRL processor.
+"""
+from __future__ import annotations
+
+import argparse
+from datetime import date, datetime, timedelta, timezone
+from fractions import Fraction
+import hashlib
+import json
+from pathlib import Path
+import re
+import subprocess
+
+from bs4 import BeautifulSoup
+
+ROOT = Path(__file__).resolve().parents[1]
+APPLE = "docs/design/cases/apple/"
+NEW = APPLE + "p02-v1/"
+REGISTER = "data/accounting-master/runs/20261002T180732-83972f09/P01/source-work-register.json"
+INDEX = "data/financial-report-benchmark/landing/apple/21eae1adf76b91a72eab511c0a96cd56f2053878b8c22df5bfdbfdbb0adfcc42.json"
+PLAN_HASH = "916a4c80553bebee3ca0b6399ba8d4e54a6f5d3bd2975cda75815b95e8f45f59"
+PINS = {
+    APPLE + "annual-2024.pdf": "ec74758cd767465362c641cf2fd5d8fedd477aed2bf7f62117e67610435dcb88",
+    APPLE + "annual-2024.txt": "caaf182340d3846ff54cf967a2d3da7dce82505170665943ea7227e6bed8336e",
+    APPLE + "interim-2025q1.html": "2f7629f0733f75b3155dd52f7ae6a8724468e3cde1a9ce32fbce96d98f1ec27e",
+    APPLE + "interim-2025q1.txt": "ab8e06fc35957f43a355d0d1d11d57d203b494a4008edb39cff162e984ef633b",
+    APPLE + "manifest.json": "f25b63803d8a7e136befa10d68b935f521aa42ffc95663b6c26d792b0e4e5fc7",
+    INDEX: "21eae1adf76b91a72eab511c0a96cd56f2053878b8c22df5bfdbfdbb0adfcc42",
+}
+MILLION = 10**6
+ENTITY = "0000320193"
+PRODUCTS = ["iPhone", "Mac", "iPad", "Wearables, Home and Accessories", "Services"]
+SEGMENTS = ["Americas", "Europe", "Greater China", "Japan", "Rest of Asia Pacific"]
+PRODUCT_MEMBERS = ["aapl:IPhoneMember", "aapl:MacMember", "aapl:IPadMember",
+                   "aapl:WearablesHomeandAccessoriesMember", "us-gaap:ServiceMember"]
+SEGMENT_MEMBERS = ["aapl:AmericasSegmentMember", "aapl:EuropeSegmentMember",
+                   "aapl:GreaterChinaSegmentMember", "aapl:JapanSegmentMember",
+                   "aapl:RestOfAsiaPacificSegmentMember"]
+REV = "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+CF_BAL = "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+
+
+class CaseError(ValueError):
+    """A source or interpretation fails the supported case contract."""
+
+
+def require(condition, message):
+    if not condition:
+        raise CaseError(message)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def file_hash(path):
+    return sha((ROOT / path).read_bytes())
+
+
+def power10(n):
+    return Fraction(10)**n
+
+
+def number(literal):
+    s = re.sub(r"[\s$]", "", literal)
+    if s in ("—", "–"):
+        return Fraction(0)
+    require(bool(re.fullmatch(r"(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?", s)) or
+            bool(re.fullmatch(r"\((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?\)", s)), "unsupported numeric literal: " + literal)
+    s = s.replace(",", "")
+    return -Fraction(s[1:-1]) if s.startswith("(") else Fraction(s)
+
+
+def interval(value, quantum):
+    v, q = Fraction(value), Fraction(quantum)
+    require(q > 0, "precision must be positive")
+    return [str(v-q/2), str(v+q/2)]
+
+
+def interval_sum(observations, coefficients=None):
+    coefs = coefficients or [1]*len(observations)
+    require(len(coefs) == len(observations), "coefficient count")
+    lo = hi = Fraction(0)
+    for obs, c in zip(observations, coefs):
+        a, b = map(Fraction, obs["rounding_interval_usd"])
+        lo += min(c*a, c*b)
+        hi += max(c*a, c*b)
+    return lo, hi
+
+
+def compatible(left, right):
+    return max(Fraction(left[0]), Fraction(right[0])) <= min(Fraction(left[1]), Fraction(right[1]))
+
+
+class Document:
+    def __init__(self, identity, original, extraction, pdf=False):
+        self.identity, self.original, self.extraction, self.pdf = identity, original, extraction, pdf
+        self.original_hash, self.extraction_hash = file_hash(original), file_hash(extraction)
+        self.text = (ROOT/extraction).read_text()
+
+    def anchor(self, start, end):
+        require(0 <= start < end <= len(self.text), "anchor range")
+        out = dict(document=self.identity, original_path=self.original,
+                   original_sha256=self.original_hash, extraction_path=self.extraction,
+                   extraction_sha256=self.extraction_hash, offset_unit="Unicode code points",
+                   start=start, end=end, quote=self.text[start:end])
+        if self.pdf:
+            page_start = self.text.rfind("\f", 0, start)+1
+            page_end = self.text.find("\f", start)
+            page = self.text[page_start:page_end if page_end >= 0 else len(self.text)]
+            m = re.search(r"Apple Inc\. \| 2024 Form 10-K \| (\d+)", page)
+            out.update(pdf_page=self.text.count("\f", 0, start)+1,
+                       printed_page=int(m[1]) if m else None,
+                       ending_pdf_page=self.text.count("\f", 0, end-1)+1)
+        return out
+
+    def find(self, pattern, bounds=None, flags=0):
+        start, end = bounds or (0, len(self.text))
+        matches = list(re.finditer(pattern, self.text[start:end], flags))
+        require(len(matches) == 1, f"{self.identity}: expected unique span {pattern!r}, got {len(matches)}")
+        m = matches[0]
+        return self.anchor(start+m.start(), start+m.end())
+
+    def page(self, printed):
+        offset = 0
+        for page in self.text.split("\f"):
+            if re.search(r"Apple Inc\. \| 2024 Form 10-K \| " + str(printed) + r"\s*$", page):
+                return offset, offset+len(page)
+            offset += len(page)+1
+        raise CaseError("printed page missing")
+
+    def binding(self):
+        return dict(id=self.identity, original_path=self.original, original_sha256=self.original_hash,
+                    extraction_path=self.extraction, extraction_sha256=self.extraction_hash)
+
+
+def discover_notes(doc, expected):
+    matches = list(re.finditer(r"(?m)^[\f \t]*Note (\d+)\s*[–-]\s*([^\n]+)", doc.text))
+    require([int(m[1]) for m in matches] == list(range(1, expected+1)), "missing, duplicate or reordered notes")
+    marker = "Report of Independent Registered" if doc.pdf else "Item 2."
+    out = []
+    for i, m in enumerate(matches):
+        end = matches[i+1].start() if i+1 < len(matches) else doc.text.find(marker, m.end())
+        require(end > m.end(), "final note boundary missing")
+        start = m.start() + len(m[0])-len(m[0].lstrip())
+        out.append(dict(id=f"{doc.identity}.note.{m[1]}", number=int(m[1]), title=m[2].strip(),
+                        anchor=doc.anchor(start, end), heading=doc.anchor(start, m.end())))
+    return out
+
+
+def context(period, dimensions=None):
+    return dict(entity=ENTITY, entity_scheme="http://www.sec.gov/CIK", perimeter="consolidated",
+                basis="US GAAP", currency="USD", period=period, dimensions=dimensions or {})
+
+
+def observation(oid, concept, value, literal, scale, quantum, ctx, measurement, anchors, **extra):
+    out = dict(id=oid, concept=concept, displayed_literal=literal, scale=scale,
+               value_usd=str(value), presentation_quantum_usd=str(quantum), context=ctx,
+               measurement=measurement, rounding_interval_usd=interval(value, quantum),
+               source_readings=anchors, status="extracted_reading", **extra)
+    return out
+
+
+def annual_row(doc, label, column, ctx, concept, measurement, bounds, columns,
+               header, oid, partition=None):
+    # A row is selected by its label within a scoped table, never by its value.
+    a = doc.find(r"^[ \t]*" + re.escape(label) + r"[ \t]{2,}[^\n]+", bounds, re.M)
+    line = a["quote"]
+    begin = line.index(label)+len(label)
+    tokens = list(re.finditer(r"\(?[\d,]+(?:\.\d+)?\)?|—", line[begin:]))
+    require(len(tokens) == columns, f"{label}: ambiguous table columns")
+    token = tokens[column]
+    start = a["start"]+begin+token.start()
+    literal = token[0]
+    return observation(oid, concept, number(literal)*MILLION, literal, 6, MILLION,
+                       ctx, measurement, [dict(row=a, cell=doc.anchor(start, start+len(literal)),
+                                               table_header=header, column_index=column)], partition=partition)
+
+
+class InlineReader:
+    """Strict subset of inline-XBRL used in this case, retaining raw ID anchors."""
+    def __init__(self, doc):
+        self.doc = doc
+        self.raw = (ROOT/doc.original).read_text()
+        self.soup = BeautifulSoup(self.raw, "html.parser")
+        self.ids = {}
+        for el in self.soup.find_all(id=True):
+            require(el["id"] not in self.ids, "duplicate HTML/XBRL id")
+            self.ids[el["id"]] = el
+        self.facts = self.soup.find_all("ix:nonfraction")
+
+    def raw_anchor(self, el):
+        # Exact original bytes (ASCII-compatible UTF-8 text offsets), not soup serialization.
+        pattern = r"<" + re.escape(el.name) + r"\b[^>]*\bid=[\"']" + re.escape(el["id"]) + r"[\"'][^>]*>.*?</" + re.escape(el.name) + r">"
+        matches = list(re.finditer(pattern, self.raw, re.S | re.I))
+        require(len(matches) == 1, "raw ID anchor missing/ambiguous")
+        m = matches[0]
+        return dict(path=self.doc.original, sha256=self.doc.original_hash,
+                    start=m.start(), end=m.end(), quote=m[0], offset_unit="Unicode code points", id=el["id"])
+
+    def resolve(self, ref, tag):
+        require(ref in self.ids and self.ids[ref].name == tag, f"broken {tag} reference {ref}")
+        return self.ids[ref]
+
+    def parse_context(self, el):
+        identifier = el.find_all("xbrli:identifier")
+        require(len(identifier) == 1, "ambiguous entity")
+        require(identifier[0].get("scheme") == "http://www.sec.gov/CIK", "unsupported entity scheme")
+        period = el.find("xbrli:period")
+        require(period is not None, "missing period")
+        tags = [n for n in period.children if getattr(n, "name", None)]
+        names = [n.name for n in tags]
+        require(names in [["xbrli:instant"], ["xbrli:startdate", "xbrli:enddate"]], "unsupported period")
+        dates = [date.fromisoformat(n.get_text()).isoformat() for n in tags]
+        require(len(dates) == 1 or dates[0] <= dates[1], "reversed period")
+        p = dict(instant=dates[0]) if len(dates) == 1 else dict(start=dates[0], end=dates[1])
+        require(not el.find("xbrldi:typedmember") and not el.find("xbrli:scenario"), "unsupported context content")
+        dims = {}
+        for d in el.find_all("xbrldi:explicitmember"):
+            require(d.get("dimension") and d["dimension"] not in dims, "duplicate/missing dimension")
+            dims[d["dimension"]] = d.get_text()
+        out = context(p, dims)
+        out["entity"] = identifier[0].get_text()
+        return out
+
+    def parse(self, fact):
+        cid, uid = fact.get("contextref"), fact.get("unitref")
+        c, u = self.resolve(cid, "xbrli:context"), self.resolve(uid, "xbrli:unit")
+        ctx = self.parse_context(c)
+        measures = u.find_all("xbrli:measure")
+        require(len(measures) == 1 and measures[0].get_text() == "iso4217:USD" and
+                not u.find("xbrli:divide"), "unsupported currency/unit")
+        require(fact.get("sign") in [None, "-"], "unsupported sign")
+        require(not fact.get("xsi:nil") and not fact.get("continuedat"), "nil/continued numeric unsupported")
+        require(re.fullmatch(r"-?\d+", fact.get("scale", "0")) is not None, "invalid scale")
+        require(re.fullmatch(r"-?\d+", fact.get("decimals", "")) is not None, "unsupported precision")
+        scale, decimals = int(fact.get("scale", "0")), int(fact["decimals"])
+        require(-12 <= scale <= 12 and -12 <= decimals <= 12, "unbounded scale/precision")
+        fmt, lit = fact.get("format"), fact.get_text(strip=True)
+        if fmt == "ixt:fixed-zero":
+            require(lit in ("—", "–", "0"), "invalid zero transform")
+            v = Fraction(0)
+        elif fmt == "ixt:num-dot-decimal":
+            require(re.fullmatch(r"(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?", lit) is not None, "invalid decimal transform")
+            v = number(lit)
+        elif fmt is None:
+            require(re.fullmatch(r"\d+(?:\.\d+)?", lit) is not None, "unformatted nonnumeric fact")
+            v = Fraction(lit)
+        else:
+            raise CaseError("unsupported inline transform " + fmt)
+        v *= power10(scale) * (-1 if fact.get("sign") == "-" else 1)
+        row = fact.find_parent("tr")
+        # Selected monetary rows must agree with the visual sign, unless narrative.
+        cell = fact.find_parent("td")
+        if cell:
+            visible = cell.get_text("", strip=True)
+            require(("(" in visible and ")" in visible) == (v < 0), "rendered/tagged sign mismatch")
+        rowtext = row.get_text(" ", strip=True) if row else fact.parent.get_text(" ", strip=True)
+        return dict(value=v, literal=lit, scale=scale, quantum=power10(-decimals), context=ctx,
+                    raw=dict(fact=self.raw_anchor(fact), context=self.raw_anchor(c), unit=self.raw_anchor(u),
+                             fact_id=fact["id"], context_id=cid, unit_id=uid, decimals=decimals,
+                             sign=fact.get("sign"), transform=fmt, rendered_text=rowtext))
+
+    def select(self, concept, ctx, measurement, oid, scale=6, decimals=-6, partition=None,
+               label=None):
+        candidates = []
+        for f in self.facts:
+            if f.get("name") != concept:
+                continue
+            c = self.resolve(f.get("contextref"), "xbrli:context")
+            parsed_ctx = self.parse_context(c)
+            if parsed_ctx == ctx:
+                candidates.append(self.parse(f))
+        require(candidates, f"missing required fact/context {concept} {ctx}")
+        first = candidates[0]
+        for c in candidates:
+            require(c["value"] == first["value"] and c["quantum"] == first["quantum"], "conflicting repeated readings")
+            require(c["scale"] == scale and c["raw"]["decimals"] == decimals, "wrong presentation scale/precision")
+        if label:
+            require(any(label in c["raw"]["rendered_text"] for c in candidates), "rendered label not found")
+        return observation(oid, concept, first["value"], first["literal"], scale, first["quantum"],
+                           ctx, measurement, [c["raw"] for c in candidates], partition=partition)
+
+
+def same_context(obs, ignore=()):
+    require(obs, "no operands")
+    base = {k: v for k, v in obs[0]["context"].items() if k not in ignore}
+    require(all({k: v for k, v in x["context"].items() if k not in ignore} == base for x in obs),
+            "entity/currency/perimeter/basis/period/dimensions mismatch")
+    require(base.get("entity") == ENTITY and base.get("perimeter") == "consolidated" and
+            base.get("currency") == "USD" and base.get("basis") == "US GAAP" and
+            base.get("entity_scheme") == "http://www.sec.gov/CIK", "unsupported case context")
+
+
+def validate_value(obs):
+    """Check value, precision and sign against the retained numeric reading."""
+    value = Fraction(obs["value_usd"])
+    require(obs["rounding_interval_usd"] == interval(value, obs["presentation_quantum_usd"]),
+            "altered rounding interval")
+    require(abs(value) == abs(number(obs["displayed_literal"])*power10(obs["scale"])),
+            "literal/scale/value mismatch")
+    require(obs["source_readings"], "missing numeric source")
+    for source in obs["source_readings"]:
+        if "cell" in source:
+            require(value == number(source["cell"]["quote"])*MILLION and obs["scale"] == 6 and
+                    Fraction(obs["presentation_quantum_usd"]) == MILLION, "annual cell/value mismatch")
+        elif "fact" in source:
+            fact = BeautifulSoup(source["fact"]["quote"], "html.parser").find("ix:nonfraction")
+            require(fact is not None, "missing inline source")
+            sign = -1 if fact.get("sign") == "-" else 1
+            require(value == number(fact.get_text(strip=True))*power10(int(fact.get("scale", "0")))*sign,
+                    "inline source/value mismatch")
+            require(obs["scale"] == int(fact.get("scale", "0")) and
+                    Fraction(obs["presentation_quantum_usd"]) == power10(-int(fact["decimals"])),
+                    "inline precision mismatch")
+        else:
+            raise CaseError("unsupported numeric reading")
+
+
+def reconcile(bridge_id, kind, operands, target, partition=None):
+    all_obs = operands+[target]
+    for obs in all_obs:
+        validate_value(obs)
+    transformations = []
+    if kind == "cash_flow":
+        require(len(operands) == 4, "cash flow operands")
+        opening, *flows = operands
+        require(opening["measurement"] == target["measurement"] == "cash_including_restricted", "cash perimeter mismatch")
+        require(all(o["measurement"] == "cash_flow" for o in flows), "cash movement type")
+        same_context(all_obs, ("period",))
+        per = flows[0]["context"]["period"]
+        require(all(x["context"]["period"] == per for x in flows), "flow period mismatch")
+        require(opening["context"]["period"] == {"instant": (date.fromisoformat(per["start"])-timedelta(days=1)).isoformat()} and
+                target["context"]["period"] == {"instant": per["end"]}, "stock/flow date mismatch")
+        transformations.append("Opening instant is the day before the disclosed flow period; closing instant is its end. Cash includes restricted cash on both sides.")
+    elif kind == "partition":
+        same_context(all_obs, ("dimensions",))
+        require(partition in ("product", "segment"), "unknown partition")
+        expected = PRODUCTS if partition == "product" else SEGMENTS
+        require([o.get("partition") for o in operands] == [partition]*len(expected), "overlapping or wrong partitions")
+        require([o.get("member_label") for o in operands] == expected, "duplicate/missing partition member")
+        require(all(o["measurement"] == "net_revenue" for o in all_obs) and not target["context"]["dimensions"], "revenue target")
+        require(len({json.dumps(o["context"]["dimensions"], sort_keys=True) for o in operands}) == len(expected), "duplicate dimension members")
+        axis, members = (("srt:ProductOrServiceAxis", PRODUCT_MEMBERS) if partition == "product" else
+                         ("us-gaap:StatementBusinessSegmentsAxis", SEGMENT_MEMBERS))
+        require([o["context"]["dimensions"] for o in operands] == [{axis: m} for m in members] and
+                all(o["concept"] == REV for o in all_obs), "partition axis/member/concept mismatch")
+        transformations.append("Sum one disclosed exhaustive table partition; product and geography are separate classifications of the same revenue.")
+    else:
+        same_context(all_obs)
+        measurements = [o["measurement"] for o in operands]
+        allowed = {
+            "balance": (["carrying_amount", "carrying_amount"], "carrying_amount"),
+            "debt_components": (["carrying_amount", "carrying_amount"], "carrying_amount"),
+            "principal_to_carrying": (["principal", "carrying_adjustment", "carrying_adjustment"], "carrying_amount"),
+            "ppe": (["gross_cost", "accumulated_depreciation"], "carrying_amount"),
+            "equality": ([target["measurement"]], target["measurement"]),
+            "rounded_debt": (["carrying_amount", "carrying_amount"], "carrying_amount"),
+        }
+        require(kind in allowed and (measurements, target["measurement"]) == allowed[kind], "measurement substitution")
+        if kind == "balance":
+            require([o["concept"] for o in all_obs] == ["us-gaap:Liabilities", "us-gaap:StockholdersEquity", "us-gaap:Assets"],
+                    "balance concept mismatch")
+        if kind in ("debt_components", "rounded_debt"):
+            require([o["concept"] for o in operands] == ["us-gaap:LongTermDebtCurrent", "us-gaap:LongTermDebtNoncurrent"],
+                    "debt component concept mismatch")
+    value = sum(Fraction(o["value_usd"]) for o in operands)
+    target_value = Fraction(target["value_usd"])
+    lhs_interval = interval_sum(operands)
+    rhs_interval = target["rounding_interval_usd"]
+    rounding = compatible(lhs_interval, rhs_interval)
+    require(rounding, "incompatible rounding intervals")
+    if kind != "rounded_debt":
+        require(value == target_value, "displayed arithmetic mismatch")
+    return dict(id=bridge_id, kind=kind, operands=[o["id"] for o in operands], target=target["id"],
+                lhs_usd=str(value), rhs_usd=str(target_value), residual_usd=str(value-target_value),
+                lhs_interval_usd=list(map(str, lhs_interval)), rhs_interval_usd=rhs_interval,
+                displayed_identity=value == target_value, rounding_compatible=rounding,
+                status="pass", transformations=transformations,
+                conclusion="displayed identity" if kind != "rounded_debt" else "rounding compatibility only")
+
+
+def html_text(raw):
+    soup = BeautifulSoup(raw, "html.parser")
+    for el in soup(["script", "style"]):
+        el.decompose()
+    return soup.get_text("\n", strip=True)
+
+
+def load_sources():
+    for p, h in PINS.items():
+        require(file_hash(p) == h, "source hash mismatch: " + p)
+    annual = Document("annual", APPLE+"annual-2024.pdf", APPLE+"annual-2024.txt", pdf=True)
+    interim = Document("interim", APPLE+"interim-2025q1.html", APPLE+"interim-2025q1.txt")
+    extracted = subprocess.run(["pdftotext", "-layout", str(ROOT/annual.original), "-"],
+                               capture_output=True, check=True, timeout=30).stdout
+    require(sha(extracted) == annual.extraction_hash, "PDF extraction does not reproduce retained text")
+    require(html_text((ROOT/interim.original).read_text()) == interim.text, "HTML extraction mismatch")
+    register = json.loads((ROOT/REGISTER).read_text())
+    bindings = []
+    for d, name in [(annual, "apple-2024-annual"), (interim, "apple-2025-q1")]:
+        candidates = [r for r in register["records"] if r["document_id"] == name]
+        require(len(candidates) == 1, "P01 source identity")
+        r = candidates[0]
+        require(r["original_sha256"] == d.original_hash == file_hash(r["original_path"]), "P01 original binding")
+        require(r["extracted_sha256"] == file_hash(r["extracted_path"]), "P01 extraction binding")
+        bindings.append(dict(**d.binding(), p01_document=name, p01_original_path=r["original_path"],
+                             p01_extraction_path=r["extracted_path"], p01_extraction_sha256=r["extracted_sha256"],
+                             extraction_relation="identical" if r["extracted_sha256"] == d.extraction_hash else
+                             "distinct text versions; offsets must not transfer",
+                             p01_publication_metadata=r["publication_metadata"]))
+    acquisitions = json.loads((ROOT/NEW/"acquisition.json").read_text())
+    external_docs = {}
+    for rec in acquisitions["records"]:
+        if "path" not in rec:
+            continue
+        require(file_hash(rec["path"]) == rec["sha256"], "acquired bytes changed")
+        if rec["path"].endswith(".html"):
+            p = Path(rec["path"])
+            extracted_path = str(p.with_suffix(".txt"))
+            require((ROOT/extracted_path).exists(), "missing acquired text")
+            require(html_text((ROOT/p).read_text()) == (ROOT/extracted_path).read_text(), "external extraction mismatch")
+            d = Document(p.stem, str(p), extracted_path)
+            external_docs[p.stem] = d
+            bindings.append(dict(**d.binding(), acquisition=rec,
+                                 historical_byte_vintage="not established by current retrieval"))
+    return annual, interim, external_docs, bindings, acquisitions
+
+
+def collect_observations(annual, interim):
+    observations, bridges = [], []
+    def put(o):
+        require(o["id"] not in {x["id"] for x in observations}, "duplicate observation id")
+        observations.append(o)
+        return o
+    def bridge(name, kind, operands, target, **kw):
+        bridges.append(reconcile(name, kind, operands, target, **kw))
+    def scope(page, start=None, end=None):
+        lo, hi = annual.page(page)
+        if start:
+            lo = annual.find(re.escape(start), (lo, hi))["start"]
+        if end:
+            stop = annual.text.find(end, lo, hi)
+            require(stop >= 0, "scope terminator missing")
+            hi = stop
+        return lo, hi
+    def arow(label, col, ctx, concept, measure, bounds, cols, oid, partition=None):
+        # Include the table's actual date headings and declared presentation scale.
+        yr = annual.find(r"^[ \t]*2024[ \t]+2023(?:[ \t]+2022)?[ \t]*$", bounds, re.M)
+        header = annual.anchor(bounds[0], yr["end"])
+        return put(annual_row(annual, label, col, ctx, concept, measure, bounds, cols, header, oid, partition))
+    a_bs = {}
+    for col, day in enumerate(["2024-09-28", "2023-09-30"]):
+        ctx = context(dict(instant=day))
+        rows = {}
+        for key, label, concept in [
+            ("assets", "Total assets", "us-gaap:Assets"),
+            ("liabilities", "Total liabilities", "us-gaap:Liabilities"),
+            ("equity", "Total shareholders’ equity", "us-gaap:StockholdersEquity"),
+            ("cash", "Cash and cash equivalents", "us-gaap:CashAndCashEquivalentsAtCarryingValue"),
+            ("ppe", "Property, plant and equipment, net", "us-gaap:PropertyPlantAndEquipmentNet")]:
+            measure = "cash_excluding_restricted" if key == "cash" else "carrying_amount"
+            rows[key] = arow(label, col, ctx, concept, measure, scope(31), 2, f"annual.bs.{day}.{key}")
+        for key, start, end, concept in [
+            ("debt_current", "Current liabilities:", "Non-current liabilities:", "us-gaap:LongTermDebtCurrent"),
+            ("debt_noncurrent", "Non-current liabilities:", "Commitments and contingencies", "us-gaap:LongTermDebtNoncurrent")]:
+            bounds = scope(31, start, end)
+            header = annual.anchor(annual.page(31)[0], annual.page(31)[0]+450)
+            rows[key] = put(annual_row(annual, "Term debt", col, ctx, concept, "carrying_amount", bounds, 2,
+                                      header, f"annual.bs.{day}.{key}"))
+        bridge(f"annual.balance.{day}", "balance", [rows["liabilities"], rows["equity"]], rows["assets"])
+        a_bs[day] = rows
+        debt_bounds = scope(43, "Term Debt", "To manage interest rate risk")
+        d = {}
+        for key, label, measurement in [
+            ("principal", "Total term debt principal", "principal"),
+            ("discount", "Unamortized premium/(discount) and issuance costs, net", "carrying_adjustment"),
+            ("hedge", "Hedge accounting fair value adjustments", "carrying_adjustment"),
+            ("carrying", "Total term debt", "carrying_amount")]:
+            d[key] = arow(label, col, ctx, "apple:Debt"+key.title(), measurement, debt_bounds, 2,
+                          f"annual.debt.{day}.{key}")
+        bridge(f"annual.principal_to_carrying.{day}", "principal_to_carrying", [d[k] for k in ["principal", "discount", "hedge"]], d["carrying"])
+        bridge(f"annual.debt_components.{day}", "debt_components", [rows["debt_current"], rows["debt_noncurrent"]], d["carrying"])
+        p = {}
+        for key, label, measure in [("gross", "Gross property, plant and equipment", "gross_cost"),
+                                    ("depreciation", "Accumulated depreciation", "accumulated_depreciation"),
+                                    ("net", "Total property, plant and equipment, net", "carrying_amount")]:
+            p[key] = arow(label, col, ctx, "apple:PPE"+key.title(), measure,
+                          scope(39, "Note 5", "Note 6"), 2, f"annual.ppe.{day}.{key}")
+        bridge(f"annual.ppe.{day}", "ppe", [p["gross"], p["depreciation"]], p["net"])
+        bridge(f"annual.ppe_statement.{day}", "equality", [p["net"]], rows["ppe"])
+    # Years and week lengths are read from the actual Note 1 calendar paragraph.
+    calendar = annual.find(r"The Company’s fiscal year is the 52- or 53-week period.*?associated quarters, months and periods of those fiscal years\.",
+                           scope(34), re.S)
+    m = re.search(r"years (\d{4}) and (\d{4}) spanned (\d+) weeks each, whereas fiscal year (\d{4}) spanned (\d+) weeks", calendar["quote"])
+    require(m is not None, "fiscal week lengths missing")
+    weeks = {m[1]: int(m[3]), m[2]: int(m[3]), m[4]: int(m[5])}
+    # The dates are bound to the split-line date header on printed page 33.
+    for col, day in enumerate(["2024-09-28", "2023-09-30", "2022-09-24"]):
+        end = date.fromisoformat(day)
+        require(end.strftime("%B")+" "+str(end.day)+"," in annual.text[slice(*annual.page(33))], "annual end header missing")
+        start = end+timedelta(days=1-weeks[str(end.year)]*7)
+        per = dict(start=start.isoformat(), end=day)
+        ctx = context(per)
+        rev = arow("Total net sales", col, ctx, REV, "net_revenue", scope(29), 3, f"annual.revenue.{end.year}")
+        for partition, members in [("product", PRODUCTS), ("segment", SEGMENTS)]:
+            parts = []
+            for i, member in enumerate(members):
+                dims = {"srt:ProductOrServiceAxis": PRODUCT_MEMBERS[i]} if partition == "product" else {"us-gaap:StatementBusinessSegmentsAxis": SEGMENT_MEMBERS[i]}
+                bounds = scope(35) if partition == "product" else scope(47, member+":", "Operating income")
+                label = "Services (1)" if member == "Services" else member
+                if partition == "segment":
+                    o = put(annual_row(annual, "Net sales", col, context(per, dims), REV, "net_revenue", bounds, 3,
+                                      annual.anchor(annual.page(47)[0], scope(47, "Americas:")[0]), f"annual.{partition}.{end.year}.{i}", partition))
+                else:
+                    o = arow(label, col, context(per, dims), REV, "net_revenue", bounds, 3,
+                              f"annual.{partition}.{end.year}.{i}", partition)
+                o["member_label"] = member
+                parts.append(o)
+            bridge(f"annual.revenue_{partition}.{end.year}", "partition", parts, rev, partition=partition)
+        flows = []
+        opening = arow("Cash, cash equivalents, and restricted cash and cash equivalents, beginning balances", col,
+                       context(dict(instant=(start-timedelta(days=1)).isoformat())), CF_BAL, "cash_including_restricted",
+                       scope(33), 3, f"annual.cf.{end.year}.opening")
+        for key, label in [("operating", "Cash generated by operating activities"),
+                            ("investing", "Cash generated by/(used in) investing activities"),
+                            ("financing", "Cash used in financing activities")]:
+            flows.append(arow(label, col, ctx, "us-gaap:NetCashProvidedByUsedIn"+key.title()+"Activities", "cash_flow",
+                              scope(33), 3, f"annual.cf.{end.year}.{key}"))
+        closing = arow("Cash, cash equivalents, and restricted cash and cash equivalents, ending balances", col,
+                       context(dict(instant=day)), CF_BAL, "cash_including_restricted", scope(33), 3,
+                       f"annual.cf.{end.year}.closing")
+        bridge(f"annual.cash_flow.{end.year}", "cash_flow", [opening]+flows, closing)
+    # The annual notional is retained as notional, never recast as debt exposure.
+    bounds = scope(38, "The notional amounts", "The carrying amounts")
+    notional = arow("Interest rate contracts", 0, context(dict(instant="2024-09-28"), {
+        "us-gaap:DerivativeInstrumentRiskAxis": "us-gaap:InterestRateContractMember",
+        "us-gaap:HedgingDesignationAxis": "us-gaap:DesignatedAsHedgingInstrumentMember"}),
+        "us-gaap:DerivativeNotionalAmount", "derivative_notional", bounds, 2, "annual.notional.2024")
+    reader = InlineReader(interim)
+    def iread(concept, ctx, measurement, oid, **kw):
+        return put(reader.select(concept, ctx, measurement, oid, **kw))
+    for day in ["2024-12-28", "2024-09-28"]:
+        ctx = context(dict(instant=day))
+        rows = {}
+        for key, concept, label in [
+            ("assets", "us-gaap:Assets", "Total assets"),
+            ("liabilities", "us-gaap:Liabilities", "Total liabilities"),
+            ("equity", "us-gaap:StockholdersEquity", "Total shareholders’ equity"),
+            ("debt_current", "us-gaap:LongTermDebtCurrent", "Term debt"),
+            ("debt_noncurrent", "us-gaap:LongTermDebtNoncurrent", "Term debt")]:
+            rows[key] = iread(concept, ctx, "carrying_amount", f"interim.bs.{day}.{key}", label=label)
+        bridge(f"interim.balance.{day}", "balance", [rows["liabilities"], rows["equity"]], rows["assets"])
+        rounded = iread("us-gaap:LongTermDebt", ctx, "carrying_amount", f"interim.debt.{day}.rounded", scale=9, decimals=-8)
+        bridge(f"interim.rounded_debt.{day}", "rounded_debt", [rows["debt_current"], rows["debt_noncurrent"]], rounded)
+        iread("us-gaap:LongTermDebtFairValue", context(dict(instant=day), {"us-gaap:FairValueByFairValueHierarchyLevelAxis": "us-gaap:FairValueInputsLevel2Member"}),
+              "fair_value", f"interim.debt.{day}.fair_value", scale=9, decimals=-8)
+        iread("us-gaap:DerivativeNotionalAmount", context(dict(instant=day), notional["context"]["dimensions"]),
+              "derivative_notional", f"interim.notional.{day}", label="Interest rate contracts")
+        if day in a_bs:
+            for key in rows:
+                bridge(f"annual_interim_comparative.{key}", "equality", [rows[key]], a_bs[day][key])
+    for start, end in [("2024-09-29", "2024-12-28"), ("2023-10-01", "2023-12-30")]:
+        ctx = context(dict(start=start, end=end))
+        rev = iread(REV, ctx, "net_revenue", "interim.revenue."+end, label="Total net sales")
+        for partition, members, dimnames, axis in [
+            ("product", PRODUCTS, PRODUCT_MEMBERS, "srt:ProductOrServiceAxis"),
+            ("segment", SEGMENTS, SEGMENT_MEMBERS, "us-gaap:StatementBusinessSegmentsAxis")]:
+            parts = []
+            for i, (member, dim) in enumerate(zip(members, dimnames)):
+                o = iread(REV, context(ctx["period"], {axis: dim}), "net_revenue", f"interim.{partition}.{end}.{i}",
+                          partition=partition, label=member if partition == "product" else "Net sales")
+                o["member_label"] = member
+                parts.append(o)
+            bridge(f"interim.revenue_{partition}.{end}", "partition", parts, rev, partition=partition)
+        opening = iread(CF_BAL, context(dict(instant=(date.fromisoformat(start)-timedelta(days=1)).isoformat())),
+                        "cash_including_restricted", "interim.cf."+end+".opening", label="beginning balances")
+        flows = [iread("us-gaap:NetCashProvidedByUsedIn"+kind+"Activities", ctx, "cash_flow", f"interim.cf.{end}.{kind.lower()}")
+                 for kind in ["Operating", "Investing", "Financing"]]
+        closing = iread(CF_BAL, context(dict(instant=end)), "cash_including_restricted", "interim.cf."+end+".closing", label="ending balances")
+        bridge("interim.cash_flow."+end, "cash_flow", [opening]+flows, closing)
+    return observations, bridges, calendar
+
+
+# Interpretation annotations, not extracted values or executable accounting rules.
+NOTE_MEANING = {
+    "Summary of Significant Accounting Policies": (
+        ["consolidation", "calendar", "measurement policies"],
+        "Use the disclosed fiscal calendar and consolidated perimeter; annual policies and interim preparation qualifications remain distinct.",
+        "Legal-entity control histories, estimate changes and full policy-to-posting rules are not reconstructed."),
+    "Revenue": (["revenue", "deferred revenue", "returns"],
+        "Keep the disclosed product/service partition separate from geographic segment revenue.",
+        "Contract performance, return estimates, transaction-price allocation and deferred-revenue movements remain unidentified."),
+    "Earnings Per Share": (["earnings", "share denominators", "dilution"],
+        "Retain the EPS numerator and dated weighted-average basic/diluted share table as unresolved typed meaning.",
+        "Share counts are in thousands and EPS is per share; this USD-only extractor does not implement dilution or per-share division."),
+    "Financial Instruments": (["investments", "derivatives", "hedging", "OCI"],
+        "Retain interest-rate derivative notional separately from debt carrying amount and rate exposure.",
+        "Notional does not identify hedge allocation, reset dates, currency sensitivities or future OCI recycling."),
+    "Property, Plant and Equipment": (["fixed assets", "depreciation"],
+        "Reconcile gross cost plus signed accumulated depreciation to net carrying amount and the balance sheet.",
+        "Acquisition cohorts, disposals, asset lives and future depreciation are not identified by the gross/net bridge."),
+    "Consolidated Financial Statement Details": (["deferred taxes", "other assets", "other liabilities"],
+        "Retain component schedules with explicit unresolved movement and recognition meaning.",
+        "Components of other assets and liabilities are not converted to a unique transaction history or posting rules."),
+    "Condensed Consolidated Financial Statement Details": (["inventories", "fixed assets"],
+        "Retain inventory components and gross/net PP&E schedules with their interim dates and presentation units.",
+        "Inventory purchase/consumption histories and asset cohorts remain unidentified; interim detail schedules are not executed here."),
+    "Income Taxes": (["current taxes", "deferred taxes", "state aid"],
+        "Keep the State Aid Decision and current/deferred tax schedules as dated disclosures.",
+        "Jurisdiction-specific settlements, taxable bases and future effective rates cannot be inferred from the totals."),
+    "Leases": (["lease liabilities", "right-of-use assets", "lease expense"],
+        "Retain maturity buckets and fixed/variable payment distinctions without treating commitments as an undiscounted liability.",
+        "Individual lease discounting, renewal choices, modifications and variable-payment drivers remain unidentified."),
+    "Debt": (["financing", "cash flow", "interest", "hedging"],
+        "Separate principal, carrying adjustments, current/noncurrent carrying value, rounded narrative amounts and fair value.",
+        "Cash repayments alone cannot produce a debt roll-forward: FX, noncash and measurement movements and contract allocations are missing."),
+    "Shareholders’ Equity": (["repurchases", "equity", "dividends"],
+        "Repurchase permission is not an obligation to acquire a minimum number of shares.",
+        "Future repurchases, dividends and issuance timing remain choices, not deterministic consequences of authorization."),
+    "Share-Based Compensation": (["compensation", "equity", "tax withholding"],
+        "Retain award/vesting disclosures and expense/related tax effects as separate accounting quantities.",
+        "Grant-level vesting, forfeiture, performance outcomes and future cash-tax settlement histories remain unresolved."),
+    "Commitments, Contingencies and Supply Concentrations": (["purchase commitments", "litigation", "supplier concentration"],
+        "Preserve conditional litigation language, contractual purchase schedules and qualitative supplier concentration.",
+        "No loss probabilities, universal materiality threshold, provision equal to commitments or numerical supplier haircut is inferred."),
+    "Contingencies": (["litigation", "accruals", "material loss"],
+        "Retain management's dated assessment of asserted legal and other claims, including its uncertainty and recorded-accrual qualification.",
+        "The assertion supplies neither a zero liability nor a numerical loss probability or quantified materiality threshold."),
+    "Segment Information and Geographic Data": (["segment revenue", "segment profit", "geography"],
+        "Geographic segments form one revenue partition; product/service revenue is another partition of the same consolidated sales.",
+        "Cross-classified product-by-geography cells, future regional behavior and full segment-profit cost allocations remain unidentified."),
+}
+
+
+def walk_anchors(value):
+    if isinstance(value, dict):
+        if {"start", "end", "quote", "offset_unit"} <= value.keys():
+            yield value
+        for item in value.values():
+            yield from walk_anchors(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from walk_anchors(item)
+
+
+def validate_anchors(value):
+    cache = {}
+    def read(path, digest):
+        resolved = (ROOT/path).resolve()
+        require(resolved.is_relative_to(ROOT), "anchor outside repository")
+        if path not in cache:
+            data = resolved.read_bytes()
+            cache[path] = (sha(data), None if path.endswith('.pdf') else data.decode('utf-8'))
+        require(cache[path][0] == digest, "anchor source hash mismatch")
+        return cache[path][1]
+    count = 0
+    for a in walk_anchors(value):
+        if "original_path" in a:
+            read(a["original_path"], a["original_sha256"])
+            text = read(a["extraction_path"], a["extraction_sha256"])
+        else:
+            text = read(a["path"], a["sha256"])
+        require(a["offset_unit"] == "Unicode code points" and
+                0 <= a["start"] < a["end"] <= len(text) and
+                text[a["start"]:a["end"]] == a["quote"], "broken source quotation/offset")
+        if "pdf_page" in a:
+            doc = Document(a["document"], a["original_path"], a["extraction_path"], True)
+            require(doc.anchor(a["start"], a["end"]) == a, "PDF page/anchor mismatch")
+        count += 1
+    return count
+
+
+def note_records(annual, interim, observations):
+    notes = discover_notes(annual, 13)+discover_notes(interim, 10)
+    inventory = json.loads((ROOT/APPLE/"manifest.json").read_text())["notes"]
+    require([(n["id"], n["title"]) for n in notes] == [(n["id"], n["title"]) for n in inventory],
+            "note inventory disagreement")
+    for note in notes:
+        areas, interpretation, unknown = NOTE_MEANING[note["title"]]
+        note.update(disposition="partially_mapped" if note["number"] in (1, 2, 4) else "unresolved_meaning_retained",
+                    affected_model_areas=areas, interpretation=interpretation,
+                    unresolved_meaning=unknown, semantic_completion=False, linked_quantities=[],
+                    qualifications="The full bounded source passage is retained; only the stated interpretation is applied.")
+        a = note["anchor"]
+        for obs in observations:
+            for source in walk_anchors(obs["source_readings"]):
+                if source.get("extraction_path") == a["extraction_path"] and a["start"] <= source["start"] < a["end"]:
+                    note["linked_quantities"].append(obs["id"])
+                    break
+        # Inline fact locations live in HTML, not in the independent text extraction.
+        # Match the fact's literal/concept within this note's corresponding ix:textBlock.
+        if a["document"] == "interim":
+            prefixes = {2: ["interim.product."], 4: ["interim.notional."],
+                        6: ["interim.debt."], 10: ["interim.segment."]}.get(note["number"], [])
+            note["linked_quantities"] = [o["id"] for o in observations if any(o["id"].startswith(p) for p in prefixes)]
+        note["linked_quantities"] = sorted(set(note["linked_quantities"]))
+        if note["linked_quantities"]:
+            note["disposition"] = "selected_quantities_mapped_with_unresolved_remainder"
+        targets = sorted(set(int(n) for n in re.findall(r"Note\s+(\d+)", a["quote"])))
+        note["cross_references"] = [dict(target=f"{a['document']}.note.{n}",
+                                         relation="literal note reference", status="source_present; meaning not necessarily executed")
+                                    for n in targets if n != note["number"]]
+        require(all(t["target"] in {n["id"] for n in notes} for t in note["cross_references"]), "unresolved internal note target")
+    by_id = {n["id"]: n for n in notes}
+    by_id["annual.note.9"]["cross_references"].append(dict(target="annual.note.4", relation="analyst link: debt and interest-rate swaps", status="source_present"))
+    by_id["interim.note.1"]["cross_references"].append(dict(target="annual.note.1", relation="explicit read-with-2024-10-K qualification", status="source_present"))
+    contingency = by_id["interim.note.9"]
+    contingency["assertion"] = dict(kind="reported_management_assessment", speaker="Apple management",
+        subject="asserted legal and other claims", modal_operator="not at least a reasonable possibility",
+        assessed_event="material loss, or material loss greater than a recorded accrual",
+        unresolved_outcomes=True, probability=None, liability_amount=None,
+        anchor=interim.find(r"The Company is subject to various legal proceedings.*?asserted legal and other claims\.",
+                            (contingency["anchor"]["start"], contingency["anchor"]["end"]), re.S))
+    return notes
+
+
+def supported_excerpt(doc, pattern, bounds=None):
+    return doc.find(pattern, bounds, re.S)
+
+
+def rendered_row_match(doc, label, literal, occurrence=0):
+    """Anchor a displayed row/value in an issuer-rendered HTML extraction.
+
+    The issuer-linked HTML retained for the publication/version check is a
+    rendered filing, not an inline-XBRL instance.  It therefore cannot be
+    parsed with ``InlineReader``.  This helper deliberately binds only the
+    visible label/value pair and records the exact occurrence; it does not
+    promote the rendered copy to a second accounting source.
+    """
+    pattern = re.escape(label) + r"\s+(?:\$\s+)?" + re.escape(literal)
+    matches = list(re.finditer(pattern, doc.text, re.S))
+    require(len(matches) > occurrence, f"rendered row missing: {label} {literal}")
+    m = matches[occurrence]
+    return doc.anchor(m.start(), m.end())
+
+
+def policy_records(annual, interim, notes):
+    n = {r["id"]: r for r in notes}
+    def within(doc, pattern):
+        a = n[doc.identity+".note.1"]["anchor"]
+        return supported_excerpt(doc, pattern, (a["start"], a["end"]))
+    return [
+        dict(id="annual.perimeter", status="reported_policy", anchor=within(annual, r"The consolidated financial statements include.*?wholly owned subsidiaries\.")),
+        dict(id="annual.reclassification", status="reported_qualification", anchor=within(annual, r"Certain prior period amounts.*?current period’s presentation\."),
+             interpretation="Comparatives are as presented in the 2024 report; original historical presentation has not been reconstructed."),
+        dict(id="annual.inventory", status="reported_policy", anchor=within(annual, r"Inventories are measured using the first-in, first-out method\.")),
+        dict(id="annual.depreciation", status="reported_policy", anchor=within(annual, r"Depreciation on property, plant and equipment.*?straight-line basis\.")),
+        dict(id="interim.preparation", status="reported_management_assertion", anchor=within(interim, r"In the opinion of the Company’s management.*?2024 Form 10-K”\)\."),
+             interpretation="Normal recurring adjustments and management estimates; read together with annual statements, not an independently complete annual policy disclosure."),
+        dict(id="interim.calendar", status="reported_policy", anchor=within(interim, r"The Company’s fiscal year.*?those fiscal years\.")),
+    ]
+
+
+def filing_records():
+    raw = json.loads((ROOT/INDEX).read_text())["filings"]["recent"]
+    out = []
+    for identity, accession in [("annual", "0000320193-24-000123"),
+                                ("interim", "0000320193-25-000008"),
+                                ("proxy", "0001308179-25-000008")]:
+        require(raw["accessionNumber"].count(accession) == 1, "filing identity missing/ambiguous")
+        i = raw["accessionNumber"].index(accession)
+        out.append(dict(id=identity, accession=accession, form=raw["form"][i], report_date=raw["reportDate"][i],
+                        filing_date=raw["filingDate"][i], acceptance_timestamp=raw["acceptanceDateTime"][i],
+                        primary_document=raw["primaryDocument"][i], index_path=INDEX, index_sha256=file_hash(INDEX),
+                        json_pointer=f"/filings/recent/accessionNumber/{i}",
+                        public_dissemination_timestamp=None, retained_byte_publication_date=None,
+                        qualification="Acceptance is index metadata, not independently verified public dissemination or retained-byte vintage."))
+    return out
+
+
+def availability(record, cutoff, scope="filing_identity"):
+    """Date-resolution query; unknown byte vintage never inherits a filing date."""
+    cutoff = date.fromisoformat(cutoff)
+    require(scope in ("filing_identity", "retained_bytes"), "unsupported availability scope")
+    day = record.get("filing_date" if scope == "filing_identity" else "retained_byte_publication_date")
+    return "unknown" if day is None else ("available_by_filing_day" if date.fromisoformat(day) <= cutoff else "later")
+
+
+def version_view(records, cutoff, scope="retained_bytes"):
+    require(len({r["id"] for r in records}) == len(records), "duplicate version identity")
+    decisions = [{"id": r["id"], "availability": availability(r, cutoff, scope)} for r in records]
+    eligible = [d["id"] for d in decisions if d["availability"] == "available_by_filing_day"]
+    return dict(versions=decisions, eligible=eligible,
+                resolution="retain_all_no_automatic_supersession", conflict_resolution="unsupported")
+
+
+def exhibit_records(annual, official, interim):
+    """Read exhibit target/version columns; distinguish a link from its contents."""
+    result = []
+    for doc, prefix in [(official, "annual"), (interim, "interim")]:
+        soup = BeautifulSoup((ROOT/doc.original).read_text(), "html.parser")
+        for tr in soup.find_all("tr"):
+            cells = [c.get_text(" ", strip=True) for c in tr.find_all("td", recursive=False)]
+            cells = [c for c in cells if c]
+            if len(cells) < 2 or not re.fullmatch(r"(?:\d+\.\d+|101|104)[*, ]*", cells[0]):
+                continue
+            # Exclude financial rows and identify only the exhibit-index description cells.
+            if not tr.find("a", href=True) and "**" not in cells[0]:
+                continue
+            number = re.match(r"\d+(?:\.\d+)?", cells[0])[0]
+            row_text = tr.get_text("\n", strip=True)
+            anchor = doc.find(re.escape(row_text))
+            links = [a["href"] for a in tr.find_all("a", href=True)]
+            internal = [u for u in links if u.startswith("#")]
+            external = [u for u in links if u.startswith("http")]
+            record = dict(id=f"{prefix}.exhibit.{number}", number=number, description=cells[1],
+                          filed_marker=cells[0], source=anchor, target_links=links,
+                          referenced_form=cells[2] if len(cells) >= 5 else None,
+                          referenced_exhibit=cells[3] if len(cells) >= 5 else None,
+                          referenced_date_or_period=cells[4] if len(cells) >= 5 else None,
+                          contents_status="unresolved", missing_terms="Full substantive interpretation and applicability to current contracts.",
+                          consequence="No complete incorporated-package or contract-history claim.",
+                          next_route="Use the exact SEC accession in the link or the issuer filing feed for the stated form and date.")
+            if internal:
+                missing_internal = [u for u in internal
+                                    if soup.find(id=u[1:]) is None and
+                                    soup.find(attrs={"name": u[1:]}) is None]
+                if missing_internal:
+                    # A malformed or stale anchor is itself evidence about
+                    # package closure.  Preserve it as an unresolved filing
+                    # obligation instead of silently treating the link as
+                    # resolved or aborting the whole bounded case build.
+                    record["contents_status"] = "internal_target_missing_in_retained_html"
+                    record["missing_internal_targets"] = missing_internal
+                    record["missing_terms"] = "Retained issuer HTML exposes an internal link whose target is absent; substantive exhibit contents remain unverified."
+                else:
+                    record["contents_status"] = "within_retained_issuer_html; semantics_unresolved"
+            if external:
+                record["contents_status"] = "external_target_not_acquired"
+            if number in ("101", "104"):
+                record["contents_status"] = "inline_facts_present; complete_taxonomy_package_not_acquired"
+                record["missing_terms"] = "Separate taxonomy/linkbase files and complete package validation."
+            if prefix == "annual":
+                # Bind each issuer index row independently to the mirrored PDF index.
+                lo, hi = annual.page(53)[0], annual.page(56)[1]
+                record["pdf_index_row"] = annual.find(r"^[ \t]*"+re.escape(number)+r"(?=[* \t])[^\n]+", (lo, hi), re.M)
+            result.append(record)
+    require(len({r["id"] for r in result}) == len(result), "duplicate exhibit rows")
+    return result
+
+
+def external_records(annual, interim, docs):
+    proxy, reg, official = [docs[k] for k in ("proxy-2025", "registration-2021", "annual-2024-official")]
+    exhibits = exhibit_records(annual, official, interim)
+    obligations = []
+    proxy_patterns = {
+        10: r"Board Independence\nApple’s Corporate Governance Guidelines.*?applicable rules of The Nasdaq Stock Market LLC.*?\(“Nasdaq”\)\.",
+        11: r"Compensation Discussion and Analysis\nThis Compensation.*?paid to our named executive officers\.",
+        12: r"Security\nOwnership of Certain Beneficial Owners and Management\nThe\nfollowing table.*?\(the “Table Date”\)",
+        13: r"Related Party Policy and Transactions\nThe Board has.*?\$120,000 in a single fiscal year",
+        14: r"Audit Fees\n\(1\).*?Total\n30,270,822\n25,403,329",
+    }
+    lo, hi = annual.page(52)
+    for item, pat in proxy_patterns.items():
+        start = annual.find(r"Item "+str(item)+r"\.[^\n]+", (lo, hi))["start"]
+        stop = annual.text.find("Item "+str(item+1)+".", start, hi) if item < 14 else hi
+        obligations.append(dict(id=f"annual.partIII.item{item}", target="2025 proxy, accession 0001308179-25-000008",
+                                incorporation=annual.anchor(start, stop), support=proxy.find(pat, flags=re.S),
+                                status="target_acquired_selected_passage_inspected",
+                                unresolved="Complete item-level semantics, exceptions and references beyond the selected passage remain unmodelled.",
+                                consequence="Proxy information cannot be backdated to the annual filing.",
+                                next_route="Inspect remaining sections in the retained proxy and its exact incorporated targets."))
+    title = reg.find(r"Exhibit 4\.1\nApple Inc\..*?Dated as of October\s+28, 2021", flags=re.S)
+    terms = reg.find(r"Section\s+301\.\nAmount\nUnlimited; Issuable in Series.*?Section\s+302\.", flags=re.S)
+    # The retained issuer extraction omits the indenture's section numbers,
+    # but preserves the substantive heading and the following covenants.
+    defaults = reg.find(r"Events of Default\n.*?Discharge, Defeasance and Covenant Defeasance", flags=re.S)
+    for e in exhibits:
+        if e["id"] == "annual.exhibit.4.26":
+            e.update(contents_status="acquired_in_registration_2021; selected_sections_inspected", acquired_support=title,
+                     section_301=terms, section_501=defaults,
+                     missing_terms="Series-specific officer certificates, outstanding balances, amendments and swap confirmations/allocation.")
+    # Source content after the annual report includes filed exhibits; 4.1 is not a missing external indenture.
+    securities = annual.find(r"(?m)^[ \t]*4\.1[^\n]*Description of Securities of the Registrant\.")
+    obligations.append(dict(id="annual.exhibit.4.1.in_pdf", target="Description of Securities, filed exhibit 4.1",
+                            support=securities, status="heading_and_contents_retained_in_pdf",
+                            unresolved="Description is not the complete incorporated indentures and series certificates.",
+                            consequence="General descriptions do not identify all current debt terms.",
+                            next_route="Inspect specific 4.2–4.28 index targets for contract reconstruction."))
+    omissions = annual.find(r"Certain instruments defining the rights of holders.*?copies of any such instruments\.", annual.page(56), re.S)
+    obligations.append(dict(id="omitted_debt_instruments", target="Instruments omitted under Item 601(b)(4)(iii)", support=omissions,
+                            status="expressly_omitted_from_filing", unresolved="Instrument identities and complete terms not specified by this index.",
+                            consequence="No complete debt-contract inventory is established.",
+                            next_route="Inspect issuer/SEC public filings for identifiable instruments; do not infer terms or initiate outreach."))
+    return dict(partIII_and_package_obligations=obligations, exhibit_inventory=exhibits,
+                agreement_interpretation=dict(status="selected_contract_sections_only", support=[title, terms, defaults],
+                    interpretation="Section 301 leaves series-specific principal/payment dates, interest terms and optional redemption to further instruments. Section 501 defines events of default with conditions; this case does not assert a default occurred.",
+                    missing="2013/2018 indentures and series certificates remain external; the 2021 base indenture does not identify Apple's current swap reset schedule."))
+
+
+def unidentified_records(notes):
+    n = {r["id"]: r for r in notes}
+    specs = [
+        ("debt_and_swaps", ["annual.note.9", "annual.note.4", "interim.note.6", "interim.note.4"],
+         "Annual interest-rate notional and interim notional are disclosed but contract allocation, resets, hedge coverage and net economic exposure remain unidentified.",
+         "Obtain series certificates and public hedge terms; never equate derivative notional with floating-rate debt exposure."),
+        ("debt_movements", ["annual.note.9", "interim.note.6"],
+         "Carrying differences cannot be identified solely from cash issuance/repayment; FX and noncash measurement changes remain separate unknowns.",
+         "Reconstruct movements only with sourced FX, hedge, discount and noncash adjustments."),
+        ("asset_cohorts", ["annual.note.5", "interim.note.5"],
+         "Gross/net balances do not identify vintages, remaining useful lives, additions and retirements.",
+         "Retain alternative cohort histories until transaction or asset-register evidence supports a narrower family."),
+        ("contingent_outcomes", ["annual.note.12", "interim.note.9"],
+         "Management's loss assessment and commitment amounts do not provide a loss probability measure or a zero liability.",
+         "Maintain unresolved outcomes and revisit dated legal disclosures; do not assign equal or confidence-derived probabilities."),
+    ]
+    return [dict(id=key, supports=[n[k]["anchor"] for k in ids], unresolved=meaning, next_action=action,
+                 status="not_identified", probability=None) for key, ids, meaning, action in specs]
+
+
+def build_case():
+    annual, interim, docs, bindings, acquisitions = load_sources()
+    observations, bridges, calendar = collect_observations(annual, interim)
+    notes = note_records(annual, interim, observations)
+    # A selected-table check relates representations, not whole-document
+    # publication vintage.  The issuer-linked HTML is rendered filing text,
+    # so bind visible label/value rows instead of treating it as a second
+    # inline-XBRL instance.  The accounting observations remain sourced from
+    # the retained annual/interim documents above.
+    rendered_specs = [
+        ("annual.bs.2024-09-28.assets", "Total assets", "364,980", 0),
+        ("annual.bs.2024-09-28.liabilities", "Total liabilities", "308,030", 0),
+        ("annual.bs.2024-09-28.equity", "Total shareholders’ equity", "56,950", 0),
+        ("annual.bs.2024-09-28.debt_current", "Term debt", "10,912", 0),
+        ("annual.bs.2024-09-28.debt_noncurrent", "Term debt", "85,750", 0),
+        ("annual.revenue.2024", "Total net sales", "391,035", 0),
+    ]
+    rendered_checks = []
+    for oid, label, literal, occurrence in rendered_specs:
+        annual_observation = next(o for o in observations if o["id"] == oid)
+        rendered_checks.append(dict(
+            id="issuer_html." + oid,
+            annual_observation=oid,
+            label=label,
+            displayed_literal=literal,
+            source=rendered_row_match(docs["annual-2024-official"], label, literal, occurrence),
+            status="visible_row_match_only",
+            interpretation="Selected rendered-row agreement supports representation checking; it does not establish whole-document equivalence or historical byte vintage.",
+            source_value_usd=annual_observation["value_usd"],
+        ))
+    matched = [x["annual_observation"] for x in rendered_checks]
+    policy = policy_records(annual, interim, notes)
+    external = external_records(annual, interim, docs)
+    records = filing_records()
+    out = dict(schema_version="accdsl.apple_case.v1", plan_sha256=PLAN_HASH,
+        scope="Retained Apple FY2024 annual, FY2025 Q1 interim and disclosed comparatives; selected numerical bridges only.",
+        source_bindings=bindings, source_pins=PINS, p01_register=dict(path=REGISTER, sha256=file_hash(REGISTER)),
+        source_acquisition=acquisitions, fiscal_calendar=calendar, policies=policy,
+        observations=observations, notes=notes, reconciliations=bridges, external=external,
+        filing_availability=records, unidentified_histories=unidentified_records(notes),
+        rounding_model=dict(arithmetic="exact rational USD", model="closed half-unit nearest-rounding intervals",
+                            issuer_tie_rule="unknown", inference="compatibility only; no distribution or identified underlying exact amounts"),
+        representation_comparison=dict(matched_observations=matched, rendered_row_checks=rendered_checks,
+                                       whole_document_equivalence=False, mirror_publication_date=None,
+                                       historical_byte_vintage="not established"),
+        coverage=dict(annual_notes=13, interim_notes=10, notes_with_linked_quantities=sum(bool(n["linked_quantities"]) for n in notes),
+                      notes_with_explicit_unresolved_meaning=len(notes), numeric_observations=len(observations),
+                      checked_bridges=len(bridges), fully_formalised_notes=0, semantic_coverage="not measured by note count"),
+        mapping_contract=dict(kind="explicit case annotations", context_source="Report policies, table headings and original inline contexts",
+            annual_dates="Fiscal year-end table headings plus Note 1 week lengths; duration starts are derived, not calendar-year substitutions.",
+            partitions="Product and geographic segment totals are reconciled separately; no product-by-geography cross-tab is identified.",
+            measurements="Debt principal, carrying amount, fair value and derivative notional remain distinct.",
+            supported_transformations="Only the recorded partition aggregation, gross/net signed addition, comparative equality and dated cash movement bridges."),
+        acceptance=dict(specified_behavior="reviewed P02 plan", implemented="bounded reusable source/context/reconciliation adapter",
+                        tested_invariants="see result.md for executed tests", accounting_validity="selected displayed identities only; no compliance determination",
+                        empirical_forecast_validity="not evaluated; no forecast generated", human_acceptance="pending"))
+    out["anchor_count"] = validate_anchors(out)
+    return out
+
+
+def validate_case(candidate):
+    """Rebuild from independently pinned sources, rejecting supplied metadata edits."""
+    validate_anchors(candidate)
+    expected = build_case()
+    require(candidate == expected, "case differs from source-derived rebuild (values, metadata, notes or obligations)")
+    return {"status": "pass", "observations": len(expected["observations"]),
+            "notes": len(expected["notes"]), "reconciliations": len(expected["reconciliations"]),
+            "anchors": expected["anchor_count"]}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", default="data/accounting-master/deliverables/P02")
+    parser.add_argument("--check", action="store_true", help="read-only rebuild and comparison")
+    args = parser.parse_args()
+    target = ROOT / args.output_dir / "case.json"
+    if args.check:
+        report = validate_case(json.loads(target.read_text()))
+    else:
+        case = build_case()
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(case, ensure_ascii=False, indent=2, sort_keys=True)+"\n")
+        report = dict(status="built", **case["coverage"])
+    print(json.dumps(report, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

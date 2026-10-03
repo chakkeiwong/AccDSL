@@ -1,0 +1,42 @@
+{
+  "verdict": "REVISE",
+  "summary": "The installed permission rule and its verification set do not cover the controller command surface consistently: the rule text lists only run and status in match, while installation checks refresh and stop, and the reviewed interface also requires review and install-and-run.",
+  "steps": [
+    "Define one canonical list of externally approved controller actions.",
+    "Generate the rule match entries from that list.",
+    "Verify every approved action against both the candidate and effective policy.",
+    "Add negative checks that remain scoped to the intended dedicated rule semantics."
+  ],
+  "assumptions": [
+    "The packet does not define the exact semantics of codex execpolicy prefix_rule(match=...). Under the usual restrictive allowlist interpretation, commands absent from match are denied.",
+    "The stated interface is authoritative that install-and-run, run, status, refresh, stop, and review are approved entrypoint actions.",
+    "Internal actions such as _checks and _builtin must remain unavailable through the installed external rule."
+  ],
+  "checks": [
+    "The supplied verification reports 44 passing tests, but the listed tests do not demonstrate that the actual installed rule permits review.",
+    "The controller's installation code checks positives for install-and-run, run, status, refresh, and stop, but omits review."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py: rule_text defines match entries only for run and status.",
+    "scripts/run_accounting_master.py: install_rule checks positive commands for install-and-run, run, status, refresh, and stop, but not review.",
+    "scripts/run_accounting_master.py: main exposes review as a normal controller action.",
+    "tests/test_accounting_master.py: the supplied test-name list contains no test proving that the installed rule allows review."
+  ],
+  "issues": [
+    {
+      "severity": "high",
+      "finding": "Permission installation is internally inconsistent and may block required controller operations. rule_text emits match entries only for [python3, run_accounting_master.py, run] and [python3, run_accounting_master.py, status]. The installer nevertheless treats refresh and stop as positive commands, and the controller exposes review as a required normal action. If match is restrictive, refresh, stop, review, and possibly install-and-run are denied. If match is not restrictive, the implementation still lacks an explicit verification that review is allowed.",
+      "repair": "Create a single canonical approved-action list containing exactly install-and-run, run, status, refresh, stop, and review. Generate match from that list, keep internal actions excluded, and run candidate and effective-policy positive checks over every listed action. Add a test that invokes the real policy checker for review and each other approved action, plus tests confirming internal actions remain denied."
+    }
+  ],
+  "residuals": [
+    "The packet does not establish accounting correctness, scientific validity, or human acceptance; the reported test count is control-plane evidence only.",
+    "The packet does not provide the external execpolicy grammar, so the precise runtime consequence of the match mismatch remains dependent on that undocumented interface.",
+    "No additional hostile-worker, deliberate-detachment, or uncatchable-kill threat model is added beyond the stated containment scope."
+  ],
+  "next_actions": [
+    "Repair the rule-generation and verification mismatch.",
+    "Rerun the permission-install tests with the real execpolicy checker, including review.",
+    "Record the exact policy semantics used by the implementation so future reviews can verify command coverage without inference."
+  ]
+}

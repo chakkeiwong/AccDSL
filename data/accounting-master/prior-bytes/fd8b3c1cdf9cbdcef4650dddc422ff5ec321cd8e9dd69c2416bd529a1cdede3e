@@ -1,0 +1,490 @@
+"""Exact, bounded rational-linear cells; no implicit integer relaxation."""
+from dataclasses import dataclass, field
+from fractions import Fraction as F
+from itertools import product
+import math
+import time
+import z3
+
+
+class UnsupportedFragment(ValueError):
+    pass
+
+
+def rational(value):
+    if isinstance(value, bool) or isinstance(value, float):
+        raise ValueError('exact rational required; booleans/floats are not amounts')
+    if isinstance(value, dict):
+        if set(value) != {'n', 'd'}:
+            raise ValueError('rational record requires exactly n and d')
+        parts = [rational(value[k]) for k in ('n', 'd')]
+        if any(x.denominator != 1 for x in parts) or parts[1] == 0:
+            raise ValueError('rational numerator/denominator must be integers with nonzero denominator')
+        return F(parts[0].numerator, parts[1].numerator)
+    return F(value)
+
+
+def q(value):
+    x = rational(value)
+    return z3.RealVal(f'{x.numerator}/{x.denominator}')
+
+
+def fraction(value):
+    value = z3.simplify(value)
+    if z3.is_int_value(value):
+        return F(value.as_long())
+    if z3.is_rational_value(value):
+        return F(value.numerator_as_long(), value.denominator_as_long())
+    raise UnsupportedFragment('non-rational solver value: ' + str(value))
+
+
+@dataclass(frozen=True)
+class Budget:
+    max_slots: int
+    max_formula_nodes: int
+    max_integer_assignments: int
+    max_cells: int
+    elapsed_ms: int
+    solver_timeout_ms: int
+    solver_rlimit: int
+
+    def __post_init__(self):
+        for v in self.__dict__.values():
+            if type(v) is not int or v < 0:
+                raise ValueError('budgets must be explicit nonnegative integers')
+
+
+@dataclass
+class Problem:
+    scope: str
+    evidence_view: str
+    variables: dict = field(default_factory=dict)
+    finite: dict = field(default_factory=dict)
+    constraints: list = field(default_factory=list)  # (source/assumption label, BoolRef)
+    views: dict = field(default_factory=dict)
+    outputs: dict = field(default_factory=dict)
+    obligations: list = field(default_factory=list)
+    exclusions: list = field(default_factory=list)
+    provenance: dict = field(default_factory=dict)
+    slots: int = 0
+    unsupported: list = field(default_factory=list)
+    rounding_stage: str = 'exact_rational'
+
+    def add(self, label, condition):
+        if any(label == x[0] for x in self.constraints):
+            raise ValueError('duplicate constraint identity: ' + label)
+        if not z3.is_bool(condition):
+            raise ValueError('constraint must be Boolean')
+        self.constraints.append((label, condition))
+
+
+class Backend:
+    """Injection seam for deterministic Unknown tests; production uses Z3."""
+    def check(self, solver, stage):
+        return solver.check()
+
+    def optimize(self, solver, stage):
+        return solver.check()
+
+
+COMPARISONS = {z3.Z3_OP_EQ, z3.Z3_OP_LE, z3.Z3_OP_GE, z3.Z3_OP_LT, z3.Z3_OP_GT}
+
+
+def affine(expr):
+    """Reject unsupported arithmetic before passing a formula to a solver."""
+    if z3.is_rational_value(expr) or z3.is_int_value(expr):
+        return False
+    if z3.is_const(expr) and expr.sort().kind() in (z3.Z3_REAL_SORT, z3.Z3_INT_SORT):
+        return True
+    op = expr.decl().kind()
+    children = expr.children()
+    if op in (z3.Z3_OP_ADD, z3.Z3_OP_SUB, z3.Z3_OP_UMINUS, z3.Z3_OP_TO_REAL):
+        return any([affine(c) for c in children])
+    if op == z3.Z3_OP_MUL:
+        flags = [affine(c) for c in children]
+        if sum(flags) > 1:
+            raise UnsupportedFragment('unknown-by-unknown product: ' + expr.sexpr())
+        return any(flags)
+    if op == z3.Z3_OP_DIV:
+        lhs = affine(children[0]); rhs = affine(children[1])
+        if rhs or fraction(children[1]) == 0:
+            raise UnsupportedFragment('symbolic/zero divisor: ' + expr.sexpr())
+        return lhs
+    raise UnsupportedFragment('unsupported arithmetic: ' + expr.sexpr())
+
+
+def validate_formula(expr):
+    if z3.is_true(expr) or z3.is_false(expr):
+        return
+    if z3.is_const(expr) and z3.is_bool(expr):
+        return
+    op = expr.decl().kind()
+    if op in COMPARISONS and all(z3.is_arith(c) for c in expr.children()):
+        for c in expr.children():
+            affine(c)
+    elif op in (z3.Z3_OP_AND, z3.Z3_OP_OR, z3.Z3_OP_NOT, z3.Z3_OP_IMPLIES):
+        for c in expr.children():
+            validate_formula(c)
+    else:
+        raise UnsupportedFragment('unsupported formula: ' + expr.sexpr())
+
+
+def nodes(expr):
+    return 1 + sum(nodes(c) for c in expr.children())
+
+
+def conjunction(expr):
+    if z3.is_and(expr):
+        return all(conjunction(c) for c in expr.children())
+    return (z3.is_true(expr) or z3.is_false(expr) or
+            expr.decl().kind() in COMPARISONS and all(z3.is_arith(c) for c in expr.children()))
+
+
+def atoms(expr):
+    if expr.decl().kind() in COMPARISONS and all(z3.is_arith(c) for c in expr.children()):
+        return [expr]
+    return [a for c in expr.children() for a in atoms(c)]
+
+
+def close(expr):
+    if z3.is_const(expr) and z3.is_bool(expr) or z3.is_eq(expr) and all(z3.is_bool(c) for c in expr.children()):
+        return expr
+    if z3.is_and(expr):
+        return z3.And(*[close(c) for c in expr.children()])
+    # simplify represents strict arithmetic comparisons as negated weak ones.
+    if z3.is_not(expr):
+        inner = expr.arg(0)
+        op = inner.decl().kind()
+        if op in (z3.Z3_OP_LE, z3.Z3_OP_LT):
+            return inner.arg(0) >= inner.arg(1)
+        if op in (z3.Z3_OP_GE, z3.Z3_OP_GT):
+            return inner.arg(0) <= inner.arg(1)
+    op = expr.decl().kind()
+    if op == z3.Z3_OP_LT:
+        return expr.arg(0) <= expr.arg(1)
+    if op == z3.Z3_OP_GT:
+        return expr.arg(0) >= expr.arg(1)
+    if not conjunction(expr):
+        raise UnsupportedFragment('cell is not a convex conjunction: ' + expr.sexpr())
+    return expr
+
+
+def _value(model, expr):
+    v = model.eval(expr, model_completion=True)
+    if z3.is_bool(v):
+        return z3.is_true(v)
+    return str(fraction(v))
+
+
+def domain_size(values):
+    # len(range(...)) overflows at sys.maxsize even though indexing remains exact.
+    if isinstance(values, range):
+        distance = values.stop - values.start if values.step > 0 else values.start - values.stop
+        return max(0, (distance + abs(values.step) - 1) // abs(values.step))
+    return len(values)
+
+
+def lazy_product(values):
+    sizes = [domain_size(v) for v in values]
+    if any(n == 0 for n in sizes):
+        return
+    indices = [0] * len(values)
+    while True:
+        yield tuple(v[i] for v, i in zip(values, indices))
+        for axis in range(len(values) - 1, -1, -1):
+            indices[axis] += 1
+            if indices[axis] < sizes[axis]:
+                break
+            indices[axis] = 0
+        else:
+            return
+
+
+def solve(problem, budget, objective=None, *, selected_views=(), view_operator=None,
+          extra=(), backend=None):
+    backend = backend or Backend()
+    started = time.monotonic()
+    result = {'schema_version': 'accdsl.reconstruction.result.v1', 'scope': problem.scope,
+              'evidence_view': problem.evidence_view, 'query': {'views': list(selected_views),
+              'operator': view_operator, 'extra': [x.sexpr() for x in extra]},
+              'status': 'Unknown', 'feasibility': 'Unknown', 'cells': [],
+              'obligations': list(problem.obligations), 'exclusions': list(problem.exclusions),
+              'provenance': problem.provenance, 'rounding_stage': problem.rounding_stage,
+              'coverage': {'total': None, 'completed': 0, 'feasible': 0, 'infeasible': 0,
+                           'unresolved': None, 'partition': 'finite assignments and disjoint comparison signs'},
+              'bounds': None, 'generated_constraints': [], 'unsupported': list(problem.unsupported)}
+    labels = list(problem.constraints)
+    if selected_views:
+        if len(selected_views) > 1 and view_operator not in ('intersection', 'union'):
+            raise ValueError('multiple views require explicit intersection or union')
+        if view_operator not in (None, 'intersection', 'union'):
+            raise ValueError('unknown view operator')
+        views = [problem.views[n] for n in selected_views]
+        condition = z3.Or(*views) if view_operator == 'union' else z3.And(*views)
+        labels.append(('query:views', condition))
+    labels.extend((f'query:extra:{i}', x) for i, x in enumerate(extra))
+    result['generated_constraints'] = [{'id': n, 'formula': e.sexpr()} for n, e in labels]
+    result['finite_domains'] = {n: ({'start': v.start, 'stop': v.stop, 'step': v.step}
+                                  if isinstance(v, range) else list(v))
+                               for n, v in problem.finite.items()}
+    try:
+        if problem.unsupported:
+            raise UnsupportedFragment('; '.join(problem.unsupported))
+        symbols = [v.sexpr() for v in problem.variables.values()]
+        if len(set(symbols)) != len(symbols):
+            raise ValueError('economic identifiers must name distinct solver variables')
+        for name, values in problem.finite.items():
+            if name not in problem.variables or not isinstance(values, (list, tuple, range)):
+                raise ValueError('finite domain must be an indexed domain of a declared variable')
+            v = problem.variables[name]
+            if not (z3.is_int(v) or z3.is_bool(v)) or not domain_size(values):
+                raise ValueError('finite choices require nonempty integer/Boolean domains')
+            if isinstance(values, range):
+                if z3.is_bool(v):
+                    raise ValueError('Boolean choices require Boolean values')
+            elif (any(type(x) is not (bool if z3.is_bool(v) else int) for x in values)
+                  or len(set(values)) != len(values)):
+                raise ValueError('finite domain values must be distinct and match the variable sort')
+        for _, e in labels:
+            validate_formula(e)
+        for e in problem.outputs.values():
+            affine(e)
+        if objective is not None:
+            affine(objective)
+        from z3.z3util import get_vars
+        declared = {v.sexpr() for v in problem.variables.values()}
+        expressions = [e for _, e in labels] + list(problem.outputs.values())
+        if objective is not None:
+            expressions.append(objective)
+        if any(v.sexpr() not in declared for e in expressions for v in get_vars(e)):
+            raise UnsupportedFragment('undeclared symbolic variable in query or constraints')
+        for name, v in problem.variables.items():
+            if (z3.is_int(v) or z3.is_bool(v)) and name not in problem.finite:
+                raise UnsupportedFragment('unbounded integer/Boolean domain: ' + name)
+    except UnsupportedFragment as exc:
+        result.update(status='UnsupportedFragment', reason=str(exc))
+        return result
+    count_nodes = sum(nodes(e) for _, e in labels) + sum(nodes(e) for e in problem.outputs.values())
+    if objective is not None:
+        count_nodes += nodes(objective)
+    if problem.slots > budget.max_slots or count_nodes > budget.max_formula_nodes:
+        result.update(status='PartialSearch', reason='slot/formula resource limit')
+        return result
+    assignment_count = math.prod(domain_size(v) for v in problem.finite.values())
+    # Only comparisons inside non-conjunctive Boolean formulae require sign cells.
+    split = {}
+    for _, e in labels:
+        if not conjunction(e):
+            for a in atoms(e):
+                split[a.sexpr()] = a
+    split = [split[k] for k in sorted(split)]
+    result['partition_predicates'] = [e.sexpr() for e in split]
+    signs_count = 3 ** len(split)
+    total = assignment_count * signs_count
+    result['coverage']['total'] = total
+    result['coverage']['unresolved'] = total
+    result['coverage']['integer_choice_assignments'] = assignment_count
+    result['coverage']['view_labels_counted_as_choices'] = False
+    finite_names = sorted(problem.finite)
+    finite_values = [problem.finite[n] for n in finite_names]
+    next_ordinal = 0
+    stopped = None
+
+    def remaining():
+        return budget.elapsed_ms - int((time.monotonic() - started) * 1000)
+
+    def configure(solver):
+        if remaining() <= 0 or budget.solver_timeout_ms == 0 or budget.solver_rlimit == 0:
+            return False
+        solver.set(timeout=max(1, min(budget.solver_timeout_ms, remaining())), rlimit=budget.solver_rlimit)
+        return True
+
+    def check(formulas, stage):
+        s = z3.Solver()
+        if not configure(s):
+            return z3.unknown, s
+        s.add(*formulas)
+        return backend.check(s, stage), s
+
+    def endpoint(original, obj, direction):
+        closure = [close(x) for x in original]
+        opt = z3.Optimize()
+        if not configure(opt):
+            return {'certified': False, 'status': 'Unknown', 'reason': 'resource limit'}
+        opt.add(*closure)
+        handle = opt.minimize(obj) if direction == 'lower' else opt.maximize(obj)
+        reply = backend.optimize(opt, 'optimize:' + direction)
+        if reply != z3.sat:
+            return {'certified': False, 'status': 'Unknown', 'reason': str(reply)}
+        val = handle.value()
+        if 'oo' in str(val):
+            return {'certified': True, 'status': 'Unbounded', 'value': None, 'attained': False,
+                    'certificate': {'closure': [x.sexpr() for x in closure], 'optimizer_value': str(val)}}
+        bound = fraction(val)
+        better = obj < q(bound) if direction == 'lower' else obj > q(bound)
+        proof, _ = check(closure + [better], 'bound-proof:' + direction)
+        attain, ss = check(original + [obj == q(bound)], 'attainment:' + direction)
+        ok = proof == z3.unsat and attain in (z3.sat, z3.unsat)
+        return {'certified': ok, 'status': 'Finite' if ok else 'Unknown', 'value': str(bound),
+                'attained': (attain == z3.sat) if attain != z3.unknown else None,
+                'witness': {n: _value(ss.model(), v) for n, v in problem.variables.items()} if attain == z3.sat else None,
+                'certificate': {'no_better': str(proof), 'no_better_query': better.sexpr(),
+                                'attainment': str(attain), 'attainment_query': (obj == q(bound)).sexpr()}}
+
+    for ai, values in enumerate(lazy_product(finite_values)):
+        if ai >= budget.max_integer_assignments:
+            stopped = 'integer/choice assignment limit'; break
+        sub = [(problem.variables[n], z3.BoolVal(v) if z3.is_bool(problem.variables[n]) else z3.IntVal(v))
+               for n, v in zip(finite_names, values)]
+        for signs in product((-1, 0, 1), repeat=len(split)):
+            if next_ordinal >= budget.max_cells or remaining() <= 0:
+                stopped = 'cell/elapsed limit'; break
+            ordinal = next_ordinal; next_ordinal += 1
+            replacements = []
+            guards = []
+            for atom, sign in zip(split, signs):
+                left, right = atom.children()
+                guards.append(left < right if sign < 0 else left == right if sign == 0 else left > right)
+                truth = {z3.Z3_OP_EQ: sign == 0, z3.Z3_OP_LT: sign < 0, z3.Z3_OP_GT: sign > 0,
+                         z3.Z3_OP_LE: sign <= 0, z3.Z3_OP_GE: sign >= 0}[atom.decl().kind()]
+                replacements.append((atom, z3.BoolVal(truth)))
+            cell_labels = [(n, z3.simplify(z3.substitute(z3.substitute(e, *replacements), *sub))) for n, e in labels]
+            cell_labels.extend((f'partition:{i}', z3.simplify(z3.substitute(g, *sub))) for i, g in enumerate(guards))
+            # Keep assignments in model/proof queries: witnesses include every shared variable.
+            cell_labels.extend((f'assignment:{n}', problem.variables[n] == v) for n, v in zip(finite_names, values))
+            original = [e for _, e in cell_labels]
+            s = z3.Solver()
+            cell = {'ordinal': ordinal, 'assignments': dict(zip(finite_names, values)),
+                    'signs': list(signs), 'formula': z3.And(*original).sexpr()}
+            if not configure(s):
+                reply = z3.unknown
+            else:
+                tracks = {}
+                for i, (_, e) in enumerate(cell_labels):
+                    track = z3.FreshBool('p04_core')
+                    tracks[track.get_id()] = i
+                    s.assert_and_track(e, track)
+                reply = backend.check(s, 'feasibility')
+            cell['feasibility'] = str(reply)
+            if reply == z3.sat:
+                m = s.model()
+                cell['witness'] = {n: _value(m, v) for n, v in problem.variables.items()}
+                cell['outputs'] = {n: _value(m, e) for n, e in problem.outputs.items()}
+                if objective is not None:
+                    cell['bounds'] = {d: endpoint(original, objective, d) for d in ('lower', 'upper')}
+                result['coverage']['feasible'] += 1
+                result['coverage']['completed'] += 1
+            elif reply == z3.unsat:
+                indices = [tracks[t.get_id()] for t in s.unsat_core()]
+                core = [cell_labels[i] for i in indices]
+                verified, _ = check([e for _, e in core], 'core-recheck')
+                cell['conflict'] = {'labels': [n for n, _ in core], 'rechecked': str(verified), 'minimal': False}
+                if verified == z3.unsat:
+                    result['coverage']['infeasible'] += 1
+                    result['coverage']['completed'] += 1
+                else:
+                    cell['feasibility'] = 'unknown'
+            result['cells'].append(cell)
+        if stopped:
+            break
+    cov = result['coverage']; cov['unresolved'] = total - cov['completed']
+    cov['unvisited'] = {'start_ordinal': next_ordinal, 'stop_ordinal': total,
+                        'retained_formula': z3.And(*[e for _, e in labels]).sexpr()}
+    cov['unresolved_visited_ordinals'] = [c['ordinal'] for c in result['cells'] if c['feasibility'] == 'unknown']
+    cov['complete'] = cov['unresolved'] == 0
+    result['reason'] = stopped
+    if cov['feasible']:
+        result['feasibility'] = 'Feasible'
+    elif cov['complete']:
+        result['feasibility'] = 'Infeasible'
+    result['status'] = 'ExactWithinScope' if cov['complete'] and not problem.obligations else 'PartialSearch'
+    if result['feasibility'] == 'Infeasible':
+        result['status'] = 'Infeasible'
+    if objective is not None and cov['feasible']:
+        bounds = {}
+        for direction in ('lower', 'upper'):
+            entries = [c['bounds'][direction] for c in result['cells'] if c['feasibility'] == 'sat']
+            all_ok = all(e['certified'] for e in entries)
+            if not all_ok:
+                bounds[direction] = {'status': 'Unknown', 'certified': False}
+                continue
+            if any(e['status'] == 'Unbounded' for e in entries):
+                out = {'status': 'Unbounded', 'value': None, 'attained': False}
+            else:
+                extreme = (min if direction == 'lower' else max)(F(e['value']) for e in entries)
+                out = {'status': 'Finite', 'value': str(extreme),
+                       'attained': any(e['attained'] for e in entries if F(e['value']) == extreme)}
+            out['certified'] = cov['complete'] and not problem.obligations
+            out['scope'] = 'global_within_declared_scope' if out['certified'] else 'explored_cells_only'
+            bounds[direction] = out
+        result['bounds'] = bounds
+        if not all(b['certified'] for b in bounds.values()) and result['status'] == 'ExactWithinScope':
+            result['status'] = 'Unknown'
+    result['wall_seconds'] = round(time.monotonic() - started, 6)
+    return result
+
+
+def half_even(value, quantum):
+    x, step = rational(value), rational(quantum)
+    if step <= 0:
+        raise ValueError('positive quantum required')
+    scaled = x / step; base = scaled.numerator // scaled.denominator
+    tail = scaled - base
+    units = base + (tail > F(1, 2) or tail == F(1, 2) and base % 2 != 0)
+    return units * step
+
+
+def disclosure_domain(displayed, quantum, convention):
+    x, step = rational(displayed), rational(quantum)
+    if step <= 0 or (x / step).denominator != 1:
+        raise ValueError('displayed amount must be an integer multiple of positive quantum')
+    if convention == 'half_even':
+        closed = int(x / step) % 2 == 0
+        return {'lower': str(x-step/2), 'upper': str(x+step/2), 'lower_closed': closed, 'upper_closed': closed}
+    raise UnsupportedFragment('unresolved disclosure rounding convention: ' + str(convention))
+
+
+def domain_formula(expr, domain):
+    if not isinstance(domain, dict) or not domain:
+        raise ValueError('an explicit domain is required')
+    if domain.get('kind') not in (None, 'interval', 'exact'):
+        raise UnsupportedFragment('unsupported domain kind: ' + str(domain.get('kind')))
+    if domain.get('values'):
+        raise UnsupportedFragment('finite value restrictions require an explicit finite choice')
+    if not any(k in domain for k in ('lower', 'upper')):
+        raise ValueError('domain must explicitly specify a lower or upper bound')
+    if domain.get('kind') == 'exact' and (domain.get('lower') is None or domain.get('upper') is None
+            or rational(domain['lower']) != rational(domain['upper'])
+            or domain.get('lower_closed') is not True or domain.get('upper_closed') is not True):
+        raise ValueError('exact domain requires one included value')
+    parts = []
+    for side, closed in (('lower', 'lower_closed'), ('upper', 'upper_closed')):
+        if domain.get(side) is not None:
+            if type(domain.get(closed)) is not bool:
+                raise ValueError('finite domain endpoints require explicit Boolean inclusion flags')
+            val = q(domain[side])
+            parts.append((expr >= val if domain[closed] else expr > val) if side == 'lower'
+                         else (expr <= val if domain[closed] else expr < val))
+    return z3.And(*parts)
+
+
+def fixed_fraction_constraint(numerator, denominator, comparator, threshold, constraints, budget, backend=None):
+    """Only fixed thresholds and a solver-proved denominator sign permit rewriting."""
+    threshold = q(threshold); backend = backend or Backend()
+    if comparator not in ('<', '<=', '>', '>=', '=='):
+        raise UnsupportedFragment('unsupported fraction comparator')
+    if not budget.elapsed_ms or not budget.solver_timeout_ms or not budget.solver_rlimit:
+        raise UnsupportedFragment('denominator sign not checked: zero resource budget')
+    for e in constraints:
+        validate_formula(e)
+    affine(numerator); affine(denominator)
+    for sign in (1, -1):
+        s = z3.Solver(); s.set(timeout=max(1, budget.solver_timeout_ms), rlimit=max(1, budget.solver_rlimit))
+        s.add(*constraints, denominator <= 0 if sign == 1 else denominator >= 0)
+        if backend.check(s, 'denominator-sign') == z3.unsat:
+            op = comparator if sign == 1 else {'<': '>', '<=': '>=', '>': '<', '>=': '<=', '==': '=='}[comparator]
+            rhs = threshold * denominator
+            return {'<': lambda: numerator < rhs, '<=': lambda: numerator <= rhs,
+                    '>': lambda: numerator > rhs, '>=': lambda: numerator >= rhs,
+                    '==': lambda: numerator == rhs}[op]()
+    raise UnsupportedFragment('denominator sign is not proved')

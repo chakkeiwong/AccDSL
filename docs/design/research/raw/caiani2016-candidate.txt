@@ -1,0 +1,762 @@
+                                                                                                                                                                                          1
+
+
+
+
+                                                   Average Error Probability in Wireless Sensor
+                                                      Networks With Imperfect Sensing and
+                                                   Communication for Different Decision Rules
+                                                  Pedro H. J. Nardelli, Iran Ramezanipour, Hirley Alves, Carlos H. M. de Lima and Matti Latva-aho
+
+
+
+                                            Abstract—This paper presents a framework to evaluate the                       In this paper, we will focus on general applications with
+                                         probability that a decision error event occurs in wireless sensor              loose reliability requirements so that sensors may have limited
+arXiv:1508.02253v2 [cs.IT] 16 Feb 2016
+
+
+
+
+                                         networks, including sensing and communication errors. We                       computational capabilities. Our goal here is to understand how
+                                         consider a scenario where sensors need to identify whether a
+                                         given event has occurred based on its periodic, noisy, observations            to build a more efficient WSN to detect a given event based on
+                                         of a given signal. Such information about the signal needs to be               an input signal, keeping its design as simple as possible. We
+                                         sent to a fusion center that decides about the actual state at that            follow here the idea of distributed detection (e.g. [6], [7]) so
+                                         specific observation time. The communication links – single- or                that every sensor estimates the occurrence of such an event and
+                                         multi-hop – are modeled as binary symmetric channels, which                    then sends this information to a fusion center, which decides
+                                         may have different error probabilities. The decision at the fusion
+                                         center is based on OR, AND, K-OUT-OF-N and MAJORITY                            based on the locally processed data; in contrast, by employing
+                                         Boolean operations on the received signals associated to individ-              a centralized approach, the sensors need to send all their raw
+                                         ual sensor observations. We derive closed-form equations for the               observations to the fusion center that then makes a decision.
+                                         average decision error probability as a function of the system                    In signal processing and information theory [8], the field
+                                         parameters (e.g. number of sensors and hops) and the input                     of distributed detection and estimation, which has a relatively
+                                         signal characterization. Our analyses show the best decision rule
+                                         is closely related to the frequency that the observed events occur             long history (e.g. [8]–[13]), builds an elegant theoretical
+                                         and the number of sensors. In our numerical example, we show                   framework for finding optimal (locally and globally) strategies.
+                                         that the AND rule outperforms MAJORITY if such an event is                     In a series of works dating back to the 80’s and 90’s, the core
+                                         rare and there is only a handful number of sensors. Conversely,                theoretical findings of distributed detection were established,
+                                         if there is a large number of sensors or more evenly distributed               as summarized in [11]. Therein, the authors reviewed the
+                                         event occurrences, the MAJORITY is the best choice. We further
+                                         show that, while the error probability using the MAJORITY rule                 advances on the topic, pointing out three different network
+                                         asymptotically goes to 0 with increasing number of sensors, it is              topologies: parallel (sensors are not connected to one another),
+                                         also more susceptible to higher channel error probabilities.                   serial (sensors connected in series) and tree (sensors connected
+                                            Index Terms—Data fusion, distributed detection, wireless sen-               following a tree hierarchy). Different formulations for the
+                                         sor networks                                                                   detection problem have been then described and their optimal
+                                                                                                                        solutions discussed.
+                                                                                                                           For instance, the Neyman-Pearson formulation poses the
+                                                                   I. I NTRODUCTION
+                                                                                                                        problem as follows [11]: “for a prescribed bound on the global
+                                            In a recent report, the consulting group McKinsey claims                    probability of false alarm, find (optimum) local and global
+                                         that the Internet of Things (IoT) – “sensors and actuators                     decision rules that minimize the global probability of miss.”
+                                         connected by networks to computing systems” – have “a total                    Other way of formulating the problem is based on Bayesian
+                                         potential economic impact of $3.9 trillion to $11.1 trillion a                 statistics aiming at minimizing the Bayes risk. Although
+                                         year by 2025” [1]. Although these numbers and methodology                      they differ in basic aspects, both search ways of optimizing
+                                         might be questionable, the fact that wireless sensor networks                  the detection rules based on binary hypothesis tests on the
+                                         (WSNs), which build the core of IoT, are becoming widespread                   presence of a given signal and they state the likelihood-ratio
+                                         in almost any possible application area, ranging from energy                   test as the optimal rule (with different parameters, though). For
+                                         systems to sleep monitoring [2].                                               these cases, the analyses are usually carried out in terms of
+                                            This wide variety of uses implies the nonexistence of a given               false positives (also known as type I error, or false-alarm) and
+                                         optimal technology solution that fits all WSNs (e.g. [2], [3]);                false negatives (also known as type II errors, or misdetection).
+                                         the requirements of control applications in industries (e.g. [4])                 Even though these results have been established for decades,
+                                         is far different from in household monitoring (e.g. [5]) and the               there is still a great interest in distributed detection. Recently,
+                                         WSN deployment should reflect these differences.                               Zhang et al. studied in two subsequent papers [14], [15] the
+                                                                                                                        detection error probability in balanced binary relay trees. The
+                                           P. H. J. Nardelli, I. Ramezanipour, H. Alves and M. Latva-aho are with the
+                                         Centre for Wireless Communications (CWC), University of Oulu, Finland.         leaves of the trees (lowest level) are related to the sensors
+                                         Contact: nardelli@ee.oulu.fi. C. H. M. de Lima is with São Paulo State         while the root (highest level) is the fusion center that makes
+                                         University (UNESP), São João da Boa Vista, Brazil. This work is partly         the decision. In between them, relay nodes combine the binary
+                                         funded by Finnish Academy and CNPq/Brazil (n.490235/2012-3) as part of
+                                         the joint project SUSTAIN, and by Strategic Research Council/Aka BC-DC         messages sent by their two neighbors at the lower level (either
+                                         project (n.292854).                                                            sensors if we consider the second lowest level or other relays
+                                                                                                                                     2
+
+
+
+for the other levels). Using the likelihood test at every level,    conditions a low average error probability can be achieved for
+they derive tight bounds of the error probability as a function     the scenario described above? For example, the answer for this
+of the number of sensors considering the binary symmetric           question for the case of rare events is that a combination of
+channel [14] and erasure channel [15]. In [16], the authors         AND decision rule by the fusion center and quantization of the
+assess the probability of decision error of a network with noisy    event occurrence with “1” leads to an average error probability
+binary symmetric channels between sensors and fusion center         close to the event frequency itself, even when only a handful
+and points out that the fusion rule should be optimized with        of sensors are used. A deeper discussion about this is found
+respect to the observed phenomenon.                                 later in this paper. It also important to mention that our work
+   In [17], the authors combine the idea of robust decentralized    differs from others in the literature as [16], [21] by focusing on
+detection with social learning. Among its contributions, [17]       a single error probability metric rather than cross-over, false-
+generalizes to tree and tandem topologies the results of [18],      positive or false-negative probabilities. More specificaly, the
+where a solution to the “minimax” robust detection problem          present work generalizes [16] to multi-hop binary symmetric
+(whose objective is to minimize the worst case performance          channels and general fusion rules.
+when the probability distribution of the observations is not           In summary, we identify the following main contributions:
+completely specified) for parallel topology is presented. In        (i) propose an analytic framework that first breaks the WSN
+a recent paper [19], the authors combine the advances in            into three phases – sensing, communication and decision – to
+spatial models for wireless networks using spatial point pro-       analyze the error events related to each one of them (Section
+cess theory (e.g. [20] and references therein) and distributed      II) to then rebuild the system as a whole to understand how the
+detection. In [21], decentralized detection for clustered sensor    error propagates through those phases (Section III), regardless
+networks with hierarchical multi-level fusion is investigated.      of the input function; (ii) find a joint error probability which
+Authors conclude that the probability of decision error is          accounts for sensing and communication, while considering
+dominated by the number of decision levels rather than the          that the sensor observations (which are conditionally indepen-
+clustering formation, which renders minimum performance             dent) are subject to Gaussian noise and independent binary
+degradation with uniform clustering. In addition to wireless        symmetric channels with different error probabilities at each
+sensor networks, distributed detection has been applied in the      hop (Section II); (iii) derive, in closed-form, the average error
+analysis of spectrum sensing strategies for cognitive radio         probability for the OR, AND, K-OUT-OF-N and MAJORITY
+networks as in [22].                                                (Section III), showing that MAJORITY rule can asymptoti-
+   The field of distributed estimation, although similar, has       cally reach a 0-error probability with the number of sensors;
+received relatively less attention. We can cite the following       (iv) show that the performance of OR and AND rules depends
+papers as initial works on that problem [9], [10], [23]. More re-   on the frequency of the event under analysis, while the other
+cently in [24], [25], the authors studied the case of distributed   two do not – this fact implies that, when a limited number
+estimation with constrained bandwidth of 1 bit, proposing a         of sensors is considered, OR or AND rule (depending on
+class of maximum likelihood estimators. Other relatively new        the quantization mapping) can outperform the MAJORITY;
+results can be found in [26], [27], while [13] provides an          (v) exemplifying the analysis with numerical results (Section
+interesting survey on the topic.                                    IV) to illustrate our findings, providing the basis for our final
+   In this paper, we choose a slightly different way by ana-        discussions and possible extensions (Section V).
+lyzing a scenario where the quantization and decision rules
+are given, instead of seeking for optimal detection/estimation
+                                                                                      II. S YSTEM DESCRIPTION
+schemes [7]. As previously mentioned, our aim is to assess the
+average error probability of a WSN with little computational            Let us assume a network composed by a set N “ t1, ..., N u
+capabilities. Specifically, our scenario is a set of sensors        of sensors that monitor a continuous signal xptq, where t P
+that periodically measure a given signal to detect whether          R` and x : R` Ñ R, to estimate whether a given event E
+a given event happens (e.g. if the signal has a value above         related to xptq happens and send this information to a fusion
+a certain threshold). Based on their noisy measurements, the        center. To avoid confusion, we summarize the key notations
+occurrence of such events is mapped into a binary number (e.g.      in Table I. Assuming that the sensors make synchronous and
+occurrence implies “1”, not occurrence implies “0”), which          periodic measurements in predetermined instants tn “ nτ with
+defines the sensor state. The sensors need then to send their       n being a natural number and τ P R` , we can define a function
+states to the fusion center via wireless channel, through one or    θrns with θ : N Ñ t0, 1u that indicates if E occurs at time tn .
+multiple hops. The relay nodes only forward the information         Hereafter we refer to θrns as the system state at time tn .
+they received. We assume binary symmetric channels whose                The sensors’ estimation of θrns is, however, imperfect. For
+associated error probabilities might be different at each level     each sensor i P N , we define a function yi rns with yi : N Ñ
+of the multi-hop transmission (but, within the same level, the      t0, 1u that represents the estimation about E from its individual
+probabilities are the same). A decision about the state of the      noisy version of xptq. If a sensing error at sensor i happens
+signal is done at the fusion center based on the binary signals     at tn , then yi rns ‰ θrns; otherwise yi rns “ θrns.
+related to each sensor. The decision rules employed by the              After the sensing phase, the sensors need then to forward
+fusion center are the memoryless Boolean functions OR, AND,         yi rns to a remotely located fusion center, which will process
+K-OUT-OF-N and MAJORITY.                                            the received information to determine whether E has indeed
+   Our study targets at answering the following: Under which        occurred. Each sensor i P N sends its state yi rns through
+                                                                                                                                                            3
+
+
+
+independent communication channels that are also subject to                                            Signal x(t) =⇒ State θ[n]
+errors. Let si rns with si : N Ñ t0, 1u be the state related
+to sensor i that is received by the fusion center after passing
+through the radio links, which can be composed by only one                                                           ...
+                                                                                              x(t)                                       x(t)
+hop or multiple hops where relay nodes forward the received
+information. If an error occurs in the link related to sensor i’s
+nth measurement, then si rns ‰ yi rns; if not, si rns “ yi rns.                                 Sensor 1                           Sensor N
+   From the signals si rns, the fusion center needs to decide
+whether event E happened at tn . Let gps1 rns, ..., sN rnsq, with                             y1 [n]                                     yN [n]
+g : t0, 1uN Ñ t0, 1u, denote the Boolean function that esti-
+mates the state θrns by the fusion center so that the estimated                                 Channel                            Channel
+state θ̂rns related to tn is given by θ̂rns “ gps1 rns, ..., sN rnsq.
+A decision error occurs whenever θ̂rns ‰ θrns. The average
+error probability Pe of the whole process is given by:                                        s1 [n]                                     sN [n]
+                                                                                                                     ...
+                        η´1
+                      1 ÿ     ”            ı
+                 Pe “       Pr θ̂rns ‰ θrns ,                            (1)                                  Fusion center
+                      η n“0
+
+where the average is taken over the samples n P t0, 1, ..., η´1u                                        θ̂[n] = g(s1 [n], ..., sN [n])
+related to a time window from t0 “ 0 and tη´1 “ T .
+   Our goal here is to analyze different design options for the                Fig. 1. Illustrative figure of the scenario under analysis. Sensors monitor a
+sensor network and the fusion center’s decision function to                    given signal xptq in order to determine the binary state θrns at time tn . Each
+                                                                               one of the N sensors in the network needs to send its state to a fusion center
+improve the estimation reliability, evaluated by the probability               (control unit) that remotely decides the state θ̂rns. In its way to the fusion
+that θ̂rns ‰ θrns. Fig. 1 illustrates the scenario under analysis.             center, errors may happen either in sensing (yi rns ‰ θrns with i “ 1, .., N )
+For instance, xptq may represent the temperature of an indus-                  or in communicating (si rns ‰ yi rns). The dashed rectangle identifies where
+                                                                               the error events may happen. Our goal is to find the expected error probability
+trial plant that requires temperatures below a given threshold                 Pe given by (1) and then compare different design options.
+xth to guarantee its safe operation. The event E can be then
+associated with an emergency where xptn q ą xth . Given the                    A. Sensing error
+signal xptq, the threshold xth and the number of sensors N ,
+we need to find the most suitable design for the quantization                      Let us denote xi ptn q the version of xptq observed by sensor
+function θ (i.e. define if the event xptq ą xth is associated                  i P N . The value of xi ptn q will be then used to define yi rns.
+with θ “ 0 or θ “ 1) and the decision rule g (OR, AND,                         Then, we can define the probability P pxi ptn q ď xth q that the
+K-OUT-OF-N , MAJORITY) at the fusion center.                                   event xi ptn q ď xth , and its complement P pxi ptn q ą xth q.
+   Next we will focus our attention on the errors in the sensing                   Remark 1: The sensing error probability is dependent on
+procedure and in the communication links, which are identified                 the input signal xptq such that an error in the sensing procedure
+by the dashed rectangle in Fig. 1, and how they affect the                     yi rns ‰ θrns occurs in two situations: (a) xptn q ą xth and
+decisions done by the fusion center.                                           xi ptn q ď xth , or (b) xptn q ď xth and xi ptn q ą xth . The error
+                                                                               probability is then related to the frequency that xptn q is above
+                               TABLE I                                         or below the threshold xth , which is captured by how many
+                         N OTATION SUMMARY                                     times θrns “ 0 or θrns “ 1 for n “ 0, ..., η ´ 1.
+                                                                                   Let us consider xptn q ď xth is associated to the state θrns “
+    Notation    Description
+                                                                               S where S P t0, 1u and xptn q ą xth is associated to the state
+        N       set of sensors
+        N       number of sensors in set N                                     θrns “ S̄, where S̄ denotes the complement of S. Then, we
+        M       number of communication hops                                   have the following definition.
+        η       total number of samples
+      xptq      continuous signal as a function of time t
+                                                                                  Definition 1: Recalling that η denotes the total number of
+       xth      signal threshold
+      θrns      sensor state at time tn related to the nth measurement         samples within an arbitrary interval defined by t0 “ 0 and
+     yi rns     sensor i estimation about the nth measurement                  tη´1 “ T . We define ηS fi ηxptn qďxth and ηS̄ fi ηxptn qąxth
+        E       event related to xptq                                          as the number of samples related to states S and S̄ in such
+     si rns     received state at the fusion center from sensor i
+      gp¨q      decision function
+                                                                               interval, respectively. In this case, ηS `ηS̄ “ η. The frequency
+      θ̂rns     estimated stated at the fusion center                          fS “ fxptn qďxth that the state S appears between t0 and tη´1 is
+     ni ptn q   additive noise associated with sensor i at tn                  fS “ ηS { pηS ` ηS̄ q Similarly, the frequency fS̄ “ fxptn qąxth
+        µ       noise mean                                                     is fS̄ “ ηS̄ { pηS ` ηS̄ q.
+       σ2       noise variance
+        S       Boolean variable associated with event E
+       fS       frequency of a given state Ss                                  B. Communication errors
+      Si,j      state of sensor i in hop j
+        pj      error probability in the communication hop j                     Let Si,0 rns “ yi rns be the signal sent by sensor i and
+       CM       set of all possible error events for M -hop link               Si,j rns be the state at the jth level with j “ 1, ..., M
+                                                                                                                                                      4
+
+
+
+                                                                                                           “ t1, 2, 3u and C¯3,odd
+                                                                 Si,2 = θ[n]                         4                       4
+                                                     1 − p2                            t1, 2u, and C3,odd                          “ t u.
+                                     Si,1 = θ[n]                                          Theorem 1: The       communication         error  probability
+                            p1
+                       1−                             p2
+                                                                 S̄i,2 6= θ[n]         P psi rns ‰ yi rnsq related to sensor i and tn over M
+      Si,0 = θ[n]                                                                ...   hops is given by:
+                                                                 S̄i,2 6= θ[n]                                       ¨            ˛¨                ˛
+                       p1                            1 − p2                                                   2M ´1
+                                                                                                               ÿ        ź               ź
+                                     S̄i,1 6= θ[n]                                      P psi rns ‰ yi rnsq “        ˝         pi ‚˝       p1 ´ pj q‚.
+                                                      p2
+                                                                 Si,2 = θ[n]
+                                                                                                              k“1       k
+                                                                                                                     iPCM,odd          k
+                                                                                                                                   jPC̄M,odd
+                                                                                                                                                  (2)
+Fig. 2. State probability tree for each sensor i “ 1, ..., N considering                     Proof: From Lemma 2 we know an error event si rns ‰
+communication error probabilities pj with j “ 1, ..., M where M is the                 yi rns occurs whenever an odd number of error events Si,j ‰
+number of hops between the sensors and the fusion center. The initial state
+is Si,0 “ yi rns and the final state is Si,M . The state Si,j P t0, 1u and S̄i,j       Si,j´1 happens for j “ 1, ..., M . To compute the probability
+denotes its complement.                                                                of such events, we need to use the law of total probability
+                                              pj                                       knowing that the error events at each level and in different
+                                                                                       measurement instants tn are independent. Using Definition 3
+                                                                                       to characterize the subsets containing the odd number of error
+              1 − pj             0                    1       1 − pj                   events, we obtain (2).
+
+                                                                                         Remark 2: If pj “ p for all j “ 1, ..., M , then
+                                              pj
+                                                                                                                           1 ´ p1 ´ 2pqM
+                                                                                                   P psi rns ‰ yi rnsq “                 ,          (3)
+Fig. 3. Transition diagram between the two possible states “0” and “1”                                                            2
+when the Binary Symmetric Channel is assumed. A change only occurs with
+probability pj with j “ 1, ..., M , which is associated with the jth level error       which is known result for cascade of binary symmetric chan-
+probability such that Si,j “ Si,j´1 with probability 1 ´ pj and Si,j ‰                 nels [8].
+Si,j´1 with probability pj .
+
+
+communication hop. At every hop, relay nodes forward their                             C. Decision function
+state Si,j rns to the next one. The probability tree of the state of
+                                                                                         Lemma 1: A decision error event θ̂rns ‰ θrns at fusion
+sensor i is presented in Fig. 2, where the initial state Si,0 rns is
+                                                                                       center depends on the actual state θrns and the decision
+equal to the state yi rns after the sensing procedure and Si,j rns
+                                                                                       function θ̂rns “ gps1 rns, ..., sN rnsq as follows.
+is the state at the jth level.
+    We assume here a binary symmetric channel where the                                  ‚ OR: If θrns “ 0, then at least one signal si rns “ 1 with
+output is different from the input with probability pj for the                             i P N leads to θ̂rns “ 1 ‰ θrns. If θrns “ 1, then an
+jth level of the tree. We assume that the error events are                                 error event θ̂rns “ 0 ‰ θrns only occurs when all signals
+independent at each level and time-steps tn , which allows                                 si rns “ 0.
+for dropping the index n. Then, the state Si,j “ Si,j´1 with                             ‚ AND: If θrns “ 0, then an error event θ̂rns “ 1 ‰ θrns
+
+probability 1 ´ pj and Si,j ‰ Si,j´1 with probability pj . Fig.                            only occurs when all signals si rns “ 1. If θrns “ 1,
+3 represents the state transition diagram of this channel.                                 then at least one signal si rns “ 0 with i P N leads to
+    Definition 2: A communication error event si rns ‰ yi rns                              θ̂rns “ 0 ‰ θrns.
+related to sensor i and tn occurs after M hops if an odd                                 ‚ K-OUT-OF-N : If θrns “ 0, an error event θ̂rns “ 1 ‰
+
+number of errors Si,j ‰ Si,j´1 had happened for j “ 1, ..., M .                            θrns occurs when at least K out of N signals si rns “ 1.
+    Definition 3: Let      us     define     the      set     of    all                    If θrns “ 1, an error event θ̂rns “ 0 ‰ θrns occurs when
+possible error events for an M -hop link as                                                at least K out of N signals si rns “ 0. If N is an even
+CM “ tt u, t1u, t2u, ..., t1, 2u, t1, 3u, ..., t1, 2, ..., M uu, which                     number and K “ N {2, the event where N {2 signals are
+contains 2M elements that refer to the index j “ 1, ..., M .                               si rns “ 0 and the other N {2 are si rns “ 1 may occur
+Let CM,odd Ă CM denote the subset of index with odd                                        and the decision will be randomized such that θ̂rns “ 0
+cardinality, which is composed by 2M ´1 elements. The                                      or θ̂rns “ 1 with 50% of chance.
+          k                                                                              ‚ MAJORITY: This rule is a specific case of K-OUT-OF-
+subset CM,odd    Ă CM,odd with k “ 1, ..., 2M ´1 denotes each
+one of the k subsets of CM,odd such that CM,odd
+                                                Ť k
+                                                            “ CM,odd .                     N when K “ rN {2s, where ras : R Ñ Z represents the
+The complement C¯M,oddk
+                            is defined in relation to t1, 2, ..., M u                      ceiling function such that it maps the real number a to
+                                                                                           its smallest following integer.
+             k
+such that CM,odd    ` C¯M,odd
+                         k
+                              “ t1, 2, ..., M u.
+    Let us now exemplify the construction of those sets when                             Corollary 1: The AND and OR decision functions are
+M “ 3. Following the procedure presented in Defini-                                    conditional versions of K-OUT-OF-N rule as follows.
+tion 3, C3 “ tt u, t1u, t2u, t3u, t1, 2u, t1, 3u, t2, 3u, t1, 2, 3uu,                    ‚ OR: If θrns “ 0, the error event is equivalent to 1-OUT-
+which has eight p23 q elements. The subset is then C3,odd “                                OF-N rule. If θrns “ 1, it is equivalent to N -OUT-OF-N .
+tt1u, t2u, t3u, t1, 2, 3uu, having then four p22 q elements. Us-                         ‚ AND: If θrns “ 0, the error event is equivalent to N -
+ing these sets, we have C3,odd 1
+                                     “ t1u and C¯3,odd 1
+                                                             “ t2, 3u,                     OUT-OF-N rule. If θrns “ 1, it is equivalent to 1-OUT-
+C3,odd “ t2u and C3,odd “ t1, 3u, C3,odd “ t3u and C¯3,odd
+  2                   ¯2                 3                      3
+                                                                     “                     OF-N .
+                                                                                                                                             5
+
+
+
+                      III. M AIN RESULTS                                   For N being even, the error probability Pe,even
+                                                                                                                       MAJ,0 is:
+   In this section we combine the results previously presented                                       ˆ
+to derive the main results of this paper, namely the average                                             f0    `                ˘
+                                                                           Pe,even       odd
+                                                                               MAJ,0 “ Pe, MAJ,0 ´          Av Pe,N {2,0 rns, S0 `
+error probability given in (1) for the OR, AND, K-OUT-OF-                                                2
+                                                                                                                                    ˙ (11)
+N and MAJORITY decision rules as a function of the number                                                   f1   `                ˘
+                                                                                                         ` Av Pe,N {2,1 rns, S1 .
+of sensors N , number of hops M and other system variables.                                                 2
+   Lemma 2: The probability Pe,K,S rns that K out of N
+sensors experience error events si rns ‰ θrns at xptn q for                 If S “ 1 such that θrns “ 1 is associated to the xptn q ď
+xptn q ď xth (i.e. θrns “ S) is:                                         xth , then Pe, OR,1 “ Pe, AND,0 , Pe, AND,1 “ Pe, OR,0 , Pe,K,1 “
+                      ˆ ˙                                                Pe,K,0 and Pe, MAJ,1 “ Pe, MAJ,0 .
+                        N
+         Pe,K,S rns “       pPS,S̄ rnsqK pPS,S rnsqN ´K ,  (4)                  Proof: To compute the average error probability Pe given
+                        K
+                                                                         in (1), we first need to compute the probability of error events
+where the probabilities PS,S̄ rns “ P pxptn q ď xth qP psi rns ‰         for each decision rule (described in Lemma 1), knowing the
+yi rnsq ` P pxptn q ą xth qP psi rns “ yi rnsq and PS,S rns “            value of θrns. We then use the fact that θrns “ 0 if xptn q ď xth
+1 ´ PS,S̄ rns.                                                           (i.e. S “ 0), Lemma 2 and Corollary 1 to find probabilities
+    Similarly, the probability Pe,K,S̄ rns that K out of N sensors       for every measurement. To obtain Pe , we compute the average
+experience error events si rns ‰ θrns at xptn q for xptn q ą xth         error probabilities for θrns “ 0 or θrns “ 1 using Definition
+(i.e. θrns “ S̄) is:                                                     4 and their respective frequencies f0 and f1 (Definition 1).
+                       ˆ ˙
+                         N                                                  By De Morgan’s law, which says that Ā`B̄ “ A ¨ B for any
+         Pe,K,S̄ rns “        pPS̄,S rnsqK pPS̄,S̄ rnsqN ´K    (5)
+                         K                                               Boolean variables A and B, we find that Pe, OR,1 “ Pe, AND,0
+where the probabilities PS̄,S rns “ P pxptn q ą xth qP psi rns ‰         and Pe, AND,1 “ Pe, OR,0 when considering S “ 1 is related
+yi rnsq ` P pxptn q ď xth qP psi rns “ yi rnsq and PS̄,S̄ rns “          to xptn q ď xth . The K-OUT-OF-N and MAJORITY rules,
+1 ´ PS̄,S rns.                                                           in turn, are actually independent of how S is assigned so
+    In other words, Pe,K,S rns represents the probability that the       Pe,K,S“0 “ Pe,K,S“1 and Pe, MAJ,1 “ Pe, MAJ,0 .
+signals related to K sensors are in state S̄ and N ´ K sensors
+are in state S when arriving at the fusion center, given that               Remark 3: These results can be written in terms of type I
+θrns “ S (i.e. xptn q ď xth ).                                           (false-positive) and type II (false-negative) errors. For S “ 0,
+    Definition 4: Let Avp¨, ¨q be the average operator such that         the type I error probability is given1 :
+                                    1     ÿ                                ‚   OR: Av p1 ´ Pe,N,0 rns, S0 q,
+                Avpvrns, Vq “                 vrns,            (6)
+                                #pvrnsq nPV                                ‚ AND: Av pPe,N,0 rns, S0 q,
+                                                                                             N
+where vrns is a list of numbers, #pvrnsq represents its
+                                                                                            ř
+                                                                           ‚ K-OUT-OF-N :        Av pPe,k,0 rns, S0 q.
+cardinality and V is the set containing the indexes related to                                   k“K
+each one of the #pvrnsq elements of vrns.                                Similarly, the type II error probability is given by:
+   Theorem 2: If the state S “ 0 (i.e. θrns “ 0 if xptn q ď xth ;          ‚   OR: Av pPe,N,1 rns, S1 q,
+refer to Definition 1) the expected decision error probability
+Pe, OR,0 introduced in (1) using OR decision rule and N                    ‚ AND: Av p1 ´ Pe,N,1 rns, S1 q,
+                                                                                           řN
+sensors is                                                                 ‚ K-OUT-OF-N :      Av pPe,k,1 rns, S1 q.
+                                                                                                 k“K
+Pe, OR,0 “ f0 Av p1 ´ Pe,N,0 rns, S0 q ` f1 Av pPe,N,1 rns, S1 q ,          Corollary 2: The asymptotic behavior of the error proba-
+                                                              (7)        bility Pe with N for S “ 0 and the different rules is:
+where f0 and f1 are given in Definition 1, and S0 and S1
+denote the set containing the indexes related to S “ 0 and                                        lim Pe, OR,0     “    f0 ,              (12)
+S “ 1.                                                                                           N Ñ8
+  Similarly, the probability Pe, AND,0 using AND decision is:                                    lim Pe, AND,0     “    f1 ,              (13)
+                                                                                                N Ñ8
+Pe, AND,0 “ f0 Av pPe,N,0 rns, S0 q ` f1 Av p1 ´ Pe,N,1 rns, S1 q .                         lim Pe,KărN {2s,0      “    1,                (14)
+                                                                                           N Ñ8
+                                                              (8)                           lim Pe,KěrN {2s,0      “    0,                (15)
+  For the K-OUT-OF-N rule except when both N is even                                       N Ñ8
+
+and K “ N {2, the probability Pe,K,0 is:                                                         lim Pe, MAJ,0     “    0.                (16)
+                                                                                                N Ñ8
+              N
+              ÿ
+ Pe,K,0 “         f0 Av pPe,k,0 rns, S0 q ` f1 Av pPe,k,1 rns, S1 q .
+            k“K
+                                                                           Remark 4: When N Ñ 8 and S “ 0, the type I error
+                                                      (9)                probability for OR rule tends to 1, while the type II to 0.
+  For MAJORITY and N odd, the probability Pe,odd
+                                              MAJ,0 is:                  Conversely, when AND rule is considered, the type I error
+                N                                                        probability for OR rule tends to 0, while the type II to 1.
+                                                                         Therefore, OR always tends to decide 1, while AND 0.
+                ÿ
+Pe,odd
+    MAJ,0 “          f0 Av pPe,k,0 rns, S0 q`f1 Av pPe,k,1 rns, S1 q .
+              k“rN {2s
+                                                                 (10)      1 The results for MAJORITY is a special case of K-OUT-OF-N .
+                                                                                                                                                                   6
+
+
+              6
+              5
+              4
+     x(t)
+
+              3
+              2
+              1
+              0
+
+             1.0
+
+             0.8
+
+             0.6
+  θ[n]
+
+
+
+
+             0.4
+
+             0.2
+
+             0.0
+
+             1.0
+
+             0.8
+
+             0.6
+  θ̂OR[n]
+
+
+
+
+             0.4
+
+             0.2
+
+             0.0
+
+             1.0
+
+             0.8
+  θ̂AND[n]
+
+
+
+
+             0.6
+
+             0.4
+
+             0.2
+
+             0.0
+
+             1.0
+
+             0.8
+  θ̂MAJ[n]
+
+
+
+
+             0.6
+
+             0.4
+
+             0.2
+
+             0.0
+                   0           50                       100                      150                       200                      250                      300
+                                                                                  t
+
+Fig. 4. Numerical example of the proposed scenario for the signal xptq “ sinp12πt{ηq ` cosp20πt{ηq ` sinp26πt{ηq ` 3, which has a mean value of
+3 and η “ 300, xth “ 4.5 (represented by the dashed line in the first and third plots, and leading to η0 “ 262 and η1 “ 38), N “ 3 (three sensors) and
+M “ 1 (one hop). Sensor i sets its state yi rns at tn based on the noisy version of signal denoted by xi ptn q “ xptn q ` ni ptn q where ni ptn q is related to an
+additive Gaussian noise with mean µ “ 0 and variance σ 2 “ 1. The error probabilities associated with the sensing procedure are given in 17 and 18. After
+the sensing procedure, signal yi rns is sent via a binary symmetric channel with error probability p1 “ 0.1, yielding a new signal si rns. At the fusion center,
+a decision is done based on si rns and the logic operations OR, AND and MAJORITY. Table II presents the error probabilities associated with this scenario.
+
+
+
+                  IV. N UMERICAL A NALYSIS                                        MAJORITY rules – special variations of the K-OUT-OF-N ,
+    To illustrate our framework in a specific setting, let us                     as stated in Theorem 2 and Corollary 1. It is worth mentioning
+consider the noisy version of xptq observed by sensor i such                      that, although this setting is somehow arbitrary, the analytic
+that xi ptn q “ xptn q ` ni ptn q where ni ptn q is related to an                 framework proposed here can be applied to different scenarios;
+additive Gaussian noise with mean µ and variance σ 2 , defining                   the computational experiments presented in this section are
+yi rns. Then, the probability P pxi ptn q ď xth q that the event                  coded in python language using IPython framework and are
+xi ptn q ď xth occurs is:                                                         available at [28].
+                        1
+                          ˆ         ˆ
+                                      xth ´ xptn q ´ µ
+                                                       ˙˙                            Before starting, we would like to explain our choice of
+  P pxi ptn q ď xth q “     1 ` erf          ?             . (17)                 the input signal xptq. Our idea was to have a positive de-
+                        2                  σ 2
+                                                                                  terministic signal, limited in amplitude, that has different
+Similarly, the probability P pxi ptn q ą xth q is:                                peaks and a visually “interesting” behavior. This allows us
+                           1
+                             ˆ          ˆ
+                                          xth ´ xptn q ´ µ
+                                                           ˙˙                     to see non-linear effects of changes in xth . Our choice xptq “
+ P pxi ptn q ą xth q “ 1 ´     1 ` erf             ?          .                   sinp12πt{ηq`cosp20πt{ηq`sinp26πt{ηq`3, whose amplitude
+                           2                     σ 2
+                                                            (18)                  varies from 0 to 6 is illustrated in the first plot of Fig. 4, but
+                                                                                  for η “ 300 and assuming M “ 1 and p1 “ 0.1, N “ 3 with
+   We study in this section the effect of the number of sensors                   additive Gaussian noise (µ “ 0, σ 2 “ 1).
+N , the number of hops M and the channel error probability                           The top plot represents the signal xptq while the actual
+for an input signal xptq “ sinp12πt{ηq ` cosp20πt{ηq `                            system state θrns associated with the event xptn q ą xth
+sinp26πt{ηq ` 3 with η “ 104 and different thresholds xth . We                    is shown next. We present in the third plot the estimations
+assume that the sensors’ observations are affected by additive                    xi ptn q from the three sensors based on their noisy version
+Gaussian noise with mean µ “ 0 and variance σ 2 “ 1 and all                       of xptq, followed by their respective states yi rns. The three
+results have been obtained using S “ 0 such that θrns “ 0 if                      received signals si rns at the fusion center, after passing
+xptn q ď xth . The results are only presented for OR, AND and                     through the communication link, are presented next. The last
+                                                                                                                                                          7
+
+
+     1.0                                                                            1.0
+               OR                                                                         OR
+               Asymp. OR                                                                  Asymp. OR
+               AND                                                                        AND
+     0.8       Asymp. AND                                                           0.8   Asymp. AND
+               MAJ                                                                        MAJ
+
+     0.6                                                                            0.6
+Pe
+
+
+
+
+                                                                               Pe
+     0.4                                                                            0.4
+
+
+
+
+     0.2                                                                            0.2
+
+
+
+
+     0.0                                                                            0.0
+                       5               10                15               20                      5                 10                15                 20
+                                            N                                                                            N
+
+Fig. 5. Average error probability Pe given in Theorem 2 as a function of the   Fig. 7. Average error probability Pe given in Theorem 2 as a function of the
+number of sensors N for OR, AND and MAJORITY decision rules, threshold         number of sensors N for OR, AND and MAJORITY decision rules, threshold
+xth “ 4.5, M “ 1 and p1 “ 0.1. The total number of samples is η “ 104          xth “ 3, M “ 1 and p1 “ 0.1. The total number of samples is η “ 104
+where η0 “ 8747 and η1 “ 1253.                                                 where η0 “ 4992 and η1 “ 5008.
+     1.0
+               OR                                                              MAJORITY is the best choice when N grows such that Pe
+               Asymp. OR
+               AND                                                             tends to 0. To analyze these facts, we need to deal with θrns.
+     0.8       Asymp. AND                                                      From Theorem 2 and Corollary 2, the frequency of θrns “ 0
+               MAJ
+                                                                               and θrns “ 1 determines the performance of OR and AND so
+     0.6
+                                                                               the former outperforms when θrns “ 0 is more frequent, and
+                                                                               vice-versa. In our example, the frequencies are: f0 “ 0.8747
+Pe
+
+
+
+
+                                                                               and f1 “ 0.1253, providing their asymptotic limit.
+     0.4                                                                          For MAJORITY, the asymptotic performance is independent
+                                                                               of such frequencies. When a small number of sensors is
+     0.2
+                                                                               considered, however, it does not provide the best performance
+                                                                               since an error in more than N {2 signal is not rare. In this case,
+                                                                               AND is the best, even working below its asymptotic limit. This
+     0.0
+                       5               10                15               20   happens due to the way that the logic operation AND works,
+                                            N                                  balancing the error events when θrns “ 0 and θrns “ 1.
+                                                                                  To get more insights on the system performance, Figs. 6, 7
+Fig. 6. Average error probability Pe given in Theorem 2 as a function of the
+number of sensors N for OR, AND and MAJORITY decision rules, threshold         and 8 show the average error probability as a function N for
+xth “ 5.5, M “ 1 and p1 “ 0.1. The total number of samples is η “ 104          xth “ 5.5 (f0 “ 0.979 and f1 “ 0.021), xth “ 3 (f0 “ 0.4992
+where η0 “ 9790 and η1 “ 210.                                                  and f1 “ 0.5008) and xth “ 1.5 (f0 “ 0.1128 and
+                                                                               f1 “ 0.8872), respectively. In the scenario where xth “ 5.5, a
+plots represent the decisions using OR, AND and MAJORITY.                      similar behavior to the xth “ 4.5 is observed, but with the
+   Table II compares the simulated and analytic error proba-                   AND rule having a better performance due to the smaller
+bilities for this example, which for better visualization only                 frequency f1 of events θrns “ 1. On the other hand, when
+considers η “ 300. Notice that for this particular example                     xth “ 1.5, the performance of the OR and AND rules switches
+AND rule has better performance compared with the other                        in relation to when xth “ 4.5 as far as the frequencies f0
+two. As we shall see later, AND rule leads to small error                      and f1 have also switched; now OR works better because
+probabilities when the number of sensors is low.                               θrns “ 0 is much more frequent. When the θrns is more
+   Fig. 5 illustrates how the average error probability Pe using               evenly distributed, illustrated in the scenario where xth “ 3,
+OR, AND and MAJORITY rules varies with the number N of                         AND and OR are equivalent and their error probability tends
+sensors making measurements when the threshold that defines                    to 0.5 (which is basically a random guess of the input state).
+the event E is xth “ 4.5. The plot shows that: (i) OR rule has                 In all scenarios, the MAJORITY rule maintains its asymptotic
+a high error probability, which increases with N , (ii) AND                    optimal performance, working better and better when the
+rule has the best performance for small values of N , and (iii)                number of sensors grows.
+                                                                                  Fig. 9 presents the effects of the number of hops on the
+                                  TABLE II                                     average error probability for xth “ 4.5 and N “ 3, considering
+           E RROR PROBABILITY FOR THE SNAPSHOT PRESENTED IN F IG . 4           that every one of the M hops is modeled as a binary symmetric
+            Decision rule   Analytic             Simulation                    channel with the same error probability p “ 0.1 so that the
+                  g           Pe       Pe (η “ 300)     Pe (η “ 105 )          equivalent channel has the error probability given by Corollary
+                OR           0.383         0.366            0.381              2. As one would expect, the increase of the number of hops
+               AND           0.101         0.090            0.101              M also increases the average error probability, regardless of
+            MAJORITY         0.129         0.136            0.125
+                                                                                                                                                           8
+
+
+     1.0                                                                            1.0
+               OR                                                                           OR
+               Asymp. OR                                                                    AND
+               AND                                                                          MAJ
+     0.8       Asymp. AND                                                           0.8
+               MAJ
+
+     0.6                                                                            0.6
+
+
+
+
+                                                                               Pe
+Pe
+
+
+
+
+     0.4                                                                            0.4
+
+
+
+
+     0.2                                                                            0.2
+
+
+
+
+     0.0                                                                            0.0
+                      5                10               15                20          0.0         0.1          0.2           0.3           0.4           0.5
+                                            N                                                                         p
+
+Fig. 8. Average error probability Pe given in Theorem 2 as a function of the   Fig. 10. Average error probability Pe given in Theorem 2 as a function of
+number of sensors N for OR, AND and MAJORITY decision rules, threshold         channel error probability p1 considering only 1-hop transmission (i.e. M “ 1)
+xth “ 1.5, M “ 1 and p1 “ 0.1. The total number of samples is η “ 104          for OR, AND and MAJORITY rules, threshold xth “ 4.5 and N “ 3.
+where η0 “ 1128 and η1 “ 8872.
+     1.0                                                                       error events in different ways so that when the channel error
+               OR                                                              probability increases, it will increase in the same proportion
+               AND
+               MAJ                                                             for both the more and less frequent states. Consequently,
+     0.8
+                                                                               although MAJORITY asymptoticly outperforms the others in
+                                                                               terms of the number of sensors, it is much more vulnerable to
+     0.6                                                                       an increase of the channel error probabilities.
+
+                                                                                                     V. F INAL REMARKS
+Pe
+
+
+
+
+     0.4                                                                          In this paper, we analyzed different ways that one could
+                                                                               design a relatively simple WSN based on three phases, namely
+                                                                               sensing, communication and decision. Different from the
+     0.2
+                                                                               literature of distributed sensing and estimation, we targeted
+                                                                               at implementing simple decision rules, regardless of their
+     0.0
+           1    2         3   4    5            6   7        8    9       10
+                                                                               optimality. Our idea here was to show that it is possible to
+                                            M                                  attain low error probabilities using a simple threshold based
+                                                                               quantizer, a limited bandwidth of 1 bit and low complexity
+Fig. 9. Average error probability Pe given in Theorem 2 as a function of the
+number of hops M considering pj “ p “ 0.1 for OR, AND and MAJORITY
+                                                                               decision rules such as AND, OR and MAJORITY.
+rules, threshold xth “ 4.5 and N “ 3. The equivalent channel probability          If the occurrence of the event is rare and associated with
+after M hops is given in Corollary 2.                                          the state “1”, the AND rule can lead to a low error probability
+                                                                               with a small number of sensors, although MAJORITY can
+the decision rule. For the setting considered here, the AND                    asymptotically reach 0-error probability for a large the number
+rule seems more robust against the increase of M , so that the                 of sensors. If its occurrence is more equally distributed, then
+error probability associated to it grows slower than the other                 AND and OR rules have a poor performance while the
+two options. Once again, this fact occurs due to the way AND                   MAJORITY is better than the other options but still requiring
+balances the error probabilities for the two possible values of                a relatively large number of sensors. We also show that the
+θrns, given more weight (in proportion to its occurrence) to                   MAJORITY rule is more susceptible to channel errors than the
+less frequent error events. The OR rule, on the other hand,                    AND rule, reflecting the way that it balances the error events
+has an overall poor performance because it balances the error                  with the input state frequencies.
+probability in the opposite way, which leads to even worse                        In any case, our results indicate a simple and cheap way to
+error probabilities. The MAJORITY rule appears to be more                      implement a WSN when the application does not have strict
+susceptible to the increase of M than AND, which indicates                     requirements. Our plan is to extend these results by consider-
+that the increase of the equivalent channel error probability                  ing erasure channels as in [14] and advanced relay strategies
+when M grows seems to affect more the former.                                  as in [29], [30], assuming the nodes follow a specific spatial
+   To better understand this fact, we present in Fig. 10 how                   distribution as in [19]. Sensors experiencing different input
+the average error probability varies with the channel error                    signals (e.g. smart-metering or sensors in different rooms)
+probability p1 when xth “ 4.5, M “ 1 and N “ 3. We                             also constitute an interesting extension of the present work.
+now can see clearer that the MAJORITY rule is indeed more                      Other promising direction is to individually analyze the types
+susceptible to worse channel conditions than the AND rule                      I and II error probabilities such keeping one of them as a fixed
+for the scenario under analysis. As presented in Theorem 2,                    target (e.g. applications that require a very low false negative
+MAJORITY, different from the latter rule, does not favor the                   probability, while false positives are unconstrained).
+                                                                                                                                                                 9
+
+
+
+                              R EFERENCES                                         [29] H. Alves et. al, “Outage, throughput and energy efficiency analysis of
+                                                                                       some half and full duplex cooperative relaying schemes,” Transactions
+ [1] J. Manyika et al., Unlocking the Potential of the Internet of Things.             on Emerging Telecommunications Technologies, Vol. 25, no 11, pg 1114-
+     McKinsey Global Institute, 2015.                                                  1125, Nov. 2014.
+ [2] C. Perera et al., “A survey on internet of things from industrial market     [30] C. H. M. Lima et al., “Effects of relay selection strategies on the spectral
+     perspective,” IEEE Access, vol. 2, pp. 1660–1679, Jan. 2014.                      efficiency of wireless systems with half-and full-duplex nodes." ArXiv
+ [3] P. Gaj et al., “Guest editorial: Distributed data processing in industrial        preprint no. 1507.03761, 2016. Unpublished.
+     applications,” IEEE Trans. Ind. Informat., vol. 11, no. 3, pp. 737–740,
+     Jun. 2015.
+ [4] L. D. Xu et al., “Internet of things in industries: A survey,” IEEE Trans.
+     Ind. Informat., vol. 10, no. 4, pp. 2233–2243, Nov. 2014.
+ [5] S. D. T. Kelly et al., “Towards the implementation of IoT for environ-
+     mental condition monitoring in homes,” IEEE Sensors J., vol. 13, no. 10,
+     pp. 3846–3853, Oct. 2013.
+ [6] J. N. Tsitsiklis, “Decentralized detection,” in Advances in Statistical
+     Signal Processing, 1993.
+ [7] J. F. Chamberland and V. V. Veeravalli, “Wireless sensors in distributed
+     detection applications,” in IEEE Signal Process. Mag., vol. 24, no. 3,
+     pp. 16–25, May 2007.
+ [8] T. M. Cover and J. A. Thomas. Elements of Information Theory. John
+     Wiley & Sons, 2012.
+ [9] E. Ayanoglu, “On optimal quantization of noisy sources,” IEEE Trans.
+     Inf. Theory, vol. 36, no. 6, pp. 1450–1452, Nov. 1990.
+[10] J. Gubner, “Distributed estimation and quantization,” IEEE Trans. Inf.
+     Theory, vol. 39, no. 4, pp. 1456–1459, Jul 1993.
+[11] R. Viswanathan and P. K. Varshney, “Distributed detection with multiple
+     sensors – Part I: Fundamentals,” Proc. IEEE, vol. 85, no. 1, pp. 54–63,
+     Jan. 1997.
+[12] R. S. Blum et al., “Distributed detection with multiple sensors – Part
+     II: Advanced topics,” Proc. IEEE, vol. 85, no. 1, pp. 64–79, Jan. 1997.
+[13] A. Sinha et al., “Estimation and decision fusion: A survey,” Neurocom-
+     puting, vol. 71, no. 13, pp. 2650–2656, 2008.
+[14] Z. Zhang et al., “Detection performance in balanced binary relay trees
+     with node and link failures,” IEEE Trans. Signal Process., vol. 61, no. 9,
+     pp. 2165–2177, May 2013.
+[15] ——, “Error probability bounds for balanced binary relay trees,” IEEE
+     Trans. Inf. Theory, vol. 58, no. 6, pp. 3548–3563, Jun. 2012.
+[16] G. Ferrari and R. Pagliari, “Decentralized binary detection with noisy
+     communication links,” IEEE Trans. on Aerospace and Elec. Systems,
+     vol. 42, no. 4, pp. 1554-1563, October 2006.
+[17] J. Ho et al., “Robust decentralized detection and social learning in tan-
+     dem networks,” IEEE Trans. Signal Process., vol. 63, no. 19, pp.5019-
+     5032, Oct.1, 2015
+[18] V. V. Veeravalli et al., “Minimax robust decentralized detection,” IEEE
+     Trans. Inf. Theory, vol. 40, no. 1, pp. 35–40, Jan. 1994.
+[19] P. Zhang et al., “Event detection in wireless sensor networks in random
+     spatial sensors deployments,” IEEE Trans. Signal Process., vol. 63, no.
+     22, pp.6122-6135, Nov.15, 2015
+[20] P. H. J. Nardelli et al., “Throughput analysis of cognitive wireless
+     networks with Poisson distributed nodes based on location information,”
+     Ad Hoc Netw., vol. 33, 2015. Online at http://www.sciencedirect.com/
+     science/article/pii/S1570870515000748
+[21] G. Ferrari, M. Martal?, and R. Pagliari, “Decentralized detection in clus-
+     tered sensor networks,” IEEE Trans. on Aerospace and Elec. Systems,
+     vol. 47, no. 2, pp. 959-973, April 2011.
+[22] K. Umebayashi et al., “Efficient decision fusion for cooperative spectrum
+     sensing based on OR-rule,” IEEE Trans. Wireless Commun., vol. 11,
+     no. 7, pp. 2585–2595, Jul. 2012.
+[23] D. Castanon et al., “Distributed estimation algorithms for nonlinear
+     systems,” IEEE Trans. Autom. Control, vol. 30, no. 5, pp. 418–425,
+     May 1985.
+[24] A. Ribeiro and G. Giannakis, “Bandwidth-constrained distributed es-
+     timation for wireless sensor networks – part I: Gaussian case,” IEEE
+     Trans. Signal Process., vol. 54, no. 3, pp. 1131–1143, Mar. 2006.
+[25] A. Ribeiro and G. B. Giannakis, “Bandwidth-constrained distributed
+     estimation for wireless sensor networks – part II: Unknown probability
+     density function,” IEEE Trans. Signal Process., vol. 54, no. 7, pp. 2784–
+     2796, Mar. 2006.
+[26] A. Dogandžić and B. Zhang, “Distributed estimation and detection for
+     sensor networks using hidden Markov random field models,” IEEE
+     Trans. Signal Process., vol. 54, no. 8, pp. 3200–3215, Aug. 2006.
+[27] H. Leung et al., “A novel statistical model for distributed estimation in
+     wireless sensor networks,” IEEE Trans. Signal Process., vol. 63, no. 12,
+     pp. 3154–3164, Jun. 2015.
+[28] P. H. J. Nardelli, [Online]. Available: http://nbviewer.ipython.org/gist/
+     pedrohjn/3139775c440db1d1064f
+

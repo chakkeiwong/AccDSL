@@ -1,0 +1,255 @@
+--- before/scripts/run_accounting_master.py
++++ scripts/run_accounting_master.py
+@@ -28,7 +28,7 @@
+                                       local_path, release_hashes, run_phase_tests,
+                                       source_register, verify_hashes, preserve_editable, changes_since, protected_hashes,
+                                       atomic_bytes, merge_hashes, verify_builtin,
+-                                      phase_recovery, recovery_excerpt)
++                                      phase_recovery, recovery_excerpt, contributed_changes)
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ CATALOG = 'scripts/accounting_master_catalog.json'
+@@ -149,7 +149,7 @@
+             reject(name + ' required phase fields are missing')
+         if not isinstance(record['status'], str) or record['status'] not in statuses:
+             reject(name + ' unknown status')
+-        for field in ['attempts', 'residuals', 'issues', 'next_actions', 'outstanding_deletions']:
++        for field in ['attempts', 'residuals', 'issues', 'next_actions', 'outstanding_deletions', 'contributed_files']:
+             if field in record and not strings(record[field]):
+                 reject(name + ' invalid ' + field)
+         for field in ['entry_inventory_path', 'accepted_at', 'block_signature']:
+@@ -931,10 +931,29 @@
+             raise MasterError('No concrete evidence files')
+         return result
+ 
++    def capture_phase_changes(self, record, stage, before, entry):
++        # The snapshot belongs to this actual work/check window, never to the
++        # interval in which other phases or the supervisor were editing files.
++        changes = changes_since(self.root, before)
++        atomic_json(stage / 'changes.json', changes)
++        touched = set(record['contributed_files'])
++        touched.update(n for names in changes.values() for n in names)
++        record['contributed_files'] = sorted(touched)
++        cumulative = contributed_changes(self.root, record, entry)
++        deleted = set(record.get('outstanding_deletions', [])) | set(changes['deleted']) | set(cumulative['deleted'])
++        record['outstanding_deletions'] = sorted(n for n in deleted if not local_path(self.root, n).is_file())
++        atomic_json(stage / 'cumulative-changes.json', cumulative)
++        self.save()
++        return changes, cumulative
++
+     def execute_phase(self, phase, folder):
+         identifier = phase['id']
+         folder.mkdir(parents=True, exist_ok=True)
+         record = self.state['phases'][identifier]
++        if phase['kind'] != 'builtin':
++            if record.get('entry_inventory_path') and 'contributed_files' not in record:
++                raise ContinuationVeto('Legacy phase needs recorded contribution attribution before resume: ' + identifier)
++            record.setdefault('contributed_files', [])
+         record['status'] = 'running'
+         record['attempts'].append(str(folder.relative_to(self.root)))
+         self.save()
+@@ -1012,30 +1031,20 @@
+                 try:
+                     work = self.worker(role, phase, packet, stage, attempt)
+                 finally:
+-                    cumulative = changes_since(self.root, entry)
+-                    record['outstanding_deletions'] = cumulative['deleted']
+-                    atomic_json(stage / 'cumulative-changes.json', cumulative)
+-                    self.save()
++                    changes, cumulative = self.capture_phase_changes(record, stage, before, entry)
+                 if stable_hash(load_json(folder / 'approved-plan.json')['plan']) != approved['plan_hash']:
+                     raise ContinuationVeto('Implementation changed its approved plan')
+-                if cumulative['deleted']:
+-                    raise MasterError('Restore prohibited phase-entry deletions before acceptance: ' + ', '.join(cumulative['deleted']))
++                if record['outstanding_deletions']:
++                    raise MasterError('Restore prohibited phase deletions before acceptance: ' + ', '.join(record['outstanding_deletions']))
+                 if work['verdict'] == 'BLOCKED':
+                     record.update(status='blocked_external', issues=work['issues'], residuals=work['residuals'])
+                     return
+-                changes = changes_since(self.root, before)
+-                atomic_json(stage / 'changes.json', changes)
+-                if changes['deleted']:
+-                    raise MasterError('Worker deleted pre-existing tracked project files: ' + ', '.join(changes['deleted']))
+-                checked = self.check_phase(phase, stage)
+-                cumulative = changes_since(self.root, entry)
+-                changes = changes_since(self.root, before)
+-                record['outstanding_deletions'] = cumulative['deleted']
+-                atomic_json(stage / 'cumulative-changes.json', cumulative)
+-                atomic_json(stage / 'changes.json', changes)
+-                self.save()
+-                if cumulative['deleted'] or changes['deleted']:
+-                    raise MasterError('Verification deleted preserved project files: ' + ', '.join(set(cumulative['deleted'] + changes['deleted'])))
++                try:
++                    checked = self.check_phase(phase, stage)
++                finally:
++                    changes, cumulative = self.capture_phase_changes(record, stage, before, entry)
++                if record['outstanding_deletions']:
++                    raise MasterError('Verification deleted preserved project files: ' + ', '.join(record['outstanding_deletions']))
+                 response = self.worker('review_result', phase,
+                     {**packet, 'work': work, 'checks': checked, 'actual_changes': changes,
+                      'cumulative_changes': cumulative,
+@@ -1049,7 +1058,7 @@
+                     return
+                 if checked.get('passed') is True and checked.get('tests', 0) > 0 and response['verdict'] == 'AGREE':
+                     names = set(work['evidence']) | set(response['evidence']) | {phase['test_file']}
+-                    names.update(cumulative['added'] + cumulative['changed'])
++                    names.update(record['contributed_files'])
+                     names.update(str(Path(phase['output_dir']) / n) for n in phase['deliverables'])
+                     names.add(str((stage / 'checks.json').relative_to(self.root)))
+                     names.add(str((folder / 'approved-plan.json').relative_to(self.root)))
+--- before/scripts/accounting_master_support.py
++++ scripts/accounting_master_support.py
+@@ -378,6 +378,16 @@
+             'deleted': sorted(set(previous) - set(current))}
+ 
+ 
++def contributed_changes(root: Path, record: dict, entry: dict) -> dict:
++    """Current changes to files actually touched in this phase's work windows."""
++    current = editable_files(root)
++    owned = set(record['contributed_files'])
++    return {'added': sorted(owned & (set(current) - set(entry))),
++            'changed': sorted(k for k in owned & current.keys() & entry.keys()
++                              if current[k] != entry[k]),
++            'deleted': sorted(owned - set(current))}
++
++
+ def recovery_excerpt(value, limit=1600) -> dict:
+     """A bounded navigation aid; full records remain authoritative."""
+     text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
+@@ -393,7 +403,11 @@
+         'phase': phase['id'],
+         'required_files': {n: local_path(root, n).is_file() for n in required},
+         'missing_files': [n for n in required if not local_path(root, n).is_file()],
+-        'current_changes': changes_since(root, load_json(local_path(root, inventory))) if inventory else None,
++        'current_changes': (contributed_changes(root, record, load_json(local_path(root, inventory)))
++                            if inventory and 'contributed_files' in record else
++                            changes_since(root, load_json(local_path(root, inventory))) if inventory else None),
++        'change_scope': ('phase_contributions' if 'contributed_files' in record else
++                         'legacy_repository_delta_requires_attribution_before_execution'),
+         'entry_inventory_path': inventory,
+         'issues': recovery_excerpt(record.get('issues', [])),
+         'recent_records': {},
+--- before/tests/test_accounting_master.py
++++ tests/test_accounting_master.py
+@@ -851,6 +851,103 @@
+         self.run_quiet(resumed, max_phases=1)
+         self.assertEqual(resumed.state['phases']['P00']['evidence_hashes']['scripts/earlier-run.py'], digest(source))
+ 
++    def test_resume_excludes_unrelated_intervening_changes_but_retains_own_work(self):
++        self.catalog['limits']['max_repairs'] = 0
++        atomic_json(self.root / CATALOG, self.catalog)
++        unrelated = self.root / 'scripts/other-phase.py'
++        unrelated.write_text('VERSION = 0\n')
++        owned = self.root / 'scripts/earlier-phase-work.py'
++        def partial(role, phase, packet, folder, attempt):
++            if role == 'implement':
++                owned.write_text('OWNED = True\n')
++                return response('IMPLEMENTED', evidence=self.write_work(phase, 'broken'))
++            return self.worker(role, phase, packet, folder, attempt)
++        initial = self.master(worker=partial)
++        self.run_quiet(initial, max_phases=1)
++        unrelated.write_text('VERSION = 1\n')
++        other_added = self.root / 'scripts/other-new.py'
++        other_added.write_text('NEW = True\n')
++        resumed = self.master()
++        self.run_quiet(resumed, max_phases=1)
++        record = resumed.state['phases']['P00']
++        self.assertEqual(record['status'], ACCEPTED)
++        self.assertIn('scripts/earlier-phase-work.py', record['evidence_hashes'])
++        self.assertNotIn('scripts/other-phase.py', record['evidence_hashes'])
++        self.assertNotIn('scripts/other-new.py', record['evidence_hashes'])
++        unrelated.write_text('VERSION = 2\n')
++        other_added.write_text('NEW = False\n')
++        resumed.refresh()
++        self.assertEqual(record['status'], ACCEPTED)
++        owned.write_text('OWNED = False\n')
++        resumed.refresh()
++        self.assertEqual(record['status'], 'stale')
++
++    def test_timeout_persists_actual_attempt_delta_for_resume(self):
++        self.catalog['limits']['max_repairs'] = 0
++        atomic_json(self.root / CATALOG, self.catalog)
++        def timeout(role, phase, packet, folder, attempt):
++            if role == 'implement':
++                (self.root / 'scripts/timed-out.py').write_text('PARTIAL = True\n')
++                raise MasterError('Command failed (timeout)')
++            return self.worker(role, phase, packet, folder, attempt)
++        m = self.master(worker=timeout)
++        self.run_quiet(m, max_phases=1)
++        record = m.state['phases']['P00']
++        delta = load_json(self.root / record['attempts'][-1] / 'execution-0/changes.json')
++        self.assertIn('scripts/timed-out.py', delta['added'])
++        self.assertIn('scripts/timed-out.py', record['contributed_files'])
++
++    def test_failed_check_contribution_survives_resume(self):
++        self.catalog['limits']['max_repairs'] = 0
++        atomic_json(self.root / CATALOG, self.catalog)
++        def failed_check(phase, folder):
++            (self.root / 'scripts/check-created.py').write_text('VALUE = 1\n')
++            raise MasterError('Test process failed after changing a file')
++        m = self.master(check=failed_check)
++        self.run_quiet(m, max_phases=1)
++        self.assertIn('scripts/check-created.py', m.state['phases']['P00']['contributed_files'])
++        resumed = self.master()
++        self.run_quiet(resumed, max_phases=1)
++        self.assertIn('scripts/check-created.py', resumed.state['phases']['P00']['evidence_hashes'])
++
++    def test_legacy_resume_requires_recorded_attribution(self):
++        self.catalog['limits']['max_repairs'] = 0
++        atomic_json(self.root / CATALOG, self.catalog)
++        def partial(role, phase, packet, folder, attempt):
++            if role == 'implement':
++                return response('IMPLEMENTED', evidence=self.write_work(phase, 'broken'))
++            return self.worker(role, phase, packet, folder, attempt)
++        m = self.master(worker=partial)
++        self.run_quiet(m, max_phases=1)
++        del m.state['phases']['P00']['contributed_files']
++        m.save()
++        self.calls.clear()
++        resumed = self.master()
++        self.assertEqual(self.run_quiet(resumed, max_phases=1), 'continuation_veto')
++        self.assertEqual(self.calls, [])
++        manifest = load_json(self.root / resumed.state['runs'][-1] / 'manifest.json')
++        self.assertIn('contribution attribution', manifest['stop_reason'])
++
++    def test_phase_created_file_deleted_later_requires_restoration(self):
++        self.catalog['limits']['max_repairs'] = 0
++        atomic_json(self.root / CATALOG, self.catalog)
++        source = self.root / 'scripts/created-earlier.py'
++        def partial(role, phase, packet, folder, attempt):
++            if role == 'implement':
++                source.write_text('VALUE = 1\n')
++                return response('IMPLEMENTED', evidence=self.write_work(phase, 'broken'))
++            return self.worker(role, phase, packet, folder, attempt)
++        m = self.master(worker=partial)
++        self.run_quiet(m, max_phases=1)
++        source.unlink()
++        resumed = self.master()
++        self.assertEqual(self.run_quiet(resumed, max_phases=1), 'continuation_veto')
++        self.assertIn('scripts/created-earlier.py', resumed.state['phases']['P00']['outstanding_deletions'])
++        source.write_text('VALUE = 1\n')
++        restored = self.master()
++        self.run_quiet(restored, max_phases=1)
++        self.assertEqual(restored.state['phases']['P00']['status'], ACCEPTED)
++
+     def test_test_side_effect_deletion_cannot_pass(self):
+         source = self.root / 'scripts/test-deleted.py'
+         source.write_text('PRESERVE = True\n')
+--- before/docs/plans/accounting-master-program.md
++++ docs/plans/accounting-master-program.md
+@@ -177,6 +177,15 @@
+ repair limits and process deadlines are unchanged. See
+ [the focused recovery repair](accounting-master-recovery-repair.md).
+ 
++Acceptance carries forward the files actually changed during each phase's
++implementation and verification attempts. It does not attribute edits by other
++phases between invocations to the resumed phase. Actual attempt deltas are saved
++even on timeouts and failed checks; explicit evidence and required deliverables
++are also hashed. Missing contributed files must be restored. Existing entry
++snapshots remain preserved, and legacy partial attempts require a documented
++attribution migration before reuse. See
++[the attribution repair](accounting-master-attribution-repair.md).
++
+ Local engineering checks:
+ python3 -m unittest discover -s tests -p test_accounting_master.py -v
+ 

@@ -1,0 +1,733 @@
+                                                     Provenance Semirings
+
+                   Todd J. Green                               Grigoris Karvounarakis                          Val Tannen
+              tjgreen@cis.upenn.edu                           gkarvoun@cis.upenn.edu                       val@cis.upenn.edu
+                                                Department of Computer and Information Science
+                                                          University of Pennsylvania
+                                                        Philadelphia, PA 19104, USA
+
+
+ABSTRACT                                                                                We observe that in all four cases, the calculations with an-
+We show that relational algebra calculations for incomplete                          notations are strikingly similar. This suggests looking for an
+databases, probabilistic databases, bag semantics and why-                           algebraic structure on annotations that captures the above
+provenance are particular cases of the same general algo-                            as particular cases. We propose using commutative semir-
+rithms involving semirings. This further suggests a com-                             ings for this purpose. In fact, we can show that the laws of
+prehensive provenance representation that uses semirings of                          commutative semirings are forced by certain expected iden-
+polynomials. We extend these considerations to datalog and                           tities in RA. Having identified commutative semirings as
+semirings of formal power series. We give algorithms for                             the right algebraic structure, we argue that a symbolic rep-
+datalog provenance calculation as well as datalog evaluation                         resentation of semiring calculations is just what is needed to
+for incomplete and probabilistic databases. Finally, we show                         record, document, and track RA querying from input to out-
+that for some semirings containment of conjunctive queries                           put for applications which require rich provenance informa-
+is the same as for standard set semantics.                                           tion. It is a standard philosophy in algebra that such sym-
+                                                                                     bolic representations form the most general such structure.
+Categories and Subject Descriptors                                                   In the case of commutative semirings, just as for rings, the
+                                                                                     symbolic representation is that of polynomials. We therefore
+H.2.1 [Database Management]: Data Models
+                                                                                     propose to use polynomials to capture provenance. Next we
+General Terms                                                                        look to extend our approach to recursive datalog queries. To
+                                                                                     achieve this we combine semirings with fixed point theory.
+Theory, Algorithms
+                                                                                        The contributions of the paper are as follows:
+Keywords
+                                                                                        • We introduce K-relations, in which tuples are anno-
+Data provenance, data lineage, incomplete databases, prob-                                tated (tagged) with elements from K. We define a gen-
+abilistic databases, semirings, datalog, formal power series                              eralized positive algebra on K-relations and argue that
+                                                                                          K must be a commutative semiring (Section 3).
+1.     INTRODUCTION
+                                                                                        • For provenance semirings we propose polynomials
+   Several forms of annotated relations have appeared in var-                             with integer coefficients, and we show that positive
+ious contexts in the literature. Query answering in these                                 algebra semantics for any commutative semirings fac-
+settings involves generalizing the relational algebra (RA) to                             tors through the provenance semantics (Section 4).
+perform corresponding operations on the annotations.
+   The seminal paper in incomplete databases [19] gener-                                • We extend these results to datalog queries by consid-
+alized RA to c-tables, where relations are annotated with                                 ering semirings with fixed points (Section 5).
+Boolean formulas. In probabilistic databases, [17] and [33]
+generalized RA to event tables, also a form of annotated                                • For the (possibly infinite) provenance in datalog query
+relations. In data warehousing, [12] and [13] compute lin-                                answers we propose semirings of formal power series
+eages for tuples in the output of queries, in effect general-                             that are shown to be generated by finite algebraic
+izing RA to computations on relations annotated with sets                                 systems of fixed point equations (Section 6).
+of contributing tuples. Finally, RA on bag semantics can be                             • We give algorithms for deciding the finiteness of these
+viewed as a generalization to annotated relations, where a                                formal power series, for computing them when finite,
+tuple’s annotation is a number representing its multiplicity.                             and for computing the coefficient of an arbitrary mono-
+                                                                                          mial otherwise (Section 7).
+                                                                                        • We show how to specialize our algorithms for com-
+Permission to make digital or hard copies of all or part of this work for                 puting full datalog answers when K is a finite dis-
+personal or classroom use is granted without fee provided that copies are                 tributive lattice, in particular for incomplete and
+not made or distributed for profit or commercial advantage and that copies
+                                                                                          probabilistic databases (Section 8).
+bear this notice and the full citation on the first page. To copy otherwise, to
+republish, to post on servers or to redistribute to lists, requires prior specific      • We consider query containment wrt K-relation se-
+permission and/or a fee.
+PODS’07, June 11–14, 2007, Beijing, China.                                                mantics and we show that for unions of conjunctive
+Copyright 2007 ACM 978-1-59593-685-1/07/0006 ...$5.00.                                    queries and when K is a distributive lattice, query
+          abc                     abc                              ac                                               ac
+          abc      ?              abc       b1                     ac     (b1 ∧ b1 ) ∨ (b1 ∧ b1 )                   ac    b1
+          dbe      ?              dbe       b2                     ae     b1 ∧ b2                                   ae    b1 ∧ b2
+          fge      ?              fge       b3                     dc     b1 ∧ b2                                   dc    b1 ∧ b2
+             (a)                      (b)                          de     (b2 ∧ b2 ) ∨ (b2 ∧ b2 ) ∨ (b2 ∧ b3 )      de    b2
+                                             ac                    fe     (b3 ∧ b3 ) ∨ (b3 ∧ b3 ) ∨ (b2 ∧ b3 )      fe    b3
+                                ac
+                                             ae o                                       (a)                              (b)
+                                ae de   ac
+      n
+          ∅, a c , d e , f e ,     ,  ,    , dc
+                                dc f e f e
+                                             de                         Figure 2: Result of Imielinski-Lipski computation
+                                de
+                                             fe
+                               (c)
+                                                                                              ac
+          Figure 1: A maybe-table and a query result                       abc                ac   2·2+2·2=8
+                                                                           abc      2         ae   2 · 5 = 10
+                                                                           dbe      5         dc   2 · 5 = 10
+                                                                           fge      1         de   5 · 5 + 5 · 5 + 5 · 1 = 55
+     containment is the same as that given by standard set
+                                                                                              fe   1·1+1·1+5·1=7
+     semantics. (Section 9).
+                                                                              (a)                         (b)
+2.   QUERIES ON ANNOTATED RELATIONS                                              Figure 3: Bag semantics example
+   We motivate our study by considering three important ex-
+amples of query answering on annotated relations and high-
+light the similarities between them.
+   The first example comes from the study of incomplete           tions we do here for multisets, and the Boolean calculations
+databases, where a simple representation system is the maybe-     for the c-table.
+table [30, 18], in which optional tuples are annotated with a        A third example comes from the study of probabilistic
+‘?’, as in the example of Figure 1(a). Such a table represents    databases, where tuples are associated with values from [0, 1]
+a set of possible worlds, and the answer to a query over such     which represent the probability that the tuple is present in
+a table is the set of instances obtained by evaluating the        the database. Answering queries over probabilistic tables re-
+query over each possible world. Thus, given a query like          quires computing the correct probabilities for tuples in the
+                                                                  output. To do this, Fuhr and Röllecke [17] and Zimányi [33]
+                def
+           q(R) = πac πab R 1 πbc R ∪ πac R 1 πbc R
+                      `                             ´
+                                                                  introduced event tables, where tuples are annotated with
+                                                                  probabilistic events, and they gave a query answering algo-
+the query result is the set of possible worlds shown in Fig-      rithm for computing the events associated with tuples in the
+ure 1(c). Unfortunately, this set of possible worlds cannot       query output.1
+itself be represented by a maybe-table, intuitively because          Figure 4(a) shows an example of an event table with as-
+whenever the tuples (a, e) and (d, c) appear, then so do (a, c)   sociated event probabilities (e.g., x represents the event that
+and (d, e), and maybe-tables cannot represent such a depen-       (a, b, c) appears in the instance, and x, y, z are assumed in-
+dency.                                                            dependent). Considering again the same query q as above,
+   To overcome such limitations, Imielinski and Lipski [19]       the Fuhr-Rölleke-Zimányi query answering algorithm pro-
+introduced c-tables, where tuples are annotated with Boolean      duces the event table shown in Figure 4(b). Note again the
+formulas called conditions. A maybe-table is a simple kind        similarity between this table and the example earlier with c-
+of c-table, where the annotations are distinct Boolean vari-      tables. The probabilities of tuples in the output of the query
+ables, as shown in Figure 1(b). In contrast to weaker rep-        can be computed from this table using the independence of
+resentation systems, c-tables are expressive enough to be         x and y.
+closed under RA queries, and the main result of [19] is an
+algorithm for answering RA queries on c-tables, producing
+another c-table as a result. On our example, this algorithm       3.    POSITIVE RELATIONAL ALGEBRA
+produces the c-table shown in Figure 2(a), which can be              In this section we attempt to unify the examples above
+simplified to the c-table shown in Figure 2(b); this c-table      by considering generalized relations in which the tuples are
+represents exactly the set of possible worlds shown in Fig-       annotated (tagged ) with information of various kinds. Then,
+ure 1(c).                                                         we will define a generalization of the positive relational al-
+   Another kind of table with annotations is a multiset or bag.   gebra (RA+ ) to such tagged-tuple relations. The examples
+In this case, the annotations are natural numbers which rep-      in Section 2 will turn out to be particular cases.
+resent the multiplicity of the tuple in the multiset. (A tuple       We use here the named perspective [1] of the relational
+not listed in the table has multiplicity 0.) Query answering      model in which tuples are functions t : U → D with U a
+on such tables involves calculating not just the tuples in the    finite set of attributes and D a domain of values. We fix
+output, but also their multiplicities.                            1
+   For example, consider the multiset shown in Figure 3(a).         The Fuhr-Röllecke-Zimányi algorithm is a general-purpose
+                                                                  intensional algorithm. Dalvi and Suciu [14] give a sound
+Then q(R), where q is the same query from before, is the          and complete algorithm which returns a safe query plan, if
+multiset shown in Figure 3(b). Note that for projection and       one exists, which may be used to answer the query correctly
+union we add multiplicities while for join we multiply them.      via a more efficient extensional algorithm. Their results do
+There is a striking similarity between the arithmetic calcula-    not apply to our example query.
+                                            ac                        Which {0, 1}-valued functions are used as selection pred-
+            abc            E    Pr          ac     x                  icates is left unspecified, except that we assume that
+            abc    x       x    0.6         ae     x∩y                false—the constantly 0 predicate, and true—the con-
+            dbe    y       y    0.5         dc     x∩y                stantly 1 predicate, are always available.
+            fge    z       z    0.1         de     y
+                                                                natural join If Ri : Ui -Tup → K i = 1, 2 then R1 1 R2 is
+                                            fe     z
+                                                                    the K-relation over U1 ∪ U2 defined by
+                     (a)                         (b)
+                                                                                                  def
+                                                                                  (R1 1 R2 )(t) = R1 (t1 ) · R2 (t2 )
+              Figure 4: Probabilistic example
+                                                                      where t1 = t on U1 and t2 = t on U2 (recall that t is a
+                                                                      U1 ∪ U2 -tuple).
+
+the domain D for the time being and we denote the set of        renaming If R : U -Tup → K and β : U → U 0 is a bijection
+all such U -tuples by U -Tup. (Usual) relations over U are          then ρβ R is a K-relation over U 0 defined by
+subsets of U -Tup.                                                                                 def
+   A notationally convenient way of working with tagged-                                (ρβ R)(t) = R(t ◦ β)
+tuple relations is to model tagging by a function on all pos-
+sible tuples, with those tuples not considered to be “in”          Proposition 3.3. The operations of RA+ preserve the
+the relation tagged with a special value. For example, the      finiteness of supports therefore they map K-relations to K-
+usual set-theoretic relations correspond to functions that      relations. Hence, Definition 3.2 gives us an algebra on K-
+map U -Tup to B = {true, false} with the tuples in the re-      relations.
+lation tagged by true and those not in the relation tagged
+by false.                                                          This definition generalizes the definitions of RA+ for the
+                                                                motivating examples we saw. Indeed, for (B, ∨, ∧, false, true)
+   Definition 3.1. Let K be a set containing a distinguished    we obtain the usual RA+ with set semantics. For (N, +, ·, 0, 1)
+element 0. A K-relation over a finite set of attributes U       it is RA+ with bag semantics.
+is a function R : U -Tup → K such that its support defined         For the Imielinski-Lipski algebra on c-tables we consider
+            def
+by supp(R) = {t | R(t) 6= 0} is finite.                         the set of Boolean expressions over some set B of variables
+                                                                which are positive, i.e., they involve only disjunction, con-
+   In generalizing RA+ we will need to assume more struc-
+                                                                junction, and constants for true and false. Then we iden-
+ture on the set of tags. To deal with selection we assume
+                                                                tify those expressions that yield the same truth-value for
+that the set K contains two distinct values 0 6= 1 which de-
+                                                                all boolean assignments of the variables in B.2 Denoting
+note “out of” and “in” the relation, respectively. To deal
+                                                                by PosBool(B) the result and applying Definition 3.2 to the
+with union and projection and therefore to combine differ-
+                                                                structure (PosBool(B), ∨, ∧, false, true) produces exactly the
+ent tags of the same tuple into one tag we assume that K
+                                                                Imielinski-Lipski algebra. Finally, for (P(Ω), ∪, ∩, ∅, Ω) we
+is equipped with a binary operation “+”. To deal with nat-
+                                                                obtain the Fuhr-Rölleke-Zimányi RA+ on event tables.
+ural join (hence intersection and selection) and therefore to
+                                                                   These four structures are examples of commutative semir-
+combine the tags of joinable tuples we assume that K is
+                                                                ings, i.e., algebraic structures (K, +, ·, 0, 1) such that (K, +, 0)
+equipped with another binary operation “·”.
+                                                                and (K, ·, 1) are commutative monoids, · is distributive over
+   Definition 3.2. Let (K, +, ·, 0, 1) be an algebraic struc-   + and ∀a, 0 · a = a · 0 = 0. Further evidence for requiring
+ture with two binary operations and two distinguished ele-      K to form such a semiring is given by
+ments. The operations of the positive algebra are defined
+as follows:                                                         Proposition 3.4. The following RA identities:
+empty relation For any set of attributes U , there is ∅ :           • union is associative, commutative and has identity ∅;
+    U -Tup → K such that ∅(t) = 0.
+                                                                    • join is associative, commutative and distributive over
+union If R1 , R2 : U -Tup → K then R1 ∪ R2 : U -Tup → K               union;
+    is defined by
+                                                                    • projections and selections commute with each other as
+                                  def
+                 (R1 ∪ R2 )(t) = R1 (t) + R2 (t)                      well as with unions and joins (when applicable);
+
+projection If R : U -Tup → K and V ⊆ U then π V R :                 • σ false (R) = ∅ and σ true (R) = R.
+     V -Tup → K is defined by
+                              X                                 hold for the positive algebra on K-relations if and only if
+                       def
+            (π V R)(t) =               R(t0 )                   (K, +, ·, 0, 1) is a commutative semiring.
+                               t=t0 on V and R(t0 )6=0
+                                                                   Glaringly absent from the list of relational identities are
+     (here t = t0 on V means t0 is a U -tuple whose restric-    the idempotence of union and of (self-)join. Indeed, these
+     tion to V is the same as the V -tuple t; note also that    fail for the bag semantics, an important particular case of
+     the sum is finite since R has finite support)              our general treatment.
+                                                                   Any function h : K → K 0 can be used to transform
+selection If R : U -Tup → K and the selection predicate
+                                                                K-relations to K 0 -relations simply by applying h to each
+     P maps each U -tuple to either 0 or 1 then σ P R :
+                                                                2
+     U -Tup → K is defined by                                    in order to permit simplifications; it turns out that this is
+                                  def
+                                                                the same as transforming using the axioms of distributive
+                    (σ P R)(t) = R(t) · P(t)                    lattices [11]
+                     ac               ac                         (a.k.a. indeterminates) from X and coefficients from N, with
+      abc            ac    {p}        ac    2p2                  the operations defined as usual4 : (N[X], +, ·, 0, 1).
+      abc      p     ae    {p, r}     ae    pr
+      dbe      r     dc    {p, r}     dc    pr                   Example of provenance computation. Start again from
+      fge      s     de    {r, s}     de    2r2 + rs             the relation R in Figure 5(a) in which tuples are tagged with
+                     fe    {r, s}     fe    2s2 + rs             their own id. R can be seen as an N[p, r, s]-relation. Apply-
+         (a)              (b)               (c)                  ing to R the query q from Section 2 and doing the calcu-
+                                                                 lations in the provenance semiring we obtain the N[p, r, s]-
+     Figure 5: Why-prov. and provenance polynomials              relation shown in Figure 5(c). The provenance of (f, e) is
+                                                                 2s2 + rs which can be “read” as follows: (f, e) is computed
+                                                                 by q in three different ways; two of them use the input tuple
+                                                                 s twice; the third uses input tuples r and s. We also see
+tag (note that the support may shrink but never increase).       that the provenance of (d, e) is different and we see how it
+Abusing the notation a bit we denote the resulting trans-        is different!                                               2
+formation from K-relations to K 0 -relations also by h. The         The following standard property of polynomials captures
+RA operations we have defined work nicely with semiring          the intuition that N[X] is as “general” as any semiring:
+structures:
+                                                                    Proposition 4.2. Let K be a commutative semiring and
+   Proposition 3.5. Let h : K → K 0 and assume that              X a set of variables. For any valuation v : X → K there
+K, K 0 are commutative semirings. The transformation given       exists a unique homomorphism of semirings
+by h from K-relations to K 0 -relations commutes with any                                 Evalv : N[X] → K
+RA+ query (for queries of one argument) q(h(R)) = h(q(R))
+if and only if h is a semiring homomorphism.                     such that for the one-variable monomials we have Evalv (x) =
+                                                                 v(x).
+4.   POLYNOMIALS FOR PROVENANCE                                     As the notation suggests, Evalv (P ) evaluates the polyno-
+   Lineage/why-provenance was defined in [12, 13, 6] as a        mial P in K given a valuation for its variables. In calcu-
+way of relating the tuples in a query output to the tuples       lations with the integer coefficients, na where n ∈ N and
+in the query input that “contribute” to them. The why-           a ∈ K is the sum in K of n copies of a. Note that N is
+provenance of a tuple t in a query output is in fact the set     embedded in K by mapping n to the sum of n copies of 1K .
+of all contributing input tuples.                                   Using the Eval notation, for any P ∈ N[x1 , . . . , xn ] and
+   Computing the why-provenance for queries in RA+ turns         any K the polynomial function fP : K n → K is given
+out to be exactly Definition 3.2 for the semiring                by:
+(P(X), ∪, ∪, ∅, ∅) where X consists of the ids of the tuples                             def
+in the input instance. For example, we consider the same               fP (a1 , . . . , an ) = Evalv (P )   v(xi ) = ai , i = 1..n
+tuples as in relation R used in the examples of Section 2           Putting together Propositions 3.5 and 4.2 we obtain The-
+but now we tag them with their own ids p,r,s, as shown in        orem 4.3 below, a conceptually important fact that says,
+Figure 5(a). The resulting R can be seen as a P({p, r, s})-      informally, that the semantics of RA+ on K-relations for
+relation by replacing p with {p}, etc. Applying the query q      any semiring K factors through the semantics of the same
+from Section 2 to R we obtain according to Definition 3.2        in provenance semirings.
+the P({p, r, s})-relation shown in Figure 5(b).                     Indeed, let K be a commutative semiring, let R be a K-
+   This example illustrates the limitations of why-provenance    relation, and let X be the set of tuple ids of the tuples in
+(also recognized in [8]). For example, in the query result in    supp(R). There is an obvious valuation v : X → K that
+Figure 5(b) (f, e) and (d, e) have the same why-provenance,      associates to a tuple id the tag of that tuple in R.
+the input tuples with id r and s. However, the query can            We associate to R an “abstractly tagged” version, denoted
+also calculate (f, e) from s alone and (d, e) from r alone. In   R̄, which is an X ∪ {0}-relation. R̄ is such that supp(R̄) =
+a provenance application in which one of r or s is perhaps       supp(R) and the tuples in supp(R̄) are tagged by their own
+less trusted or less usable than the other the effect can be     tuple id. For example, in Figure 7(d) we show an abstractly-
+different on (f, e) than on (d, e) and this cannot be detected   tagged version of the relation in Figure 7(b). Note that as
+by why-provenance. It seems that we need to know not just        an X ∪ {0}-relation, R̄ is a particular kind of N[X]-relation.
+which input tuples contribute but also how they contribute.3        To simplify notation we state the theorem for queries of
+   On the other hand, by using the different operations of the   one argument (but the generalization is immediate):
+semiring, Definition 3.2 appears to fully “document” how an
+output tuple is produced. To record the documentation as             Theorem 4.3. For any RA+ query q we have
+tuple tags we need to use a semiring of symbolic expressions.
+In the case of semirings, like in ring theory, these are the                           q(R) = Evalv ◦ q(R̄)
+polynomials.                                                     To illustrate an instance of this theorem, consider the prove-
+                                                                 nance polynomial 2r2 + rs of the tuple (d, e) in Figure 5(c).
+  Definition 4.1. Let X be the set of tuple ids of a (usual)     Evaluating it in N for p = 2, r = 5, s = 1 we get 55 which is
+database instance I. The positive algebra provenance             indeed the multiplicity of (d, e) in Figure 3(a).
+semiring for I is the semiring of polynomials with variables
+                                                                 4
+                                                                  These are polynomials in commutative variables so their
+3
+ In contrast to why-provenance, the notion of provenance         operations are the same as in middle-school algebra, except
+we propose could justifiably be called how-provenance.           that subtraction is not allowed.
+                    Q(x, y) :- R(x, z), R(z, y)                  gument. It follows that countable sums are associative and
+                                (a)                              commutative, that · distributes over countable sums and
+            aa      2        aa    2·2=4                         that countable sums are monotone in each addend.
+            ab      3        ab    2 · 3 + 3 · 4 = 18              Examples of commutative ω-continuous semirings:
+            bb      4        bb    4 · 4 = 16                          • (B, ∨, ∧, false, true)
+              (b)                      (c)
+                                                                       • (N∞ , +, ·, 0, 1) where we add ∞ to the natural num-
+           Figure 6: Datalog with bag semantics                          bers and define ∞ + n = n + ∞ = ∞ and ∞ · n =
+                                                                         n · ∞ = ∞ except for ∞ · 0 = 0 · ∞ = 0. We can think
+                                                                         of N∞ as the ω-continuous “completion” of N.
+
+5.     DATALOG ON K -RELATIONS                                         • (PosBool(B), ∨, ∧, false, true) with B finite. This com-
+    We now seek to give semantics on K-relations to data-                mutative semiring is in fact a distributive lattice [11]
+log queries. It is more convenient to use the unnamed per-               and the natural order is the lattice order. Since we
+spective here. We also consider only “pure” datalog rules                identify those expressions that yield the same truth-
+in which all subgoals are relational atoms. First observe                value for all boolean assignments for the variables, B
+that for conjunctive queries over K-relations the semantics              finite makes PosBool(B) finite, hence ω-continuous.
+in Definition 3.2 simplifies to computing tags as sums of              • (P(Ω), ∪, ∩, ∅, Ω), used for event tables which is also
+products, each product corresponding to a valuation of the               an example of distributive lattice.
+query variables that makes the query body hold. For exam-
+ple, consider the conjunctive query and N-relation shown in            • (N∞ , min, +, ∞, 0), the tropical semiring [22]
+Figure 6(a) and (b), respectively.
+    There are two valuations that produce the answer Q(a, b):          • ([0, 1], max, min, 0, 1) is related to fuzzy sets [32] so we
+{x = a, y = a, z = b} yields the body R(a, a), R(a, b) while             will call it the fuzzy semiring.
+{x = a, y = b, z = b} yields the body R(a, b), R(b, b). The
+sum of products of tags is 2 · 3 + 3 · 4 which is exactly what     Definition 5.1. Let (K, +, ·, 0, 1) be a commutative
+the equivalent RA+ query yields according to Definition 3.2.     ω-continuous semiring. To keep notation simple let q be a
+If we think of this conjunctive query as a datalog program,      datalog query with one argument (it is easy to generalize to
+the two valuations above correspond to the two derivation        multiple arguments). For any K-relation R define
+trees of the tuple Q(a, b).                                                            X “         Y             ”
+    This suggests the following generalized semantics for dat-              q(R)(t) =                     R(t0 )
+                                                                                           τ yields t   t0 ∈leaves(τ )
+alog on K-relations: the tag of an answer tuple is the sum
+over all its derivation trees of the product of the tags of      where τ ranges over all q-derivation trees for t and t0 ranges
+the leaves of each tree. Indeed, this generalizes the bag se-    over all the leaves of τ .
+mantics of datalog considered in [26, 27] when the number
+of derivation trees is finite. In general, a tuple can have        The next result shows that Definition 5.1 does indeed give
+infinitely many derivation trees (an algorithm for detecting     us a semantics for datalog queries on K-relations.
+this appears in [28]) hence we need to work with semirings
+in which infinite sums are defined.                                Proposition 5.2. For any K-relation R, q(R) has finite
+    Closed semirings [31] have infinite sums but their “+”       support and is therefore a K-relation.
+is idempotent which rules out the bag and provenance se-
+mantics. We will adopt the approach used in formal lan-            Proof. (sketch) Let S be the set of tuples t s.t. R(t) 6= 0
+guages [22] and later show further connections with how          and let t0 be a tuple s.t. q(R)(t0 ) 6= 0. By Definition 5.1, this
+semirings and formal power series are used for context-free      implies that there is a derivation tree for t (s.t. the tags of
+languages. By assuming that D is countable, it will suffice      the tuples in its leaves are non-zero and correspond to this
+to define countable sums.                                        product) i.e., t0 ∈ q(S). Since q(S) is finite, q(R) has finite
+                                                       def
+    Let (K, +, ·, 0, 1) be a semiring and define a ≤ b ⇔ ∃x a+   support.
+x = b. When ≤ is a partial order we say that K is naturally
+ordered. B, N, N[X] and the other semiring examples we             As an example, consider the datalog program q with out-
+gave so far are all naturally ordered.                           put predicate Q defined by the rules shown in Figure 7(c),
+    We say that K is an ω-complete semiring if it is naturally   applied on the N-relation R shown in Figure 7(a). Since any
+ordered and ≤ is such that ω-chains x0 ≤ x1 ≤ · · · ≤ xn ≤       N-relation is also a N∞ -relation and N∞ is ω-continuous we
+· · · have least upper bounds. In such semirings we can define   can answer this query5 and we obtain the table shown in
+countable sums:                                                  Figure 7(b).
+                                                                   A couple of sanity checks follow.
+                       X                Xm
+                               def
+                           an = sup (      ai )                      Proposition 5.3. Let q be an RA+ query in which the
+                                  m∈N i=0
+                    n∈N                                          selection predicates only test for attribute equality and let
+Note that if ∃N s.t. ∀n > N, an = 0 then
+                                              P                  q 0 be the (non-recursive) datalog query obtained by standard
+                                                 n∈N an   =
+PN                                                               translation from q. Then q and q 0 produce the same an-
+      a i . All the semiring examples we gave so  far are ω-
+  i=0                                                            swer when applied to the same instance of a database of
+complete with the exception of N and N[X].
+                                                                 K-relations.
+  An ω-continuous semiring is an ω-complete semiring in
+                                                                 5
+which the operations + and · are ω-continuous in each ar-            This is transitive closure with bag semantics.
+                                                ab       8               exists, and we call it the solution of the algebraic system
+                              ab      2
+                                                ac       3               above.
+    Q(x, y) :- R(x, y)        ac      3
+                                                cb       2
+                              cb      2
+                                                bd       ∞                 As an example, consider the one-variable equation x =
+    Q(x, y) :- Q(x, z),       bd      1
+                                                dd       ∞               ax + b with a, b ∈ K. This is closely related to regular
+               Q(z, y)        dd      1
+                                                ad       ∞               language theory and its solution is x = a∗ b where
+             (a)                (b)                (c)                                   a∗ = 1 + a + a2 + a3 + · · ·
+                                                                                             def
+
+
+                              ab      x     x = m + yz                   For example, in N∞ we have 1∗ = ∞ while in PosBool(B)
+          ab       m
+                              ac      y     y=n                          we have e∗ = true for any e.
+          ac       n
+                              cb      z     z=p                             Consider a datalog program q and to simplify notation
+          cb       p
+                              bd      u     u = r + uv                   assume just one edb predicate R and one idb-and-output
+          bd       r
+                              dd      v     v = s + v2                   predicate Q. Given an edb K-relation of finite support R
+          dd       s
+                              ad      w     w = xu + wv                  we can effectively construct an algebraic system over K as
+             (d)                (e)                (f)                   follows. Denote by Q also the K-relation that is the output
+                                                                         of the program and let Q̄ be the abstractly-tagged (as in
+                    Figure 7: Datalog example                            Theorem 4.3) version of Q where X is the set of ids of the
+                                                                         tuples in supp(Q). Since Q̄ is a X ∪ {0}-relation and R is
+                                                                         a K-relation both can be seen also as K[X]-relations. The
+                                                                         immediate consequence operator Tq is in fact a union of con-
+   Proposition 5.4. For any datalog query q and any B-                   junctive queries, hence Definition 3.2 shows how to calculate
+relation R, supp(q(R)) is the same as the result of applying             effectively Tq (R, Q̄) as a K[X]-relation of finite support. By
+q to the standard relation supp(R).                                      equating the tags of Q̄ with those of Tq (R, Q̄) we obtain the
+   The definition of datalog semantics given above is not so             promised algebraic system. We will denote this system as
+useful computationally. However, we can think of it as the               Q̄ = Tq (R, Q̄) (although it only involves the tags of these
+proof-theoretic definition, and as with standard datalog, it             relations).
+turns out that there is an equivalent fixpoint-theoretic defi-
+nition that is much more workable.                                          Theorem 5.6. With the notation above, for any tuple t,
+   Intuitively, this involves representing the possibly infinite         the tag Q(t) given by Definition 5.1, when not 0, equals the
+sum of products above as a system of fixpoint equations that             component of the solution (Definition 5.5) of the algebraic
+reflect all the ways that a tuple can be produced as a result            system Q̄ = Tq (R, Q̄) corresponding to the id of t.
+of applying the immediate consequence operator Tq (for a
+                                                                           To illustrate with an example, consider again the datalog
+datalog query q) on other tuples. Since such an immediate
+                                                                         program in Figure 7(a) applied to the same N-relation, R
+consequence can involve other tuples in idb relations, that
+                                                                         shown in Figure 7(b). In Figure 7(e) we have the abstractly-
+may themselves have infinitely many derivations, we intro-
+                                                                         tagged version of the output relation, Q̄ in which the tuples
+duce a new variable for each tuple in the idb relation and
+                                                                         are tagged with their own ids. The corresponding algebraic
+use that variable to refer to that tuple when calculating its
+                                                                         system is the one obtained from Figure 7(f) by replacing
+immediate consequences. Thus, for every tuple there is an
+                                                                         m = 2, n = 3, p = 2, r = 1, s = 1. (Note that Tq (R, Q̄) =
+equation between the variable for that tuple and a polyno-
+                                                                         R ∪ Q̄ 1 Q̄.) Calculating its solution we get after two fixed
+mial over all the variables.
+                                                                         point iterations x = 8, y = 3, z = 2, u = 2, v = 2, w = 2. In
+   To make this precise we consider polynomials with coef-
+                                                                         further iterations x, y, z remain the same while u, v, w grow
+ficients in an arbitrary commutative semiring K. If the set
+                                                                         unboundedly (in Section 7 we show how unbounded growth
+of variables is X we denote the set of polynomials by K[X].
+                                                                         can be detected). Hence the solution is the one shown in Fig-
+We have already used N[X] for provenance but K[X] also
+                                                                         ure 7(c).
+forms a commutative semiring. We saw in Section 4 that
+                                                                           Note that semiring homomorphisms are monotone with
+because N can be embedded in any semiring K the polyno-
+                                                                         respect to the natural order. However, to work well with
+mials in N[X] define polynomial functions over K. Similarly,
+                                                                         the datalog semantics more is needed.
+if X = {x1 , . . . , xn } then any polynomial P ∈ K[X] defines
+a polynomial function fP : K n → K. Most importantly, if                    Proposition 5.7. Let K, K 0 be commutative ω-continuous
+K is ω-continuous then fP is ω-continuous in each argument.              semirings and let h : K → K 0 be an ω-continuous semir-
+   Definition 5.5. Let K be a commutative ω-continuous                   ing homomorphism. Then, the transformation given by h
+semiring. An algebraic system over K with variables X =                  from K-relations to K 0 -relations commutes with any data-
+{x1 , . . . , xn } consists of a list of polynomials P1 , . . . , Pn ∈   log query (for queries of one argument q(h(R)) = h(q(R)) ).
+K[X] and is written
+                      x1 =       P1 (x1 , . . . , xn )                   6.   FORMAL POWER SERIES FOR
+                            ···
+                      xn =       Pn (x1 , . . . , xn )                        PROVENANCE
+Together, fP1 , . . . , fPn define a function fP : K n → K n .             In Section 4 we showed how to use N[X]-relations to cap-
+K n has a component-wise commutative ω-continuous semir-                 ture an expressive notion of provenance for the tuples in the
+ing structure such that fP is ω-continuous. Hence, the least             output of an RA+ query. However, polynomials will not
+fixed point                                                              suffice for the provenance of tuples in the output of datalog
+                                   m                                     queries because the semiring N[X] does not define infinite
+                   lfp(fP ) = sup fP (0, . . . , 0)
+                                m∈N                                      sums. As with the transition from N to N∞ we wish to
+“complete” N[X] to a commutative ω-continuous semiring.                     Algebra provenance, N[X], is embedded in datalog prove-
+This problem has been tackled in formal language theory                  nance, N∞ [X], by regarding polynomials as formal power
+and it led to the study of formal power series [22].                     series in which all but finitely many coefficients are 0. Here
+   Note that when we try to apply naively Definition 5.1 to              is the corresponding sanity check:
+datalog queries on N[X]-relations we encounter two kinds of
+infinite summations. First, it is possible that we have to                  Proposition 6.2. Let q be an RA+ query (of one argu-
+sum infinitely many distinct monomials. This leads directly              ment, to simplify notation) in which the selection predicates
+to formal power series. Second, it is possible that we have              only test for attribute equality, let q 0 be the (non-recursive)
+to sum infinitely many copies of the same monomial. This                 datalog query obtained by standard translation from q and
+means that we need coefficients from N∞ , not just N.                    let R be a N[X]-relation. Modulo the embedding of N[X] in
+   Let X be a set of variables. Denote by X ⊕ the set of all             N∞ [X] we have q 0 (R) = q(R)
+possible monomials over X. For example, if X = {x, y} then                 Formal power series can be evaluated in commutative
+X ⊕ = {xm y n | m, n ≥ 0} = {, x, y, x2 , xy, y 2 , x3 , x2 y, . . .}   ω-continuous semirings:
+where  is the monomial in which both x and y have expo-
+nent 0.                                                                     Proposition 6.3. Let K be a commutative ω-continuous
+   Let K be a commutative semiring. A formal power                       semiring and X a set of variables. For any valuation v :
+series with variables from X and coefficients from K is a                X → K there exists a unique ω-continuous homomorphism
+mapping that associates to each monomial in X ⊕ a coeffi-                of semirings
+cient in K. A formal power series S is traditionally written
+as a possibly infinite sum                                                                   Evalv : N∞ [[X]] → K
+                             X                                           such that for the one-variable monomials we have Evalv (x) =
+                      S =        S(µ) µ
+                                                                         v(x).
+                                µ∈X ⊕
+
+and we denote the set of formal power series by K[[X]]. As                  Therefore, just like polynomials, formal power series de-
+with K[X], there is a commutative semiring structure on                  fine series functions on any commutative ω-continuous
+K[[X]] given by the usual way of adding and multiplying,                 semiring. Finally, we have the analog of Theorem 4.3.
+for example
+                            X                                               Theorem 6.4. The semantics of datalog on K-relations
+           (S1 · S2 )(µ) =      S1 (µ1 ) · S2 (µ2 )                      for any commutative ω-continuous semiring K factors
+                               µ1 µ2 =µ                                  through the semantics of the same in provenance semirings
+                                                                         (of formal power series).
+  But the real reason we use formal power series is the fact
+that if K is ω-continuous then K[[X]] is also ω-continuous                Although the coefficients in the provenance series may be
+(see [22], for example).                                                 ∞, we can characterize exactly when this happens7 :
+   Definition 6.1. Let X be the set of tuple ids of a database
+                                                                            Theorem 6.5. A datalog query q has provenance series
+instance I. The datalog provenance semiring for I is the
+                                                                         in N[[X]] for some tuple t if and only if the instantiation of
+commutative ω-continuous semiring of formal power series
+                                                                         q has no cycle of unit rules (rules whose body consists of a
+N∞ [[X]].
+                                                                         single idb) s.t. t is part of the cycle (i.e., appears on the
+   Let us calculate, using the fixed point semantics, the prove-         head of one of those unit rules and the body of another) and
+nances for the output of the datalog query in Figure 7(a).               t is in the result of q.
+We now take as input the relation, call it R̄, in Figure 7(d)
+which is the abstractly-tagged (tagged with tuple ids) ver-              7.   COMPUTING PROVENANCE SERIES
+sion of the relation R in Figure 7(b). Note that we have two                We show here that several natural questions that one
+sets of variables here. The tuple ids of R̄ form one set of              can ask about the computability of formal power series in
+variables and the provenance semiring in which we compute                N∞ [[X]] can in fact be decided and all finitely representable
+is N∞ [[m, n, p, r, s]]. At the same time, the ids of the tuples         information can in fact be computed.
+in Q̄ in Figure 7(e) are used as variables in the algebraic                 Given a datalog program q and a relational instance I,
+system, whose right-hand sides belong to                                 consider the formal power series provenance of some tuple
+                 N∞ [[m, n, p, r, s]][x, y, z, u, v, w]                  t in the output q(I), i.e., q(I)(t) where the datalog seman-
+                                                                         tics is taken in N∞ [[X]] (X is the set of ids of the tuples in
+i.e., they are polynomials in the variables {x, y, z, u, v, w},          I). We show that it is decidable whether q(I)(t) is in fact
+with coefficients in the semiring of formal power series                 a polynomial in N [X]. The algorithm All-Trees, shown in
+N∞ [[m, n, p, r, s]]. The v component of the solution can be             Figure 8 (inspired by [28]) decides this for all output tuples
+calculated separately:6                                                  and computes the polynomial when the answer is affirma-
+               v = s + s2 + 2s3 + 5s4 + 14s5 + · · ·                     tive.
+                                                                            For an output tuple t for which the answer given by al-
+Also, one can see that x = m + np, u = rv∗ , w = r(m +                   gorithm All-Trees is negative, we can use Theorem 6.5 to
+np)(v∗ )2 . For example the coefficient of rnps3 in the prove-           decide whether q(I)(t) is in N[[X]]. The remaining ques-
+nance w of Q(a, d) is 5, which means this tuple can be ob-               tion is whether q(I)(t) is in N∞ [X], which we can decide by
+tained in 5 distinct ways using R(a, c), R(c, b) and R(b, d)             7
+once and R(d, d) three times.                                             In this theorem, the instantiation of a datalog query is the
+                                                                         set of rules obtained by considering all satisfying valuations
+6
+    [9] shows that the coefficient of sn+1 is n!(n+1)!
+                                                 2n!
+                                                       .                 for the variables in rules of q.
+Algorithm All-Trees                                                  Algorithm Monomial-Coefficient
+Input: query q, instance I                                           Input: query q, monomial µ, tuple t
+Output: the power series P (t) for every tuple t ∈ q(I)              Output: C, the coefficient of µ in the power series P (t)
+1. Initialize T ← {t() : t ∈ I}                                      1. Initialize T ← {t() : t ∈ M }
+2. Initialize T ∞ ← ∅                                                2. Initialize P ∞ ← ∅
+3. repeat                                                            3. repeat
+4.       Tν ← Tqν (T, T ∞ )                                          4.        Ti ← Tqi (T, T ∞ )
+5.       for every tree τ ∈ Tν                                       5.        for every tree τ ∈ Ti
+6.           do if any child of root(τ ) is in T ∞ or any            6.            do if for any child tree τ 0 of root(τ ),
+                 proper descendant of root(τ ) to a node as-                           (root(τ 0 ), fringe(τ 0 )) ∈ P ∞ or there is a
+                 sociated with the same tuple                                          chain from root(τ ) to a node associated
+7.                 then T ∞ ← T ∞ ∪ {root(τ )}                                         with the same tuple
+8.                 else T ← T ∪ {τ }                                 7.                   then P ∞ ← P ∞ ∪ {(root(τ ), fringe(τ ))}
+9. until nothing added to either T or T ∞ in last iteration          8.                   else T ← T ∪ {τ }
+10. for every t ∈ q(I)                                               9. until nothing added to either T or T ∞ in last iteration
+11.     do if t ∈ T ∞                                                10. if (t, µ) ∈ P ∞
+12.            then P (t) ← ∞ P `         Q          ´               11.    then C ← ∞
+13.            else P (t) ←                        l                 12.    else for every τ ∈ T s.t. root(τ ) = t and
+                              τ ∈ T:  l∈fringe(τ )
+                                                                                   fringe(τ ) = µ
+                               root(τ )=t
+14. return P                                                         13.                do C ← C + 1
+                                                                     14. return C
+
+               Figure 8: Algorithm All-Trees
+                                                                               Figure 9: Algorithm Monomial-Coefficient
+
+checking if there is any cycle in the instantiation of the query
+involving at least one non-unit rule, s.t. t is part of that cy-     either has produced a tree τ with larger fringe(τ ) than the
+cle; otherwise, q(I)(t) is in N∞ [[X]]. In algorithm All-Trees       ones that were combined to produce it, or it has identified
+shown in Figure 8:                                                   a pair (t0 , µ0 ) whose derivation trees involve a cycle of unit
+                                                                     rules. The algorithm then is guaranteed to terminate, be-
+   • T is the set of derivation trees computed thus far; T ∞         cause for all such tuples t0 with infinitely many derivations,
+     is the set of tuples with infinitely many derivations;          no trees for t0 with fringe(τ ) = µ0 are used in any subsequent
+     fringe(τ ) is the bag of labels of leaves of the tree τ .       derivations, and moreover, the set of trees τ s.t. τ does not
+                                                                     involve nodes marked as infinite and fringe(τ ) ≤ µ is finite.
+   • Tqν (T, T ∞ ) = {τ | τ 6∈ T ∧ τ ∈ Tq (T) ∧ root(τ ) 6∈ T ∞ },
+     where Tq (T) is the set of trees produced by applying
+     a rule on tuples in {root(τ ) | τ ∈ T} ∪ T ∞ .                  8.    INCOMPLETE / PROBABILISTIC
+                                                                           DATABASES
+   Algorithm All-Trees terminates because at every iteration
+only trees which are not there already are produced and                 Theorem 6.4 suggests using algorithm All-Trees for evalu-
+moreover, for every tuple that has infinitely many deriva-           ating datalog queries in various semirings. We already noted
+tions, as soon as it is identified and inserted in T ∞ , no more     in Section 7 that this will work fine for N∞ . How about
+trees for it are produced. Note also that by Theorem 6.4 this        PosBool(B), P(Ω), and, as a sanity check, B? When algo-
+algorithm will also give us, in particular, an algorithm for         rithm All-Trees returns ∞, the evaluation on these semirings
+evaluating datalog queries on bag semantics, just like in [28].      will return a normal value! We show that we can compute
+   If the answer of algorithm All-Trees for an output tuple t        this value in the more general case when the semiring K
+is negative, we can also use algorithm Monomial-Coefficient,         is a finite distributive lattice. We do so with some simple
+shown in Figure 9, to compute the coefficient of a particular        modifications to algorithm All-Trees:
+monomial µ in q(I)(t), even when that coefficient is ∞. In                • Redefine Tqν to take only T as a parameter, and return
+this algorithm:                                                             all τ in Tq (T) such that for all τ 0 in T, if root(τ ) =
+   • M is the set of tuples whose ids appear in µ, a mono-                  root(τ 0 ), then fringe(τ ) < fringe(τ 0 ).
+     mial represented as a bag of labels that appear in it;          Thus a derivation tree for a tuple is considered “new” only
+     P ∞ is a set of pairs (t, µ), representing tuples t for         when its associated monomial is smaller than any yet seen
+     which infinite derivation trees whose leaves are equal          for that tuple. This modified algorithm always returns a
+     to the monomial µ have been found.                              polynomial for each tuple. Evaluating these polynomials in
+   • Tqi (T, P ∞ , µ) = {τ | τ 6∈ T ∧ τ ∈ Tq (T) ∧ fringe(τ ) ≤      K gives the K-relation output.
+     µ ∧ (root(τ ), m) 6∈ P ∞ }, where Tq (T) is the set of trees      The sanity check that for K = B the output tuples get
+     that can be produced by applying a rule on tuples in            the tag true is easy to check. For K = PosBool(B), after
+     {root(τ ) | τ ∈ T} ∪ {t | (t, m) ∈ P ∞ } it, where the          also checking that for any valuation v : B → B we have
+     multiplicity of each is the corresponding exponent in           v(q(R)) = q(v(R)), we get a datalog on boolean c-tables
+     the monomial.                                                   semantics. This is new for incomplete databases.
+                                                                       In probabilistic databases we restrict ourselves, as usual,
+  If n is the length of the longest acyclic path of unit rules,      to the case when the domain D is finite, hence the sample
+then every n+1 iterations the algorithm Monomial-Coefficient         space Ω of all possible instances is finite. K = P(Ω) is a
+finite distributive lattice so we get an effective semantics for        Two recent papers on provenance, although independent
+datalog on event tables. After checking that the resulting           of our work, have a closer relationship to our approach. Like
+event tagging a tuple t does in fact say that t is in q(R) for       us, [8] identifies the limitations of why-provenance and pro-
+the random instance R, we conclude that our algorithm also           poses route-provenance which is also related to derivation
+generalizes that of [16].                                            trees. The issue of infinite routes in recursive programs is
+                                                                     avoided by considering only minimal ones. [3] proposes a no-
+9.    QUERY CONTAINMENT                                              tion of lineage of tuples for a type of incomplete databases
+                                                                     but does not consider recursive queries. It turns out that we
+  Here we present some results about query containment
+                                                                     can also describe the lineage in [3] by means of a special com-
+w.r.t. the general semantics in K-relations.
+                                                                     mutative semiring so our approach is more general. More
+   Definition 9.1. Let K be a naturally ordered commu-               significantly, we have provided evidence for the statement
+tative semiring and let q1 , q2 be two queries defined on K-         “the algorithm in [19] could already compute lineage” rather
+relations. We define containment with respect to K-relations         than just showing that incompleteness and provenance can
+semantics by                                                         co-exist.
+                      def
+                                                                        The first attempt at a general theory of relations with an-
+         q1 v K q2    ⇔     ∀R ∀t q1 (R)(t) ≤ q2 (R)(t)              notations appears to be [20] where axiomatized label systems
+                                                                     are introduced in order to study containment.
+When K is B and N we get the usual notions of query con-
+                                                                        Our paper borrows the machinery of semirings and formal
+tainment with respect to set and bag semantics.
+                                                                     power series from the theory of formal languages (see [22]
+  Some simple facts follow immediately. For example if h :
+                                                                     and references in there). For example, (non-commutative)
+K → K 0 is a semiring homomorphism such that h(x) ≤
+                                                                     algebraic systems of equations can be associated to context-
+h(y) ⇒ x ≤ y and q1 , q2 are RA+ queries it follows from
+                                                                     free grammars and the integer coefficients in the formal
+Prop. 3.5 that q1 vK 0 q2 ⇒ q1 vK q2 . If instead h is
+                                                                     power series solutions count the “degree of ambiguity” of
+a surjective homomorphism then q1 vK q2 ⇒ q1 vK 0 q2 .
+                                                                     a string in the language [9] (their restriction to grammars
+Similarly when K, K 0 and h are also ω-continuous and q1 , q2
+                                                                     without unit rules inspired our Theorem 6.5).
+are datalog queries (via Prop. 5.7).
+                                                                        Context-free grammars have been used in the study of
+  The following result allows us to use the decidability of
+                                                                     datalog but mainly chain datalog programs were considered
+containment of unions of conjunctive queries [7, 29].
+                                                                     (e.g., [2]) in order to capture the inherent order in strings.
+    Theorem 9.2. If K is a distributive lattice then for any         Closed semirings are used in [31, 10] but only in order to
+q1 , q2 unions of conjunctive queries we have                        use Kleene’s regular expression algorithm to optimize special
+                                                                     classes of datalog programs.
+                     q1 vK q2 iff q1 vB q2                              We learned with interest that some of what we do is sim-
+  Proof. (sketch) One direction follows because B can be             ilar in spirit with a line of work is AI on constraint satisfac-
+homomorphically embedded in K. For the other direction               tion problems (CSP) [4, 5]. Their constraints over semirings
+we use the existence of query body homomorphisms to es-              are in fact the same as our K-relations and the two opera-
+tablish mappings between monomials of provenance polyno-             tions on constraints correspond indeed to relational join and
+mials. Then we apply the factorization theorem (4.3) and             projection. CSP solutions are expressed as projection-join
+the idempotence and absorption laws of K.                            queries in [4] and as Prolog programs in [5]. Computing so-
+                                                                     lutions is the same as the evaluation of join and projection in
+   Therefore, if K is a distributive lattice for (unions of)         Section 3 and [5] also uses fixed points on semirings. There
+conjunctive queries containment with respect to K-relation           are some important differences though. The semirings used
+semantics is decidable by the same procedure as for standard         in [4, 5] are such that + is idempotent and 1 is a top el-
+set semantics. PosBool(B), P(Ω) and the fuzzy semiring are           ement in the resulting order. This rules out our semirings
+all distributive lattices. A theorem similar to the one above        N, N∞ , N[X], N∞ [[X]] hence the bag and provenance seman-
+is shown in [20] but the class of algebraic structures used          tics. 8 More importantly, much of the focus in CSP is in
+there does not include PosBool(B) or P(Ω) (although it does          choosing optimal solutions rather than how these solutions
+include the fuzzy semiring).                                         depend on the constraints.
+
+10.    RELATED WORK                                                  11.    CONCLUSION AND FURTHER WORK
+   Lineage/why-provenance was introduced in [12, 13, 6],                Beyond the technical results, this paper can be regarded
+(the last paper uses a tree data model) but the relation-            also as arguing that various forms of K-relations, even mul-
+ship with [19] was not noticed. The papers on probabilistic          tisets, provide coarser forms of provenance while the poly-
+databases [17, 33, 23] note the similarities with [19] but do        nomial and formal power series annotations are, by virtue of
+not attempt a generalization.                                        their “universality” (as illustrated by the factorization theo-
+   Datalog with bag semantics in which derivation trees are          rems) the most general form of annotation possible with the
+counted was considered in several papers, among them [25,            boundaries of semiring structures. This might be a perspec-
+26, 27]. The evaluation algorithms presented in these papers         tive worth using when, in the future, we search for prove-
+do not terminate if some output tuple has infinite multiplicity.     nance structures for data models other than relational.
+Datalog on incomplete and on probabilistic databases is con-         8
+                                                                       Another difference is that for datalog semantics we require
+sidered in [15, 24], again with non-terminating algorithms.          our semirings to be ω-continuous while [5] uses the less well-
+Later [28] gave an algorithm for detecting infinite multiplicities   behaved fixed points given by Tarski’s theorem for mono-
+in datalog with bag semantics and [16] gave a terminating            tone operators on complete lattices. However, the semiring
+algorithm for datalog on probabilistic databases.                    examples [5] appear to be in fact ω-continuous.
+   Although we only considered boolean c-tables, the results     [12] Y. Cui. Lineage Tracing in Data Warehouses. PhD
+can be extended to arbitrary c-tables. Further, we would like         thesis, Stanford University, 2001.
+to extend Definition 3.2 to include negation, which seems to     [13] Y. Cui, J. Widom, and J. L. Wiener. Tracing the
+require axiomatizing an additional operation akin to “proper          lineage of view data in a warehousing environment.
+subtraction” in N. Algorithm All-Trees does not immedi-               TODS, 25(2), 2000.
+ately give an effective way to evaluate datalog over the trop-   [14] N. Dalvi and D. Suciu. Efficient query evaluation on
+ical semiring but we conjecture that such a procedure exists.         probabilistic databases. In VLDB, 2004.
+We also conjecture that containment under bag semantics of       [15] F. Dong and L. V. S. Lakshmanan. Deductive
+conjunctive or unions of conjunctive queries implies (hence is        databases with incomplete information. In Symposium
+equivalent to) containment under N[X]-relation semantics.             on Logic Programming, 1992.
+This would allow us to transfer to N[X] the undecidability       [16] N. Fuhr. Probabilistic datalog — a logic for powerful
+result in [20].                                                       retrieval methods. In SIGIR, 1995.
+   Although in general database research and AI CSP re-
+                                                                 [17] N. Fuhr and T. Rölleke. A probabilistic relational
+search sadly tend to ignore each other (witness the original
+                                                                      algebra for the integration of information retrieval and
+submission of this paper!), some deep connections have been
+                                                                      database systems. TOIS, 14(1), 1997.
+exhibited in [21], involving, in particular, conjunctive query
+containment. Looking at the relationship between our work        [18] T. J. Green and V. Tannen. Models for incomplete and
+and that of [4, 5] from this perspective might provide inter-         probabilistic information. In EDBT Workshops, 2006.
+esting results.                                                  [19] T. Imielinski and W. Lipski. Incomplete information
+   Finally, we plan to investigate the application of our ap-         in relational databases. JACM, 31(4), 1984.
+proach to database applications where a fine and detailed        [20] Y. E. Ioannidis and R. Ramakrishnan. Containment of
+notion of provenance is needed, for example to propagate              conjunctive queries: beyond relations as sets. TODS,
+information back and forth between databases related by               20(3), 1995.
+logical constraints of various kinds.                            [21] P. Kolaitis and M. Vardi. Conjunctive-query
+   Acknowledgments We are grateful to Zack Ives for                   containment and constraint satisfaction. In PODS,
+many useful discussions. We thank Nilesh Dalvi for point-             1998.
+ing out [20], Jan Chomicki for letting us know about semir-      [22] W. Kuich. Semirings and formal power series. In
+ings being used in constraint satisfaction and an anonymous           Handbook of formal languages, volume 1. Springer,
+referee for pointing out [5]. The authors were partially sup-         1997.
+ported by NSF grants IIS 0415810 and IIS 0513778.                [23] L. V. S. Lakshmanan, N. Leone, R. Ross, and V. S.
+                                                                      Subrahmanian. Probview: a flexible probabilistic
+12.   REFERENCES                                                      database system. TODS, 22(3), 1997.
+ [1] S. Abiteboul, R. Hull, and V. Vianu. Foundations of         [24] L. V. S. Lakshmanan and F. Sadri. Probabilistic
+     Databases. Addison-Wesley, 1995.                                 deductive databases. In Symposium on Logic
+                                                                      Programming, 1994.
+ [2] F. N. Afrati and C. H. Papadimitriou. The parallel
+     complexity of simple logic programs. J. ACM,                [25] M. Maher and R. Ramakrishnan. Déjà vu in fixpoints
+     40(4):891–916, 1993.                                             of logic programs. In NACLP, 1989.
+ [3] O. Benjelloun, A. D. Sarma, A. Y. Halevy, and               [26] I. S. Mumick. Query Optimization in Deductive and
+     J. Widom. ULDBs: Databases with uncertainty and                  Relational Databases. PhD thesis, Stanford University,
+     lineage. In VLDB, 2006.                                          1991.
+ [4] S. Bistarelli, U. Montanari, and F. Rossi.                  [27] I. S. Mumick, H. Pirahesh, and R. Ramakrishnan. The
+     Semiring-based constraint satisfaction and                       magic of duplicates and aggregates. In VLDB Journal,
+     optimization. JACM, 44(2):201–236, 1997.                         1990.
+ [5] S. Bistarelli, U. Montanari, and F. Rossi.                  [28] I. S. Mumick and O. Shmueli. Finiteness properties of
+     Semiring-based constraint logic programming: syntax              database queries. In Fourth Australian Database
+     and semantics. ACM TOPLAS, 23(1):1–29, 2001.                     Conference, 1993.
+ [6] P. Buneman, S. Khanna, and W.-C. Tan. Why and               [29] Y. Sagiv and M. Yannakakis. Equivalences among
+     where: A characterization of data provenance. In                 relational expressions with the union and difference
+     ICDT, 2001.                                                      operators. J. ACM, 27(4), 1980.
+ [7] A. K. Chandra and P. M. Merlin. Optimal                     [30] A. D. Sarma, O. Benjelloun, A. Halevy, and J. Widom.
+     implementation of conjunctive queries in relational              Working models for uncertain data. In ICDE, 2006.
+     data bases. In STOC, 1977.                                  [31] J. D. Ullman. Principles of Database and
+ [8] L. Chiticariu and W.-C. Tan. Debugging schema                    Knowledge-Base Systems, volume II. Computer
+     mappings with routes. In VLDB, 2006.                             Science Press, 1989.
+ [9] N. Chomsky and M.-P. Schützenberger. The algebraic         [32] L. A. Zadeh. Fuzzy sets. Inf. Control, 8(3), 1965.
+     theory of context-free languages. Computer                  [33] E. Zimányi. Query evaluation in probabilistic
+     Programming and Formal Systems, pages 118–161,                   relational databases. TCS, 171(1-2), 1997.
+     1963.
+[10] M. P. Consens and A. O. Mendelzon. Low complexity
+     aggregation in graphlog and datalog. In ICDT, 1990.
+[11] P. Crawley and R. P. Dilworth. Algebraic Theory of
+     Lattices. Prentice Hall, 1973.
+

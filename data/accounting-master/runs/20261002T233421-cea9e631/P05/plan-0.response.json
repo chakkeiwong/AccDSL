@@ -1,0 +1,66 @@
+{
+  "assumptions": [
+    "P05 implements a bounded DemoCorporate/1 runtime for MC13–MC18 and MC28. It does not extend the entire DSL or close G4, G5, G14 or G18.",
+    "Northstar’s homogeneous inventory, delivery recognition, asset lives, positive-profit tax rate, half-year accrual fractions, zero OCI and zero additional funding capacity are inherited synthetic assumptions. Record their provenance and test their consequences; none becomes a general accounting default.",
+    "Historical inputs describe aggregate half-year operations, not recovered invoices. Declare a feasible dependency order, with purchases before deliveries and sufficient receivables/payables before settlement; do not present that order as observed history.",
+    "Use exact rational arithmetic without monetary rounding for this profile. Apple observations retain their original USD scale and disclosed precision; any conversion to millions must be explicit.",
+    "Support exogenous stress and explicitly specified finite conditioning. Structural intervention, unsupported instruments and unimplemented accounting treatments return explicit unsupported statuses.",
+    "Apple calculations use the prepared P02 observations retrospectively. Unknown retained-byte publication timing prevents a historical-availability claim; derivative notional does not identify effective floating-rate exposure.",
+    "This planning pass is read-only. No files were changed and no implementation tests were run."
+  ],
+  "checks": [
+    "Before execution, record the evidence contract in progress.md: question, named comparators, required invariants, vetoes, explanatory diagnostics, assumption provenance, failure modes and nonclaims. Exact journal/statement agreement and adversarial checks determine engineering acceptance; runtime and test counts are explanatory only.",
+    "Run CUDA_VISIBLE_DEVICES=-1 python3 -B -m unittest discover -s tests -p 'test_accounting_p05.py' -v. Require every declared obligation to execute, with failures and skips recorded explicitly.",
+    "Run CUDA_VISIBLE_DEVICES=-1 python3 -B -m unittest discover -s tests -p 'test_accounting_p0[234].py' -v for prerequisite regressions. Existing temporary-file tests require an authorised writable implementation environment; inability to execute them remains an explicit verification limitation.",
+    "Implement and run CUDA_VISIBLE_DEVICES=-1 python3 -B scripts/check_accounting_p05.py --output-dir data/accounting-master/deliverables/P05 --execution-inventory \"$P05_EXECUTION_INVENTORY\" --approved-plan \"$P05_APPROVED_PLAN\", using the actual supervisor-supplied paths. The checker must validate those references and preserve test failures in execution.json.",
+    "Independently replay every generated journal, verify each batch balances, reconcile account movements and closing entries, and recompute balance sheet, income/OCI, direct and indirect cash flow, and equity bridges for H1, H2, FY and each completed forecast branch.",
+    "Change demand, price, collections, inventory targets, rates and opening balances. Verify derived journals change appropriately. Remove or poison expected-result fields and confirm runtime outputs are unchanged; perturb generated postings and classifications and confirm the independent checker detects the errors.",
+    "Exercise duplicate replay, conflicting identities, invalid contexts, insufficient inventory, excessive settlement, unknown operations, malformed amounts, dependency cycles and injected posting failure. Rejected events must leave economic state, ledger, journal, identity registry and provenance unchanged.",
+    "Test funding shortfalls separately from validation rejection; verify unpaid obligations, last committed state, unavailable outputs and branch status survive. Test branch isolation, branch-order invariance and preservation of unresolved probability mass.",
+    "Exercise actual behaviour and measurement entry points with future disclosures, future realised drivers, role-forbidden fields, permitted current inputs and explicitly announced stress inputs. Check publication/ingestion distinctions and incompatible revision rejection.",
+    "Verify source/input/code/test hashes, deterministic replay and protected-file preservation. Test that the checker exits unsuccessfully on a missing obligation, failing test, invalid provenance reference or protected-file mismatch."
+  ],
+  "evidence": [
+    "data/accounting-master/runs/20261002T233421-cea9e631/P05/plan-0.recovery.json",
+    "docs/plans/accounting-mission-requirements.md",
+    "docs/design/chapters/07-execution.tex",
+    "docs/design/chapters/13-reference-company.tex",
+    "docs/design/fixtures/northstar.json",
+    "docs/design/fixtures/temporal.json",
+    "scripts/build_repair_fixtures.py",
+    "scripts/check_repair_conformance.py",
+    "scripts/core0_ir_v1.py",
+    "scripts/reconstruction_v1.py",
+    "scripts/apple_case_v1.py",
+    "tests/test_accounting_p04.py",
+    "data/accounting-master/deliverables/P02/case.json",
+    "data/accounting-master/deliverables/P03/conformance.json",
+    "data/accounting-master/deliverables/P04/conformance.json"
+  ],
+  "issues": [],
+  "next_actions": [
+    "Submit this bounded plan for independent plan review.",
+    "After plan acceptance, implement the declared modules, event inputs, tests and deliverables; preserve all prerequisite evidence and supervisor files.",
+    "Submit execution.json, result.md and actual source/test changes for result review against all four original acceptance criteria."
+  ],
+  "residuals": [
+    "execution.json, result.md and tests/test_accounting_p05.py are confirmed absent; P05 implementation acceptance is not established.",
+    "P03 explicitly excludes runtime execution. P04 supplies bounded reconstruction and joint-family operations, not an executable corporate accounting package.",
+    "General instrument lifecycles, consolidation, currency translation, nonlinear histories, arbitrary information policies and complete real-company operations remain outside this slice.",
+    "Apple debt/hedge allocation, noncash debt movements, asset cohorts and contingent outcomes remain unidentified. Conditional calculations cannot resolve those missing facts.",
+    "Full accounting validity, empirical forecast validity and human acceptance remain unestablished. MC01–MC35 and G1–G18 retain their wider obligations."
+  ],
+  "steps": [
+    "1. Establish the implementation boundary and checkpoint. Create progress.md after initial implementation inspection, then update it after meaningful changes within 600 words. Declare new files scripts/company_execution_v1.py, scripts/check_accounting_p05.py, docs/design/fixtures/p05-economic-inputs-v1.json and tests/test_accounting_p05.py, plus execution.json and result.md. Preserve existing fixtures, prerequisite results, release-pinned files, snapshots and controller files. Record source hashes because usable Git provenance is unavailable.",
+    "2. Separate economic inputs from accounting expectations. Author versioned Northstar opening economic state, contract/asset schedules, historical transactions and forecast policies from the inspected narrative and stated assumptions. Include quantities, prices, settlement amounts, dates, dependencies and provenance, but no supplied postings or expected statements. Keep northstar.json exclusively on the checker side. Combine delivery recognition and inventory consumption in one atomic operation; aggregate generated postings when comparing with the older separated reference rows.",
+    "3. Implement the bounded event engine. Validate schema, entity/book/currency context, exact amounts, dates, dependencies and operation support. Implement delivery, collection, inventory purchase, supplier payment, payroll, plant acquisition/depreciation, interest accrual/settlement, simplified tax/prepayment, dividends and closing. Include small separate cash equity issue and par-debt issue/redemption cases for the declared financing lifecycle; unsupported conversion/modification treatments remain explicit. Stage all economic changes, journal entries and explanation links before validating and committing them together.",
+    "4. Define ordering, identity and failure behaviour. Schedule by declared dates, phases and dependencies; reject unresolved noncommuting order or cycles. Canonicalise typed payloads with normalised rationals and dates; identical event-ID replay returns the prior result, while changed payloads conflict. Distinguish Applied, Duplicate, Rejected, EconomicFundingDefault, Unsupported and internal execution failure. For Northstar, use available cash with no invented borrowing or capital injection. Declare all-or-nothing settlement for insufficient cash, preserve the amount due and last committed state, and mark dependent statements incomplete rather than reporting them as completed forecasts.",
+    "5. Enforce information access inside both decision generation and measurement. Supply restricted role/date views containing eligible disclosures, committed state and permitted drivers, never the full future trajectory. Separate economic time, publication time and ingestion cutoff; unknown availability fails closed for historical use. Make advance knowledge of a stress path an explicit policy. Preserve Northstar’s original and corrected disclosure views without treating premature revenue recognition as valid delivery accounting. Require compatible revisions when deriving H2 from annual and interim observations.",
+    "6. Generate statements and preserve history/scenario dependence. Produce income and explicit zero OCI before journalised closing; derive balance sheets, direct cash flow, indirect cash flow including prepaid-tax movements, equity roll-forwards and debt/asset schedules from the same journal stream. Integrate the existing P03-to-P04 debt-family path through a narrow validated adapter, retaining source/model/view identities. Execute fixed, floating and an interior allocation and preserve the continuous family’s constraint; finite examples are not an exhaustive enumeration. Derive the Northstar affine joint outputs under their positivity assumptions and check them against event execution. Exogenous stress must not change history weights. Reuse P04 finite conditioning only with explicit justified joint atoms, likelihoods and information-block identities; keep failed and unsupported branches and their mass.",
+    "7. Apply the shared engine to Apple’s bounded marginal stress. Select P02 interim cash, assets, liabilities and equity by explicit observation IDs/context, preserving source anchors, units and rounding information. Keep reported carrying amounts, principal and derivative notionals distinct. Supply the documented 200-basis-point, 13/52-year, immediate-settlement, no-tax scenario as assumptions, with exposure either conditional at 14,575 million or restricted to the assumed interval [0,14,575]. Generate interest, cash and closing effects through the event engine and recompute all affected statement differences. Report the frozen disclosure baseline separately from hypothetical changes; preserve unresolved operations and unknown historical availability.",
+    "8. Implement independent verification and write actual results. Use a separate test-side posting replay and bridge calculator rather than runtime report helpers. Compare generated historical and forecast results with existing references, analytic formulas and perturbed inputs. Include a wiring test proving the P03/P04 family reaches the runtime and information restrictions reach both consumers. Write execution.json with actual inputs, journals, outcomes, branch coverage, checks, requirement mapping and manifest: commands, environment, CPU status, deterministic seed designation, wall time, hashes, approved plan, source versions and changed files. Write result.md with decision table, separate engineering/accounting/forecast/human statuses, strongest alternative explanation and remaining work.",
+    "9. Apply the skeptical audit and stop rules. The inspected baseline exposes three material traps: replaying authored postings as event execution, promoting balanced books into accounting validity, and treating Apple notional as observed exposure. Steps 2, 6 and 7 address them. Matched comparisons use identical periods, units, histories and assumptions. Integrity failure, information leakage, missing required checks or unexplained comparator disagreement veto acceptance and trigger repair. An expected economic default or unsupported branch is retained evidence, not a reason to abandon remaining cases. Run only deterministic bounded checks; no benchmark ranking, calibration or forecasting-performance claim is authorised by their success."
+  ],
+  "summary": "Plan an actual economic-event runtime for Northstar, connected to the existing bounded history interfaces, with independent journal/statement checks and a source-bound conditional Apple stress. The existing Northstar checker is a posting oracle, so it cannot itself satisfy P05 event-execution acceptance.",
+  "verdict": "PLAN"
+}

@@ -1,0 +1,44 @@
+{
+  "assumptions": [
+    "The supplied snippets and interfaces are the entire review packet; omitted implementations and test bodies are not assumed to provide additional safeguards.",
+    "Process supervision assumes Linux /proc visibility and permission to inspect and signal every worker descendant. The packet does not establish those prerequisites."
+  ],
+  "checks": [
+    "Statically traced worker launch, cleanup, termination handling, locking, rule installation and exceptional exits.",
+    "Compared the permission prefix with every action accepted by main.",
+    "The packet reports 33 passing tests, but supplies no test bodies. This supports control-plane verification only, not accounting correctness or closure of gaps associated with the accepted 192-report panel.",
+    "No tools, files or commands were accessed."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "HIGH — Standalone review does not handle SIGTERM safely. main executes controller_review outside catch_termination, although that review can launch a worker through process. With the normal SIGTERM disposition, the supervisor exits without Python finally cleanup; the child runs in a separate session and can survive while the supervisor's flock is released. Extend termination handling over every child-launching action, including review, and retain durable cleanup-required status until descendant termination is verified.",
+    "HIGH — Writable internal operations bypass the single-writer boundary. main dispatches _checks and _builtin before acquiring any lock. The prefix approval also permits these actions because its pattern ends at the script path. A second invocation can therefore run phase tests or a builtin concurrently with the master. Checking that --out resolves somewhere beneath runs neither proves controller ownership nor prevents targeting existing records. Require a controller-issued internal invocation capability tied to the active run and lock, restrict outputs to fresh attempt-owned destinations, and reject direct concurrent internal invocations. A delegated lock mechanism must avoid deadlocking legitimate children.",
+    "HIGH — Worker integrity checks are skipped on failures. In worker, process errors, a missing destination, malformed JSON and validate_response failures all occur before check_protection and runtime_guard verification. A workspace-write worker can alter protected evidence, controller files, state or authorization and then fail without this boundary raising the required integrity veto. Run integrity verification in an exception-safe finalization path after child cleanup, preserve the original failure details, and prevent further implementation or repair workers whenever integrity verification fails. Recovery must use independently protected preserved bytes.",
+    "HIGH — Process-group cleanup does not establish cleanup of all descendants. start_new_session creates an initial group, but a descendant can call setsid or change groups. terminate_group and live_group_members inspect only the original group, so process can record finished while a detached descendant continues writing. Disabling multi_agent does not prevent ordinary subprocess creation or detachment. Enforce lifecycle containment that includes escaped descendants, such as a controller-owned cgroup, and verify it is empty before releasing writer ownership. If workers are instead trusted never to detach, explicitly identify that as an unenforced assumption; the current 'complete process-group cleanup' implementation cannot support the stronger all-descendants guarantee.",
+    "HIGH — Rule installation is neither serialized nor atomically published. install_rule runs before the runner lock and writes the final policy pathname directly after O_EXCL creation. A crash during writing can leave a partial rule; subsequent installation then rejects the differing file, preventing automatic recovery. Concurrent installers can also race on the candidate, policy and authorization records. Serialize installation with the master ownership lock, publish a fully written and fsynced policy atomically without overwriting an existing different rule, and make recovery between policy publication and authorization recording explicit and idempotent.",
+    "MEDIUM — Startup integration isolation reads a potentially different configuration from the worker. worker parses only ~/.codex/config.toml, while Popen inherits the environment. An alternate CODEX_HOME can make the CLI load MCP servers absent from that parsed file, leaving them enabled. Additional configuration layers are also not addressed by the supplied interface. Resolve the actual worker configuration location and effective server set, or launch with an explicitly isolated configuration that preserves the authorized model and authentication. Verify effective isolation before substantive workers run.",
+    "MEDIUM — terminate_group signals a numeric group repeatedly without validating ownership. After proc.wait reaps the leader and its group disappears, the same numeric identifier can be reused. The subsequent SIGKILL, or the second terminate_group call in bounded_process's finally, can then target an unrelated group. Although process_identity records start_ticks, termination does not use them. Make cleanup idempotent and use verified ownership or stable lifecycle containment before further signalling; ambiguous ownership must stop with a diagnostic rather than signal an unrelated process."
+  ],
+  "next_actions": [
+    "Repair lifecycle containment, SIGTERM coverage and exception-safe integrity verification first.",
+    "Apply one ownership protocol to installation, normal execution, review and delegated internal operations; make policy publication and interrupted installation recoverable.",
+    "Validate effective worker configuration and add focused fault-injection checks for the reported failure paths.",
+    "Rerun deterministic verification and obtain a fresh bounded controller review after repairs; retain all accounting, scientific and human-acceptance gaps."
+  ],
+  "residuals": [
+    "The packet does not expose Master construction, run/resume ownership checks, atomic_json, preservation storage or controller-review gating. Their correctness remains unverified.",
+    "The 16 MiB output check is a polling threshold, not a hard storage cap: output can exceed it between polls and during cleanup.",
+    "The installation checks omit review from their positive command list, although the reviewed permission package includes it. Prefix matching appears to allow it, but its explicit verification is missing.",
+    "Actual repair execution, refreshed phase plans and scoped acceptance cannot be assessed from this process-permissions packet."
+  ],
+  "steps": [
+    "Completed the authorized packet-only static review.",
+    "Separated concrete process and permission defects from missing interface evidence and broader acceptance limitations."
+  ],
+  "summary": "REVISE: termination coverage, descendant containment, internal-operation ownership, failure-path integrity checks and rule installation do not yet establish the reviewed execution guarantees.",
+  "verdict": "REVISE"
+}

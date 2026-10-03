@@ -1,0 +1,40 @@
+{
+  "verdict": "REVISE",
+  "summary": "State refresh can proceed from malformed or unrecognized phase state, and its protection boundary depends on an unstated caller obligation.",
+  "steps": [
+    "Validate the persisted state schema before refresh uses it.",
+    "Reject unknown phase statuses and malformed phase records with a controlled continuation veto or explicit state-migration error.",
+    "Make refresh verify current protected/controller hashes before committing state and before publishing derived plans, or document and enforce that every refresh caller performs both checks.",
+    "Recompute live controller hashes at refresh time rather than relying only on hashes captured during Master initialization."
+  ],
+  "assumptions": [
+    "The persisted state file may survive interruption, manual corruption, partial external edits, or an older controller version.",
+    "Master.refresh is part of the resume/status/refresh interface and may be invoked independently of the worker execution path.",
+    "The stated frozen-evidence guarantee applies to generation of next-plan.json and next-plan.md, not only to worker execution."
+  ],
+  "checks": [
+    "The supplied verification reports 55 passing tests, but the listed tests do not establish that arbitrary persisted phase statuses are rejected or that refresh itself enforces current protection hashes.",
+    "The test count is treated as control-plane evidence only; it does not establish accounting correctness, scientific validity, or closure of G1–G18."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py: Master.__init__ loads state and checks only the set of phase IDs; it does not validate schema, required fields, or the allowed status vocabulary.",
+    "scripts/run_accounting_master.py: Master.refresh computes eligibility with `status != ACCEPTED` and only specially excludes unchanged `blocked_external`; an unknown status is therefore eligible when dependencies are accepted.",
+    "scripts/run_accounting_master.py: Master.refresh calls save() and writes next-plan artifacts without calling check_protection().",
+    "scripts/run_accounting_master.py: Master.__init__ captures self.controls once, while refresh publishes `controller_hashes: self.controls` and input_fingerprint() also uses that startup snapshot.",
+    "scripts/accounting_master_support.py: atomic JSON helpers are used for individual files, but the supplied refresh code does not show a protection check surrounding the state and derived-plan publication sequence.",
+    "tests/test_accounting_master.py: the listed tests cover accepted-evidence invalidation, controller mutation during execution, and plan-generation repair, but no supplied test name covers malformed persisted state or direct refresh protection enforcement."
+  ],
+  "issues": [
+    "{\"finding\": \"Malformed persisted state can be treated as runnable state. Master.__init__ verifies only that phase IDs match the catalog. In refresh(), any status other than accepted_internal or unchanged blocked_external is eligible if dependencies are accepted. A corrupted or unknown status can therefore cause a phase to be selected and potentially executed, rather than failing closed. Missing fields can instead produce uncontrolled KeyError/TypeError failures.\", \"id\": \"state-refresh-1\", \"repair\": \"Add explicit persisted-state validation before refresh: schema version, top-level keys, exact phase set, required per-phase fields, allowed status enum, attempts/residuals/issues/next_actions types, gap-status keys, and compatible run metadata. Reject invalid state with a deterministic continuation veto or require an explicit migration path. Add a focused regression test for an unknown status and a missing required field.\", \"severity\": \"high\"}",
+    "{\"finding\": \"refresh() does not enforce the frozen controller/evidence boundary itself. It saves state and publishes next-plan.json/next-plan.md using hashes captured at initialization. If a caller invokes refresh after a controller or protected evidence mutation without a prior check_protection() call, the refresh can commit a plan containing stale controller_hashes. The packet states protection across failure paths, but the refresh interface shown here leaves that as an unstated caller assumption.\", \"id\": \"state-refresh-2\", \"repair\": \"At refresh entry, verify current protected and controller hashes against the expected snapshot and fail closed on change. Recompute the live controller hash map immediately before plan publication, and ensure the state hash and derived plans are generated from that protected snapshot. If protection is intentionally delegated to callers, make that precondition explicit and enforce it with a guard/token rather than relying on convention.\", \"severity\": \"medium\"}"
+  ],
+  "residuals": [
+    "The packet does not show all call sites, so it is not possible to determine whether an outer run path already performs the missing refresh-time protection checks.",
+    "Atomic replacement of each individual file does not make state.json and the two derived next-plan files a single transaction; recovery can rebuild derived plans on the next invocation."
+  ],
+  "next_actions": [
+    "Implement persisted-state validation and fail-closed handling.",
+    "Close or explicitly enforce the refresh protection precondition.",
+    "Add only targeted tests for malformed state and refresh-time protection; retain the existing bounded lifecycle and trusted-worker assumptions."
+  ]
+}

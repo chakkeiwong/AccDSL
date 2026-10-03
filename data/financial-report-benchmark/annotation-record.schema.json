@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:accdsl:financial-report-benchmark:annotation:v1",
+  "title": "Provisional source annotation record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["annotation_id", "document_id", "original_sha256", "source", "literal", "readings", "review_status", "open_questions"],
+  "properties": {
+    "annotation_id": {"type": "string", "minLength": 1},
+    "document_id": {"type": "string", "minLength": 1},
+    "original_sha256": {"$ref": "#/$defs/sha256"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "section", "locator"],
+      "properties": {
+        "format": {"enum": ["pdf", "html"]},
+        "section": {"type": ["string", "null"]},
+        "locator": {"type": "string", "minLength": 1, "description": "Physical PDF page(s) and table/row/cell or original HTML selector with a quoted span; printed page labels must be distinguished."},
+        "extracted_text_sha256": {"$ref": "#/$defs/sha256"},
+        "incorporated_document_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "literal": {"type": "string", "minLength": 1},
+    "readings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reading_id", "evidence_kind", "meaning", "context", "status", "supporting_annotation_ids"],
+        "properties": {
+          "reading_id": {"type": "string", "minLength": 1},
+          "evidence_kind": {"enum": ["source_assertion", "extraction_reading", "derived_consequence", "modelling_assumption"]},
+          "meaning": {"type": "string", "minLength": 1},
+          "value_exact": {"type": ["string", "null"], "description": "Exact reported/derived numeral or symbolic expression; unknown is null, never an inferred zero."},
+          "context": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entity", "perimeter", "concept", "period", "currency", "unit", "scale", "sign", "precision", "basis"],
+            "properties": {
+              "entity": {"type": ["string", "null"]},
+              "perimeter": {"type": ["string", "null"]},
+              "concept": {"type": ["string", "null"]},
+              "period": {"type": ["string", "null"]},
+              "currency": {"type": ["string", "null"]},
+              "unit": {"type": ["string", "null"]},
+              "scale": {"type": ["string", "null"]},
+              "sign": {"type": ["string", "null"]},
+              "precision": {"type": ["string", "null"]},
+              "basis": {"type": ["string", "null"]},
+              "dimensions": {"type": "object", "additionalProperties": {"type": ["string", "null"]}}
+            }
+          },
+          "status": {"enum": ["proposed", "retained_alternative", "rejected_with_reason", "adjudicated"]},
+          "reason": {"type": ["string", "null"]},
+          "supporting_annotation_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        }
+      }
+    },
+    "review_status": {"enum": ["provisional", "internally_checked", "independently_adjudicated"]},
+    "review_evidence": {"type": "array", "items": {"type": "string"}, "description": "Identity/date/scope and immutable review record; schema validity alone never establishes this review status."},
+    "open_questions": {"type": "array", "items": {"type": "string"}},
+    "supersedes_annotation_id": {"type": ["string", "null"]}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+  "description": "Source annotation exchange format, not executable Core 0 IR or an accounting oracle. Empty readings explicitly retain an unresolved source span. Semantic acceptance and review evidence require separate checks."
+}

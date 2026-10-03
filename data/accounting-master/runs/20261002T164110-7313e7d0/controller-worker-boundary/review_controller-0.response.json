@@ -1,0 +1,43 @@
+{
+  "verdict": "REVISE",
+  "summary": "The supplied worker boundary has two gaps: it can consume a pre-existing response without establishing freshness, and process cleanup can bypass the process-level integrity check. The reported 44 passing tests support control-plane verification but do not resolve these gaps or establish accounting correctness.",
+  "steps": [
+    "Reviewed only the supplied code, interfaces, verification metadata and test names.",
+    "Traced response acceptance and process-finalization paths for stale output, ordinary failures and integrity-check coverage.",
+    "Kept the review within the stated trusted-worker, initial-process-group containment scope."
+  ],
+  "assumptions": [
+    "Workers and controller are trusted. Deliberate detachment, hostile actors and uncatchable termination between fork and durable registration remain outside scope.",
+    "The packet does not establish that every folder/role/attempt combination is fresh across retries and resume. Such a caller invariant would affect the stale-response finding and must be explicit if relied upon.",
+    "The implementations of bounded_process, atomic_json, verify_hashes and signal handling are not supplied. Their stated interfaces are assumed; test names alone do not establish their detailed behavior.",
+    "The packet does not establish that self.controls independently covers next-plan.json. Master.process explicitly snapshots that file, whereas Master.worker does not."
+  ],
+  "checks": [
+    "validate_response checks exact fields, permitted verdicts, nonempty summaries, string-array fields, concrete PLAN steps/checks and absence of issues for AGREE.",
+    "Production implement/repair workers select workspace-write; other roles select read-only. The command requests approval never and disables the listed integrations and nested-agent feature.",
+    "Master.worker checks integrity in finally, including when worker execution or response validation fails.",
+    "The supplied verification reports 44 passing tests with no error. No tests were executed or test bodies inspected in this review.",
+    "Phase acceptance and source checks cannot close the accounting, scientific or human-acceptance gaps associated with the accepted 192-report panel."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py: Master._worker_result uses a deterministic role-attempt response pathname, checks only destination.exists() after execution and then loads that file.",
+    "scripts/run_accounting_master.py: Master.process writes active-process status and raises on remaining group members before reaching verify_hashes.",
+    "scripts/run_accounting_master.py: Master.worker guards state and authorization but does not explicitly snapshot next-plan.json as Master.process does.",
+    "tests/test_accounting_master.py: The supplied names include failure-path integrity, interruption, configuration-isolation and process-cleanup tests; their bodies and assertions are not supplied."
+  ],
+  "issues": [
+    "WB-1 — Response freshness is not enforced. In Master._worker_result, destination is folder / f'{role}-{attempt}.response.json'. An existing file is neither rejected nor distinguished from output of the current invocation. If that pathname is reused and the current child exits successfully without replacing it, destination.exists() succeeds and an old PLAN, AGREE or IMPLEMENTED response passes validation. The subsequent atomic_json rewrite makes the old response look like a newly persisted result. This is a stale-acceptance path unless callers guarantee fresh output paths, an interface invariant absent from the packet. Repair: allocate a fresh invocation-specific output pathname, reject unexpected pre-existing output, and consume only that invocation's validated response. Preserve earlier responses as evidence rather than deleting or overwriting them. If uniqueness is supplied by callers, document and enforce it at this boundary.",
+    "WB-2 — Cleanup failure short-circuits integrity verification. In Master.process.finally, remaining group members cause ContinuationVeto before verify_hashes executes; failure to publish active-process.json also exits before that check. The outer worker finally provides partial coverage, but it does not explicitly include the process-local next-plan.json snapshot. Thus the supplied code does not implement the stated integrity-check coverage across all child failure paths. It already blocks continuation on survivors, so this finding is about missing integrity evidence and guard coverage, not permission to launch another writer. Repair: structure cleanup/status publication and integrity verification as independently attempted finalization operations, retain both failures and any available process result, and raise a continuation veto after collecting them. With live survivors, label the integrity snapshot provisional and require cleanup plus another integrity check before resume."
+  ],
+  "residuals": [
+    "Repair execution, fresh plan review, dependency invalidation, exact command approval and preservation of all original gaps are represented by interfaces and named tests, but their implementations are outside the supplied excerpts.",
+    "The two CLI configuration inspections each have a 30-second timeout, but they do not use self.remaining or the stop callback. Whether their combined startup time must fit the overall invocation deadline is an unspecified interface detail.",
+    "A clean integrity snapshot while descendants remain alive cannot establish final preservation; it records only the state observed at that moment.",
+    "The reported test count and hashes are supporting control-plane evidence. They do not establish accounting accuracy, scientific validity or human acceptance."
+  ],
+  "next_actions": [
+    "Enforce fresh response output at the worker boundary and cover a pre-existing valid response followed by successful execution that produces no new response.",
+    "Make cleanup/status failures and integrity checks independently observable; cover simultaneous cleanup failure and a protected-file or next-plan change.",
+    "Rerun the relevant control-plane checks and obtain a fresh review of the repaired packet while retaining all accounting, scientific and human-acceptance gaps."
+  ]
+}

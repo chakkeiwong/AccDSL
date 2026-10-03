@@ -1,0 +1,1584 @@
+
+Open Information Model 1.0
+
+
+Open Information Model 1.0
+
+Recommendation 13 October 2021
+Copyright ©  XBRL International Inc., All Rights Reserved.This version:<http://www.xbrl.org/Specification/oim/REC-2021-10-13/oim-REC-2021-10-13.html>Editors:
+        Paul Warren, 
+         
+          XBRL International Inc.
+        
+         <pdw@xbrl.org>
+      
+        Herm Fischer, 
+         
+          Mark V Systems Limited
+        
+         <fischer@markv.com>
+      
+        Mark Goodhand, 
+         
+          CoreFiling
+        
+         <mrg@corefiling.com>
+      Contributors:
+        Daniel Dracott, 
+         
+          CoreFiling
+        
+         <djd@corefiling.com>
+      
+        Eleanor Joslin, 
+         
+          CoreFiling
+        
+         <ejj@corefiling.com>
+      
+
+Status
+Circulation of this Recommendation is unrestricted. This document is normative. 
+            Recipients are invited to submit comments to
+          oim@xbrl.org,
+          
+            and to submit notification of any relevant patent rights 
+            of which they are aware and provide supporting 
+            documentation.
+          
+
+
+Abstract
+      
+
+
+This document describes a syntax-independent model for business reports that
+conform to the XBRL v2.1 and XBRL Dimensions v1.0 specifications.  The model is
+intended to enable easy and lossless transformation of a well defined set of
+semantics between a variety of different syntactic representations, including
+the XML syntax defined in the above specifications.
+    
+      
+
+    
+
+
+Table of Contents
+1 Introduction
+
+   1.1 Scope
+
+   1.2 Terminology
+
+      1.2.1 Collections
+
+   1.3 Namespaces and namespace prefixes
+
+2 Processors
+
+3 XBRL Report Model
+
+   3.1 Datatypes
+
+      3.1.1 Data Type Registry
+
+   3.2 Reports
+
+   3.3 Facts
+
+   3.4 Dimensions
+
+   3.5 Links
+
+      3.5.1 Footnotes
+
+         3.5.1.1 The xbrl:note concept
+
+4 Prefixed content
+
+5 Equality and equivalence
+
+   5.1 Equality definitions
+
+      5.1.1 Fact value equality
+
+      5.1.2 Taxonomy-defined dimension value equality
+
+      5.1.3 URI comparison
+
+      5.1.4 Comparison of xbrl:note facts 
+
+      5.1.5 Canonical language value
+
+   5.2 Equivalence definitions
+
+6 Duplicate and alternative facts
+
+   6.1 Complete duplicates
+
+   6.2 Consistent duplicates
+
+      6.2.1 Numeric value consistency
+
+   6.3 Inconsistent duplicates
+
+   6.4 Multi-language alternatives
+
+   6.5 Multi-unit alternatives
+
+
+
+Appendices
+A References
+
+B Intellectual property status (non-normative)
+
+C  Document History (non-normative)
+
+D Errata Corrections incorporated in this document
+
+
+Table
+1 Namespaces and namespace prefixes
+
+
+Definitions
+Canonical language value
+Complete duplicates
+Component
+Concept Core Dimension (Component)
+Conformant processor
+Consistent duplicates
+Core Dimension
+Dimension
+Duplicate facts
+Entity Core Dimension (Component)
+Enumeration fact
+Equal dimension value
+Equal fact property
+Equal facts
+Equal reports
+Equivalent fact property
+Equivalent facts
+Equivalent reports
+Fact (Component)
+Fact base datatype
+Fact datatype
+Fact period type
+Fact value equality
+Inconsistent duplicates
+Language Core Dimension (Component)
+Link group (Component)
+List
+Multi-language alternatives
+Multi-unit alternatives
+Nillable
+Non-numeric fact
+Non-text fact
+Note ID core dimension (Component)
+Numeric fact
+Period Core Dimension (Component)
+Prefixed content
+Property
+Report (Component)
+Set
+Supported DTR types
+Supported specification
+Taxonomy-defined Dimension (Component)
+Taxonomy-defined dimension value equality
+Text fact
+Typed dimension base datatype
+Unit Core Dimension (Component)
+Unordered collection
+Validating conformant processor
+XHTML fragment
+
+
+Error codes
+oime:disallowedDuplicateFacts 
+oime:duplicateFactDimension 
+oime:duplicateFactId 
+oime:illegalMultiLanguageAlternatives 
+oime:illegalMultiUnitAlternatives 
+oime:illegalPureUnit 
+oime:illegalStandardFootnoteTarget 
+oime:invalidBaseURL 
+oime:invalidDimensionValue 2 
+oime:invalidFactId 
+oime:invalidFactValue 2 
+oime:invalidLanguage 
+oime:invalidNoteIDValue 
+oime:invalidPeriodDimension 2 
+oime:invalidUseOfReservedIdentifier 
+oime:invalidXHTMLFragment 
+oime:misplacedDecimalsProperty 
+oime:misplacedLanguageDimension 
+oime:misplacedNoteFactDimension 2 
+oime:misplacedNoteIDDimension 
+oime:misplacedUnitDimension 
+oime:missingConceptDimension 
+oime:missingFactId 
+oime:missingLanguageForNoteFact 
+oime:missingNoteIDDimension 
+oime:missingPeriodDimension 
+oime:noTaxonomy 
+oime:unknownConcept 
+oime:unknownDimension 
+oime:unsupportedConceptDataType 2 
+oime:unsupportedDimensionDataType 
+oime:unusedNoteFact 
+oime:valueForAbstractConcept 
+oime:xhtmlElementInNonDefaultNamespace 
+
+
+    
+ 
+      
+1 Introduction 
+      
+
+
+The XBRL v2.1 [XBRL 2.1] and XBRL Dimensions v1.0 [DIMENSIONS] specifications define an XML-based syntax for business
+reports, and accompanying metadata definitions known as taxonomies.  It is
+appealing to work with XBRL data in a variety of different formats such as
+JSON, relational and other databases and CSVs.  Such use is hampered by the
+lack of a clear definition of the information that may be considered
+significant in an XBRL report, as distinct from that which is syntactic detail.
+This leads to inconsistencies in the data that is understood and how it is
+represented, and often to the exposure of unnecessary syntactic detail to end
+users.
+
+      
+      
+
+
+This specification defines a syntax-independent model for an XBRL report, which
+allows different syntactic formats to be used to represent the same data.  The
+model captures a subset of the information that can be represented in the XML
+syntax defined by XBRL v2.1, in order to provide a simple and portable model.
+
+      
+      
+
+        
+1.1 Scope
+        
+
+
+This document provides a model for an XBRL report (or XBRL
+  instance) that conforms to the set of supported specifications.  It
+does not attempt to model the metadata information defined in an XBRL
+taxonomy.  The Working Group recognises the importance of taxonomy information
+when working with XBRL data, but believes that there is considerable value in a
+model that is restricted in scope to XBRL report on its own, and thus has
+chosen to address this requirement first.
+
+        
+        
+
+
+Taxonomy information is expected to form the basis of future specifications
+that expose such information either in a separate model, or as layers of
+additional information that augment the model defined in this specification.
+
+        
+        
+            
+
+              The supported specifications are:
+            
+            
+              
+XBRL v2.1 [XBRL 2.1]  
+              
+XBRL Dimensions v1.0 [DIMENSIONS]  
+              
+Extensible Enumerations v2.0 [EXTENSIBLE ENUMERATIONS 2.0]  
+            
+        
+        
+      
+      
+
+        
+1.2 Terminology
+        
+
+    The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, 
+    SHOULD, SHOULD NOT, RECOMMENDED, MAY, and OPTIONAL, in this
+    specification, are to be interpreted as described in [IETF RFC 2119].
+
+        
+
+        The keywords
+          concept, 
+          fact,
+          footnote,
+          and
+          taxonomy,
+          as well as the terms nillable and abstract as applied to concepts,
+          are to be interpreted as described in the XBRL specification [XBRL 2.1].
+        
+        
+
+          The keywords dimension, hypercube, typed dimension, explicit dimension and dimension default are to be interpreted as described in the XBRL Dimensions specification [DIMENSIONS].
+        
+
+        
+
+            The keywords time interval, local time and zone designator
+            are to be interpreted as defined in ISO 8601 [ISO8601].
+        
+        
+
+            
+1.2.1 Collections
+            
+
+
+            This specification uses the following terms to refer to
+            collections.  The use of these terms indicates whether the order
+            and uniqueness of members is significant under the model, and thus
+            whether these properties need to be preserved when transforming 
+            reports.
+
+            
+            
+
+                A list is an ordered sequence of members.  Members may be repeated within the list. 
+            
+            
+
+                An unordered collection is a collection that may contain repeated members.  The number of times that each member appears is significant, but the order between them is not.  Also known as a bag or multi-set. 
+            
+            
+
+                A set is an unordered collection that contains no repeated members. 
+            
+        
+      
+
+      
+
+        
+1.3 Namespaces and namespace prefixes
+        
+
+          Namespace prefixes [XML Names] will be used 
+          for elements and attributes in
+          the form ns:name where ns is the 
+          namespace prefix and name is the local name. 
+          Throughout this specification, the mappings
+          from namespace prefixes to actual namespaces are consistent
+          with  Table 1.
+        
+        
+        
+
+          The prefix column in  Table 1 is non normative. 
+          The namespace URI column is normative.
+        
+        
+Table 1: Namespaces and namespace prefixes
+          
+          
+            
+
+              Prefix
+              Namespace URI
+            
+          
+          
+            
+
+              dtr-type
+              http://www.xbrl.org/dtr/type/*
+            
+            
+
+              xbrl
+              https://xbrl.org/2021
+            
+            
+
+              xbrli
+              http://www.xbrl.org/2003/instance
+            
+            
+
+              xs
+              http://www.w3.org/2001/XMLSchema
+            
+            
+
+              enum2
+              http://xbrl.org/2020/extensible-enumerations-2.0
+            
+            
+oimehttp://www.xbrl.org/2021/oim/error
+          
+        
+        
+
+The prefix dtr-type denotes any namespace that is the namespace for a type defined in the Data Types Registry [DTR STRUCTURE].
+        
+      
+
+    
+    
+
+        
+2 Processors
+
+        
+
+
+This specification defines two classes of processors:
+
+        
+        
+
+            
+A conformant processor is any software that consumes data that conforms to the model defined in this document. A conformant processor MUST apply the constraints defined within this specification and raise an error with the specified code if any of the constraints are not satisfied.
+
+            
+A validating conformant processor is a conformant processor which additionally applies all constraints defined by the supported specifications and supported DTR types for an xBRL-XML [xBRL-XML] representation of the data in a successfully-created model.  The appropriate error codes from those specifications MUST be raised if it is not possible to construct an xBRL-XML representation that satisfies all such constraints.
+        
+
+    
+    
+
+      
+3 XBRL Report Model
+      
+
+
+The report model is defined as a series of components, each having a set
+of named properties.  These components,
+and their associated properties are defined in the tables shown below.
+Components may also have constraints associated with them which all
+instantiations of these components must adhere to.
+
+      
+      
+
+        
+3.1 Datatypes
+        
+
+
+          The report model uses the XML Schema datatypes system [XML Schema Datatypes] for defining the datatype of values.  
+          It does not make use of the XML Schema structures system [XML Schema Structures], as this does not make sense outside of the context of an XML document.
+
+        
+        
+
+            Values in the report model refer to the value within the value space.  The lexical representation does not form part of the model.  
+        
+        
+
+            
+
+                For example, 1, 1.0 and 1.00 are all alternative lexical representations of the same xs:decimal value.  An OIM processor must treat all these values as equal, and is not required to retain the lexical representation from which the value was obtained.
+            
+        
+        
+
+
+          It should be noted that there are some references in this document to
+          XBRL "item types", such as dtr-type:domainItemType.
+          References to these item types are primarily to identify classes of
+          facts, based on their datatypes.  
+        
+        
+
+          Item types are technically XML schema complex types, as they contain
+          definitions of allowed XML attributes.  These attribute definitions
+          are not applicable to the report model, and values in the report model are only
+          required to comply with the "simple content" portions of these
+          datatypes (see complex type definitions with simple
+          content [XML Schema Structures]).
+        
+        
+
+            
+3.1.1 Data Type Registry
+            
+
+
+            The Data Types Registry (DTR) [DTR STRUCTURE]
+            defines a set of additional datatypes which XBRL Processors may
+            optionally support.  A number of DTR types are referenced
+            directly by this specification, and are referred to as supported DTR types.
+
+            
+            
+                
+
+                    The supported DTR types are:
+                
+                
+                        
+dtr-type:domainItemType
+                        
+dtr-type:noLangTokenItemType
+                        
+dtr-type:noLangStringItemType
+                        
+dtr-type:prefixedContentItemType
+                        
+dtr-type:prefixedContentType
+                        
+dtr-type:SQNameType
+                        
+dtr-type:SQNameItemType
+                        
+dtr-type:SQNamesType
+                        
+dtr-type:SQNamesItemType
+                
+            
+            
+
+                Some DTR types include additional validation rules as part
+                of their registry definition.  Validating conformant processors are required to apply such rules to supported DTR types (see  Section 2).
+            
+        
+      
+      
+
+        
+3.2 Reports
+        
+
+
+  The top-level component is a report.
+
+        
+        
+
+Component: Report
+Properties:{taxonomy}A list of URLs to XML Schema document that together identify the taxonomy for the report.  The list MUST NOT be empty (oime:noTaxonomy).{facts}
+                
+
+                    A set of facts.  
+                
+                
+            {base-url}
+                
+
+                    An optional URL recording the location from which the
+                    report was loaded
+                    (or an explicitly specified alternative base URL).   {base-url} MUST 
+                    be an absolute URL (oime:invalidBaseURL).
+                
+                    
+                
+
+                    This
+                    URL MAY be used for resolving relative
+                    URLs appearing as fact and dimension
+                    values within the report, 
+                    although such resolution will depend on the definition of
+                    the concepts and dimensions involved and is not prescribed by this
+                    specification.
+                
+            
+        
+
+            Processors MUST support http, https and file scheme URLs in the {taxonomy} property.  Processors MAY support other schemes, but such use is discouraged as they may not be supported in all processors.  Use of absolute file URLs is also discouraged, as reports using this are unlikely to be portable.
+        
+        
+
+            
+
+                This model simplifies the mechanism for identifying a taxonomy to a list of references to XML Schema documents.  The xBRL-XML syntax permits references to both schema and linkbase files, and also references in the form of links to the definition of role and arcrole types.  References to linkbases are not supported, and   <roleRef>  and  <arcroleRef>  in the xBRL-XML syntax are subject to special treatment.  See [xBRL-XML] for full details.
+            
+        
+      
+
+      
+
+          
+3.3 Facts
+
+
+          
+
+Component: Fact
+
+              A fact is a discrete piece of information in an XBRL Report. All facts have the following properties.
+            
+Properties:{id}
+                  
+A unique identifier for the fact.  The value MUST be an NCName (oime:invalidFactId), and MUST be unique across all facts within the report (oime:duplicateFactId). This property MUST be present on all facts (oime:missingFactId).
+                  
+                  
+
+            {id} attributes can be useful in providing traceability of facts through different syntactic representations, but do not form part of the semantic information provided by a report.
+                  
+              
+              {dimensions}A set of dimensions.  The set may contain at most one of each core dimension.  The set may contain multiple taxonomy defined dimensions, but their {name} properties MUST be unique within the set  oime:duplicateFactDimension. {links}A set of link groups associated with the fact.  
+              {value}The value associated with this fact.  This may be the special value "nil".  The meaning of a fact reported as "nil", the distinction between this and a fact that is not reported, or a fact reported with an empty, or zero, value (where applicable) is implementation dependent.{decimals}The precision of the value, expressed as a number of decimal places, or "infinity", indicating that the value is infinitely precise.
+Constraints:
+If the fact's {value} is "nil", the fact MUST be nillable; otherwise, the {value} MUST be in the value space of the fact's base datatype (oime:invalidFactValue).  Note that full validation against the fact's datatype and, in the case of supported DTR types, the DTR definition, is only required of validating conformant processors.  The oime:invalidFactValue MAY be used for such full validation.
+              
+The {decimals} property MUST be present on, and MUST only be present on, non-nil numeric facts (oime:misplacedDecimalsProperty).
+A fact's datatype MUST NOT be a complex type with complex content (oime:unsupportedConceptDataType).
+If the fact's datatype is dtr-type:prefixedContentItemType, or a type derived from dtr-type:prefixedContentItemType that is not supported by the processor, the processor MUST raise oime:unsupportedConceptDataType.
+
+          
+
+              A fact's datatype is the XML Schema type of the concept identified by the fact's concept core dimension.
+        
+
+          
+
+              A fact's base datatype is the XML Schema primitive type from which the fact's datatype is derived.
+        
+
+          
+
+              A fact is nillable if the concept identified by the fact's concept core dimension is nillable.
+        
+
+          
+
+              A numeric fact is a fact with a datatype that is derived from the XML Schema types of xs:decimal, xs:double or xs:float. 
+          
+
+          
+
+              A non-numeric fact is any fact that is not a numeric fact.
+          
+
+          
+          
+
+    A text fact is a fact with a datatype that is derived from the XML Schema type of xs:string, but which is not one of, or a type derived from one of, the following types:
+            
+                
+xs:language
+                
+xs:Name
+                
+dtr-type:domainItemType
+                
+dtr-type:noLangTokenItemType
+                
+dtr-type:noLangStringItemType
+            
+            
+        
+
+        
+            
+
+    A non-text fact is any fact that is not a text fact.
+            
+        
+
+          
+
+        
+    An enumeration fact is a fact with a concept core dimension that identifies an enumeration concept.   
+          An enumeration fact has a value that is either a single expanded name or a set of expanded names.
+          
+
+          
+Note that in the above definitions, "derived from" includes indirect derivation via intermediate types.
+
+          
+The text fact definition identifies those facts to which the language core dimension is applicable.
+          
+      
+
+
+
+      
+
+        
+3.4 Dimensions
+        
+
+          A dimension is a piece of additional information that serves to uniquely identify a fact.
+A dimension may either be one of the core dimensions listed below or a taxonomy-defined dimension.
+        
+        
+
+          A core dimension is a dimension that is defined by the XBRL v2.1 specification, as distinct from those which are defined in a taxonomy using the XBRL Dimensions specification [DIMENSIONS] .
+        
+
+        
+
+Component: Concept Core Dimension
+Properties:{name}The expanded name corresponding to xbrl:concept{value}An expanded name identifying an XBRL concept.
+Constraints:
+
+              The concept core dimension MUST be present on all facts (oime:missingConceptDimension).
+          
+
+              The concept core dimension MUST identify a concept from the taxonomy (oime:unknownConcept).
+          
+
+              The identified concept MUST NOT be abstract (oime:valueForAbstractConcept).
+          
+
+        
+
+Component: Entity Core Dimension
+
+
+The entity core dimension represents the primary legal entity (person or
+organisation) associated with a fact.  
+
+
+          
+Properties:{name}The expanded name corresponding to xbrl:entity{scheme}A URI denoting the scheme from which an identifier is drawn.{identifier}A string identifying the entity to which the fact relates.
+Constraints:
+
+              
+
+                  The entity core dimension MUST NOT have a scheme of 'https://xbrl.org/2021/entities' with an identifier of 'NA' (oime:invalidUseOfReservedIdentifier).
+              
+              
+
+            The entity core dimension is optional, and MAY be omitted 
+if there is no primary legal entity associated with a fact, either because the fact does not relate to a legal entity, or because
+the fact captures a transaction or relationship between two or more legal
+entities with equal standing.  
+              
+              
+
+                  
+
+
+                      As defined in [xBRL-XML], the special entity with scheme of 'https://xbrl.org/2021/entities' and identifier 'NA' is used to represent the absence of this dimension in xBRL-XML syntax.
+                  
+              
+          
+
+        
+
+Component: Period Core Dimension
+
+The period core dimension represents the period of time, or instant, to which a
+fact is applicable.  Whilst the xBRL-XML representation uses different elements
+to represent instants and durations, this specification uses a common model for
+both in the form of an time interval as defined in ISO 8601 [ISO8601], with
+instants being represented using a zero-length time interval.
+
+          
+Properties:{name}The expanded name corresponding to xbrl:period{interval}
+
+A time interval, as defined in ISO 8601.  The time
+    interval MAY be zero-length (i.e. start and end
+at the same instant), denoting an instant in time.  The time interval MAY be defined in local time (i.e. without a time zone designator) in which case processors MUST NOT assume a particular time zone, but MUST preserve the information that the time interval is in local time.
+
+            
+
+                
+
+This specification, being a syntax-independent model, does not make use of the representations defined in ISO 8601, but as ISO 8601 is the representation used in xBRL-XML and in other representations based on this specification, the model draws on the terms and definitions used in ISO 8601 in order to ensure that the {interval} property can be represented using formats defined in ISO 8601.
+                
+            
+            
+Constraints:
+
+            
+
+                If the fact's period type is duration, the period code dimension is optional, and if present {interval} MUST be a non-zero length time interval (oime:invalidPeriodDimension).
+            
+            
+
+                If the fact's period type is instant, the period code dimension MUST be present (oime:missingPeriodDimension) and {interval} MUST be a zero-length time interval (oime:invalidPeriodDimension).
+
+            
+            
+
+                Note that as defined in [xBRL-XML], the absence of the period core dimension is represented by the special value of "forever" in xBRL-XML syntax.
+            
+          
+
+        
+
+            A fact's period type is the value of the  @periodType attribute on the schema definition of the concept identified by the fact's concept core dimension, and is either duration or instant.
+        
+
+        
+
+Component: Unit Core Dimension
+Properties:{name}The expanded name corresponding to xbrl:unit{numerators}An unordered collection of expanded names, identifying individual measures.{denominators}An optional, unordered collection of expanded names, identifying individual measures.
+Constraints:
+
+              
+
+                  The unit core dimension MUST only be present on numeric facts (oime:misplacedUnitDimension).  The unit core dimension is optional on numeric facts.
+              
+              
+
+                  The unit core dimension MUST NOT have a single numerator of xbrli:pure with no denominators (oime:illegalPureUnit).  The xbrli:pure measure used in xBRL-XML is mapped to a fact with an absent unit core dimension in this model (see [xBRL-XML]).
+              
+          
+
+        
+
+Component: Language Core Dimension
+Properties:{name}The expanded name corresponding to xbrl:language{language}A string specifying the language in which the fact is reported.  The string MUST be a valid BCP 47 [BCP47] language code oime:invalidLanguage.
+Constraints:
+
+              The language core dimension MUST only be present on text facts (oime:misplacedLanguageDimension) and is optional on such facts. 
+          
+
+        
+
+            
+
+                Note that BCP 47 language codes are case insensitive, and whilst there are conventions for the capitalisation of these strings, differences in capitalisation do not convey different codes.  See  Section 5.2.
+            
+        
+
+
+        
+
+Component: Note ID core dimension
+
+              The note ID core dimension is used on xbrl:note facts in order to prevent multiple occurrences of such facts in a report from being classified as duplicates. xbrl:note facts are used to represent text footnotes (see  Section 3.5.1.1).
+          
+Properties:{name}The expanded name corresponding to xbrl:noteId{id}A unique identifier for a fact.
+Constraints:
+
+            
+
+The {id} property MUST be the same as the fact's {id} property (oime:invalidNoteIDValue).
+            
+            
+
+              This dimension MUST NOT be present on facts with a concept core dimension that is not xbrl:note (oime:misplacedNoteIDDimension).
+            
+            
+
+                See also  Section 3.5.1.1.
+            
+          
+
+        
+
+Component: Taxonomy-defined Dimension
+Properties:{name}The expanded name identifying the dimension.{value}The value for the dimension.  Values for taxonomy-defined dimensions do not have any associated language information.
+Constraints:
+
+          The {name} of a taxonomy-defined dimension MUST identify a dimension in the taxonomy (oime:unknownDimension).
+          
+
+              If the identified dimension is an explicit dimension, the {value} MUST be a valid expanded name; otherwise, if {value} is the special value "nil", the typed dimension MUST be nillable; otherwise, {value} MUST be in the value space for the base datatype of the typed dimension (oime:invalidDimensionValue).  Note that full validation against the typed dimension's datatype and, in the case of supported DTR types, the DTR definition, is only required of validating conformant processors.  The oime:invalidDimensionValue MAY be used for such full validation.  
+          
+
+              
+
+                  If the identified dimension is a typed dimension then the dimension MUST NOT
+                  (oime:unsupportedDimensionDataType):
+              
+              
+                  
+ have a complex type;
+
+                  
+ have a type of, or derived from:
+                      
+                          
+xs:ENTITY
+                          
+xs:ENTITIES
+                          
+xs:ID
+                          
+xs:IDREF
+                          
+xs:IDREFS
+                          
+xs:NMTOKEN
+                          
+xs:NMTOKENS
+                          
+xs:NOTATION
+                      
+                  
+
+                      have a type that is derived by list or union, other than xbrli:dateUnion or a type derived by restriction from xbrli:dateUnion; or
+                  
+                  
+ have a type of dtr-type:prefixedContentType or a type derived from dtr-type:prefixedContentType that is not supported by the processor.
+              
+          
+        
+
+Explicit dimensions will have a datatype of xs:QName, but it should be noted that a datatype of xs:QName does not imply that the dimension is explicit; it may be a QName typed dimension.  The actual nature of the dimension can be determined from the taxonomy.  
+        
+        
+
+          The set of taxonomy-defined dimensions associated with a fact does not include any explicit dimensions using a dimension default.
+        
+        
+
+            The base datatype of a typed dimension is the XML Schema primitive type from which the typed dimension's datatype is derived.
+        
+      
+      
+
+        
+3.5 Links
+        
+
+
+Links represent relationships between facts in a report.  
+Links are a generalisation of the footnote mechanism defined in XBRL v2.1.  
+    
+        
+
+        
+
+Component: Link group
+A link group is a collection of relationships between facts in a report.  The group is uniquely identified by the combination of the {group} and {link type} properties.  The relationships in a link group have a common source fact, which is the fact on which the link group is defined.  The target facts for the relationships are defined by the {target facts} property.
+Properties:{group}A URI identifying a grouping of links between facts.{link type}A URI identifying the type of the relationships between the facts in the group.{target facts}A list of facts which are the target of the links in the group.
+        
+
+            
+3.5.1 Footnotes
+            
+
+
+This specification prescribes special behaviour for the standard link type of
+http://www.xbrl.org/2003/arcrole/fact-footnote.  The {target facts} for any link group with this {link type} MUST have a concept core dimension of xbrl:note (oime:illegalStandardFootnoteTarget).
+
+            
+
+            
+
+The mapping between links and footnotes as defined in XBRL v2.1 is described in xBRL-XML [xBRL-XML].
+            
+
+            
+
+                
+3.5.1.1 The xbrl:note concept
+                
+
+                    This specification defines the xbrl:note concept, which is used to represent text footnotes as defined in XBRL v2.1, and for which specific handling is prescribed in xBRL-XML [xBRL-XML].  The xbrl:note concept has a datatype of xbrli:stringItemType.
+                
+                
+
+                    The value of the xbrl:note concept MUST be a string containing a serialisation of an XHTML fragment (oime:invalidXHTMLFragment).  The serialisation assumes a default namespace of http://www.w3.org/1999/xhtml, and any elements in that namespace MUST use the default namespace (oime:xhtmlElementInNonDefaultNamespace).
+                
+                
+
+                An XHTML fragment is an XML fragment in which any top-level element nodes are in the http://www.w3.org/1999/xhtml namespace.
+                
+                
+
+                    Facts with a concept core dimension of xbrl:note:
+                
+                
+                    
+MUST be included in the {target facts} property of at least one link group (oime:unusedNoteFact);
+                    
+MUST have the  language core dimension (oime:missingLanguageForNoteFact); 
+                    
+MUST have the note ID core dimension (oime:missingNoteIDDimension).
+                    
+MUST NOT have the entity core dimension or period core dimension (oime:misplacedNoteFactDimension); and
+                    
+MUST NOT have any taxonomy-defined dimensions (oime:misplacedNoteFactDimension).
+                
+                
+
+                    Note that as text facts, xbrl:note facts cannot have the {decimals} property or unit core dimension.
+                
+            
+        
+      
+    
+    
+
+        
+4 Prefixed content
+        
+
+            Some datatypes make use of prefixes as a shorthand notation for namespace URIs.  Values for these datatypes make use of a map of prefix to namespace URI bindings that are in scope for the location in which the value appears.  Neither the prefixes, nor the maps to which they refer form part of the model, and as such, special handling of these values is required in order to ensure that the model contains the referenced URIs rather than prefixes.  Values for which this is required are referred to as prefixed content..
+        
+        
+
+            In an XML document, the map of prefixes to namespace URIs is provided by namespace bindings (see [XML Names]).  Other formats based on this model typically use a prefix map.
+        
+        
+            
+Under this model, prefixed content is the value of any fact or taxonomy defined dimension with a datatype of, or derived from: 
+            
+                
+xs:QName
+                
+xbrli:QNameItemType
+                
+dtr-type:SQNameType
+                
+dtr-type:SQNameItemType
+                
+dtr-type:SQNamesType
+                
+dtr-type:SQNamesItemType
+                
+dtr-type:PrefixedContentType
+                
+dtr-type:PrefixedContentItemType
+             
+        
+        
+
+            
+
+                Processors cannot support arbitrary formats that may contain prefixed values, as it is necessary to know the details of the format in order to be able to reliably identify the prefixes.  The dtr-type:PrefixedContentType and dtr-type:PrefixedContentItemType types exist to signal the presence of values that contain prefixes.  These types may not be used directly, but processors MAY support specific types derived from them.  Processors are required to signal an error if they encounter content using a derived type that they do not support (see the constraints on facts and taxonomy-defined dimensions).
+            
+        
+    
+    
+
+        
+5 Equality and equivalence
+        
+
+
+            This specification provides separate definitions of equality and equivalence for facts and reports.  Equivalent reports can be considered to convey the same semantic information.  The stricter definition of equal reports additionally requires fact {id} properties to be equal.  
+            
+
+        
+        
+
+            
+5.1 Equality definitions
+            
+            
+
+                Two reports, A and B, are equal under this model if:
+            
+            
+                
+For every fact in A, there is an equal fact in B, and vice versa; and
+                
+The {taxonomy} component of A is equal to the {taxonomy} component of B.
+            
+            
+            
+            
+
+                Two facts, a and b, are equal if, for each property present on a, there is an equal fact property present on b and vice versa.
+            
+            
+
+                Two fact properties are equal if they meet the relevant criterion defined below:
+                
+                    
+Two {id} properties are equal if they have the same string value.
+                    
+Two {dimensions} properties, a and b, are equal if, for every dimension in a the same dimension is present in b with an equal dimension value and vice versa.  
+                    
+Two {value} properties are equal if they satisfy the criteria for fact value equality. 
+
+
+                    
+Two {decimals} properties are equal if they have the same integer value.
+                    
+Two {links} properties, a and b, are equal if, for every link group in a there is a link group in b with the equal {group}, {link type} and {target facts} properties, and vice versa.  Two {target fact} properties, tfa and tfb are equal if each fact in tfa is equal to the corresponding fact in tfb.
+                
+            
+            
+
+                Two dimension values are equal if they meet the relevant criterion defined below:
+                
+                    
+Two concept core dimension values are equal if the namespace name and local name for both values are equal.
+                    
+Two entity core dimension values are equal if the {scheme} and {identifier} properties have the same string values.
+                    
+Two period core dimension values are equal if they denote the same time interval as defined in ISO 8601.
+                    
+Two unit core dimension values are equal if the collection of {numerators} measures for both are equal, and the {denominators} property is either absent for both, or is the same collection of measures.  Two measures are equal if they have the same namespace name and local name.  Both {numerators} and {denominators} are unordered collections.
+                    
+Two language core dimension values are equal if they have the same canonical language value.
+                    
+Two note id core dimension values are equal if they have the same string value.
+                    
+Two taxonomy-defined dimension values if they satisfy the criteria for taxonomy-defined dimension value equality.
+                
+            
+
+            
+
+                
+5.1.1 Fact value equality
+                
+                    
+The {value} properties of two facts are equal if they have the same datatype and:
+                    
+                        
+Both values are nil; or
+                        
+They meet the relevant criterion below based on their datatype:
+                            
+                                
+For enumeration facts, the two values are the same set of expanded names.
+                                
+For prefixed content, the values are the same after resolving prefixes to namespace URIs.  In the case of dtr-type:SQNamesItemType, the collection of values is treated as a list.
+                                
+                                
+For facts with a datatype of, or derived from, xbrli:languageItemType the values are equal if they have the same canonical language value.
+                                
+For all other datatypes, the values are equal if
+                                    they have the same actual value based on the facts' datatype (see also  Section 5.1.3 and  Section 5.1.4).
+                            
+                    
+                
+            
+
+            
+
+                
+5.1.2 Taxonomy-defined dimension value equality
+                
+                    
+Two taxonomy-defined dimension values are equal if they have the same datatype and:
+                    
+                        
+Both values are nil; or
+                        
+They meet the relevant criterion below based on their datatype:
+                            
+                                
+For prefixed content, the values are the same after resolving prefixes to namespace URIs.  In the case of dtr-type:SQNamesType, the collection of values is treated as a list.
+                                
+                                
+For values with a datatype of, or derived from, xs:language the values are equal if they have the same canonical language value.
+                                
+For all other datatypes, the values are equal if
+                                    they have the same actual value based on the dimension's datatype (see also  Section 5.1.3).
+                            
+                    
+                
+            
+
+            
+
+                
+5.1.3 URI comparison
+                
+
+
+                    Values for datatypes of, or derived from, xs:anyURI that are relative URIs are not absolutized prior to comparison.  This means that two relative URIs with same value will be considered equal even though they appear in different documents with different locations.  This specification does not specify where relative URIs appearing in fact and taxonomy-defined dimension values should be resolved relative to.
+
+                
+            
+            
+
+                
+5.1.4 Comparison of xbrl:note facts 
+                
+
+                    xbrl:note facts (see  Section 3.5.1.1) are compared according to their datatype, which is derived from xsd:string.  Under this model, the value is a serialisation of an XHTML fragment.  It should be noted that when creating a model from an xBRL-XML [xBRL-XML] report, there is more than one valid serialisation of the same XHTML fragment (for example, attributes may be reordered), which could lead to equivalent XHTML not being considered equal under this model.  This is only an issue when working with data derived from xBRL-XML, as other formats based on this model must treat the value as a simple string.
+                
+            
+            
+
+                
+5.1.5 Canonical language value
+                
+
+                    A canonical language value is a BCP 47 language code whitespace normalised according to the requirements for xs:language and represented with all letters in lowercase.
+                
+                
+
+                    
+
+                        BCP 47 language codes are case-insensitive.  XBRL usage of language codes is based on the XML Schema xs:language datatype, which does not prescribe a case convention for the canonical lexical representation, which means that comparison of values in their XML Schema canonical lexical representation is not sufficient for establishing equality.  It should be note that all-lowercase is not the conventional form for BCP 47 codes, but it is used here to avoid the need for parsing of BCP 47 codes. 
+                    
+                
+            
+        
+        
+
+            
+5.2 Equivalence definitions
+
+
+            
+
+                Two reports, A and B, are equivalent under this model if, for every fact in A, there is at least one equivalent fact in B, and vice versa.
+            
+            
+
+                Two facts, a and b, are equivalent if, for each property on a, there is an equivalent fact property present on b and vice versa.
+            
+
+            
+
+                Two fact properties are equivalent if they meet the relevant criterion for equal fact properties with the following modifications:
+                
+                    
+Two {id} property values are always considered equivalent (i.e. they are ignored for the purposes of establishing equivalence).
+                    
+Similarly, when considering the equivalence of {dimensions} properties, two note id core dimensions are always considered equivalent.
+                    
+Facts in the {target facts} properties of each link group in the {links} properties need only meet the requirements of equivalent facts.
+                
+            
+            
+
+                
+
+                    The above definition does not require equivalent reports to have the same number of facts.  Multiple equivalent facts in one report can be considered equivalent to a single fact in the other.
+                
+            
+        
+    
+    
+
+        
+6 Duplicate and alternative facts
+        
+
+            This specification provides a number of definitions relating to
+            facts which may be considered duplicates or alternatives for certain
+            purposes.  
+            
+        
+        
+Two facts, a and b, are duplicate facts if for every dimension in the {dimensions} property of a, the same dimension is present in b with an equal dimension value and vice versa.
+        
+
+            Duplicate facts are
+            permitted under the model, but users may wish to prohibit some or
+            all classes of duplicates in specific applications.
+        
+        
+
+            Alternative facts are facts that are distinguished by only the
+            language
+            or unit core
+            dimensions.  Unlike duplicate
+            facts, alternative facts are dimensionally distinct,
+            but users may wish to restrict their use as they may provide
+            alternative, and potentially inconsistent, values for the same data
+            point.
+        
+        
+
+            Neither duplicates nor alternative facts are considered an error by
+            this specification.  Specifications based on this model
+            MAY prohibit certain classes of duplicates and
+            alternative facts.  This specification defines the standard error code, oime:disallowedDuplicateFacts, 
+            that MAY be used when prohibited duplicate facts are present in a report.
+        
+        
+
+            
+6.1 Complete duplicates
+            
+                
+Two duplicate facts are complete duplicates if:
+                
+                    
+they have satisfy the requirements for fact value equality; and
+                    
+either:
+                        
+                            
+the {decimals} property is absent from both facts; or
+                            
+the {decimals} property has the same integer value.
+
+                        
+                
+            
+        
+        
+
+            
+6.2 Consistent duplicates
+            
+                
+Two duplicate facts are consistent duplicates if they are complete duplicates, or: 
+                
+                    
+they are numeric facts; and
+                    
+they have reported values and precisions that are consistent with having been rounded from a single actual value, as described below.
+                
+            
+            
+
+                
+6.2.1 Numeric value consistency
+                
+
+                Consistency of numeric values is established by considering the interval represented by each reported fact, and ensuring that there is overlap between all intervals.  The interval used should be inclusive ("closed"), with the additional constraint that values reported to the same precision are only considered consistent if they have the same reported value.  For more details on this approach, see Handling Duplicate Facts in XBRL and Inline XBRL [DUPLICATES-WGN].
+                
+            
+            
+
+                Numeric facts that are complete duplicates are also considered to be consistent duplicates.
+            
+            
+
+                
+
+                    It should be noted that the definition of consistency is not transitive;  a fact A being consistent with both B and C does not imply that B and C are consistent. 
+                
+            
+        
+        
+
+            
+6.3 Inconsistent duplicates
+            
+                
+
+            Two duplicate facts are inconsistent duplicates if:
+                 
+                
+                    
+they are numeric facts but are not consistent duplicates; or 
+                    
+they are non-numeric facts but do not satisfy the requirements for fact value equality.
+                
+            
+        
+        
+
+            
+6.4 Multi-language alternatives
+            
+                
+Two facts, a and b, are multi-language alternatives if:
+                
+                    
+ both facts are text facts;
+                    
+ for every dimension except the language core dimension in the {dimensions} property of a, the same dimension is present in b with an equal dimension value and vice versa; and 
+                    
+ the facts have distinct values for the language core dimension.
+                
+                    
+                
+            
+The error code oime:illegalMultiLanguageAlternatives MAY be used by applications that prohibit multi-language alternatives.
+        
+        
+
+            
+6.5 Multi-unit alternatives
+            
+                
+Two facts, a and b, are multi-unit alternatives if:
+                
+                    
+ both facts are numeric facts;
+                    
+ for every dimension except the unit core dimension in the {dimensions} property of a, the same dimension is present in b with an equal dimension value and vice versa; and 
+                    
+ the facts have distinct values for the unit core dimension.
+                
+                    
+                
+            
+The error code oime:illegalMultiUnitAlternatives MAY be used by applications that prohibit multi-unit alternatives.
+        
+    
+  
+
+    
+
+      
+Appendix A References
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      BCP47IETF.
+ "
+         BCP47: Tags for Identifying Languages
+	"DIMENSIONSXBRL International Inc..
+ "XBRL Dimensions 1.0"
+Ignacio Hernández-Ros, and Hugh Wallis.DTR STRUCTUREXBRL International Inc.
+ "Data Types Registry - Structure 1.1"
+Mark GoodhandHugh WallisPaul Warren.DUPLICATES-WGNXBRL International Inc..
+ "Handling Duplicate Facts in XBRL and Inline XBRL 1.0"
+Paul Warren.EXTENSIBLE ENUMERATIONS 2.0XBRL International Inc..
+ "Extensible Enumerations 2.0"
+Mark Goodhand, and Paul Warren.IETF RFC 2119IETF (Internet Engineering Task Force).
+ "RFC 2119: Key words for use in RFCs to  Indicate Requirement Levels"
+Scott Bradner.ISO8601International Standards Organisation.
+ "
+		ISO 8601 international standard numeric date and time representations.
+	"OIMCOMMONXBRL International Inc..
+ "XBRL Open Information Model Common Definitions"
+Herm Fischer, Mark Goodhand, and Paul Warren.XBRL 2.1XBRL International Inc..
+ "Extensible Business Reporting Language (XBRL) 2.1 Includes Corrected Errata Up To 2013-02-20"
+Phillip Engel, Walter Hamscher, Geoff Shuetrim, David vun Kannon, and Hugh Wallis.XML NamesW3C (World Wide Web Consortium).
+ "Namespaces in XML 1.0 (Third Edition)"XML Schema DatatypesW3C (World Wide Web Consortium).
+ "XML Schema Part 2: Datatypes Second Edition"
+Paul V. Biron, and Ashok Malhotra.XML Schema StructuresW3C (World Wide Web Consortium).
+ "XML Schema Part 1: Structures Second Edition"
+Henry S. Thompson, David Beech, Murray Maloney, and Noah Mendelsohn.xBRL-XMLXBRL International Inc..
+ "xBRL-XML: XML Mappings for the Open Information Model 1.0"
+Paul Warren, and Herm Fischer.
+    
+    
+
+  
+Appendix B Intellectual property status (non-normative)
+  
+  
+
+    This document and translations of it may be copied and
+    furnished to others, and derivative works that comment on or
+    otherwise explain it or assist in its implementation may be
+    prepared, copied, published and distributed, in whole or in
+    part, without restriction of any kind, provided that the above
+    copyright notice and this paragraph are included on all such
+    copies and derivative works. However, this document itself may
+    not be modified in any way, such as by removing the copyright
+    notice or references to XBRL International or XBRL
+    organizations, except as required to translate it into
+    languages other than English. Members of XBRL International
+    agree to grant certain licenses under the XBRL International
+    Intellectual Property Policy 
+    (www.xbrl.org/legal).
+  
+
+
+  
+
+    This document and the information contained herein is provided
+    on an "AS IS" basis and XBRL INTERNATIONAL DISCLAIMS ALL
+    WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+    ANY WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT
+    INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+    MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+  
+
+  
+
+    The attention of users of this document is directed to the
+    possibility that compliance with or adoption of XBRL
+    International specifications may require use of an invention
+    covered by patent rights. XBRL International shall not be
+    responsible for identifying patents for which a license may be
+    required by any XBRL International specification, or for
+    conducting legal inquiries into the legal validity or scope of
+    those patents that are brought to its attention. XBRL
+    International specifications are prospective and advisory
+    only. Prospective users are responsible for protecting
+    themselves against liability for infringement of patents. XBRL
+    International takes no position regarding the validity or
+    scope of any intellectual property or other rights that might
+    be claimed to pertain to the implementation or use of the
+    technology described in this document or the extent to which
+    any license under such rights might or might not be available;
+    neither does it represent that it has made any effort to
+    identify any such rights. Members of XBRL International agree
+    to grant certain licenses under the XBRL International
+    Intellectual Property Policy 
+    (www.xbrl.org/legal).
+  
+
+    
+
+      
+Appendix C  Document History (non-normative)
+      
+DateAuthorDetails
+        
+13 January 2016Paul Warren
+          
+First Public Working Draft
+        
+        
+14 December 2016Paul Warren
+          
+Candidate Recommendation
+        
+        
+02 May 2017Paul Warren
+          
+Second Candidate Recommendation
+        
+        
+12 December 2018Paul Warren
+          
+Third Candidate Recommendation
+        
+        
+12 June 2019Paul Warren
+          
+Fourth Candidate Recommendation
+        
+        
+07 May 2020Paul Warren
+          
+Fifth Candidate Recommendation
+        
+        
+14 October 2020Paul Warren
+          
+Sixth Candidate Recommendation
+        
+        
+03 February 2021Paul Warren
+          
+Seventh Candidate Recommendation
+        
+        
+16 February 2021Paul Warren
+          
+Eighth Candidate Recommendation
+        
+        
+07 July 2021Paul Warren
+          
+Nineth Candidate Recommendation
+        
+        
+04 August 2021Paul Warren
+          
+Proposed Recommendation
+        
+        
+13 October 2021Paul Warren
+          
+Recommendation
+        
+      
+    
+    
+
+      
+Appendix D Errata Corrections incorporated in this document
+      
+ This appendix contains a list of the errata that have been incorporated into this document. This represents
+        all those errata corrections that have been approved by the XBRL International Specification Maintenance Working
+        Group (SWG) up to and including 13 October 2021. Hyperlinks to relevant e-mail threads may only
+        be followed by those who have access to the relevant mailing lists. Access to internal XBRL mailing lists is
+        restricted to members of XBRL International Inc. 
+      
+No errata have been incorporated into this document.
+
+    
+  

@@ -1,0 +1,251 @@
+\chapter{Historical compatibility and future simulation}
+\label{ch:math}
+
+\section{Define what is observed before inverting it}
+
+Let $D_k$ be the disclosures available under information cutoff $k$. Each
+numeric observation $d_i$ has a context: entity or group perimeter, concept,
+measurement basis, dimensions, currency, period and precision. These contexts
+are part of the observation operator, not additional columns that can be
+discarded after extraction.
+
+A candidate history $h$ contains an opening economic and accounting state,
+events through the last historical date $T$, contract terms, accounting
+policies, consolidation relationships and latent quantities. Let $M$ denote
+the declared model scope: its event templates, admissible rule versions and
+allowed unknowns. It excludes arbitrary events that the chosen model has no
+way to represent. The reporting operator $O_i(h)$ produces the quantity to
+which observation $i$ refers, including its basis and perimeter.
+
+Reported numbers are often rounded. If a number $v_i$ is rounded to the nearest
+unit $q_i$, an illustrative admissible interval is
+$[v_i-q_i/2,v_i+q_i/2)$ under the corresponding tie convention. The actual
+rounding convention, scale and XBRL accuracy metadata govern the imported
+constraint. A disclosure with unspecified precision does not acquire a
+convenient tolerance silently. Write $\mathcal{I}_i$ for the justified
+observation interval, and $C_M(h)$ for the joint accounting, contractual and
+semantic constraints. Then the historical compatibility set is
+\begin{equation}\label{eq:histset}
+ \Hist_M(D_k)=\{h\in\mathcal{H}_M:
+ C_M(h)\ \land\ O_i(h)\in\mathcal{I}_i\text{ for every applicable }i\}.
+\end{equation}
+Qualitative assertions enter as reviewed logical conditions, rather than
+numeric intervals. Incompatible source contexts are never forced into the
+same equation.
+
+Equation~\eqref{eq:histset} distinguishes three outcomes. An empty set means
+that the observations and declared model are inconsistent. A singleton means
+that this model identifies a history at its chosen resolution. A larger set
+preserves unresolved alternatives. An empty set does not prove that the
+company's accounts are false: a wrong extraction, missing event type or
+incorrect perimeter can cause the inconsistency. A singleton does not prove
+that the model contains the real history.
+
+\section{Why published statements cannot identify all transactions}
+
+The simplest derivation uses fixed account mappings and a fixed basis. Let
+$z\in\mathbb{R}^n$ contain unknown historical movement amounts. For $m$
+disclosed aggregates, let $A\in\mathbb{R}^{m\times n}$ be the aggregation
+matrix and $y=Az\in\mathbb{R}^m$. If there is a nonzero vector $v$ with
+$Av=0$, then
+\[
+ A(z+v)=Az+Av=y.
+\]
+Both movement vectors give the same reports whenever both satisfy the remaining
+constraints. Thus the feasible family is the affine set $z+\ker A$ intersected
+with those constraints. Accounting requirements can shrink this family, but
+do not generally eliminate it. For example, cash collections in a receivables
+bridge are constrained by
+\[
+ AR_T=AR_0+\text{credit sales}-\text{collections}
+       -\text{write-offs}+\text{other classified movements}.
+\]
+If the note does not distinguish acquisitions, currency effects and write-offs,
+several collections paths may fit the same closing balance.
+
+There is a second ambiguity beyond aggregation. In
+Equation~\eqref{eq:running}, identical historical movements arise from different
+contractual reset terms. Even recovering $z$ exactly would leave these terms
+unidentified. AccDSL therefore infers economically relevant states and
+contract terms alongside journal movements. A linear inverse solver over
+statement lines alone cannot solve this second problem.
+
+\section{The accounting state and its invariants}
+
+For one entity book with $n_a$ accounts in one functional currency, let
+$b_t\in\mathbb{Q}^{n_a}$ be
+signed account balances, with debit amounts positive and credit amounts
+negative. Exact decimal amounts can be represented as rationals with a power
+of ten denominator. A journal batch $j_t$ contains the signed functional-currency
+amounts posted by one atomic event or explicitly grouped event batch. Its
+balance condition is
+\begin{equation}\label{eq:posting}
+ \boldsymbol{1}^{\mathsf T}j_t=0,\qquad b_t=b_{t^-}+j_t.
+\end{equation}
+If $\boldsymbol{1}^{\mathsf T}b_0=0$, substitution gives
+$\boldsymbol{1}^{\mathsf T}b_t=
+\boldsymbol{1}^{\mathsf T}b_{t^-}+\boldsymbol{1}^{\mathsf T}j_t=0$.
+Induction establishes conservation through every committed batch. Opening
+balances must therefore be supplied as a balanced, explained entry or a
+balanced imported state with unresolved composition explicitly identified.
+
+This proof establishes a bookkeeping invariant. It does not establish that an
+amount belongs in the chosen account, that a contract exists, or that an
+accounting standard permits a treatment. Posting validation additionally
+checks account roles, ownership, currency conversions, applicability of rules
+and event preconditions.
+
+The balance vector includes temporary revenue and expense accounts during
+the period. Period closing transfers their net balance to equity through
+balanced entries. A reporting function can include current profit in equity
+before closing, or use the closed book afterwards, but must not include it
+twice. Income and cash-flow reports use classified movements and exclude
+mechanical closing transfers from operating flows. Consequently statements
+are functions of balances, journals, contract state and reporting rules:
+\begin{equation}\label{eq:report}
+ Y_{[u,v)}=R(b_{v^-},J_{[u,v)},X_{v^-},\rho,[u,v)).
+\end{equation}
+Here $\rho$ specifies the reporting basis and perimeter, and $X$ contains
+economic state beyond ledger balances. Cash-flow classification is part of
+$R$, not recoverable from the closing cash balance alone.
+
+Each book has its own functional currency. Quantities such as shares, tonnes
+and foreign-currency units are typed separately and never added to this
+balance equation. A foreign-currency posting stores its original units and
+the functional-currency valuation with its rate source. Translation into a
+group's presentation currency and consolidation adjustments occur in a
+separate book under explicit rules.
+
+\section{Simulate events from economic state}
+
+For a chosen history $h$, the state at $T$ is $X_T(h)$. It contains balances,
+open contracts, lots or cohorts, unpaid accruals, commitments and other
+quantities needed for future evolution. Let $s$ identify a scenario definition,
+$U_t^s$ its supplied economic drivers, $a_t$ management's actions, and
+$\varepsilon_t$ future innovations. A behavioural policy $\pi$ chooses
+$a_t$ using the permitted information $\mathcal{F}_t$:
+\begin{align}
+ a_t&=\pi(X_t,U_{\leq t}^s,\mathcal{F}_t;\theta),\label{eq:actions}\\
+ e_{t+1}&=\mathcal G(X_t,a_t,U_{t:t+1}^s,\varepsilon_{t+1};\theta),\label{eq:events}\\
+ (j_{t+1},m_{t+1})&=\mathcal A(e_{t+1},X_t,r_{t+1}),\label{eq:account}\\
+ X_{t+1}&=\mathcal T(X_t,e_{t+1},j_{t+1},m_{t+1}).\label{eq:transition}
+\end{align}
+The generator $\mathcal G$ emits events, such as a sale, rate reset, payment or default.
+The accounting function $\mathcal A$ applies rule package $r$ and returns journal
+postings plus measurement annotations $m$. The transition $\mathcal T$ updates economic
+and ledger state atomically. A default can therefore change the loan's legal
+status, expected recoveries, recognised allowance and cash collections through
+related, but distinct, records.
+
+This ordering is a reference abstraction. Within a date, event dependencies
+and phases specify the actual order. Expectations used to measure an allowance
+or provision must be calculated from the information permitted at that date.
+They cannot use the realised future path of the simulation. An inner
+expectation model may use quadrature, analytic formulas or nested simulation;
+its approximation and seed belong in the measurement annotation.
+
+Some scenarios specify a deterministic macroeconomic path while leaving
+idiosyncratic defaults random. Others supply a joint stochastic driver model.
+A risk-neutral measure used to value a derivative is distinct from the
+real-world measure used to simulate business outcomes. Every stochastic
+adapter declares its measure and conditioning information. The accounting
+function receives the resulting valuation with that declaration.
+
+\section{Preserve sets and distributions separately}
+
+Let $K_{h,s}$ be the probability law of future reports produced by the forward
+model conditional on history $h$, scenario $s$ and its declared behavioural
+assumptions. A deterministic simulation is the special case of a point mass.
+When no probabilities over historical explanations are justified, the natural
+answer is a family of laws,
+\begin{equation}\label{eq:family}
+ \mathcal{K}_{M,s}(D_k)=\{K_{h,s}:h\in\Hist_M(D_k)\}.
+\end{equation}
+The system can report each explanation, bounds on a deterministic outcome,
+or lower and upper event probabilities across this family. Those are different
+result types. A range of conditional means is not a confidence interval, and
+an envelope of conditional quantiles is not itself a single predictive
+distribution.
+
+If a defensible probability measure $\mu(dh\mid D_k,M)$ supported on
+$\Hist_M(D_k)$ is supplied, histories and report outcomes must have specified
+measurable spaces. Assume that $K_{h,s}$ is a probability kernel: it is a
+probability measure on report outcomes for each $h$, and $h\mapsto K_{h,s}(B)$
+is measurable for each measurable event $B$. The predictive law is then
+\begin{equation}\label{eq:mixture}
+ \Prob(Y^s\in B\mid D_k,M)=
+ \int K_{h,s}(B)\,\mu(dh\mid D_k,M).
+\end{equation}
+For discrete explanations this is the usual weighted sum. For continuous
+unknowns, integration uses the declared measure over those unknowns, not a
+count of solver solutions. Bayesian weights require a prior and a likelihood;
+expert weights remain labelled as elicited. A likelihood must not treat a
+statement total and all its components as independent repeated evidence.
+Deterministic equality constraints require a reduced parameterisation or
+proper conditional-measure treatment, rather than an undocumented Gaussian
+penalty with near-zero variance.
+
+Suppose the fixed-loan explanation receives weight $w$ and the floating-loan
+explanation receives $1-w$, solely as an illustration. Under the rate shock,
+\[
+ \Prob(I=5)=w,\qquad\Prob(I=7)=1-w,
+ \qquad\E[I]=7-2w.
+\]
+The expected expense is useful but hides the two different outcomes. For a
+general scalar output with finite second moment, put $m(h)=\E[Y\mid h]$.
+Write $Y-\E[Y]=(Y-m(h))+(m(h)-\E[Y])$. The cross term vanishes because
+$\E[Y-m(h)\mid h]=0$. Taking expectations of the squared expression gives
+\begin{equation}\label{eq:variance}
+ \operatorname{Var}(Y)=
+ \E_h[\operatorname{Var}(Y\mid h)]+
+ \operatorname{Var}_h(\E[Y\mid h]).
+\end{equation}
+The first term is uncertainty within a chosen explanation; the second captures
+differences between explanations. This decomposition requires the measure
+$\mu$. Without it, the system reports the family in
+Equation~\eqref{eq:family}, rather than manufacturing a variance.
+
+Weights themselves can be uncertain. For an admissible class $\mathcal{W}$
+of measures, AccDSL can compute
+\[
+ \underline p(B)=\inf_{\mu\in\mathcal{W}}\int K_{h,s}(B)\,d\mu(h),
+ \qquad
+ \overline p(B)=\sup_{\mu\in\mathcal{W}}\int K_{h,s}(B)\,d\mu(h).
+\]
+If every measure supported on the feasible histories is allowed and point
+masses are included, these bounds reduce to the infimum and supremum of
+$K_{h,s}(B)$ over histories: averages cannot lie outside the range of their
+integrands, and point masses attain, or approximate, the extremes. Narrower
+weight restrictions require an explicit justification and a separate
+optimisation problem.
+
+\section{Resolution and computational limits}
+
+For a requested horizon $H$ and scenario family $\mathcal{S}$, histories may be
+grouped only when they have the same conditional law for all requested
+outputs:
+\[
+ h_1\sim_{H,\mathcal{S}}h_2
+ \quad\Longleftrightarrow\quad
+ K_{h_1,s}=K_{h_2,s}\text{ on those outputs for every }s\in\mathcal{S}.
+\]
+This definition explains why individual sales can sometimes be replaced by
+cohorts, while fixed and floating loans usually cannot be merged for an
+interest-rate stress. Exact equivalence can be difficult to prove. A grouping
+justified only by approximate numerical agreement carries an error criterion
+and is not labelled exact. Source provenance remains available even when
+execution shares a common state.
+
+Bounds require comparable honesty. A linear program can provide certified
+extrema for a supported linear model. A set of feasible sampled histories
+provides observed extrema: its minimum is no smaller than the true infimum,
+and its maximum is no larger than the true supremum. It therefore supplies
+an inner exploration of possibilities, not a certified outer bound. Interval
+methods may provide outer bounds that no single history attains. Every result
+records which of these meanings applies.
+
+The initial implementation offers exact bounded choices and linear constraints,
+symbolic continuous families such as $\alpha\in[0,1]$, and explicit scenario
+execution at selected feasible states. General nonlinear partial identification,
+automatic model discovery and exhaustive enumeration of all economic histories
+are research extensions, not promises made by the core language.

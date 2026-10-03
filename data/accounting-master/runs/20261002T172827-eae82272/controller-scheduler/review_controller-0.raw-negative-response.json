@@ -1,0 +1,55 @@
+{
+  "verdict": "REVISE",
+  "summary": "The scheduler has two approval and recovery defects, plus a broad exception boundary that can downgrade controller failures into ordinary phase repairs.",
+  "steps": [
+    "Reviewed the supplied scheduler control flow against the stated resumability, repair, approval, process-boundary, and preservation interfaces.",
+    "Separated concrete control-plane defects from limitations caused by omitted helper implementations and omitted project history."
+  ],
+  "assumptions": [
+    "The stated acceptance interface applies to builtin phases as well as worker-backed phases unless an explicit equivalent internal review contract is supplied.",
+    "The omitted implementations of check_protection, evidence_hashes, live_group_members, worker, and refresh may add checks, but they cannot remove the shown control-flow gaps.",
+    "The trusted-worker and initial-process-group containment assumptions in the packet are accepted as stated and are not treated as missing requirements."
+  ],
+  "checks": [
+    "The supplied verification reports 55 passing tests, but test counts are treated only as control-plane evidence and do not establish accounting correctness or prove that the identified branches are fully covered.",
+    "The review used only the supplied code, interfaces, test names, and verification metadata."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    {
+      "id": "CTRL-001",
+      "severity": "high",
+      "location": "scripts/run_accounting_master.py: Master.recover_process",
+      "finding": "When the saved worker leader PID is reused, the branch `current and current['start_ticks'] != previous['start_ticks']` immediately marks the prior process finished. It does not inspect `live_group_members(previous['pgid'])`. Old descendants can therefore remain in the original process group while a new run proceeds, violating the stated stale-state recovery and bounded single-writer/process guarantee.",
+      "repair": "After detecting PID reuse, inspect the saved process group. If any members remain, raise ContinuationVeto and require scoped inspection before resuming. Mark recovery finished only when the old group is confirmed inactive. Preserve the existing no-signal behavior for the unrelated reused PID."
+    },
+    {
+      "id": "CTRL-002",
+      "severity": "high",
+      "location": "scripts/run_accounting_master.py: Master.execute_phase builtin branch",
+      "finding": "Builtin phases are accepted after `result.get('status') == 'passed'` and a protection check. This path does not run the normal deterministic phase checks, does not require a positive result-review verdict, and does not enforce the global acceptance condition that tests run and pass with a reviewed result. A malformed or over-optimistic builtin response can therefore produce `accepted_internal` without the required verification/review evidence.",
+      "repair": "Apply the same acceptance gate to builtin phases: verify every required deliverable, run the phase checks and require `passed is True` with a positive test count, create the corresponding checks/evidence record, and require an equivalent reviewed result verdict before setting `accepted_internal`. If builtin phases are intentionally exempt, state that exemption explicitly in the interface and persist an equivalent internal review artifact with dedicated coverage."
+    },
+    {
+      "id": "CTRL-003",
+      "severity": "high",
+      "location": "scripts/run_accounting_master.py: Master.run phase loop",
+      "finding": "The phase loop catches every exception other than ContinuationVeto from `execute_phase`, marks the phase `needs_repair`, and continues scheduling later phases. Unexpected controller defects such as invariant failures, schema/key errors, or controller persistence failures can therefore be misclassified as worker/phase failures. This conflicts with the stated controller-failure rule requiring supervisor repair and a fresh read-only review, never implicit continuation.",
+      "repair": "Narrow the catch to explicitly classified phase/worker failures that are safe to repair. Route unexpected exceptions and controller integrity/persistence errors to a continuation-veto path that records the failure, stops scheduling, preserves evidence, and requires supervisor repair plus fresh review before another run."
+    }
+  ],
+  "residuals": [
+    "The packet does not include helper implementations, so this review cannot determine whether omitted helpers independently compensate for any part of these gaps.",
+    "The supplied tests include PID-reuse and worker-failure scenarios by name, but the packet does not provide their assertions or coverage details; passing counts alone do not show that lingering descendants after PID reuse or unexpected controller exceptions are rejected.",
+    "No conclusion is made about accounting, scientific, or human-acceptance completeness; the packet explicitly keeps those gaps open."
+  ],
+  "next_actions": [
+    "Repair CTRL-001 through CTRL-003 in the controller.",
+    "Add focused tests for PID reuse with surviving old-group descendants, builtin acceptance without valid checks/review, and unexpected controller exceptions being continuation vetoes.",
+    "Rerun the full controller test suite, regenerate the reviewed plan and result evidence, and obtain a fresh read-only review before accepting the scheduler changes."
+  ]
+}

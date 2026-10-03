@@ -1,0 +1,2091 @@
+"""Core 0.1 source-independent typed IR and bounded lowering profile.
+
+The module deliberately implements a small, explicit profile.  It does not
+load an authored expected IR and it does not infer missing evidence, review,
+package, or accounting metadata.  Callers provide those facts through
+``CompileBindings``.  ``core0_frontends_v1`` supplies the textual parser; this
+module is also the typed-library entrypoint.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field, fields, is_dataclass
+from datetime import date, datetime, timezone
+from decimal import Decimal, InvalidOperation
+from fractions import Fraction
+import copy
+import hashlib
+import json
+from pathlib import Path
+import re
+import unicodedata
+from types import MappingProxyType
+from typing import Any, Iterable, Mapping, Optional, Sequence
+
+try:  # The repository already uses jsonschema; no new dependency is added.
+    import jsonschema
+except Exception:  # pragma: no cover - reported by validation when absent.
+    jsonschema = None
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SCHEMA_PATH = ROOT / "docs/design/spec/core-ir.schema.json"
+
+# The executable profile is deliberately limited to the four account roles
+# exported by the retained DemoDebt package.  Keeping this mapping explicit
+# prevents a caller from changing the accounting perimeter by supplying a
+# different role table through bindings.
+_ACCOUNT_ROLES = {
+    "Cash": "Asset",
+    "Debt": "Liability",
+    "InterestExpense": "Expense",
+    "Retained": "Equity",
+}
+
+
+class _Failure(Exception):
+    def __init__(self, diagnostic: "Diagnostic"):
+        self.diagnostic = diagnostic
+        super().__init__(diagnostic.message)
+
+
+@dataclass(frozen=True)
+class Diagnostic:
+    code: str
+    message: str
+    location: str = "program"
+    severity: str = "error"
+    capability: Optional[str] = None
+    span: Optional[tuple[int, int]] = None
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "code": self.code,
+            "message": self.message,
+            "location": self.location,
+            "severity": self.severity,
+            "capability": self.capability,
+            "span": list(self.span) if self.span is not None else None,
+        }
+
+
+@dataclass(frozen=True)
+class CompileResult:
+    ir: Optional[dict[str, Any]]
+    diagnostics: tuple[Diagnostic, ...] = ()
+    source_map: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
+    input_sha256: Optional[str] = None
+    binding_records: Mapping[str, Any] = field(default_factory=dict)
+
+    @property
+    def ok(self) -> bool:
+        return self.ir is not None and not self.diagnostics
+
+    @property
+    def semantic_projection(self) -> Optional[dict[str, Any]]:
+        return {"ir": semantic_projection(self.ir), "bindings": dict(self.binding_records)} if self.ir is not None else None
+
+
+@dataclass(frozen=True)
+class ValidationResult:
+    valid: bool
+    diagnostics: tuple[Diagnostic, ...] = ()
+
+    @property
+    def ok(self) -> bool:
+        return self.valid and not self.diagnostics
+
+
+def _pairs(value: Mapping[str, Any] | Iterable[tuple[str, Any]] | None) -> tuple[tuple[str, Any], ...]:
+    if value is None:
+        return ()
+    if isinstance(value, Mapping):
+        return tuple((str(k), v) for k, v in value.items())
+    return tuple((str(k), v) for k, v in value)
+
+
+def _tuple(value: Iterable[Any] | None) -> tuple[Any, ...]:
+    return tuple(value or ())
+
+
+def _fraction(value: Fraction | int | str | Decimal) -> Fraction:
+    if isinstance(value, Fraction):
+        return value
+    if isinstance(value, int):
+        return Fraction(value, 1)
+    if isinstance(value, Decimal):
+        return Fraction(value)
+    if isinstance(value, str):
+        try:
+            return Fraction(Decimal(value))
+        except (InvalidOperation, ValueError, ZeroDivisionError) as exc:
+            raise ValueError(f"invalid decimal literal {value!r}") from exc
+    raise TypeError(f"unsupported numeric value {type(value)!r}")
+
+
+def rational(value: Fraction | int | str | Decimal) -> dict[str, str]:
+    q = _fraction(value)
+    return {"n": str(q.numerator), "d": str(q.denominator)}
+
+
+def parse_rational(value: Mapping[str, str]) -> Fraction:
+    try:
+        n, d = int(value["n"]), int(value["d"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("invalid rational") from exc
+    if d <= 0:
+        raise ValueError("invalid rational denominator")
+    q = Fraction(n, d)
+    if (str(q.numerator), str(q.denominator)) != (value["n"], value["d"]):
+        raise ValueError("noncanonical rational")
+    return q
+
+
+def _clean_id(value: str) -> str:
+    value = re.sub(r"[^A-Za-z0-9_.-]+", "_", value)
+    return value.strip(".") or "anonymous"
+
+
+def _iso(value: str, where: str) -> str:
+    try:
+        parsed = date.fromisoformat(value)
+    except ValueError as exc:
+        raise _Failure(Diagnostic("InvalidDate", f"{value!r} is not a Gregorian date", where)) from exc
+    if parsed.isoformat() != value:
+        raise _Failure(Diagnostic("InvalidDate", f"use canonical YYYY-MM-DD for {value!r}", where))
+    return value
+
+
+def _string(value: str) -> str:
+    if any(0xD800 <= ord(c) <= 0xDFFF for c in value):
+        raise _diag("InvalidString", "unpaired Unicode surrogate", "string")
+    return unicodedata.normalize("NFC", value)
+
+
+def binding_projection(value: Any) -> Any:
+    """JSON-compatible, complete typed inputs, including external records."""
+    if isinstance(value, Fraction):
+        return rational(value)
+    if isinstance(value, Decimal):
+        return rational(value)
+    if is_dataclass(value):
+        return {"constructor": type(value).__name__, **{f.name: binding_projection(getattr(value, f.name)) for f in fields(value)}}
+    if isinstance(value, (list, tuple)):
+        return [binding_projection(v) for v in value]
+    if isinstance(value, Mapping):
+        return {k: binding_projection(v) for k, v in value.items()}
+    return value
+
+
+def _instant(value: str, where: str) -> str:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise _Failure(Diagnostic("InvalidTimestamp", f"invalid timestamp {value!r}", where)) from exc
+    if parsed.tzinfo is None:
+        raise _Failure(Diagnostic("MissingTimezone", "timestamps require an explicit timezone", where))
+    return value
+
+
+def _time(kind: str, start: str, end: Optional[str], calendar: str) -> dict[str, Any]:
+    _iso(start, "time.start")
+    if kind == "interval":
+        if end is None or date.fromisoformat(end) <= date.fromisoformat(start):
+            raise _Failure(Diagnostic("InvalidPeriod", "interval end must be after start", "time"))
+        _iso(end, "time.end_exclusive")
+    elif end is not None:
+        raise _Failure(Diagnostic("InvalidPeriod", "instant cannot have an end", "time"))
+    return {"kind": kind, "start": start, "end_exclusive": end, "calendar": calendar}
+
+
+# ---------------------------------------------------------------------------
+# Typed-library constructors
+
+
+@dataclass(frozen=True)
+class Expr:
+    """Marker class for typed expressions."""
+
+
+@dataclass(frozen=True)
+class Literal(Expr):
+    value: Any
+    type_name: Optional[str] = None
+    unit: Optional[str] = None
+    display: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class Ref(Expr):
+    name: str
+
+
+@dataclass(frozen=True)
+class External(Expr):
+    key: str
+
+
+@dataclass(frozen=True)
+class Call(Expr):
+    name: str
+    args: tuple[Expr, ...] = ()
+
+    def __init__(self, name: str, args: Sequence[Expr] = ()):
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "args", tuple(args))
+
+
+@dataclass(frozen=True)
+class Binary(Expr):
+    op: str
+    left: Expr
+    right: Expr
+
+
+@dataclass(frozen=True)
+class Unary(Expr):
+    op: str
+    arg: Expr
+
+
+@dataclass(frozen=True)
+class ArrayExpr(Expr):
+    items: tuple[Expr, ...] = ()
+
+    def __init__(self, items: Sequence[Expr] = ()):
+        object.__setattr__(self, "items", tuple(items))
+
+
+@dataclass(frozen=True)
+class RecordExpr(Expr):
+    fields: tuple[tuple[str, Expr], ...] = ()
+
+    def __init__(self, fields: Mapping[str, Expr] | Sequence[tuple[str, Expr]] = ()):
+        object.__setattr__(self, "fields", _pairs(fields))
+
+
+@dataclass(frozen=True)
+class UseDecl:
+    name: str
+    version: str
+
+
+@dataclass(frozen=True)
+class SourceDecl:
+    name: str
+    external: str
+
+
+@dataclass(frozen=True)
+class EntityDecl:
+    name: str
+    currency: str
+
+
+@dataclass(frozen=True)
+class BookDecl:
+    name: str
+    entity: str
+    basis: str
+    version: str
+
+
+@dataclass(frozen=True)
+class AccountDecl:
+    name: str
+    role: str
+    book: str
+
+
+@dataclass(frozen=True)
+class OpeningDecl:
+    name: str
+    book: str
+    external: str
+
+
+@dataclass(frozen=True)
+class ObservationDecl:
+    name: str
+    type_name: str
+    instant: str
+    value: Expr
+    source: str
+
+
+@dataclass(frozen=True)
+class SymbolDecl:
+    name: str
+    type_name: str
+    lower: Expr
+    upper: Expr
+    reason: str
+
+
+@dataclass(frozen=True)
+class LetDecl:
+    name: str
+    value: Expr
+    declared_type: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class ConstraintDecl:
+    name: str
+    expression: Expr
+
+
+@dataclass(frozen=True)
+class ContractDecl:
+    name: str
+    type_name: str
+    book: str
+    fields: tuple[tuple[str, Expr], ...] = ()
+
+    def __init__(self, name: str, type_name: str, book: str,
+                 fields: Mapping[str, Expr] | Sequence[tuple[str, Expr]] = ()):
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "type_name", type_name)
+        object.__setattr__(self, "book", book)
+        object.__setattr__(self, "fields", _pairs(fields))
+
+
+@dataclass(frozen=True)
+class AlternativeDecl:
+    name: str
+    assumptions: tuple[Expr, ...] = ()
+
+    def __init__(self, name: str, assumptions: Sequence[Expr] = ()):
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "assumptions", tuple(assumptions))
+
+
+@dataclass(frozen=True)
+class ScenarioDecl:
+    name: str
+    settings: tuple[tuple[str, Expr], ...] = ()
+
+    def __init__(self, name: str, settings: Mapping[str, Expr] | Sequence[tuple[str, Expr]] = ()):
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "settings", _pairs(settings))
+
+
+@dataclass(frozen=True)
+class ReportDecl:
+    name: str
+    book: str
+    mapping: Expr
+
+
+@dataclass(frozen=True)
+class UnsupportedDecl:
+    kind: str
+    name: str = ""
+
+
+Declaration = (UseDecl | SourceDecl | EntityDecl | BookDecl | AccountDecl | OpeningDecl |
+               ObservationDecl | SymbolDecl | LetDecl | ConstraintDecl | ContractDecl |
+               AlternativeDecl | ScenarioDecl | ReportDecl | UnsupportedDecl)
+
+
+@dataclass(frozen=True)
+class Program:
+    module: str
+    version: str
+    declarations: tuple[Declaration, ...] = ()
+    uses: tuple[UseDecl, ...] = ()
+
+    def __init__(self, module: str, version: str,
+                 declarations: Sequence[Declaration] = (), uses: Sequence[UseDecl] = ()):
+        if isinstance(declarations, Mapping) or isinstance(uses, Mapping):
+            raise TypeError("Program requires typed declarations, not an IR dictionary")
+        object.__setattr__(self, "module", str(module))
+        object.__setattr__(self, "version", str(version))
+        object.__setattr__(self, "declarations", tuple(declarations))
+        object.__setattr__(self, "uses", tuple(uses))
+
+
+# ---------------------------------------------------------------------------
+# Explicit compiler bindings
+
+
+@dataclass(frozen=True)
+class ReadingBinding:
+    key: str
+    literal: str
+    amount: Fraction | int | str
+    currency: str
+    instant: str
+    uri: str
+    filing_id: str
+    available: str
+    ingested: str
+    reviewer: str
+    review_date: str
+    review_reason: str
+    cutoff: str
+    system_as_of: Optional[str] = None
+    prior_view: str = "fixture:empty-view"
+    extraction: str = "provided-binding"
+    action: Optional[str] = None
+
+    def __post_init__(self):
+        object.__setattr__(self, "amount", _fraction(self.amount))
+
+
+@dataclass(frozen=True)
+class OpeningBinding:
+    key: str
+    date: str
+    balances: tuple[tuple[str, Fraction | int | str], ...]
+    book: Optional[str] = None
+    contracts: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
+
+    def __init__(self, key: str, date: str,
+                 balances: Mapping[str, Fraction | int | str] | Sequence[tuple[str, Fraction | int | str]],
+                 book: Optional[str] = None, contracts: Sequence[str] = (),
+                 dependencies: Sequence[str] = ()):
+        object.__setattr__(self, "key", key)
+        object.__setattr__(self, "date", date)
+        object.__setattr__(self, "balances", tuple((k, _fraction(v)) for k, v in _pairs(balances)))
+        object.__setattr__(self, "book", book)
+        object.__setattr__(self, "contracts", tuple(contracts))
+        object.__setattr__(self, "dependencies", tuple(dependencies))
+
+
+@dataclass(frozen=True)
+class ReportBinding:
+    key: str
+    mapping: str
+    cash_flow_policy: str
+    closing_policy: str
+    required_operations: tuple[str, ...]
+
+    def __init__(self, key: str, mapping: str, cash_flow_policy: str,
+                 closing_policy: str, required_operations: Sequence[str]):
+        object.__setattr__(self, "key", key)
+        object.__setattr__(self, "mapping", mapping)
+        object.__setattr__(self, "cash_flow_policy", cash_flow_policy)
+        object.__setattr__(self, "closing_policy", closing_policy)
+        object.__setattr__(self, "required_operations", tuple(required_operations))
+
+
+@dataclass(frozen=True)
+class PackageBinding:
+    name: str
+    version: str
+    digest: str
+    basis: str
+    effective_start: str
+    effective_end: str
+    operations: tuple[str, ...]
+    dependencies: tuple[str, ...]
+    authority: tuple[str, ...]
+    review_status: str = "illustrative"
+    implementation: Optional[str] = None
+    contract_types: tuple[str, ...] = ("DebtMix",)
+    artifact: str = "docs/design/fixtures/demo-debt-package.json"
+
+    @property
+    def id(self) -> str:
+        return f"{self.name}@{self.version}"
+
+    def __init__(self, name: str, version: str, digest: str, basis: str,
+                 effective_start: str, effective_end: str,
+                 operations: Sequence[str], dependencies: Sequence[str],
+                 authority: Sequence[str], review_status: str = "illustrative",
+                 implementation: Optional[str] = None,
+                 contract_types: Sequence[str] = ("DebtMix",),
+                 artifact: str = "docs/design/fixtures/demo-debt-package.json"):
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "version", version)
+        object.__setattr__(self, "digest", digest)
+        object.__setattr__(self, "basis", basis)
+        object.__setattr__(self, "effective_start", effective_start)
+        object.__setattr__(self, "effective_end", effective_end)
+        object.__setattr__(self, "operations", tuple(operations))
+        object.__setattr__(self, "dependencies", tuple(dependencies))
+        object.__setattr__(self, "authority", tuple(authority))
+        object.__setattr__(self, "review_status", review_status)
+        object.__setattr__(self, "implementation", implementation)
+        object.__setattr__(self, "contract_types", tuple(contract_types))
+        object.__setattr__(self, "artifact", artifact)
+
+
+@dataclass(frozen=True)
+class AssumptionBinding:
+    key: str
+    rationale: str
+    provenance: str = "ScenarioDesign"
+    role: str = "Hypothesis"
+    source_refs: tuple[str, ...] = ()
+    information_cutoff: Optional[str] = None
+    valid_start: Optional[str] = None
+    valid_end: Optional[str] = None
+
+    def __init__(self, key: str, rationale: str, provenance: str = "ScenarioDesign",
+                 role: str = "Hypothesis", source_refs: Sequence[str] = (),
+                 information_cutoff: Optional[str] = None,
+                 valid_start: Optional[str] = None, valid_end: Optional[str] = None):
+        object.__setattr__(self, "key", key)
+        object.__setattr__(self, "rationale", rationale)
+        object.__setattr__(self, "provenance", provenance)
+        object.__setattr__(self, "role", role)
+        object.__setattr__(self, "source_refs", tuple(source_refs))
+        object.__setattr__(self, "information_cutoff", information_cutoff)
+        object.__setattr__(self, "valid_start", valid_start)
+        object.__setattr__(self, "valid_end", valid_end)
+
+
+@dataclass(frozen=True)
+class SymbolAdmission:
+    name: str
+    reading_key: str
+    reason: str
+    reviewer: str
+    date: str
+    kind: str = "HistoricalFact"
+
+
+@dataclass(frozen=True)
+class AlternativeBinding:
+    name: str
+    author: str
+    created_at: str
+    reason: str
+
+
+@dataclass(frozen=True)
+class CompileBindings:
+    packages: tuple[PackageBinding, ...] = ()
+    readings: tuple[ReadingBinding, ...] = ()
+    openings: tuple[OpeningBinding, ...] = ()
+    reports: tuple[ReportBinding, ...] = ()
+    assumptions: tuple[AssumptionBinding, ...] = ()
+    calendar_id: str = "DemoCalendar@1"
+    calendar_name: str = "Gregorian"
+    horizon_start: str = "2026-01-01"
+    horizon_end: str = "2027-01-01"
+    symbol_uncertainty: str = "HistoricalFact"
+    entity_perimeter: str = "Acme-only"
+    admissions: tuple[SymbolAdmission, ...] = ()
+    alternatives: tuple[AlternativeBinding, ...] = ()
+
+    def __init__(self, packages: Sequence[PackageBinding] = (), readings: Sequence[ReadingBinding] = (),
+                 openings: Sequence[OpeningBinding] = (), reports: Sequence[ReportBinding] = (),
+                 assumptions: Sequence[AssumptionBinding] = (), calendar_id: str = "DemoCalendar@1",
+                 calendar_name: str = "Gregorian", horizon_start: str = "2026-01-01",
+                 horizon_end: str = "2027-01-01", symbol_uncertainty: str = "HistoricalFact",
+                 entity_perimeter: str = "Acme-only", admissions: Sequence[SymbolAdmission] = (),
+                 alternatives: Sequence[AlternativeBinding] = ()):
+        object.__setattr__(self, "packages", tuple(packages))
+        object.__setattr__(self, "readings", tuple(readings))
+        object.__setattr__(self, "openings", tuple(openings))
+        object.__setattr__(self, "reports", tuple(reports))
+        object.__setattr__(self, "assumptions", tuple(assumptions))
+        object.__setattr__(self, "calendar_id", calendar_id)
+        object.__setattr__(self, "calendar_name", calendar_name)
+        object.__setattr__(self, "horizon_start", horizon_start)
+        object.__setattr__(self, "horizon_end", horizon_end)
+        object.__setattr__(self, "symbol_uncertainty", symbol_uncertainty)
+        object.__setattr__(self, "entity_perimeter", entity_perimeter)
+        object.__setattr__(self, "admissions", tuple(admissions))
+        object.__setattr__(self, "alternatives", tuple(alternatives))
+
+    def admission(self, name: str) -> SymbolAdmission:
+        return _unique(self.admissions, "name", name, "MissingSymbolAdmission")
+
+    def alternative(self, name: str) -> AlternativeBinding:
+        return _unique(self.alternatives, "name", name, "MissingAlternativeMetadata")
+
+    def package(self, name: str, version: Optional[str] = None) -> PackageBinding:
+        candidates = [p for p in self.packages if p.name == name and (version is None or p.version == version)]
+        if len(candidates) != 1:
+            raise _Failure(Diagnostic("MissingPackageBinding", f"package {name!r} is not uniquely bound", name))
+        return candidates[0]
+
+    def reading(self, key: str) -> ReadingBinding:
+        candidates = [r for r in self.readings if r.key == key]
+        if len(candidates) != 1:
+            raise _Failure(Diagnostic("MissingExternalBinding", f"reading {key!r} is not bound", key))
+        return candidates[0]
+
+    def opening(self, key: str) -> OpeningBinding:
+        candidates = [r for r in self.openings if r.key == key]
+        if len(candidates) != 1:
+            raise _Failure(Diagnostic("MissingExternalBinding", f"opening {key!r} is not bound", key))
+        return candidates[0]
+
+    def report(self, key: str) -> ReportBinding:
+        candidates = [r for r in self.reports if r.key == key]
+        if len(candidates) != 1:
+            raise _Failure(Diagnostic("MissingExternalBinding", f"report mapping {key!r} is not bound", key))
+        return candidates[0]
+
+    def assumption(self, key: str) -> AssumptionBinding:
+        candidates = [a for a in self.assumptions if a.key == key]
+        if len(candidates) != 1:
+            raise _Failure(Diagnostic("MissingAssumptionMetadata", f"assumption metadata {key!r} is not bound", key))
+        return candidates[0]
+
+    @classmethod
+    def demo(cls, root: Path | str | None = None, principal: Fraction | int | str = 100,
+             stress_rate: Fraction | int | str = Fraction(7, 100),
+             fixed_rate: Fraction | int | str = Fraction(1, 20),
+             opening_balances: Mapping[str, Fraction | int | str] | None = None) -> "CompileBindings":
+        """Create explicit synthetic bindings for the bounded demonstration profile.
+
+        This helper is a convenience for tests and examples.  The compiler
+        still receives all evidence/package/assumption records as arguments;
+        it does not inspect the authored expected IR.
+        """
+        root_path = Path(root) if root is not None else ROOT
+        package_path = root_path / "docs/design/fixtures/demo-debt-package.json"
+        digest = hashlib.sha256(package_path.read_bytes()).hexdigest() if package_path.is_file() else ""
+        p = _fraction(principal)
+        stress = _fraction(stress_rate)
+        fixed = _fraction(fixed_rate)
+        literal = f"Debt {p}; interest 5; fixed/floating split not disclosed"
+        reading = ReadingBinding(
+            key="synthetic-note-7", literal=literal, amount=p, currency="USD",
+            instant="2025-12-31", uri="fixture:demo-debt-package.json#registry/synthetic-note-7",
+            filing_id="synthetic-2025", available="2026-01-01T00:00:00Z",
+            ingested="2026-01-01T00:00:00Z", reviewer="synthetic-fixture-author",
+            review_date="2026-01-01T00:00:00Z",
+            review_reason="Explicit synthetic disclosure supplied by the caller",
+            cutoff="2026-01-01T00:00:00Z", action="Accept")
+        balances = opening_balances if opening_balances is not None else {"Cash": p - 5, "Debt": -p, "InterestExpense": 0, "Retained": 5}
+        opening = OpeningBinding("after-2025-close", "2025-12-31", balances, book="Local")
+        package = PackageBinding(
+            "DemoDebt", "1", digest, "DemoDebt", "2025-01-01", "2028-01-01",
+            ("reset", "accrue_and_pay", "close", "statements"),
+            ("builtin:Core0@1", "DemoCalendar@1"), ("fixture:demo-debt-package.json",))
+        report = ReportBinding("DemoDebt.statements.v1", "DemoDebt.statements.v1",
+                               "interest_operating", "close", ("accrue_and_pay",))
+        assumptions = tuple(AssumptionBinding(key, reason, information_cutoff=reading.cutoff,
+                           valid_start="2026-01-01", valid_end="2027-01-01") for key, reason in (
+            ("alternative", "Named endpoint condition supplied for comparison"),
+            ("constraint", "Explicit caller constraint on the shared family"),
+            ("contract-rate", "Component rates are explicit scenario inputs supplied by the caller"),
+            ("scenario", f"Illustrative constant annual stress {stress}; not an estimated future rate")))
+        # Retain values for callers that want to inspect the intended defaults;
+        # rate values remain in the typed/source program itself.
+        _ = fixed
+        admissions = (SymbolAdmission("alpha", reading.key, "Fixed-rate proportion not disclosed",
+                                     "synthetic-fixture-author", reading.review_date),)
+        alternatives = tuple(AlternativeBinding(name, "synthetic-fixture-author", reading.review_date,
+                            "Named endpoint hypothesis supplied by the synthetic caller")
+                             for name in ("allFixed", "allFloating"))
+        return cls((package,), (reading,), (opening,), (report,), assumptions,
+                   admissions=admissions, alternatives=alternatives)
+
+
+def _unique(rows, attr, key, code):
+    matches = [r for r in rows if getattr(r, attr) == key]
+    if len(matches) != 1:
+        raise _diag(code, f"{key!r} must have exactly one explicit binding", str(key))
+    return matches[0]
+
+
+def _validate_bindings(bindings: CompileBindings) -> None:
+    """Validate caller supplied metadata before any semantic lowering.
+
+    Bindings are facts supplied by the caller; they are never inferred from a
+    source declaration or from the authored expected IR.  This early pass
+    catches duplicate/ambiguous exports, invalid dates and unsafe package
+    artifacts so later lowering can rely on a single explicit record.
+    """
+    if not isinstance(bindings, CompileBindings):
+        raise _diag("InvalidBindings", "compile bindings must be CompileBindings", "bindings")
+
+    def unique(rows: Sequence[Any], attr: str, where: str) -> None:
+        values = [getattr(row, attr) for row in rows]
+        if len(values) != len(set(values)):
+            raise _diag("AmbiguousBinding", f"duplicate {attr} in {where}", where)
+
+    unique(bindings.packages, "id", "packages")
+    unique(bindings.readings, "key", "readings")
+    unique(bindings.openings, "key", "openings")
+    unique(bindings.reports, "key", "reports")
+    unique(bindings.assumptions, "key", "assumptions")
+    unique(bindings.admissions, "name", "admissions")
+    unique(bindings.alternatives, "name", "alternatives")
+
+    try:
+        _iso(bindings.horizon_start, "bindings.horizon_start")
+        _iso(bindings.horizon_end, "bindings.horizon_end")
+        if date.fromisoformat(bindings.horizon_end) <= date.fromisoformat(bindings.horizon_start):
+            raise _diag("InvalidPeriod", "horizon end must be after start", "bindings.horizon")
+    except _Failure:
+        raise
+    if bindings.calendar_id != "DemoCalendar@1" or bindings.calendar_name != "Gregorian":
+        raise _diag("UnsupportedCalendar", "Core0.1 requires DemoCalendar@1/Gregorian", "bindings.calendar")
+    if bindings.symbol_uncertainty not in {"HistoricalFact"}:
+        raise _diag("UnsupportedUncertainty", "Core0.1 admits only HistoricalFact symbols", "bindings.symbol_uncertainty")
+
+    package_root = ROOT.resolve()
+    for package in bindings.packages:
+        if package.name != "DemoDebt" or package.version != "1":
+            raise _diag("UnsupportedPackage", "Core0.1 requires DemoDebt@1", package.id)
+        if not re.fullmatch(r"[0-9a-f]{64}", package.digest):
+            raise _diag("InvalidPackageDigest", "package digest must be a SHA-256 hex digest", package.id)
+        try:
+            start = date.fromisoformat(package.effective_start)
+            end = date.fromisoformat(package.effective_end)
+        except ValueError as exc:
+            raise _diag("InvalidDate", "package applicability dates must be YYYY-MM-DD", package.id) from exc
+        if end <= start:
+            raise _diag("InvalidPeriod", "package effective end must be after start", package.id)
+        artifact = (ROOT / package.artifact).resolve()
+        if not artifact.is_relative_to(package_root) or not artifact.is_file():
+            raise _diag("UnsafePackageArtifact", "package artifact must be an existing project-local file", package.id)
+        if hashlib.sha256(artifact.read_bytes()).hexdigest() != package.digest:
+            raise _diag("PackageDigestMismatch", "package artifact digest differs from binding", package.id)
+        if package.basis != package.name or "builtin:Core0@1" not in package.dependencies or "DemoCalendar@1" not in package.dependencies:
+            raise _diag("PackageBinding", "package basis/dependencies are not the locked Core0 set", package.id)
+        if set(package.operations) != {"reset", "accrue_and_pay", "close", "statements"}:
+            raise _diag("PackageBinding", "package operations differ from the retained DemoDebt export", package.id)
+        if any(not str(a) or ".." in str(a) for a in package.authority):
+            raise _diag("UnsafePackageAuthority", "package authority contains an unsafe path", package.id)
+
+    for reading in bindings.readings:
+        if not reading.key or not reading.currency or reading.action != "Accept":
+            raise _diag("BindingAcceptance", "readings require an explicit Accept action", reading.key or "reading")
+        _iso(reading.instant, f"reading:{reading.key}.instant")
+        for label, value in (("available", reading.available), ("ingested", reading.ingested),
+                             ("review_date", reading.review_date), ("cutoff", reading.cutoff)):
+            _instant(value, f"reading:{reading.key}.{label}")
+        if reading.system_as_of is not None:
+            _instant(reading.system_as_of, f"reading:{reading.key}.system_as_of")
+        if not reading.reviewer or not reading.review_reason or not reading.literal:
+            raise _diag("IncompleteEvidence", "reading bindings require reviewer, reason and literal", reading.key)
+        if reading.amount < 0:
+            raise _diag("InvalidReading", "debt principal reading must be nonnegative", reading.key)
+
+    for opening in bindings.openings:
+        _iso(opening.date, f"opening:{opening.key}.date")
+        if not opening.balances or len({name for name, _ in opening.balances}) != len(opening.balances):
+            raise _diag("OpeningStateMismatch", "opening balances require unique account names", opening.key)
+        if any(name not in _ACCOUNT_ROLES for name, _ in opening.balances):
+            raise _diag("OpeningStateMismatch", "opening contains an account outside DemoDebt", opening.key)
+
+    for report in bindings.reports:
+        if not report.key or not report.mapping or not report.cash_flow_policy or not report.closing_policy:
+            raise _diag("IncompleteReportBinding", "report bindings require mapping and policies", report.key or "report")
+        if not report.required_operations:
+            raise _diag("IncompleteReportBinding", "report binding requires at least one operation", report.key)
+
+    for assumption in bindings.assumptions:
+        if assumption.provenance not in {"Analyst", "EmpiricalEstimate", "ImportedModel", "ScenarioDesign"}:
+            raise _diag("InvalidAssumption", "unsupported assumption provenance", assumption.key)
+        if assumption.role not in {"Baseline", "Hypothesis", "Convenience", "ReviewedDefault"}:
+            raise _diag("InvalidAssumption", "unsupported assumption role", assumption.key)
+        if assumption.information_cutoff is not None:
+            _instant(assumption.information_cutoff, f"assumption:{assumption.key}.cutoff")
+        if assumption.valid_start is None or assumption.valid_end is None:
+            raise _diag("IncompleteAssumption", "assumptions require a validity interval", assumption.key)
+        _iso(assumption.valid_start, f"assumption:{assumption.key}.valid_start")
+        _iso(assumption.valid_end, f"assumption:{assumption.key}.valid_end")
+        if date.fromisoformat(assumption.valid_end) <= date.fromisoformat(assumption.valid_start):
+            raise _diag("InvalidPeriod", "assumption validity end must be after start", assumption.key)
+
+    readings = {r.key for r in bindings.readings}
+    for admission in bindings.admissions:
+        if admission.reading_key not in readings or admission.kind != "HistoricalFact":
+            raise _diag("SymbolAdmission", "symbol admissions must cite a bound HistoricalFact reading", admission.name)
+        _instant(admission.date, f"admission:{admission.name}.date")
+        if not admission.reviewer or not admission.reason:
+            raise _diag("IncompleteAdmission", "symbol admissions require reviewer and reason", admission.name)
+    for alternative in bindings.alternatives:
+        _instant(alternative.created_at, f"alternative:{alternative.name}.created_at")
+        if not alternative.author or not alternative.reason:
+            raise _diag("IncompleteAlternative", "alternative metadata require author and reason", alternative.name)
+
+
+# ---------------------------------------------------------------------------
+# Lowering
+
+
+def _empty_ir() -> dict[str, Any]:
+    keys = [
+        "models", "contexts", "sourceSpans", "documents", "observations", "narratives",
+        "coverageUnits", "mappings", "partitions", "entities", "controls", "books", "accounts",
+        "symbols", "choices", "expressions", "constraints", "assumptions", "alternatives",
+        "contracts", "postings", "states", "events", "rules", "packages", "measurements",
+        "journals", "scenarios", "informationViews", "reviewDecisions", "evidenceViews",
+        "modelScopes", "historyFamilies", "probabilityModels", "reportMappings", "resultCells",
+        "branchResults", "runs", "diagnostics",
+    ]
+    out = {k: [] for k in keys}
+    out["schema_version"] = "0.1"
+    return out
+
+
+def _diag(code: str, message: str, location: str, capability: Optional[str] = None,
+          span: Optional[tuple[int, int]] = None) -> _Failure:
+    return _Failure(Diagnostic(code, message, location, capability=capability, span=span))
+
+
+class _Compiler:
+    def __init__(self, program: Program, bindings: CompileBindings,
+                 source_spans: Optional[Mapping[int, Mapping[str, Any]]] = None,
+                 input_text: Optional[str] = None):
+        self.program = program
+        self.bindings = bindings
+        self.source_spans = source_spans or {}
+        self.input_text = input_text
+        self.ir = _empty_ir()
+        self.source_map: dict[str, dict[str, Any]] = {}
+        self.expr_rows: dict[str, dict[str, Any]] = {}
+        self.expr_info: dict[str, tuple[str, Optional[str], Any]] = {}
+        self.decls: dict[str, Any] = {}
+        self.lets: dict[str, LetDecl] = {}
+        self.let_ids: dict[str, str] = {}
+        self.lowering_lets: set[str] = set()
+        self.observations: dict[str, ObservationDecl] = {}
+        self.symbols: dict[str, SymbolDecl] = {}
+        self.sources: dict[str, SourceDecl] = {}
+        self.entities: dict[str, EntityDecl] = {}
+        self.books: dict[str, BookDecl] = {}
+        self.accounts: dict[str, AccountDecl] = {}
+        self.openings: dict[str, OpeningDecl] = {}
+        self.contracts: dict[str, ContractDecl] = {}
+        self.alternatives: dict[str, AlternativeDecl] = {}
+        self.scenarios: dict[str, ScenarioDecl] = {}
+        self.reports: dict[str, ReportDecl] = {}
+        self.constraints: dict[str, ConstraintDecl] = {}
+        self.package: Optional[PackageBinding] = None
+        self.entity: Optional[EntityDecl] = None
+        self.book: Optional[BookDecl] = None
+        self.scope_id = f"scope:{_clean_id(program.module)}@{_clean_id(program.version)}"
+        self.model_id = f"{program.module}@{program.version}"
+
+    def fail(self, code: str, message: str, location: str, capability: Optional[str] = None,
+             node: Any = None) -> None:
+        span = None
+        if node is not None and id(node) in self.source_spans:
+            item = self.source_spans[id(node)]
+            span = (item.get("start", 0), item.get("end", 0))
+        raise _diag(code, message, location, capability, span)
+
+    def collect(self) -> None:
+        _validate_bindings(self.bindings)
+        if not self.program.module or not self.program.version:
+            self.fail("InvalidModule", "module name and version are required", "module")
+        reserved = {
+            "module", "version", "use", "source", "entity", "functional", "book", "basis",
+            "account", "opening", "observation", "instant", "period", "symbol", "in", "because",
+            "choice", "binding", "let", "constraint", "alternative", "assume", "contract", "event",
+            "rule", "for", "as", "when", "require", "post", "scenario", "set", "report", "from",
+            "to", "true", "false", "and", "or", "not", "debit", "credit", "overrides", "per", "year",
+        }
+        self._check_name(self.program.module, "module", reserved)
+        declared_uses = tuple(d for d in self.program.declarations if isinstance(d, UseDecl))
+        all_uses = tuple(self.program.uses) + declared_uses
+        seen_use_ids: set[str] = set()
+        for use in all_uses:
+            self._check_name(use.name, "use", reserved)
+            if (use.name, use.version) in seen_use_ids:
+                self.fail("DuplicateDeclaration", f"duplicate package use {use.name!r}", use.name)
+            seen_use_ids.add((use.name, use.version))
+            try:
+                package = self.bindings.package(use.name, use.version)
+            except _Failure:
+                raise
+            if self.package is not None and self.package.id != package.id:
+                self.fail("PackageCollision", "multiple package bases are outside Core0.1", use.name)
+            self.package = package
+        for decl in self.program.declarations:
+            if isinstance(decl, UseDecl):
+                # A use is allowed either in Program.uses or declarations, but
+                # it must not be silently duplicated.
+                continue
+            if isinstance(decl, UnsupportedDecl):
+                self.fail("UnsupportedDeclaration", f"{decl.kind} is outside Core0.1", decl.name or decl.kind,
+                          capability=decl.kind)
+            name = getattr(decl, "name", None)
+            if name:
+                self._check_name(name, type(decl).__name__, reserved)
+                if name in self.decls:
+                    self.fail("DuplicateDeclaration", f"duplicate declaration {name!r}", name)
+                self.decls[name] = decl
+                self._record_source(name, decl, name, "declaration")
+            if isinstance(decl, (ContractDecl, ScenarioDecl)):
+                pairs = decl.fields if isinstance(decl, ContractDecl) else decl.settings
+                if len({k for k, _ in pairs}) != len(pairs):
+                    self.fail("DuplicateField", "fields must occur once", name)
+            if isinstance(decl, SourceDecl):
+                self.sources[decl.name] = decl
+            elif isinstance(decl, EntityDecl):
+                self.entities[decl.name] = decl
+            elif isinstance(decl, BookDecl):
+                self.books[decl.name] = decl
+            elif isinstance(decl, AccountDecl):
+                self.accounts[decl.name] = decl
+            elif isinstance(decl, OpeningDecl):
+                self.openings[decl.name] = decl
+            elif isinstance(decl, ObservationDecl):
+                self.observations[decl.name] = decl
+            elif isinstance(decl, SymbolDecl):
+                self.symbols[decl.name] = decl
+            elif isinstance(decl, LetDecl):
+                self.lets[decl.name] = decl
+            elif isinstance(decl, ConstraintDecl):
+                self.constraints[decl.name] = decl
+            elif isinstance(decl, ContractDecl):
+                self.contracts[decl.name] = decl
+            elif isinstance(decl, AlternativeDecl):
+                self.alternatives[decl.name] = decl
+            elif isinstance(decl, ScenarioDecl):
+                self.scenarios[decl.name] = decl
+            elif isinstance(decl, ReportDecl):
+                self.reports[decl.name] = decl
+            else:
+                self.fail("UnsupportedDeclaration", f"{type(decl).__name__} is outside Core0.1", str(decl))
+        # A typed program may pass uses separately; source frontend does this.
+        if self.package is None and all_uses:
+            self.fail("MissingPackageBinding", "a Core0.1 program requires one package use", "use")
+        if self.package is None:
+            self.fail("MissingPackageBinding", "a Core0.1 program requires one package use", "use")
+        if len(self.entities) != 1 or len(self.books) != 1:
+            self.fail("ProfileCardinality", "Core0.1 requires exactly one entity and one book", "profile")
+        if any(len(x) != 1 for x in (self.sources, self.observations, self.symbols, self.contracts)):
+            self.fail("ProfileCardinality", "Core0.1 requires one source, observation, symbol and contract", "profile")
+        if len(self.openings) != 1 or len(self.reports) != 1 or len(self.scenarios) != 1:
+            self.fail("ProfileCardinality", "Core0.1 requires one opening, scenario and report", "profile")
+        if len(self.alternatives) < 1:
+            self.fail("ProfileCardinality", "Core0.1 requires at least one named alternative", "profile")
+        self.entity = next(iter(self.entities.values()))
+        self.book = next(iter(self.books.values()))
+        if self.book.entity != self.entity.name:
+            self.fail("BindingMismatch", "book entity must name the declared entity", self.book.name)
+        if self.book.basis != self.package.name or self.book.version != self.package.version:
+            self.fail("PackageBinding", "book basis/version must match the locked package", self.book.name)
+        if self.entity.currency != "USD":
+            self.fail("UnsupportedCurrency", "DemoDebt report requires USD", self.entity.name)
+        if {a.name: a.role for a in self.accounts.values()} != _ACCOUNT_ROLES:
+            self.fail("PackageAccounts", "DemoDebt report requires its four named account roles", "accounts")
+
+    @staticmethod
+    def _check_name(name: str, where: str, reserved: set[str]) -> None:
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+            raise _diag("InvalidIdentifier", f"invalid identifier {name!r}", where)
+        if name in reserved:
+            raise _diag("ReservedIdentifier", f"reserved keyword {name!r} cannot be declared", where)
+
+    def _external_ids(self) -> dict[str, Any]:
+        return {
+            **{r.key: r for r in self.bindings.readings},
+            **{o.key: o for o in self.bindings.openings},
+            **{r.key: r for r in self.bindings.reports},
+        }
+
+    def _expr_id(self, owner: str, path: str) -> str:
+        return f"expr:{_clean_id(owner)}:{_clean_id(path)}"
+
+    def _record_source(self, expr_id: str, expr: Any, owner: str, path: str) -> None:
+        item = self.source_spans.get(id(expr))
+        if item:
+            self.source_map[expr_id] = dict(item, owner=owner, path=path)
+        else:
+            self.source_map[expr_id] = {"constructor": type(expr).__name__, "owner": owner, "path": path}
+
+    def _add_expr(self, expr_id: str, row: dict[str, Any], typ: str,
+                  context: Optional[str], value: Any = None, expr: Any = None,
+                  owner: str = "", path: str = "") -> tuple[str, str, Optional[str], Any]:
+        if expr_id in self.expr_rows:
+            prior = self.expr_rows[expr_id]
+            if prior != row:
+                self.fail("ExpressionIdentityCollision", f"two expressions map to {expr_id}", expr_id)
+            return expr_id, typ, context, value
+        self.expr_rows[expr_id] = row
+        self.expr_info[expr_id] = (typ, context, value)
+        self._record_source(expr_id, expr, owner, path)
+        return expr_id, typ, context, value
+
+    def _lookup_type(self, name: str) -> tuple[str, Optional[str], Any]:
+        if name in self.let_ids:
+            return self.expr_info[self.let_ids[name]]
+        if name in self.observations:
+            obs = self.observations[name]
+            ctx = f"context:{_clean_id(obs.name)}"
+            key = self.sources[obs.source].external
+            return f"Observation<{obs.type_name}>", ctx, self.bindings.reading(key).amount
+        if name in self.symbols:
+            return self.symbols[name].type_name, None, None
+        self.fail("UnknownReference", f"reference {name!r} is not declared", name)
+
+    def _constant(self, expr_id: str) -> Optional[Fraction]:
+        if expr_id not in self.expr_info:
+            return None
+        value = self.expr_info[expr_id][2]
+        return value if isinstance(value, Fraction) else None
+
+    def lower_expr(self, expr: Expr, owner: str, path: str,
+                   expected: Optional[str] = None) -> tuple[str, str, Optional[str], Any]:
+        expr_id = self._expr_id(owner, path)
+        if isinstance(expr, Literal):
+            value = expr.value
+            typ = expr.type_name
+            unit = expr.unit
+            display = expr.display
+            if isinstance(value, bool):
+                typ = typ or "Bool"
+                if typ != "Bool" or unit is not None:
+                    self.fail("TypeMismatch", "Boolean literal cannot carry numeric type/unit", owner)
+                text = "true" if value else "false"
+                row = dict(id=expr_id, op="literal", type=typ, context=None, args=[], rational=None,
+                           text=text, target=None, field_names=[])
+                return self._add_expr(expr_id, row, typ, None, value, expr, owner, path)
+            if isinstance(value, Fraction) or isinstance(value, (int, Decimal)):
+                q = _fraction(value)
+                if unit == "per year":
+                    if typ and typ != "Rate<annual_simple>":
+                        self.fail("TypeMismatch", "annual unit disagrees with literal type", owner)
+                    typ = "Rate<annual_simple>"
+                elif unit:
+                    if not re.fullmatch(r"[A-Z]{3}", unit):
+                        self.fail("UnsupportedUnit", f"unit {unit!r} is outside Core0.1", owner)
+                    if typ and typ != f"Money<{unit}>":
+                        self.fail("TypeMismatch", "currency suffix disagrees with literal type", owner)
+                    typ = f"Money<{unit}>"
+                else:
+                    if expected and expected.startswith("Rate<") and typ != expected:
+                        self.fail("MissingRateUnit", "annual rates require the explicit `per year` unit", owner, "rate", expr)
+                    typ = typ or "Real"
+                if typ == "Int" and q.denominator != 1:
+                    self.fail("TypeMismatch", "fractional literal cannot have Int type", owner, node=expr)
+                context = None
+                row = dict(id=expr_id, op="literal", type=typ, context=context, args=[], rational=rational(q),
+                           text=None, target=None, field_names=[])
+                return self._add_expr(expr_id, row, typ, context, q, expr, owner, path)
+            if isinstance(value, str):
+                typ = typ or "String"
+                value = _string(value)
+                if typ == "Date":
+                    value = _iso(value.lstrip("@"), owner)
+                row = dict(id=expr_id, op="literal", type=typ, context=None, args=[], rational=None,
+                           text=value, target=None, field_names=[])
+                return self._add_expr(expr_id, row, typ, None, value, expr, owner, path)
+            self.fail("UnsupportedLiteral", f"literal {type(value).__name__} is outside Core0.1", owner, node=expr)
+        if isinstance(expr, External):
+            # External source references are admitted only by declaration-level
+            # handlers.  Keeping this operation explicit prevents accidental
+            # fixture or filesystem lookup from an arbitrary expression.
+            self.fail("UnsupportedExternalExpression", "external references are only valid in source/opening/report declarations", owner, "external", expr)
+        if isinstance(expr, Ref):
+            if expr.name in self.lets and expr.name not in self.let_ids:
+                self._lower_let(expr.name)
+            typ, context, value = self._lookup_type(expr.name)
+            if expr.name in self.lets:
+                target = self.let_ids[expr.name]
+            else:
+                target = expr.name
+            row = dict(id=expr_id, op="ref", type=typ, context=context, args=[], rational=None,
+                       text=None, target=target, field_names=[])
+            return self._add_expr(expr_id, row, typ, context, value, expr, owner, path)
+        if isinstance(expr, Call):
+            if expr.name not in {"value", "constant"}:
+                self.fail("UnsupportedExpression", f"call {expr.name!r} is not admitted", owner, f"call:{expr.name}", expr)
+            if len(expr.args) != 1:
+                self.fail("ArityMismatch", f"{expr.name} requires one argument", owner, node=expr)
+            args = [self.lower_expr(a, owner, f"{path}.arg{i}") for i, a in enumerate(expr.args)]
+            if expr.name == "value":
+                if len(args) != 1 or not args[0][1].startswith("Observation<"):
+                    self.fail("TypeMismatch", "value requires exactly one observation", owner, node=expr)
+                typ = args[0][1][12:-1]
+                context = args[0][2]
+                target = "builtin:value@1"
+            elif expr.name == "constant":
+                if len(args) != 1 or not args[0][1].startswith("Rate<"):
+                    self.fail("TypeMismatch", "constant requires one explicitly annual rate", owner, node=expr)
+                typ = f"Driver<{args[0][1]}>"
+                context = args[0][2]
+                target = "builtin:constant@1"
+            else:
+                self.fail("UnsupportedExpression", f"call {expr.name!r} is not admitted in Core0.1", owner,
+                          capability=f"call:{expr.name}", node=expr)
+            row = dict(id=expr_id, op="call", type=typ, context=context,
+                       args=[a[0] for a in args], rational=None, text=None, target=target, field_names=[])
+            return self._add_expr(expr_id, row, typ, context, args[0][3] if args else None, expr, owner, path)
+        if isinstance(expr, Unary):
+            arg = self.lower_expr(expr.arg, owner, f"{path}.arg0")
+            if expr.op == "not":
+                if arg[1] != "Bool":
+                    self.fail("TypeMismatch", "not requires a Boolean operand", owner, node=expr)
+                typ, value = "Bool", (not arg[3]) if isinstance(arg[3], bool) else None
+            elif expr.op == "-":
+                if not _numeric_type(arg[1]):
+                    self.fail("TypeMismatch", "negation requires a numeric operand", owner, node=expr)
+                typ, value = arg[1], (-arg[3]) if isinstance(arg[3], Fraction) else None
+            else:
+                self.fail("UnsupportedExpression", f"unary operator {expr.op!r} is unsupported", owner, node=expr)
+            row = dict(id=expr_id, op="not" if expr.op == "not" else "negate", type=typ,
+                       context=arg[2], args=[arg[0]], rational=None, text=None, target=None, field_names=[])
+            return self._add_expr(expr_id, row, typ, arg[2], value, expr, owner, path)
+        if isinstance(expr, Binary):
+            left = self.lower_expr(expr.left, owner, f"{path}.left")
+            right = self.lower_expr(expr.right, owner, f"{path}.right")
+            op = expr.op
+            context = _merge_context(left[2], right[2], owner, self)
+            if op in {"and", "or"}:
+                if left[1] != right[1] or left[1] != "Bool":
+                    self.fail("TypeMismatch", "Boolean operands are required", owner, node=expr)
+                typ, value = "Bool", _fold_bool(op, left[3], right[3])
+            elif op in {"==", "!=", "<", "<=", ">", ">="}:
+                if left[1] != right[1]:
+                    self.fail("TypeMismatch", "comparison operands must have identical types", owner, node=expr)
+                if op not in {"==", "!="} and not _numeric_type(left[1]):
+                    self.fail("TypeMismatch", "ordering requires numeric operands", owner)
+                if left[1].startswith(("Observation<", "Driver<")):
+                    self.fail("UnsupportedOperation", "compare quantities, not observation/driver handles", owner)
+                typ, value = "Bool", _compare(op, left[3], right[3])
+            elif op in {"+", "-"}:
+                if left[1] != right[1] or not _numeric_type(left[1]):
+                    self.fail("TypeMismatch", "addition/subtraction requires compatible numeric quantities", owner, node=expr)
+                typ, value = left[1], _arithmetic(op, left[3], right[3])
+            elif op == "*":
+                if not _numeric_type(left[1]) or not _numeric_type(right[1]):
+                    self.fail("TypeMismatch", "multiplication requires numeric quantities", owner, node=expr)
+                if _is_scalar(left[1]) and not _is_scalar(right[1]):
+                    typ = right[1]
+                elif _is_scalar(right[1]) and not _is_scalar(left[1]):
+                    typ = left[1]
+                elif _is_scalar(left[1]) and _is_scalar(right[1]):
+                    typ = "Int" if left[1] == right[1] == "Int" else "Real"
+                else:
+                    self.fail("UnsupportedOperation", "product of two dimensional quantities is outside Core0.1", owner, "multiply", expr)
+                value = _arithmetic(op, left[3], right[3])
+            elif op == "/":
+                if not _numeric_type(left[1]) or not _numeric_type(right[1]):
+                    self.fail("TypeMismatch", "division requires numeric quantities", owner, node=expr)
+                denominator = right[3]
+                if not isinstance(denominator, Fraction) or denominator == 0:
+                    self.fail("UnprovedNonzeroDenominator", "division denominator must be a nonzero constant", owner, "divide", expr)
+                if not _is_scalar(right[1]):
+                    self.fail("UnsupportedOperation", "division by a dimensional quantity is outside Core0.1", owner, "divide", expr)
+                typ = left[1] if not _is_scalar(left[1]) else "Real"
+                value = _arithmetic(op, left[3], right[3])
+            else:
+                self.fail("UnsupportedExpression", f"operator {op!r} is unsupported", owner, capability=f"operator:{op}", node=expr)
+            row = dict(id=expr_id, op=_IR_OPS[op], type=typ, context=context,
+                       args=[left[0], right[0]], rational=None, text=None, target=None, field_names=[])
+            return self._add_expr(expr_id, row, typ, context, value, expr, owner, path)
+        if isinstance(expr, (ArrayExpr, RecordExpr)):
+            self.fail("UnsupportedExpression", "arrays and records are outside Core0.1", owner,
+                      capability=type(expr).__name__, node=expr)
+        self.fail("UnsupportedExpression", f"unknown typed expression {type(expr).__name__}", owner, node=expr)
+
+    def _lower_let(self, name: str) -> None:
+        if name in self.let_ids:
+            return
+        if name in self.lowering_lets:
+            self.fail("ExpressionCycle", f"cyclic let binding involving {name!r}", name)
+        decl = self.lets.get(name)
+        if decl is None:
+            self.fail("UnknownReference", f"unknown let binding {name!r}", name)
+        self.lowering_lets.add(name)
+        expr_id, typ, context, _ = self.lower_expr(decl.value, f"let:{name}", "value", decl.declared_type)
+        if decl.declared_type and decl.declared_type != typ:
+            self.fail("TypeMismatch", f"let {name!r} declares {decl.declared_type}, inferred {typ}", name)
+        self.let_ids[name] = expr_id
+        self.lowering_lets.remove(name)
+
+    def _external(self, key: str, where: str) -> Any:
+        if key in {r.key for r in self.bindings.readings}:
+            return self.bindings.reading(key)
+        if key in {o.key for o in self.bindings.openings}:
+            return self.bindings.opening(key)
+        if key in {r.key for r in self.bindings.reports}:
+            return self.bindings.report(key)
+        self.fail("MissingExternalBinding", f"external export {key!r} is not supplied", where)
+
+    def _lower_source_metadata(self) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
+        source_keys: dict[str, str] = {}
+        for name, decl in self.sources.items():
+            source_keys[name] = decl.external
+            self._external(decl.external, name)
+        return source_keys, {}, {}
+
+    def _build_evidence(self, source_keys: Mapping[str, str]) -> dict[str, tuple[str, str, str]]:
+        # Return source-key -> (document, span, view) IDs.
+        out: dict[str, tuple[str, str, str]] = {}
+        for key in sorted(set(source_keys.values())):
+            reading = self.bindings.reading(key)
+            _instant(reading.available, f"reading:{key}.available")
+            _instant(reading.ingested, f"reading:{key}.ingested")
+            _instant(reading.review_date, f"reading:{key}.review_date")
+            _instant(reading.cutoff, f"reading:{key}.cutoff")
+            _iso(reading.instant, f"reading:{key}.instant")
+            if reading.system_as_of is not None:
+                _instant(reading.system_as_of, f"reading:{key}.system_as_of")
+            document_id = f"document:{_clean_id(key)}"
+            span_id = f"span:{_clean_id(key)}"
+            reading_id = f"reading:{_clean_id(key)}"
+            review_id = f"review:{_clean_id(key)}"
+            view_id = f"evidence:{_clean_id(key)}"
+            self.ir["sourceSpans"].append({
+                "id": span_id, "document": document_id, "locator": f"binding:{key}",
+                "literal": reading.literal, "extraction": reading.extraction,
+            })
+            self.ir["documents"].append({
+                "id": document_id, "sha256": hashlib.sha256(reading.literal.encode("utf-8")).hexdigest(),
+                "uri": reading.uri, "filing_id": reading.filing_id, "available": reading.available,
+                "availability_policy": "explicit_binding_timestamp", "ingested": reading.ingested,
+            })
+            self.ir["reviewDecisions"].append({
+                "id": review_id, "reading_ids": [reading_id], "action": reading.action,
+                "reviewer": reading.reviewer, "date": reading.review_date,
+                "reason": reading.review_reason, "evidence": [span_id],
+                "prior_view": reading.prior_view, "new_view": view_id,
+                "invalidated_descendants": [],
+            })
+            self.ir["evidenceViews"].append({
+                "id": view_id, "cutoff": reading.cutoff, "system_as_of": reading.system_as_of,
+                "mode": "ExplicitSelection", "documents": [document_id], "observations": [],
+                "decisions": [review_id], "conflict_sets": [], "transforms": [],
+            })
+            out[key] = (document_id, span_id, view_id)
+            # The reading object is a small external export represented by the
+            # binding.  It is referenced by observations but is not embedded as
+            # an executable package or expected-result fixture.
+            self._reading_ids[key] = reading_id
+        return out
+
+    def build(self) -> CompileResult:
+        self.collect()
+        source_keys, _, _ = self._lower_source_metadata()
+        self._reading_ids: dict[str, str] = {}
+        evidence = self._build_evidence(source_keys)
+        assert self.entity is not None and self.book is not None and self.package is not None
+        entity = self.entity
+        book = self.book
+        package = self.package
+        model_scope = self.scope_id
+        # Core declarations and package context.
+        self.ir["entities"].append({"id": entity.name, "functional_currency": entity.currency})
+        self.ir["packages"].append({
+            "id": package.id, "version": package.version, "digest": package.digest,
+            "basis": package.basis,
+            "effective": _time("interval", package.effective_start, package.effective_end, self.bindings.calendar_id),
+            "operations": [f"{package.id}/{x}" for x in package.operations],
+            "extension_points": [], "dependencies": list(package.dependencies),
+            "authority": list(package.authority), "review_status": package.review_status,
+            "implementation": package.implementation,
+        })
+        self.ir["books"].append({"id": book.name, "entity": book.entity, "basis": package.id,
+                                  "package": package.id, "currency": entity.currency})
+        for account in self.accounts.values():
+            if account.book != book.name:
+                self.fail("BindingMismatch", "all accounts must belong to the declared book", account.name)
+            if account.role not in {"Asset", "Liability", "Expense", "Equity"}:
+                self.fail("UnsupportedAccountRole", f"account role {account.role!r} is outside profile", account.name)
+            self.ir["accounts"].append({"id": account.name, "book": account.book,
+                                         "role": account.role, "report_concept": account.name})
+        # Time/context and observations.
+        observation_contexts: dict[str, str] = {}
+        for obs in self.observations.values():
+            _iso(obs.instant, obs.name)
+            if not obs.type_name.startswith("Money<"):
+                self.fail("UnsupportedObservationType", "Core0.1 observations are monetary", obs.name)
+            currency = obs.type_name[6:-1]
+            if currency != entity.currency:
+                self.fail("ContextMismatch", "observation currency must match the entity currency", obs.name)
+            key = source_keys.get(obs.source)
+            if key is None:
+                self.fail("UnknownReference", f"observation source {obs.source!r} is not a source alias", obs.name)
+            reading = self.bindings.reading(key)
+            oi = self.lower_expr(obs.value, f"observation:{obs.name}", "value", obs.type_name)
+            if oi[1] != obs.type_name:
+                self.fail("TypeMismatch", "observation literal must carry matching currency", obs.name)
+            if _fraction(_literal_value(obs.value, obs.name)) != reading.amount:
+                self.fail("SourceReadingMismatch", "surface observation and bound reading disagree", obs.name)
+            if reading.currency != currency or reading.instant != obs.instant:
+                self.fail("ReadingContextMismatch", "bound reading does not match observation context", obs.name)
+            context_id = f"context:{_clean_id(obs.name)}"
+            observation_contexts[obs.name] = context_id
+            self.ir["contexts"].append({
+                "id": context_id, "entity": entity.name, "perimeter": self.bindings.entity_perimeter,
+                "concept": "debt_principal", "basis": package.id, "measurement": "principal",
+                "time": _time("instant", obs.instant, None, self.bindings.calendar_id),
+                "unit": currency, "currency": currency, "taxonomy_version": None, "dimensions": [],
+            })
+            document_id, span_id, view_id = evidence[key]
+            reading_id = self._reading_ids[key]
+            review_id = f"review:{_clean_id(key)}"
+            self.ir["observations"].append({
+                "id": obs.name, "context": context_id, "domain": {
+                    "kind": "exact", "lower": rational(reading.amount), "upper": rational(reading.amount),
+                    "lower_closed": True, "upper_closed": True, "values": [], "missing_reason": None,
+                    "display": obs.value.display or f"{reading.amount} {currency}",
+                    "rounding_rule": "exact_binding",
+                }, "source_spans": [span_id], "reading": reading_id,
+                "review_decision": review_id, "supersedes": [], "revision_group": f"binding-{_clean_id(key)}",
+            })
+            for view in self.ir["evidenceViews"]:
+                if view["id"] == view_id:
+                    view["observations"].append(obs.name)
+        # Symbols and declarations.
+        for symbol in self.symbols.values():
+            if symbol.type_name != "Real":
+                self.fail("UnsupportedSymbol", "Core0.1 admits one Real interval symbol", symbol.name)
+            low = self.lower_expr(symbol.lower, f"symbol:{symbol.name}", "lower", "Real")
+            high = self.lower_expr(symbol.upper, f"symbol:{symbol.name}", "upper", "Real")
+            if low[1] != "Real" or high[1] != "Real" or low[3] is None or high[3] is None or low[3] > high[3]:
+                self.fail("InvalidDomain", "symbol bounds must be ordered constants", symbol.name)
+            source_key = next(iter(source_keys.values()))
+            admission = self.bindings.admission(symbol.name)
+            if admission.reading_key != source_key or _string(admission.reason) != _string(symbol.reason):
+                self.fail("SymbolAdmission", "source reason and supplied admission disagree", symbol.name)
+            span_id = evidence[source_key][1]
+            self.ir["symbols"].append({
+                "id": symbol.name, "type": symbol.type_name, "context": None,
+                "domain": {"kind": "interval", "lower": rational(low[3]), "upper": rational(high[3]),
+                            "lower_closed": True, "upper_closed": True, "values": [],
+                            "missing_reason": None, "display": None, "rounding_rule": None},
+                "uncertainty_kind": self.bindings.symbol_uncertainty, "scope": self.model_id,
+                "dependencies": [], "admission": f"admission:{symbol.name}", "provenance": [span_id],
+            })
+        for name in self.lets:
+            self._lower_let(name)
+        # Contract, alternatives, and scenario expressions.
+        contract = next(iter(self.contracts.values()))
+        fields = dict(contract.fields)
+        required_fields = {"principal", "fixed_fraction", "fixed_rate", "initial_floating_rate"}
+        if set(fields) != required_fields:
+            self.fail("ContractFields", "DebtMix requires principal, fraction and two rates", contract.name)
+        field_rows = []
+        for name in ("principal", "fixed_fraction", "fixed_rate", "initial_floating_rate"):
+            expected = {"principal": f"Money<{entity.currency}>", "fixed_fraction": "Real",
+                        "fixed_rate": "Rate<annual_simple>", "initial_floating_rate": "Rate<annual_simple>"}[name]
+            info = self.lower_expr(fields[name], f"contract:{contract.name}", f"field:{name}", expected)
+            if info[1] != expected:
+                self.fail("ContractType", f"field {name!r} has type {info[1]}, expected {expected}", contract.name)
+            if name in {"fixed_rate", "initial_floating_rate"}:
+                self._assumption_row(f"contract:{contract.name}:{name}", info[0], contract.name, evidence)
+            field_rows.append({"name": name, "expression": info[0]})
+        self.ir["contracts"].append({"id": contract.name, "type": f"{package.id}/{contract.type_name}",
+                                      "book": contract.book, "fields": field_rows, "package": package.id,
+                                      "source_refs": [evidence[next(iter(source_keys.values()))][1]]})
+        alt_ids = []
+        constraint_ids = []
+        for alt in self.alternatives.values():
+            meta = self.bindings.alternative(alt.name)
+            alt_ids.append(alt.name)
+            alt_constraints = []
+            for index, assumption in enumerate(alt.assumptions):
+                eid = self.lower_expr(assumption, f"alternative:{alt.name}", f"assumption:{index}")[0]
+                cid = f"constraint:{_clean_id(alt.name)}:{index}"
+                self.ir["constraints"].append({"id": cid, "expression": eid, "kind": "assumption",
+                                                "scope": alt.name, "source_refs": []})
+                alt_constraints.append(cid)
+                self._assumption_row(f"alternative:{alt.name}:{index}", eid, alt.name, evidence)
+            if not alt_constraints:
+                self.fail("MissingAlternativeCondition", "named alternatives require a Boolean condition", alt.name)
+            self.ir["alternatives"].append({
+                "id": alt.name, "parent": f"history:{_clean_id(self.model_id)}", "scope": model_scope,
+                "author": meta.author,
+                "created_at": meta.created_at,
+                "constraints": alt_constraints, "choice_group": None,
+                "reason": meta.reason, "evidence": [evidence[next(iter(source_keys.values()))][1]],
+                "opposing_evidence": [],
+            })
+        for con in self.constraints.values():
+            eid = self.lower_expr(con.expression, f"constraint:{con.name}", "condition")[0]
+            self.ir["constraints"].append({"id": con.name, "expression": eid, "kind": "assumption",
+                                           "scope": model_scope, "source_refs": []})
+            constraint_ids.append(con.name)
+            self._assumption_row(f"constraint:{con.name}", eid, model_scope, evidence)
+        scenario = next(iter(self.scenarios.values()))
+        settings = dict(scenario.settings)
+        if set(settings) != {"market_rate"}:
+            self.fail("ScenarioFields", "Core0.1 scenario requires one market_rate setting", scenario.name)
+        driver = self.lower_expr(settings["market_rate"], f"scenario:{scenario.name}", "market_rate")
+        if not driver[1].startswith("Driver<Rate<"):
+            self.fail("ScenarioType", "market_rate must be a constant annual rate driver", scenario.name)
+        self._assumption_row(f"scenario:{scenario.name}", driver[0], scenario.name, evidence)
+        self.ir["scenarios"].append({"id": scenario.name, "kind": "ExogenousStress",
+                                      "drivers": [{"name": "market_rate", "expression": driver[0]}],
+                                      "probability_model": None, "observed_event": None, "structural_model": None,
+                                      "replaced_equations": [], "visibility": "announced"})
+        # Opening state and report mapping.
+        opening_decl = next(iter(self.openings.values()))
+        opening = self.bindings.opening(opening_decl.external)
+        if opening.book is not None and opening.book != opening_decl.book:
+            self.fail("OpeningStateMismatch", "opening binding belongs to another book", opening_decl.name)
+        account_names = {a.name for a in self.accounts.values()}
+        bound_names = {name for name, _ in opening.balances}
+        if account_names != bound_names:
+            self.fail("OpeningStateMismatch", "opening binding must provide every account exactly once", opening_decl.name)
+        total = sum((value for _, value in opening.balances), Fraction(0))
+        if total != 0:
+            self.fail("UnbalancedState", "opening signed balances must sum to zero", opening_decl.name)
+        self.ir["states"].append({"id": opening_decl.name, "date": _iso(opening.date, opening_decl.name),
+                                   "book": opening_decl.book,
+                                   "balances": [{"account": name, "signed_amount": rational(value)} for name, value in opening.balances],
+                                   "contracts": [contract.name], "measurements": [],
+                                   "dependencies": list(opening.dependencies) or [evidence[next(iter(source_keys.values()))][2]]})
+        report = next(iter(self.reports.values()))
+        rb = self.bindings.report(report.mapping.key if isinstance(report.mapping, External) else str(report.mapping)) if isinstance(report.mapping, External) else None
+        if rb is None:
+            self.fail("UnsupportedReportMapping", "report mapping must be an explicit external binding", report.name)
+        self.ir["reportMappings"].append({"id": report.name, "book": report.book, "basis": package.id,
+                                          "rows": [{"name": "package_mapping", "expression": self._source_ref_expr(rb.mapping, report.name)}],
+                                          "closing_policy": f"{package.id}/{rb.closing_policy}",
+                                          "cash_flow_policy": f"{package.id}/{rb.cash_flow_policy}",
+                                          "required_operations": [f"{package.id}/{x}" for x in rb.required_operations]})
+        # Profile scope and conservative family status.  This profile does not
+        # perform a reconstruction or feasibility search.
+        slot = self._literal_expr("scope", "slot_limit", 1, "Int")
+        self.ir["modelScopes"].append({"id": model_scope, "templates": [f"{package.id}/{contract.type_name}"],
+                                       "slot_limits": [{"name": "debt_contracts", "expression": slot}],
+                                       "resolution": "one fixed/floating aggregate, annual simple accrual",
+                                       "calendars": [self.bindings.calendar_id], "choices": [],
+                                       "exclusions": ["fees", "foreign_currency", "embedded_options"], "obligations": []})
+        family_id = f"history:{_clean_id(self.model_id)}"
+        self.ir["historyFamilies"].append({"id": family_id, "scope": model_scope,
+            "evidence_view": evidence[next(iter(source_keys.values()))][2], "opening_state": opening_decl.name,
+            "symbols": list(self.symbols), "choices": [], "constraints": constraint_ids,
+            "alternatives": alt_ids, "feasibility": "Unknown", "coverage": "PartialSearch",
+            "completed_cells": 0, "unresolved_cells": 1, "witnesses": [], "solver_results": []})
+        declarations = [self.let_ids.get(n, n) for n in self.decls]
+        declarations = [n for n in declarations if n not in self.sources]
+        self.ir["models"].append({"id": self.model_id, "language_version": "Core0.1",
+                                  "declarations": list(dict.fromkeys(declarations)),
+                                  "package_lock": [package.id], "scope": model_scope})
+        self.ir["expressions"] = list(self.expr_rows.values())
+        self.ir["diagnostics"] = []
+        # Evidence view observations were added after creation; record all
+        # generated rows deterministically.
+        self.ir["sourceSpans"].sort(key=lambda r: r["id"])
+        self.ir["documents"].sort(key=lambda r: r["id"])
+        self.ir["observations"].sort(key=lambda r: r["id"])
+        self.ir["expressions"].sort(key=lambda r: r["id"])
+        self.ir["assumptions"].sort(key=lambda r: r["id"])
+        self.ir["constraints"].sort(key=lambda r: r["id"])
+        self.ir["alternatives"].sort(key=lambda r: r["id"])
+        self.ir["reviewDecisions"].sort(key=lambda r: r["id"])
+        self.ir["evidenceViews"].sort(key=lambda r: r["id"])
+        # Validate the generated structure before exposing it.
+        checked = validate_ir(self.ir, self.bindings)
+        if not checked.ok:
+            raise _Failure(checked.diagnostics[0])
+        return CompileResult(copy.deepcopy(self.ir), (), MappingProxyType(copy.deepcopy(self.source_map)))
+
+    def _source_ref_expr(self, mapping: str, owner: str) -> str:
+        return self._literal_expr(owner, "report_mapping", mapping, "SourceRef")
+
+    def _literal_expr(self, owner: str, path: str, value: Any, typ: str) -> str:
+        expr = Literal(value, type_name=typ)
+        return self.lower_expr(expr, owner, path)[0]
+
+    def _assumption_row(self, key: str, expression: str, scope: str,
+                        evidence: Mapping[str, tuple[str, str, str]]) -> str:
+        # Existing row IDs are reused when the same source expression is
+        # referenced by more than one binding, while metadata remains explicit.
+        aid = f"assumption:{_clean_id(key)}"
+        if any(r["id"] == aid for r in self.ir["assumptions"]):
+            return aid
+        # The demo helper supplies coarse keys.  Custom callers can provide
+        # exact keys; fall back only to the documented profile categories.
+        if key.startswith("alternative:"):
+            meta = self.bindings.assumption("alternative")
+        elif key.startswith("contract:"):
+            meta = self.bindings.assumption("contract-rate")
+        elif key.startswith("scenario:"):
+            meta = self.bindings.assumption("scenario")
+        elif key.startswith("constraint:"):
+            meta = self.bindings.assumption("constraint")
+        else:
+            meta = self.bindings.assumption(key)
+        start, end, cutoff = meta.valid_start, meta.valid_end, meta.information_cutoff
+        self.ir["assumptions"].append({"id": aid, "expression": expression, "scope": scope,
+            "rationale": meta.rationale, "provenance": meta.provenance, "source_refs": list(meta.source_refs),
+            "valid": _time("interval", start, end, self.bindings.calendar_id),
+            "information_cutoff": cutoff, "role": meta.role})
+        return aid
+
+
+_IR_OPS = {"+": "add", "-": "subtract", "*": "multiply", "/": "divide",
+           "==": "eq", "!=": "ne", "<": "lt", "<=": "le", ">": "gt", ">=": "ge",
+           "and": "and", "or": "or"}
+
+
+def _numeric_type(typ: str) -> bool:
+    return typ in {"Real", "Int", "Rate<annual_simple>", "YearFraction"} or bool(re.fullmatch(r"Money<[A-Z]{3}>", typ))
+
+
+def _is_scalar(typ: str) -> bool:
+    return typ in {"Real", "Int"}
+
+
+def _merge_context(left: Optional[str], right: Optional[str], owner: str, compiler: _Compiler) -> Optional[str]:
+    if left and right and left != right:
+        compiler.fail("ContextMismatch", "quantities require an explicit compatible context", owner)
+    return left or right
+
+
+def _literal_value(expr: Expr, where: str) -> Any:
+    if not isinstance(expr, Literal):
+        raise _Failure(Diagnostic("SourceReadingMismatch", "observation value must be a numeric literal", where))
+    if not isinstance(expr.value, (Fraction, int, Decimal)):
+        raise _Failure(Diagnostic("SourceReadingMismatch", "observation value must be numeric", where))
+    return _fraction(expr.value)
+
+
+def _arithmetic(op: str, left: Any, right: Any) -> Any:
+    if not isinstance(left, Fraction) or not isinstance(right, Fraction):
+        return None
+    if op == "+":
+        return left + right
+    if op == "-":
+        return left - right
+    if op == "*":
+        return left * right
+    if op == "/":
+        return left / right
+    return None
+
+
+def _compare(op: str, left: Any, right: Any) -> Optional[bool]:
+    if left is None or right is None:
+        return None
+    return {"==": left == right, "!=": left != right, "<": left < right,
+            "<=": left <= right, ">": left > right, ">=": left >= right}[op]
+
+
+def _fold_bool(op: str, left: Any, right: Any) -> Optional[bool]:
+    if not isinstance(left, bool) or not isinstance(right, bool):
+        return None
+    return left and right if op == "and" else left or right
+
+
+def compile_program(program: Program, bindings: CompileBindings,
+                    *, source_spans: Optional[Mapping[int, Mapping[str, Any]]] = None,
+                    input_text: Optional[str] = None) -> CompileResult:
+    """Lower a typed ``Program`` through the shared Core0.1 stages."""
+    if not isinstance(program, Program):
+        raise TypeError("compile_program requires a Program constructed from typed declarations")
+    input_sha256 = hashlib.sha256(input_text.encode("utf-8")).hexdigest() if input_text is not None else None
+    try:
+        result = _Compiler(program, bindings, source_spans, input_text).build()
+        if input_sha256 is None:
+            input_sha256 = hashlib.sha256(json.dumps(binding_projection(program), sort_keys=True).encode()).hexdigest()
+        return CompileResult(result.ir, result.diagnostics, result.source_map, input_sha256, binding_projection(bindings))
+    except _Failure as exc:
+        return CompileResult(None, (exc.diagnostic,), MappingProxyType({}),
+                             input_sha256)
+
+
+# ---------------------------------------------------------------------------
+# IR validation and exact evaluation
+
+
+def _load_schema() -> dict[str, Any]:
+    try:
+        return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise RuntimeError(f"cannot read closed Core IR schema: {SCHEMA_PATH}") from exc
+
+
+def _invalid(code: str, message: str, location: str) -> Diagnostic:
+    return Diagnostic(code, message, location)
+
+
+def _nodes(ir: Mapping[str, Any]) -> tuple[dict[str, tuple[str, Mapping[str, Any]]], Optional[Diagnostic]]:
+    nodes: dict[str, tuple[str, Mapping[str, Any]]] = {}
+    for section, rows in ir.items():
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, Mapping) or "id" not in row:
+                continue
+            identifier = row["id"]
+            if identifier in nodes:
+                return {}, _invalid("DuplicateID", f"identifier {identifier!r} occurs more than once", identifier)
+            nodes[identifier] = (section, row)
+    return nodes, None
+
+
+def _ref(nodes: Mapping[str, tuple[str, Mapping[str, Any]]], identifier: str,
+         sections: Optional[set[str]], where: str) -> Optional[Diagnostic]:
+    if identifier not in nodes:
+        return _invalid("UnknownReference", f"unknown reference {identifier!r}", where)
+    if sections and nodes[identifier][0] not in sections:
+        return _invalid("ReferenceKind", f"{identifier!r} has kind {nodes[identifier][0]}, expected {sorted(sections)}", where)
+    return None
+
+
+class _IRTypeChecker:
+    def __init__(self, ir: Mapping[str, Any], nodes: Mapping[str, tuple[str, Mapping[str, Any]]]):
+        self.ir, self.nodes = ir, nodes
+        self.memo: dict[str, tuple[str, Optional[str], Any]] = {}
+        self.active: set[str] = set()
+
+    def expr(self, identifier: str) -> tuple[str, Optional[str], Any]:
+        if identifier in self.memo:
+            return self.memo[identifier]
+        if identifier in self.active:
+            raise _Failure(Diagnostic("ExpressionCycle", "cyclic expression dependency", identifier))
+        if identifier not in self.nodes or self.nodes[identifier][0] != "expressions":
+            raise _Failure(Diagnostic("UnknownReference", f"expression {identifier!r} is not declared", identifier))
+        self.active.add(identifier)
+        e = self.nodes[identifier][1]
+        op, target = e["op"], e["target"]
+        args = [self.expr(a) for a in e["args"]]
+        types = [a[0] for a in args]
+        contexts = [a[1] for a in args]
+        context = next((c for c in contexts if c is not None), None)
+        if any(c is not None and context is not None and c != context for c in contexts):
+            raise _Failure(Diagnostic("ContextMismatch", "expression operands use incompatible contexts", identifier))
+        if op == "literal":
+            if e["args"] or e["target"] is not None or e["field_names"]:
+                raise _Failure(Diagnostic("ExpressionPayload", "literal cannot have operands, target or fields", identifier))
+            if (e["rational"] is None) == (e["text"] is None):
+                raise _Failure(Diagnostic("ExpressionPayload", "literal requires exactly one payload", identifier))
+            if e["rational"] is not None:
+                value = parse_rational(e["rational"])
+                if not _numeric_type(e["type"]):
+                    raise _Failure(Diagnostic("TypeMismatch", "rational literal must have a numeric type", identifier))
+                if e["type"] == "Int" and value.denominator != 1:
+                    raise _Failure(Diagnostic("TypeMismatch", "fractional integer literal", identifier))
+            elif e["text"] is not None:
+                value = e["text"]
+                if e["type"] == "Bool" and value not in {"true", "false"}:
+                    raise _Failure(Diagnostic("TypeMismatch", "Boolean text literal must be true or false", identifier))
+                if e["type"] == "Date":
+                    _iso(value, identifier)
+                if e["type"] == "SourceRef":
+                    # SourceRef text is checked below against supplied report
+                    # bindings; here it must at least be a nonempty string.
+                    if not value:
+                        raise _Failure(Diagnostic("ExpressionPayload", "SourceRef cannot be empty", identifier))
+                if e["type"] not in {"String", "Bool", "Date", "SourceRef"}:
+                    raise _Failure(Diagnostic("TypeMismatch", "text literal has unsupported type", identifier))
+            result, context = e["type"], e["context"]
+        elif op == "ref":
+            if e["args"] or e["rational"] is not None or e["text"] is not None or e["field_names"] or target is None:
+                raise _Failure(Diagnostic("ExpressionPayload", "reference has an invalid payload", identifier))
+            if target not in self.nodes:
+                raise _Failure(Diagnostic("UnknownReference", f"reference {target!r} is not declared", identifier))
+            section, row = self.nodes[target]
+            if section == "expressions":
+                result, context, value = self.expr(target)
+            elif section == "symbols":
+                result, context, value = row["type"], row["context"], None
+            elif section == "observations":
+                ctx = self.nodes[row["context"]][1]
+                result, context, value = f"Observation<Money<{ctx['currency']}>>", row["context"], None
+            else:
+                raise _Failure(Diagnostic("ReferenceKind", f"cannot reference {section} from expression", identifier))
+            value = None
+        elif op == "call":
+            if e["rational"] is not None or e["text"] is not None or e["field_names"] or target is None:
+                raise _Failure(Diagnostic("ExpressionPayload", "call has an invalid payload", identifier))
+            if target == "builtin:value@1":
+                if len(args) != 1 or not types or not types[0].startswith("Observation<"):
+                    raise _Failure(Diagnostic("TypeMismatch", "value requires one observation", identifier))
+                result, context = types[0][12:-1], args[0][1]
+                value = args[0][2]
+            elif target == "builtin:constant@1":
+                if len(args) != 1 or not types or types[0] != "Rate<annual_simple>":
+                    raise _Failure(Diagnostic("TypeMismatch", "constant requires one annual rate", identifier))
+                result, context, value = f"Driver<{types[0]}>", args[0][1], args[0][2]
+            else:
+                raise _Failure(Diagnostic("UnsupportedExpression", "unknown builtin call", identifier))
+        else:
+            if target is not None or e["rational"] is not None or e["text"] is not None or e["field_names"]:
+                raise _Failure(Diagnostic("ExpressionPayload", "operator has an invalid payload", identifier))
+            arity = 1 if op in {"negate", "not"} else 2
+            if len(args) != arity:
+                raise _Failure(Diagnostic("ArityMismatch", "wrong expression arity", identifier))
+            if op in {"not", "and", "or"}:
+                if any(t != "Bool" for t in types):
+                    raise _Failure(Diagnostic("TypeMismatch", "Boolean operands required", identifier))
+                result, context = "Bool", None
+                value = None
+            elif op in {"eq", "ne", "lt", "le", "gt", "ge"}:
+                if types[0] != types[1]:
+                    raise _Failure(Diagnostic("TypeMismatch", "comparison types differ", identifier))
+                if op not in {"eq", "ne"} and not _numeric_type(types[0]):
+                    raise _Failure(Diagnostic("TypeMismatch", "ordering requires numeric operands", identifier))
+                result, context, value = "Bool", None, None
+            elif op in {"add", "subtract"}:
+                if types[0] != types[1] or not _numeric_type(types[0]):
+                    raise _Failure(Diagnostic("TypeMismatch", "compatible numeric operands required", identifier))
+                result, context, value = types[0], context, None
+            elif op == "negate":
+                if not _numeric_type(types[0]):
+                    raise _Failure(Diagnostic("TypeMismatch", "numeric operand required", identifier))
+                result, context, value = types[0], args[0][1], None
+            elif op in {"multiply", "divide"}:
+                if not _numeric_type(types[0]) or not _numeric_type(types[1]):
+                    raise _Failure(Diagnostic("TypeMismatch", "numeric operands required", identifier))
+                if op == "divide" and not _is_scalar(types[1]):
+                    raise _Failure(Diagnostic("UnsupportedOperation", "divisor must be scalar", identifier))
+                if op == "divide" and not isinstance(args[1][2], Fraction):
+                    raise _Failure(Diagnostic("UnprovedNonzeroDenominator", "divisor must be constant", identifier))
+                if op == "divide" and args[1][2] == 0:
+                    raise _Failure(Diagnostic("UnprovedNonzeroDenominator", "divisor is zero", identifier))
+                if op == "multiply":
+                    if _is_scalar(types[0]) and not _is_scalar(types[1]):
+                        result = types[1]
+                    elif _is_scalar(types[1]) and not _is_scalar(types[0]):
+                        result = types[0]
+                    elif _is_scalar(types[0]) and _is_scalar(types[1]):
+                        result = "Int" if types[0] == types[1] == "Int" else "Real"
+                    else:
+                        raise _Failure(Diagnostic("UnsupportedOperation", "product of two dimensional quantities is unsupported", identifier))
+                else:
+                    result = types[0] if not _is_scalar(types[0]) else "Real"
+                context, value = context, None
+            else:
+                raise _Failure(Diagnostic("UnsupportedExpression", f"operator {op!r} unsupported", identifier))
+        declared = (e["type"], e["context"])
+        if declared != (result, context):
+            raise _Failure(Diagnostic("TypeMismatch", f"declared {declared}, inferred {(result, context)}", identifier))
+        self.active.remove(identifier)
+        self.memo[identifier] = (result, context, value)
+        return self.memo[identifier]
+
+
+def validate_ir(ir: Mapping[str, Any], bindings: CompileBindings,
+                *, schema: Optional[Mapping[str, Any]] = None) -> ValidationResult:
+    """Validate closed-schema shape and independent Core0.1 semantics."""
+    if not isinstance(ir, Mapping):
+        return ValidationResult(False, (_invalid("StructuralError", "IR must be a mapping", "ir"),))
+    try:
+        _validate_bindings(bindings)
+    except _Failure as exc:
+        return ValidationResult(False, (exc.diagnostic,))
+    schema = schema or _load_schema()
+    if jsonschema is None:
+        return ValidationResult(False, (_invalid("MissingDependency", "jsonschema is required for closed-schema validation", "validator"),))
+    try:
+        jsonschema.Draft202012Validator(schema).validate(ir)
+    except jsonschema.ValidationError as exc:
+        return ValidationResult(False, (_invalid("StructuralError", exc.message, "/".join(map(str, exc.path))),))
+    nodes, duplicate = _nodes(ir)
+    if duplicate:
+        return ValidationResult(False, (duplicate,))
+    try:
+        packages = {p.id: p for p in bindings.packages}
+        package_rows = {r["id"]: r for r in ir["packages"]}
+        if set(package_rows) != set(packages):
+            raise _Failure(Diagnostic("PackageBinding", "IR package lock differs from supplied package bindings", "packages"))
+        for pid, package in packages.items():
+            row = package_rows[pid]
+            if (row["version"] != package.version or row["digest"] != package.digest or
+                    row["basis"] != package.basis or row["dependencies"] != list(package.dependencies) or
+                    row["authority"] != list(package.authority) or row["review_status"] != package.review_status or
+                    row["implementation"] != package.implementation):
+                raise _Failure(Diagnostic("PackageDigestMismatch", "package digest/basis differs from binding", pid))
+            if row["operations"] != [f"{pid}/{x}" for x in package.operations]:
+                raise _Failure(Diagnostic("PackageBinding", "package operation lock differs from binding", pid))
+            effective = row["effective"]
+            if effective["calendar"] != bindings.calendar_id or effective["start"] != package.effective_start or effective["end_exclusive"] != package.effective_end:
+                raise _Failure(Diagnostic("PackageValidity", "package applicability differs from binding", pid))
+            if date.fromisoformat(effective["start"]) >= date.fromisoformat(bindings.horizon_end) or date.fromisoformat(effective["end_exclusive"]) <= date.fromisoformat(bindings.horizon_start):
+                raise _Failure(Diagnostic("PackageValidity", "package does not cover the requested horizon", pid))
+        entities = {r["id"]: r for r in ir["entities"]}
+        books = {r["id"]: r for r in ir["books"]}
+        if len(entities) != 1 or len(books) != 1:
+            raise _Failure(Diagnostic("ProfileCardinality", "one entity and book are required", "profile"))
+        for row in ir["contexts"]:
+            if (err := _ref(nodes, row["entity"], {"entities"}, row["id"])):
+                raise _Failure(err)
+            if row["basis"] != next(iter(packages)) or row["currency"] != row["unit"] or row["currency"] != entities[row["entity"]]["functional_currency"]:
+                raise _Failure(Diagnostic("ContextMismatch", "context basis, unit and currency disagree", row["id"]))
+            _time("instant" if row["time"]["kind"] == "instant" else "interval", row["time"]["start"], row["time"]["end_exclusive"], row["time"]["calendar"])
+            if row["time"]["calendar"] != bindings.calendar_id or row["perimeter"] != bindings.entity_perimeter:
+                raise _Failure(Diagnostic("ContextMismatch", "context calendar or perimeter differs from bindings", row["id"]))
+        for row in ir["sourceSpans"]:
+            if (err := _ref(nodes, row["document"], {"documents"}, row["id"])):
+                raise _Failure(err)
+        for row in ir["documents"]:
+            _instant(row["available"], row["id"]); _instant(row["ingested"], row["id"])
+        reviews = {r["id"]: r for r in ir["reviewDecisions"]}
+        views = {r["id"]: r for r in ir["evidenceViews"]}
+        spans = {r["id"]: r for r in ir["sourceSpans"]}
+        documents = {r["id"]: r for r in ir["documents"]}
+        observations = {r["id"]: r for r in ir["observations"]}
+        for row in ir["reviewDecisions"]:
+            if row["action"] not in {"Accept", "AcceptAlternative", "Propose", "Reject", "Supersede"}:
+                raise _Failure(Diagnostic("ReviewAction", "unsupported review action", row["id"]))
+            if not row["reviewer"] or not row["reason"] or not row["evidence"]:
+                raise _Failure(Diagnostic("IncompleteReview", "review decisions require reviewer, reason and evidence", row["id"]))
+            for sid in row["evidence"]:
+                if sid not in spans:
+                    raise _Failure(Diagnostic("UnknownReference", "review evidence span is unknown", row["id"]))
+            for rid in row["reading_ids"]:
+                if not rid.startswith("reading:"):
+                    raise _Failure(Diagnostic("UnknownReference", "review reading id is malformed", row["id"]))
+        for row in ir["evidenceViews"]:
+            _instant(row["cutoff"], row["id"])
+            if row["system_as_of"] is not None:
+                _instant(row["system_as_of"], row["id"])
+            for did in row["documents"]:
+                if did not in documents:
+                    raise _Failure(Diagnostic("UnknownReference", "evidence document is unknown", row["id"]))
+            for sid in row["decisions"]:
+                if sid not in reviews:
+                    raise _Failure(Diagnostic("UnknownReference", "evidence decision is unknown", row["id"]))
+            for oid in row["observations"]:
+                if oid not in observations:
+                    raise _Failure(Diagnostic("UnknownReference", "evidence observation is unknown", row["id"]))
+        for row in ir["observations"]:
+            if (err := _ref(nodes, row["context"], {"contexts"}, row["id"])):
+                raise _Failure(err)
+            for rid in row["source_spans"]:
+                if (err := _ref(nodes, rid, {"sourceSpans"}, row["id"])):
+                    raise _Failure(err)
+            reading_key = next((r.key for r in bindings.readings if f"reading:{_clean_id(r.key)}" == row["reading"]), None)
+            if reading_key is None:
+                raise _Failure(Diagnostic("UnknownReference", "observation reading is not bound", row["id"]))
+            reading = bindings.reading(reading_key)
+            if row["domain"]["lower"] != rational(reading.amount) or row["domain"]["upper"] != rational(reading.amount):
+                raise _Failure(Diagnostic("SourceReadingMismatch", "observation domain differs from bound reading", row["id"]))
+            document_id = f"document:{_clean_id(reading.key)}"
+            span = next((s for s in ir["sourceSpans"] if s["id"] in row["source_spans"]), None)
+            if span is None or span["literal"] != reading.literal:
+                raise _Failure(Diagnostic("SourceLiteralMismatch", "source span literal differs from binding", row["id"]))
+            doc = next((d for d in ir["documents"] if d["id"] == document_id), None)
+            if doc is None or doc["sha256"] != hashlib.sha256(reading.literal.encode()).hexdigest():
+                raise _Failure(Diagnostic("SourceDigestMismatch", "document digest differs from binding", row["id"]))
+            review = reviews.get(row["review_decision"])
+            if review is None or review["action"] != "Accept" or review["reviewer"] != reading.reviewer or review["date"] != reading.review_date:
+                raise _Failure(Diagnostic("BindingAcceptance", "observation lacks the bound accepted review decision", row["id"]))
+            view = next((v for v in views.values() if row["id"] in v["observations"]), None)
+            if view is None or reading.cutoff != view["cutoff"] or (reading.system_as_of is not None and view["system_as_of"] != reading.system_as_of):
+                raise _Failure(Diagnostic("EvidenceCutoff", "observation is not in the bound evidence view", row["id"]))
+        for row in ir["books"]:
+            if row["package"] not in package_rows:
+                raise _Failure(Diagnostic("PackageBinding", "book package is not locked", row["id"]))
+            if row["currency"] != entities[row["entity"]]["functional_currency"]:
+                raise _Failure(Diagnostic("ContextMismatch", "book currency differs from entity", row["id"]))
+        for row in ir["accounts"]:
+            if (err := _ref(nodes, row["book"], {"books"}, row["id"])):
+                raise _Failure(err)
+            if row["id"] not in _ACCOUNT_ROLES or row["role"] != _ACCOUNT_ROLES[row["id"]]:
+                raise _Failure(Diagnostic("PackageAccounts", "account role is outside the locked DemoDebt mapping", row["id"]))
+        if {r["id"]: r["role"] for r in ir["accounts"]} != _ACCOUNT_ROLES:
+            raise _Failure(Diagnostic("PackageAccounts", "all four DemoDebt account roles are required", "accounts"))
+        model_ids = {r["id"] for r in ir["models"]}
+        scope_ids = {r["id"] for r in ir["modelScopes"]}
+        if len(model_ids) != 1 or len(scope_ids) != 1:
+            raise _Failure(Diagnostic("ProfileCardinality", "one model and one model scope are required", "models"))
+        admissions = {a.name: a for a in bindings.admissions}
+        for row in ir["symbols"]:
+            if row["uncertainty_kind"] != bindings.symbol_uncertainty or row["scope"] not in model_ids:
+                raise _Failure(Diagnostic("SymbolAdmission", "symbol uncertainty or scope differs from bindings", row["id"]))
+            admission = admissions.get(row["id"])
+            if admission is None or row["admission"] != f"admission:{row['id']}" or not row["provenance"]:
+                raise _Failure(Diagnostic("SymbolAdmission", "symbol admission/provenance is incomplete", row["id"]))
+            domain = row["domain"]
+            if domain["kind"] != "interval" or domain["lower"] is None or domain["upper"] is None:
+                raise _Failure(Diagnostic("InvalidDomain", "Core0.1 symbols require a closed interval", row["id"]))
+            if parse_rational(domain["lower"]) < 0 or parse_rational(domain["upper"]) > 1:
+                raise _Failure(Diagnostic("InvalidDomain", "alpha interval must lie inside [0,1]", row["id"]))
+        for row in ir["assumptions"]:
+            if row["expression"] not in {e["id"] for e in ir["expressions"]}:
+                raise _Failure(Diagnostic("UnknownReference", "assumption expression is unknown", row["id"]))
+            if row["scope"] not in model_ids and row["scope"] not in {a["id"] for a in ir["alternatives"]} and row["scope"] not in {c["id"] for c in ir["contracts"]} and row["scope"] not in {s["id"] for s in ir["scenarios"]}:
+                raise _Failure(Diagnostic("AssumptionScope", "assumption scope is not declared", row["id"]))
+            valid = row["valid"]
+            _time("interval", valid["start"], valid["end_exclusive"], valid["calendar"])
+            if valid["calendar"] != bindings.calendar_id or valid["start"] != bindings.horizon_start or valid["end_exclusive"] != bindings.horizon_end:
+                raise _Failure(Diagnostic("AssumptionValidity", "assumption validity must cover the profile horizon", row["id"]))
+            _instant(row["information_cutoff"], row["id"])
+            if not row["rationale"] or not row["source_refs"] and row["provenance"] != "ScenarioDesign":
+                raise _Failure(Diagnostic("MissingAssumption", "assumption rationale or source provenance is missing", row["id"]))
+            aid = row["id"]
+            if aid.startswith("assumption:alternative_"):
+                key = "alternative"
+            elif aid.startswith("assumption:contract_"):
+                key = "contract-rate"
+            elif aid.startswith("assumption:scenario_"):
+                key = "scenario"
+            elif aid.startswith("assumption:constraint_"):
+                key = "constraint"
+            else:
+                key = None
+            if key is not None:
+                meta = bindings.assumption(key)
+                if (row["rationale"] != meta.rationale or row["provenance"] != meta.provenance or
+                        row["role"] != meta.role or row["information_cutoff"] != meta.information_cutoff or
+                        row["valid"]["start"] != meta.valid_start or row["valid"]["end_exclusive"] != meta.valid_end):
+                    raise _Failure(Diagnostic("AssumptionBinding", "assumption metadata differs from explicit binding", row["id"]))
+        checker = _IRTypeChecker(ir, nodes)
+        for row in ir["expressions"]:
+            checker.expr(row["id"])
+        for row in ir["constraints"]:
+            inferred = checker.expr(row["expression"])
+            if inferred[0] != "Bool":
+                raise _Failure(Diagnostic("ConstraintType", "constraint expression must be Boolean", row["id"]))
+        for row in ir["contracts"]:
+            if row["book"] not in books:
+                raise _Failure(Diagnostic("UnknownReference", "contract book is unknown", row["id"]))
+            if row["package"] not in package_rows or row["type"] != f"{row['package']}/DebtMix":
+                raise _Failure(Diagnostic("PackageBinding", "contract type/package is not locked", row["id"]))
+            if not row["source_refs"]:
+                raise _Failure(Diagnostic("ContractProvenance", "contract requires source provenance", row["id"]))
+            fields = {f["name"]: f["expression"] for f in row["fields"]}
+            if set(fields) != {"principal", "fixed_fraction", "fixed_rate", "initial_floating_rate"}:
+                raise _Failure(Diagnostic("ContractFields", "contract fields are incomplete or duplicated", row["id"]))
+            expected = {"principal": f"Money<{books[row['book']]['currency']}>", "fixed_fraction": "Real",
+                        "fixed_rate": "Rate<annual_simple>", "initial_floating_rate": "Rate<annual_simple>"}
+            for name, typ in expected.items():
+                if checker.expr(fields[name])[0] != typ:
+                    raise _Failure(Diagnostic("ContractType", f"{name} has the wrong type", row["id"]))
+            fixed = checker.expr(fields["fixed_fraction"])
+            if fixed[2] is not None and (fixed[2] < 0 or fixed[2] > 1):
+                raise _Failure(Diagnostic("ContractDomain", "fixed fraction must lie inside [0,1]", row["id"]))
+            for name in ("fixed_rate", "initial_floating_rate"):
+                value = checker.expr(fields[name])[2]
+                if value is not None and value < 0:
+                    raise _Failure(Diagnostic("ContractDomain", f"{name} must be nonnegative", row["id"]))
+        alternatives = {r["id"]: r for r in ir["alternatives"]}
+        for row in ir["alternatives"]:
+            if row["parent"] not in {r["id"] for r in ir["historyFamilies"]} or row["scope"] not in scope_ids:
+                raise _Failure(Diagnostic("AlternativeScope", "alternative parent or scope is unknown", row["id"]))
+            meta = next((a for a in bindings.alternatives if a.name == row["id"]), None)
+            if meta is None or row["author"] != meta.author or row["created_at"] != meta.created_at or row["reason"] != meta.reason:
+                raise _Failure(Diagnostic("AlternativeMetadata", "alternative metadata differs from binding", row["id"]))
+            if not row["constraints"]:
+                raise _Failure(Diagnostic("MissingAlternativeCondition", "alternative requires at least one condition", row["id"]))
+            for cid in row["constraints"]:
+                c = next((x for x in ir["constraints"] if x["id"] == cid), None)
+                if c is None or c["scope"] != row["id"] or checker.expr(c["expression"])[0] != "Bool":
+                    raise _Failure(Diagnostic("AlternativeScope", "alternative condition is not scoped to its branch", row["id"]))
+        for row in ir["states"]:
+            total = Fraction(0); seen = set()
+            for balance in row["balances"]:
+                if balance["account"] in seen:
+                    raise _Failure(Diagnostic("DuplicateBalance", "opening account occurs twice", row["id"]))
+                seen.add(balance["account"]); total += parse_rational(balance["signed_amount"])
+            if total != 0:
+                raise _Failure(Diagnostic("UnbalancedState", "opening balances do not sum to zero", row["id"]))
+            expected_accounts = {a["id"] for a in ir["accounts"] if a["book"] == row["book"]}
+            if seen != expected_accounts:
+                raise _Failure(Diagnostic("IncompleteState", "opening state must include every account", row["id"]))
+            opening = next((o for o in bindings.openings
+                            if row["date"] == o.date and row["book"] == (o.book or row["book"]) and
+                            {name: rational(value) for name, value in o.balances} ==
+                            {b["account"]: b["signed_amount"] for b in row["balances"]}), None)
+            if opening is None:
+                raise _Failure(Diagnostic("OpeningStateMismatch", "opening state differs from bound opening export", row["id"]))
+            if row["contracts"] != [c["id"] for c in ir["contracts"]]:
+                raise _Failure(Diagnostic("OpeningStateMismatch", "opening state must retain active contract", row["id"]))
+        for row in ir["historyFamilies"]:
+            if row["feasibility"] == "Feasible" and not row["witnesses"]:
+                raise _Failure(Diagnostic("MissingWitness", "feasible family requires a witness", row["id"]))
+            if row["coverage"] == "ExactWithinScope" and (row["unresolved_cells"] or not row["completed_cells"]):
+                raise _Failure(Diagnostic("FalseCoverage", "exact coverage requires completed cells and no unresolved cells", row["id"]))
+            if row["coverage"] != "PartialSearch" or row["feasibility"] != "Unknown" or row["completed_cells"] != 0 or row["unresolved_cells"] != 1:
+                raise _Failure(Diagnostic("CoverageClaim", "Core0.1 family must remain explicitly unsearched", row["id"]))
+            if set(row["symbols"]) != {s["id"] for s in ir["symbols"]} or set(row["alternatives"]) != set(alternatives):
+                raise _Failure(Diagnostic("FamilyMembership", "family must retain all shared symbols and alternatives", row["id"]))
+            if row["evidence_view"] not in views or row["opening_state"] not in {s["id"] for s in ir["states"]}:
+                raise _Failure(Diagnostic("FamilyMembership", "family evidence/opening references are unknown", row["id"]))
+        for row in ir["scenarios"]:
+            for driver in row["drivers"]:
+                info = checker.expr(driver["expression"])
+                if info[0] != "Driver<Rate<annual_simple>>":
+                    raise _Failure(Diagnostic("ScenarioType", "scenario driver must be a constant annual rate", row["id"]))
+        for row in ir["reportMappings"]:
+            if not row["rows"] or row["rows"][0]["expression"] not in checker.memo:
+                raise _Failure(Diagnostic("ReportMapping", "report mapping expression is not compiled", row["id"]))
+            rb = next((r for r in bindings.reports if r.key == row["id"] or r.mapping == row["rows"][0].get("value")), None)
+            if row["book"] not in books or row["basis"] not in package_rows or not row["required_operations"]:
+                raise _Failure(Diagnostic("ReportMapping", "report mapping book/package/operations are incomplete", row["id"]))
+            if rb is None:
+                # The generated mapping uses a SourceRef literal; compare the
+                # text payload directly when an explicit row binding exists.
+                expr = next((e for e in ir["expressions"] if e["id"] == row["rows"][0]["expression"]), None)
+                if expr is None or expr["type"] != "SourceRef" or expr["text"] not in {r.mapping for r in bindings.reports}:
+                    raise _Failure(Diagnostic("ReportMapping", "report mapping is not bound to an explicit export", row["id"]))
+        if not ir["diagnostics"]:
+            pass
+    except _Failure as exc:
+        return ValidationResult(False, (exc.diagnostic,))
+    return ValidationResult(True, ())
+
+
+@dataclass(frozen=True)
+class _Symbolic:
+    name: str
+
+
+def evaluate_expression(ir: Mapping[str, Any], identifier: str,
+                        symbols: Mapping[str, Fraction | int | str] | None = None) -> Any:
+    """Evaluate exact supported expressions for a supplied symbol assignment."""
+    nodes = {e["id"]: e for e in ir.get("expressions", [])}
+    symbol_values = {k: _fraction(v) for k, v in (symbols or {}).items()}
+    observations = {o["id"]: o for o in ir.get("observations", [])}
+    contexts = {c["id"]: c for c in ir.get("contexts", [])}
+    seen: set[str] = set()
+
+    def go(eid: str) -> Any:
+        if eid in seen:
+            raise ValueError(f"expression cycle at {eid}")
+        if eid not in nodes:
+            raise KeyError(eid)
+        e = nodes[eid]; op = e["op"]
+        if op == "literal":
+            if e["rational"] is not None:
+                return parse_rational(e["rational"])
+            if e["type"] == "Bool":
+                return e["text"] == "true"
+            return e["text"]
+        seen.add(eid)
+        try:
+            if op == "ref":
+                target = e["target"]
+                if target in nodes:
+                    return go(target)
+                if target in symbol_values:
+                    return symbol_values[target]
+                if target in observations:
+                    return parse_rational(observations[target]["domain"]["lower"])
+                return _Symbolic(target)
+            if op == "call":
+                value = go(e["args"][0])
+                return value
+            args = [go(a) for a in e["args"]]
+            if any(isinstance(a, _Symbolic) for a in args):
+                return _Symbolic(eid)
+            if op == "add": return args[0] + args[1]
+            if op == "subtract": return args[0] - args[1]
+            if op == "multiply": return args[0] * args[1]
+            if op == "divide": return args[0] / args[1]
+            if op == "negate": return -args[0]
+            if op == "not": return not args[0]
+            if op == "and": return args[0] and args[1]
+            if op == "or": return args[0] or args[1]
+            return {"eq": args[0] == args[1], "ne": args[0] != args[1], "lt": args[0] < args[1],
+                    "le": args[0] <= args[1], "gt": args[0] > args[1], "ge": args[0] >= args[1]}[op]
+        finally:
+            seen.remove(eid)
+    return go(identifier)
+
+
+def semantic_projection(ir: Mapping[str, Any] | None) -> Optional[dict[str, Any]]:
+    if ir is None:
+        return None
+    # Source offsets live in CompileResult.source_map.  IR itself retains
+    # source context, package locks, assumptions, alternatives and bindings.
+    projected = copy.deepcopy(dict(ir))
+    projected.pop("diagnostics", None)
+    return projected
+
+
+__all__ = [
+    "AccountDecl", "AlternativeDecl", "ArrayExpr", "AssumptionBinding", "Binary", "BookDecl",
+    "Call", "CompileBindings", "CompileResult", "ConstraintDecl", "ContractDecl", "Diagnostic",
+    "EntityDecl", "Expr", "External", "LetDecl", "Literal", "OpeningBinding", "OpeningDecl",
+    "ObservationDecl", "PackageBinding", "Program", "RecordExpr", "Ref", "ReportBinding",
+    "ReportDecl", "ScenarioDecl", "SourceDecl", "SymbolDecl", "Unary", "UnsupportedDecl", "UseDecl",
+    "ValidationResult", "compile_program", "evaluate_expression", "rational", "semantic_projection",
+    "validate_ir",
+]

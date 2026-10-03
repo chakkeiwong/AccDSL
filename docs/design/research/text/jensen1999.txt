@@ -1,0 +1,554 @@
+                  Temporal                               Databases
+
+
+
+
+                  Richard Snodgrass, University of North Carolina at Chapel Hill
+                                llsoo Ahn, AT&T Bell Laboratories
+
+
+
+Database                          Time is an essential part of infor-
+                                         mation about the constantly evolv-
+                                                                                 costs, coupled with the emergence of
+                                                                                 promising new mass storage technologies
+management systems                       ing real world. Facts or data need to   such as optical disks,2 has amplified in-
+                                  be interpreted in the context of time.         terest in database management systems
+should provide                    Causal relationships among events or           with version management or temporal
+temporal support                  entities are embedded in the temporal
+                                  information. Time is a universal attribute
+                                                                                 support. George Copeland maintained
+                                                                                 that
+directly. Four types of           in most information management applica-           ... as the price of hardware continues
+                                  tions and deserves special treatment as
+databases are                     such.
+                                                                                    to plummet, thresholds are eventually
+                                                                                    reached at which these compromises [to
+differentiated by their              Databases supposedly model reality,            achieve hardware efficiency] must be re-
+                                                                                    balanced in order to minimize the total
+ability to represent              but conventional database management
+                                  systems (DBMSs) lack the capability to
+                                                                                    cost of a system. . . . If the deletion
+                                                                                    mechanism common to most database
+temporal information.             record and process time-varying aspects of        systems today is replaced by a non-dele-
+                                  the real world. With increasing sophistica-       tion policy .. ., then these systems will
+                                  tion of DBMS applications, the lack of            realize significant improvements in
+                                  temporal support raises serious problems          functionality, integrity, availability, and
+                                  in many cases. For example, conventional           simplicity. 3
+                                  DBMSs cannot support historical queries        Gio Wiederhold also observed, in a review
+                                  about past status, let alone trend analysis    of the present state ofdatabase technology
+                                  (essential for applications like decision      and its future, that
+                                  support systems). There is no way to repre-       The availability of ever greater and less
+                                  sent retroactive or proactive changes,            expensive storage devices has removed
+                                  while support for error correction or audit       the impediment that prevented keeping
+                                  trail necessitates costly maintenance of          very detailed or extensive historical
+                                  backups, checkpoints, or transaction logs         information in on-line databases....
+                                  to preserve past states. There is a growing       An immediate effect of these changes
+                                                                                    will be the retention of past data ver-
+                                  interest in applying database methods for         sions over long periods. 4
+                                  version control and design management in          In the past five years, numerous
+                                  computer-aided design, requiring capa-         schemes have been proposed to support
+                                  bilities to store and process time-            temporal information processing in
+                                  dependent data. Without temporal sup-          database management systems by incor-
+                                  port from the system, many applications
+                                  have been forced to manage temporal            porating one or more time attributes.
+                                  information in an ad-hoc manner.               However, there has been some confusion
+                                                                                 concerning terminology and the definition
+                                      The need to provide temporal support       of these time attributes. In this article we
+                                   in DBMSs has been recognized for at least     describe a taxonomy of time consisting of
+                                   a decade. A bibliographical survey in 1982    three distinct time concepts for use in data-
+                                   contained about 70 articles relating time     bases.5 Using the taxonomy, we defime
+                                   and information processing, I and at least    four types of databases, differentiated by
+                                   90 more articles have appeared since then.    their ability to support these time concepts
+                                   Recently, the rapid decrease of storage       and processing of temporal information.
+
+Septembe3r 1986                      001891602/86/0900e003590100 © 1986 IEEE                                                      35
+             I               I l I
+                    I
+                                           ___7
+                                                                                          transaction
+                                                                                             time
+Figure 1. A snapshot relation.                    Figure 2. A rollback relation.
+
+
+
+
+                                                       v.£K
+                                                     time
+                                                                        ~~~vali&
+                                                                          time
+                                                                                                 vff                      vi
+                                                                                                 tme                      tine
+                                                                                          transaction
+                                                                                             time
+
+Figure 3. An historical relation.                 Figure 4. A temporal relation.
+
+
+                                                  and a query in Quel (a tuple calculus-based     specific aspect. This aspect should be sup-
+The taxonomy                                      language for the Ingres database manage-        ported in a general fashion by the DBMS,
+                                                  ment system 6) as to Merrie's rank,             rather than by application programs.
+  Although the following discussion is               range of f is Faculty
+based on the relational model, analogous             retrieve (f.Rank)                                  Rollback databases. One approach to
+arguments also apply to hierarchical or                 where f.Name = "Merrie"                    resolving the above deficiencies is to store
+network models.                                   yields the rank of associate professor.          all past states, indexed by time, of the
+                                                     In many situations this snapshot data-        snapshot database as it evolves. Such an
+    Snapshot databases. Conventional              base is inadequate. For example, it cannot      approach requires a representation of
+ databases model an enterprise as it              answer queries such as                           transaction time, the time the information
+                                                                                                  was stored in the database. Under this ap-
+ changes dynamically by a snapshot at a              * What was Merrie's rank two years
+ particular point in time. A state or an in-           ago? (historical query)                    proach a relation can be illustrated con-
+ stance of a database is its current content,        * How did the number of faculty              ceptually in three dimensions (see Figure
+ which does not necessarily reflect the cur-           change over the last five years? (trend    2), with transaction time serving as the
+ rent status of the enterprise. The state of a                                                    third axis. The relation can be regarded as
+                                                       analysis)                                  a sequence of snapshot relations (termed
+ database is updated using data manipula-         nor record facts like
+ tion operations such as insertion, deletion,                                                     snapshot states) indexed by time. By mov-
+                                                     * Merrie was promoted to a full pro-         ing along the time axis and selecting a par-
+ or replacement, taking effect as soon as
+                                                       fessor starting last month. (retro-        ticular snapshot state, it is possible to get a
+ they are committed. In this process, past             active change)
+ states of the database, representing those                                                       snapshot of the relation at some time in the
+                                                     * Lee is joining the faculty next month.     past and make queries about it (a snapshot
+ of the enterprise, are discarded and for-
+                                                       (proactive change)                         relation). The operation of selecting a
+ gotten. We term this type of database a
+ snapshot database.                               Without system support in this respect,         snapshot state is termed rollback, and a
+   In the relational model, a database is a       many applications have had to maintain          database supporting it is termed a rollback
+collection of relations. Each relation con-       and handle temporal information in an ad-       database.
+sists of a set of tuples with the same set of     hoc manner. For instance, many person-             Changes to a rollback database may be
+attributes and is usually represented as a        nel databases attempt to record the entire      made only to the most recent snapshot
+two-dimensional table (see Figure 1). As          employment history of the company's             state. The relation illustrated in Figure 2
+changes occur in the enterprise, this table       employees. That some of the attributes          had three transactions applied to it, start-
+is updated appropriately. For example, at         record time and that only a subset of the       ing from a null relation: (1) addition of
+a certain moment an instance of the rela-         employees actually work for the company         three tuples, (2) addition of one tuple, and
+tion Faculty with the two attributes Name         at any particular point in time do not con-     (3) deletion of one tuple (entered in the
+and Rank may be                                   cern the DBMS itself. The DBMS provides         first transaction) and addition of another
+                                                  no facility for interpretation or manipula-     tuple. Each transaction results in a new
+     Name                  Po*                    tion of this information; such operations       shapshot state being appended to the front
+                                                  must be handled by specially-written            of the time axis. Once a transaction is com-
+     Merie         Associate Professor            application programs. The fact that data        mitted, the snapshot states in the rollback
+     Tom           Assodate Professor             vary over time is not an application-           relation may not be altered.
+36
+                                                                                                                                   COMPUTER
+   The distinction between snapshot data-        statement with a valid clause to specify            A temporal relation may be regarded as
+bases and rollback databases is that the lat-    how the implicit time attribute is com-          a sequence of historical states, each a com-
+ter have the ability to return to any previ-     puted and a when predicate to specify the        plete historical relation. The rollback
+ous state to execute a snapshot query. Any       temporal relationship of tuples participa-       operation on a temporal relation selects a
+query language can be converted to one           ting in a derivation. These added con-           particular historical state, on which a his-
+that can query a rollback database by            structs handle complex temporal relation-        torical query can be executed. Each trans-
+adding a clause effecting the rollback           ships such as begin of, precede, and             action causes a new historical state to be
+operation. TQuel (for Temporal QUEry             overlap. For example, the TQuel query            created; hence, temporal relations are
+Language),7 an extension of Quel for             requesting Merrie's rank when Tom ar-            append-only. The temporal relation in
+temporal databases, augments the retrieve        rived is                                         Figure 4 is the result of four transactions,
+statement with an as of clause to specify           range of fl is Faculty-                       starting from a null relation: (1) three
+the relevant transaction time. The TQuel            range of f2 is Faculty                        tuples were added, (2) one tuple was
+query                                               retrieve (fl.Rank)                            added, (3) one tuple was added and an ex-
+    range of f is Faculty                              where fl.Name = 'Merrie' and               isting one deleted, and (4) one tuple was
+    retrieve (f.Rank)                                        f2.Name = 'Tom'                      modified so that it started at a later valid
+       where f.Name = "Merrie"                         when fl overlap begin of f2                time.
+       as of 'September 1978"                    The derived relation is also a historical re-       Since TQuel supports both historical
+on a rollback Faculty relation will find         lation that can be used in further historical    queries and rollback operations, it can be
+Merrie's rank as of September 1978. The          queries.                                         used to query temporal databases. An ex-
+result of a query on a rollback database is a       Another distinction between historical        ample is the TQuel query
+pure snapshot relation.                          and rollback databases is that historical            range of fl is Faculty
+   One limitation of supporting transac-         DBMSs support arbitrary modification,                range of f2 is Faculty
+tion time is that the history of database        whereas rollback DBMSs only allow snap-              retrieve (fl.Rank)
+activities, rather than the history of the       shot states to be appended. The same se-                where fl.Name = "Merrie' and
+real world, is recorded. A tuple becomes         quence of transactions that resulted in the                    f2.Name = 'Tom'
+effective as soon as it is entered into the      rollback relation in Figure 2 will result in           when fl overlap begin of f2
+database, as in a snapshot database. There       the historical relation in Figure 3, where             as of 'January 1979"
+is no way to record retroactive/proactive        the label of the time axis indicates the valid   that determines Merrie's rank when Tom
+changes, nor to correct errors in past           time. However, the historical relation can       arrived, according to the state of the
+tuples. Errors can sometimes be over-            show that a later transaction has changed        database as of January 1979. This derived
+ridden (if they are in the current state), but   the time when a tuple takes effect in the        relation is a temporal relation, so further
+they cannot be forgotten. For instance, if       relation, which is not possible on a roll-       temporal relations can be derived from it.
+it were discovered that Merrie's promo-          back relation. Rollback DBMSs can roll           The answer may differ if a similar query is
+tion had occurred earlier than previously        back to an incorrect previous snapshot           made as of October 1978 and if her pro-
+recorded, this error could not be corrected      relation; historical DBMSs can represent         motion was not yet recorded by that time.
+in a rollback database; the query given          current knowledge about the past.
+above would continue to respond with the                                                             User-defined time. User-defined time is
+incorrect rank.                                     Temporal databases. Benefits of both          necessary when additional temporal infor-
+                                                 approaches can be combined by support-           mation, not handled by transaction or
+   Historical databases. While rollback          ing both transaction time and valid time in      valid time, is stored in the database. The
+databases record a sequence of snapshot          the same relation. While a rollback              values of user-defined temporal attributes
+states, historical databases record a single     database views stored tuples, whether            are not interpreted by the DBMS and are
+historical state per relation. As errors are     valid or not, as of some moment in time,         thus the easiest to support; only an inter-
+discovered, they are corrected by modify-        and a historical database always views           nal representation and input/output func-
+ing the database. Previous states of the         tuples valid at some moment as of now, a         tions are needed. Such attributes will then
+database itself are not retained, so it is not   temporal database can view tuples valid at       occur in the relation scheme. Multiple rep-
+possible to view the database as it was in       some moment seen as of some other mo-            resentations are also possible, each associ-
+the past. No record is kept of the errors        ment, thereby completely capturing the           ated with input and output functions. As
+corrected. Historical databases resemble         history of retroactive/proactive changes.        an example of user-defined time, consider
+snapshot databases in this respect.              The user of a temporal DBMS can exam-            a Promotion relation with three attributes:
+Historical databases support valid time,         ine historical information from the view-        Name, Rank, and Approved-Date. The
+the time when the relationship in the enter-     point of a previous state of the database;       Approved-Date (a user-defined time) is
+prise being modeled was valid.                   both kinds of time may be manipulated in         the date when the promotion committee
+   The semantics of valid time are closely       a query.                                         approved the promotion; the valid time is
+related to reality, hence more complex              We use the term temporal database to          the date when the promotion will take ef-
+than the semantics of transaction time           emphasize the need for both valid time and       fect; and the transaction time is the date
+concerned with database activities. There-       transaction time in handling temporal in-        the information concerning the promo-
+fore, historical databases need sophisti-        formation. Since there are two orthogonal        tion was stored in the database.
+cated operations to manipulate the com-          time axes involved now, temporal rela-
+plex semantics of valid time adequately.         tions should be illustrated in four dimen-          An analogy. A simple analogy will help
+TQuel supports such queries (termed his-         sions (Figure 4 shows a single temporal          clarify the subtle differences among the
+torical queries) by augmenting the retrieve      relation).                                       four types of databases categorized above.
+
+September 1986                                                                                                                             37
+                                                   An analogy for user-defined time would       the collection of all past payroll stubs
+                  No rollback      Rollback      be the date printed on each payroll stub in-   (rollback), the most current resume
+                                                 dicating when the pay period started. Note     (historical), and the collection of all past
+ Current          Snapshot       Rollback        that this date does not necessarily corre-     resumes (temporal).
+                                                 spond to the date the check (or the pre-          Starting with these empty relations, a
+                                                 vious one) was issued.                         series of update operations are applied to
+     Historical Historical      Temporal                                                        each of them. After each update opera-
+                                                    Summary of taxonomy. Three kinds of         tion, the states of four relations are dis-
+     queries                                     time-transaction time, valid time, and         played: the snapshot relation in a conven-
+Figure 5. Types of databases.                    user-defined time-were introduced, re-         tional format as a single snapshot state,
+                                                 sulting in a categorization of the types of    the rollback relation as a sequence of snap-
+                                                database management systems based on            shot states, the historical relation as a
+                                                their support for handling temporal infor-      single historical state, and the temporal
+                                                mation. As shown in Figure 5, transaction       relation as a sequence of historical states.
+                   | Transaction      Valid     time and valid time define the two orthog-      Several queries on these relations focus on
+     Snapshot                                   onal capabilities of rollback operations        what information is and, more important-
+                                                and historical queries, thereby differen-       ly, is not represented in each relation.
+     Rollback                                   tiating four types of databases: snapshot,
+     Historical                                 rollback, historical, and temporal.                Meme joins as an instructor. In Sep-
+                                                   Support of rollback operations requires      tember 1973, the following statement is
+     Temporal                                   the incorporation of transaction time,          executed:
+                                                which concerns the representation. Sup-             append to ? (Name = 'Merrie", Rank =
+Figure 6. Attributes of the four types of       port of historical queries requires the in-         " Instructor if)
+databases.                                      corporation of valid time, which is associ-     In these examples, the "?" symbol would
+                                                ated with reality. Support of user-defined      be replaced by the name of a relation:
+                                                time is orthogonal to support of historical     snapshot, rollback, historical, or tem-
+                                                queries or rollback operations. Hence, the      poral.
+   First, a snapshot relation can be com-       three kinds of time actually define eight          The four relations resulting from the
+pared to the latest payroll stub showing the    different types of databases. The taxon-        execution of this statement are almost
+current position of the recipient. If the       omy presented here defines four types           identical (see Figure 7). The snapshot rela-
+person gets a promotion, the next stub          based on their support of transaction and       tion shows that Merrie is currently an in-
+shows the new rank, but there is no way to      valid time (see Figure 6). Each of these        structor. The rollback relation contains a
+find out about a past rank from the latest      types may or may not support user-              single snapshot state created on September
+stub.                                           defined time. However, we note that user-       1973 (the transaction time that indexes the
+   If all the payroll stubs are carefully col-  defined time is much closer to valid time       snapshot states is shown following the
+lected without discarding any of them, as       than to transaction time, in that both valid    state), indicating that Merrie started
+some people do, it is possible to determine     time and user-defined time are concerned        receiving payroll checks made out to "In-
+the rank as of some time in the past from       with reality itself, whereas transaction        structor Merrie" from September 1973.
+the stub of that period. This collection of     time involves only the model of reality (the    The historical relation indicates that Mer-
+payroll stubs can be compared to a roll-        database). DBMSs (and their query lan-          rie has been hired as an instructor (the
+back relation, a slice of which is a snapshot   guages) purporting to provide full tempor-      valid time for each tuple in the historical
+relation comparable to a payroll stub.          al support should handle all three kinds of     state is shown to the left of the tuple); there
+These stubs will be printed in indelible ink,   time.                                           is currently one line on Merrie's resume.
+so that it will not be possible to make                                                         The temporal relation contains one
+changes to payroll stubs of the past, even An example                                           historical state, containing one tuple;
+when there is a retroactive promotion or                                                        analogously, there is one resume with one
+an error in last year's salary.                   The following example highlights the          entry in Merrie's resume file.
+   A historical relation can be compared to similarities and differences among the                 If we asked back in October 1973
+a resume, containing the history of job four types of relations, snapshot, roll-                "What was Merrie's rank?",
+positions a person held up through the back, historical, and temporal. We first                     range of f is ?
+moment the resume was prepared. If an create an empty relation for each of the                      retrieve (f.Rank)
+error is found in the resume, or if the per- four types using TQuel create statements:                 where f.Name = "Merrie"
+son gets a promotion, a new resume re-            create Snapshot (Name = c20, Rank =           the same information would be returned
+flecting the change is in order. The current                                   c20)             from all four relations ("Instructor"), but
+resume should always be up to date.               create persistent Rollback (Name = c20,       in rather different ways. For the rollback
+   A temporal relation can be considered                                      Rank = c20)       relation, the current snapshot state is used;
+as a collection of all such resumes marked        create interval Historical (Name = c20,       for the historical relation, the tuples cur-
+by the date when each of them was pre-                                        Rank = c20)       rently valid are searched; and for the tem-
+pared. It is possible and often interesting       create persistent interval Temporal (Name     poral relation, the tuples currently valid in
+to go back to an old resume and read                                       = c20, Rank = c20)
+                                                                                                the current historical state are searched.
+about the personal data as known at some These are the relations alluded to earlier,            The defaults defined in TQuel ensure that
+past moment.                                   namely, the latest payroll check (snapshot),     queries containing only where clauses will
+38                                                                                                                               COMPUTER
+return the same information regardless of
+relation types.7                                  Snapshot:             N
+                                                                            ee      Instructor
+   Merrie is promoted to fuil professor. In
+December of that year, a replace statement        Rollback:
+is executed:                                                            Nwre                        F~k        R(Transaction Time)
+    replace f (Rank = 'Full Professor')                                 Meme        Instructor                     (September 1973)
+      where f.Name = "Merrie"
+Figure 8 illustrates the changes in the four      Hlstorical:
+relations. Since the snapshot relation             Valid Time)           Nm         Rwk
+records only the current information, the         '(SeptemberF1973)
+                                                                 Meme               Instructor
+existing tuple is modified, as is the next        Temporal:
+payroll check made out to Merrie. A new
+snapshot state is appended to the rollback        (Valid Timea                      Fbk                                   Trnction Time)
+relation; Merrie's pay stubs for September        (September- 1973)         rems    Instructor                           (September 1973)-
+1973 through November 1973 still read
+"Instructor Merrie," but the December
+1973 paycheck is made out to "Full Pro-
+fessor Merrie." Snapshot states within the
+rollback relation are separated by dotted
+lines. A tuple is added to the historical         Snapshot:
+relation with a valid time of December
+                                                                         N~ Rwk
+                                                                         Meme       Full Professor
+1973; an entry is also added to Merrie's re-
+sume. The historical relation always con-         Rollback:
+tains only one historical state, so no dotted
+lines will appear in its illustration.                                    Nam                                   ark{Transaction Time)
+                                                                         Morrie Instructor                           (September 1973)-
+   The historical relation is an interval rela-                                 ........................
+                                                                                  ........                    .......   ............................
+tion. In the representation shown in Figure                              Merrie Full Professor                       (December 1973)
+8, a tuple is valid until the next tuple with
+the same key becomes effective. Hence,             Historical:
+the historical relation in this figure indi-       VYalid time)          Nff          tc
+cates that Merrie was an instructor from          (September 1973) Merrie           Instructor
+September 1973 until December 1973,               (Decemrber 1973) Merrie           Full Professor
+when she became a full professor. The             Temporal:
+temporal relation contains two historical            lid Time)                      Rrk                                  (Transaction Time)
+states: one current from September
+through November 1973 and the longer                 tSopt
+                                                         r r 1973) Meme             Instructor                           (September 1973)
+one created in December 1973. Merrie's            (September 1973) Morrie           Instructor                           (Decembr ij
+resume file now contains two resumes, one         (December 1973) Meme              Full Professor
+dated September 1973 containing one job           Figure 8. Merrie is promoted to full professor.
+pdsition, and the more recent one dated
+December 1973 containing two job posi-
+tions. Only one transaction time is needed
+for each historical state, even if it contains
+multiple tuples.
+   When we ask the next month, January            stored (looking at Merrie's pay stub from          retrieve (f.Rank)
+ 1974, about Merrie's rank,                       January won't tell us what the paycheck              where f.Name = "Merrie"
+                                                  read three months earlier). The rollback             as of "October, 1973"
+    retrieve (f.Rank)
+      where f.Name = "Merrie"                     relation can't give us an answer either. Of
+we again get the same result from all four        course, we could flip through the payroll      This query effectively turns back the clock
+relations ("Full Professor"), except that         stubs, but such a search won't tell us if      to October; all changes after October are
+we also get the past rank of Instructor           Merrie was given a retroactive promotion       not considered. A result is not forthcom-
+from the historical and the temporal rela-        (such a situation will be examined shortly).   ing from either the snapshot or the histori-
+tions. If we ask in January, "What was            Both the historical and temporal relations     cal relations, because they both record
+Merrie's rank last October ?":                    can provide the answer "Instructor" by         only current knowledge (in the case of
+    retrieve (f. Rank)                            examining the current resume (the histori-     historical relations, current knowledge
+      where f.Name = "Merrie"                     cal relation records only the current one      about the past). In this case, however, flip-
+      when f overlap "October, 1973"              anyway).                                       ping through the pay stubs or the stack of
+                                                     Still interacting with the DBMS in Jan-     resumes (the rollback and temporal rela-
+we run into some difficulties. This query         uary 1974, we ask "What did we think           tions, respectively) will allow us to deter-
+cannot be executed on a snapshot relation,        Merrie's current rank was three months         mine what we knew in October 1973: that
+since information about the past is not           ago?":                                         Merrie was then an instructor.
+
+ September 1986                                                                                                                                   39
+                                                                                                                                                but we can modify only the current state of
+  Snapshot:                                                                                                                                     the snapshot and rollback relations by
+                                 Nam           Rank                                                                                                replace f (Rank = "Associate Professor")
+                                                                                                                                                     where f.Name = "Merrie"
+                                 Merrie        Assistant Professor
+                                                                                                                                                As shown in Figure 10, the fact that the
+  Rollback:                                                                                                                                     promotion was retroactive is irrelevant in
+                                 Nam           Rark                                                 (Transaction Time)                         the snapshot and rollback relations. In
+                                 Merrie        Instructor                                           (September 1973)
+                                                 ..........................                         ................................ .-*.*@.    particular, the pay stubs (the rollback rela-
+                                 Merrie        Full Professor                                       (December 1973)                            tion) from February 1974 to November
+                                                                                                                                                1978 still specify "Assistant Professor
+                                 Merrie        Assistant Professor                                  (February 1974)                             Merrie." However, the current resume
+                                                                                                                                                (the historical relation) and the most re-
+  Historical:                                                                                                                                  cent resume in the resume file (the tem-
+ (Valid Time)                    Namn          Fbk                                                                                             poral relation) will both record the promo-
+  September 1973) Merrie                       Instructor                                                                                      tion date as June 1978.
+  December 1973) Merrie                        Assistant Professor                                                                                 When we query the relations in the fol-
+  Temporal:                                                                                                                                    lowing March, all four will list Merrie's
+  Valid Time)                    Name          Ra                                                                                              current rank as "Associate Professor."
+                                                                                                         ransaction Time)                      The historical and temporal relations will
+  September                1973)
+ ...............................
+                                 Merrie
+                                 ...........
+                                               Instructor                                            (Setember 1973)                           list her rank in October 1978 as "Associate
+                                               ........................................   ...................................
+  September 1973) Merrie                       Instructor                                           (December 1973)                            Professor. " The rollback and temporal re-
+  December 1973) Merrie                        Full Professor                                                                                  lations will list her current rank, as best
+  September 1973) Merrie                       Instructor                                           (February 1974)                            known in October 1978, as "Assistant Pro-
+ (December 1973) Merrie                        Assistant Professor                                                                             fessor," indicating that the promotion had
+                                                                                                                                               not been made. However, the temporal
+Figure 9. A correction.                                                                                                                        relation can answer even more involved
+                                                                                                                                               queries, such as "What was Merrie's rank
+                                                                                                                                               in October 1978, as best known in
+                                                                                                                                               November 1978?":
+   A correction. In the next month,                                                                                                                 retrieve (f.Rank)
+                                                                     historical and temporal relations. When                                           when f overlap "October, 1978"
+however, we realize that we made a mis-                              asked what Merrie's rank was in January,                                          where f.Name = "Merrie"
+take. Last December, Merrie wasn't pro-                                                                                                                as of "November 1978 "
+                                                                           retrieve (f.Rank)
+moted from instructor to full professor;                                      where f.Name = "Merrie"
+she was only promoted to assistant pro-                                                                                                        This query can only be answered by the
+                                                                              when f overlap "January 1974"                                    temporal relation, which returns a rank of
+fessor. We modify the historical and the                            the snapshot and rollback relations cannot
+temporal relations in February 1984 by                                                                                                         "Assistant Professor." If the as of clause
+                                                                    provide an answer. However, the histori-                                   were omitted, the result would be "Asso-
+   replace f (Rank = "Assistant Professor")                         cal and temporal relations both respond
+     valid from begin of "December 1973"                                                                                                       ciate Professor."
+                                                                    with the corrected rank, "Assistant Pro-                                      We have examined the information rep-
+     where f.Name = "Merrie"
+                                                                    fessor. "                                                                  resented by each of the four types of rela-
+but we can correct only the current state of                           If we ask a different question, "What
+the snapshot and rollback relations by                                                                                                         tions and have shown how each relation
+                                                                    was Merrie's current rank as best known                                    responds to various update and retrieval
+     replace f (Rank = "Assistant Professor")                       last January?",                                                            operations. A few tautologies should now
+        where f.Name = "Merrie"
+                                                 retrieve (f.Rank)                                                                             be defensible:
+Figure 9 shows that the next paycheck will          where f.Name = "Merrie"
+indicate a new rank, paychecks issued                                                                                                             * The most recent snapshot state in the
+                                                    as of "January 1974"                                                                             rollback relation is always identical to
+from February 1974 on will bear the cor- then the snapshot and historical relations
+rect title, and the current resume is cor- cannot reply, since they only record infor-                                                               the entire contents of the snapshot
+rected.                                                                                                                                              relation.
+                                              mation as currently known. Both the roll-                                                           * Similarly, the most recent historical
+    Note that the pay stubs for December back and temporal relations can provide
+1973 and January 1974 still mention "Full the information we request ("Full Profes-                                                                  state in the temporal relation is
+Professor Merrie" and that the resume file sor"), while the temporal relation also                                                                   always identical to the entire contents
+still contains an old resume with the incor- provides the past rank of "Instructor."                                                                 of the historical relation.
+rect promotion rank; both of these rela-                                                                                                          * Queries containing only a target list
+tions are by definition append-only.                                                                                                                 and a where clause will return the
+                                                Merne is promoted retroactively. In                                                                  same information when applied to
+    We perform three queries in August. December 1978, Merrie is promoted to
+We first ask about Merrie's current rank: associate professor, retroactive from June                                                                 any of the four types of relations.
+     retrieve (f.Rank)                        1978. We record the fact in the historical
+        where f.Name = "Merrie"
+All four relations respond with "Assistant
+                                              and temporal relations by                                                                        An implementation
+                                                 replace f (Rank = "Associate Professor")
+Professor," except that we also get the            valid from begin of "June 1978"                                                               There are several approaches to imple-
+past rank of "Instructor" from the                 where f.Name = " Merrie"                                                                    menting a DBMS supporting the opera-
+40                                                                                                                                                                             COMPUTER
+tions described above. When confronted
+with the task of adding temporal support       Snapshot:
+to a DBMS, one reasonable initial strategy                                       Nam           Rank
+would be to interpose a layer of code be-                                        Merrie        Associate Professor
+tween the user and the database system.
+This layered approach has the significant      Rollback:
+advantage of not requiring any change to                                         Nam           Rark                                  (Transaction Time)
+                                                                                 Merrie        Instructor                            (September 1973)
+the complex data structures and algo-                                                          ......................
+                                                                                                 ....                                ...................................
+rithms within the DBMS proper. How-                                              Merrie        Full Professor                        (December 1973)
+ever, the petformance of such a system
+may be inadequate. An immediate con-                                             Merrie        Assistant Professor                   (February 1974)
+cern is the monotonically increasing and                                         Merrie        Associate Professor                   (December 1978)
+potentially enormous storage require-
+ments. In addition, there are multiple ver-    Historical:
+sions for some tuples, rendering conven-
+tional storage schemes such as indexing or      Valid Time)       Nare                         Frk
+                                                    epem r 1 973) errie                        Instructor
+hashing less effective. Performance will        December 1973) Merrie                          Assistant Professor
+deteriorate rapidly not only for temporal       June 1978)        Merrie                       Associate Professor
+queries but also for nontemporal queries.
+   An alternative is to integrate temporal     Temporal:
+support into the DBMS itself, developing
+new query evaluation algorithms and ac-         Valid Time)      Name                          Rrt                                      (Transaction Time)
+cess methods to achieve reasonable perfor-
+                                                September 1 973) -Merrie                       Instructor                               (September 1973)
+                                               ...............................   ...........   ............................ ...................................
+mance for a variety of temporal queries        (September 1973) Merrie                         Instructor                               (December 1973)
+without penalizing more frequent non-          (December 1973) Merrie                          Full Professor
+temporal queries. This approach clearly        (September 1973) Merrie                         Instructor                               (February 1974)
+involves substantial research and imple-       (December 1973) Merrie                          Assistant Professor
+mentation effort, yet promises to address
+deficiencies in performance.                   (September 1973) Merrie                         Instructor                               (December 1978)
+   We have adopted an intermediate strat-       December 1973 Merrie                           Assistant Professor
+egy in implementing our prototype tem-
+                                                uJne 1978)      Merrie                         Associate Professor
+poral lMBS. We modified portions of the
+snapshot DBMS Ingres, 6 but still used the    Figure 10. Merrie is promoted retroactively.
+conventional access methods and query
+evaluation algorithms available in it. Such
+a strategy may also be useful when adding
+temporal support to a conventional hierar-    time attributes indicating the period the                      time values can be done in human readable
+chical or network DBMS. This prototype        version is active. Although this tuple ver-                    form by automatically converting to and
+helps identify problems with conventional     sioning scheme appears to have a high                          from the internal representation. Various
+access methods and query evaluation al-       degree of redundancy, in that the entire                       formats of date or time are accepted for in-
+gorithms in providing temporal support,       tuple is duplicated whenever the value of                      put, and resolutions ranging from second
+and serves as a comparison point for fully    any attribute changes, analysis reveals that                   to year are selectable for output. The copy
+integrated DBMSs developed in the             this scheme consumes less space than at-                       statement was also modified to support
+future. We also used it to run the example    tribute versioning when the database is not                    batch input and output of relations having
+queries above, where it flagged a few sub-    volatile.8                                                     temporal attributes.
+tle errors that had escaped our scrutiny.        For the prototype, the parser of Ingres                        The resulting prototype supports all the
+   One of the most important decisions        was modified to accept TQuel statements                        TQuel statements, including the aug-
+was determining how to embed a four-          and generate an extended syntax tree with                      mented create, append, delete, replace,
+dimensional temporal relation into a two-     subtrees for valid, when, and as of clauses.                   and retrieve statements. The valid, when,
+dimensional snapshot relation as sup-         Some of the query evaluation modules                           and as of clauses are fully supported. All
+ported by Ingres. There are at least five     were changed to handle the newly defined                       three kinds of time are supported, as are all
+ways to embed a temporal relation in a        node types and the implicit temporal at-                       four types of relations. Proposed exten-
+snapshot relation.7 Our prototype adopted     tributes. Functions to handle the temporal                     sions to the language, including indeter-
+the scheme of augmenting each tuple with      operators begin of, end of, precede, over-                     minacy and aggregate functions, are not
+two transaction time attributes for a roll-   lap, extend, and as of were added in the in-                   yet supported.
+back and a temporal relation, and one or      terpreter. The system relation was modi-                          To evaluate the performance of the
+two valid time attributes for a historical    fied to support the various combinations                       prototype, we ran a benchmark with a set
+and a temporal relation, depending on         of implicit temporal attributes according                      of queries on the four types of databases
+whether the relation modeled events or in-    to the type of relation as specified by its                    using various access methods. We deter-
+tervals. Each update operation on an exist-   create statement, an example of which ap-                      mined the fixed portion, the variable por-
+ing tuple generates a new version of the      peared earlier. The temporal attribute has                     tion, and the growth rate of the disk access
+tuple, marked with appropriate values of      a distinct type, so that input and output of                   cost for various types of queries, as the
+
+Septemnber 1986                                                                                                                                                       41
+                          number of versions in each database in-               Data Engineering, Los Angeles, CA, Feb.
+                          creased using a series of replace opera-              1986, pp. 374-381.
+                          tions.9 Performance degraded rapidly for           9. 1. Ahn and R. Snodgrass, "Performance
+                          both temporal and nontemporal queries,                Evaluation of a Temporal Database Man-
+                          as expected for conventional access                   agement System," Proc. Int'l Conf.
+                          methods such as hashing and indexed se-               Management of Data, ACM SIGMOD,
+                          quential access. We are investigating new             Washington DC, May 1986, pp. 96-107.
+                          access methods addressing this problem to
+                          enhance the performance.
+
+                              W
+                              A I hile fifteen years of research
+                                      have focused on formalizing
+                                      and implementing snapshot
+                          databases, only a few researchers have
+                          recently studied the formalization of
+                          historical databases and the implementa-
+                          tion of rollback databases. Little has been
+                          published on formalizing rollback or tem-
+                          poral databases, or on implementing his-
+                          torical or temporal databases. The special       Richard Snodgrass is currently an assistant pro-
+                          opportunities promised by temporal               fessor at the Department of Computer Science,
+                          databases are, at this time, matched by the      University of North Carolina, Chapel Hill. His
+                          challenges in supporting them.                   research interests include temporal databases,
+                                                                           programming environments, and software
+                                                                           monitoring. He is the director of the SoftLab
+                          Acknowledgments                                  project, which is concerned with pragmatic
+                                                                           issues in the implementation of programming
+                                                                           environments, database management systems,
+                            This work was supported by NSF grant           and operating systems.
+                          DCR-8402339. Richard Snodgrass' work                Snodgrass received the BA degree in physics
+                          was also supported by an IBM Faculty             from Carleton College, Northfield, MN, in
+                          Development Award.                               1977 and the PhD degree in computer science
+                                                                           from Carnegie-Mellon University, Pittsburgh,
+                                                                           PA, in 1982.
+                          References
+                           I. A. Bolour et al., "The Role of Time in In-
+                              formation Processing: A Survey," SigArt
+                              Newsletter, Vol. 80, Apr. 1982, pp. 28-48.
+                           2. A. Hoagland, "Information Storage
+                              Technology: A Look at the Future,"
+                              Computer, Vol. 18, No. 7, July 1985, pp.
+                              60-67.
+                           3. G. Copeland, "What If Mass Storage
+                              Were Free?," Computer, Vol. 15, No. 7,
+                              July 1982, pp. 27-35.
+                           4. G. Weiderhold, "Databases," Comput-
+                              er, Vol. 17, No. 10, Oct. 1984, pp.          llsoo Ahn is a member of the technical staff at
+                              211-223.                                     Bell Laboratories, Columbus, Ohio. His re-
+                           5. R. Snodgrass and 1. Ahn, "A Taxonomy         search interests include temporal databases,
+                              of Time in Databases," Proc. Int'l Conf.     physical database design, performance anal-
+                              Management of Data, ACM SIGMOD,              ysis, distributed systems and computer net-
+                              Austin, TX, May 1985, pp. 236-246.           works.
+                                                                              Ahn worked as an engineer for telephone
+                           6. G. D. Held, M. Stonebraker, and E.           switching systems and as an MVS system pro-
+                              Wong, "Ingres-A Relational Data Base         grammer in the Korea Telecommunications
+                              Management System," Proc. 1975 Nat'l         Co. after receiving an MSEE from the Korea
+                              Computer Conf., Vol. 44, 1975, pp.
+                                                                           Advanced Institute of Science in 1977. He
+                              409-416.                                     received a PhD in computer science from the
+                           7. R. Snodgrass, "The Temporal Query            University of North Carolina at Chapel Hill in
+                              Language TQuel," ACM Trans. Data-            1986.
+                              base Systems, to appear 1986.
+                           8. 1. Ahn, "Towards an Implementation of           Readers may write to Snodgrass at the Uni-
+                              Database Management Systems with             versity of North Carolina at Chapel Hill, Dept.
+                              Temporal Support," Second Int'l Conf.        of Computer Science, Chapel Hill, NC 27514.
+
+                                                                                                             COMPUTER
+Reader Service Number 4
+

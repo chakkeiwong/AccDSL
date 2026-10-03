@@ -1,0 +1,39 @@
+{
+  "assumptions": [
+    "The controller and workers are trusted, and containment covers ordinary handled interruption and the initial process group only.",
+    "The packet does not show Master initialization or Master.run. Whether they reload state under the writer lock and validate authorization against independently reviewed controller hashes is a missing interface assumption.",
+    "The supplied permission package authorizes the reviewed program; it does not automatically authorize changed controller code."
+  ],
+  "checks": [
+    "Reviewed only the supplied code and interfaces; no tools, files or commands were accessed.",
+    "Checked prefix-rule semantics, publication ordering, interrupted-install recovery, authorization provenance and writer recovery.",
+    "The reported 55 passing tests support control-plane behavior. Test bodies were not supplied, and the count establishes no accounting correctness."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "High — install_rule replaces the authorization baseline with current controls without checking that those controls are the approved version. It unconditionally writes controller_hashes_at_grant=master.controls, including on repeated install-and-run and recovery through run. The prepared receipt stores only the candidate rule hash, and recovery does not validate even that hash before regenerating the candidate. Consequently, an ordinary controller edit between preparation and resume can be recorded as explicitly approved; the rule text is unchanged because it binds only the entrypoint path. A later comparison against this newly written authorization cannot detect the substitution. Repair: durably bind installation preparation to the approved controller hashes and review identity, validate that binding before publication and recovery, and preserve existing authorization rather than silently replacing it. Changed controls must follow the stated supervisor-repair and fresh-review path.",
+    "High — installation writes precede abandoned-worker recovery. Both install-and-run and interrupted-install recovery acquire runner.lock and immediately call install_rule; neither calls master.recover_process. Acquiring the lock alone does not establish worker quiescence: the supplied lifecycle contract explicitly allows an abandoned worker after supervisor termination, and internal helpers close their inherited lock copy. The review branch correctly performs recovery first. Installation can therefore rewrite candidate, receipt, checks and authorization while a previous editable worker remains alive; any later recovery inside master.run occurs after these writes. Repair: under the acquired lock, recover and quiesce the recorded prior process before installation mutations, and stop without publishing or authorizing if ownership is ambiguous. Reload relevant state after recovery.",
+    "Medium — recovery leaves an ordinary interrupted installation permanently marked incomplete when authorization.json already exists. install_rule writes authorization.json before marking installation.json complete. If interrupted between those writes, main's run recovery condition is false because authorization exists, so the published receipt is never reconciled. An existing authorization also suppresses recovery after an interrupted repeated installation. Repair: inspect and reconcile every nonterminal installation receipt under the lock, independently of authorization existence; verify the target hash, approval checks and original authorization binding before marking completion. Do not regenerate authorization merely to finish the receipt."
+  ],
+  "next_actions": [
+    "Make installation a recoverable transaction bound to the original reviewed controls and approval evidence.",
+    "Recover abandoned processes before installation writes and reconcile partial receipts on every explicit resume.",
+    "Add focused regression coverage for changed controls during installation recovery, installation with a surviving recorded worker, and interruption after authorization publication but before receipt completion."
+  ],
+  "residuals": [
+    "atomic_rule_publish uses atomic no-overwrite publication, checks conflicting content and fsyncs the target directory; those are appropriate protections in the supplied implementation.",
+    "The prefix intentionally permits entrypoint arguments beyond the public actions. The parser and live internal grants provide the additional restriction; match/not_match are not an action allowlist.",
+    "The effective-policy check covers supplied local rule files, not every runtime-managed restriction. The permission package correctly preserves runtime rejection.",
+    "The 192-report source panel and internal phase acceptance cannot close the remaining accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Traced installation through preparation, publication, authorization and completion.",
+    "Examined resume behavior at each durable-write boundary and compared installation ordering with the stated process-recovery contract."
+  ],
+  "summary": "Revise installation provenance and recovery. The supplied paths can reauthorize changed controls, mutate installation records before abandoned workers are recovered, and leave interrupted receipts unreconciled.",
+  "verdict": "REVISE"
+}

@@ -1,0 +1,331 @@
+"""Executed P03 obligations; authored typed inputs never pass through the parser."""
+import copy
+from dataclasses import replace
+from fractions import Fraction as F
+import hashlib
+import json
+from pathlib import Path
+import sys
+import unittest
+from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'scripts'))
+import core0_ir_v1 as ir
+from core0_frontends_v1 import compile_source
+import jsonschema
+
+OBSERVATIONS = []
+BASE = (ROOT / 'docs/design/fixtures/borrowing.acc').read_text()
+REASON = 'Fixed-rate proportion not disclosed'
+RENAMED = '''module FinancingStudy version "2";
+use DemoDebt version "1";
+source disclosure = external("synthetic-note-7");
+entity Beta functional USD;
+book Statutory entity Beta basis DemoDebt version "1";
+account Cash : Asset book Statutory;
+account Debt : Liability book Statutory;
+account InterestExpense : Expense book Statutory;
+account Retained : Equity book Statutory;
+opening carried for Statutory from external("after-2025-close");
+observation borrowing : Money<USD> instant @2025-12-31 = 150 USD from disclosure;
+symbol share : Real in [0, 1] because "Fixed-rate proportion not disclosed";
+contract facility : DebtMix book Statutory {
+ principal = value(borrowing); fixed_fraction = share;
+ fixed_rate = 0.05 per year; initial_floating_rate = 0.05 per year;
+}
+alternative fixed { assume share == 1; }
+alternative floating { assume share == 0; }
+scenario shock { set market_rate = constant(0.08 per year); }
+report financials for Statutory { mapping = external("DemoDebt.statements.v1"); }
+'''
+
+
+def bindings(principal=100, renamed=False):
+    """Explicit synthetic evidence, separately authored from source and expected IR."""
+    p = F(principal); stamp = '2026-01-01T00:00:00Z'
+    book, symbol = ('Statutory', 'share') if renamed else ('Local', 'alpha')
+    names = ('fixed', 'floating') if renamed else ('allFixed', 'allFloating')
+    package_path = ROOT / 'docs/design/fixtures/demo-debt-package.json'
+    return ir.CompileBindings(
+        packages=[ir.PackageBinding('DemoDebt', '1', hashlib.sha256(package_path.read_bytes()).hexdigest(),
+            'DemoDebt', '2025-01-01', '2028-01-01', ['reset','accrue_and_pay','close','statements'],
+            ['builtin:Core0@1','DemoCalendar@1'], ['fixture:demo-debt-package.json'])],
+        readings=[ir.ReadingBinding('synthetic-note-7', f'Synthetic disclosed debt {p} USD; split undisclosed', p,
+            'USD', '2025-12-31', 'fixture:p03-synthetic', 'synthetic-2025', stamp, stamp,
+            'synthetic-author', stamp, 'Explicit synthetic acceptance, not human approval', stamp,
+            system_as_of=stamp, action='Accept')],
+        openings=[ir.OpeningBinding('after-2025-close', '2025-12-31',
+            {'Cash':p-5, 'Debt':-p, 'InterestExpense':0, 'Retained':5}, book=book)],
+        reports=[ir.ReportBinding('DemoDebt.statements.v1','DemoDebt.statements.v1',
+            'interest_operating','close',['accrue_and_pay'])],
+        assumptions=[ir.AssumptionBinding(k, 'Synthetic explicit '+k, information_cutoff=stamp,
+            valid_start='2026-01-01',valid_end='2027-01-01')
+            for k in ('alternative','constraint','contract-rate','scenario')],
+        admissions=[ir.SymbolAdmission(symbol,'synthetic-note-7',REASON,'synthetic-author',stamp)],
+        alternatives=[ir.AlternativeBinding(n,'synthetic-author',stamp,'Synthetic endpoint') for n in names],
+        calendar_id='DemoCalendar@1',calendar_name='Gregorian',horizon_start='2026-01-01',
+        horizon_end='2027-01-01',symbol_uncertainty='HistoricalFact',
+        entity_perimeter='Beta-only' if renamed else 'Acme-only')
+
+
+def typed(principal=100, stress=F(7,100), renamed=False, arithmetic=False):
+    mod, ver, src, ent, book, opening, obs, sym, contract, a1, a0, scenario, report = (
+        ('FinancingStudy','2','disclosure','Beta','Statutory','carried','borrowing','share','facility',
+         'fixed','floating','shock','financials') if renamed else
+        ('BorrowingExample','1','note7','Acme','Local','after2025','debt','alpha','loans',
+         'allFixed','allFloating','rateShock','statements'))
+    ds = [ir.SourceDecl(src,'synthetic-note-7'),ir.EntityDecl(ent,'USD'),ir.BookDecl(book,ent,'DemoDebt','1')]
+    ds += [ir.AccountDecl(n,r,book) for n,r in [('Cash','Asset'),('Debt','Liability'),('InterestExpense','Expense'),('Retained','Equity')]]
+    ds += [ir.OpeningDecl(opening,book,'after-2025-close'),
+           ir.ObservationDecl(obs,'Money<USD>','2025-12-31',ir.Literal(F(principal),unit='USD'),src),
+           ir.SymbolDecl(sym,'Real',ir.Literal(F(0)),ir.Literal(F(1)),REASON)]
+    fraction = ir.Ref(sym)
+    if arithmetic:
+        ds += [ir.LetDecl('mix',ir.Binary('/',ir.Binary('*',ir.Ref(sym),ir.Literal(F(2))),ir.Literal(F(2)))),
+               ir.ConstraintDecl('limit',ir.Binary('and',ir.Binary('>=',ir.Ref(sym),ir.Literal(F(0))),
+                    ir.Binary('<=',ir.Ref(sym),ir.Literal(F(1)))))]
+        fraction=ir.Ref('mix')
+    ds += [ir.ContractDecl(contract,'DebtMix',book,[('principal',ir.Call('value',[ir.Ref(obs)])),
+           ('fixed_fraction',fraction),('fixed_rate',ir.Literal(F(1,20),unit='per year')),
+           ('initial_floating_rate',ir.Literal(F(1,20),unit='per year'))])]
+    for name,value in ((a1,1),(a0,0)):
+        conds=[ir.Binary('==',ir.Ref(sym),ir.Literal(F(value)))]
+        if arithmetic: conds += [ir.Binary('>=',ir.Ref(sym),ir.Literal(F(0)))]
+        ds.append(ir.AlternativeDecl(name,conds))
+    ds += [ir.ScenarioDecl(scenario,[('market_rate',ir.Call('constant',[ir.Literal(F(stress),unit='per year')]))]),
+           ir.ReportDecl(report,book,ir.External('DemoDebt.statements.v1'))]
+    return ir.Program(mod,ver,ds,[ir.UseDecl('DemoDebt','1')])
+
+
+def arithmetic_source():
+    return BASE.replace('contract loans', 'let mix = alpha * 2 / 2;\nconstraint limit: alpha >= 0 and alpha <= 1;\ncontract loans').replace(
+        'fixed_fraction = alpha;', 'fixed_fraction = mix;').replace('assume alpha == 1;', 'assume alpha == 1; assume alpha >= 0;').replace(
+        'assume alpha == 0;', 'assume alpha == 0; assume alpha >= 0;')
+
+
+SOURCE_NEGATIVES = {
+ 'unknown_report_field': (lambda s:s.replace('mapping =', 'extra = 3; mapping ='),'ParseError'),
+ 'duplicate_report_field': (lambda s:s.replace('mapping = external("DemoDebt.statements.v1");','mapping = external("DemoDebt.statements.v1"); mapping = external("DemoDebt.statements.v1");'),'ParseError'),
+ 'missing_rate_unit': (lambda s:s.replace('fixed_rate = 0.05 per year','fixed_rate = 0.05'),'MissingRateUnit'),
+ 'unsupported_event': (lambda s:s+'\nevent maturity() book Local;','UnsupportedDeclaration'),
+ 'reserved_identifier': (lambda s:s.replace('entity Acme','entity report'),'ReservedIdentifier'),
+ 'invalid_date': (lambda s:s.replace('@2025-12-31','@2025-02-30'),'InvalidDate'),
+ 'invalid_escape': (lambda s:s.replace('Fixed-rate',r'Fixed\qrate'),'ParseError'),
+ 'invalid_surrogate': (lambda s:s.replace('Fixed-rate',r'Fixed\ud800rate'),'InvalidString'),
+ 'duplicate_declaration': (lambda s:s+'\nentity Acme functional USD;','DuplicateDeclaration'),
+ 'duplicate_contract_field': (lambda s:s.replace('fixed_fraction = alpha;', 'fixed_fraction = alpha; fixed_fraction = alpha;'),'DuplicateField'),
+ 'unknown_reference': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = absent'),'UnknownReference'),
+ 'cyclic_lets': (lambda s:s.replace('contract loans','let first = second; let second = first; contract loans'),'ExpressionCycle'),
+ 'unsupported_call': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = sqrt(alpha)'),'UnsupportedExpression'),
+ 'unsupported_array': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = [alpha, 1]'),'UnsupportedExpression'),
+ 'unsupported_field': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = alpha.part'),'UnsupportedExpression'),
+ 'wrong_dimensions': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = 1 USD + 1'),'TypeMismatch'),
+ 'rate_product': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = 1 USD * 0.05 per year'),'UnsupportedOperation'),
+ 'zero_divisor': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = alpha / 0'),'UnprovedNonzeroDenominator'),
+ 'unproved_divisor': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = 1 / alpha'),'UnprovedNonzeroDenominator'),
+ 'bad_arity': (lambda s:s.replace('value(debt)','value(debt, debt)'),'ArityMismatch'),
+ 'invalid_fraction_bounds': (lambda s:s.replace('fixed_fraction = alpha','fixed_fraction = alpha + 1'),'ContractDomain'),
+ 'principal_disagreement': (lambda s:s.replace('principal = value(debt)','principal = 200 USD'),'ContractPrincipal'),
+ 'malformed_syntax': (lambda s:s.replace('module BorrowingExample','module {'),'ParseError'),
+ 'wrong_book': (lambda s:s.replace('account Cash : Asset book Local','account Cash : Asset book Elsewhere'),'BindingMismatch'),
+ 'extra_scenario_setting': (lambda s:s.replace('set market_rate', 'set other = 1; set market_rate'),'ScenarioFields'),
+}
+
+
+class P03Tests(unittest.TestCase):
+    def record(self, case, **values):
+        OBSERVATIONS.append(dict(id=case, passed=True, **values))
+
+    def success(self, source, program, b, case, expected):
+        before=ir.binding_projection(b); original=ir.binding_projection(program)
+        a=compile_source(source,b); t=ir.compile_program(program,b)
+        self.assertTrue(a.ok,[d.as_dict() for d in a.diagnostics]);self.assertTrue(t.ok,[d.as_dict() for d in t.diagnostics])
+        self.assertEqual(a.semantic_projection,t.semantic_projection)
+        self.assertEqual(a.binding_records,t.binding_records)
+        self.assertEqual(before,ir.binding_projection(b));self.assertEqual(original,ir.binding_projection(program))
+        self.assertEqual(a.ir,compile_source(source,b).ir)
+        fields={v['name']:v['expression'] for v in a.ir['contracts'][0]['fields']}
+        symbol=a.ir['symbols'][0]['id']; rates=[]
+        for alpha in (1,0):
+            ev=lambda eid:ir.evaluate_expression(a.ir,eid,{symbol:F(alpha)})
+            principal=ev(fields['principal']); weight=ev(fields['fixed_fraction']); fixed=ev(fields['fixed_rate'])
+            stress=ev(a.ir['scenarios'][0]['drivers'][0]['expression'])
+            rates.append(principal*(weight*fixed+(1-weight)*stress))
+        self.assertEqual(rates,list(map(F,expected)))
+        fam=a.ir['historyFamilies'][0]
+        self.assertEqual((fam['feasibility'],fam['coverage'],fam['completed_cells'],fam['unresolved_cells'],fam['witnesses'],fam['solver_results']),
+                         ('Unknown','PartialSearch',0,1,[],[]))
+        self.record(case,source=source,input_sha256=a.input_sha256,typed_sha256=t.input_sha256,
+                    ir=a.ir,bindings=a.binding_records,source_map=dict(a.source_map),typed_source_map=dict(t.source_map),
+                    expected_interest=list(map(str,expected)),observed_interest=list(map(str,rates)))
+        return a
+
+    def test_positive_pairs(self):
+        for case,source,program,b,expect in [
+          ('borrowing_baseline',BASE,typed(),bindings(),(5,7)),
+          ('borrowing_stress_09',BASE.replace('0.07 per year','0.09 per year'),typed(stress=F(9,100)),bindings(),(5,9)),
+          ('borrowing_principal_200',BASE.replace('= 100 USD','= 200 USD'),typed(200),bindings(200),(10,14)),
+          ('renamed_independent',RENAMED,typed(150,F(8,100),True),bindings(150,True),(F(15,2),12)),
+          ('borrowing_let_arithmetic',arithmetic_source(),typed(arithmetic=True),bindings(),(5,7))]:
+            with self.subTest(case=case):
+                result=self.success(source,program,b,case,expect)
+                if case=='borrowing_let_arithmetic':
+                    self.assertEqual(len(result.ir['historyFamilies'][0]['constraints']),1)
+                    self.assertEqual([len(a['constraints']) for a in result.ir['alternatives']],[2,2])
+
+    def test_formatting_and_spelling(self):
+        base=compile_source(BASE,bindings())
+        for name,source in [('borrowing_crlf_comment','// comment\r\n'+BASE.replace('\n','\r\n')),
+                            ('decimal_spelling',BASE.replace('100 USD','100.00 USD'))]:
+            result=self.success(source,typed(),bindings(),name,(5,7))
+            self.assertEqual(base.semantic_projection,result.semantic_projection)
+            self.assertNotEqual(base.input_sha256,result.input_sha256)
+        for decl in ('Acme','Local','loans','statements'):
+            span=base.source_map[decl];self.assertIn(decl,BASE[span['start']:span['end']])
+        self.record('declaration_source_spans')
+
+    def test_source_rejections(self):
+        for name,(change,code) in SOURCE_NEGATIVES.items():
+            with self.subTest(case=name):
+                result=compile_source(change(BASE),bindings())
+                self.assertFalse(result.ok)
+                self.assertEqual(result.diagnostics[0].code,code)
+                self.record(name,expected=code,diagnostics=[d.as_dict() for d in result.diagnostics])
+
+    def test_typed_rejections(self):
+        p=typed(); contract=next(d for d in p.declarations if isinstance(d,ir.ContractDecl))
+        replacements={
+          'typed_missing_rate_unit':('fixed_rate',ir.Literal(F(1,20)),'MissingRateUnit'),
+          'typed_unknown_reference':('fixed_fraction',ir.Ref('absent'),'UnknownReference'),
+          'typed_unsupported_call':('fixed_fraction',ir.Call('sqrt',[ir.Ref('alpha')]),'UnsupportedExpression'),
+          'typed_float':('fixed_rate',ir.Literal(0.05,unit='per year'),'UnsupportedLiteral'),
+          'typed_invalid_bounds':('fixed_fraction',ir.Binary('+',ir.Ref('alpha'),ir.Literal(F(1))),'ContractDomain'),
+        }
+        for name,(field,value,code) in replacements.items():
+            with self.subTest(case=name):
+                bad=replace(contract,fields=[(k,value if k==field else v) for k,v in contract.fields])
+                result=ir.compile_program(replace(p,declarations=[bad if d is contract else d for d in p.declarations]),bindings())
+                self.assertFalse(result.ok);self.assertEqual(result.diagnostics[0].code,code)
+                self.record(name,expected=code,diagnostics=[d.as_dict() for d in result.diagnostics])
+
+    def test_binding_rejections(self):
+        b=bindings()
+        cases={
+         'missing_acceptance':(replace(b,readings=[replace(b.readings[0],action=None)]),'BindingAcceptance'),
+         'missing_admission':(replace(b,admissions=[]),'MissingSymbolAdmission'),
+         'missing_assumption':(replace(b,assumptions=[]),'MissingAssumptionMetadata'),
+         'missing_alternative':(replace(b,alternatives=[]),'MissingAlternativeMetadata'),
+         'ambiguous_reading':(replace(b,readings=b.readings*2),'AmbiguousBinding'),
+         'changed_reading':(replace(b,readings=[replace(b.readings[0],amount=200)]),'SourceReadingMismatch'),
+         'package_digest_binding':(replace(b,packages=[replace(b.packages[0],digest='0'*64)]),'PackageDigestMismatch'),
+         'package_horizon':(replace(b,horizon_end='2029-01-01'),'PackageValidity'),
+         'missing_perimeter':(replace(b,entity_perimeter=None),'MissingContext'),
+         'missing_calendar':(replace(b,calendar_id=None),'MissingContext'),
+         'wrong_report_policy_binding':(replace(b,reports=[replace(b.reports[0],cash_flow_policy='invented')]),'ReportMapping'),
+        }
+        for name,(bound,code) in cases.items():
+            with self.subTest(case=name):
+                result=compile_source(BASE,bound)
+                self.assertFalse(result.ok);self.assertEqual(result.diagnostics[0].code,code)
+                self.record(name,expected=code,diagnostics=[d.as_dict() for d in result.diagnostics])
+
+    def test_schema_valid_corruptions(self):
+        base=compile_source(BASE,bindings());self.assertTrue(base.ok)
+        schema=json.loads((ROOT/'docs/design/spec/core-ir.schema.json').read_text())
+        for name,(change,code) in IR_NEGATIVES.items():
+            with self.subTest(case=name):
+                bad=copy.deepcopy(base.ir);change(bad)
+                jsonschema.Draft202012Validator(schema).validate(bad)
+                result=ir.validate_ir(bad,bindings())
+                self.assertFalse(result.ok);self.assertEqual(result.diagnostics[0].code,code)
+                self.record(name,schema_valid=True,expected=code,diagnostics=[d.as_dict() for d in result.diagnostics])
+
+    def test_no_expected_fixture_input(self):
+        original=Path.read_text
+        def guarded(path,*a,**kw):
+            if path.name in {'borrowing.ir.json','borrowing.expected.json','borrowings.json','core-ir-demo.json'}:
+                raise AssertionError('Compiler tried reading expected fixture')
+            return original(path,*a,**kw)
+        with patch.object(Path,'read_text',guarded):
+            self.assertTrue(ir.compile_program(typed(),bindings()).ok)
+            self.assertTrue(compile_source(BASE,bindings()).ok)
+        self.record('no_expected_fixture_input')
+
+
+    def test_authored_fields_and_legacy_validation(self):
+        from core_semantics import validate
+        authored=json.loads((ROOT/'docs/design/fixtures/core-ir-demo.json').read_text())
+        registry=json.loads((ROOT/'docs/design/fixtures/core-demo-registry.json').read_text())
+        schema=json.loads((ROOT/'docs/design/spec/core-ir.schema.json').read_text())
+        legacy=validate(authored,registry,schema,ROOT)
+        self.assertEqual(legacy['status'],'passed',legacy)
+        generated=compile_source(BASE,bindings()).ir
+        for name in ('entity','perimeter','concept','basis','measurement','time','unit','currency','dimensions'):
+            self.assertEqual(authored['contexts'][0][name],generated['contexts'][0][name])
+        for name in ('lower','upper','kind','lower_closed','upper_closed'):
+            self.assertEqual(authored['observations'][0]['domain'][name],generated['observations'][0]['domain'][name])
+        for name in ('closing_policy','cash_flow_policy','required_operations'):
+            self.assertEqual(authored['reportMappings'][0][name],generated['reportMappings'][0][name])
+        for alpha in (0,1):
+            for field in ('principal','fixed_fraction','fixed_rate','initial_floating_rate'):
+                values=[]
+                for doc in (authored,generated):
+                    eid=next(f['expression'] for f in doc['contracts'][0]['fields'] if f['name']==field)
+                    values.append(ir.evaluate_expression(doc,eid,{'alpha':F(alpha)}))
+                self.assertEqual(*values)
+        self.record('authored_fields_and_legacy',legacy=legacy)
+
+    def test_unicode_and_global_preservation(self):
+        left=compile_source(BASE+'\nlet caption = "caf\u00e9";',bindings())
+        right=compile_source(BASE+'\nlet caption = "cafe\u0301";',bindings())
+        self.assertTrue(left.ok); self.assertTrue(right.ok)
+        self.assertEqual(left.semantic_projection,right.semantic_projection)
+        self.assertNotEqual(left.input_sha256,right.input_sha256)
+        self.record('unicode_normalization')
+        r=compile_source(arithmetic_source(),bindings()); self.assertTrue(r.ok)
+        r.ir['historyFamilies'][0]['constraints']=[]
+        check=ir.validate_ir(r.ir,bindings());self.assertFalse(check.ok)
+        self.assertEqual(check.diagnostics[0].code,'FamilyMembership')
+        self.record('lost_global_constraint',diagnostics=[d.as_dict() for d in check.diagnostics])
+
+
+def expression(doc, suffix):
+    return next(e for e in doc['expressions'] if e['id'].endswith(suffix))
+
+IR_NEGATIVES = {
+ 'ir_renamed_assumption_metadata':(lambda d:d['assumptions'][0].update(id='renamed',rationale='invented'),'AssumptionBinding'),
+ 'ir_lost_rate_assumption':(lambda d:d['assumptions'].pop(2),'MissingAssumption'),
+ 'ir_missing_assumptions':(lambda d:d.update(assumptions=[]),'MissingAssumption'),
+ 'ir_missing_report':(lambda d:d.update(reportMappings=[]),'ProfileCardinality'),
+ 'ir_model_scope':(lambda d:d['models'][0].update(scope='absent'),'ModelBinding'),
+ 'ir_model_lock':(lambda d:d['models'][0].update(package_lock=[]),'ModelBinding'),
+ 'ir_model_declarations':(lambda d:d['models'][0].update(declarations=[]),'ModelBinding'),
+ 'ir_scope_calendar':(lambda d:d['modelScopes'][0].update(calendars=['OtherCalendar']),'ScopeBinding'),
+ 'ir_missing_scenario_driver':(lambda d:d['scenarios'][0].update(drivers=[]),'ScenarioFields'),
+ 'ir_scenario_driver_name':(lambda d:d['scenarios'][0]['drivers'][0].update(name='other'),'ScenarioFields'),
+ 'ir_document_metadata':(lambda d:d['documents'][0].update(available='2027-01-01T00:00:00Z'),'SourceMetadataMismatch'),
+ 'package_digest':(lambda d:d['packages'][0].update(digest='0'*64),'PackageDigestMismatch'),
+ 'wrong_reference_kind':(lambda d:expression(d,'field_principal.arg0').update(target='Local'),'ReferenceKind'),
+ 'ir_arity':(lambda d:expression(d,'field_principal').update(args=[]),'ArityMismatch'),
+ 'ir_quantity':(lambda d:expression(d,'field_fixed_rate').update(type='Real'),'ContractType'),
+ 'ir_context':(lambda d:d['contexts'][0].update(perimeter='Other'),'ContextMismatch'),
+ 'ir_context_dimensions':(lambda d:d['contexts'][0].update(dimensions=[{'axis':'segment','member':'other'}]),'ContextMismatch'),
+ 'ir_observation_date':(lambda d:d['contexts'][0]['time'].update(start='2025-12-30'),'ReadingContextMismatch'),
+ 'ir_acceptance':(lambda d:d['reviewDecisions'][0].update(action='Reject'),'BindingAcceptance'),
+ 'ir_cutoff':(lambda d:d['evidenceViews'][0].update(cutoff='2026-01-02T00:00:00Z'),'EvidenceCutoff'),
+ 'ir_assumption':(lambda d:d['assumptions'][0].update(rationale='invented'),'AssumptionBinding'),
+ 'ir_duplicate_fields':(lambda d:d['contracts'][0]['fields'].append(copy.deepcopy(d['contracts'][0]['fields'][0])),'ContractFields'),
+ 'ir_fraction_domain':(lambda d:d['symbols'][0]['domain'].update(upper=ir.rational(2)),'InvalidDomain'),
+ 'ir_symbolic_bounds':(lambda d:expression(d,'field_fixed_fraction').update(op='add',target=None,args=['expr:symbol_alpha:upper','expr:symbol_alpha:upper']),'ContractDomain'),
+ 'ir_principal':(lambda d:expression(d,'field_principal').update(op='literal',args=[],target=None,context=None,rational=ir.rational(200)),'ContractPrincipal'),
+ 'unbalanced_opening':(lambda d:d['states'][0]['balances'][0].update(signed_amount=ir.rational(94)),'UnbalancedState'),
+ 'ir_opening_binding':(lambda d:(d['states'][0]['balances'][0].update(signed_amount=ir.rational(94)),d['states'][0]['balances'][3].update(signed_amount=ir.rational(6))),'OpeningStateMismatch'),
+ 'ir_report_policy':(lambda d:d['reportMappings'][0].update(cash_flow_policy='DemoDebt@1/invented'),'ReportMapping'),
+ 'ir_report_operations':(lambda d:d['reportMappings'][0].update(required_operations=['DemoDebt@1/reset']),'ReportMapping'),
+ 'false_family_coverage':(lambda d:d['historyFamilies'][0].update(coverage='ExactWithinScope'),'FalseCoverage'),
+ 'ir_false_feasibility':(lambda d:d['historyFamilies'][0].update(feasibility='Feasible'),'MissingWitness'),
+ 'ir_lost_branch':(lambda d:d['historyFamilies'][0].update(alternatives=[]),'FamilyMembership'),
+}
+
+if __name__=='__main__': unittest.main()

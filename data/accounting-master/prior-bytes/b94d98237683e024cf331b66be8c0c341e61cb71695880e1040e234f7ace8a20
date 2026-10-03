@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""Execute all catalogued P03 obligations and preserve actual observations."""
+import argparse
+from datetime import datetime, timezone
+import hashlib
+import io
+import json
+from pathlib import Path
+import platform
+import sys
+import time
+import unittest
+from importlib.metadata import version
+
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'tests'))
+import test_accounting_p03 as cases
+
+CHANGED=['scripts/core0_frontends_v1.py','scripts/core0_ir_v1.py','scripts/check_accounting_p03.py',
+         'tests/test_accounting_p03.py','docs/design/spec/core0-lowering-profile-v1.md',
+         'docs/design/fixtures/p03-lowering-cases-v1.json']
+
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--output-dir',required=True);args=parser.parse_args()
+    out=Path(args.output_dir).resolve()
+    if out != ROOT/'data/accounting-master/deliverables/P03':
+        parser.error('output-dir must be the declared P03 output directory')
+    started=time.monotonic()
+    entry=json.loads((ROOT/'data/accounting-master/runs/20261002T181809-4cb566e0/P03/phase-entry-inventory.json').read_text())
+    before={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in entry if (ROOT/p).is_file()}
+    cases.OBSERVATIONS.clear(); stream=io.StringIO()
+    suite=unittest.defaultTestLoader.loadTestsFromModule(cases)
+    result=unittest.TextTestRunner(stream=stream,verbosity=0).run(suite)
+    catalog=json.loads((ROOT/'docs/design/fixtures/p03-lowering-cases-v1.json').read_text())
+    required={c['id'] for c in catalog['obligations']}
+    observed={c['id'] for c in cases.OBSERVATIONS}
+    missing=sorted(required-observed);extra=sorted(observed-required)
+    after={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() if (ROOT/p).is_file() else None for p in before}
+    protection=[p for p in before if before[p]!=after[p]]
+    initial=Path('/tmp/accdsl-p03-protected-entry.json')
+    worker_changes=[]
+    if initial.exists():
+        worker_changes=[p for p,h in json.loads(initial.read_text()).items() if not (ROOT/p).is_file() or hashlib.sha256((ROOT/p).read_bytes()).hexdigest()!=h]
+    passed=(result.wasSuccessful() and result.testsRun>0 and not result.skipped and not missing and not extra and not protection and not worker_changes)
+    payload={
+      'schema_version':'accdsl.p03.conformance.v1','passed':passed,'profile':catalog['profile'],
+      'manifest':{'git_commit':'unavailable: existing marker is not a usable repository',
+        'command':'python3 -B scripts/check_accounting_p03.py --output-dir data/accounting-master/deliverables/P03',
+        'environment':{'python':platform.python_version(),'lark':version('lark'),'jsonschema':version('jsonschema')},
+        'hardware':'CPU only; no accelerator framework imported','random_seeds':'N/A: deterministic checks',
+        'data_version':'synthetic P03 bindings and digest-locked DemoDebt@1',
+        'utc':datetime.now(timezone.utc).isoformat(),'wall_seconds':round(time.monotonic()-started,3),
+        'plan':'data/accounting-master/runs/20261002T205123-6b8e9a16/P03/approved-plan.json',
+        'result':'data/accounting-master/deliverables/P03/result.md',
+        'outputs':['data/accounting-master/deliverables/P03/conformance.json','data/accounting-master/deliverables/P03/result.md'],
+        'changed_files':CHANGED+['data/accounting-master/deliverables/P03/'+n for n in ('conformance.json','result.md','progress.md')]},
+      'tests':{'methods_run':result.testsRun,'obligations_run':len(observed),'missing':missing,'uncatalogued':extra,
+               'skipped':result.skipped,'failures':[{'test':str(t),'detail':d} for t,d in result.failures+result.errors]},
+      'observations':cases.OBSERVATIONS,
+      'hashes':{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in CHANGED},
+      'protected_files':{'before':before,'after':after,'changed_during_check':protection,
+          'changed_during_worker':worker_changes,'historical_differences':[p for p in before if before[p]!=entry[p]]},
+      'requirement_coverage':{'MC02':'context and provenance','MC04':'separate alternatives and global constraints',
+         'MC10':'explicit historical admission and scenario assumptions','MC20':'package digest/applicability and report policies',
+         'MC23':'independent matched typed/text programs; no authoring superiority claim','MC24':'bounded parsing, binding, typing and independent IR rejection'},
+      'unsupported':catalog['unsupported'],
+      'acceptance':{'engineering':passed,'accounting_validity':'not established','forecast_validity':'not established',
+                    'human_acceptance':'pending','whole_gap_closure':False}}
+    out.mkdir(parents=True,exist_ok=True)
+    (out/'conformance.json').write_text(json.dumps(payload,indent=2,ensure_ascii=True)+'\n')
+    decision='PASS' if passed else 'FAIL'
+    (out/'result.md').write_text(f'''# P03 bounded source lowering result
+
+{decision}: {result.testsRun} unittest methods executed {len(observed)} catalogued obligations.
+The compiler parses source declarations, binds explicit package/evidence/context
+metadata, checks quantities, and constructs independently validated shared IR.
+Direct typed declarations use the same semantic stages. Neither compiler entrypoint
+reads expected IR. Complete actual IR, bindings, source spans, raw hashes and exact
+expected/observed interest values are retained in conformance.json.
+
+Independent renamed input and principal/rate changes establish input sensitivity.
+Baseline endpoint interest is 5/7; 9% stress gives 5/9; principal 200 gives 10/14.
+These are exact one-year arithmetic checks, not journal execution. The authored IR
+comparison covers corresponding economic/context/policy fields and excludes its
+reconstruction claims. Schema-valid corruptions must fail semantic validation.
+
+| Decision | Primary criterion | Veto diagnostics | Main uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| {decision} for bounded engineering conformance | independent frontends, changed inputs and rejection coverage | missing obligations={len(missing)}, failures={len(result.failures)+len(result.errors)}, protected changes={len(protection)+len(worker_changes)} | unimplemented language breadth and domain acceptance | independent result review | whole G2/G12/G15 closure, accounting or forecasting validity |
+
+Specification is the versioned profile. Implemented behavior is in the two versioned
+modules. Tested invariants are the executed catalog obligations. Accounting validity,
+empirical forecasting and human acceptance remain separate and unestablished.
+All MC01–MC35 and G1–G18 retain wider obligations.
+
+The strongest alternative explanation for frontend agreement is a shared compiler
+bug; independent arithmetic, authored-field comparison and schema-valid corruptions
+reduce that risk without proving the general language. The weakest evidence is
+coverage outside this debt profile. A counterexample within the declared profile
+would overturn this engineering acceptance and trigger a focused repair.
+
+Actual checker command: `{payload['manifest']['command']}`.
+Environment: Python {platform.python_version()}, Lark {version('lark')}, jsonschema
+{version('jsonschema')}; deterministic CPU execution, no random seed or GPU use.
+Wall time: {payload['manifest']['wall_seconds']} seconds. Git commit unavailable;
+source and protected-input hashes are in conformance.json. No package installation.
+The standalone required unittest command was also run; its final outcome is recorded
+in progress.md. Changed code, tests and profile/catalog files are enumerated in the
+manifest. Historical controller/P02 changes predate this worker.
+
+Residuals: general packages, events, rules, postings, arbitrary mappings, multiple
+entities/books/observations, currencies/calendars, cross-company concepts, extraction
+uncertainty, accounting elections, estimates, behavior, future innovations and
+probability measures remain unsupported. Families remain Unknown/PartialSearch with
+zero completed cells, one unsearched cell and no invented witnesses or solver results.
+''')
+    print(json.dumps({'passed':passed,'methods':result.testsRun,'obligations':len(observed),'missing':missing,
+          'failures':len(result.failures)+len(result.errors),'protected_changes':protection+worker_changes}))
+    return 0 if passed else 1
+
+if __name__=='__main__':sys.exit(main())

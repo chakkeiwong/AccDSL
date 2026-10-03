@@ -1,0 +1,147 @@
+"""Independent input replay and exact algebra; P04 executed obligations."""
+import copy
+from dataclasses import replace
+from fractions import Fraction as F
+from itertools import product
+import json
+from pathlib import Path
+import sys
+import unittest
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
+import z3
+from rational_solver_v1 import *
+from reconstruction_v1 import *
+from test_accounting_p03 import bindings, BASE
+from core0_frontends_v1 import compile_source
+ROOT=Path(__file__).resolve().parents[1]
+OBSERVATIONS=[]
+B=Budget(20,10000,500,500,20000,1000,1000000)
+
+
+def spec():
+    return {'schema_version':'accdsl.reconstruction.input.v1','scope':'two-period-cash','evidence_view':'synthetic-accepted',
+        'exclusions':['unregistered events'],'obligations':[],'rounding_stage':'exact_rational',
+        'context':{'entity':'Synthetic','currency':'USD','basis':'Demo','period':'T0:T2'},'admissions':[],
+        'choices':[],'symbols':[],'templates':{'sale':{'postings':{'Cash':'1','Equity':'-1'},'state':{'sold':'1'},'provenance':['synthetic:sale-v1']}},
+        'slots':[{'id':'a','date':'T1','template':'sale','kind':'Int','integer_bounds':[0,3],'active':True},
+                 {'id':'b','date':'T2','template':'sale','kind':'Int','integer_bounds':[0,3],'active':True}],
+        'dates':['T1','T2'],'opening':{'Cash':'10','Equity':'-10'},'economic_opening':{'sold':'0'},
+        'mappings':{'cash':'balance:T2:Cash','early':'balance:T1:Cash','sold':'state:T2:sold','equity':'balance:T2:Equity'},
+        'observations':[],'constraints':[],'views':{}}
+
+
+def observation(s,amount):
+    return {'id':'cash-note','context':copy.deepcopy(s['context']),'action':'Accept','source':['synthetic:cash-note'],
+            'mapping':'cash','domain':{'lower':str(amount),'upper':str(amount),'lower_closed':True,'upper_closed':True}}
+
+
+class ReconstructionTests(unittest.TestCase):
+    def record(self,name,result):OBSERVATIONS.append({'obligation':name,'passed':True,'result':result})
+    def test_independent_enumeration(self):
+        evidence=[]
+        # Oracle replays original template incidence; no production expressions or Z3.
+        for opening,total,limit,coefficient in [(10,13,3,1),(4,8,4,1),(7,13,3,2)]:
+            s=spec();s['opening']={'Cash':str(opening),'Equity':str(-opening)}
+            s['templates']['sale']['postings']={'Cash':str(coefficient),'Equity':str(-coefficient)}
+            for row in s['slots']:row['integer_bounds']=[0,limit]
+            s['observations']=[observation(s,total)]
+            p=construct(s);r=solve(p,B)
+            actual={(int(F(c['witness']['a'])),int(F(c['witness']['b']))) for c in r['cells'] if c['feasibility']=='sat'}
+            expected=set()
+            for a,b in product(range(limit+1),repeat=2):
+                cash=F(opening)
+                for amount in (a,b):cash+=F(coefficient)*amount
+                if cash==total:expected.add((a,b))
+            self.assertEqual(actual,expected);self.assertEqual(r['status'],'ExactWithinScope')
+            for c in r['cells']:
+                if c['feasibility']=='sat':self.assertEqual(F(c['outputs']['cash'])+F(c['outputs']['equity']),0)
+            s['slots'].reverse();rr=solve(construct(s),B)
+            self.assertEqual({tuple(c['witness'][n] for n in ('a','b')) for c in rr['cells'] if c['feasibility']=='sat'},
+                             {tuple(c['witness'][n] for n in ('a','b')) for c in r['cells'] if c['feasibility']=='sat'})
+            evidence.append({'inputs':s,'oracle':sorted(expected),'actual':r})
+        self.record('enumeration',evidence)
+    def test_p03_parent_views(self):
+        source=BASE.replace('alternative allFixed { assume alpha == 1; }','alternative allFixed { assume alpha <= 0.75; }').replace('alternative allFloating { assume alpha == 0; }','alternative allFloating { assume alpha >= 0.25; }')
+        results=[]
+        for text in (BASE,source):
+            c=compile_source(text,bindings());self.assertTrue(c.ok)
+            p=from_p03(c.ir,bindings(),{'DemoDebt@1/DebtMix':'fixed-floating-amounts-v1'})
+            self.assertFalse(p.unsupported)
+            r=solve(p,B,p.outputs['interest']);self.assertEqual(r['bounds']['lower']['value'],'5');self.assertEqual(r['bounds']['upper']['value'],'7')
+            self.assertEqual(r['coverage']['total'],1)
+            half=p.variables['alpha']==q('1/2')
+            self.assertEqual(solve(p,B,extra=[half])['feasibility'],'Feasible')
+            both=solve(p,B,selected_views=['allFixed','allFloating'],view_operator='intersection',extra=[half])
+            self.assertEqual(both['feasibility'],'Infeasible' if text==BASE else 'Feasible')
+            fixed=solve(p,B,selected_views=['allFixed'],extra=[half])
+            self.assertEqual(fixed['feasibility'],'Infeasible' if text==BASE else 'Feasible')
+            self.assertEqual(solve(p,B,extra=[half])['feasibility'],'Feasible')
+            results.append({'parent':r,'intersection':both,'conditional':fixed})
+        self.record('p03_views',results)
+    def test_rounded_strict_and_unbounded(self):
+        fixture=json.loads((ROOT/'docs/design/fixtures/borrowings.json').read_text())['rounded']
+        p=Problem('rounded-debt','fixture');f,v=z3.Reals('F V');p.variables={'F':f,'V':v}
+        p.add('amounts',z3.And(f>=0,v>=0));p.add('debt-note',z3.And(f+v>=q(fixture['debt'][0]),f+v<q(fixture['debt'][1])))
+        p.add('interest-note',z3.And(q('.05')*(f+v)>=q(fixture['interest'][0]),q('.05')*(f+v)<q(fixture['interest'][1])))
+        r=solve(p,B,q('.05')*f+q('.07')*v)
+        self.assertEqual(r['bounds']['lower']['value'],'199/40');self.assertTrue(r['bounds']['lower']['attained'])
+        self.assertEqual(r['bounds']['upper']['value'],'1407/200');self.assertFalse(r['bounds']['upper']['attained'])
+        x=z3.Real('x');empty=Problem('empty','fixture',variables={'x':x});empty.add('strict',x>0);empty.add('closed',x<=0)
+        self.assertEqual(solve(empty,B,x)['status'],'Infeasible')
+        u=Problem('unbounded','fixture',variables={'x':x});u.add('positive',x>0)
+        un=solve(u,B,x);self.assertEqual(un['bounds']['upper']['status'],'Unbounded');self.assertFalse(un['bounds']['lower']['attained'])
+        const=solve(u,B,q(2));self.assertTrue(const['bounds']['lower']['attained'])
+        self.record('strict_bounds',{'rounded':r,'unbounded':un,'constant':const})
+    def test_rounding_and_integer_gaps(self):
+        self.assertEqual([half_even(x,'1') for x in ['-2.5','-1.5','1.5','2.5']],[F(-2),F(-2),F(2),F(2)])
+        self.assertTrue(disclosure_domain('2','1','half_even')['upper_closed']);self.assertFalse(disclosure_domain('3','1','half_even')['lower_closed'])
+        self.assertEqual(half_even('.005','.01')+half_even('.005','.01'),0);self.assertEqual(half_even('.010','.01'),F('.01'))
+        p=Problem('integer-gap','fixture',variables={'k':z3.Int('k')},finite={'k':range(0,3)})
+        p.add('gap',z3.And(p.variables['k']>0,p.variables['k']<1));self.assertEqual(solve(p,B)['status'],'Infeasible')
+        self.record('rounding_integer',{'negative_ties':'checked','posting_boundary':'checked','integer':solve(p,B)})
+    def test_incomplete_unsupported_unknown(self):
+        s=spec();p=construct(s)
+        zero=solve(p,replace(B,max_cells=0));self.assertEqual(zero['coverage']['completed'],0)
+        partial=solve(p,replace(B,max_cells=1),p.outputs['cash']);self.assertEqual(partial['status'],'PartialSearch');self.assertFalse(partial['bounds']['upper']['certified'])
+        class UnknownBackend(Backend):
+            def check(self,solver,stage):return z3.unknown
+        unknown=solve(p,B,backend=UnknownBackend());self.assertEqual(unknown['feasibility'],'Unknown')
+        x,y=z3.Reals('x y');p=Problem('nonlinear','fixture',variables={'x':x,'y':y});p.add('nonlinear',x*y==1)
+        self.assertEqual(solve(p,B)['status'],'UnsupportedFragment')
+        p=Problem('unbounded-int','fixture',variables={'k':z3.Int('k')});self.assertEqual(solve(p,B)['status'],'UnsupportedFragment')
+        s['obligations']=['unmatched source'];self.assertEqual(solve(construct(s),B)['status'],'PartialSearch')
+        self.record('coverage_unknown',{'zero':zero,'partial':partial,'unknown':unknown})
+    def test_identity_context_conflicts(self):
+        s=spec();s['observations']=[observation(s,13)];s['observations']*=2
+        p=construct(s);self.assertEqual(sum(n=='observation:cash-note' for n,e in p.constraints),1)
+        bad=copy.deepcopy(s);bad['observations'][1]=observation(bad,14)
+        with self.assertRaises(ValueError):construct(bad)
+        bad=copy.deepcopy(s);bad['observations'][0]['context']['currency']='EUR'
+        with self.assertRaises(ValueError):construct(bad)
+        s['constraints']=[{'id':'source:contradiction','expression':['<','cash','0']}]
+        r=solve(construct(s),B);self.assertEqual(r['status'],'Infeasible')
+        self.assertTrue(all(c['conflict']['rechecked']=='unsat' for c in r['cells']))
+        self.record('identity_conflicts',r)
+    def test_admission_measure_grouping(self):
+        accepted=[]
+        for kind,fields in ADMISSION_FIELDS.items():
+            a={'id':kind,'scope':'synthetic','provenance':['synthetic'],'dependencies':[],'kind':kind}
+            a.update({k:'declared' for k in fields})
+            if kind=='ExtractionReading':a['review_decision']='Accept'
+            if kind=='AccountingElection':a.update(permitted_treatments=['FIFO'],election='FIFO')
+            accepted.append(admit(a));bad=dict(a);del bad[fields[0]]
+            with self.assertRaises(ValueError):admit(bad)
+        measure=FiniteMeasure([{'id':'fixed','weight':'3/5','status':'complete','outcome':'5'}, {'id':'floating','weight':'2/5','status':'unsupported','outcome':None}], 'explicit synthetic joint prior')
+        posterior=measure.update({'fixed':'1/5','floating':'4/5'},['new-note'])
+        self.assertEqual([a['weight'] for a in posterior.atoms],['3/11','8/11']);self.assertIsNone(measure.summary()['mean'])
+        with self.assertRaises(ValueError):posterior.update({'fixed':'1','floating':'1'},['new-note'])
+        with self.assertRaises(ValueError):measure.update({'fixed':'0','floating':'0'},['zero'])
+        with self.assertRaises(ValueError):weighted_summary([])
+        contracts=[{'id':str(i),'principal':str(10+i),'rate':'1/20','reset':'fixed','maturity':'2030','hedge':'none'} for i in range(2)]
+        scenario={'rate':'7/100','year_fraction':'1'};horizon=['2026','2027'];group=group_contracts(contracts,scenario,horizon)
+        for key,value in [('rate','1/10'),('maturity','2031')]:
+            altered=copy.deepcopy(contracts);altered[0][key]=value
+            with self.assertRaises(ValueError):group_contracts(altered,scenario,horizon,group)
+        with self.assertRaises(ValueError):group_contracts(contracts,dict(scenario,rate='8/100'),horizon,group)
+        with self.assertRaises(ValueError):group_contracts(contracts,scenario,['2026','2028'],group)
+        self.record('uncertainty_probability_grouping',{'admissions':accepted,'posterior':posterior.atoms,'mass':measure.summary(),'group':group})

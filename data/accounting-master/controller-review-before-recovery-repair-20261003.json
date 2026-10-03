@@ -1,0 +1,98 @@
+{
+  "verdict": "AGREE",
+  "review_kind": "supervisor_finding_adjudication",
+  "issues": [],
+  "reviewed_at": "2026-10-02T18:18:09.866338+00:00",
+  "controller_hashes": {
+    "scripts/run_accounting_master.py": "de3ad7fe9da9f04a45ac83ab1b58464e786615dac5f4dd4452e1c87d6b31ba70",
+    "scripts/accounting_master_support.py": "051ef422c753c51e23f36aa5b5529b5a29eb39b670140ce9132ccc7e353d962b",
+    "scripts/accounting_master_catalog.json": "8a3b381ad5845b90739d56ce7331eefdaaf7900081e7c58ce20987729b4c5989",
+    "scripts/accounting_master_response.schema.json": "aad6a6c3c2cdfc98728bf450c0350e4b3aff3ea32664038bd73b3f8b7ce7cd6c",
+    "tests/test_accounting_master.py": "e260eea3ce5bb0b94e7c754ced8254fa45ec7a145b5e3abef5937609b623f306",
+    "docs/plans/accounting-master-program.md": "5ea69147991337d3d457898a03e1e7a0681f6211f0690938b230e9d6a79b9515"
+  },
+  "prior_review": "data/accounting-master/controller-review-before-adjudication-20261003.json",
+  "prior_review_sha256": "26924d307b90c4ac42e7f58ea52e3a8585f2748d6b44b94e98488437799878ec",
+  "review_evidence_hashes": {
+    "docs/design/review/accounting-master-adjudication-2026-10-03.md": "20a643414e24c4b7efa741c8fc81d24ec8478adf2ff6dcfba3856735f4a03d15"
+  },
+  "finding_dispositions": [
+    {
+      "finding": "process-lifecycle: Recovery does not contain ordinary concurrent process creation. _stop_recovered_group collects live_group_members exactly once and then sends both signals only to that fixed descriptor list. A trusted worker can fork a same-group child after enumeration, including during the 0.1-second TERM grace period. That child receives neither signal. The final membership check correctly raises ContinuationVeto, but leaves the child running without a deadline; after the leader disappears, recover_process can only veto subsequent resumes because the leader is absent. This is an ordinary process-tree race within the stated scope, not detachment. Repair recovery so it establishes a quiescent membership set before destroying its ownership anchor, or safely discovers and terminates newly created members under a bounded, identity-checked protocol. Preserve unresolved identities durably if cleanup cannot finish. Also replace the single 0.1-second post-KILL sleep with bounded quiescence polling: signal delivery does not imply immediate exit. Add regression coverage for a same-group descendant created after initial enumeration and for delayed exit following signalling.",
+      "status": "repaired_verified",
+      "reason": "Freeze identity-checked group membership, discover late children, and poll bounded exit; late-child and real recovery regressions pass."
+    },
+    {
+      "finding": "permissions-install: High — install_rule replaces the authorization baseline with current controls without checking that those controls are the approved version. It unconditionally writes controller_hashes_at_grant=master.controls, including on repeated install-and-run and recovery through run. The prepared receipt stores only the candidate rule hash, and recovery does not validate even that hash before regenerating the candidate. Consequently, an ordinary controller edit between preparation and resume can be recorded as explicitly approved; the rule text is unchanged because it binds only the entrypoint path. A later comparison against this newly written authorization cannot detect the substitution. Repair: durably bind installation preparation to the approved controller hashes and review identity, validate that binding before publication and recovery, and preserve existing authorization rather than silently replacing it. Changed controls must follow the stated supervisor-repair and fresh-review path.",
+      "status": "repaired_verified",
+      "reason": "Preserve original standing authorization; bind and verify pending candidate/control/grant metadata. Repeated install and recovery regression passes."
+    },
+    {
+      "finding": "permissions-install: High — installation writes precede abandoned-worker recovery. Both install-and-run and interrupted-install recovery acquire runner.lock and immediately call install_rule; neither calls master.recover_process. Acquiring the lock alone does not establish worker quiescence: the supplied lifecycle contract explicitly allows an abandoned worker after supervisor termination, and internal helpers close their inherited lock copy. The review branch correctly performs recovery first. Installation can therefore rewrite candidate, receipt, checks and authorization while a previous editable worker remains alive; any later recovery inside master.run occurs after these writes. Repair: under the acquired lock, recover and quiesce the recorded prior process before installation mutations, and stop without publishing or authorizing if ownership is ambiguous. Reload relevant state after recovery.",
+      "status": "repaired_verified",
+      "reason": "Inspected main: lock, recover prior worker, reload state, then install on both branches."
+    },
+    {
+      "finding": "permissions-install: Medium — recovery leaves an ordinary interrupted installation permanently marked incomplete when authorization.json already exists. install_rule writes authorization.json before marking installation.json complete. If interrupted between those writes, main's run recovery condition is false because authorization exists, so the published receipt is never reconciled. An existing authorization also suppresses recovery after an interrupted repeated installation. Repair: inspect and reconcile every nonterminal installation receipt under the lock, independently of authorization existence; verify the target hash, approval checks and original authorization binding before marking completion. Do not regenerate authorization merely to finish the receipt.",
+      "status": "repaired_verified",
+      "reason": "Reconcile pending receipts regardless of grant existence; repeated-install recovery regression passes."
+    },
+    {
+      "finding": "worker-boundary: Invalid worker list: evidence",
+      "status": "repaired_verified",
+      "reason": "Inspect raw worker response: required-absence control guard added; structured negative evidence retained losslessly. Regression passes."
+    },
+    {
+      "finding": "state-refresh: {\"finding\": \"Malformed persisted state can be treated as runnable state. Master.__init__ verifies only that phase IDs match the catalog. In refresh(), any status other than accepted_internal or unchanged blocked_external is eligible if dependencies are accepted. A corrupted or unknown status can therefore cause a phase to be selected and potentially executed, rather than failing closed. Missing fields can instead produce uncontrolled KeyError/TypeError failures.\", \"id\": \"state-refresh-1\", \"repair\": \"Add explicit persisted-state validation before refresh: schema version, top-level keys, exact phase set, required per-phase fields, allowed status enum, attempts/residuals/issues/next_actions types, gap-status keys, and compatible run metadata. Reject invalid state with a deterministic continuation veto or require an explicit migration path. Add a focused regression test for an unknown status and a missing required field.\", \"severity\": \"high\"}",
+      "status": "repaired_verified",
+      "reason": "Validate persisted-state schema, IDs, status, lists, gaps and evidence hashes at load/reload/save/refresh. Malformed-state tests pass."
+    },
+    {
+      "finding": "state-refresh: {\"finding\": \"refresh() does not enforce the frozen controller/evidence boundary itself. It saves state and publishes next-plan.json/next-plan.md using hashes captured at initialization. If a caller invokes refresh after a controller or protected evidence mutation without a prior check_protection() call, the refresh can commit a plan containing stale controller_hashes. The packet states protection across failure paths, but the refresh interface shown here leaves that as an unstated caller assumption.\", \"id\": \"state-refresh-2\", \"repair\": \"At refresh entry, verify current protected and controller hashes against the expected snapshot and fail closed on change. Recompute the live controller hash map immediately before plan publication, and ensure the state hash and derived plans are generated from that protected snapshot. If protection is intentionally delegated to callers, make that precondition explicit and enforce it with a guard/token rather than relying on convention.\", \"severity\": \"medium\"}",
+      "status": "repaired_verified",
+      "reason": "refresh directly validates protection; finalization publishes non-runnable veto on corruption. Refresh and mutation tests pass."
+    },
+    {
+      "finding": "scheduler: {\"finding\": \"When the saved worker leader PID is reused, the branch `current and current['start_ticks'] != previous['start_ticks']` immediately marks the prior process finished. It does not inspect `live_group_members(previous['pgid'])`. Old descendants can therefore remain in the original process group while a new run proceeds, violating the stated stale-state recovery and bounded single-writer/process guarantee.\", \"id\": \"CTRL-001\", \"location\": \"scripts/run_accounting_master.py: Master.recover_process\", \"repair\": \"After detecting PID reuse, inspect the saved process group. If any members remain, raise ContinuationVeto and require scoped inspection before resuming. Mark recovery finished only when the old group is confirmed inactive. Preserve the existing no-signal behavior for the unrelated reused PID.\", \"severity\": \"high\"}",
+      "status": "repaired_verified",
+      "reason": "PID-reuse recovery checks remaining group and never signals reused process. Separate empty/populated-group tests pass."
+    },
+    {
+      "finding": "scheduler: {\"finding\": \"Builtin phases are accepted after `result.get('status') == 'passed'` and a protection check. This path does not run the normal deterministic phase checks, does not require a positive result-review verdict, and does not enforce the global acceptance condition that tests run and pass with a reviewed result. A malformed or over-optimistic builtin response can therefore produce `accepted_internal` without the required verification/review evidence.\", \"id\": \"CTRL-002\", \"location\": \"scripts/run_accounting_master.py: Master.execute_phase builtin branch\", \"repair\": \"Apply the same acceptance gate to builtin phases: verify every required deliverable, run the phase checks and require `passed is True` with a positive test count, create the corresponding checks/evidence record, and require an equivalent reviewed result verdict before setting `accepted_internal`. If builtin phases are intentionally exempt, state that exemption explicitly in the interface and persist an equivalent internal review artifact with dedicated coverage.\", \"severity\": \"high\"}",
+      "status": "repaired_verified",
+      "reason": "Builtin parent independently verifies real results and stores deterministic check/result-review records; actual P00/P01 17/580 checks pass."
+    },
+    {
+      "finding": "scheduler: {\"finding\": \"The phase loop catches every exception other than ContinuationVeto from `execute_phase`, marks the phase `needs_repair`, and continues scheduling later phases. Unexpected controller defects such as invariant failures, schema/key errors, or controller persistence failures can therefore be misclassified as worker/phase failures. This conflicts with the stated controller-failure rule requiring supervisor repair and a fresh read-only review, never implicit continuation.\", \"id\": \"CTRL-003\", \"location\": \"scripts/run_accounting_master.py: Master.run phase loop\", \"repair\": \"Narrow the catch to explicitly classified phase/worker failures that are safe to repair. Route unexpected exceptions and controller integrity/persistence errors to a continuation-veto path that records the failure, stops scheduling, preserves evidence, and requires supervisor repair plus fresh review before another run.\", \"severity\": \"high\"}",
+      "status": "repaired_verified",
+      "reason": "Unexpected controller errors veto scheduling; explicit MasterError remains repairable. Fault-injection regression passes."
+    },
+    {
+      "finding": "phase-plan-repair: High — Accepted evidence omits earlier implementation and repair changes. In Master.execute_phase, acceptance adds only changes['added'] and changes['changed'] from the current attempt to names. For example, attempt 0 changes a reusable module and fails verification; attempt 1 repairs another file and passes. Unless a worker explicitly lists the first module as evidence, its accepted contents are not hashed. The same omission occurs after resume because before describes the resumed workspace, while entry describes the original phase entry. Subsequent modification or loss of that module therefore cannot be detected from this phase's evidence_hashes. Repair: include cumulative added and changed files in accepted evidence, using a fresh delta against the preserved phase-entry inventory at acceptance. Add coverage for an earlier-attempt module omitted from worker evidence, both within one invocation and across resume.",
+      "status": "repaired_verified",
+      "reason": "Accepted evidence includes cumulative phase-entry delta across repairs/resume. Both regressions pass."
+    },
+    {
+      "finding": "phase-plan-repair: High — Verification can introduce prohibited deletions or unreviewed changes after the last delta check. Master.execute_phase computes cumulative and changes, rejects deletions, and then runs check_phase. The check subprocess can accidentally modify or delete an editable project file. The result reviewer receives the pre-check deltas, and acceptance does not recompute them. If verification deletes a phase-entry file untouched by implementation and absent from explicit evidence or deliverables, tests can still report success, check_protection can pass, and the phase can become accepted_internal. outstanding_deletions also remains stale. Repair: after verification, recompute cumulative and per-attempt changes, persist outstanding_deletions, enforce deletion prohibitions, and supply the updated deltas to result review. Ensure acceptance hashes those final contents. Add coverage for a check process deleting an otherwise untouched phase-entry file and for a check process modifying an editable file.",
+      "status": "repaired_verified",
+      "reason": "Recompute delta/deletions after verification and before review; test-side-effect deletion/change regressions pass."
+    },
+    {
+      "finding": "evidence: `ensure_controller_tests` accepts a cached `controller-tests.json` solely when `passed` is true, `sha256` matches `self.controls`, and `tests > 0`. It does not validate the cached report schema, verify that the referenced log exists and is complete, verify that the recorded test file/environment is still usable, or bind the report to an immutable run artifact. A stale, truncated, or accidentally edited report can therefore bypass execution of the current controller tests while reporting acceptance. Repair: validate all required fields and types, require an intact log/result artifact whose digest and test-file/controller hashes match the cache, and otherwise rerun tests (or raise a controlled continuation veto); make the cached acceptance record itself atomically written and integrity-checked.",
+      "status": "repaired_verified",
+      "reason": "Always execute current controller tests before reusing review; stale passed-cache regression passes."
+    },
+    {
+      "finding": "evidence: `run_phase_tests` writes its log with `Path.write_text`, and `baseline` writes `corpus-regressions.log` directly with `write_text`. These writes can leave truncated files on interruption, while the stated interface requires recoverable atomic writes and evidence preservation. Repair: write logs through the same temporary-file, flush/fsync, atomic-replace, and parent-directory-fsync protocol used by `atomic_json`/`atomic_bytes`; ensure interruption recovery treats an incomplete log as invalid evidence rather than reusable state.",
+      "status": "repaired_verified",
+      "reason": "Completed legacy reports, corpus-regression and phase-test logs use atomic_bytes; inspected write paths."
+    },
+    {
+      "finding": "P02/P03 real planners timeout; plan_seconds was unused",
+      "status": "repaired_verified",
+      "reason": "Actual timeout logs inspected; role-specific budget selection tested; planning budget extended to 720s with targeted inspection instructions, unchanged acceptance criteria."
+    }
+  ],
+  "verification": "72 controller tests passed; fresh runner checks remain required.",
+  "scope": "Bounded controller acceptance only; no new independent-model unanimity, accounting or forecast acceptance."
+}

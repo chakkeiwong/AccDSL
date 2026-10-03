@@ -1,0 +1,136 @@
+# AccDSL mission requirements and acceptance evidence
+
+Established 2 October 2026 (Asia/Hong_Kong).
+Authority: [mission control](../../MISSION_CONTROL.md).
+Scope: requirements for the governing design and the eventual product it
+specifies. Current assessments concern the document, not implemented software.
+
+## Provenance and assessment rules
+
+- **U1:** original user request on heterogeneous annual/interim reports, all
+  footnotes, accounting standards, industries, company labels, time, financial
+  institutions, bonds and equities; saved-session record 10.
+- **U2:** explicit request to preserve different possible journals,
+  interpretations and scenario-dependent future distributions; record 115.
+- **U3:** explicit request for a detailed governing LaTeX design, broad
+  literature collection, open-source survey, concrete methods, DSL comparison
+  and adherence to the user's policies; record 145.
+- **P:** applicable scientific coding, literature and prose policies.
+- **D:** a derived engineering/scientific requirement needed to make U1–U3
+  concrete. It does not make the particular proposed implementation immutable.
+
+The user authorised mission installation and then the reviewed repair plan.
+Assessments below reflect the 2 October 2026 repair; the protected pre-repair
+register remains under `docs/design/review/pre-repair-2026-10-02/`.
+This register continues to control the work.
+It does not retrospectively approve every technical choice in the manuscript.
+Traceability uses MC IDs to avoid confusing this register with the manuscript's
+older R1–R10 summary. M1–M8 are goals in the root mission document. G1–G10 refer
+to the [initial gap audit](../design/review/gap-audit-2026-10-02.md); G11–G18 refer
+to the [expanded audit](../design/review/mission-gap-audit-2026-10-02.md).
+
+`Partial` means the draft addresses the topic but its required design evidence
+is incomplete. `Open` means the essential concrete deliverable is still absent.
+`Specified` and `Checked` require explicit evidence and scope. An implemented
+feature, accounting-valid treatment and empirically supported forecast each
+need their own evidence; no design status implies any of them. The acceptance
+column defines the unchanged obligation; the assessment records the evidence
+actually supplied. Chapter numbers refer to the revised PDF. The [repair result
+map](../design/review/gap-repair-results-2026-10-02.md) links the supporting files
+and outstanding work. A reference check is a bounded design oracle, not a
+production conformance test.
+
+## M1 — Historical record and meaning
+
+| ID | Requirement and origin | Evidence needed to complete the design | Current assessment and related gaps |
+| --- | --- | --- | --- |
+| MC01 | Account for complete annual, quarterly and semi-annual disclosure packages, including notes and relevant referenced material. U1, U3. | Define the source inventory, coverage units, cross-reference closure and disposition rules. A worked filing package must account for retained, structured, duplicated and unresolved content without treating page extraction as semantic completion. | Specified procedure; acquired-file inventory checked. Ch. 2 Apple and Ch. 3 coverage; `cases/apple/manifest.json` accounts for 121 annual pages, 13 annual notes and 10 interim notes. External incorporated documents and full semantic translation remain incomplete. G5, G11. |
+| MC02 | Preserve numeric meaning: entities, perimeter, concept, dimensions, currency, units, scale, sign, basis and precision. U1, D. | Complete context/value types and compatibility rules, with valid/invalid examples and faithful rendering of the original disclosed amounts. | Specified in Chs. 3, 7 and Core 0 Context/Domain/Posting records, including display and rounding metadata. Schema, source scales and rounded-debt calculations have bounded checks; full static context/type validation is not implemented. G2, G3, G12. |
+| MC03 | Represent narrative policies, qualifications, commitments and cross-references, including material that is not executable yet. U1, U3, D. | Specify narrative assertion types, modality/quantifiers, links to affected amounts and obligations, and reviewed translation into constraints without inventing thresholds. | Specified Narrative/coverage records and modality rules in Ch. 3 and Core 0. Apple note and cross-reference obligations are retained; representative debt language is interpreted. Complete translation of all material narratives remains open. G2, G11. |
+| MC04 | Separate reported assertions, extraction readings, derivations, assumptions and conflicts. U1, U2, P, D. | Define source/derived/assumed status propagation and conflict handling; show both extraction error and a genuinely conflicting disclosure without silently changing either source. | Specified source/assumption constraints, review actions and conflict sets in Chs. 3, 6, 10. The 720-to-120 OCR repair differs from the 120-to-110 reported correction; transitive invalidation has a reference check. Full workflow validation remains pending. G2, G15, G17. |
+| MC05 | Represent economic, reporting, publication/availability and system times; preserve original and revised history. U1, U3, D. | Specify original, latest-available and harmonised queries, cutoffs, supersession, calendar/interval rules and retrospective/prospective changes. Include exact annual/interim/restatement fixtures. | Specified in Chs. 2–3 and EvidenceView/Time contracts. Four publication/ingestion queries and compatible annual-minus-interim subtraction are reference-checked in `temporal.json`. General calendar and standards-transition implementations remain pending. G2, G4, G13. |
+| MC06 | Distinguish legal entities, ownership, control, group perimeter and consolidation. U1, D. | Provide dated entity/control and adjustment-book types, acquisition/disposal and intragroup examples, and rules preventing unexplained consolidation plugs. | Specified structural control/elimination model; Ch. 9 and `sectors.json` check a simplified 80% acquisition, intragroup loan and full disposal. Actual control conclusions, goodwill/tax/FX and complex retained interests need further authority and operations. G4, G7, G12. |
+| MC07 | Align differing company labels and overlapping dimensions without equating unlike measurements or double counting. U1, D. | Specify concept/mapping relationships, applicability and aggregation rules; demonstrate company extensions and product/geography totals over the same population. | Specified mapping composition, applicability and partition obligations in Ch. 3/Core 0. The product/channel overlap counterexample is checked; general company-extension/mapping validation awaits implementation. G2, G12. |
+
+## M2 — Histories, interpretation and uncertainty
+
+| ID | Requirement and origin | Evidence needed to complete the design | Current assessment and related gaps |
+| --- | --- | --- | --- |
+| MC08 | Preserve jointly consistent discrete alternatives and continuous unknowns across accounts, notes and dates. U2, D. | Define history-family and choice/constraint semantics; provide cases preserving linked alternatives and rejecting incompatible combinations without independent account-by-account selection. | Specified shared symbols, choices and joint formulas in Chs. 2, 6–8. Exact reference checks retain fixed/floating histories, reject incompatible debt and reject incompatible marginal extrema. General reconstruction implementation remains pending. G1, G2, G15. |
+| MC09 | Construct historical families through a specified method, with honest scope and search completeness. U2, U3, D. | Define candidate templates, model-scope records, instantiation and constraint lowering, feasible/infeasible/unknown results, truncation and coverage evidence. | Specified finite template/slot construction and coverage rules in Ch. 6/Core 0. Northstar bridges are solved and checked within the declared scope; completeness concerns that model only. A compiler for arbitrary supported template registries remains pending. G1, G3. |
+| MC10 | Distinguish uncertainty about facts, disclosure readings, admissible accounting treatment, estimates, behaviour and future shocks. U2, P, D. | Specify the categories, dependencies and admissibility checks; show why a factual unknown, permitted election and unsupported treatment cannot be substituted for one another. | Specified six uncertainty kinds with separate admission/provenance/dependency rules in Core 0 and Chs. 6–8. Examples distinguish factual composition, permitted inventory election and unsupported treatment. All-category semantic validation remains pending. G6, G15. |
+| MC11 | Preserve the economic memory and scenario responses needed when histories are aggregated or refined. U2, D. | Define required state by contract/lot/cohort, permitted grouping transformations, supported horizon/scenarios, exact versus approximate status and invalidation when the query changes. | Specified grouping keys, additive transition/report proof, exact/approximate status and query invalidation in Ch. 6/Core 0. Debt, lot and cohort counterexamples are given; a general equivalence checker or empirical approximate-cohort error bound is not established. G1, G16. |
+| MC12 | Add probabilities only under an explicit justified joint measure, and retain unweighted alternatives when weights are unsupported. U2, P, D. | Specify optional weight/prior/likelihood records, dependence, overlaps, updates and mass preservation; provide a worked weighted and unweighted example with clear interpretation. | Specified finite joint weighting and one-use likelihood update in Ch. 6/Core 0; exact posterior 3/11 and 8/11, mixture and retained unresolved mass are checked. Continuous inference requires a target-specific method and validation. G2, G6, G15. |
+
+## M3 — Economic events, journals and forecasts
+
+| ID | Requirement and origin | Evidence needed to complete the design | Current assessment and related gaps |
+| --- | --- | --- | --- |
+| MC13 | Drive economic events from contract state and explicit behaviour, then apply accounting rules and atomic journal/state updates. U2, D. | Specify one reference economic model, event payloads, recognition/measurement operations, preconditions, ordering and atomic transitions. Prove the stated bookkeeping invariant and separately define admissibility. | Specified Northstar economic decisions, event preconditions and operations in Chs. 2, 8. Reference journals, atomic rejection and idempotency checks pass. This verifies the bounded oracle, not a production event engine or accounting compliance. G2, G4, G6. |
+| MC14 | Give scenarios and decision information explicit meanings. U2, P, D. | Define supported exogenous stress, observational-conditioning and intervention modes, or explicitly scope unsupported modes; enforce information dates and distinguish real-world from pricing measures. | Specified exogenous stress, observational conditioning, intervention preconditions and information capabilities in Ch. 8/Core 0. Finite conditioning and an information-date example are checked; causal intervention execution and arbitrary information-policy enforcement remain pending. G6, G14. |
+| MC15 | Specify ordinary corporate operations and accounting across periods. U1, U2, U3, D. | Provide a bounded coherent package for revenue/collections, purchases/payments, inventory/costs, assets/depreciation, payroll, financing and applicable closing/tax assumptions, with explicit exclusions. | Specified bounded corporate package in Chs. 2, 8 with exact annual/interim and forecast fixtures. Delivery, collection, purchase, payment, costs, plant, payroll, debt, simple tax and closing reconcile. Real tax/revenue/lease/FX packages remain separate work. G4, G5. |
+| MC16 | Produce coherent financial statements, movements and supported note schedules from the same underlying history/path. U1, U2, D. | Define balance sheet, income/comprehensive income, cash flow and equity mappings, non-cash movements, closing and note relationships; supply a full set of expected outputs. | Reference-checked complete Northstar balance sheet, income/zero OCI, direct/indirect cash flow and equity from common journals; Chs. 2, 8 and `northstar.json`. Apple checks a coherent marginal financing stress only. General note schedules and report engine remain pending. G4, G5, G6. |
+| MC17 | Represent financing instruments and their economic/accounting lifecycles, particularly bonds and equity. U1, U2, D. | Specify proceeds, principal, carrying/fair values, rates, calendars, maturities, rights and share quantities; work issuance, accrual, settlement and relevant modification/conversion/default cases under declared treatments. | Partially specified and reference-checked: Chs. 8–9 distinguish principal/carrying/fair values and work ordinary and convertible bond issue, accrual, redemption/conversion, shares and funding default. Detailed modification, early repurchase and other-basis hybrid classification remain open. G4, G7. |
+| MC18 | Preserve joint conditional future outcomes, honest bounds and distinct failure/completeness states. U2, P, D. | Define result payloads and queries that retain branch/path dependence, distinguish sampled ranges from certified bounds and distinguish default from unsupported/numerically failed output without silent dropping or renormalisation. | Specified result cells, branch statuses, strict bound attainment and unresolved mass in Chs. 6, 8, 10/Core 0. Exact linear, joint-output and funding/default reference checks pass; general simulation/result-query implementation remains pending. G2, G3, G6. |
+
+## M4 — Standards, sectors and company variation
+
+| ID | Requirement and origin | Evidence needed to complete the design | Current assessment and related gaps |
+| --- | --- | --- | --- |
+| MC19 | Accommodate IFRS, US GAAP and China GAAP/ASBE with dated treatments, elections and transitions. U1, U3. | Define the supported treatment matrix, rule authority and version selection; show matched economic events under selected genuinely different treatments and identify unimplemented operations. | Partially repaired. Ch. 9 compares FIFO/LIFO/average and records dated rule selection. Selected IAS-equivalent paragraphs inspected in official AASB texts; US LIFO has company-policy evidence only, full ASC authority is blocked, and official ASBE version verification remains pending. G7, G8, G13. |
+| MC20 | Support materially different industry and company concepts without bypassing the common accounting semantics. U1, D. | Specify extension points, concept mappings and rule admissibility; include representative industry differences and an invalid company override. | Specified extension points, override admission, separate books and mappings in Chs. 3, 7, 9/Core 0. Inventory/bank/insurer structures expose distinct state requirements. Full invalid-override and package-conformance execution remains pending. G2, G7, G12. |
+| MC21 | Represent banks' liabilities, assets, deposits, capital and regulatory/economic constraints. U1, U2. | Define core bank structural records now and operation-level later methods for funding, credit, liquidity and capital, including accounting/prudential reconciliation and an appropriate worked case. | Partially repaired: Ch. 9 specifies bank origination, transfer, interest, allowance, cash funding and default; exact fixture balances and capital reconciliation pass. Prudential weights are illustrative; full allowance lifecycle, IFRS 9/CECL and jurisdictional capital rules remain open. G7, G8. |
+| MC22 | Represent insurers' contract groups, claims, service/finance components, assets and reinsurance. U1, U2. | Define cohort/group state and movements, declared measurement approaches and interfaces, reinsurance links and a complete structural/roll-forward example; expand actuarial/accounting support. | Partially repaired: Ch. 9 and `sectors.json` give a complete short-duration PAA gross/reinsurance roll-forward and chain-ladder point calculation. Selected AASB 17 paragraphs and Mack technical sections inspected. General measurement, transition, variable fees and uncertainty/RA estimation remain open. G7, G8, G16. |
+
+## M5 — Concrete methods, DSL and implementation contracts
+
+| ID | Requirement and origin | Evidence needed to complete the design | Current assessment and related gaps |
+| --- | --- | --- | --- |
+| MC23 | Explain the DSL's role and tradeoffs against credible alternatives, including typed ordinary code, XBRL, ledgers, rule languages and probabilistic tools. U1, U3, P. | Tie each claimed benefit to the same concrete tasks and shared semantic requirements; state costs and a fair authoring comparison protocol. Keep empirical superiority unclaimed until evaluated. | Specified shared-IR comparison and identical authoring tasks in Chs. 5, 11/Core 0; limited syntax/literal equivalence checked. Participant study, full frontend equivalence and any superiority claim remain unevaluated. G2, G9. |
+| MC24 | Specify the core language and IR completely enough for compatible independent implementations. U3, D. | Provide complete grammar/lexical rules, AST/IR schemas, types, context rules, built-ins, errors, package interfaces and source-to-IR-to-result fixtures, including the demonstration package. | Core 0 grammar, closed structural IR, built-ins, arities, context/domain rules and complete debt dependency package supplied. Authored expected IR and selected expression-to-result checks pass. Complete compiler, external-registry and semantic rejection conformance remain unimplemented; independent implementability review is pending. G2, G12, G15. |
+| MC25 | Specify APIs, adapters, storage, versioning, identity and deterministic recovery. U3, P, D. | Define complete arguments/results, state ownership, migration semantics, evidence/model/run identity, event idempotency, random-stream allocation and replay requirements with examples. | Specified APIs, ownership, canonical identity, migration/replay and stream keying in Ch. 10/Core 0; concrete adapter exchanges included. Reference identity, replay/conflict and stream checks pass; transactional storage, migrations and non-Z3 adapters remain unimplemented. G2, G9, G18. |
+| MC26 | Specify supported numerical/solver operations and their limits. U3, P, D. | Define formula fragments, reformulations, exact/approximate monetary treatment, rounding, strict-domain bounds, infeasibility/conflict evidence, timeout and resource behaviour. | Specified rational-linear/finite-choice scope, amount reformulation, quantisation distinctions and typed unknowns in Ch. 6/Core 0. Z3 checks 4.975 attained and 7.035 unattained and concrete histories. Nonlinear solvers and a production rounding/optimization layer remain pending. G3, G10. |
+| MC27 | Specify analyst/LLM review and correction as a traceable local workflow. U1, U3, D. | Define proposal, acceptance, alternative, rejection and supersession actions, with evidence requirements, consistency checks and derived-result invalidation; show an actual conflict-resolution example. | Specified Propose/Accept/AcceptAlternative/Reject/Supersede actions, examples and dependency invalidation in Ch. 10/Core 0. The transitive invalidation oracle passes; a complete analyst UI/workflow and human adjudication remain pending. G2, G17. |
+| MC28 | Connect the full design through complete synthetic and real disclosure cases. U1, U2, U3, D. | Supply a known-history synthetic company and a named annual/interim real package across multiple dates; trace representative notes through records, constraints, alternatives and all affected future statements. Add structural finance/sector cases before fixing the core types. | Reference cases delivered in Ch. 2: complete synthetic Northstar history/revision/forecast and named Apple annual/interim inventory, notes and conditional stress. Ch. 9 supplies sector/finance structures. Real-company full semantic closure and independent case annotation remain open; no complete Apple forecast is claimed. G4, G5, G7. |
+
+## M6 — Literature, sources and reusable software
+
+| ID | Requirement and origin | Evidence needed to complete the design | Current assessment and related gaps |
+| --- | --- | --- | --- |
+| MC29 | Conduct a broad, technically grounded literature survey beyond the original collection. U3, P. | Inspect relevant primary methods/theory/evaluation/appendices and official code where available; compare direct alternatives; make genuine backward/forward screening, source-specific omissions, corrections and claim support inspectable. | Partially repaired: 179 individual title/metadata decisions across 194 occurrences/72 searches replace generic exclusions; generation rejects unscreened candidates. Mack and selected rule sources add inspected technical support. All-candidate full-text review and later module literature are not complete. G8. |
+| MC30 | Preserve the relevant source library and precise provenance. U3, P. | Archive accessible relevant papers under the required naming convention, retain exact versions/anchors, preserve original files, and document unavailable sources without relying on their uninspected claims. | 32 catalogued paper PDFs verified by hash/page count, with original collection preserved; Apple filings and selected standards archived separately. Version/authority limits and four blocked papers remain recorded. Mechanical integrity does not certify every technical claim. G8. |
+| MC31 | Survey open-source tools and define evidence-based reuse boundaries. U3, P, D. | Inspect official interfaces/licences, identify supported subsets, specify adapter exchanges and version assumptions, and separate inspected capabilities from later integration/performance evidence. | Inspected software snapshots/licences retained; Ch. 10/Core 0 specify typed exchanges, errors and concrete examples. Z3 is exercised. Arelle/ACTUS/QuantLib/Docling/ledger integrations and pinned deployment combinations remain pending. G9. |
+
+## M7 — Governing scholarly design
+
+| ID | Requirement and origin | Evidence needed to complete the design | Current assessment and related gaps |
+| --- | --- | --- | --- |
+| MC32 | Deliver a detailed, readable LaTeX/PDF document that governs the intended implementation. U3, P. | Explain the whole problem, justify chosen methods, stage mathematical prerequisites, define supported behaviour and disclose open scope; connect derivations and sources to complete examples and interfaces. Preserve mathematical/source fidelity during revisions and inspect the rendered result. | Revised Version 1.1 candidate, 11 chapters plus two appendices, full cases and supporting normative files. Build, rendered inspection and baseline-preservation review are recorded in `review/author-review.md`. Human comprehension, domain review and independent implementability acceptance remain pending. G1, G2, G4, G5, G7, G10. |
+
+## M8 — Validation, completion and sustained direction
+
+| ID | Requirement and origin | Evidence needed to complete the design | Current assessment and related gaps |
+| --- | --- | --- | --- |
+| MC33 | Define meaningful acceptance and separate engineering, accounting and scientific evidence. U3, P, D. | Provide canonical conformance inputs/outputs, corpus/annotation rules, justified release-specific criteria, review status and later forecast baselines/uncertainty protocols. Existing arithmetic/build checks keep their limited meanings. | Specified fixtures, corpus strata, annotation/adjudication/split protocol, hard conformance vetoes and provisional workload limits in Ch. 11/`corpus-protocol.json`. Reference checks and author review recorded; corpus expansion, adjudication, performance and release validation remain pending. G5, G10. |
+| MC34 | Stage implementation without losing the full mission or concealing unresolved decisions. U1, U2, U3, P, D. | Maintain requirement-to-section/case/gap traceability, explicit current-versus-later support, dependency order, workload assumptions and open decisions. Re-audit after material changes and test interactions, not just individual rows. | Mission and all 34 assessments updated without changing requirement wording. The reviewed repair plan and G1–G18 result map preserve current/later/source-blocked obligations; implementation order remains in Ch. 11. Wider mission and acceptance stay active. G1–G18. |
+
+## Current disposition and maintenance
+
+The local repair campaign supplied concrete methods, cases, contracts and
+reference evidence; it did not complete the wider product mission. The
+[repair results](../design/review/gap-repair-results-2026-10-02.md) distinguish
+specified behaviour, checked examples, source limitations and later execution.
+Human comprehension, independent accounting and implementation review remain
+pending. These do not prevent further provisional work.
+
+Next, validate the Core 0 semantics/registry and shared-IR compiler against
+positive and negative cases, then implement the bounded Northstar path and
+selected adapters. In parallel with later domain design, acquire missing
+primary authority, expand the real corpus and resolve substantive annotation
+questions. Richer bank/insurance and continuous inference methods retain their
+separate milestones; the bounded core does not redefine those requirements.
+
+Update affected rows after substantive changes. Preserve the requirement and
+acceptance wording unless the user changes scope. New findings may be added;
+these 34 requirements and 18 gap categories are a traceable baseline, not a
+proof that no further omissions can be found.

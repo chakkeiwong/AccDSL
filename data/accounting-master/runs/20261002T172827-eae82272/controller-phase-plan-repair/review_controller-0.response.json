@@ -1,0 +1,37 @@
+{
+  "assumptions": [
+    "Workers are trusted, reviewer roles are read-only, and process containment has the supplied limits.",
+    "The packet does not specify that check processes cannot modify editable project files. check_protection covers frozen evidence and controller files, not every phase-entry file.",
+    "The outer acceptance/resume implementation is not supplied; no independent mechanism for freezing cumulative phase changes is established."
+  ],
+  "checks": [
+    "Inspected the supplied planning, execution, repair, verification, acceptance, and worker-integrity code without tools.",
+    "Traced multi-attempt acceptance and modifications during verification.",
+    "Treated the reported 55 passing tests as supporting control-plane evidence. Test names alone do not establish coverage of the findings below."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py: Master.execute_phase computes cumulative changes but builds accepted evidence_hashes from the final attempt's changes plus explicitly named evidence and deliverables.",
+    "scripts/run_accounting_master.py: Master.execute_phase checks deletions and captures changes before Master.check_phase; it does not recompute them before acceptance.",
+    "scripts/run_accounting_master.py: Master.check_phase checks deliverable existence and protected hashes after the check process, but does not check the complete editable-file delta.",
+    "tests/test_accounting_master.py: Supplied test names cover repair execution, deletion obligations, and evidence invalidation; their implementations are not included."
+  ],
+  "issues": [
+    "High — Accepted evidence omits earlier implementation and repair changes. In Master.execute_phase, acceptance adds only changes['added'] and changes['changed'] from the current attempt to names. For example, attempt 0 changes a reusable module and fails verification; attempt 1 repairs another file and passes. Unless a worker explicitly lists the first module as evidence, its accepted contents are not hashed. The same omission occurs after resume because before describes the resumed workspace, while entry describes the original phase entry. Subsequent modification or loss of that module therefore cannot be detected from this phase's evidence_hashes. Repair: include cumulative added and changed files in accepted evidence, using a fresh delta against the preserved phase-entry inventory at acceptance. Add coverage for an earlier-attempt module omitted from worker evidence, both within one invocation and across resume.",
+    "High — Verification can introduce prohibited deletions or unreviewed changes after the last delta check. Master.execute_phase computes cumulative and changes, rejects deletions, and then runs check_phase. The check subprocess can accidentally modify or delete an editable project file. The result reviewer receives the pre-check deltas, and acceptance does not recompute them. If verification deletes a phase-entry file untouched by implementation and absent from explicit evidence or deliverables, tests can still report success, check_protection can pass, and the phase can become accepted_internal. outstanding_deletions also remains stale. Repair: after verification, recompute cumulative and per-attempt changes, persist outstanding_deletions, enforce deletion prohibitions, and supply the updated deltas to result review. Ensure acceptance hashes those final contents. Add coverage for a check process deleting an otherwise untouched phase-entry file and for a check process modifying an editable file."
+  ],
+  "next_actions": [
+    "Use final cumulative changes to construct the accepted evidence set.",
+    "Recompute and validate editable-file changes after verification and before result review.",
+    "Run focused regression checks for both defects, then rerun the controller checks and obtain a fresh read-only review."
+  ],
+  "residuals": [
+    "Process cleanup, atomic persistence, exclusive locking, narrow approval matching, and outer resume behavior are stated interfaces here; their implementations cannot be independently assessed from this packet.",
+    "The accepted 192-report source panel and internal phase acceptance do not establish accounting correctness or close scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Compared the supplied acceptance path against cumulative preservation and resumability requirements.",
+    "Identified two acceptance defects without introducing additional threat models."
+  ],
+  "summary": "Two defects can permit internal acceptance with incomplete evidence protection or missed verification-time deletions. Repair execution and rechecking are present, but final acceptance must validate and freeze the complete phase delta.",
+  "verdict": "REVISE"
+}

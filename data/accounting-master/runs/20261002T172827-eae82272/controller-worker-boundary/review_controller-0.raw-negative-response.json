@@ -1,0 +1,55 @@
+{
+  "verdict": "REVISE",
+  "summary": "Worker-boundary protection does not establish that newly created supervisor-control files are detected, leaving a possible state/grant forgery path.",
+  "steps": [
+    "Define protection semantics for absent expected files and unexpected newly created supervisor files.",
+    "Capture the pre-worker existence state for state.json, authorization.json, and any other supervisor controls.",
+    "Make post-worker verification fail when a previously absent protected control appears or when any unapproved control path is added.",
+    "Add bounded tests covering creation of absent supervisor state or authorization files during both successful and failing worker execution."
+  ],
+  "assumptions": [
+    "The supplied call sites show verify_hashes receiving only the expected hash mapping; the packet does not establish that verify_hashes independently detects unexpected files.",
+    "worker_override is a trusted test seam and is not an externally configurable production execution path."
+  ],
+  "checks": [
+    "The 55 supplied tests provide supporting control-plane evidence, including worker state-forgery and worker-failure integrity tests.",
+    "Those tests do not demonstrate detection of a protected file created after it was absent from the initial guarded mapping.",
+    "The response validator correctly rejects missing or extra top-level response fields and rejects AGREE responses retaining issues."
+  ],
+  "evidence": [
+    {
+      "file": "scripts/run_accounting_master.py",
+      "finding": "Master._worker_result builds runtime_guard with state_path and authorization.json only when each path already exists, then calls verify_hashes(self.root, runtime_guard) after worker execution."
+    },
+    {
+      "file": "scripts/run_accounting_master.py",
+      "finding": "Master.worker applies the same conditional guarded-hash construction in its finally block. A newly created file is therefore absent from the expected mapping unless verify_hashes has undocumented unexpected-file detection."
+    },
+    {
+      "file": "scripts/run_accounting_master.py",
+      "finding": "The worker-forgery requirement is stated as a tested interface, but the packet does not show a creation-after-absence case proving that requirement."
+    },
+    {
+      "file": "tests/test_accounting_master.py",
+      "finding": "The supplied test names include test_worker_cannot_forge_supervisor_state, but no supplied assertion or code shows that the test covers creation of a previously absent state or authorization file."
+    }
+  ],
+  "issues": [
+    {
+      "severity": "blocking",
+      "title": "New supervisor-control files may evade worker integrity verification",
+      "location": "scripts/run_accounting_master.py: Master.worker and Master._worker_result",
+      "problem": "The pre-worker guard records hashes only for files that already exist. If a worker creates state.json or authorization.json when absent, the post-worker verify_hashes call receives no expected entry for that path. Unless verify_hashes explicitly rejects unexpected files, the mutation is not detected and a worker can forge supervisor state or the upfront grant.",
+      "repair": "Make the guard represent both existence and digest, or explicitly compare the protected/control path set before and after execution. Reject any newly created supervisor-control file unless the controller itself authorized that creation. Apply the same rule in process-level cleanup where guarded controls are constructed conditionally. Add tests for creation of absent state.json and authorization.json during normal, malformed-response, and exception paths."
+    }
+  ],
+  "residuals": [
+    "The packet does not provide verify_hashes or merge_hashes implementations, so their behavior for unexpected files is an unresolved interface assumption. If verify_hashes already rejects unlisted files, document and test that contract; otherwise the issue remains blocking.",
+    "The packet does not establish whether mcp list output is complete for every startup integration. The current code checks enabled flags for returned entries only; completeness should be documented or tested, but this is residual until the CLI-output contract is supplied."
+  ],
+  "next_actions": [
+    "Inspect or specify verify_hashes semantics for absent and unexpected paths.",
+    "Add the missing creation-after-absence integrity tests before accepting the worker boundary.",
+    "Re-run the focused worker-boundary test set and retain the resulting evidence."
+  ]
+}

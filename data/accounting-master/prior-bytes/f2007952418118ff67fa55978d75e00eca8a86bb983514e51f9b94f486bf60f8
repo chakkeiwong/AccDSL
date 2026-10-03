@@ -1,0 +1,226 @@
+"""Deterministic real-input checks for the bounded Apple P02 case.
+
+The tests deliberately exercise the retained annual PDF/text and interim HTML
+through the reusable case adapter.  Expected identities below are stated from
+the filing rows themselves; they are not copied from a generated case result.
+"""
+from __future__ import annotations
+
+import copy
+from fractions import Fraction
+import json
+from pathlib import Path
+import re
+import subprocess
+import unittest
+
+from scripts import apple_case_v1 as case
+
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "data/accounting-master/deliverables/P02"
+CASE_PATH = OUT / "case.json"
+ANNUAL_TEXT = ROOT / "docs/design/cases/apple/annual-2024.txt"
+INTERIM_HTML = ROOT / "docs/design/cases/apple/interim-2025q1.html"
+
+
+class AccountingP02Tests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.case_data = json.loads(CASE_PATH.read_text())
+        cls.by_id = {o["id"]: o for o in cls.case_data["observations"]}
+
+    def test_real_inputs_build_and_independent_annual_arithmetic(self):
+        built = case.build_case()
+        self.assertEqual(len(built["notes"]), 23)
+        self.assertEqual(built["coverage"]["annual_notes"], 13)
+        self.assertEqual(built["coverage"]["interim_notes"], 10)
+        self.assertEqual(built["acceptance"]["empirical_forecast_validity"],
+                         "not evaluated; no forecast generated")
+
+        annual = ANNUAL_TEXT.read_text()
+        debt_row = re.search(
+            r"Total term debt principal.*?97,341.*?\n.*?"
+            r"Unamortized premium/\(discount\) and issuance costs, net.*?\(321\).*?\n.*?"
+            r"Hedge accounting fair value adjustments.*?\(358\).*?\n.*?"
+            r"Total term debt\s+96,662",
+            annual,
+            re.S,
+        )
+        self.assertIsNotNone(debt_row)
+        # Independent displayed-million arithmetic from the retained PDF text.
+        self.assertEqual(Fraction(97341) - Fraction(321) - Fraction(358),
+                         Fraction(96662))
+        self.assertEqual(
+            Fraction(10912) + Fraction(85750),
+            Fraction(96662),
+        )
+        self.assertIn("30,737", annual)
+        self.assertIn("29,965", annual)
+
+        # The independent retained HTML contains the actual tagged facts used
+        # by the interim reader, including the rounded narrative debt fact.
+        interim = INTERIM_HTML.read_text()
+        self.assertIn('name="us-gaap:LongTermDebt"', interim)
+        self.assertIn('>94.8</ix:nonFraction>', interim)
+
+    def test_cli_check_rebuilds_case_from_sources(self):
+        result = subprocess.run(
+            ["python3", "-B", "scripts/apple_case_v1.py", "--check",
+             "--output-dir", "data/accounting-master/deliverables/P02"],
+            cwd=ROOT, text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["notes"], 23)
+        self.assertGreater(report["anchors"], 500)
+
+    def test_note_inventory_and_boundary_mutations_are_rejected(self):
+        annual = case.Document("annual", case.APPLE + "annual-2024.pdf",
+                               case.APPLE + "annual-2024.txt", pdf=True)
+        self.assertEqual(len(case.discover_notes(annual, 13)), 13)
+        duplicate = case.Document("annual", case.APPLE + "annual-2024.pdf",
+                                  case.APPLE + "annual-2024.txt", pdf=True)
+        duplicate.text = duplicate.text.replace("Note 2 –", "Note 1 –", 1)
+        with self.assertRaises(case.CaseError):
+            case.discover_notes(duplicate, 13)
+        broken_boundary = case.Document("annual", case.APPLE + "annual-2024.pdf",
+                                        case.APPLE + "annual-2024.txt", pdf=True)
+        broken_boundary.text = broken_boundary.text.replace(
+            "Report of Independent Registered", "Report marker removed")
+        with self.assertRaises(case.CaseError):
+            case.discover_notes(broken_boundary, 13)
+
+    def test_anchor_quote_hash_and_metadata_revalidation_reject_mutations(self):
+        mutated = copy.deepcopy(self.case_data)
+        anchor = mutated["notes"][0]["anchor"]
+        anchor["quote"] = anchor["quote"] + " altered"
+        with self.assertRaises(case.CaseError):
+            case.validate_anchors(mutated)
+
+        mutated = copy.deepcopy(self.case_data)
+        anchor = mutated["notes"][0]["anchor"]
+        anchor["extraction_sha256"] = "0" * 64
+        with self.assertRaises(case.CaseError):
+            case.validate_anchors(mutated)
+
+        mutated = copy.deepcopy(self.case_data)
+        mutated["observations"][0]["displayed_literal"] = "1"
+        with self.assertRaises(case.CaseError):
+            case.validate_case(mutated)
+
+    def test_context_scale_sign_and_measurement_substitutions_reject(self):
+        assets = copy.deepcopy(self.by_id["annual.bs.2024-09-28.assets"])
+        liabilities = copy.deepcopy(self.by_id["annual.bs.2024-09-28.liabilities"])
+        equity = copy.deepcopy(self.by_id["annual.bs.2024-09-28.equity"])
+
+        wrong_scale = copy.deepcopy(assets)
+        wrong_scale["scale"] = 9
+        with self.assertRaises(case.CaseError):
+            case.validate_value(wrong_scale)
+
+        wrong_sign = copy.deepcopy(assets)
+        wrong_sign["value_usd"] = "-364980000000"
+        with self.assertRaises(case.CaseError):
+            case.validate_value(wrong_sign)
+
+        wrong_perimeter = copy.deepcopy(equity)
+        wrong_perimeter["context"]["perimeter"] = "standalone"
+        with self.assertRaises(case.CaseError):
+            case.reconcile("bad.perimeter", "balance",
+                           [liabilities, wrong_perimeter], assets)
+
+        fair_value = copy.deepcopy(self.by_id["interim.debt.2024-12-28.fair_value"])
+        current = copy.deepcopy(self.by_id["interim.bs.2024-12-28.debt_current"])
+        noncurrent = copy.deepcopy(self.by_id["interim.bs.2024-12-28.debt_noncurrent"])
+        with self.assertRaises(case.CaseError):
+            case.reconcile("bad.measurement", "rounded_debt",
+                           [current, noncurrent], fair_value)
+
+    def test_cash_perimeter_and_revenue_axis_substitutions_reject(self):
+        opening = copy.deepcopy(self.by_id["annual.cf.2024.opening"])
+        closing = copy.deepcopy(self.by_id["annual.cf.2024.closing"])
+        flows = [copy.deepcopy(self.by_id[f"annual.cf.2024.{k}"])
+                 for k in ("operating", "investing", "financing")]
+        balance_sheet_cash = copy.deepcopy(self.by_id["annual.bs.2023-09-30.cash"])
+        # 30,737 is the cash-flow opening balance; 29,965 is the prior
+        # balance-sheet cash-only figure.  The latter has the wrong perimeter.
+        self.assertEqual(Fraction(opening["displayed_literal"].replace(",", "")),
+                         Fraction(30737))
+        self.assertEqual(Fraction(balance_sheet_cash["displayed_literal"].replace(",", "")),
+                         Fraction(29965))
+        with self.assertRaises(case.CaseError):
+            case.reconcile("bad.cash.perimeter", "cash_flow",
+                           [balance_sheet_cash] + flows, closing)
+
+        product = [copy.deepcopy(self.by_id[f"annual.product.2024.{i}"])
+                   for i in range(5)]
+        product_total = copy.deepcopy(self.by_id["annual.revenue.2024"])
+        self.assertEqual(case.reconcile("ok.product", "partition", product,
+                                        product_total, partition="product")["status"],
+                         "pass")
+        product[0]["context"]["dimensions"] = {
+            "us-gaap:StatementBusinessSegmentsAxis": "aapl:AmericasSegmentMember"
+        }
+        with self.assertRaises(case.CaseError):
+            case.reconcile("bad.product.axis", "partition", product,
+                           product_total, partition="product")
+
+    def test_inline_fact_context_and_unit_ids_are_required(self):
+        interim = case.Document("interim", case.APPLE + "interim-2025q1.html",
+                                case.APPLE + "interim-2025q1.txt")
+        reader = case.InlineReader(interim)
+        fact = copy.copy(reader.facts[0])
+        fact["contextref"] = "missing-context"
+        with self.assertRaises(case.CaseError):
+            reader.parse(fact)
+        fact = copy.copy(reader.facts[0])
+        fact["unitref"] = "missing-unit"
+        with self.assertRaises(case.CaseError):
+            reader.parse(fact)
+
+    def test_rounding_compatibility_and_incompatibility_are_distinct(self):
+        current = copy.deepcopy(self.by_id["interim.bs.2024-12-28.debt_current"])
+        noncurrent = copy.deepcopy(self.by_id["interim.bs.2024-12-28.debt_noncurrent"])
+        rounded = copy.deepcopy(self.by_id["interim.debt.2024-12-28.rounded"])
+        passing = case.reconcile("ok.rounded", "rounded_debt",
+                                 [current, noncurrent], rounded)
+        self.assertTrue(passing["rounding_compatible"])
+        self.assertFalse(passing["displayed_identity"])
+
+        incompatible = copy.deepcopy(rounded)
+        incompatible["displayed_literal"] = "95.1"
+        incompatible["value_usd"] = "95100000000"
+        incompatible["rounding_interval_usd"] = case.interval(
+            Fraction("95100000000"), Fraction("100000000"))
+        source = incompatible["source_readings"][0]["fact"]
+        source["quote"] = source["quote"].replace(">94.8<", ">95.1<")
+        with self.assertRaises(case.CaseError):
+            case.reconcile("bad.rounded", "rounded_debt",
+                           [current, noncurrent], incompatible)
+
+    def test_external_obligations_and_unidentified_histories_remain_explicit(self):
+        external = self.case_data["external"]
+        self.assertTrue(external["partIII_and_package_obligations"])
+        self.assertTrue(any("proxy" in x.get("target", "").lower()
+                            for x in external["partIII_and_package_obligations"]))
+        self.assertTrue(any(x.get("contents_status") ==
+                            "internal_target_missing_in_retained_html"
+                            for x in external["exhibit_inventory"]))
+        views = case.version_view(self.case_data["filing_availability"],
+                                  "2024-11-01", scope="retained_bytes")
+        self.assertEqual({x["availability"] for x in views["versions"]},
+                         {"unknown"})
+        self.assertEqual(
+            {x["status"] for x in self.case_data["unidentified_histories"]},
+            {"not_identified"},
+        )
+        self.assertEqual(
+            self.case_data["representation_comparison"]["whole_document_equivalence"],
+            False,
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

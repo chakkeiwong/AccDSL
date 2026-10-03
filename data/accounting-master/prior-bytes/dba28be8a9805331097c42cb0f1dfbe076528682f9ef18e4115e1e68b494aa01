@@ -1,0 +1,300 @@
+"""Textual Core 0.1 frontend.
+
+The frontend retains token spelling and source positions while translating the
+grammar into the typed constructors in :mod:`core0_ir_v1`.  It deliberately
+does not construct IR from a fixture or from a JSON schema.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from fractions import Fraction
+import json
+from pathlib import Path
+import re
+from typing import Any, Mapping, Optional
+
+from lark import Lark, Token, Tree, UnexpectedInput
+
+try:  # Support both ``scripts.core0_frontends_v1`` and direct script imports.
+    from .core0_ir_v1 import (
+        AccountDecl, AlternativeDecl, ArrayExpr, Binary, BookDecl, Call, CompileBindings,
+        ConstraintDecl, ContractDecl, EntityDecl, External, Expr, LetDecl, Literal,
+        ObservationDecl, OpeningDecl, Program, RecordExpr, Ref, ReportDecl, ScenarioDecl,
+        SourceDecl, SymbolDecl, Unary, UnsupportedDecl, UseDecl, compile_program,
+    )
+except ImportError:  # pragma: no cover - used when scripts/ is sys.path[0].
+    from core0_ir_v1 import (
+        AccountDecl, AlternativeDecl, ArrayExpr, Binary, BookDecl, Call, CompileBindings,
+        ConstraintDecl, ContractDecl, EntityDecl, External, Expr, LetDecl, Literal,
+        ObservationDecl, OpeningDecl, Program, RecordExpr, Ref, ReportDecl, ScenarioDecl,
+        SourceDecl, SymbolDecl, Unary, UnsupportedDecl, UseDecl, compile_program,
+    )
+
+
+ROOT = Path(__file__).resolve().parents[1]
+GRAMMAR_PATH = ROOT / "docs/design/spec/core-0.lark"
+
+
+@dataclass(frozen=True)
+class _Node:
+    data: str
+    children: tuple[Any, ...]
+    start: int
+    end: int
+
+
+@dataclass(frozen=True)
+class FrontendProgram:
+    program: Program
+    source_spans: Mapping[int, Mapping[str, Any]]
+
+
+def _node(value: Any) -> Any:
+    if isinstance(value, Tree):
+        meta = value.meta
+        return _Node(value.data, tuple(_node(c) for c in value.children),
+                     int(getattr(meta, "start_pos", 0)), int(getattr(meta, "end_pos", 0)))
+    return value
+
+
+def _text(value: Any) -> str:
+    return str(value)
+
+
+def _strip_string(value: str, where: str) -> str:
+    try:
+        parsed = json.loads(value)
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid JSON string at {where}") from exc
+    if not isinstance(parsed, str):
+        raise ValueError(f"expected a string at {where}")
+    return parsed
+
+
+def _type(node: Any) -> str:
+    if not isinstance(node, _Node) or node.data != "type":
+        raise ValueError("expected type node")
+    if not node.children:
+        raise ValueError("empty type")
+    name = _text(node.children[0])
+    if len(node.children) == 1:
+        return name
+    return f"{name}<{','.join(_type(c) for c in node.children[1:])}>"
+
+
+def _mark(expr: Expr, node: _Node, source: str, spans: dict[int, dict[str, Any]]) -> Expr:
+    spans[id(expr)] = {"start": node.start, "end": node.end,
+                       "text": source[node.start:node.end]}
+    return expr
+
+
+def _operator_fold(node: _Node, source: str, spans: dict[int, dict[str, Any]]) -> Expr:
+    if not node.children:
+        raise ValueError(f"empty {node.data}")
+    current = _expr(node.children[0], source, spans)
+    i = 1
+    while i < len(node.children):
+        op = _text(node.children[i])
+        right = _expr(node.children[i + 1], source, spans)
+        current = _mark(Binary(op, current, right), node, source, spans)
+        i += 2
+    return current
+
+
+def _expr(value: Any, source: str, spans: dict[int, dict[str, Any]]) -> Expr:
+    if isinstance(value, Token):
+        if value.type == "NAME":
+            return _mark(Ref(_text(value)), _Node("token", (), value.start_pos, value.end_pos), source, spans)
+        if value.type == "BOOL":
+            node = _Node("bool", (), value.start_pos, value.end_pos)
+            return _mark(Literal(_text(value) == "true", type_name="Bool", display=_text(value)), node, source, spans)
+        if value.type == "DATE":
+            node = _Node("date", (), value.start_pos, value.end_pos)
+            return _mark(Literal(_text(value), type_name="Date", display=_text(value)), node, source, spans)
+        if value.type == "STRING":
+            node = _Node("string", (), value.start_pos, value.end_pos)
+            return _mark(Literal(_strip_string(_text(value), "string"), type_name="String", display=_text(value)), node, source, spans)
+        raise ValueError(f"unexpected token {_text(value)!r}")
+    if not isinstance(value, _Node):
+        raise ValueError("expected expression node")
+    if value.data == "number":
+        if not value.children:
+            raise ValueError("empty number")
+        spelling = _text(value.children[0])
+        try:
+            number = Fraction(spelling) if "." not in spelling else Fraction(spelling)
+        except ValueError as exc:
+            raise ValueError(f"invalid number {spelling!r}") from exc
+        raw = source[value.start:value.end].strip()
+        unit: Optional[str] = None
+        if re.search(r"\bper\s+year\s*$", raw):
+            unit = "per year"
+        elif len(value.children) > 1:
+            unit = _text(value.children[1])
+        return _mark(Literal(number, unit=unit, display=raw), value, source, spans)
+    if value.data in {"disjunction", "conjunction", "comparison", "sum", "product"}:
+        return _operator_fold(value, source, spans)
+    if value.data == "unary":
+        if len(value.children) == 1:
+            return _expr(value.children[0], source, spans)
+        op, child = _text(value.children[0]), _expr(value.children[1], source, spans)
+        return _mark(Unary(op, child), value, source, spans)
+    if value.data == "postfix":
+        current = _expr(value.children[0], source, spans)
+        for child in value.children[1:]:
+            current = _mark(Call("field", (current, Ref(_text(child)))), value, source, spans)
+        return current
+    if value.data == "call":
+        if not value.children:
+            raise ValueError("empty call")
+        name = _text(value.children[0])
+        args = tuple(_expr(c, source, spans) for c in value.children[1:])
+        if name == "external":
+            if len(args) != 1 or not isinstance(args[0], Literal) or not isinstance(args[0].value, str):
+                raise ValueError("external requires one string literal")
+            return _mark(External(args[0].value), value, source, spans)
+        return _mark(Call(name, args), value, source, spans)
+    if value.data == "array":
+        return _mark(ArrayExpr(tuple(_expr(c, source, spans) for c in value.children)), value, source, spans)
+    if value.data == "record":
+        fields: list[tuple[str, Expr]] = []
+        for child in value.children:
+            if not isinstance(child, _Node) or child.data != "record_field":
+                raise ValueError("invalid record field")
+            fields.append((_text(child.children[0]), _expr(child.children[1], source, spans)))
+        return _mark(RecordExpr(fields), value, source, spans)
+    if value.data == "record_field":
+        raise ValueError("record field outside record")
+    if value.data == "atom" and value.children:
+        return _expr(value.children[0], source, spans)
+    raise ValueError(f"unsupported expression syntax {value.data!r}")
+
+
+def _domain(node: _Node, source: str, spans: dict[int, dict[str, Any]]) -> tuple[Expr, Expr] | None:
+    if node.data != "domain" or len(node.children) != 2:
+        return None
+    raw = source[node.start:node.end].lstrip()
+    if not raw.startswith("["):
+        return None  # finite choices are outside Core0.1
+    return (_expr(node.children[0], source, spans), _expr(node.children[1], source, spans))
+
+
+def parse_program(source: str) -> FrontendProgram:
+    parser = Lark(GRAMMAR_PATH.read_text(encoding="utf-8"), parser="lalr",
+                  propagate_positions=True, maybe_placeholders=False)
+    tree = _node(parser.parse(source))
+    if not isinstance(tree, _Node) or tree.data != "start" or len(tree.children) < 2:
+        raise ValueError("module header is required")
+    module, version = _text(tree.children[0]), _strip_string(_text(tree.children[1]), "module version")
+    spans: dict[int, dict[str, Any]] = {}
+    declarations: list[Any] = []
+    uses: list[UseDecl] = []
+    unsupported = {"choice", "event", "rule", "require", "post", "setting", "parameters"}
+    for item in tree.children[2:]:
+        if not isinstance(item, _Node):
+            raise ValueError("unexpected module token")
+        d, c = item.data, item.children
+        try:
+            if d == "use":
+                uses.append(UseDecl(_text(c[0]), _strip_string(_text(c[1]), "use version")))
+            elif d == "source":
+                value = _expr(c[1], source, spans)
+                if not isinstance(value, External):
+                    raise ValueError("source requires external(string)")
+                declarations.append(SourceDecl(_text(c[0]), value.key))
+            elif d == "entity":
+                declarations.append(EntityDecl(_text(c[0]), _text(c[1])))
+            elif d == "book":
+                declarations.append(BookDecl(_text(c[0]), _text(c[1]), _text(c[2]), _strip_string(_text(c[3]), "book version")))
+            elif d == "account":
+                declarations.append(AccountDecl(_text(c[0]), _text(c[1]), _text(c[2])))
+            elif d == "opening":
+                value = _expr(c[2], source, spans)
+                if not isinstance(value, External):
+                    raise ValueError("opening requires external(string)")
+                declarations.append(OpeningDecl(_text(c[0]), _text(c[1]), value.key))
+            elif d == "observation":
+                typ = _type(c[1])
+                ts = c[2]
+                if not isinstance(ts, _Node) or ts.data != "time_spec":
+                    raise ValueError("observation time is required")
+                if len(ts.children) == 1:
+                    instant = _text(ts.children[0]).lstrip("@")
+                else:
+                    raise ValueError("period observations are outside Core0.1")
+                value = _expr(c[3], source, spans)
+                declarations.append(ObservationDecl(_text(c[0]), typ, instant, value, _text(c[4])))
+            elif d == "symbol":
+                typ = _type(c[1]); bounds = _domain(c[2], source, spans)
+                if bounds is None:
+                    declarations.append(UnsupportedDecl("finite-domain", _text(c[0])))
+                else:
+                    declarations.append(SymbolDecl(_text(c[0]), typ, bounds[0], bounds[1],
+                                                   _strip_string(_text(c[3]), "symbol reason")))
+            elif d == "binding":
+                name = _text(c[0]); idx = 1; declared = None
+                if isinstance(c[idx], _Node) and c[idx].data == "type":
+                    declared = _type(c[idx]); idx += 1
+                declarations.append(LetDecl(name, _expr(c[idx], source, spans), declared))
+            elif d == "constraint":
+                declarations.append(ConstraintDecl(_text(c[0]), _expr(c[1], source, spans)))
+            elif d == "contract":
+                fields = []
+                for field_node in c[3:]:
+                    if not isinstance(field_node, _Node) or field_node.data != "field":
+                        raise ValueError("invalid contract field")
+                    fields.append((_text(field_node.children[0]), _expr(field_node.children[1], source, spans)))
+                declarations.append(ContractDecl(_text(c[0]), _text(c[1]), _text(c[2]), fields))
+            elif d == "alternative":
+                assumptions = []
+                for assumption in c[1:]:
+                    if not isinstance(assumption, _Node) or assumption.data != "assumption":
+                        raise ValueError("invalid alternative assumption")
+                    assumptions.append(_expr(assumption.children[0], source, spans))
+                declarations.append(AlternativeDecl(_text(c[0]), assumptions))
+            elif d == "scenario":
+                settings = []
+                for setting in c[1:]:
+                    if not isinstance(setting, _Node) or setting.data != "setting":
+                        raise ValueError("invalid scenario setting")
+                    settings.append((_text(setting.children[0]), _expr(setting.children[1], source, spans)))
+                declarations.append(ScenarioDecl(_text(c[0]), settings))
+            elif d == "report":
+                fields = [x for x in c[2:] if isinstance(x, _Node) and x.data == "field"]
+                mappings = [x for x in fields if _text(x.children[0]) == "mapping"]
+                if len(mappings) != 1:
+                    raise ValueError("report requires one mapping field")
+                mapping = _expr(mappings[0].children[1], source, spans)
+                declarations.append(ReportDecl(_text(c[0]), _text(c[1]), mapping))
+            elif d in unsupported:
+                declarations.append(UnsupportedDecl(d, _text(c[0]) if c else d))
+            else:
+                declarations.append(UnsupportedDecl(d, _text(c[0]) if c else d))
+        except (IndexError, TypeError, ValueError) as exc:
+            raise ValueError(f"invalid {d} declaration at {item.start}: {exc}") from exc
+    return FrontendProgram(Program(module, version, declarations, uses), spans)
+
+
+def compile_source(source: str, bindings: CompileBindings):
+    """Parse and lower a source program through the shared compiler."""
+    try:
+        parsed = parse_program(source)
+    except UnexpectedInput as exc:
+        try:
+            from .core0_ir_v1 import CompileResult, Diagnostic
+        except ImportError:  # pragma: no cover
+            from core0_ir_v1 import CompileResult, Diagnostic
+        start = getattr(exc, "pos_in_stream", None)
+        return CompileResult(None, (Diagnostic("ParseError", str(exc), "source",
+                                               span=(start, start) if start is not None else None),), {})
+    except ValueError as exc:
+        try:
+            from .core0_ir_v1 import CompileResult, Diagnostic
+        except ImportError:  # pragma: no cover
+            from core0_ir_v1 import CompileResult, Diagnostic
+        return CompileResult(None, (Diagnostic("ParseError", str(exc), "source"),), {})
+    return compile_program(parsed.program, bindings, source_spans=parsed.source_spans, input_text=source)
+
+
+__all__ = ["FrontendProgram", "compile_source", "parse_program"]

@@ -1,0 +1,38 @@
+{
+  "assumptions": [
+    "Worker roles enforce the supplied verdict restrictions and read-only versus workspace-write permissions.",
+    "preserve_editable and changes_since compare against the snapshot passed to them; no unshown cumulative deletion check is assumed.",
+    "The stated trusted-worker and initial-process-group containment assumptions apply."
+  ],
+  "checks": [
+    "Inspected the supplied planning, execution, repair, verification, acceptance and integrity-check branches without using tools.",
+    "Confirmed that unsuccessful verification triggers an actual repair worker followed by verification and result review.",
+    "Confirmed that acceptance requires passed checks, a positive test count, AGREE and existing evidence files.",
+    "Treated the reported 44 passing tests as supporting control-plane evidence only; test bodies were not supplied."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "scripts/run_accounting_master.py — Master.execute_phase resets the deletion baseline before every repair. If implementation deletes a pre-existing tracked file, changes_since detects it and raises MasterError. The next repair snapshots the already-damaged tree, so leaving that file absent no longer appears in changes['deleted']. Passing checks and AGREE can then accept the phase without restoring the prohibited deletion. A worker returning BLOCKED bypasses changes_since entirely, creating the same risk on resume. Preserve a durable phase-entry inventory and byte references across retries and resumed attempts; reconcile deletions after every editable worker outcome, including BLOCKED and handled failures. Require restoration of every outstanding prohibited deletion before acceptance. Keep cumulative changes available to the reviewer as well as the latest repair delta.",
+    "scripts/run_accounting_master.py — Master.execute_phase handles BLOCKED only from plan and implementation/repair workers. A BLOCKED plan review is treated as a request for plan repair; a BLOCKED result review triggers another editable repair. Exhaustion becomes needs_plan_repair or needs_repair rather than blocked_external, defeating the stated rule that unchanged external blocks are skipped and potentially repeating work against an unavailable prerequisite. Handle BLOCKED explicitly after both review calls, preserve its issues and residuals, and use the existing external-block tracking path. If review roles cannot emit BLOCKED, that missing interface restriction must be stated and an explicit supported mechanism must convey external blockers discovered during review."
+  ],
+  "next_actions": [
+    "Add regression coverage for deletion followed by an otherwise successful repair, and deletion followed by BLOCKED and resume; acceptance must remain impossible until restoration.",
+    "Add coverage for external blocks discovered during plan and result review, including unchanged-input resume behavior.",
+    "Rerun the controller checks and obtain a fresh bounded review after these repairs."
+  ],
+  "residuals": [
+    "The packet supplies test names and a passing summary, but not test bodies; their detailed assertions were not checked.",
+    "The implementations of refresh, outer state persistence, process management, locking, atomic writes and approval installation were not supplied. Their guarantees remain interface assumptions in this review.",
+    "Neither the accepted panel of 192 reports nor scoped phase acceptance establishes accounting correctness, scientific validity, closure of G1–G18 or human acceptance."
+  ],
+  "steps": [
+    "Traced failure and BLOCKED paths through subsequent repair and resume behavior.",
+    "Compared the visible transitions with the supplied preservation and external-block interfaces."
+  ],
+  "summary": "Two repair-path defects require revision: retries can forget prohibited deletions, and review-discovered external blockers do not enter the external-block state.",
+  "verdict": "REVISE"
+}

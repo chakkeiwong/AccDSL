@@ -1,0 +1,37 @@
+{
+  "assumptions": [
+    "The supervisor and workers are trusted, single-threaded launch is enforced, and workers remain in their initial process group.",
+    "Recovery runs under the exclusive writer lock before another phase starts; the supplied packet states this interface but omits its calling sequence.",
+    "No conclusions are drawn about deliberate detachment or uncatchable termination before durable registration."
+  ],
+  "checks": [
+    "Inspected the supplied launch, signal deferral, normal cleanup, recovery signalling, and lock snippets without tools.",
+    "The packet reports 55 passing tests. Test bodies are not supplied, so their names and reported results establish no additional assertions.",
+    "Normal cleanup retains the unreaped leader through group signalling and checks quiescence before reaping."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "Recovery does not contain ordinary concurrent process creation. _stop_recovered_group collects live_group_members exactly once and then sends both signals only to that fixed descriptor list. A trusted worker can fork a same-group child after enumeration, including during the 0.1-second TERM grace period. That child receives neither signal. The final membership check correctly raises ContinuationVeto, but leaves the child running without a deadline; after the leader disappears, recover_process can only veto subsequent resumes because the leader is absent. This is an ordinary process-tree race within the stated scope, not detachment. Repair recovery so it establishes a quiescent membership set before destroying its ownership anchor, or safely discovers and terminates newly created members under a bounded, identity-checked protocol. Preserve unresolved identities durably if cleanup cannot finish. Also replace the single 0.1-second post-KILL sleep with bounded quiescence polling: signal delivery does not imply immediate exit. Add regression coverage for a same-group descendant created after initial enumeration and for delayed exit following signalling."
+  ],
+  "next_actions": [
+    "Repair recovery membership handling and bounded exit waiting while preserving PID-reuse protection.",
+    "Verify that the recovery race leaves no live owned descendants and that a subsequent explicit run can resume.",
+    "Rerun the controller checks and obtain a fresh review of the changed lifecycle code."
+  ],
+  "residuals": [
+    "The packet does not supply the durable registration callback, active-process completion writes, or lock/recovery call sites. Their exception ordering and atomicity cannot be verified here.",
+    "bounded_process returns the leader's successful exit code even when cleanup terminates surviving descendants. The interface should specify whether such descendants are disposable background services or required phase work; success is honest only if required work has already completed.",
+    "The timeout and output limit are polling thresholds. Popen, registration, and callbacks have no visible independent deadlines, and direct log writes can exceed the output threshold between checks. Their boundedness assumptions remain unspecified.",
+    "The accepted 192-report source panel and scoped internal acceptance do not establish accounting correctness, scientific validity, or human acceptance; all original gaps remain open."
+  ],
+  "steps": [
+    "Reviewed only the supplied process-lifecycle packet.",
+    "Separated the concrete recovery race from missing interface evidence and nonblocking limitations."
+  ],
+  "summary": "REVISE: recovery can miss ordinary same-group descendants, leave them running, and prevent automatic resumption despite correctly refusing completion.",
+  "verdict": "REVISE"
+}

@@ -1,0 +1,839 @@
+        Incomplete Data: What Went Wrong, and How to Fix It
+
+                                                                                   Leonid Libkin
+                                                                              School of Informatics
+                                                                             University of Edinburgh
+                                                                             libkin@inf.ed.ac.uk
+
+
+
+ABSTRACT                                                                                        General Terms
+Incomplete data is ubiquitous: the more data we accu-                                           Theory, Languages, Algorithms
+mulate and the more widespread tools for integrating
+and exchanging data become, the more instances of in-                                           Keywords
+completeness we have. And yet the subject is poorly
+handled by both practice and theory. Many queries for                                           Incomplete information, query evaluation
+which students get full marks in their undergraduate
+courses will not work correctly in the presence of in-
+complete data, but these ways of evaluating queries are                                         1. INTRODUCTION
+cast in stone – SQL standard. We have many theoreti-
+cal results on handling incomplete data but they are, by
+                                                                                                The need to handle incomplete data was recognized
+and large, about showing high complexity bounds, and
+                                                                                                early in the development of relational database sys-
+thus are often dismissed by practitioners. Even worse,
+                                                                                                tems: already in the 1970s, Codd developed the basis
+we have a basic theoretical notion of what it means to
+                                                                                                of what would become null-related features of commer-
+answer queries over incomplete data, and yet this is not
+                                                                                                cial DBMSs [21, 22]. His proposal for a single one-size-
+at all what practical systems do.
+                                                                                                fits-all null value, its propagation through arithmetic
+    Is there a way out of this predicament? Can we have
+                                                                                                and Boolean operations, and the use of the three-valued
+a theory of incompleteness that will appeal to theoreti-
+                                                                                                logic for computing with nulls was largely reflected in
+cians and practitioners alike, by explaining incomplete-
+                                                                                                the SQL standard. It has, however, quickly become ap-
+ness and being at the same time implementable and use-
+                                                                                                parent that the adopted design of null-related features
+ful for applications? After giving a critique of both the
+                                                                                                has a number of deficiencies, and it has become one of
+practice and the theory of handling incompleteness in
+                                                                                                the most criticized aspects of SQL design [24, 26].
+databases, the paper outlines a possible way out of this
+crisis. The key idea is to combine three hitherto used                                          To illustrate one of the best known points of
+approaches to incompleteness: one based on certain an-                                          such criticism, consider a database of orders and
+swers and representation systems, one based on viewing                                          payments, with relations Order(o_id,product) and
+incomplete databases as logical theories, and one based                                         Pay(p_id,order,amount): the first gives order ids and
+on orderings expressing relative value of information.                                          products they are for, the other indicates that a pay-
+                                                                                                ment with a given id was made for an order. We want
+                                                                                                to check if there are unpaid orders. A student who has
+Categories and Subject Descriptors                                                              taken a basic database course will immediately produce
+H.2.1 [Database Management]: Logical Design—
+Data Models; H.2.1 [Database Management]: Lan-                                                     SELECT o_id FROM Order
+guages—Query Languages; H.2.4 [Database Manage-                                                    WHERE o_id NOT IN (SELECT order FROM Pay)
+ment]: Systems—Query Processing
+                                                                                                expecting to get full marks. But now take Order =
+Permission to make digital or hard copies of all or part of this work for personal or           {(oid1, pr1), (oid2, pr2)}, and Pay = {(pid1, ⊥, 100)},
+classroom use is granted without fee provided that copies are not made or distributed           where ⊥ indicates null value. We know that at least one
+for profit or commercial advantage and that copies bear this notice and the full citation
+                                                                                                order has not been paid for, and yet the above query
+on the first page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or          happily returns the empty set, indicating that no cus-
+republish, to post on servers or to redistribute to lists, requires prior specific permission   tomers need to be chased for their payments! The prob-
+and/or a fee. Request permissions from permissions@acm.org.                                     lem easily confounds SQL programmers: consider a sim-
+PODS’14, June 22–27, 2014, Snowbird, UT, USA.                                                   ple query R−S, where R and S are single-attribute rela-
+Copyright is held by the owner/author(s). Publication rights licensed to ACM.
+ACM 978-1-4503-2375-8/14/06 ...$15.00. http://dx.doi.org/10.1145/2594538.2594551
+                                                                                                tions, written as SELECT R.A FROM R WHERE R.A NOT
+.                                                                                               IN (SELECT S.A FROM S). It will produce the empty
+set if S contains just a null value, no matter what R         about finite structures – but that does not make it eas-
+contains. This goes against our intuition, of course: we      ier. A detailed study of the complexity of finding cer-
+know that if |R| > |S|, then R − S cannot possibly be         tain answers was initiated by [3] which showed hardness
+empty, but SQL tells us that it is. As [26] nicely put        results, coNP-hard and up. In fact, high complexity
+it, “those SQL features are . . . fundamentally at odds       bounds are widespread in applications of incomplete-
+with the way the world behaves”; a more damning as-           ness as well, with classes such as coNP, Πp2 , Pspace,
+sertion “you can never trust the answers you get from a       coNEXP, and so on being regularly mentioned, even
+database with nulls” is found in [24].                        for data complexity.
+How did we get there? The approach to evaluating              So, where does this bring us? We can summarize the
+queries with nulls dates back to Codd’s paper [21] from       state of affairs roughly as follows:
+1975, in which the 3-valued logic approach is advocated.
+Problems with it were caught early [37]: a simple query       Practice:   • sacrifice correctness for efficiency;
+                                                                    • the same query evaluation engine for complete
+   SELECT p_id                                                        and incomplete data;
+   FROM Pay                                                   Theory: • correctness at the expense of efficiency;
+   WHERE order = "oid1"         OR   order <> "oid1"                • new semantics for query answering in the pres-
+                                                                      ence of incompleteness.
+when evaluated on the database shown above, produces
+the empty table, and yet intuitively we expected the          The picture looks quite bleak: it is almost 40 years
+answer to be ‘pid1’. Indeed, no matter what non-null          since nulls were introduced, and yet the practice has
+value we replace the null with, this is what the query        taught generations to live with incorrect answers, while
+will produce.                                                 the theory is not really addressing the right problems.
+                                                              What can we do?
+The idea of answering queries consistently with every
+possible interpretation of nulls, first proposed in [37] as   First, we have to recognize that we live in the real world,
+a way of fixing some problems with Codd’s 3-valued            and no database vendors will change their products if we
+approach, led to the notion of certain answers, now           offer them radical solutions, like completely new query
+the standard way of answering queries over incomplete         evaluation algorithms. Indeed, it took them many years
+databases. It was first properly defined by [54]. The         to make DBMSs as efficient as they are today, and sig-
+definition relies on the notion of a semantics of an in-      nificant changes in basic query processing algorithms
+complete database D, denoted by [[D]], which is the set       will result in years worth of work to adjust other ele-
+of all complete databases D′ that D can represent. For        ments of their products. We can, perhaps, suggest small
+instance, such databases can be obtained by replacing         and easily implementable changes. And we definitely
+nulls by values (but this is not the only possibility).       can suggest new algorithms for specialized products.
+Then, given a relational query Q and an incomplete
+database D, certain answers were defined as                   Second, we must develop a theory applicable to a vari-
+                          \                                   ety of models: relational, XML, graph data, with differ-
+        certain(Q, D) =      {Q(D′ ) | D′ ∈ [[D]]},     (1)   ent types of incomplete information. But we also need
+                                                              a good testbed for such a general theory. Nulls seen
+i.e., they consist of tuples that belong to the answer no     in earlier examples correspond to SQL’s view of miss-
+matter how the missing information is interpreted.            ing information in standalone databases. But we can
+In the theory community, certain answers have be-             have incompleteness due to a multitude of other reasons,
+come the way for answering queries over incomplete            in particular, data interoperability. Incompleteness in-
+databases, used across a variety of applications such         evitably arises when we move data between different
+as query answering using views [1, 39], data integration      applications, such as in data integration and exchange
+[43], data exchange [7], inconsistency management [15],       scenarios [5, 7, 29, 43]. For example, suppose that from
+and data cleaning [30].                                       the Order relation, we want to build a database of cus-
+                                                              tomers and their preferences. Such a transformation is
+However, this more disciplined approach, compared to          usually specified by rules known as schema mappings
+SQL’s 3-valued logic, does not come for free. Let Q be        [7], for instance,
+a Boolean (i.e., true/false) query. Then certain(Q, D) is
+                                                                         Order(i, p) → Cust(x), Pref(x, p)
+true iff Q is true in every D′ ∈ [[D]]. Thus computing
+certain answers becomes a form of validity (i.e., check-      saying that if an order was placed for a product p, then
+ing if a sentence is true in all structures). In fact, when   a customer x must exist who placed that order, and
+Q comes from relational calculus, then under the open-        that customer x prefers product p. From the tuple
+world-semantics (to be defined later), finding certain        Order(oid1,pr1), this rule will generate tuples Cust(⊥)
+answers is exactly the validity problem. However, this        and Pref(⊥,pr1), and from the tuple Order(oid2,pr2)
+is an undecidable problem, as was shown by Church             it will generate Cust(⊥′) and Pref(⊥′,pr2). Note that
+and Turing back in the 1930s. Actually, the problem           it is important for us to remember that, while the val-
+we look at is slightly different – we are only concerned      ues ⊥ and ⊥′ are not yet known, when ⊥ is replaced
+by some value c in Cust(⊥), it must be replaced by the         on the declarative side. The selection-projection-join-
+same value c in Pref(⊥,pr1), and likewise for ⊥′ . On          union fragment of relational algebra is also referred to
+the other hand, ⊥ and ⊥′ may be replaced by the same,          as the positive relational algebra (the difference opera-
+or by different constants – there are no restrictions.         tor is removed). Logically, it corresponds to the ∃, ∧, ∨-
+                                                               fragment of FO, also known as existential positive for-
+What this example tells us is that we must have a mech-        mulae. In terms of its expressiveness, it is exactly the
+anism for saying that some nulls should always be re-          same as unions of conjunctive queries, denoted by UCQ.
+placed by the same constant. Such nulls are known as           Recall that conjunctive queries are select-project-join,
+naı̈ve, or marked nulls [2, 40]. They are the most com-        or ∃, ∧-queries; queries in UCQ are their unions.
+mon model of nulls used in integration/exchange tasks
+[7, 29, 43] and in fact have been implemented as part of
+schema mapping and data exchange tools [38, 55].               Incomplete databases and their semantics
+Thus, while the approach to incompleteness we are              We assume that databases are populated by two types
+about to present does not assume any particular data           of elements: constants (such as numbers, strings, etc.)
+model, we shall be using, as the main illustration, the        and nulls. The set of constants is denoted by Const and
+model of naı̈ve nulls in relations (of course SQL’s nulls      the set of nulls by Null. These are countably infinite
+are just a special case of it). In this model the stan-        sets. Nulls will be denoted by ⊥, sometimes with sub-
+dard interpretation of nulls is that a value is missing.       or superscripts.
+This is not the only possibility: other nulls, such as
+‘non-applicable’ or ‘no-information’ exist as well [44,        A relational schema is a set of relation names with asso-
+67]. However, all the results that we show here apply          ciated arities. An incomplete relational instance D as-
+regardless of the nature of nulls: all that we need is a       signs to each k-ary relation symbol S from the schema
+definition of the semantics of incomplete databases for        a k-ary relation over Const ∪ Null, i.e., a finite subset of
+results to work.                                               (Const ∪ Null)k . Such incomplete relational instances
+                                                               are referred to as naı̈ve databases [2, 40]; note that
+Plan of the paper Our goal is to make an attempt at            a null ⊥ ∈ Null can appear multiple times. If each
+building applicable theory of incompleteness. We start         null ⊥ ∈ Null appears at most once, we speak of Codd
+by recalling the basics of existing relational theory of       databases; these model SQL’s nulls. If we talk about
+incomplete information in Section 2. In Section 3 we           single relations, it is common to refer to them as naı̈ve
+discuss a number of serious shortcomings of this theory.       tables and Codd tables.
+
+In Section 4 we explain the basics of a different ap-          We write Const(D) and Null(D) for the sets of constants
+proach to incompleteness, based on a duality between           and nulls that occur in a database D. The active do-
+objects and queries. Combining the two, we present a           main of D is adom(D) = Const(D) ∪ Null(D). A com-
+simple model of incomplete objects (not just relational        plete database D has no nulls, i.e., adom(D) ⊆ Const.
+databases) that lets us define the notion of certainty in      Below, R is a naı̈ve table and S is a Codd table:
+a principled way. We do it in Section 5, and show that
+there are actually two different notions of certainty: one                ⊥ 1 ⊥′                   ⊥1 1 ⊥2
+                                                                    R:                        S:
+represents it as an object, and the other as the knowl-                   2 ⊥′ ⊥                    2 ⊥3 ⊥4
+edge we possess about that object.
+                                                               with Const(R) = Const(S) = {1, 2} and Null(R) =
+We then use the new notions of certainty to apply them         {⊥, ⊥′ } and Null(S) = {⊥1 , ⊥2 , ⊥3 , ⊥4 }.
+to query answers and extract what should rightly be
+                                                               Each incomplete database can represent many possi-
+called certain answers to queries. This is done in Sec-
+                                                               ble complete databases. The exact set of complete
+tion 6, which shows that sometimes it is actually very
+                                                               databases it represents is the semantics of an incomplete
+easy to compute certain answers using existing query
+                                                               database. The semantics is by no means unique, but
+evaluation technology. The key is the right notion of the
+                                                               in this paper we concentrate on the two most common
+semantics, of both input databases and query answers,
+                                                               ones, based on open-world and close-world assumptions
+and the right representational mechanism for query an-
+                                                               [40, 58], usually abbreviated as owa and cwa. The key
+swers. Section 7 outlines directions for further work.
+                                                               notion for both is a valuation of nulls, which is a map-
+                                                               ping v : Null(D) → Const. This mapping associates a
+                                                               constant value with each null. It naturally extends to
+2.   RELATIONAL INCOMPLETENESS                                 databases: v(D) is simply the result of replacing each
+                                                               null ⊥ ∈ adom(D) by v(⊥).
+We now present formal definitions for some of the basic        With that, we define cwa and owa semantics as follows:
+notions related to incomplete information in relational
+                                                                   [[D]]cwa = {D′ | D′ = v(D), v is a valuation}
+databases, see [2, 34, 40, 66]. But first, we briefly recall       [[D]]owa = {D′ | D′ ⊇ v(D), v is a valuation}
+the main languages we deal with here, cf. [2]. The basic
+language will be relational algebra, on the procedural         Under cwa, we believe that an incomplete database
+side, and first-order logic (FO), or relational calculus,      represents information fully, except some missing val-
+ues. Thus, databases represented by it are obtained by               Strong representation systems, as the name suggest,
+substituting values for nulls. Under owa, the database               are quite strong, and thus are hard to come by.
+is open to adding new facts: thus, after substituting                The best known example is that of conditional ta-
+values for nulls, one can add new tuples.                            bles for full relational algebra (equivalently, first-
+                                                                     order logic) under [[ ]]cwa , see [40]. To give an ex-
+For instance, relation R1 below belongs to both [[R]]cwa             ample, let us revisit the query R − S.            If our
+and [[R]]owa , for R depicted above (as it is obtained by            database D has R = {1, 2} and S = {⊥}, then
+valuation ⊥ 7→ 3, ⊥′ 7→ 4), and relation R2 is in [[R]]owa ,         Q([[D]]cwa ) = {{1, 2}, {1}, {2}}, depending on whether
+as it also adds the tuple (5, 6, 7):                                 the null ⊥ is instantiated into 1, or 2, or another con-
+                                            3   1    4               stant. This can be represented by a conditional table
+                  3   1   4
+          R1 :                       R2 :   2   4    3                                         condition
+                  2   4   3
+                                            5   6    7                                  1 ⊥′ = 1 ∨ ⊥′ = 2
+                                                                                        2        ⊥′ 6= 1
+A more expressive representation mechanism for incom-                Indeed, going over possible values of ⊥′ , one can see
+plete information is that of conditional tables. Such a              that it generates exactly Q([[D]]cwa ). One problem with
+table is of the form                                                 such an answer is that it is hardly meaningful to hu-
+                   
+                            condition
+                                                                    mans, and one probably would not be happy getting
+                    t1        c1                                    this answer from a DBMS.
+            D =                       , c
+                                           
+                      ···      ···                                   Since (2) is too strong a condition, one tries to replace
+                       tn      cn                                    it by
+where t1 , . . . , tn are tuples and c, c1 , . . . , cn are condi-                        [[A]] ∼ Q([[D]])                  (3)
+tions: Boolean combinations of statements x = y, where
+x, y ∈ Const ∪ Null. Note that conditions may use nulls              where ∼ is some equivalence relation. This idea led
+not present in the tuples. Conditional tables are usually            to the notion of a weak representation system based on
+viewed under the closed-world semantics [[D]]cwa which               the following equivalence. For two sets of instances, I1
+consists of databases {v(ti ) | v(ci ) = true, i ≤ n},               T I2 ,′ and ′ a query language
+                                                                     and                             L, we let I1 ∼L I2 if
+                                                                       {q(D ) | D ∈ I1 } = {q(D′ ) | D′ ∈ I2 } for each q
+                                                                                             T
+where v is a valuation so that v(c) is true. For example,
+consider a conditional table                                         in L. If (3) holds for ∼L over a class K of instances
+                                                                   for each query Q ∈ L, we say that K forms a weak
+                       condition                                     representation system for L under semantics [[ ]]. The
+    D =  1              ⊥=1      , (⊥ = 0) ∨ (⊥ = 1)               best known examples are, under both [[ ]]owa and [[ ]]cwa :
+                    0    ⊥=0
+                                                                        • Codd tables for selection/projection queries; and
+The only valuations satisfying (⊥ = 0) ∨ (⊥ = 1) are
+⊥ 7→ 0 and ⊥ 7→ 1. Hence [[C]]cwa = {{0}, {1}}; condi-                  • Naı̈ve tables for UCQs (positive relational algebra).
+tional tables thus can encode disjunctions: C says that
+either 0 or 1 is in the database.                                    The key reason weak representation systems are of in-
+                                                                     terest is that they let us compute certain answers.
+Query answering                                                      Given an instance D, let Dcmpl be the complete part
+                                                                     of it, i.e., all the tuples in D without nulls. Then, if
+Fix a semantics [[ ]] of incompleteness, and assume we               we have a weak representation system, it follows that
+are given a query Q and an incomplete database D.                    Acmpl = certain(Q, D). Thus, certain answers are ob-
+Of course we know how to evaluate Q on complete                      tained by keeping the complete portion of the answer
+databases. So the key object for us to work with is                  given by (3).
+
+              Q([[D]]) = {Q(D′ ) | D′ ∈ [[D]]}                       What makes the connection particularly attractive is
+                                                                     that sometimes A is just Q(D), i.e., one naı̈vely evalu-
+of query answers on all databases that are possibly rep-             ates Q on D as if nulls were the usual values. In such
+resented by D. If we have an incomplete database that                a case, when A in (3) equals Q(D), we say that naive
+represents this set, then we have our query answer.                  evaluation works for Q. It then follows that
+That is, if there is a table A (for answer) such that
+                                                                                    Q(D)cmpl = certain(Q, D).               (4)
+                       [[A]] = Q([[D]]),                      (2)
+                                                                     It is known that naı̈ve evaluation works for UCQs under
+then we declare A to be the answer to Q on D.                        both open and closed world semantics [40]. Moreover,
+Indeed, we get a single table that captures exactly                  under owa, the result is optimal for FO: if we have a
+the space of all possible query answers. If this hap-                Boolean (yes/no) FO query and naı̈ve evaluation works
+pens for all incomplete database from some class K                   for it, then it is equivalent to a UCQ, i.e., a positive
+(Codd/naı̈ve/conditional tables, or others) and for all              relational algebra query [51]. To see how naı̈ve evalu-
+queries Q from a language L, then we say that K forms                ation fails for non-positive queries, consider the query
+a strong representation system for L under [[ ]].                    πA (R − S) where R = {(1, ⊥)} and S = {(1, ⊥′ )} are
+relations over attributes A, B. Then naı̈ve evaluation        compositionality, but its essence is really going from
+computes {1}, while the certain answer is ∅.                  the very strong requirement (2) to a weaker one that
+                                                              only certain answers need to be produced. And certain
+If naı̈ve evaluation works, i.e., (4) holds, computing cer-   answers are defined as the intersection of all possible
+tain answers can be done by a straightforward query           answers. Again, at first this looks very reasonable: we
+evaluation following by an extra selection operation,         want tuples that will be in the answer no matter how
+throwing out tuples with nulls (or simply adding IS           nulls are interpreted. But a closer examination reveals
+NOT NULL conditions in the WHERE clause of the original       some problems. To start with, there are models other
+query). Thus, we do not need to invent new evaluation         than relational. What can one do, for instance, for XML
+techniques.                                                   queries returning documents? (A side remark: much of
+As for the complexity of computing certain answers, for       the work on incompleteness in XML has been restricted
+full relational algebra (first-order logic) it is undecid-    to XML-to-relational queries, for this very reason [4, 9,
+able under [[ ]]owa and coNP-complete under [[ ]]cwa , for    13, 33].) But even more importantly, how do we know
+data complexity (that is, for a fixed query, when only        that we do not lose important information by taking in-
+database is the input), see [3, 33]. This makes it pro-       tersection and removing information from the answer?
+hibitively expensive under cwa, and plain impossible
+under owa, but the good news is that due to (4), the          Are certain answers certain? Actually, the standard
+complexity is very low (AC0 ( DLogSpace) for posi-            intersection-based certain answers need not be. Inter-
+tive relational algebra queries.                              section takes some tuples away from potential answers.
+                                                              At first the intuition appears to be fine: removing tuples
+It is a general phenomenon that by going away from            from what is certain, we seem to retain only informa-
+positive queries, one loses tractability of finding cer-      tion we are certain about. However, removing tuples
+tain answers, demonstrated for many problems related          amounts to removing data, not information. In fact,
+to handling incompleteness in databases [7, 13, 15, 17,       the process can actually add information: for instance,
+18, 29, 43, 53, 62, 66]. There are some classes extend-       under cwa, by removing a tuple we gain information
+ing UCQs for which certain answers can be computed            that it is not in the answer. Hence, certain answers
+tractably – for instance, Boolean combinations of con-        defined by (1) cannot be called certain in all scenarios.
+junctive queries [33] – but the algorithms, despite hav-
+ing polynomial time bounds, are too complicated to be         Semantics and informativeness. Above, we alluded to
+efficiently implemented on top of existing DBMSs.             the possibility of comparing incomplete databases in
+                                                              terms of their informativeness. This is a line of work
+                                                              that was pursued in the 1990s, rather independently
+3.   CRITIQUE OF THEORY                                       of the rest of the work on incompleteness [16, 49, 57,
+                                                              64]. The idea was to define orderings stating that one
+                                                              database has more information than another, albeit for
+There has been plenty of criticism of practical ap-           primitive models, such as Codd tables. Having an or-
+proaches to incomplete information, in particular SQL’s       dering describing informativeness could be important
+treatment of nulls, see, e.g., [24, 25, 26], but the the-     for deciding what the proper semantics of query an-
+oretical approaches have so far been spared. We put           swers is, bringing us back to our first point of discus-
+an end to it now. In fact much of theoretical research        sion. Indeed, it is expected that one should get more
+on incomplete information took the notions of strong          informative answers from more informative databases.
+and weak representation systems and certain answers           However, there was no real attempt to tie the ordering-
+as sacrosanct but we shall argue that their untouchable       based approach with the basics such as representation
+status needs to be re-examined.                               systems and certain answers, and this needs to be done.
+Semantics of query answers. Let us look at the seem-          Are objects sufficiently expressive to be query answers?
+ingly uncontroversial (2) saying that if we are lucky         We are used to queries returning database objects
+enough to get A satisfying [[A]] = Q([[D]]), then A should    – tables, XML documents, graphs. But are these
+be viewed as the answer to Q on D. At the first glance it     sufficiently expressive to describe answers on incom-
+looks like a reasonable condition, but nonetheless there      plete databases? Specifically, are these sufficiently
+is one assumption built into it that is not unassailable.     expressive to represent sets Q([[D]])? Such sets may
+Note that (2) requires that both the input database D,        well be infinite, and describing them may require a
+and the answer A, be interpreted under the same se-           more complex representation mechanism than simple
+mantics [[ ]]. However, a priori, there is no reason for      database objects: an example of that was already seen
+it. Why, for instance, should the answer to a query be        when we looked at conditional tables. But is it always
+interpreted under cwa if this is the semantics of the         possible – and necessary – to have representations that
+input?                                                        look like database relations, while they are not?
+Why intersection? The equivalence ∼L used in the def-         Can high complexity bounds be avoided? Too much
+inition of weak representation systems looks quite ad         work has been done on showing high complexity
+hoc. Actually it is: it was defined that way to ensure
+bounds. A typical picture looks like this: a class of        4. DUALITY: INCOMPLETE DATA AS
+queries, often a fragment of positive relational algebra,       QUERIES
+can be evaluated efficiently; beyond that, intractability
+or even undecidability of data complexity is shown.
+Such results, while occasionally requiring nontrivial        We now describe an alternative way of looking at incom-
+machinery, are becoming completely standard – but is         plete databases that dates back to [58, 60]. It proved
+this really the direction the field should be going in?      to be more popular with the knowledge representation
+And how much of this owes to the rigid setting (basic        community than with the mainstream database com-
+semantics, certain answers) that one is unwilling to         munity. More importantly for us, it developed the idea
+tweak and experiment with? In fact, very often high          of duality between queries and databases (first noticed
+complexity is shown in the setting where the semantics       in [19]) for incompletely specified databases.
+of input databases is the same as the semantics of           We start with an example. Consider an incomplete rela-
+query answers. So perhaps there is another reason to
+                                                             tion R = {(1, ⊥), (⊥, 2)}. It can be viewed as a tableau
+reconsider that assumption.                                  of a Boolean conjunctive query QR = ∃x R(1, x) ∧
+Thus, despite an extensive literature and cast-in-stone      R(x, 2). Complete databases satisfying this query are
+notions of representation systems and certain answers,       precisely the databases in the semantics of R under
+theoreticians do not actually know that much about           owa. If we let ModC (ϕ) stand for all the models of
+handling incomplete information in databases. There          a formula ϕ among complete databases, then our ob-
+are very basic questions that are still lacking adequate     servation can be formulated as
+answers; among them:                                                          ModC (QR ) = [[R]]owa .                (5)
+   • What is the semantics of query answers? When            This tells us that the semantics of an incomplete
+     can/should it be the same as the semantics of input     database can be defined by a logical formula. This can
+     databases?                                              be extended for other semantics: for instance, the for-
+   • Is taking intersection the only way to define certain   mula
+                                                                                                                  
+     answers?                                                              R(1, x) ∧ R(x, 2) 
+                                                             Qcwa
+                                                                                                                 
+   • What does it mean to have a more informative             R   = ∃x                            y = 1∧z =x 
+                                                                         ∧ ∀y, z (R(y, z) →
+     data set?                                                                                 ∨ y = x∧z =2
+   • How do informativeness and semantics relate?            has the property that ModC (Qcwa    R ) = [[R]]cwa . In gen-
+   • How can we represent answers to queries over in-        eral, the approach of [58, 60] was to view a database as
+     complete databases?                                     a logical theory, i.e., a collection Φ of formulae. A finite
+   • When can we rely on existing query evaluation al-       Φ = {ϕ1 , . . . , ϕn } can of course be viewed as a single
+     gorithms to produce meaningful answers?                 formula ϕ1 ∧ . . . ∧ ϕn .
+                                                             What is the advantage of viewing incomplete databases
+It may seem that neither theory nor practice has good        as logical theories? An immediate benefit is that we
+answers to a persistent and ubiquitous problem of han-       can cast the query answering problem as logical impli-
+dling incomplete information. But perhaps we can             cation, or, closer to the database language, as query
+view this positively rather than negatively: this sim-       containment.
+ply means that we are back at square one, and an effort
+must be made to develop a proper theory and to apply         Indeed, suppose we have an database D given as a the-
+it. Both sides must show some flexibility – in tweak-        ory Φ so that ModC (Φ) = [[D]]. Take a Boolean query
+ing both definitions and products – but first questions      Q. For it to be true in every database in [[D]] it has
+posed above (and many others) need to be answered.           to be true in every model of Φ; thus, Q is true with
+This paper does not claim to provide all such answers,       certainty iff it is logically implied by Φ, i.e., Φ |= Q. If
+far from it. But we shall at least attempt to outline an     Φ happens to be a single query Q′ , as in our examples
+approach: one has to start somewhere, after all. Our         above, this amounts to checking implication Q′ |= Q,
+idea is to bind together three directions of work on in-     or, as database literature prefers to call it, containment
+complete information:                                        of Q′ in Q. Thus, finding certain answers is a special
+                                                             case of logical implication or query containment.
+  1. the standard database approach based on repre-
+     sentation systems and certain answers;                  The connection gives us further insights. Suppose we
+                                                             have an incomplete database D, a Boolean conjunctive
+  2. the approach from the knowledge representation
+                                                             query Q, and we would like to know whether the certain
+     community, based on viewing databases as logical
+                                                             answer to Q is true on D. As in (5), we have a Boolean
+     theories, pioneered by Reiter [58, 60] in the 1980s;
+                                                             conjunctive query QD so that ModC (QD ) = [[D]]owa .
+     and
+                                                             Thus, under owa, certain(Q, D) is true iff QD is con-
+  3. the approach based on the ideas from program-           tained in Q. By a well known fact about conjunctive
+     ming semantics that used orderings to describe in-      queries, this happens if and only if the tableau of QD
+     formation content, proposed in the 1990s [16, 49].      satisfies Q – but the tableau of QD is D itself. Hence,
+the certain answer is true iff D |= Q. Thus, viewing           The intuition is that the more objects an incomplete
+incomplete databases as formulae, we can use known             object can potentially denote, the less information it
+results on containment to find cases when naı̈ve evalu-        contains (in the extreme case, if we have no information
+ation works.                                                   at all, every object is a possibility). We then impose two
+                                                               conditions on triples hD, C, [[ ]]i:
+One may notice that we used conjunctive queries to-
+gether with the owa semantics, which is described as
+the models of conjunctive queries. Is this a coincidence?        1. a complete object c denotes at least itself: c ∈ [[c]];
+Is it possible, for instance, to use naı̈ve evaluation for a     2. a complete object c is more informative than any
+larger class of queries under cwa, since the formula de-            incomplete object x it may represent: if c ∈ [[x]],
+scribing [[ ]]cwa uses features beyond those of conjunctive         then x  c.
+queries? We shall see later that the answer is positive.
+                                                               These conditions hold for [[ ]]owa , [[ ]]cwa , and many other
+                                                               semantics of incompleteness.
+5.    INCOMPLETENESS AND CERTAINTY:
+      A NEW LOOK                                               We want to incorporate all approaches to incomplete-
+                                                               ness even at this general level, so we now bring in logical
+                                                               formulae. Let us assume that we have a set F of formu-
+With this dual look at incomplete information – as for-        lae and the satisfaction relation |= between objects and
+mulae and as structures – we now start addressing ques-        formulae: x |= ϕ means that ϕ is true in x. We write
+tions posed at the end of Section 3. We want to deal           Th(x) for the theory of x:
+with them in a setting that is independent of a partic-
+                                                                                 Th(x) = {ϕ | x |= ϕ}
+ular data model – and yet applicable to all of them.
+In other words, we do not want to provide definitions          is the set of formulae true in x. We write Mod(ϕ) for
+that will apply specifically to relational databases, or       models of ϕ:
+to XML documents, or to graph databases. What we
+want instead is a minimalistic approach that will use                            Mod(ϕ) = {x | x |= ϕ}
+only the key concepts of incompleteness. In fact, it is        is the set of all objects satisfying ϕ. These are extended
+easier to work in a general setting so that details of a       to sets in the usual way:
+concrete data model would not obscure the picture. We                        \                              \
+now present such a minimalist model of incompleteness,           Th(X) =          Th(x) and Mod(Φ) =           Mod(ϕ).
+following [51, 52].                                                        x∈X                              ϕ∈Φ
+
+                                                               Also, as before, we write ModC (ϕ) for Mod(ϕ) ∩ C.
+5.1 Representation systems
+                                                               Now we turn tuples hD, C, [[ ]], Fi into representation sys-
+                                                               tems that let us talk at once about objects, their seman-
+To talk about incomplete information, one needs three          tics, logical representation, and information orderings.
+key notions: of objects, of complete objects, which form       For that, we add the following conditions.
+a subset of the set of objects, and of semantics of in-
+completeness, which associates with every object a set         For formulae. Logical formulae must have enough
+of complete objects represented by it.                         power to define the semantics, as in (5), and must re-
+To formalize this, we consider triples hD, C, [[ ]]i, where    spect the informativeness of the objects.
+                                                               Formally, for each object x there must be a formula δx
+     • D is a set of database objects (e.g., relational        so that ModC (δx ) = [[x]]. Furthermore, x  y and x |= ϕ
+       databases over the same schema),                        imply y |= ϕ for every formula ϕ. We also require that
+     • C ⊆ D is the set of complete objects (e.g.,             formulae be closed under conjunction.
+       databases without nulls);
+                                                               For objects. Sets of objects cannot be too thin: thinking
+     • [[ ]] is a function from D to subsets of C; the set     of relational databases, nulls should be replaceable by
+       [[x]] ⊆ C is the semantics of object x.                 sufficiently many constants. That is, there must be suf-
+                                                               ficiently many valuations v of nulls so that v(D) ∈ [[D]];
+We have not imposed any conditions at all, but some of         this is definitely true in standard semantics of incom-
+them are needed to make this definition reflect the real-      pleteness.
+ity of incomplete data models. For instance, we expect
+a complete object c in the semantics of an incomplete          To state what ‘sufficiently many’ means, note that for
+object x to have more information than x. To express           every finite set C ⊂ Const, we have an equivalence rela-
+this, we fulfill our promise and bring the third line of       tion ≈C between databases: D ≈C D′ says that there
+work on incompleteness – based on orderings – into the         is an isomorphism f between D and D′ that preserves
+picture. We define the information ordering as                 constants in C (technically, both f and f −1 are the
+                                                               identity on C). Then, for every D, there is a valua-
+                   x  y ⇔ [[y]] ⊆ [[x]].                      tion v so that v(D) ≈C D. Indeed, we can just replace
+nulls with distinct constants outside of the finite set C.    are those that do not use negation: they are formed
+Thus, we have infinitely many equivalence relations ≈C        from atomic formulae using ∧, ∨, ∃, and ∀. We now
+such that for every database D, and every such relation,      extend this class to positive formulae with universal
+there is D′ ∈ [[D]] so that D′ ≈C D.                          guards, denoted by Pos∀G . Such formulae are closed
+                                                              under ∧, ∨, ∃, ∀ and the following rule: if ϕ(x̄, ȳ) is
+Equivalence relations ≈C satisfy some basic properties.
+For instance, a formula that only mentions constants          a Pos∀G formula in which all variables in x̄ are dis-
+in C cannot distinguish two equivalent databases with         tinct, and R is a relation symbol of the arity |x̄|, then
+respect to ≈C . Also, if D ≈C∪C ′ D, then D ≈C D′ and         ∀x̄ (R(x̄) → ϕ(x̄, ȳ)) is a Pos∀G formula. In Section
+D ≈C ′ D ′ .                                                  6 we also describe this fragment in terms of relational
+                                                              algebra operators.
+These conditions can easily be formalized in our basic
+model. We assume that there is a family Iso = {≈j }j∈J        Then the cwa representation system is defined as
+of equivalence relations on D so that:                        RScwa (σ) = hDcwa (σ), Pos∀G i. For each D with
+                                                              Null(D) = {⊥1 , . . . , ⊥n }, the formula δD is
+   • The set {c ∈ [[x]] | x ≈j c} is nonempty for each                                      ^                _        
+     x ∈ D and j ∈ J;                                         ∃x1 , . . . , xn PosDiag(D)∧       ∀ȳ R(ȳ) →    ȳ = t̄ ,
+                                                                                          R∈σ              t̄∈RD
+   • for all j, j ′ ∈ J, there is k ∈ J so that x ≈k y
+     implies both x ≈j y and x ≈j ′ y; and                    where the
+                                                                    V length of ȳ and t̄ is the arity of R, and ȳ = t̄
+   • for each formula ϕ ∈ F, there must be j ∈ J so           means i≤arity(R) (yi = ti ).
+     that x ≈j y implies x |= ϕ ⇔ y |= ϕ.                     We can also describe orderings owa and cwa corre-
+                                                              sponding to [[ ]]owa and [[ ]]cwa . Recall that a homomor-
+Of course these three conditions hold for the family          phism h : D → D′ , where D and D′ are two databases
+{≈C | C is a finite subset of Const}. From now on, we         of the same schema, is a mapping h from adom(D) to
+assume all the above conditions. We then call:                adom(D′ ) so that h(a) = a whenever a ∈ Const, and
+                                                              for each tuple t̄ in relation R of D, the tuple h(t̄) is in
+   • D = hD, C, [[ ]], Isoi a domain, and                     the relation R of D′ , cf. [2, 7]. That is, h replaces nulls
+                                                              with either other nulls or constants, and leaves con-
+   • RS = hD, Fi a representation system.
+                                                              stants intact. A homomorphism is called strong onto if
+                                                              every tuple in D′ is the image of a tuple in D, i.e., if
+We now give examples of those and show how they help          D′ = h(D). Then [32, 51]:
+us define the notion of certainty.
+                                                               • D owa D′ ⇔ ∃ homomorphism h : D → D′ ;
+                                                               • D cwa D′ ⇔ ∃ strong onto homomorphism
+5.2 OWA and CWA representation systems                                         h : D → D′ .
+
+We now provide examples of representation systems cor-        The owa and cwa semantics are not the only possible
+responding to relational owa and cwa semantics. Let           ones of course. For instance, one can use a weaker ver-
+D(σ) and C(σ) be the sets of all relational databases,        sion of cwa, in which tuples can be added, as long as
+and of all complete databases (not having nulls) of           they do not add new elements to the active domain [59].
+schema σ. The domains will be of the form D∗ (σ) =            Then a representation system for this semantics will use
+hD(σ), C(σ), [[ ]] ∗ , Isoi, where ∗ is owa or cwa. The re-   the class of positive FO formulae, and the ordering is
+lations in Iso are, as seen earlier, of the form ≈C when      given by the existence of onto homomorphisms, which
+C ranges over finite subsets of Const.                        map adom(D) onto adom(D′ ) [32, 52].
+
+Under owa, the set of formulae F can be taken                 We can also connect representation systems and order-
+to be UCQ, unions of conjunctive queries. Thus,               ings. It can be shown that Mod(δx ) =↑ x = {y | x  y},
+RSowa (σ) = hDowa (σ), UCQi is a representation system        i.e., the set of all models of δx is the set of more infor-
+under owa. The formula δD is simply ∃x̄ PosDiag(D),           mative objects.
+where PosDiag(D), the positive diagram of D, is the
+conjunction of all atoms in D, where each null ⊥i is          5.3 Certainty in representation systems
+associated with a variable xi . For instance, if D con-
+tains a relation R = {(1, 2), (2, ⊥1), (⊥1 , ⊥2 )}, then
+PosDiag(D) = R(1, 2) ∧ R(2, x1 ) ∧ R(x1 , x2 ).               Recall that to define certain answers to queries, we had
+                                                              to determine certain information contained in the set
+Under cwa, we used different features in the formula          Q([[D]]). Thus, the central problem for us is to under-
+describing [[R]]cwa in Section 4. Such formulae use uni-      stand how to define certainty contained in a set X ⊆ D
+versal quantification and implication, although in a lim-     of objects. With the dual view of objects as elements of
+ited way: the antecedent in implication was a relational      an ordered set and as formulae, we have two approaches
+atom. Such a class of formulae was already studied a          to defining certainty: as knowledge about the collection
+long time ago [23]. Recall that positive FO formulae          X, and as an object representing what is known about
+it. In general, the former is more flexible: we have al-       may have different formulae ϕ and ψ satisfying (6) but
+ready seen this in the example of conditional tables,          they are equivalent: Mod(ϕ) = Mod(ψ). Likewise, the
+which are just encodings of formulae. Trying to repre-         greatest lower bound is not unique, but for everyV two
+sent certainty as another object of the same kind can          objects x, x′ satisfying the condition of being X we
+tie our hands too much, although in many important             have x  x′ and x′  x, which means [[x]] = [[x′ ]], i.e., x
+cases it can be done.                                          and x′ are equivalent. The idea of using formula/object
+                                                               duality to define certain answers first appeared in [28],
+Certain information represented as knowledge The first         albeit in a very limited context, when F = D and x |= y
+attempt to describe with certainty information con-            was a shorthand for y  x. The definitions we are using
+tained in a set X of objects is to find a formula ϕ            here, as well as the results below, are from [52].
+so that Mod(ϕ) = X. This is the approach of strong
+representation systems which look for an object A so           These notions of certainty have some of the expected
+that [[A]] = Q([[D]]); indeed, by the duality between          properties. For instance, the certain knowledge about
+formulae and objects, this is the same as requiring            [[x]] is δx , and its object representation is x itself:
+ModC (δA ) = Q([[D]]). The problem is that not all sets        certainK [[x]] = δx and certainO [[x]] = x. In partic-
+X are of the form Mod(ϕ), for formula coming from              ular, certainO [[x]] |= certainK [[x]], although in general
+logics of interest to us (of course we could use a highly      certainO X |= certainK X need not hold. Also the the-
+expressive formalism but such a formalism would hardly         ory of all objects represented by x is the same as the
+be useful).                                                    theory of x, i.e., Th([[x]]) = Th(x).
+
+So following the approach of weak representation sys-          Moreover, certainK X can be viewed as a greatest lower
+tems, we go for the next best thing, and replace equal-        bound in a well-known ordering on formulae: implica-
+ity by an equivalence relation. But equivalence between        tion ψ ⊢ ϕ, which holds if every model of ψ is a model
+what? We now appeal to the duality again, and view             of ϕ. Thus, for a set of formulae Φ, we can look atV its
+X as a theory, i.e., Th(X), which says what we know            greatest lower bound in this preorder, denoted by Φ.
+about X with certainty in a given logical language. In-        This is the most specific formula ψ that implies every
+deed, Th(X) contains formulae ϕ which are true in all          ϕ ∈ Φ (i.e., every other formula that implies Φ must
+objects of X.                                                  imply ψVas well). Note that since ⊢ is a preorder, tech-
+                                                               nically Φ is a set of formulae, all of which, however,
+We now must find a formula ϕ representing this certain         are equivalent.
+knowledge Th(X). Since two sets of formulae are equiv-
+alent if they have the same models, we need a formula ϕ        Now the following is an alternative description of certain
+such that Mod(ϕ) = Mod(Th(X)). This is our certain             knowledge:
+knowledge of X, denoted by certainK X. To summarize,                                          ^
+                                                                              certainK X =       Th(X).               (8)
+           Mod(certainK X) = Mod(Th(X)).                (6)
+                                                               With this understanding of how to extract certain in-
+It is easy to show that if Mod(ϕ) = X, or if ModC (ϕ) =        formation, we are now going to apply it to sets Q([[D]]),
+X, then ϕ = certainK X. Thus, (6) is a relaxation of the       to see how certain answers must be defined.
+very strong notion of strong representation systems.
+
+Certain information represented as object We appeal to         6. MAKING CERTAIN ANSWERS EASY
+the ordering-based approach to incompleteness. To rep-
+resent what we know about X with certainty by an ob-
+ject y, this object must be less informative than any          We now want to use concepts from Section 5 to de-
+object x ∈ X (as it reflects knowledge contained in all        fine certain answers to queries and to see when they
+other objects in X as well). If we have two such objects       can be computed efficiently, essentially using the ex-
+y and y ′ , and y ′  y, then of course we prefer y as it is   isting technology. But first let us revisit the standard
+giving us more information.                                    intersection-based notion of certain answers (1) to see
+                                                               what may go wrong if we use it. Take a very sim-
+Thus, the object that we seek must be less informative         ple example: we have a database containing relation
+than all objects in X, and at the same time the most           R = {(1, 2), (2, ⊥)}, and a query Q that just returns R.
+informative among such objects. This is preciselyVthe          Following (1), certain(Q, R) = {(1, 2)} under both owa
+greatest lower bound of X, with respect to  (or X,            and cwa. This is, however, problematic for a number of
+using the standard order-theoretic notation). We de-           reasons. First of all, such an answer misses information
+note it by certainO X. To summarize,                           that there is a tuple whose first component is 2. Even
+                               ^                               more importantly, using intersection blindly for defining
+                  certainO X =    X.               (7)         certain answers leads to counterintuitive results. Ap-
+                                                               pealing to orderings describing the degree of incomplete-
+A few remarks are in order. Neither certainK X nor             ness, we would expect certain(Q, R) not to exceed the
+certainO X need exist in general. When they exist, they        level of informativeness of Q(R′ ) for each R′ ∈ [[R]], as
+may not be unique, but they are equivalent. That is, we        it presents information common to all such Q(R′ ). Un-
+der owa, this is easily true, as {(1, 2)} owa R′ for each           x ≈k y implies Q(x) ≈′j Q(y). Relational queries under
+R′ ∈ [[R]]owa . However, under cwa, exactly the oppo-                the standard interpretation of ≈ satisfy it.
+site is true: {(1, 2)} 6cwa R′ for each R′ ∈ [[R]]cwa . So
+in what sense {(1, 2)} is a certain answer under cwa is              This is great news: we can get properly defined cer-
+quite mysterious.                                                    tain answers without, seemingly, doing anything special.
+                                                                     But a question remains: why do we need representation
+What causes this problem is the fact that intersection,              systems and (10) when we already have (9) at the level
+in general, does not correspond to the ordering and the              of objects? The answer is: because in the absence of
+semantics of query answers. It may do so, but only                   a representation system, (9) need not be true; in fact,
+under very limited conditions [52]. And if we want to                one first needs to establish (10) and then derive (9) as
+define certainty as the greatest lower bound for the right           a corollary, as shown in [52].
+ordering, as in (7) and (8), we need to understand what
+the orderings are. Note that we are defining orderings               Thus, if we want to rely on existing query evaluation
+on query answers, so we are back to one of our basic                 techniques to produce correct answers in the presence
+questions: what is the semantics of query answers?                   of incompleteness, we need two things:
+
+To answer this, we use a very basic principle:                         1. A proper semantics for query answers that ensures
+                                                                          that more informative inputs produce more infor-
+      if we know more about the input of a query,                         mative outputs; and
+      then we should know more about its output.                       2. a representation system for that semantics.
+
+However simple and natural this principle is, it is ig-              We now show how to achieve these for relational
+nored by most approaches to incompleteness, starting                 databases under owa and cwa.
+with the definitions of strong and weak representation
+systems that somehow assume the same semantics for                   6.2 Naïve evaluation under owa and cwa
+inputs and outputs.
+                                                                     We now look at what naı̈ve evaluation gives us when,
+6.1 Queries and naïve evaluation                                     as had been done before, we use the same semantics for
+                                                                     query inputs and query answers; the semantics will be
+                                                                     [[ ]]owa and [[ ]]cwa . Relational queries expressed in FO, or
+To state results in a way independent of a particular
+                                                                     relational algebra, are guaranteed to be generic. Thus,
+data model, we view queries as mappings Q : D → D′
+                                                                     we need to understand when they are monotone.
+between two domains D = hD, C, [[ ]], Isoi and D′ =
+                 ′
+hD′ , C ′ , [[ ]] , Iso′ i. The basic principle stated above, that   For now, look at a Boolean query Q, and the descrip-
+more informative inputs produce more informative out-                tion of orderings owa and cwa . Then monotonicity
+puts, is then the monotonicity of queries: if x  y then             simply means that if D |= Q and h : D → D′ is a homo-
+Q(x) ′ Q(y), where ′ is the ordering associated with               morphism, for owa (or strong onto homomorphism, for
+                           ′
+the semantics [[ ]] . In particular, using blindly the same          cwa), then D′ |= Q. In other words, Q is preserved un-
+semantics for both databases and query results (as is                der homomorphisms (or strong onto homomorphisms).
+often actually done) does not necessarily make sense.
+                                                                     Homomorphism preservation is a well known concept in
+Certain answer to Q on an object x represents certain                logic; in particular, homomorphism preservation theo-
+information in Q([[x]]). We have shown how to define it              rems give syntactic descriptions of classes of formulae
+as knowledge, and as object, and the former requires a               satisfying these semantic conditions. Most of them are
+representation system RS = hD′ , Fi on query answers.                proved for infinite structures, but some work in the fi-
+In its presence, we can define certain answers as                    nite case too [20]. For instance, an FO sentence is pre-
+                                                                     served under homomorphisms iff it is equivalent to a
+    objects:   certainO (Q, x) = certainO Q([[x]]),                  union of conjunctive queries [63]. Preservation results
+    knowledge: certainK (Q, x) = certainK Q([[x]]).                  for onto homomorphisms, however, only work in the in-
+                                                                     finite case, and are known to fail in the finite [6, 65].
+Then the following holds [52]: if Q is both monotone
+                                                                     Nonetheless, one can take advantage of sufficient condi-
+and generic, then
+                                                                     tions for preservation: for instance, it is known that the
+                  certainO (Q, x) = Q(x)                      (9)    class of Pos∀G formulae is preserved under strong onto
+                  certainK (Q, x) = δQ(x)                    (10)    homomorphisms [32].
+                                                                     We can now show when naı̈ve evaluation works un-
+That is, naı̈ve evaluation works: simply applying Q,                 der owa and cwa, if we use the same semantics for
+without doing anything else, is what we need. By gener-              databases and query answers. Let Q be a query that
+icity we mean the standard notion of independence of                 is defined on databases of schema σ and produces
+query results under permutation: in the above setting,               databases of schema σ ′ . We say that ∗-naı̈ve evaluation
+it is stated as follows: for every j, there is k so that             works for Q, where ∗ is owa or cwa, if certainO (Q, D) =
+Q(D), where we view Q as a mapping from D∗ (σ) to                  7. WHERE DO WE GO FROM HERE?
+D∗ (σ ′ ) (remember that we need a semantics of answers
+specified in order to define the lower bound which gives
+us the notion of certainO ).                                       Summary
+Then, combining (9) with the preservation result of [63]           We started with a rather bleak assessment of the practi-
+and the fact that UCQs form a representation system                cal use of nulls: “If you have any nulls in your database,
+under owa, we obtain:                                              you’re getting wrong answers to some of your queries.
+                                                                   What’s more, you have no way of knowing, in general,
+   • owa-naı̈ve evaluation works for UCQs, i.e., for pos-          just which queries you’re getting wrong answers to; all
+     itive relational algebra queries.                             results become suspect. You can never trust the an-
+                                                                   swers you get from a database with nulls” [24]. We then
+                                                                   analyzed the state of theoretical research on incomplete-
+By combining (9) with the preservation result for Pos∀G            ness in databases, and concluded that it was in disarray
+[32] and the fact that Pos∀G forms a representation sys-           as well.
+tem under cwa, we obtain
+                                                                   But by answering some of the questions posed at the
+                                               ∀G                  end of Section 3, we can alleviate some of the fears
+   • cwa-naı̈ve evaluation works for Pos            queries.
+                                                                   expressed in [24]. Not all results become suspect. You
+                                                                   can sometimes trust the result you get from a database
+Can we get a better intuition of the power of Pos∀G                with nulls. One precondition for it is to have naı̈ve, or
+queries? Clearly they add something to the positive                marked nulls, but this, as mentioned already, is doable,
+relational algebra, and clearly it cannot be the dif-              and implemented in existing DBMS [38]. Then one can
+ference operator. Recall that many real-life queries               fully trust answers to positive relational algebra queries,
+with for-all conditions can be written using the divi-             even extended with a rather liberal use of the division
+sion operator of relational algebra. If we have a re-              operator under the closed-world semantics. In general,
+lation R with attributes A1 , . . . , Am , B1 , . . . , Bk and a   if the semantics of the answers is right, one can trust
+relation S with attributes B1 , . . . , Bk , then R ÷ S con-       the answers provided by the standard query evaluation.
+tains tuples of A-attributes of R that appear in R in
+every possible combination with a tuple from S, i.e.,              As for the key questions about the state of the theory of
+R ÷ S = {t̄ ∈ πĀ (R) | ∀s̄ ∈ S : (t̄, s̄) ∈ R}. Division          incompleteness, we provided a few answers. We argued
+is a derived operation of relational algebra, it can be            that the semantics of query answers need not be the
+expressed with σ, π, ×, ∪, −.                                      same as the semantics of input databases, and that it
+                                                                   should be chosen in a way that more informative inputs
+The easy way to think of the class Pos∀G is that it adds           provide more informative outputs. Intersection is not
+to the positive relational algebra the operation of diving         the only way to define certain answers – in fact some-
+by a base relation (i.e., S in R ÷ S must be a relation            times it is a plain wrong way to define certain answers.
+in the database). In fact, the class is slightly more ex-          We should be open to viewing query answers as both ob-
+pressive, and defined as follows.                                  jects and a representation of knowledge about all possi-
+                                                                   ble answers. And we should be free to go back and forth
+Let ∆ be the query returning {(a, a) | a ∈ adom(D)};               between several paradigms for dealing with incomplete-
+it is easily definable in positive relational algebra. Let         ness: the standard object-based view, the logical-theory
+RA(∆, π, ×, ∪) be the class of relational algebra queries          view, and the ordering view.
+obtained from base relations and ∆ by closing them
+under π, ×, and ∪. Now we define RAcwa as follows:
+                                                                   Future directions
+   • Each relation name is an RAcwa query;
+   • RAcwa is closed under σ, π, ×, and ∪ (i.e., all op-           More expressive queries We have seen how to handle
+     erations except difference);                                  positive relational algebra queries and their extension
+                                                                   with the division operator. Can we push this further?
+   • if Q is an RAcwa query, and Q′ is an RA(∆, π, ×, ∪)           Of course yes: (9) and (10) tell us that there is no limit
+     query, then Q ÷ Q′ is in RAcwa .                              as long as the semantics is chosen correctly. So the
+                                                                   next obvious step is to analyze semantic requirements
+One can then show the following.                                   for different types of queries, and see when they can
+                                                                   be used together with the standard query evaluation
+   • RAcwa = Pos∀G , and consequently:                             techniques.
+   • cwa-naı̈ve evaluation works for RAcwa .                       Evaluation techniques Naı̈ve evaluation simply applies
+                                                                   existing query evaluation as is, and it produces the right
+Thus, we have two large classes of queries for which               answers under the right semantics. But we are assum-
+simply evaluating queries using existing technology does           ing we actually know how to apply a given query to a
+produce correct answers.                                           database with nulls, and this need not always be the
+case. There are a variety of possible evaluation tech-           tion is used, and with few exceptions, owa is the dom-
+niques that need to be investigated. Returning to our            inating semantics. In fact quite often naı̈ve evaluation
+example from the introduction, it is quite bad that the          is used for query answering in cases where it is known
+query says no payments are missing, but at least we are          not to work (as explained in [7, 50]). It thus seems to
+not chasing good guys – there are no false positives. Can        be a natural next step to apply the notions of certainty
+this always be guaranteed? Sound evaluation has been             we presented here in these applications. This may well
+addressed before [61], but we do not fully understand ef-        involve rethinking several of the semantic assumptions
+ficient query evaluation techniques with nulls and their         made in the past.
+interaction with the right notions of certainty. The log-
+ical approach to incomplete databases also fits in well          Acknowledgments I am very grateful to Marcelo Are-
+with the three-value semantics of SQL: theories repre-           nas, Pablo Barceló, Diego Figueira, Amélie Gheer-
+senting databases need not be complete and may lead              brant, Filip Murlak, Juan Reutter, and Cristina Sir-
+to unknown answers [42, 60]. One can also consider               angelo for reading earlier drafts and providing many
+applying existing reasoning procedures with unknown              helpful comments. Thanks also to Serge Abiteboul,
+outcomes (e.g., [48]) to databases with nulls.                   Claire David, Giuseppe de Giacomo, Maurizio Lenz-
+                                                                 erini, Wim Martens, Antonella Poggi, Lucian Popa, and
+Handling constraints This subject has been addressed,            Domagoj Vrgoč for comments, discussions, and ques-
+in particular for functional dependencies, with sev-             tions reflected in this paper. This work is partly sup-
+eral different attempts to define when an incomplete             ported by EPSRC grant J015377.
+database satisfies a constraint, see, e.g., [12, 46]. Some
+of these results were also applied to database design,
+both relational and beyond [8, 47]. However, unlike in           8. REFERENCES
+the case of querying, little attention has been paid to
+the role of the semantics. But constraints are queries,           [1] S. Abiteboul, O. Duschka. Complexity of answering queries
+after all, and we should be able to apply techniques de-              using materialized views. In PODS’98, pages 254–263.
+                                                                  [2] S. Abiteboul, R. Hull, and V. Vianu. Foundations of
+veloped here to their study. Most constraints, however,               Databases. Addison-Wesley, 1995.
+involve universal quantification, and thus special care           [3] S. Abiteboul, P. Kanellakis, and G. Grahne. On the
+needs to be taken in evaluating them.                                 representation and querying of sets of possible worlds.
+                                                                      Theoretical Computer Science, 78(1):158–187, 1991.
+Beyond relations: XML and graphs We have looked                   [4] S. Abiteboul, L. Segoufin, and V. Vianu. Representing and
+                                                                      querying XML with incomplete information. ACM TODS,
+only at relational databases but of course there are other            31(1):208–254, 2006.
+models of data. Already a long time ago, analogs of the           [5] S. Abiteboul et al. Web Data Management. Cambridge
+basic concepts from [40] were worked out for nested re-               University Press, 2011.
+lations [45]. More recently, there was some activity in           [6] M. Ajtai and Y. Gurevich. Monotone versus positive. J.
+                                                                      ACM, 34(4):1004–1015, 1987.
+studying incompleteness in XML [4, 13, 27, 28]. One               [7] M. Arenas, P. Barceló, L. Libkin, and F. Murlak.
+of the key differences is that not only data but also                 Foundations of Data Exchange. Cambridge University
+some structural features can be missing, although it                  Press, 2014.
+was shown that structural incompleteness leads to in-             [8] M. Arenas and L. Libkin. A normal form for XML
+tractability very quickly. Most of these papers used                  documents. ACM TODS, 29(1):195–232, 2004.
+                                                                  [9] M. Arenas and L. Libkin. XML data exchange: Consistency
+XML-to-relations queries to define certain answers by                 and query answering. J. ACM, 55(2), 2008.
+means of intersection; an exception is [28] in which a           [10] M. Arenas, J. Pérez, and J. L. Reutter. Data exchange
+rudimentary version of (6) was given. To extend our                   beyond complete data. J. ACM, 60(4), 2013.
+techniques to XML, we would need to find classes of              [11] A. Atserias, A. Dawar, and P. Kolaitis. On preservation
+                                                                      under homomorphisms and unions of conjunctive queries.
+queries satisfying homomorphism preservation condi-                   J. ACM, 53(2):208–237, 2006.
+tions, which is not a trivial task at all for tree-like struc-   [12] P. Atzeni and N. M. Morfuni. Functional dependencies in
+tures [11] and it becomes even harder with data present.              relations with null values. IPL, 18(4):233–238, 1984.
+A few initial results in this direction were very recently       [13] P. Barceló, L. Libkin, A. Poggi, and C. Sirangelo. XML
+reported in [31]. And in the case of graph databases                  with incomplete information. J. ACM, 58(1), 2010.
+                                                                 [14] P. Barceló, L. Libkin, and J. Reutter. Querying regular
+we know even less; see [14, 56] for attempts at defining              graph patterns. J. ACM, 61(1), 2014.
+incompleteness over graph data and RDF.                          [15] L. Bertossi. Database Repairing and Consistent Query
+                                                                      Answering. Morgan&Claypool Publishers, 2011.
+Applications Some of the most important applications             [16] P. Buneman, A. Jung, A. Ohori. Using powerdomains to
+                                                                      generalize relational databases. TCS, 91(1):23–55, 1991.
+of incomplete data occur in tasks such as data integra-          [17] A. Calı̀, D. Lembo, and R. Rosati. On the decidability and
+tion, data exchange, and consistent query answering:                  complexity of query answering over inconsistent and
+in fact, in all three of them, the standard semantics of              incomplete databases. In PODS, pages 260–271, 2003.
+query answering is based on certain answers. The need            [18] D. Calvanese, G. D. Giacomo, and M. Lenzerini.
+to apply techniques from incomplete databases in these                Semi-structured data with constraints and incomplete
+                                                                      information. In Description Logics, 1998.
+areas is well recognized, see, e.g., [1, 35, 41] for data in-    [19] A. K. Chandra, P. M. Merlin. Optimal implementation of
+tegration and [10, 36, 50] for data exchange. However,                conjunctive queries in relational data bases. In STOC’77,
+in all the cases, the standard intersection-based defini-             pages 77–90.
+                                                                 [20] C. Chang, H. Keisler. Model Theory. North Holland, 1990.
+[21] E. F. Codd. Understanding relations (installment #7).            [46] M. Levene and G. Loizou. Axiomatisation of functional
+     FDT - Bulletin of ACM SIGMOD, 7(3):23–28, 1975.                       dependencies in incomplete relations. Theor. Comput. Sci.,
+[22] E. F. Codd. Extending the database relational model to                206(1-2):283–300, 1998.
+     capture more meaning. ACM TODS, 4(4):397–434, 1979.              [47] M. Levene and G. Loizou. Database design for incomplete
+[23] K. Compton. Some useful preservation theorems. Journal                relations. ACM TODS, 24(1):80–125, 1999.
+     of Symbolic Logic, 48(2):427–440, 1983.                          [48] H. J. Levesque. A completeness result for reasoning with
+[24] C. J. Date. Database in Depth - Relational Theory for                 incomplete first-order knowledge bases. In KR, pages
+     Practitioners. O’Reilly, 2005.                                        14–23, 1998.
+[25] C. J. Date. A critique of Claude Rubinson’s paper ‘Nulls,        [49] L. Libkin. A semantics-based approach to design of query
+     three-valued logic, and ambiguity in SQL: critiquing Date’s           languages for partial information. In Semantics in
+     critique’. SIGMOD Record, 37(3):20–22, 2008.                          Databases, LNCS vol. 1358, pages 170–208. Springer, 1995.
+[26] C. J. Date and H. Darwin. A Guide to the SQL Standard.           [50] L. Libkin. Data exchange and incomplete information. In
+     Addison-Wesley, 1996.                                                 PODS, pages 60–69, 2006.
+[27] C. David, A. Gheerbrant, L. Libkin, and W. Martens.              [51] L. Libkin. Incomplete information and certain answers in
+     Containment of pattern-based queries over data trees. In              general data models. In PODS, pages 59–70, 2011.
+     ICDT, pages 201–212, 2013.                                       [52] L. Libkin. Certain answers as objects and knowledge. In
+[28] C. David, L. Libkin, and F. Murlak. Certain answers for               Principles of Knowledge Representation and Reasoning
+     XML queries. In PODS, pages 191–202, 2010.                            (KR), 2014.
+[29] R. Fagin, P. G. Kolaitis, R. J. Miller, and L. Popa. Data        [53] L. Libkin and C. Sirangelo. Data exchange and schema
+     exchange: Semantics and query answering. Theoretical                  mappings in open and closed worlds. J. Comput. Syst. Sci.,
+     Computer Science, 336:89–124, 2005.                                   77(3):542–571, 2011.
+[30] W. Fan and F. Geerts. Foundations of Data Quality                [54] W. Lipski. On semantic issues connected with incomplete
+     Management. Morgan&Claypool Publishers, 2012.                         information databases. ACM TODS, 4(3):262–296, 1979.
+[31] D. Figueira and L. Libkin. Pattern logics and auxiliary          [55] B. Marnette, G. Mecca, P. Papotti, S. Raunich, and
+     relations. In LICS, 2014.                                             D. Santoro. ++Spicy: an opensource tool for
+[32] A. Gheerbrant, L. Libkin, and C. Sirangelo. When is naı̈ve            second-generation schema mapping and data exchange.
+     evaluation possible? In PODS, pages 75–86, 2013.                      PVLDB, 4(12):1438–1441, 2011.
+[33] A. Gheerbrant, L. Libkin, and T. Tan. On the complexity          [56] C. Nikolaou and M. Koubarakis. Incomplete information in
+     of query answering over incomplete XML documents. In                  RDF. In RR, pages 138–152, 2013.
+     ICDT, pages 169–181, 2012.                                       [57] A. Ohori. Semantics of types for database objects.
+[34] G. Grahne. The Problem of Incomplete Information in                   Theoretical Computer Science, 76:53–91, 1990.
+     Relational Databases. Springer, 1991.                            [58] R. Reiter. On closed world data bases. In Logic and Data
+[35] G. Grahne. Information integration and incomplete                     Bases, pages 55–76, 1977.
+     information. IEEE Data Eng. Bull., 25(3):46–52, 2002.            [59] R. Reiter. Equality and domain closure in first-order
+[36] G. Grahne and A. Onet. Representation systems for data                databases. J. ACM, 27(2):235–249, 1980.
+     exchange. In ICDT, pages 208–221, 2012.                          [60] R. Reiter. Towards a logical reconstruction of relational
+[37] J. Grant. Null values in a relational data base. Inf. Process.        database theory. In On Conceptual Modelling, pages
+     Lett., 6(5):156–157, 1977.                                            191–233, 1982.
+[38] L. M. Haas, M. A. Hernández, H. Ho, L. Popa, and                [61] R. Reiter. A sound and sometimes complete query
+     M. Roth. Clio grows up: from research prototype to                    evaluation algorithm for relational databases with null
+     industrial tool. In SIGMOD, pages 805–810, 2005.                      values. J. ACM, 33(2):349–347, 1986.
+[39] A. Halevy. Theory of answering queries using views.              [62] R. Rosati. On the decidability and finite controllability of
+     SIGMOD Record, 29(1):40–47, 2000.                                     query processing in databases with incomplete information.
+[40] T. Imielinski and W. Lipski. Incomplete information in                In PODS, pages 356–365, 2006.
+     relational databases. J. ACM, 31(4):761–791, 1984.               [63] B. Rossman. Homomorphism preservation theorems. J.
+[41] D. Lembo, M. Lenzerini, and R. Rosati. Source                         ACM, 55(3), 2008.
+     inconsistency and incompleteness in data integration. In         [64] B. Rounds. Situation-theoretic aspects of databases. In
+     Description Logics, 2002.                                             Situation Theory and Applications, volume 26 of CSLI,
+[42] M. Lenzerini. Type data bases with incomplete                         pages 229–256. 1991.
+     information. Inf. Sci., 53(1-2):61–87, 1991.                     [65] A. Stolboushkin. Finitely monotone properties. In LICS,
+[43] M. Lenzerini. Data integration: a theoretical perspective.            pages 324–330, 1995.
+     In PODS, pages 233–246, 2002.                                    [66] R. van der Meyden. Logical approaches to incomplete
+[44] N. Lerat and W. L. Jr. Nonapplicable nulls. Theor.                    information: A survey. In Logics for Databases and
+     Comput. Sci., 46(3):67–82, 1986.                                      Information Systems, pages 307–356, 1998.
+[45] M. Levene and G. Loizou. Semantics for null extended             [67] C. Zaniolo. Database relations with null values. J. Comput.
+     nested relations. ACM TODS, 18(3):414–459, 1993.                      Syst. Sci., 28(1):142–166, 1984.
+

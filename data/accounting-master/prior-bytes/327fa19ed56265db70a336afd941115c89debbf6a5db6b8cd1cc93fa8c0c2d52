@@ -1,0 +1,1098 @@
+           systems
+Article
+Operationalizing Accounting Reporting in System
+Dynamics Models
+Kawika Pierson
+ Atkinson Graduate School of Management, Willamette University, Salem, OR 97301, USA;
+ kpierson@willamette.edu
+                                                                                                    
+ Received: 14 January 2020; Accepted: 20 March 2020; Published: 24 March 2020                       
+
+
+ Abstract: System dynamics implementations of financial statements are currently limited by the
+ lack of a simple to use, yet sufficiently detailed model that operationally replicates the accounting
+ reporting process for the income statement, balance sheet, cash flow statement, and statement of
+ changes in owners’ equity. While system dynamics accounting structures exist, they are inconsistently
+ applied in the literature. In this paper, we offer a comprehensive accounting model in the hope
+ that academics and practitioners will use its structures to better represent accounting reports in
+ their projects.
+
+ Keywords: accounting system dynamics; accounting reporting model; financial statements;
+ accounting differential equations
+
+
+
+
+1. Introduction
+      Models of businesses and business processes are some of the earliest applications of system
+dynamics [1,2] and continue to be very influential today [3–6]. While these models often include
+structures that are intended to represent financial accounting reports, the way that the accounting
+reporting process is represented is usually highly simplistic. In some cases, a simplistic treatment of
+accounting is all that is needed for a model’s purpose, but it is also likely that the lack of a standard
+structure [7] for operationalizing accounting inside of system dynamics models leads some modelers
+to over-simplify what can be an opaque and detail-oriented area of management.
+      The most highly operational representations of accounting reporting inside of system dynamics
+models are the work of John Sterman and his co-authors. As early as his thesis [8,9] Sterman’s models
+included simple structures for endogenously representing balance sheets and income statements [10].
+While his treatment of accounting is sometimes questionable (for example, the negative debt in [11]),
+his Analog Devices paper with Nelson Repenning and Fred Kofman [12] was the first to recognize the
+importance of explicitly representing accounting reporting as a discrete process.
+      Most system dynamics models in management accurately represent basic accounting definitions
+such as net income being the difference between revenue and expenses, but they almost always
+model the instantaneous value of these flows rather than considering the way that the process of
+generating accounting reports aggregates the flows over time and reports them during a single time
+step. The instantaneous value of the flow of revenue at the end of the year is not the same as the
+total revenue earned over the year, yet because it is so easy to create a flow of revenue, most system
+dynamics models rely on simple flows. Correct accounting reporting structures are a common thread in
+the work of Sterman’s coauthors and students [13–15], but it is exceedingly rare to see other modelers
+use them [16–18] even when their express purpose is to represent accounting reports [19,20].
+      Not operationalizing the accounting reporting process has the potential to cause serious problems.
+First, managers use accounting reports to make decisions and evaluate results. Representing the way
+that these reports average and lag the instantaneous values of the relevant flows is required in order
+
+
+Systems 2020, 8, 9; doi:10.3390/systems8010009                                  www.mdpi.com/journal/systems
+Systems 2020, 8, 9                                                                                  2 of 13
+
+
+
+to build models that replicate the decision process of managers. Second, if we want to “involve the
+people, one hopes to influence in the modeling process from the beginning” [21] (page 38) by building
+face validity, replicating the types of reports managers are used to working with is an important step.
+Face validity is particularly salient for applications of system dynamics in flight simulators [5,22–24].
+Finally, any work that aims to match simulated outputs with quantitative data on financial results will
+be biased if it does not replicate the accounting reporting process that produced that data.
+      The lack of a standard structure for replicating the income statement, balance sheet, statement of
+cash flows, and owners’ equity statement is limiting the implementation of operational accounting
+structures in system dynamics models. While Repenning and Sterman [25] provide an excellent
+foundation for such a model, the field needs an updated effort in this direction, both because their
+model has been so rarely utilized, and because there are some incremental improvements that can be
+made. For example, Repenning and Sterman do not extend the logic of the reporting process to the
+cash flow statement, and so their model’s reporting of those results relies on instantaneous values of
+flows. They also fail to represent straight line depreciation, opting instead to model depreciation as a
+first order delay. These decisions are understandable given their purpose, but these omissions will
+stand out as incorrect to people familiar with accounting conventions.
+      This paper’s contribution then, is to provide an open-access, well-documented model that is
+both general in its ability to interface with the work of modelers unfamiliar with accounting, and
+operational enough to produce financial statements that look familiar to seasoned businesspeople. We
+build and offer a module that can be used by other modelers without any knowledge of accounting.
+Our model boundary uses typical variables that most system dynamics professionals will understand
+rather than requiring users to interface with the accounting model by breaking down individual
+accounting transactions (such as in Ch. 3 of [26]). We hope that this strikes an appropriate balance
+between usability and precision.
+      Yes, model structures should be determined by a model’s purpose, but this decision is always a
+judgement call. Since representing accounting accurately is difficult, some modelers may decide that
+their purpose does not really require it even when there would be a benefit. A standard structure that
+can be easily applied and adapted will allow far wider application of operational representations of
+accounting, increasing the ability of modelers to properly engage key stakeholders, build face validity,
+and match their models to reported accounting data.
+
+2. Important Accounting Concepts
+     The outputs of the accounting reporting process are the financial statements, the most prominent
+way that managers understand and direct their firms. There are five financial statements companies
+include in their annual reports: The income statement, the balance sheet, the cash flow statement, the
+statement of changes in owners’ equity, and the other comprehensive income statement. Of these, the
+balance sheet, income statement, cash flow statement, and statement of changes in owners’ equity are
+the most salient to managers, and so we will limit our model to presenting only these four.
+     The income statement reports the net income of the firm, which is the bottom-line measure of
+profit, and one of the most important outputs of the accounting process [27]. The classic income
+statement presentation places revenue, or the flow of value created by the company’s sales, at the top,
+with expenses sequentially subtracted from revenue, resulting in more restrictive income figures being
+calculated as you move down the statement. Typical expense categories include the cost of goods sold,
+operating expenses like marketing and depreciation, and interest and tax expenses.
+     The balance sheet presents the stocks of value in the company and is organized into three sections:
+assets, liabilities, and equity. These three sections are related through an equation known as the balance
+sheet identity, which states that the assets of the company must always equal the liabilities of the
+company plus its owners’ equity. Some assets and liabilities on the balance sheet are called accruals [28]
+because they add up the difference between flows of cash, such as the collection of customer payments,
+and flows of value, such as the billing of customers for the shipment of goods.
+Systems 2020, 8, 9                                                                                  3 of 13
+
+
+
+      Three categories of cash flows are reported on the cash flow statement: operating, investing, and
+financing. Operating cash flows arise from the company’s day to day operations, investing cash flows
+occur when the company invests in long-term assets or financial markets, and financing cash flows
+arise from the debt and equity used to raise cash for the other two types of activities. Due to the focus
+on value flows rather than cash flows in the first two financial statements, the operating cash flow of
+for-profit companies is presented using the indirect method, which carefully explains the differences
+between net income and net cash flow from operating activities. This reconciliation is accomplished by
+first subtracting out the impact of any non-cash expenses counted as a part of net income and then
+undoing the impact of the changes in each accrual account on the balance sheet.
+      The owners’ equity statement reports the flows in and out of each stock of equity in the firm.
+While this is conceptually simple for a system dynamics audience, it can often be very detailed and
+complex in practice. We do not implement many of the more detailed potential equity arrangements
+here, but they will follow the general form of the equity stocks that we have implemented.
+      We omitted one financial statement, the other comprehensive income statement, because it
+documents the impacts of particularly complex transactions like financial derivatives and revaluation
+of long-term pension obligations, and therefore would be much harder to create simply. Luckily, these
+kinds of transactions are unlikely to arise in most system dynamics modeling applications.
+
+Incremental Improvements
+     Our model improves on the state of the art in system dynamics models of accounting
+reporting [12,15,25] in several ways. This paper is the first to calculate straight line depreciation
+with both the historical cost and accumulated depreciation represented explicitly, generate an indirect
+statement of cash flows, represent the impact of accruals on the statement of cash flows, enable quarterly
+reporting as an option for all financial statements, generate a statement of changes in owners’ equity,
+and give reported output that is constant over a period rather than a pulse during a single time step.
+
+3. Description of the Accounting Model
+
+3.1. Current Assets
+     The model includes three current asset stocks that are very typical: Cash, Accounts Receivable,
+and Inventory.
+     Cash integrates all the instantaneous cash flows in and out of the company and is initialized at a
+target fraction of operating cash outflows, a common way for companies to think about their desired
+cash on hand. We make the conscious decision not to require the stock of cash to keep a positive value
+so that we can preserve the balance sheet identity, but any operational financing model should cause
+the company to borrow or issue equity in order to keep the stock of cash above zero.
+     Accounts receivable is an accrual, which means that it integrates the difference between a flow of
+value (sales on credit) and a flow of cash (collections from customers). Sales on credit are assumed
+to be a constant fraction of all revenue, with the rest of revenue resulting in an immediate cash flow.
+Collections from customers are modeled as a first-order material delay occurring over an average
+collection time that is equal to the credit terms that the company offers to its customers.
+     Inventory is also an accrual. It accumulates the difference between the value consumed when
+inventory is sold, and the cash consumed when materials or labor are used to create inventory. The cost
+of inventory removed from this stock when goods are sold is calculated using the average cost method,
+which assumes that the total cost of inventory is spread evenly between each of the inventory units that
+the company is constructing or storing. This is not the way that most companies do their inventory
+accounting, but it is the only reasonable method for a system dynamics model of inventory accounting
+to use.
+Systems 2020, 8, 9                                                                                                                 4 of 13
+
+
+
+      Replicating the most common method of accounting for inventory in a system dynamics context
+is difficult because the first-in first-out (FIFO) method,1 which is followed by most companies, is a
+problematically discrete process. Whenever the unit cost of inventory changes, FIFO inventory tracks
+             Systems 2020, 8, x FOR PEER REVIEW                                                                           4 of 14
+how many units are produced at that cost. This accounting enables the exact cost of the oldest units
+in inventory toReplicating
+                    be removed          whenever
+                                  the most               inventory
+                                             common method              is sold.forDue
+                                                                 of accounting            to this,
+                                                                                     inventory       correctly
+                                                                                                in a system       accounting
+                                                                                                             dynamics   context for FIFO
+             is difficult  because    the first‐in first‐out (FIFO)   method,  1 which is followed by most companies, is a
+inventory in a system dynamics model would require dynamically creating a new stock of inventory
+             problematically discrete process. Whenever the unit cost of inventory changes, FIFO inventory tracks
+value everyhow timemanytheunitsunit
+                                  arecost    of materials
+                                       produced    at that cost.or  labor
+                                                                 This        changed
+                                                                       accounting        and
+                                                                                    enables the then    dynamically
+                                                                                                 exact cost               removing that
+                                                                                                            of the oldest units
+stock of inventory       value                                                                                            2
+             in inventory     to be whenever
+                                     removed wheneverthose inventory
+                                                              goods were is sold.sold.
+                                                                                  Due toThis   might be
+                                                                                         this, correctly     possible,
+                                                                                                          accounting         but it is very
+                                                                                                                      for FIFO
+             inventory
+computationally           in a system
+                      costly            dynamics
+                                 for what     will model
+                                                     not bewould     require dynamically
+                                                               an important                creating
+                                                                                   difference         a new stock
+                                                                                                 in most          of inventory
+                                                                                                            contexts.
+            value every time the unit cost of materials or labor changed and then dynamically removing that
+            stock of inventory value whenever those goods were sold. This might be possible,2 but it is very
+3.2. Long-Term Assets
+            computationally costly for what will not be an important difference in most contexts.
+      The model includes two types of long-term assets that have very similar accounting structures:
+            3.2. Long‐Term Assets
+Plant, Property, and Equipment (PPE), and Intangible Assets.
+                  The model includes two types of long‐term assets that have very similar accounting structures:
+      Both categories of long-term assets are reported on the balance sheet at their value net of a stock
+            Plant, Property, and Equipment (PPE), and Intangible Assets.
+of accumulatedBoth value   loss, called
+                      categories           depreciation
+                                  of long‐term                for PPE
+                                                 assets are reported on and  amortization
+                                                                        the balance            forvalue
+                                                                                    sheet at their  intangibles.     Rather than
+                                                                                                        net of a stock
+losing valueofin  an exponential
+               accumulated             smooth,
+                              value loss,          the way for
+                                          called depreciation   most
+                                                                  PPEsystem     dynamics
+                                                                       and amortization       models would
+                                                                                         for intangibles.         formulate the
+                                                                                                          Rather than
+relationshiplosing
+             [25], value
+                    PPE in
+                         and an intangibles
+                                exponential smooth,    the way
+                                                lose value       most system
+                                                               according   to dynamics  models wouldmethod
+                                                                              the “straight-line”      formulate   the
+                                                                                                                 which  requires
+            relationship [25], PPE and intangibles lose value according to the “straight‐line” method which
+that the same   value  be   removed       each   time   period.   This  structure    is shown     in Figure
+            requires that the same value be removed each time period. This structure is shown in Figure 1.    1.
+
+
+
+
+                                                   Historical Cost of
+                                                   Plant Property and        +
+                                 Increase in          Equipment         Discontinuation of
+                              Historical Cost of                           Depreciation
+                                     PPE                                                                     Discontinuation of
+                                                                                        -                +
+                                        +                                             Tangible Asset            Depreciation
+                                                                                          Average              Accumulation
+                                                                                     Depreciation Time
+                     Amount Spent on
+                     Long Term Assets
+                                                    BS Net Plant                 +   -            BS Accumulated
+                                   +
+                                                    Property and                                   Depreciation
+                                  Capital            Equipment             Depreciation
+                                Expenditure
+
+
+                                Structure
+                     Figure 1. Figure        for Replicating
+                                      1. Structure for ReplicatingStraight  LineDepreciation
+                                                                   Straight Line Depreciation     or Amortization.
+                                                                                             or Amortization.
+
+
+      The modelThe       model accomplishes
+                     accomplishes        this bythisseparating
+                                                      by separatingaa stock
+                                                                      stock ofofhistorical
+                                                                                  historicalvaluevalue
+                                                                                                  from the stocks
+                                                                                                        from   thethat track that track
+                                                                                                                    stocks
+              net value. Historical values move out of the model following a fixed delay with the specified delay
+net value. Historical        values move out of the model following a fixed delay with the specified delay
+              time, and a constant fraction of the historical value migrates from the net value stock to the value loss
+time, and a stock
+              constant     fraction    of thethehistorical
+                     each time step. Since                    value
+                                                  historical cost onlymigrates
+                                                                        decreases from
+                                                                                    when thetheitem
+                                                                                                 netisvalue  stock to the
+                                                                                                       fully depreciated  or value loss
+stock each time step. Since the historical cost only decreases when the item is fully depreciated or
+              amortized,   the rate of value loss  is constant over the  item’s useful  life.
+                   It is important to note that while all tangible assets with long useful lives are added to the stock
+amortized, the rate       of value loss is constant over the item’s useful life.
+              of PPE, only intangible assets that are purchased from outside of the company are recorded in the
+      It is important     to  note that
+              stock of intangible         while
+                                     assets. Any all    tangible
+                                                   intangible      assets
+                                                               assets       with internally
+                                                                       produced    long useful      lives
+                                                                                               by the     are added
+                                                                                                       company   shouldtobethe stock of
+PPE, only intangible
+              expensed asassets
+                             researchthat  are purchased from outside of the company are recorded in the stock
+                                       and development.
+of intangible assets. Any intangible assets produced internally by the company should be expensed as
+research and  1 development.
+                Last‐in first‐out, or LIFO is the second most common method and suffers from all the same
+               difficulties. Very few companies use the average cost method, but it is the only tractable method for
+3.3. Liabilities
+              most system dynamics models.
+               Users wishing
+               2
+     The liabilities         to of
+                       section  better
+                                   theapproximate FIFO might
+                                        model includes        consider
+                                                          accruals     creating
+                                                                     for        a higher
+                                                                          accounts       order structure,
+                                                                                      payable             but be wages, as
+                                                                                                 and accrued
+             careful to remember that inventory does not move through those stocks with a constant delay time.
+well as a structure for tracking the long-term and short-term debt of the company.
+               Inventory is pulled through the stocks as inventory is sold to the customer.
+
+
+1   Last-in first-out, or LIFO is the second most common method and suffers from all the same difficulties. Very few companies
+    use the average cost method, but it is the only tractable method for most system dynamics models.
+2   Users wishing to better approximate FIFO might consider creating a higher order structure, but be careful to remember
+    that inventory does not move through those stocks with a constant delay time. Inventory is pulled through the stocks as
+    inventory is sold to the customer.
+Systems 2020, 8, 9                                                                                  5 of 13
+
+
+
+      The accrual for accounts payable is very similar to the accrual for accounts receivable. Accounts
+payable integrates the difference between the value of the materials purchased on credit by the company
+(a constant fraction of the total materials purchases) and the cash paid by the company to its suppliers.
+The payment of accounts payable is a first-order material delay of the level of accounts payable, that
+uses a constant delay time determined by the credit terms offered by the company’s suppliers.
+      Wages accrue on the company’s balance sheet as the difference between the value of the wages
+earned by workers and the cash that the company pays to workers at some later date. The model
+allows for the separate flows of the value of labor used to create inventory and the value of labor used
+for selling, general, and administrative tasks to be combined in this one stock of accrued wages. The
+payment of wages is modeled as a first-order material delay.
+      The structure for debt on the company’s balance sheet connects long-term debt with short-term
+debt using a shared stock and flow chain. New borrowing by the company flows into the stock of
+long-term debt, which drains through a first-order material delay of its level. The delay time is the
+average loan term minus the definition of a “current” liability which is the greater of one year, or
+the company’s operating cycle. The stock of short-term debt is then drained with a delay time equal
+to the definition of current that was used. Both debt stocks accrue interest at a constant fractional
+interest rate, which is an input to the model. An operational financing model should consider replacing
+this structure.
+
+3.4. Equity
+      The equity section of the model includes two balance sheet stocks, the stock of additional paid
+in capital that tracks the value of the cash received from sales of the company’s stock, and the stock
+of retained earnings that accumulates the difference between the net income of the company and the
+dividends paid to the owners of the company. We ignore par value for this model since it is rarely
+an economically significant amount. We also track the number of shares of stock outstanding for the
+company, but this number is not needed for any reason other than the calculation of dividends per
+share and earnings per share.
+      The stock of retained earnings uses the instantaneous rate of each flow of revenue and expense as
+its inflow rather than the reported revenues or expenses that the model also calculates. This ensures
+that the balance sheet equation holds for each time step of the model rather than only when values
+are reported.
+
+3.5. Income and Expenses
+     Each of the instantaneous flows of revenue and expenses created by a typical system dynamics
+model is subtly different from the reported revenue and expenses created as an output of the accounting
+process. In order to adjust for these differences and report the correct values on the income statement,
+we make extensive use of the formulation from Pierson and Sterman [15]. The structure accumulates
+the instantaneous flows over some reporting period, then when signaled to report values, it drains
+the accumulated stocks in a single time step, outputting the total of the instantaneous flows over
+the period.
+     We extend this structure in two important ways. First, we employ the “sample if true” function in
+Vensim to change the pulse output of the reporting structure into a constant output. The pulses are
+useful for matching a model with data, but when people make decisions based on accounting numbers,
+they look back at the most recently reported numbers as a basis for those decisions. This formulation
+stores the most recently reported numbers to replicate that information availability. Second, we include
+a switch that allows the reporting period of the model to change from annual reporting to quarterly
+reporting and adjust the reported quarterly numbers to be in units of dollars per quarter, rather than
+the annualized dollars per year that the original structure required. This structure is shown in Figure 2.
+             Systems 2020, 8, x FOR PEER REVIEW                                                                              6 of 14
+
+Systems 2020,per
+              8, 9quarter, rather than the annualized dollars per year that the original structure required. This                      6 of 13
+             structure is shown in Figure 2.
+
+                                                                                                     <Time>
+                                                                      <Reporting
+                                                                       Period>
+                                                                                          Check
+                                                                                         Reporting
+
+                                                             Accumulated
+                                                              Reported
+                                       New Reported                              Drained Reported
+                                                               Revenue
+                                     +   Revenue                                     Revenue
+                    <Price per         +
+                 Inventory Unit>                                                   +
+                                                                                              <TIME STEP>
+                           <Inventory Units                                   Reported
+                              Shipped>            Annual Reporting            Revenue
+                                                      Switch                  -
+                                                              +                              + IS Revenue
+                                                                  Reporting                                        <Check
+                                                                   Period                                         Reporting>
+                                                                                         +
+                                                                                             Quarterly
+                                                                                             Revenue -
+                                                                                                              Quarters per
+                                                                                                                 Year
+
+                           FigureFigure
+                                 2. The2. Modified
+                                          The Modified Reporting Structure
+                                                     Reporting   Structure with Quarterly
+                                                                             with         Output.
+                                                                                   Quarterly   Output.
+
+                   It is important to note that this structure replicates a source of delay that arises in the actual
+      It is important         to note that this structure replicates a source of delay that arises in the actual
+             accounting reporting process. Accounting numbers cannot be reported until after they are realized.
+accounting      reporting
+             Thus,   the profitprocess.
+                                 reported at Accounting
+                                              the beginningnumbers          cannot
+                                                               of year 3, say,         be reported
+                                                                                is the average          until after
+                                                                                                profit realized  during they
+                                                                                                                          yearare
+                                                                                                                               2. realized.
+Thus, the profit
+             This is anreported
+                          importantat   the beginning
+                                      consideration          of year
+                                                      for modelers      3, say,
+                                                                      looking     is thethis
+                                                                               to match    average
+                                                                                              module’sprofit
+                                                                                                         outputrealized    during year 2.
+                                                                                                                  with reported
+             accounting numbers.
+This is an important                   The structure
+                              consideration             will report looking
+                                                 for modelers         2018 revenue    on the first
+                                                                                 to match     thisday  of 2019, the
+                                                                                                    module’s           same with
+                                                                                                                  output    way reported
+             that a company has to wait until after its fiscal year to report the results for that year.
+accounting numbers. The structure will report 2018 revenue on the first day of 2019, the same way that
+                   We calculate taxes as a constant fraction of the reported earnings before taxes of the company
+a companyand   has    to wait
+                   drain         until
+                           the stock    afterand
+                                     of cash   itsthe
+                                                    fiscal
+                                                       stockyear    to report
+                                                              of retained        the instantly
+                                                                           earnings    results in
+                                                                                                forresponse
+                                                                                                     that year.
+                                                                                                              to these reported
+      We calculate       taxes   as  a constant     fraction    of  the  reported     earnings     before
+             taxes. This is an oversimplification in both the complexity and the timing of taxes, but       taxes   oftreatment
+                                                                                                                a full  the company and
+drain the stock of cash and the stock of retained earnings instantly in response to theseofreported
+             of  the  intricacies  of corporate   taxation  is  far  beyond   the  scope  of this  paper. If the  timing     the     taxes.
+             payment of taxes is more important in a given case, it is relatively simple to add a taxes payable
+This is an oversimplification in both the complexity and the timing of taxes, but a full treatment of the
+             accrual to the liabilities section and record its impact on the cash flow statement.
+intricacies of corporate taxation is far beyond the scope of this paper. If the timing of the payment of
+taxes is more      important
+             3.6.Direct  Cash Flowsin a given case, it is relatively simple to add a taxes payable accrual to the
+liabilities section     and    record
+                   In order to correctly itscontrol
+                                             impact theon   the
+                                                         level of cash   flow
+                                                                  the stock      statement.
+                                                                             of cash  in the company, we must calculate the
+             instantaneous, direct cash flows the company experiences. We follow the same categorization of cash
+3.6. Direct flows
+             Cashinto
+                  Flows
+                      operating, investing, and financing that is used later on the indirect cash flow statement so
+             as to not duplicate model structures.
+     In order to correctly control the level of the stock of cash in the company, we must calculate the
+           3.7. Financial
+instantaneous,    directStatements
+                          cash flows the company experiences. We follow the same categorization of cash
+flows into operating,     investing,
+                 We construct   each ofand  financing
+                                        the four        that is used
+                                                 most commonly     usedlater  on the
+                                                                         financial     indirect
+                                                                                   statements in cash flow the
+                                                                                                 the model, statement so
+           balance sheet,
+as to not duplicate        the income
+                       model          statement, the indirect cash flow statement, and the statement of changes
+                                 structures.
+             in owners’ equity.
+3.7. Financial Statements
+             3.7.1. Balance Sheet
+    We construct    each ofsheet
+               The balance    the reports
+                                   four most    commonly
+                                          the level            used
+                                                    of each asset,    financial
+                                                                   liability,     statements
+                                                                              and equity stock ininthe
+                                                                                                     the  model,
+                                                                                                       firm.       the balance
+                                                                                                             Each of
+sheet, thethese
+           income     statement,
+                accounts             the
+                         are collected    indirect
+                                       together       cash
+                                                 on one  viewflow
+                                                               of thestatement,     and thewith
+                                                                      model and annotated       statement
+                                                                                                     the prefix of changes in
+                                                                                                                “BS”
+          for balance sheet. These accounts do not interact with the reporting process in any interesting ways
+owners’ equity.
+
+3.7.1. Balance Sheet
+     The balance sheet reports the level of each asset, liability, and equity stock in the firm. Each of
+these accounts are collected together on one view of the model and annotated with the prefix “BS” for
+balance sheet. These accounts do not interact with the reporting process in any interesting ways because
+they are simply reported at their level on a specific day. The model calculates both the instantaneous
+balance sheet amounts and the most recently reported balance sheet values.
+
+3.7.2. Income Statement
+     The income statement reports the cumulative flow of net income earned by the company over
+the reporting period by starting with the revenue flow and subtracting off the flow of each expense.
+Systems 2020, 8, 9                                                                                                                                  7 of 13
+
+
+
+Since we have already calculated these accumulations, the income statement view in the model simply
+collects each of the items typically reported on the income statement for easy viewing, labels them
+with the prefix “IS”, and calculates a few intermediate profit numbers.
+
+3.7.3. Indirect Cash Flow Statement
+      Accountants report financing and investing cash flows as accumulated average flows over a
+period, analogous to the way that income is reported, but they report operating cash flows indirectly
+by showing a reconciliation of net income with net cash flow from operations. This reconciliation
+first removes all non-cash expenses from net income and then shows the impact of accumulations or
+consumptions of value through the various accrual stocks on the balance sheet. The accounting model
+needs to track two years of some reported balance sheet items in order to accomplish this task, and so
+the indirect cash flow statement view does so. Due to this, indirect cash flows are reported one time
+step after the balance sheet and income statement are reported.
+
+3.7.4. Statement of Changes in Owners’ Equity
+      The presentation of the statement of changes in owners’ equity borrows some of the structure
+from the cash flow statement and income statement. The owners’ equity statement remembers two
+periods worth of the level of the equity stocks so that it can present a beginning and ending balance
+of each. It also accumulates reported flows for dividends and share issuance so that these flows can
+illustrate why each equity balance changed over the reporting period.
+
+4. Accounting Model Boundary and Inputs Needed
+     The accounting model is designed to interface with an existing system dynamics model of a
+business. There are three general areas over which the models will connect: Business Dynamics,
+Accounting Constants, and Financial Decisions. Many of these inputs are not required, in that they can
+be freely set to zero if a model does not include them in its boundary.
+
+4.1. Business Dynamics
+     The business dynamics area includes variables that track the strategic decisions and physical
+stocks of the company. The variables in the business dynamics area are described in Table 1.
+
+          Table 1. Description of the Business Dynamics Variables Needed to Run the Accounting Model.
+         Variable                                                   Description                                                Units       Required?
+                             The calculation of revenue requires information on the price of a unit of inventory. Service
+  Price per Inventory Unit                                                                                                  Dollars/Unit      Yes
+                             businesses can use the price charged per customer.
+                             The calculation of revenue also requires the number of inventory units being shipped to
+  Inventory Units Shipped    the customer. Service businesses can use the rate of customers having their                    Units/Year        Yes
+                             service completed.
+      Cost of Material       The cost of inventory is the sum of the cost of materials and the cost of labor. Material
+                                                                                                                            Dollars/Year      No
+        Purchases            costs should be added when the materials arrive, not when they are paid for.
+   Cost of Labor Used to     The cost of inventory is the sum of the cost of materials and the cost of labor. Labor costs
+                                                                                                                            Dollars/Year      No
+     Create Inventory        should be added when the workers complete their work, not when wages are paid.
+                             We use a current count of the number of units in inventory to determine the correct cost of
+    Units in Inventory                                                                                                         Units          Yes
+                             goods sold.
+    Selling General and
+                             Selling general and administrative expenses are a common expense reported on income
+      Administrative                                                                                                        Dollars/Year      No
+                             statements, and so the accounting model includes this variable.
+        Salary Costs
+       Research and          Research and development expenses are a common expense reported on income
+                                                                                                                            Dollars/Year      No
+       Development           statements, and so the accounting model includes this variable.
+                             Marketing expenses are a common expense reported on income statements, and so the
+     Marketing Spend                                                                                                        Dollars/Year      No
+                             accounting model includes this variable.
+     Amount Spent on         If the company purchases intangible assets from other companies, those asset purchases
+                                                                                                                            Dollars/Year      No
+     Intangible Assets       can have long-term impacts on the balance sheet and income statement.
+     Amount Spent on         Any tangible assets that last longer than a year must be depreciated, impacting both the
+                                                                                                                            Dollars/Year      No
+     Long-Term Assets        balance sheet and income statement of the company.
+Systems 2020, 8, 9                                                                                                                                     8 of 13
+
+
+
+4.2. Accounting Constants
+     These accounting constants are either delays that inform how long the accounting model
+accumulates certain variables, fractions that define where flows are accounted for, or switches that
+determine the method of accounting that is done. The variables in the accounting constants area are
+described in Table 2.
+
+               Table 2. Description of the Accounting Constants Needed to Run the Accounting Model.
+          Variable                                                   Description                                                  Units       Required?
+   Days of Credit Terms      The length of time, on average, that the company gives customers to pay for their goods
+                                                                                                                                  Days           Yes
+   Offered to Customers      or services.
+  Supplier Credit Terms in
+                             The length of time, on average, that the company’s suppliers give it to pay its bills.               Days           Yes
+           Days
+     Fraction of Sales       The percentage of all of the company’s sales that are conducted in cash rather than
+                                                                                                                              Dimensionless      No
+     Collected in Cash       being billed.
+   Fraction of Material
+                             The percentage of the company’s material purchases paid in cash rather than credit.              Dimensionless      No
+  Purchases Paid in Cash
+   Weeks Between Wage
+                             How many weeks it takes for the company to pay its workers.                                         Weeks           Yes
+       Payments
+  Intangible Asset Average   The length of time over which the company amortizes its intangibles assets. Intangibles
+                                                                                                                                  Years          Yes
+     Amortization Time       are amortized using the straight-line method.
+  Tangible Asset Average     The length of time over which the company depreciates its tangible assets. Long-term
+                                                                                                                                  Years          Yes
+    Depreciation Time        assets are depreciated using the straight-line method.
+                             The fraction of the company’s earnings before taxes that are paid to the government as
+          Tax Rate                                                                                                            Dimensionless      No
+                             corporate income taxes.
+                             Current assets and liabilities are separated based on a time period that is the greater of one
+   Definition of Current                                                                                                          Years          Yes
+                             year or the operating cycle of the company. This is almost always one year in practice.
+  Annual Reporting Switch    This switches the reporting period in the model from one year to one quarter.                    Dimensionless      Yes
+
+
+
+4.3. Financial Decisions
+     The accounting model does not specify how the decisions to finance the company’s behavior are
+made. The decision over how much money to raise, and whether to raise those funds through debt or
+equity, must be made using some decision rules that are exogenous to the model. The variables in the
+financial decisions area are described in Table 3.
+
+                 Table 3. Description of the Financial Decisions Needed to Run the Accounting Model.
+          Variable                                                   Description                                                  Units       Required?
+    Target for Months of     The model initializes the stock of cash to be equal to the level targeted by the company.
+      Operating Cash         This is done so that the model will start in equilibrium, but is not used endogenously by           Months          No
+     Outflows on Hand        the accounting model.
+                             A flow of debt issued by the company is needed to run the liabilities section of the model,
+     New Debt Issued                                                                                                           Dollars/Year      No
+                             but the decision of how to finance the company is left to the accounting model user.
+                             The length of the loans taken out by the company will impact how long it takes for the
+    Average Loan Term                                                                                                             Years          Yes
+                             debt to be paid back.
+     Debt Interest Rate      Interest on the company’s debt accrues at a constant fractional rate per year.                   Fraction/Year      No
+                             A flow of share issuance is needed to run the equity section of the model, but the decision
+       Shares Issued                                                                                                           Shares/Year       No
+                             of how to finance the company is left to the accounting model user.
+                             If the company issues stock, the model needs to know the price per share so that the
+        Share Price                                                                                                           Dollars/Share      No
+                             correct cash flow from share issuance can be accounted for.
+                             If the company decides to pay dividends, then the model wants to know the total dollar
+  Total Dividend Payment                                                                                                         Dollars         No
+                             value of the dividend payment.
+                             The model includes the option of delaying the dividend payment rather than having it
+  Dividend Payment Delay                                                                                                          Years          No
+                             occur at the start of each payment period.
+    Dividend Payment         This variable allows the model to pay dividends annually, semi-annually, quarterly, or at
+                                                                                                                                  Years          No
+        Frequency            some arbitrary frequency.
+       Initial Shares        The company’s balance sheet may have started with shares already issued, and the
+                                                                                                                                 Shares          No
+       Outstanding           number of shares issued will be recorded as the initial value of this stock.
+                             The company’s balance sheet may have started with shares already issued, and the cash
+    Initial BS Additional
+                             inflow from that share issuance would be recorded as the initial value of the stock of              Dollars         No
+       Paid in Capital
+                             additional paid in capital.
+
+
+
+      All model structures are documented in an Appendix created with the help of the SDM-Doc
+tool [29]. The model is available in the Supplementary Materials or by email request.
+                          quarterly, or at some arbitrary frequency.
+                          The company’s balance sheet may have
+      Initial Shares      started with shares already issued, and the
+                                                                                            Shares             No
+      Outstanding         number of shares issued will be recorded as
+                          the initial value of this stock.
+Systems 2020, 8, 9                                                                                                 9 of 13
+                          The company’s balance sheet may have
+        Initial BS        started with shares already issued, and the
+  Additional
+5. Discussion     Paid in cash inflow from that share issuance would                       Dollars             No
+         Capital          be recorded as the initial value of the stock of
+5.1. Tests of Model Behavior
+                          additional paid in capital.
+      Testing the validity of a system dynamics model requires assessing both its structural validity
+      Allbehavioral
+and its    model structures   are[30].
+                       validity     documented
+                                         While theindiscussion
+                                                       an Appendix    created
+                                                                  above       with
+                                                                          makes   anthe  help of the
+                                                                                      argument     for SDM‐Doc      tool
+                                                                                                         the structural
+[29]. The   model  is available  in  the  supplementary      material or by email   request.
+validity of our model because it shows how the model structures represent the accounting reporting
+process, we have not yet established whether these structures behave in a valid way. If we simulate the
+5. Discussion
+accounting model using notional inputs, we can observe that the structures of the model create correct
+outputs, providing an argument for the model’s behavioral validity.
+5.1. Tests of Model Behavior
+      Figure 3 shows the response of the model to a pulse that simulates the purchase of a $5000 piece
+      Testing the
+of equipment     at validity
+                    the startofofa year
+                                    system2. dynamics     model
+                                              If users want   therequires
+                                                                   stock ofassessing
+                                                                            long-termboth     its structural
+                                                                                          assets  to increasevalidity
+                                                                                                                 in this
+and   its behavioral   validity  [30].   While   the discussion   above  makes    an argument
+way, they should use a pulse multiplied by the total cost and divided by the size of the time step.for   the structural
+validity   of ourcost
+The historical    model   because
+                       of the        it shows
+                              equipment          how the
+                                             remains    at model  structures
+                                                           $5000 over        represent
+                                                                       the entire  15-yeartheuseful
+                                                                                              accounting      reporting
+                                                                                                      life, but the net
+process,   we have
+value decreases    asnot  yet established
+                      a straight  line over whether     these
+                                              that period.     structures
+                                                            Once          behave
+                                                                  the useful       in ended
+                                                                             life has  a validand
+                                                                                                way. theIf equipment
+                                                                                                           we simulateis
+the
+fullyaccounting   model
+       depreciated,        using notional
+                      the historical           inputs,
+                                        cost (and  the we   can observe
+                                                        accumulated      that the structures
+                                                                       depreciation   which isofnot theshown
+                                                                                                          modelhere)
+                                                                                                                  create
+                                                                                                                      is
+correct
+removed   outputs, providing
+            from the  model. an argument for the model’s behavioral validity.
+
+
+
+
+                        Figure
+                        Figure 3.
+                               3. Net
+                                  Net Plant,
+                                      Plant, Property,
+                                             Property, and
+                                                       and Equipment and Historical
+                                                           Equipment and Historical Cost.
+                                                                                    Cost.
+
+     Figure  3 shows
+     The balance       theidentity,
+                   sheet    responseor of
+                                       thethe   modelof
+                                             equality   toassets
+                                                           a pulse  thatthe
+                                                                  with     simulates   the purchase
+                                                                              sum of liabilities  plus of a $5000
+                                                                                                        equity,     piece
+                                                                                                                is one  of
+of
+theequipment   at the start
+    most important     tests of
+                             of year  2. If validity
+                                the face    users want    the stockstatements.
+                                                      of financial   of long‐termAs   assets  to increase
+                                                                                         Figure   4 shows,inourthismodel
+                                                                                                                     way,
+they should
+produces      use athat
+           output    pulse   multiplied
+                        comports    with by thisthe  total cost
+                                                 identity        and time
+                                                            at every  dividedstep.by the size of the time step. The
+historical cost of the equipment
+     A foundational                  remainsin
+                        model of accruals        at accounting
+                                                    $5000 over the   entire
+                                                                  holds   that,15‐year  useful
+                                                                                 to a first     life, but the net
+                                                                                            approximation,      thevalue
+                                                                                                                     total
+decreases
+accruals ofas a straightshould
+            a business   line over   that period.
+                                 be linearly         Once
+                                               related      thevalue
+                                                        to the  usefuloflife has ended
+                                                                          revenue   [31]. and
+                                                                                          Whilethethis
+                                                                                                    equipment     is fully
+                                                                                                       is an accounting
+theory rather than a result of an accounting rule, any reasonable model of the accounting reporting
+process should show equilibrium behavior generally agreeing with this relationship.
+     Figure 5 shows one test of this relationship where revenue in the model decreases by 25% at
+the beginning of year 2 and by an additional 25% at the beginning of year 5. While the accruals for
+accounts receivable and inventory take some time to adjust, in equilibrium, the level of both is clearly
+proportional to the size of the flow of revenue.
+depreciated, the historical cost (and the accumulated depreciation which is not shown here) is
+removed from the model.
+      The balance sheet identity, or the equality of assets with the sum of liabilities plus equity, is one
+of the most important tests of the face validity of financial statements. As Figure 4 shows, our model
+Systems 2020, 8, 9                                                                                  10 of 13
+produces output that comports with this identity at every time step.
+
+
+
+
+                                Figure 4. Balance Sheet Assets, Liabilities, and Equity.
+
+     A foundational model of accruals in accounting holds that, to a first approximation, the total
+accruals of a business should be linearly related to the value of revenue [31]. While this is an
+accounting theory rather than a result of an accounting rule, any reasonable model of the accounting
+reporting process should show
+                          Figureequilibrium   behavior
+                                 4. Balance Sheet Assets,generally
+                                                          Liabilities,agreeing with this relationship.
+                                                                       and Equity.
+                                 Figure 4. Balance Sheet Assets, Liabilities, and Equity.
+
+     A foundational model of accruals in accounting holds that, to a first approximation, the total
+accruals of a business should be linearly related to the value of revenue [31]. While this is an
+accounting theory rather than a result of an accounting rule, any reasonable model of the accounting
+reporting process should show equilibrium behavior generally agreeing with this relationship.
+
+
+
+
+            Figure 5. Changes to Receivable and Inventory Accruals Following Changes to Revenue.
+            Figure 5. Changes to Receivable and Inventory Accruals Following Changes to Revenue.
+ 5.2. Context within the Literature
+      Figure 5 shows one test of this relationship where revenue in the model decreases by 25% at the
+      Given the large number of system dynamics models in strategic management [32,33], improving
+beginning of year 2 and by an additional 25% at the beginning of year 5. While the accruals for
+ the way that accounting reporting is represented in these models has the potential to be highly impactful.
+accounts receivable and inventory take some time to adjust, in equilibrium, the level of both is clearly
+This large body of work commonly represents accounting in a relatively simplistic way [16–18]. As the
+proportional     to the   size of the   flow of revenue.
+ model we Figure
+             provide  5. Changes     to Receivable
+                          is both freely             and and
+                                             available   Inventory  Accruals
+                                                              easy to   deploy Following
+                                                                                 within anChanges   to Revenue.
+                                                                                             existing   system dynamics
+ model, we hope that future work on the system dynamics of strategic management will choose to
+5.2. Context
+       FigureWithin
+               5these
+                  shows  theone
+                              Literature
+                                  test of this relationship where revenue in the model decreases by 25% at the
+ incorporate            structures.
+ beginning
+      Given  of    year
+             the large
+      Sometimes,          2  and
+                           number
+                       inexact      byofansystem
+                                            additional
+                                   representations     of25%
+                                                    dynamics   at the beginning
+                                                               models
+                                                          accounting     in
+                                                                         maystrategicofmanagement
+                                                                                         yearappropriate
+                                                                                be entirely   5. While    theforaccruals
+                                                                                                      [32,33],   improving for
+                                                                                                                   a model’s
+ accounts
+the        receivable
+     way that
+purpose    [34,35],   butand
+                   accountingeveninventory
+                                   reporting  take   some is
+                                                           time
+                                                             an to
+                                                is represented
+                                    when accounting               inadjust,
+                                                                      theseinmodels
+                                                                 important      equilibrium,
+                                                                               focus  ofhas thethepotential
+                                                                                         a system  level of both
+                                                                                                     dynamics to be is highly
+                                                                                                                       clearly
+                                                                                                                   modeling
+ proportional     to the   size of  the  flow  of  revenue.
+project [19,36–38], authors often approach accounting by re-inventing the wheel rather than
+ incorporating previously published models such as Repenning and Sterman [25]. In almost all
+ 5.2. Context Within the Literature
+ cases where authors create their own accounting structures, they treat the instantaneous values of
+ revenue,  expenses,
+       Given  the large   and  cash flow
+                            number          as if they
+                                       of system        were identical
+                                                    dynamics   models to  in the reported
+                                                                             strategic     values of those
+                                                                                       management             concepts
+                                                                                                       [32,33],           [26].
+                                                                                                                  improving
+Very   few modelers
+ the way   that accountinghave thought      carefully
+                                    reporting          about this in
+                                                 is represented    important     distinction,
+                                                                       these models           andpotential
+                                                                                        has the    because accounting
+                                                                                                               to be highly is
+ a poorly understood, detail-oriented subfield of management, unless a simple, standard structure is
+widely adopted, generating simple accounting relationships without considering whether they are
+ operationally correct will continue to seem expedient to many system dynamics modelers.
+Systems 2020, 8, 9                                                                                   11 of 13
+
+
+
+     The lack of adoption of this approach beyond Sterman and his students [13–15], may be because
+these papers address accounting reporting as an afterthought rather than a focus of their work. At a
+minimum then, our paper can be viewed as the first example of a paper that focuses on describing
+and updating Sterman’s approach to representing accounting in a system dynamics model, offering a
+straightforward, visible, and freely available set of structures that other modelers can adopt, if it is
+appropriate for their purpose.
+     One of our central claims in arguing for the importance of these structures is that representing
+only the instantaneous flows of value on the income statement will cause a bias in simulated results.
+Table 4 reports the results of simulation tests that illustrate the size of this bias for several different
+growth paths. These simulations show that models which only calculate instantaneous flows will
+make growing firms look larger and more profitable than they should. In general, this distortion is
+larger for net income than for revenue on a percentage basis, increases as the rate of growth increases,
+and is more pronounced for exponential growth than for linear growth paths.
+
+                        Table 4. Impact of Incorrectly Representing Accounting Reporting
+
+               Treatment               Variable         Instant Value     Reported Value     Error
+            20% Step t = 1.5         Revenue t = 2         $60,000            $55,000         9.1%
+                                    Net Income t = 2       $43,555            $38,927        11.9%
+             5% p/y Ramp             Revenue t = 2         $55,000            $53,711         2.4%
+                                    Net Income t = 2       $39,104            $37,892         3.2%
+             10% p/y Ramp            Revenue t = 2         $60,000            $57,422         4.5%
+                                    Net Income t = 2       $43,130            $40,707         6.0%
+          5% p/y Exponential         Revenue t = 2         $55,259            $53,858         2.6%
+                                    Net Income t = 2       $39,322            $38,004         3.5%
+         10% p/y Exponential         Revenue t = 2         $61,070            $58,025         5.2%
+                                    Net Income t = 2       $44,033            $41,167         7.0%
+
+
+     The magnitude of the bias in revenue and net income is quite large in these tests. The size of
+the distortion supports our argument that explicitly representing the way that accounting reports
+aggregate flows of value is important, not just because this is an operational reflection of the accounting
+process but also because it makes a real difference in the numbers. Reliance on instantaneous values of
+revenues, expenses, and income is a serious limitation of work by Bianchi [19] and Yamaguchi [26] that
+otherwise does a good job of representing accounting identities.
+     There are several important extensions of our work that readers may consider pursuing. Extending
+the model so that it can be driven exclusively with publicly available accounting data would be an
+interesting way to study how the reported financial statements of public companies differ from the
+assumptions that underlie this model. Findings from such an effort could be used to improve the
+structures of the model, or to identify times when public companies are potentially managing earnings.
+Trying to replicate the financial statements of a public company could provide similar insights. These
+two extensions are better left to future work though, because they will involve making assumptions
+about the way that revenues and expenses in a company evolve, which runs counter to our current
+effort to provide a generic model of accounting that can be widely used.
+
+6. Conclusions
+     We document a model that replicates the accounting reporting process within a system dynamics
+framework, allowing future modelers to incorporate these structures into projects that would benefit
+from more robust accounting structures. While the details of the accounting reporting process may
+not be important to include in all cases, these formulations will be important when modelers want to
+establish face validity with an audience familiar with accounting reports, in cases where modelers are
+attempting to match simulated output with real accounting data, or when models include decision
+Systems 2020, 8, 9                                                                                          12 of 13
+
+
+
+rules that depend on reported accounting numbers. We hope that providing this model will increase
+the number of system dynamics projects that represent accounting reporting operationally.
+
+Supplementary Materials: A Vensim version of the Accounting Model and its Documentation are available
+online at http://www.mdpi.com/2079-8954/8/1/9/s1, or by email request to the author.
+Funding: This research received no external funding.
+Conflicts of Interest: The author declares no conflict of interest.
+
+References
+1.    Forrester, J.W. Industrial dynamics. J. Oper. Res. Soc. 1997, 48, 1037–1041. [CrossRef]
+2.    Forrester, J.W. Market Growth as Influenced by Capital Investment; Industrial Management Review: Cambridge,
+      MA, USA, 1968.
+3.    Lyneis, J.M. System dynamics for business strategy: A phased approach. Syst. Dyn. Rev. 1999, 15, 37–70.
+      [CrossRef]
+4.    Sterman, J.D. Business Dynamics: Systems Thinking and Modeling for a Complex World; Irwin/McGraw-Hill:
+      Boston, MA, USA, 2000.
+5.    Sterman, J. Interactive web-based simulations for strategy and sustainability: The MIT Sloan LearningEdge
+      management flight simulators, Part I. Syst. Dyn. Rev. 2014, 30, 89–121. [CrossRef]
+6.    Warren, K. Strategy Dynamics Essentials; Strategy Dynamics Limited: London, UK, 2015.
+7.    Warren, K. Standard cases: Standard structures: Standard models. In Proceedings of the 32nd International
+      Conference of the System Dynamics Society, Delft, The Netherlands, 20–24 July 2014.
+8.    Sterman, J. The Energy Transition and the Economy: A System Dynamics Approach. Ph.D. Thesis,
+      Massachusetts Institute of Technology, Cambridge, MA, USA, 1982.
+9.    Sterman, J. Economic vulnerability and the energy transition. In Proceedings of the 1981 System Dynamics
+      Research Conference, Institute of Management and Science, Rensselaerville, NY, USA, 14–17 October 1981.
+10.   Sterman, J.D. The economic long wave: Theory and evidence. Syst. Dyn. Rev. 1986, 2, 87–125. [CrossRef]
+11.   Sterman, J.D.; Morrison, B. People Express Management Flight Simulator; Sloan School of Management:
+      Cambridge, MA, USA, 1988.
+12.   Sterman, J.D.; Repenning, N.P.; Kofman, F. Unanticipated side effects of successful quality programs:
+      Exploring a paradox of organizational improvement. Manag. Sci. 1997, 43, 503–521. [CrossRef]
+13.   Oliva, R.; Sterman, J.D.; Giese, M. Limits to growth in the new economy: Exploring the ‘get big fast’ strategy
+      in e-commerce. Syst. Dyn. Rev. 2003, 19, 83–117. [CrossRef]
+14.   Hsueh, J.C. Dynamics of Shared Capitalism Policies in a Startup Company by Joe C. Hsueh. Ph.D. Thesis,
+      Massachusetts Institute of Technology, Cambridge, MA, USA, 2011.
+15.   Pierson, K.; Sterman, J.D. Cyclical dynamics of airline industry earnings. Syst. Dyn. Rev. 2013, 29, 129–156.
+      [CrossRef]
+16.   Warren, K. Improving strategic management with the fundamental principles of system dynamics. Syst. Dyn.
+      Rev. 2005, 21, 329–350. [CrossRef]
+17.   Strohhecker, J.; Größler, A. Implementing sustainable business strategies. Syst. Res. Behav. Sci. 2012, 29,
+      547–570. [CrossRef]
+18.   Cosenz, F. Supporting start-up business model design through system dynamics modelling. Manag. Decis.
+      2017, 55, 57–80. [CrossRef]
+19.   Bianchi, C. Introducing SD modelling into planning and control systems to manage SMEs’ growth:
+      A learning-oriented perspective. Syst. Dyn. Rev. 2002, 18, 315–338. [CrossRef]
+20.   Yamaguchi, K. Principle of accounting system dynamics–modeling corporate financial statements.
+      In Proceedings of the 21st International Conference of the System Dynamics Society, New York, NY,
+      USA, 20–24 July 2003.
+21.   Sterman, J. System dynamics at sixty: The path forward. Syst. Dyn. Rev. 2018, 34, 5–47. [CrossRef]
+22.   Morecroft, J.D. System dynamics and microworlds for policymakers. Eur. J. Oper. Res. 1988, 35, 301–320.
+      [CrossRef]
+23.   Gold, S. System-dynamics-based modeling of business simulation algorithms. Simul. Gaming 2005, 36,
+      203–218. [CrossRef]
+Systems 2020, 8, 9                                                                                              13 of 13
+
+
+
+24.   Gary, M.S.; Wood, R.E. Unpacking mental models through laboratory experiments. Syst. Dyn. Rev. 2016, 32,
+      99–127. [CrossRef]
+25.   Repenning, N.P.; Sterman, J.D. Unanticipated Side Effects of Successful Quality Programs: Technical Documentation;
+      Massachusetts Institute of Technology: Cambridge, MA, USA, 1994.
+26.   Yamaguchi, K.; Home, M. Money and Macroeconomic Dynamics Accounting System Dynamics Approach, 2nd ed.;
+      Japan Future Research Center: Awaji Island, Japan, 2013.
+27.   Ball, R.; Brown, P. An empirical evaluation of accounting income numbers. J. Account. Res. 1968, 6, 159–178.
+      [CrossRef]
+28.   Ohlson, J.A.; Zhang, X.J. Accrual accounting and equity valuation. J. Account. Res. 1998, 36, 85–111.
+      [CrossRef]
+29.   Martinez-Moyano, I.J. Documentation for model transparency. Syst. Dyn. Rev. 2012, 28, 199–208. [CrossRef]
+30.   Barlas, Y. Formal aspects of model validity and validation in system dynamics. Syst. Dyn. Rev. 1996, 12,
+      183–210. [CrossRef]
+31.   Jones, J.J. Earnings management during import relief investigations. J. Account. Res. 1991, 29, 193–228.
+      [CrossRef]
+32.   Torres, J.P.; Kunc, M.; O’brien, F. Supporting strategy using system dynamics. Eur. J. Oper. Res. 2017, 260,
+      1081–1094. [CrossRef]
+33.   Cosenz, F.; Noto, G. Applying system dynamics modelling to strategic management: A literature review.
+      Syst. Res. Behav. Sci. 2016, 33, 703–741. [CrossRef]
+34.   Agrawalla, R.K. A Systems Model to Make, Market, and Lead Your Way towards Sustained Growth. Systems
+      2017, 5, 41. [CrossRef]
+35.   Langarudi, S.P.; Bar-On, I. Utility perception in system dynamics models. Systems 2018, 6, 37. [CrossRef]
+36.   Nguyen, T.; Cook, S.; Ireland, V. Application of system dynamics to evaluate the social and economic benefits
+      of infrastructure projects. Systems 2017, 5, 29. [CrossRef]
+37.   Sana, S.S.; Ferro-Correa, J.; Quintero, A.; Amaya, R. A system dynamics model of financial flow in supply
+      chains: A case study. RAIRO Oper. Res. 2018, 52, 187–204. [CrossRef]
+38.   Mohammadifardi, H.; Knight, M.A.; Unger, A.A. Sustainability Assessment of Asset Management Decisions
+      for Wastewater Infrastructure Systems—Implementation of a System Dynamics Model. Systems 2019, 7, 34.
+      [CrossRef]
+
+                        © 2020 by the author. Licensee MDPI, Basel, Switzerland. This article is an open access
+                        article distributed under the terms and conditions of the Creative Commons Attribution
+                        (CC BY) license (http://creativecommons.org/licenses/by/4.0/).
+

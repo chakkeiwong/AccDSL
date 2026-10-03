@@ -1,0 +1,677 @@
+"""Bounded P06 context, chronology, uncertainty and resolution runtime.
+
+The profile is intentionally explicit: it uses exact ``Fraction`` arithmetic,
+Gregorian half-open periods, finite populations, and a fixed-rate unhedged bullet
+debt resolver.  Every rejection has a stable ``P06Error.code``.  This module
+checks structural and computational contracts; it does not certify accounting
+eligibility or the truth of retained source evidence.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import date, datetime, time, timedelta, timezone
+from fractions import Fraction
+import hashlib
+import json
+from types import MappingProxyType
+from typing import Any, Iterable, Mapping, Sequence
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+
+class P06Error(ValueError):
+    """A rejected P06 operation with a stable diagnostic code."""
+    def __init__(self, code: str, message: str, *, location: str = ""):
+        self.code, self.location, self.message = code, location, message
+        suffix = f" at {location}" if location else ""
+        super().__init__(f"{code}{suffix}: {message}")
+
+
+def fail(code: str, message: str, location: str = "") -> None:
+    raise P06Error(code, message, location=location)
+
+
+def _fraction(value: Any, where: str = "value") -> Fraction:
+    if isinstance(value, Fraction):
+        return value
+    if isinstance(value, bool):
+        fail("INVALID_RATIONAL", "boolean is not a scalar", where)
+    try:
+        if isinstance(value, int):
+            return Fraction(value)
+        if isinstance(value, str):
+            return Fraction(value)
+        if isinstance(value, float):
+            # Floats are rejected to keep exactness explicit.
+            fail("INEXACT_RATIONAL", "float input is not accepted", where)
+        if isinstance(value, Mapping) and set(value) == {"n", "d"}:
+            q = Fraction(int(value["n"]), int(value["d"]))
+            if int(value["d"]) <= 0:
+                fail("INVALID_RATIONAL", "denominator must be positive", where)
+            if {"n": str(q.numerator), "d": str(q.denominator)} != {
+                "n": str(value["n"]), "d": str(value["d"])
+            }:
+                fail("NONCANONICAL_RATIONAL", "fraction must be reduced", where)
+            return q
+    except (ValueError, ZeroDivisionError) as exc:
+        fail("INVALID_RATIONAL", str(exc), where)
+    fail("INVALID_RATIONAL", "expected an integer or canonical rational", where)
+
+
+def _iso_date(value: Any, where: str) -> date:
+    if not isinstance(value, str):
+        fail("INVALID_DATE", "date must be YYYY-MM-DD", where)
+    try:
+        parsed = date.fromisoformat(value)
+    except ValueError as exc:
+        fail("INVALID_DATE", str(exc), where)
+    if parsed.isoformat() != value:
+        fail("INVALID_DATE", "noncanonical ISO date", where)
+    return parsed
+
+
+def _instant(value: Any, where: str) -> datetime:
+    if not isinstance(value, str):
+        fail("INVALID_TIMESTAMP", "timestamp must be an ISO string", where)
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        fail("INVALID_TIMESTAMP", str(exc), where)
+    if parsed.tzinfo is None:
+        fail("MISSING_TIMEZONE", "timestamp requires an explicit timezone", where)
+    return parsed
+
+
+@dataclass(frozen=True)
+class Context:
+    concept: str
+    entity: str
+    perimeter: str
+    perimeter_version: str
+    basis: str
+    measurement: str
+    unit: str
+    currency: str
+    calendar: str
+    dimensions: tuple[tuple[str, str], ...] = ()
+    gross_net: str = "gross"
+    parent: str | None = None
+    group: str | None = None
+    scale: Any = None
+    sign: Any = None
+    precision: Any = None
+
+    @classmethod
+    def from_dict(cls, row: Mapping[str, Any]) -> "Context":
+        required = ("concept", "entity", "perimeter", "perimeter_version", "basis",
+                    "measurement", "unit", "currency", "calendar", "dimensions", "gross_net")
+        for key in required:
+            if key not in row:
+                fail("MISSING_CONTEXT_FIELD", f"missing {key}", "context")
+        dims = row["dimensions"]
+        if not isinstance(dims, Mapping):
+            fail("INVALID_DIMENSIONS", "dimensions must be an object", "context.dimensions")
+        if any(not isinstance(k, str) or not isinstance(v, str) for k, v in dims.items()):
+            fail("INVALID_DIMENSIONS", "dimension keys and values must be strings", "context.dimensions")
+        if row["gross_net"] not in {"gross", "net"}:
+            fail("INVALID_GROSS_NET", "gross_net must be gross or net", "context.gross_net")
+        return cls(*(str(row[k]) for k in required[:9]),
+                   tuple(sorted((str(k), str(v)) for k, v in dims.items())),
+                   str(row["gross_net"]), row.get("parent"), row.get("group"),
+                   row.get("scale"), row.get("sign"), row.get("precision"))
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "concept": self.concept, "entity": self.entity, "perimeter": self.perimeter,
+            "perimeter_version": self.perimeter_version, "basis": self.basis,
+            "measurement": self.measurement, "unit": self.unit, "currency": self.currency,
+            "calendar": self.calendar, "dimensions": dict(self.dimensions),
+            "gross_net": self.gross_net, "parent": self.parent, "group": self.group,
+            "scale": self.scale, "sign": self.sign, "precision": self.precision,
+        }
+
+
+@dataclass(frozen=True)
+class MappingRule:
+    source_concept: str
+    target_concept: str
+    kind: str = "equivalent"
+    source_context: str | None = None
+    target_context: str | None = None
+    effective_start: date | None = None
+    effective_end: date | None = None
+    conversion: str | None = None
+    provenance: tuple[str, ...] = ()
+
+    @classmethod
+    def from_dict(cls, row: Mapping[str, Any]) -> "MappingRule":
+        if not row.get("provenance"):
+            fail("MAPPING_PROVENANCE_REQUIRED", "mapping provenance is required", "mapping")
+        start = _iso_date(row["effective_start"], "mapping.effective_start") if row.get("effective_start") else None
+        end = _iso_date(row["effective_end"], "mapping.effective_end") if row.get("effective_end") else None
+        if start and end and end <= start:
+            fail("INVALID_MAPPING_WINDOW", "effective end must follow start", "mapping")
+        kind = row.get("kind", "equivalent")
+        if kind not in {"equivalent", "component", "reclassification"}:
+            fail("UNSUPPORTED_MAPPING", f"unsupported mapping kind {kind}", "mapping")
+        return cls(str(row["source_concept"]), str(row["target_concept"]), kind,
+                   row.get("source_context"), row.get("target_context"), start, end,
+                   row.get("conversion"), tuple(str(x) for x in row["provenance"]))
+
+    def active(self, when: date | None) -> bool:
+        if when is None:
+            return self.effective_start is None and self.effective_end is None
+        return ((self.effective_start is None or when >= self.effective_start) and
+                (self.effective_end is None or when < self.effective_end))
+
+
+def _context_mismatch(a: Context, b: Context) -> tuple[str, str] | None:
+    fields = ("entity", "perimeter", "perimeter_version", "basis", "measurement", "unit",
+              "currency", "calendar", "dimensions", "gross_net", "parent", "group",
+              "scale", "sign", "precision")
+    for field_name in fields:
+        if getattr(a, field_name) != getattr(b, field_name):
+            return field_name, getattr(a, field_name).__repr__() + " != " + getattr(b, field_name).__repr__()
+    if a.concept != b.concept:
+        return "concept", repr(a.concept) + " != " + repr(b.concept)
+    return None
+
+
+def _check_mapping_graph(rules: Sequence[MappingRule]) -> None:
+    graph: dict[str, set[str]] = {}
+    for rule in rules:
+        graph.setdefault(rule.source_concept, set()).add(rule.target_concept)
+    state: dict[str, int] = {}
+    def visit(node: str) -> None:
+        state[node] = 1
+        for nxt in graph.get(node, ()):
+            if state.get(nxt) == 1:
+                fail("MAPPING_CYCLE", "mapping graph contains a cycle", node)
+            if state.get(nxt) != 2:
+                visit(nxt)
+        state[node] = 2
+    for node in graph:
+        if state.get(node, 0) == 0:
+            visit(node)
+
+
+def compatible_context(source: Context | Mapping[str, Any], target: Context | Mapping[str, Any],
+                       rules: Sequence[MappingRule | Mapping[str, Any]] = (),
+                       *, at: str | date | None = None) -> dict[str, Any]:
+    """Return a mapping witness or reject a context mismatch."""
+    a = source if isinstance(source, Context) else Context.from_dict(source)
+    b = target if isinstance(target, Context) else Context.from_dict(target)
+    when = _iso_date(at, "mapping.at") if isinstance(at, str) else at
+    parsed = [x if isinstance(x, MappingRule) else MappingRule.from_dict(x) for x in rules]
+    _check_mapping_graph(parsed)
+    mismatch = _context_mismatch(a, b)
+    if mismatch is None:
+        return {"status": "compatible", "kind": "identity", "source": a.as_dict(), "target": b.as_dict()}
+    field_name, detail = mismatch
+    if field_name == "concept":
+        eligible = [r for r in parsed if r.source_concept == a.concept and r.target_concept == b.concept and r.active(when)]
+        if not eligible:
+            fail("CONTEXT_MISMATCH", f"concept mismatch {detail} requires an explicit active mapping", field_name)
+        rule = eligible[0]
+        if rule.kind == "equivalent" and (rule.conversion or "") not in {"", "none"}:
+            fail("UNSUPPORTED_MEASUREMENT_CONVERSION", "equivalent mapping cannot convert measurements", field_name)
+        if rule.source_context and rule.source_context != a.entity:
+            fail("MAPPING_SOURCE_CONTEXT_MISMATCH", "mapping source context does not match", field_name)
+        if rule.target_context and rule.target_context != b.entity:
+            fail("MAPPING_TARGET_CONTEXT_MISMATCH", "mapping target context does not match", field_name)
+        return {"status": "compatible", "kind": rule.kind, "source": a.as_dict(), "target": b.as_dict(),
+                "provenance": list(rule.provenance)}
+    codes = {"perimeter": "PARENT_GROUP_MISMATCH", "perimeter_version": "PERIMETER_VERSION_MISMATCH",
+             "basis": "BASIS_MISMATCH", "measurement": "MEASUREMENT_MISMATCH", "currency": "CURRENCY_MISMATCH",
+             "calendar": "CALENDAR_MISMATCH", "gross_net": "GROSS_NET_MISMATCH", "dimensions": "DIMENSION_MISMATCH",
+             "scale": "UNSUPPORTED_MEASUREMENT_CONVERSION", "sign": "DISPLAY_METADATA_MISMATCH", "precision": "DISPLAY_METADATA_MISMATCH",
+             "entity": "ENTITY_MISMATCH", "unit": "UNIT_MISMATCH", "parent": "PARENT_GROUP_MISMATCH", "group": "PARENT_GROUP_MISMATCH"}
+    fail(codes.get(field_name, "CONTEXT_MISMATCH"), f"context field mismatch: {detail}", field_name)
+
+
+def map_context(source: Context | Mapping[str, Any], target: Context | Mapping[str, Any],
+                rules: Sequence[MappingRule | Mapping[str, Any]] = (), *, at: str | date | None = None) -> dict[str, Any]:
+    return compatible_context(source, target, rules, at=at)
+
+
+def check_partition(population: Iterable[str], members: Mapping[str, Iterable[str]], *,
+                    residual: Mapping[str, Any] | None = None, axis: str = "") -> dict[str, Any]:
+    pop = list(population)
+    if len(pop) != len(set(pop)):
+        fail("DUPLICATE_POPULATION", "population identifiers must be unique", axis)
+    universe = set(pop)
+    seen: dict[str, str] = {}
+    normalized: dict[str, list[str]] = {}
+    for label, values in members.items():
+        vals = list(values)
+        if len(vals) != len(set(vals)):
+            fail("DUPLICATE_MEMBER", f"member repeated in {label}", axis)
+        unknown = set(vals) - universe
+        if unknown:
+            fail("UNKNOWN_MEMBER", f"members outside population: {sorted(unknown)}", axis)
+        for value in vals:
+            if value in seen:
+                fail("OVERLAPPING_PARTITION", f"{value} occurs in {seen[value]} and {label}", axis)
+            seen[value] = label
+        normalized[label] = vals
+    missing = universe - set(seen)
+    if missing:
+        if not residual:
+            fail("INCOMPLETE_PARTITION", f"uncovered members: {sorted(missing)}", axis)
+        residual_values = set(residual.get("members", ()))
+        if residual_values != missing:
+            fail("INVALID_RESIDUAL", "residual must identify exactly uncovered members", axis)
+        if not residual.get("known", False):
+            fail("UNKNOWN_RESIDUAL", "unknown residual cannot yield an exact total", axis)
+    if residual and set(residual.get("members", ())) & set(seen):
+        fail("OVERLAPPING_PARTITION", "residual overlaps a named member", axis)
+    return {"status": "partitioned", "axis": axis, "population": pop, "members": normalized,
+            "residual": dict(residual) if residual else None, "covered": len(seen), "complete": not missing}
+
+
+def _availability(value: Any, *, timezone_name: str | None, date_only_policy: str | None, where: str) -> datetime:
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            fail("MISSING_TIMEZONE", "timestamp requires timezone", where)
+        return value
+    if isinstance(value, date):
+        value = value.isoformat()
+    if not isinstance(value, str):
+        fail("INVALID_AVAILABILITY", "availability must be date or timestamp", where)
+    if "T" in value or " " in value:
+        return _instant(value, where)
+    d = _iso_date(value, where)
+    if date_only_policy != "next_local_midnight":
+        fail("DATE_ONLY_POLICY_REQUIRED", "date-only availability requires next_local_midnight", where)
+    if not timezone_name:
+        fail("TIMEZONE_REQUIRED", "named timezone required for date-only availability", where)
+    try:
+        zone = ZoneInfo(timezone_name)
+    except ZoneInfoNotFoundError:
+        fail("UNKNOWN_TIMEZONE", timezone_name, where)
+    return datetime.combine(d + timedelta(days=1), time.min, zone)
+
+
+def _validate_assertions(assertions: Sequence[Mapping[str, Any]]) -> dict[str, Mapping[str, Any]]:
+    rows = {str(a.get("id")): a for a in assertions}
+    if len(rows) != len(assertions) or None in rows:
+        fail("DUPLICATE_ASSERTION", "assertion identifiers must be unique", "assertions")
+    for row in assertions:
+        if not row.get("source"):
+            fail("MISSING_SOURCE", "assertion source is required", str(row.get("id")))
+        for parent in row.get("supersedes", []):
+            if parent not in rows:
+                fail("DANGLING_SUPERSESSION", f"unknown superseded assertion {parent}", str(row.get("id")))
+            if parent == row["id"]:
+                fail("SUPERSESSION_CYCLE", "assertion cannot supersede itself", str(row["id"]))
+    state: dict[str, int] = {}
+    def visit(key: str) -> None:
+        state[key] = 1
+        for parent in rows[key].get("supersedes", []):
+            if state.get(parent) == 1:
+                fail("SUPERSESSION_CYCLE", "supersession graph contains a cycle", key)
+            if state.get(parent) != 2:
+                visit(parent)
+        state[key] = 2
+    for key in rows:
+        if state.get(key, 0) == 0:
+            visit(key)
+    return rows
+
+
+def select_evidence(assertions: Sequence[Mapping[str, Any]], cutoff: str | datetime | date, *,
+                    mode: str = "latest_available", system_as_of: str | datetime | date | None = None,
+                    timezone_name: str | None = None, date_only_policy: str | None = None,
+                    harmonisations: Sequence[Mapping[str, Any]] = ()) -> dict[str, Any]:
+    rows = _validate_assertions(assertions)
+    if mode not in {"original", "latest_available", "harmonised"}:
+        fail("UNSUPPORTED_EVIDENCE_VIEW", mode, "mode")
+    if isinstance(cutoff, datetime):
+        cut = cutoff if cutoff.tzinfo else fail("MISSING_TIMEZONE", "cutoff requires timezone", "cutoff")
+    else:
+        cut = _availability(cutoff, timezone_name=timezone_name, date_only_policy=date_only_policy, where="cutoff")
+    asof = None
+    if system_as_of is not None:
+        asof = system_as_of if isinstance(system_as_of, datetime) else _availability(system_as_of, timezone_name=timezone_name, date_only_policy=date_only_policy, where="system_as_of")
+    eligible = []
+    unresolved = []
+    for row in assertions:
+        if row.get("available") in (None, "unknown", "not_established"):
+            unresolved.append({"id": row["id"], "reason": "source_availability_unestablished"})
+            continue
+        try:
+            available = _availability(row["available"], timezone_name=timezone_name, date_only_policy=date_only_policy, where=f"{row['id']}.available")
+            ingested = _availability(row.get("ingested", row["available"]), timezone_name=timezone_name, date_only_policy=date_only_policy, where=f"{row['id']}.ingested")
+        except P06Error:
+            raise
+        if available <= cut and (asof is None or ingested <= asof):
+            eligible.append(row)
+        if row.get("historical_byte_vintage") in {"not_established_by_this_inventory", "unknown"}:
+            unresolved.append({"id": row["id"], "reason": "historical_byte_vintage_unestablished"})
+    eligible_ids = {x["id"] for x in eligible}
+    if mode == "original":
+        selected = [x for x in eligible if not any(parent in eligible_ids for parent in x.get("supersedes", []))]
+        # Roots are the first available assertions in a lineage: remove rows that supersede them.
+        selected = [x for x in selected if not x.get("supersedes")]
+    else:
+        superseded = {parent for x in eligible for parent in x.get("supersedes", [])}
+        selected = [x for x in eligible if x["id"] not in superseded]
+    transformations = []
+    if mode == "harmonised":
+        for h in harmonisations:
+            source = h.get("source_id")
+            if source not in {x["id"] for x in selected}:
+                continue
+            if h.get("review_decision") != "Accept" or not h.get("provenance"):
+                fail("HARMONISATION_NOT_REVIEWED", "harmonisation requires accepted review and provenance", str(source))
+            if h.get("changes_basis") or h.get("changes_measurement"):
+                fail("HARMONISATION_CONTEXT_CHANGE", "harmonisation cannot replace basis or measurement", str(source))
+            transformations.append({"source_id": source, "target_id": h.get("target_id", source), "provenance": list(h["provenance"])})
+    return {"mode": mode, "cutoff": str(cutoff), "selected": [dict(x) for x in selected],
+            "selected_ids": [x["id"] for x in selected], "eligible_ids": sorted(eligible_ids),
+            "unresolved": unresolved, "transformations": transformations}
+
+
+def _row_context(row: Mapping[str, Any]) -> str:
+    return json.dumps(row.get("context", {}), sort_keys=True, separators=(",", ":"))
+
+
+def subtract_cumulative(total: Mapping[str, Any], earlier: Mapping[str, Any], *,
+                        revision_compatibility: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    for label, row in (("total", total), ("earlier", earlier)):
+        if row.get("kind") != "cumulative":
+            fail("YTD_REQUIRES_CUMULATIVE", f"{label} must be cumulative", label)
+        if row.get("period", {}).get("end") is None:
+            fail("INVALID_PERIOD", "cumulative period requires exclusive end", label)
+    if total.get("concept") != earlier.get("concept"):
+        fail("CONCEPT_MISMATCH", "flow concepts differ", "ytd")
+    if _row_context(total) != _row_context(earlier):
+        fail("CONTEXT_MISMATCH", "cumulative contexts differ", "ytd")
+    if total.get("calendar") != earlier.get("calendar"):
+        fail("CALENDAR_MISMATCH", "calendars differ", "ytd")
+    tp, ep = total["period"], earlier["period"]
+    if tp.get("start") != ep.get("start"):
+        fail("PERIOD_START_MISMATCH", "cumulative periods must share a start", "ytd")
+    tend, eend = _iso_date(tp["end"], "total.period.end"), _iso_date(ep["end"], "earlier.period.end")
+    if eend >= tend:
+        fail("NONNESTED_PERIOD", "earlier period must end before total", "ytd")
+    tstart = _iso_date(tp["start"], "total.period.start")
+    if _iso_date(ep["start"], "earlier.period.start") != tstart:
+        fail("PERIOD_START_MISMATCH", "period starts differ", "ytd")
+    tr = total.get("revision_id"); er = earlier.get("revision_id")
+    if not tr or not er:
+        allowed = revision_compatibility and revision_compatibility.get("accepted")
+        if not allowed or not revision_compatibility.get("scope") or not revision_compatibility.get("evidence"):
+            fail("REVISION_UNKNOWN", "subtraction requires explicit revision identities or a reviewed scoped exception", "ytd")
+    if tr != er:
+        allowed = revision_compatibility and revision_compatibility.get("accepted")
+        if not allowed or not revision_compatibility.get("scope") or not revision_compatibility.get("evidence"):
+            fail("REVISION_INCOMPATIBLE", "subtraction requires a common revision or reviewed scoped exception", "ytd")
+    amount = _fraction(total["amount"], "total.amount") - _fraction(earlier["amount"], "earlier.amount")
+    return {"kind": "flow", "amount": amount, "period": {"start": ep["end"], "end": tp["end"]},
+            "concept": total["concept"], "context": total.get("context"), "calendar": total["calendar"],
+            "provenance": {"operation": "cumulative_subtraction", "total_id": total.get("id"), "earlier_id": earlier.get("id"),
+                           "revision_id": tr or er}}
+
+
+_SUPPORTED_MEASUREMENT_METHODS = {"direct", "discounted_cash_flow", "observable_input"}
+_SUPPORTED_MEASURES = {"real_world", "pricing"}
+
+
+def _validate_joint_law(law: Any, where: str) -> list[dict[str, Any]]:
+    atoms = law.get("atoms") if isinstance(law, Mapping) else law
+    if not isinstance(atoms, list) or not atoms:
+        fail("INVALID_JOINT_LAW", "finite joint law needs atoms", where)
+    ids = [a.get("id") for a in atoms]
+    if any(not isinstance(x, str) for x in ids) or len(ids) != len(set(ids)):
+        fail("INVALID_JOINT_LAW", "atom IDs must be distinct", where)
+    hypotheses = [a.get("hypothesis") for a in atoms]
+    if any(not isinstance(h, Mapping) or not h or any(isinstance(v, (Mapping, list, tuple)) for v in h.values()) for h in hypotheses):
+        fail("INVALID_JOINT_LAW", "complete scalar hypotheses are required", where)
+    if len({json.dumps(h, sort_keys=True) for h in hypotheses}) != len(hypotheses):
+        fail("INVALID_JOINT_LAW", "joint hypotheses overlap", where)
+    weights = [_fraction(a.get("weight"), where) for a in atoms]
+    if any(w < 0 for w in weights) or sum(weights, Fraction()) != 1:
+        fail("INVALID_JOINT_LAW", "weights must be nonnegative and sum to one", where)
+    return [dict(a) for a in atoms]
+
+
+def admit_uncertainty(record: Mapping[str, Any], *, known_records: Mapping[str, Mapping[str, Any]] | None = None,
+                      available_information: Iterable[str] = ()) -> dict[str, Any]:
+    kind = record.get("kind")
+    fields = {
+        "ExtractionReading": ("source", "locator", "review_decision"),
+        "HistoricalFact": ("evidence", "reason"),
+        "AccountingElection": ("package", "permitted_treatments", "election", "effective_date", "eligibility_evidence"),
+        "MeasurementEstimate": ("method", "measurement_date", "inputs"),
+        "BehaviourPolicy": ("policy", "information_set", "decision_time"),
+        "FutureInnovation": ("driver", "future_period", "scenario", "joint_law", "measure"),
+    }
+    if kind not in fields:
+        fail("UNKNOWN_UNCERTAINTY_CATEGORY", f"unsupported category {kind!r}", "kind")
+    for key in ("id", "scope", "provenance", "dependencies") + fields[kind]:
+        if key not in record or (key != "dependencies" and not record[key]):
+            fail("MISSING_ADMISSION_FIELD", f"missing admission field {key}", str(record.get("id", "")))
+    if not isinstance(record["provenance"], list) or not isinstance(record["dependencies"], list):
+        fail("INVALID_ADMISSION_LIST", "provenance and dependencies must be lists", str(record["id"]))
+    known_records = known_records or {}
+    for dep in record["dependencies"]:
+        if dep not in known_records:
+            fail("DANGLING_DEPENDENCY", f"unknown dependency {dep}", str(record["id"]))
+    graph = {key: list(value.get("dependencies", ())) for key, value in known_records.items()}
+    graph[str(record["id"])] = list(record["dependencies"])
+    state: dict[str, int] = {}
+    def visit(node: str) -> None:
+        state[node] = 1
+        for dep in graph.get(node, ()):
+            if state.get(dep) == 1:
+                fail("CYCLIC_DEPENDENCY", "uncertainty dependencies contain a cycle", str(record["id"]))
+            if state.get(dep) != 2:
+                visit(dep)
+        state[node] = 2
+    for node in graph:
+        if state.get(node, 0) == 0:
+            visit(node)
+    if kind == "ExtractionReading" and record["review_decision"] != "Accept":
+        fail("READING_NOT_ACCEPTED", "reading requires accepted review", str(record["id"]))
+    if kind == "AccountingElection" and record["election"] not in record["permitted_treatments"]:
+        fail("TREATMENT_NOT_PERMITTED", "election is outside package permissions", str(record["id"]))
+    if kind == "MeasurementEstimate":
+        if record["method"] not in _SUPPORTED_MEASUREMENT_METHODS:
+            fail("UNSUPPORTED_ESTIMATION_METHOD", record["method"], str(record["id"]))
+        if not isinstance(record["inputs"], Mapping) or any(v is None for v in record["inputs"].values()):
+            fail("MISSING_ESTIMATE_INPUT", "measurement inputs must be available", str(record["id"]))
+    if kind == "BehaviourPolicy":
+        if not isinstance(record["information_set"], list):
+            fail("INVALID_INFORMATION_SET", "information_set must be a list", str(record["id"]))
+        if any(str(x).startswith("future_realised:") for x in record["information_set"]):
+            fail("FUTURE_INFORMATION_LEAKAGE", "future realised outcome is unavailable at decision time", str(record["id"]))
+    if kind == "FutureInnovation":
+        if record["measure"] not in _SUPPORTED_MEASURES:
+            fail("INCOMPATIBLE_PROBABILITY_MEASURE", "measure must be real_world or pricing", str(record["id"]))
+        _validate_joint_law(record["joint_law"], str(record["id"]))
+    return dict(record)
+
+
+def guard_information_view(view: Mapping[str, Any], *, event_time: str | date, request: str = "exogenous_stress") -> dict[str, Any]:
+    if request in {"observational_conditioning", "structural_intervention"}:
+        fail("UNSUPPORTED_INFORMATION_OPERATION", request, "information_view")
+    visible = set(view.get("visible", ()))
+    future_stress = set(view.get("future_announced", ()))
+    hidden = set(view.get("future_realised", ()))
+    if hidden & visible or any(str(x).startswith("future_realised:") for x in visible):
+        fail("FUTURE_INFORMATION_LEAKAGE", "future realised outcomes cannot be visible", "information_view")
+    if not view.get("measure_id"):
+        fail("MISSING_PROBABILITY_MEASURE", "information view needs an explicit measure", "information_view")
+    if view.get("pricing_measure_id") and view["pricing_measure_id"] == view["measure_id"]:
+        fail("INCOMPATIBLE_PROBABILITY_MEASURE", "real-world and pricing measures must be distinct", "information_view")
+    return {"status": "accepted", "event_time": str(event_time), "visible": sorted(visible),
+            "future_announced": sorted(future_stress), "future_realised_hidden": sorted(hidden),
+            "measure_id": view["measure_id"], "selection_changes_history": False}
+
+
+@dataclass(frozen=True)
+class DebtConstituent:
+    id: str
+    principal: Fraction
+    rate: Fraction
+    maturity: Fraction
+    reset: str = "fixed"
+    hedge: str = "unhedged"
+
+    @classmethod
+    def from_dict(cls, row: Mapping[str, Any]) -> "DebtConstituent":
+        principal = _fraction(row.get("principal"), f"{row.get('id')}.principal")
+        if principal < 0:
+            fail("NEGATIVE_PRINCIPAL", "principal must be nonnegative", str(row.get("id")))
+        return cls(str(row["id"]), principal, _fraction(row.get("rate"), f"{row.get('id')}.rate"),
+                   _fraction(row.get("maturity"), f"{row.get('id')}.maturity"), str(row.get("reset", "fixed")), str(row.get("hedge", "unhedged")))
+
+
+def _query_signature(query: Mapping[str, Any]) -> str:
+    return hashlib.sha256(json.dumps(query, sort_keys=True, default=str, separators=(",", ":")).encode()).hexdigest()
+
+
+def interest_certificate(constituents: Sequence[DebtConstituent], target_rate: Fraction | str | int,
+                         horizon: Fraction | str | int) -> dict[str, Fraction]:
+    T = _fraction(horizon, "horizon")
+    if T < 0:
+        fail("INVALID_HORIZON", "horizon must be nonnegative", "horizon")
+    rstar = _fraction(target_rate, "target_rate")
+    exact = sum((c.principal * c.rate * T for c in constituents), Fraction())
+    approx = sum((c.principal * rstar * T for c in constituents), Fraction())
+    bound = T * sum((c.principal * abs(c.rate - rstar) for c in constituents), Fraction())
+    difference = abs(exact - approx)
+    if difference > bound:
+        fail("INVALID_APPROXIMATION_CERTIFICATE", "triangle-inequality bound is violated", "approximation")
+    return {"exact": exact, "approximate": approx, "error": difference, "bound": bound}
+
+
+def resolve_bullet_debt(constituents: Sequence[DebtConstituent | Mapping[str, Any]], query: Mapping[str, Any], *,
+                       previous: Mapping[str, Any] | None = None,
+                       approximation: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    rows = [x if isinstance(x, DebtConstituent) else DebtConstituent.from_dict(x) for x in constituents]
+    if not rows:
+        fail("EMPTY_DEBT_SET", "at least one constituent is required", "debt")
+    required = ("contract", "context", "evidence_view", "horizon", "scenario", "requested_outputs", "accrual_convention", "group_by")
+    for key in required:
+        if key not in query:
+            fail("MISSING_QUERY_FIELD", f"missing {key}", "query")
+    signature = _query_signature(query)
+    if previous is not None and previous.get("query_signature") != signature:
+        fail("STALE_RESULT", "query changed; grouping sufficiency must be revalidated", "query")
+    horizon = _fraction(query["horizon"], "query.horizon")
+    if horizon < 0:
+        fail("INVALID_HORIZON", "horizon must be nonnegative", "query.horizon")
+    if query["scenario"] not in {"base", "announced_stress"}:
+        fail("UNSUPPORTED_SCENARIO", str(query["scenario"]), "query.scenario")
+    if query["accrual_convention"] != "simple_actual_fraction":
+        fail("UNSUPPORTED_ACCRUAL", str(query["accrual_convention"]), "query.accrual_convention")
+    if not isinstance(query["requested_outputs"], list) or not query["requested_outputs"]:
+        fail("MISSING_OUTPUT_REQUEST", "requested_outputs must be nonempty", "query")
+    unsupported_outputs = set(query["requested_outputs"]) - {"interest", "principal"}
+    if unsupported_outputs:
+        fail("UNSUPPORTED_OUTPUT", f"unsupported outputs: {sorted(unsupported_outputs)}", "query.requested_outputs")
+    dimensions = ("rate", "maturity", "reset", "hedge")
+    group_by = set(query["group_by"])
+    if not group_by <= set(dimensions):
+        fail("UNSUPPORTED_GROUP_DIMENSION", "group_by contains unsupported dimension", "query.group_by")
+    for dim in dimensions:
+        values = {getattr(c, dim) for c in rows}
+        if len(values) > 1 and dim not in group_by:
+            fail("GROUPING_INSUFFICIENT", f"dimension {dim} varies but is not grouped", "query.group_by")
+    for c in rows:
+        if c.hedge != "unhedged":
+            fail("HEDGED_DEBT_UNSUPPORTED", "only unhedged debt is supported", c.id)
+        if c.reset != "fixed":
+            fail("RESET_UNSUPPORTED", "only fixed reset is supported", c.id)
+        if c.maturity < horizon:
+            fail("MATURITY_CROSSING", "maturity crosses the requested horizon", c.id)
+    groups: dict[tuple[Any, ...], list[DebtConstituent]] = {}
+    for c in rows:
+        key = tuple(getattr(c, dim) if dim in group_by else "homogeneous" for dim in dimensions)
+        groups.setdefault(key, []).append(c)
+    output: dict[str, Any] = {}
+    if "interest" in query["requested_outputs"]:
+        output["interest"] = sum((c.principal * c.rate * horizon for c in rows), Fraction())
+    if "principal" in query["requested_outputs"]:
+        output["principal"] = sum((c.principal for c in rows), Fraction())
+    result = {"status": "resolved", "query_signature": signature,
+              "query": json.loads(json.dumps(query, default=str)), "groups": [
+                  {"key": [str(x) for x in key], "constituent_ids": [c.id for c in members],
+                   "principal": sum((c.principal for c in members), Fraction()),
+                   "interest": sum((c.principal * c.rate * horizon for c in members), Fraction())}
+                  for key, members in groups.items()],
+              "outputs": output, "constituent_ids": [c.id for c in rows], "fresh": True}
+    if approximation is not None:
+        if not approximation.get("scope") or approximation.get("scope") != "fixed_rate_interest" or not approximation.get("evidence"):
+            fail("APPROXIMATION_EVIDENCE_REQUIRED", "declared scope and evidence are required", "approximation")
+        cert = interest_certificate(rows, approximation.get("target_rate"), horizon)
+        tolerance = _fraction(approximation.get("tolerance"), "approximation.tolerance")
+        declared = _fraction(approximation.get("error_bound"), "approximation.error_bound")
+        if tolerance < 0 or declared < cert["error"] or declared > tolerance or declared < cert["bound"]:
+            fail("APPROXIMATION_BOUND_INVALID", "declared bound must cover exact error and certificate within tolerance", "approximation")
+        result["approximation"] = {k: str(v) for k, v in cert.items()} | {"tolerance": str(tolerance), "declared_error_bound": str(declared)}
+    return result
+
+
+@dataclass
+class P06Engine:
+    contexts: dict[str, Context] = field(default_factory=dict)
+    mappings: list[MappingRule] = field(default_factory=list)
+    assertions: list[dict[str, Any]] = field(default_factory=list)
+    uncertainty: dict[str, dict[str, Any]] = field(default_factory=dict)
+    current_results: dict[str, dict[str, Any]] = field(default_factory=dict)
+    preserved_results: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+    def add_context(self, identifier: str, context: Context | Mapping[str, Any]) -> None:
+        if identifier in self.contexts:
+            fail("DUPLICATE_CONTEXT", identifier, identifier)
+        self.contexts[identifier] = context if isinstance(context, Context) else Context.from_dict(context)
+
+    def add_mapping(self, rule: MappingRule | Mapping[str, Any]) -> None:
+        self.mappings.append(rule if isinstance(rule, MappingRule) else MappingRule.from_dict(rule))
+        _check_mapping_graph(self.mappings)
+
+    def add_assertion(self, row: Mapping[str, Any]) -> None:
+        self.assertions.append(dict(row))
+        _validate_assertions(self.assertions)
+
+    def revise(self, assertion_id: str, replacement: Mapping[str, Any]) -> None:
+        rows = {x["id"]: x for x in self.assertions}
+        if assertion_id not in rows:
+            fail("UNKNOWN_ASSERTION", assertion_id, "revision")
+        replacement = dict(replacement)
+        replacement.setdefault("supersedes", [assertion_id])
+        self.assertions = [replacement if x["id"] == replacement["id"] else x for x in self.assertions] + ([] if replacement["id"] in rows else [replacement])
+        _validate_assertions(self.assertions)
+        self.current_results.clear()
+
+    def preserve_result(self, result_id: str = "current") -> dict[str, Any]:
+        """Retain an earlier result view while current evidence is revised."""
+        if result_id not in self.current_results:
+            fail("UNKNOWN_RESULT", result_id, "preserve_result")
+        self.preserved_results[result_id] = self.current_results[result_id]
+        return self.preserved_results[result_id]
+
+    def evaluate(self, request: Mapping[str, Any]) -> dict[str, Any]:
+        evidence = select_evidence(self.assertions, request["cutoff"], mode=request.get("evidence_view", "latest_available"),
+                                   system_as_of=request.get("system_as_of"), timezone_name=request.get("timezone"),
+                                   date_only_policy=request.get("date_only_policy"), harmonisations=request.get("harmonisations", ()))
+        source_context = self.contexts[request["source_context"]]
+        target_context = self.contexts[request["target_context"]]
+        mapping = compatible_context(source_context, target_context, self.mappings, at=request.get("as_of"))
+        admitted = []
+        for row in request.get("uncertainty", ()):
+            admitted.append(admit_uncertainty(row, known_records=self.uncertainty))
+            self.uncertainty[row["id"]] = admitted[-1]
+        resolution = resolve_bullet_debt(request["constituents"], request["query"], approximation=request.get("approximation"))
+        result = {"evidence": evidence, "mapping": mapping, "uncertainty": admitted, "resolution": resolution,
+                  "input_sha256": hashlib.sha256(json.dumps(request, sort_keys=True, default=str).encode()).hexdigest()}
+        key = request.get("result_id", "current")
+        self.current_results[key] = result
+        return result
+
+
+__all__ = ["P06Error", "Context", "MappingRule", "compatible_context", "map_context", "check_partition",
+           "select_evidence", "subtract_cumulative", "admit_uncertainty", "guard_information_view",
+           "DebtConstituent", "interest_certificate", "resolve_bullet_debt", "P06Engine"]

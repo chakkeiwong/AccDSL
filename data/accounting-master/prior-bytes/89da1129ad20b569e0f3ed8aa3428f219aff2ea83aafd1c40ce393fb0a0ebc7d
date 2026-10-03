@@ -1,0 +1,70 @@
+# Context, chronology, and resolution profile v1
+
+This bounded profile implements P06 engineering behaviour for exact rational
+quantities, Gregorian half-open dates, finite populations, and nonnegative
+unhedged bullet debt. It is a versioned runtime contract, not an accounting
+eligibility or forecast-validity claim.
+
+## Public operations
+
+`Context` identifies concept, entity, perimeter and version, basis, measurement,
+unit/currency, calendar, dimensions, and gross/net status. `compatible_context`
+requires all fields to match or an explicit dated `MappingRule`; parent/group,
+perimeter, basis, measurement, currency, calendar, dimension, and gross/net
+mismatches are rejected. Mapping cycles, expired rules, and unsupported conversion
+kinds fail with stable diagnostic codes.
+
+`check_partition` independently checks finite member sets. Members must be disjoint
+and cover the declared population, or an explicitly named residual must be present;
+an unknown residual cannot produce an exact total. Population and axis signatures
+prevent combining alternative classifications.
+
+`select_evidence` validates a supersession DAG and filters assertions by filing
+availability and optional ingestion cutoff before selecting `original`,
+`latest_available`, or `harmonised`. Date-only availability requires an explicit
+named timezone and `next_local_midnight` policy. Unknown retained-byte vintage is
+returned as unresolved. Harmonisation preserves source IDs and transformation
+provenance.
+
+`subtract_cumulative` computes an exact scalar flow only when concept, context,
+calendar, start, nested exclusive ends, and revision compatibility agree. It
+rejects instant values and incompatible vintages; reviewed exceptions must name
+scope and evidence.
+
+`admit_uncertainty` supports exactly six categories: ExtractionReading,
+HistoricalFact, AccountingElection, MeasurementEstimate, BehaviourPolicy, and
+FutureInnovation. It validates dependencies and category-specific fields. Unknown
+categories, unsupported methods/treatments, invalid finite joint laws, and
+incompatible measures fail explicitly.
+
+`resolve_bullet_debt` retains constituents and validates a query signature over
+contract, context, evidence view, horizon, scenario, requested outputs, and accrual
+convention. Any changed signature requires fresh validation. The supported exact
+case is fixed-rate unhedged bullet debt with no maturity crossing. The optional
+fixed-rate approximation requires nonnegative horizon, a declared tolerance, and a
+certificate using the triangle inequality:
+`|sum(P_i r_i T)-sum(P_i) r* T| <= T sum(P_i |r_i-r*|)`.
+
+## Evidence and default audit
+
+| Choice | Provenance | Failure mode | Smallest diagnostic | Status |
+|---|---|---|---|---|
+| Exact `Fraction` arithmetic | Core 0 and P03 rational helpers | float rounding changes subtraction or bounds | independent Fraction oracle | reviewed bounded default |
+| Gregorian half-open dates | Core 0 temporal fixture | inclusive end or calendar mismatch | nested interval tests | reviewed bounded default |
+| Date-only next-local-midnight | approved P06 plan | UTC/local boundary selects wrong assertion | named-zone boundary test | explicit policy |
+| Finite partition populations | approved P06 plan | proof string hides overlap or omission | set enumeration | convenience test input |
+| Six uncertainty categories | P03 admission fields and approved plan | malformed evidence admitted | positive plus semantic negative per category | bounded support |
+| Bullet-debt grouping | P04 additive reference and approved plan | stale/query-insufficient grouping | query signature and constituent oracle | bounded hypothesis |
+| Approximation certificate | approved plan derivation | tolerance claimed without error bound | exact difference versus bound | optional reviewed path |
+
+Synthetic fixtures test structure only. P01 source records with
+`historical_byte_vintage=not_established_by_this_inventory` remain unresolved for
+historical byte selection. Passing this profile does not establish professional
+accounting treatment, empirical forecast validity, or human acceptance.
+
+## Criterion map
+
+MC02/MC05: context and partition checks; MC06/MC07: chronology and YTD revision
+selection; MC10: category admission; MC11/MC14: query-dependent grouping and
+approximation. Tests in `tests/test_accounting_p06.py` provide independent expected
+sets and arithmetic.

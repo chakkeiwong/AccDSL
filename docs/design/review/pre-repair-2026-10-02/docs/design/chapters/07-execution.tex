@@ -1,0 +1,224 @@
+\chapter{Reconstruction and execution procedures}
+\label{ch:execution}
+
+\section{Ingest, reconcile and construct histories}
+
+The historical procedure starts with a filing manifest. It records documents,
+reporting dates, publication dates, revisions and expected statements and
+notes. Tagged filings are parsed through an XBRL adapter; PDF and HTML sources
+are segmented into text, tables, captions and references. The original bytes
+and extraction output remain immutable. Re-running an improved extractor
+creates a new extraction version with links to the same source.
+
+For each table, the importer first resolves headers, units, signs, periods and
+dimensions. It then proposes concept mappings. A deterministic validator checks
+subtotal arithmetic, duplicate facts, comparative consistency and cross-note
+references. Every proposed repair creates a new reading. The system may suggest
+that an OCR value is 10 rather than 70, but only a reviewed correction or an
+explicit alternative allows that reading into a validated model.
+
+Reconciliation proceeds from local totals to movement schedules. A debt bridge
+may contain opening debt, issuance, repayment, acquired debt, interest
+accretion, currency effects, fair-value changes and closing debt. Every
+component receives a movement type. An unexplained residual is stored as a
+residual with a source and period; it is not automatically classified as
+repayment or issuance. A model can introduce an unknown decomposition of that
+residual, subject to evidence and economic constraints.
+
+The reconstruction engine then performs the following finite procedure within
+a declared model scope:
+\begin{enumerate}
+\item Build shared variables for observations, opening states, contract terms
+and supported movement amounts. Attach original rounding domains.
+\item Add identities, roll-forwards, account restrictions, contractual
+relationships and cross-period links. Add each semantic reading as a condition
+on the same joint model.
+\item Propagate types, units, intervals and simple equalities. Reject context
+mismatches before invoking a numerical solver.
+\item Ask the solver for feasibility. On infeasibility, return a sufficient
+conflicting subset of constraints, its source spans and model assumptions.
+A solver's conflict core need not be the smallest possible explanation.
+\item Retain finite alternatives and continuous solution families symbolically.
+Materialise example histories only when needed for review or execution.
+\item Check whether each requested simulation has sufficient economic state.
+Missing maturities, reset dates or cohort composition become declared
+assumptions or explicit unresolved inputs.
+\end{enumerate}
+
+Unrestricted journal enumeration would be unbounded: arbitrary offsetting
+transactions can be inserted without changing reports. The model therefore
+declares allowed event types, time resolution, relevant accounts, lot/cohort
+resolution and limits on latent contract instances. These limits describe the
+represented family; they are not evidence that all real possibilities were
+searched. The compiler canonicalises syntactic duplicates and equivalences
+established by its supported rewrite rules. It does not decide arbitrary
+economic equivalence. Probability measures attach to declared economic
+hypotheses or parameters, never to a count of encodings; adding a duplicate
+representation therefore cannot create extra probability mass or coverage.
+
+The first implementation uses symbolic linear bridges and finite structural
+choices. Nonlinear economic models can be evaluated on feasible states through
+plugins. A solver timeout preserves the unresolved family and returns
+\code{SolverIncomplete}; it does not prune the family as impossible. Search
+budgets belong to run configuration and are recorded with the results.
+
+\section{Condition a run without rewriting history}
+
+A run selects an evidence view and cutoff, a historical family, a forecast
+starting date, scenario definitions, accounting packages, management policies,
+output queries and numerical settings. A run may use a concrete history,
+an exact symbolic family, a finite set of conditional histories, or weighted
+draws from a declared distribution. The output records which mode was used.
+
+Suppose no debt maturity is disclosed. An analyst may run a conditional case
+that assumes all debt matures after the forecast horizon. The run is valid
+under that assumption even though the historical representation remains
+incomplete. The interface must display the assumption next to the result and
+provide sensitivity cases when the assumption is material. It must not label
+the assumed maturity as a discovered historical fact.
+
+Management behaviour normally uses only information available at the decision
+date. A perfect-foresight stress case is a separate, explicitly labelled
+policy. Scenarios should share the same underlying innovations when estimating
+paired differences where appropriate, with stable stream identifiers so
+branch order does not change the draws. Common random numbers improve the
+comparability of paired simulations; they do not imply that every branch has
+the same economic event counts or shock distribution.
+
+\section{Schedule and commit events}
+
+Each event carries an economic occurrence time, accrual interval when relevant,
+settlement time, entity, contract or cohort identifier, currency, inputs and
+provenance. Its ordering key consists of date, declared phase, dependency edges
+and a deterministic tie identifier. The reference phases are: opening and
+scheduled contractual changes; market observations and rate resets; business
+events and decisions; accrual and measurement; settlement; period closing and
+reporting. A contract can require a more specific dependency. These phases are
+an engineering starting point, not a universal description of market timing.
+
+Two events may share a tie order only if their order is either specified or
+irrelevant to the result. If payment before remeasurement and payment after
+remeasurement differ, an unresolved ordering is a model ambiguity or an error.
+The engine does not conceal it behind alphabetical event IDs.
+
+\begin{lstlisting}
+execute_event(event, state, run_context):
+    verify prerequisites and information availability
+    resolve applicable measurement and recognition rules
+    compute proposed economic changes and measurements
+    compute proposed journal batch(es)
+    validate types, contexts, balance, constraints and idempotency
+    atomically commit state, journals and explanation edges
+    return new state, emitted dependent events, diagnostics
+\end{lstlisting}
+
+The atomic unit includes the economic state and its accounting effects.
+If posting fails, neither state changes. A repeated event ID with identical
+inputs returns the existing result; the same ID with different inputs is a
+conflict. Consolidation runs after entity books reach the required date and
+stores its adjustments separately. A failure in one scenario branch cannot
+mutate another branch's state.
+
+\section{Funding, tax and other simultaneous relations}
+
+Some financial models have circular dependencies. Interest affects taxable
+profit; tax and investment affect funding needs; funding affects interest.
+The reference executor first tries to resolve these through explicit timing.
+For example, beginning-of-period debt can determine current interest, with
+new borrowing affecting the next accrual period. That is acceptable only when
+the model's timing assumption is stated and appropriate.
+
+Where the economic model genuinely requires simultaneous decisions, the
+dependency graph identifies the strongly connected component and delegates it
+to a declared equation or optimisation solver. The solver must return a
+solution, residuals, admissibility checks and uniqueness or multiplicity
+status. A contraction iteration requires a justified convergence condition;
+an arbitrary fixed iteration count is not a mathematical solution. Multiple
+admissible equilibria become alternatives when material. No solution produces
+a model outcome such as financing failure, or an explicit numerical failure,
+depending on the cause.
+
+Funding policy must include available facilities, limits, covenants, collateral
+and allowed capital actions. The program cannot issue unlimited debt to keep
+cash positive. An inability to meet payments may be a legitimate default
+outcome. Default ends or changes contractual and accounting processes under
+the relevant event rules; it is not quietly discarded as a bad simulation draw.
+
+\section{Worked example: identical history, different future journals}
+
+Return to the company in Chapter~\ref{ch:purpose}. Immediately after the
+historical interest payment and closing, cash is 95, debt is 100 and equity
+is $-5$. There are no other assets, liabilities or transactions. Next year's
+expense is 5 in the all-fixed branch and 7 in the all-floating branch under
+the rate shock. The generated entries and closing statements are:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule Output & All fixed & All floating\\\midrule
+Debit interest expense / credit cash &5&7\\
+Closing cash &90&88\\
+Closing debt &100&100\\
+Current-year profit & $-5$ & $-7$\\
+Closing equity after profit transfer &$-10$&$-12$\\
+Cash change &$-5$&$-7$\\\bottomrule
+\end{tabular}
+\end{center}
+The balance-sheet identity holds in each branch: $90=100-10$ and
+$88=100-12$. The demonstration reporting profile classifies interest paid as
+operating cash flow. A different permitted reporting profile changes that
+classification, while preserving the cash movement and source event. This
+example proves the intended distinction and its arithmetic; it does not
+estimate the probability that either debt structure describes a real company.
+
+\section{Worked example: a bond has several relevant amounts}
+
+A two-period zero-coupon bond raises cash of 100 and promises 110.25 at maturity.
+Assume a 5\% effective rate per period, no transaction costs, no default, and
+amortised-cost treatment under a demonstration rule. The effective-interest
+schedule follows directly from $100(1.05)^2=110.25$:
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule Date & Opening liability & Interest accretion & Closing liability\\\midrule
+Issue &0&0&100\\
+End of period 1 &100&5&105\\
+End of period 2, before payment &105&5.25&110.25\\
+Redemption &110.25&0&0\\\bottomrule
+\end{tabular}
+\end{center}
+Issuance debits cash and credits the liability by 100. Each accretion debits
+interest expense and credits the liability. Redemption debits the liability
+and credits cash by 110.25. Legal face amount, carrying amount and market
+fair value remain separate fields. A market-rate shock may change fair value
+without changing this contractual payment schedule or this demonstration
+amortised-cost path.
+
+Cash-flow reporting uses the actual payment event and its economic components;
+the annual accretion is non-cash. The applicable reporting package decides how
+to classify the maturity payment, rather than inferring it solely from the
+liability debit. Fees, modifications, early redemption, embedded options,
+hedges and foreign currency require additional event and measurement rules.
+
+Ordinary equity issuance similarly separates cash, share quantity and legal
+capital. Ten new shares at 12, with par value 1, produce cash of 120, share
+capital of 10 and premium of 110 under a simple par-value profile. Shares
+outstanding increase by ten units. Direct issuance costs of 3 reduce the
+specified equity account and cash under the chosen illustrative treatment.
+The accounting rule and the cost's eligibility must be explicit; this example
+does not prescribe every jurisdiction's treatment.
+
+\section{Reporting and explanations}
+
+The reporting engine produces the balance sheet, income statement, comprehensive
+income, cash-flow statement, changes in equity and note schedules when the
+necessary modules are present. Each output carries its basis, perimeter,
+period, scenario and interpretation. A comparative table cannot combine an
+original prior-year figure and a restated current-year comparative without
+displaying that choice.
+
+An explanation is a dependency graph with typed edges: extracted from,
+interpreted as, assumed by, constrained by, generated by, measured by,
+posted by, aggregated into and supersedes. A cash-flow line must lead back
+to payment events; a fair-value movement must lead back to valuation inputs;
+a consolidated amount must show eliminations. A provenance path establishes
+how a result was obtained. It does not by itself establish that the underlying
+economic model is correct.

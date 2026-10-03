@@ -1,0 +1,122 @@
+Perform a bounded packet-only code review. Do not use tools, read files, run commands, or reread project/mission history.
+The user authorised this precise review scope. All code and relevant evidence for this packet are supplied below; identify any missing interface assumption explicitly.
+The engineering target is resumable sequential phase execution with actual repair, fresh reviewed plans, preservation of evidence and reusable narrow command approval.
+The accepted source panel has 192 reports; source checks and scoped internal phase acceptance must never close all accounting, scientific or human-acceptance gaps.
+Find concrete defects in the assigned scope and its stated interfaces. Test counts are supporting control-plane evidence, not accounting correctness.
+Review accidental failures, ordinary handled interruption, stale state and honest acceptance. The controller and workers are trusted; hostile multi-tenant actors, deliberate detachment and an uncatchable kill between fork and durable registration are outside the stated containment guarantee. Do not add those threat models as new acceptance requirements.
+Return the required JSON: AGREE only with issues=[]; otherwise REVISE with precise code-level findings and repair instructions. Put nonblocking limitations in residuals.
+Evidence entries may name only the supplied real file paths. Do not invent tests or assertions. Keep the response under 1500 words.
+Return a JSON object with ALL these exact keys and array/string types (fill with actual findings; no extra keys): {"verdict": "AGREE", "summary": "Replace with the actual finding", "steps": [], "assumptions": [], "checks": [], "evidence": [], "issues": [], "residuals": [], "next_actions": []}
+{
+  "scope": {
+    "id": "controller",
+    "name": "Review the master program",
+    "criteria": [
+      "The current controller and tests implement the reviewed master plan without false completion or approval bypass.",
+      "Repairs execute; verification and review rerun; next plans incorporate actual findings.",
+      "Processes are bounded, writes recover atomically, one writer runs, and frozen evidence is protected."
+    ],
+    "assigned_scope": "process-lifecycle"
+  },
+  "packet": {
+    "packet_only": true,
+    "scope": "process-lifecycle",
+    "files": [
+      "scripts/run_accounting_master.py",
+      "scripts/accounting_master_support.py",
+      "tests/test_accounting_master.py"
+    ],
+    "code": {
+      "exclusive_lock": "def exclusive_lock(path):\n    path.parent.mkdir(parents=True, exist_ok=True)\n    with path.open('a+') as stream:\n        try:\n            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)\n        except BlockingIOError as exc:\n            raise MasterError('Another master runner holds the single-writer lock') from exc\n        stream.seek(0)\n        stream.truncate()\n        stream.write(str(os.getpid()))\n        stream.flush()\n        try:\n            yield stream.fileno()\n        finally:\n            fcntl.flock(stream, fcntl.LOCK_UN)",
+      "terminate_group": "def terminate_group(proc):\n    if getattr(proc, '_master_cleanup_done', False):\n        return\n    original = getattr(proc, '_master_identity', None)\n    current = process_identity(proc.pid)\n    if original is None:\n        if proc.returncode is not None:\n            return  # Already reaped by the caller: do not signal a reusable PID.\n        original = current\n    if current is None:\n        if live_group_members(proc.pid):\n            raise ContinuationVeto('Group leader was reaped before cleanup; ownership needs inspection')\n    elif not original or current['start_ticks'] != original['start_ticks'] or current['pgid'] != proc.pid:\n        raise ContinuationVeto('Process-group identity changed; unrelated processes were not signalled')\n    else:\n        os.killpg(proc.pid, signal.SIGTERM)\n        deadline = time.monotonic() + 3\n        while live_group_members(proc.pid) and time.monotonic() < deadline:\n            time.sleep(.02)\n        # The leader remains unreaped, including when it is a zombie. Its PID\n        # therefore cannot be reused between the ownership check and this signal.\n        current = process_identity(proc.pid)\n        if current and current['start_ticks'] == original['start_ticks']:\n            if live_group_members(proc.pid):\n                os.killpg(proc.pid, signal.SIGKILL)\n        deadline = time.monotonic() + 3\n        while live_group_members(proc.pid) and time.monotonic() < deadline:\n            time.sleep(.02)\n        if live_group_members(proc.pid):\n            raise ContinuationVeto('Group did not become quiescent after escalation; recovery remains unresolved')\n    proc.wait(timeout=5)\n    proc._master_cleanup_done = True",
+      "process_identity": "def process_identity(pid):\n    try:\n        fields = (Path('/proc') / str(pid) / 'stat').read_text().rsplit(') ', 1)[1].split()\n        return {'pid': pid, 'state': fields[0], 'pgid': int(fields[2]), 'start_ticks': int(fields[19])}\n    except FileNotFoundError:\n        return None",
+      "live_group_members": "def live_group_members(pgid):\n    members = []\n    for entry in Path('/proc').iterdir():\n        if entry.name.isdigit():\n            try:\n                info = process_identity(int(entry.name))\n            except (PermissionError, ProcessLookupError):\n                continue\n            if info and info['pgid'] == pgid and info['state'] != 'Z':\n                members.append(info)\n    return members",
+      "open_pidfd": "def open_pidfd(pid):\n    if hasattr(os, 'pidfd_open'):\n        return os.pidfd_open(pid)\n    # This host's Python lacks the wrapper, but Linux x86-64 exposes syscall\n    # 434, verified in /usr/include/x86_64-linux-gnu/asm/unistd_64.h. See the\n    # Linux man-pages pidfd_open(2) syscall example. Other ABIs fail explicitly.\n    if sys.platform != 'linux' or platform.machine() != 'x86_64':\n        raise ContinuationVeto('No reviewed pidfd_open binding for this platform')\n    libc = ctypes.CDLL(None, use_errno=True)\n    libc.syscall.restype = ctypes.c_long\n    result = libc.syscall(ctypes.c_long(434), ctypes.c_int(pid), ctypes.c_uint(0))\n    if result < 0:\n        error = ctypes.get_errno()\n        raise OSError(error, os.strerror(error))\n    return int(result)",
+      "catch_termination": "def catch_termination():\n    previous = signal.getsignal(signal.SIGTERM)\n    def stopped(signum, frame):\n        raise KeyboardInterrupt('Supervisor received SIGTERM')\n    signal.signal(signal.SIGTERM, stopped)\n    try:\n        yield\n    finally:\n        signal.signal(signal.SIGTERM, previous)",
+      "bounded_process": "def bounded_process(argv, cwd, log, seconds, *, prompt=None, heartbeat=None, stopped=None, on_spawn=None, pass_fds=()):\n    \"\"\"Bound the initial process group. Workers are trusted not to detach jobs.\"\"\"\n    log.parent.mkdir(parents=True, exist_ok=True)\n    started = time.monotonic()\n    prompt_file = log.with_suffix('.stdin.txt')\n    if prompt is not None:\n        prompt_file.write_text(prompt)\n    if threading.active_count() != 1:\n        raise ContinuationVeto('The reviewed process launcher requires a single-threaded supervisor')\n    with log.open('wb') as stream, (prompt_file.open('rb') if prompt is not None else open(os.devnull, 'rb')) as input_stream:\n        proc = None\n        old_mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTERM, signal.SIGINT})\n        try:\n            # Defer handled interruption until ownership is durably registered.\n            # Restore the child's inherited mask before exec. This preexec path\n            # is restricted above to a dedicated single-threaded supervisor.\n            proc = subprocess.Popen(argv, cwd=cwd, stdin=input_stream,\n                                    stdout=stream, stderr=subprocess.STDOUT, start_new_session=True,\n                                    env={**os.environ, 'PYTHONUNBUFFERED': '1', 'CUDA_VISIBLE_DEVICES': '-1'}, pass_fds=pass_fds,\n                                    preexec_fn=lambda: signal.pthread_sigmask(signal.SIG_SETMASK, old_mask))\n            proc._master_identity = process_identity(proc.pid)\n            if on_spawn:\n                on_spawn(proc)\n            signal.pthread_sigmask(signal.SIG_SETMASK, old_mask)\n            last_beat = started\n            reason = None\n            # WNOWAIT observes exit without reaping the group leader. Cleanup\n            # retains an unambiguous ownership anchor until all signalling ends.\n            while os.waitid(os.P_PID, proc.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:\n                elapsed = time.monotonic() - started\n                if elapsed >= seconds:\n                    reason = 'timeout'\n                elif log.stat().st_size > 16 * 1024 * 1024:\n                    reason = 'output_limit'\n                elif stopped and stopped():\n                    reason = 'stop_requested'\n                if reason:\n                    break\n                if heartbeat and time.monotonic() - last_beat >= 20:\n                    heartbeat(round(elapsed, 1))\n                    last_beat = time.monotonic()\n                time.sleep(0.1)\n            terminate_group(proc)\n            if log.stat().st_size > 16 * 1024 * 1024:\n                reason = 'output_limit'\n            return {'argv': argv, 'exit_code': proc.returncode, 'reason': reason,\n                    'wall_seconds': round(time.monotonic() - started, 3), 'log': str(log)}\n        finally:\n            try:\n                if proc is not None:\n                    terminate_group(proc)\n            finally:\n                signal.pthread_sigmask(signal.SIG_SETMASK, old_mask)",
+      "stop_recovered_group": "def stop_recovered_group(previous):\n    \"\"\"Signal positively identified processes using stable Linux pidfds.\"\"\"\n    leader = process_identity(previous['pid'])\n    if not leader or any(leader[k] != previous[k] for k in ['pid', 'pgid', 'start_ticks']):\n        raise ContinuationVeto('Recovered worker ownership changed before signalling')\n    if not hasattr(signal, 'pidfd_send_signal'):\n        raise ContinuationVeto('Stable process signalling is unavailable; inspect the prior worker')\n    descriptors = []\n    try:\n        for member in live_group_members(previous['pgid']):\n            try:\n                fd = open_pidfd(member['pid'])\n            except ProcessLookupError:\n                continue\n            current = process_identity(member['pid'])\n            if not current or current['start_ticks'] != member['start_ticks'] or current['pgid'] != previous['pgid']:\n                os.close(fd)\n                continue\n            descriptors.append(fd)\n        anchor = process_identity(previous['pid'])\n        if not anchor or any(anchor[k] != previous[k] for k in ['pid', 'pgid', 'start_ticks']):\n            raise ContinuationVeto('Saved group lifetime changed while collecting recovery handles; no signal was sent')\n        for sig in [signal.SIGTERM, signal.SIGKILL]:\n            for fd in descriptors:\n                try:\n                    signal.pidfd_send_signal(fd, sig)\n                except ProcessLookupError:\n                    pass\n            time.sleep(.1)\n    finally:\n        for fd in descriptors:\n            os.close(fd)\n    if live_group_members(previous['pgid']):\n        raise ContinuationVeto('Prior worker group still has live members after stable-identity cleanup')",
+      "Master.recover_process": "def recover_process(self):\n        path = self.home / 'active-process.json'\n        if not path.exists():\n            return\n        saved = load_json(path)\n        if saved.get('status') == 'finished':\n            return\n        previous = saved.get('identity')\n        if not previous or previous['pgid'] != previous['pid']:\n            raise ContinuationVeto('Incomplete prior-worker identity; inspect before resuming')\n        current = process_identity(previous['pid'])\n        if current and current['start_ticks'] != previous['start_ticks']:\n            saved.update(status='finished', recovery='Prior PID has been reused; unrelated process was not signalled')\n        elif current:\n            if current['pgid'] != previous['pgid']:\n                raise ContinuationVeto('Prior worker changed process group; inspect before resuming')\n            stop_recovered_group(previous)\n            saved.update(status='finished', recovery='Terminated positively identified prior worker group')\n        elif live_group_members(previous['pgid']):\n            raise ContinuationVeto('Prior worker leader is absent but its group remains; ownership requires inspection')\n        else:\n            saved.update(status='finished', recovery='Prior process group is no longer active')\n        atomic_json(path, saved)\n        self.event('prior_worker_recovered', recovery=saved['recovery'])"
+    },
+    "interfaces": {
+      "worker_modes": "implement/repair workspace-write; other roles read-only; approval never; sequential, no nested workers",
+      "protection": "check_protection verifies current hashes of frozen release/source/research/snapshot evidence and controller files; worker checks state/grant before and after",
+      "acceptance": "tests must run and pass; result review must AGREE; required deliverables and evidence must exist; all original gaps stay open",
+      "repair_limits": "two repairs per invocation; one attempt of each eligible phase per run; unchanged external blocks skipped until changed inputs or explicit retry",
+      "preservation": "before editable work, preserve source/manuscript bytes; delta goes to the result reviewer; deleted tracked files fail",
+      "controller_failure": "requires supervisor repair and fresh read-only review, never implicit approval",
+      "lifecycle_scope": "Initial process group only. Trusted workers must not detach; this is an explicit unenforced assumption, not cgroup/malicious-worker containment.",
+      "internal_helpers": "Only supervisor children with the live inherited lock, matching parent identity, one-use capability, active phase and fresh output may run. Parent retains the lock; child closes its validated copy.",
+      "source_protection": "Frozen source/release/PDF/snapshot hashes are checked across child and worker failure paths. CLI query helpers are bounded read-only local configuration inspections."
+    },
+    "verification": {
+      "passed": true,
+      "tests": 44,
+      "error": null,
+      "sha256": {
+        "scripts/run_accounting_master.py": "60bdffad032fcd1ad43289586a3e1604d3f2421c6aacf5c4bbbd5b2dca139e6f",
+        "scripts/accounting_master_support.py": "bdb4ac8756d01364303c313b540df4d625a2af499ecc380bdac75b3e47e72e54",
+        "scripts/accounting_master_catalog.json": "564f3ae9f7ddd8bab5b492ee6404174c5f36cc0fa0cab6a97c6d3382e95199b7",
+        "scripts/accounting_master_response.schema.json": "aad6a6c3c2cdfc98728bf450c0350e4b3aff3ea32664038bd73b3f8b7ce7cd6c",
+        "tests/test_accounting_master.py": "f4a922852961321ed2c8d0090c29018999af29f88b59f27fdbb77ddc7a5f7976",
+        "docs/plans/accounting-master-program.md": "647835c7ad7006ed6efc16fb7a61a8ac8b0a83d420fcc622c2e3d6a2b22ba590"
+      },
+      "log": "data/accounting-master/runs/20261002T164110-7313e7d0/controller-tests.log",
+      "checked_at": "2026-10-02T16:41:15.981340+00:00"
+    },
+    "test_names": [
+      "test_executes_real_repair_before_acceptance",
+      "test_next_phase_plan_uses_actual_previous_result",
+      "test_resume_does_not_repeat_accepted_work",
+      "test_changed_evidence_invalidates_dependents",
+      "test_zero_checks_cannot_pass_even_with_agree",
+      "test_missing_evidence_cannot_be_accepted",
+      "test_plan_review_repairs_before_implementation",
+      "test_failed_plan_review_never_executes",
+      "test_external_block_does_not_stop_independent_phase",
+      "test_unchanged_external_block_is_not_retried_on_resume",
+      "test_previous_next_actions_reach_next_phase_packet",
+      "test_preexisting_bytes_are_preserved_before_edit",
+      "test_successful_slices_do_not_close_mission_or_gaps",
+      "test_controller_mutation_is_continuation_veto",
+      "test_implementation_cannot_rewrite_approved_plan",
+      "test_worker_cannot_forge_supervisor_state",
+      "test_worker_failure_still_checks_integrity",
+      "test_malformed_worker_response_still_checks_integrity",
+      "test_test_process_integrity_veto_is_not_downgraded_to_failed_check",
+      "test_interrupted_phase_replans_before_resuming",
+      "test_exclusive_writer_lock",
+      "test_atomic_json_and_duplicate_key_rejection",
+      "test_evidence_path_escape_is_rejected",
+      "test_dependency_cycle_is_rejected",
+      "test_schema_validity_does_not_accept_wrong_role_verdict",
+      "test_process_timeout_is_bounded",
+      "test_nonreading_process_cannot_block_large_prompt",
+      "test_successful_parent_exit_also_terminates_descendant",
+      "test_startup_identity_failure_cleans_created_child",
+      "test_sigterm_during_registration_is_deferred_then_cleaned",
+      "test_unquiescent_group_after_escalation_vetoes_before_reaping",
+      "test_recovery_group_reuse_is_vetoed_before_signalling",
+      "test_resume_terminates_identified_prior_worker",
+      "test_pid_reuse_does_not_signal_unrelated_process",
+      "test_sigterm_of_supervisor_cleans_its_child",
+      "test_subprocess_shell_characters_are_literal_arguments",
+      "test_zero_test_suite_fails",
+      "test_allow_rule_has_only_fixed_entrypoint",
+      "test_worker_config_overrides_existing_bare_key",
+      "test_worker_config_rejects_ambiguous_override_key",
+      "test_atomic_rule_publication_preserves_conflicting_rule",
+      "test_rule_publication_failure_does_not_leave_partial_target",
+      "test_direct_internal_invocation_is_rejected",
+      "test_real_child_inherits_lock_and_consumes_grant_once"
+    ],
+    "controller_hashes": {
+      "scripts/run_accounting_master.py": "60bdffad032fcd1ad43289586a3e1604d3f2421c6aacf5c4bbbd5b2dca139e6f",
+      "scripts/accounting_master_support.py": "bdb4ac8756d01364303c313b540df4d625a2af499ecc380bdac75b3e47e72e54",
+      "scripts/accounting_master_catalog.json": "564f3ae9f7ddd8bab5b492ee6404174c5f36cc0fa0cab6a97c6d3382e95199b7",
+      "scripts/accounting_master_response.schema.json": "aad6a6c3c2cdfc98728bf450c0350e4b3aff3ea32664038bd73b3f8b7ce7cd6c",
+      "tests/test_accounting_master.py": "f4a922852961321ed2c8d0090c29018999af29f88b59f27fdbb77ddc7a5f7976",
+      "docs/plans/accounting-master-program.md": "647835c7ad7006ed6efc16fb7a61a8ac8b0a83d420fcc622c2e3d6a2b22ba590"
+    },
+    "reviewed_evidence_contract_and_permission_scope": "\n\nQuestion: does the master execute bounded phases, actually repair failures,\nrefresh reviewed next-phase plans, preserve evidence and resume without\nduplicate successful work or repeated approvals?\n\nComparator: the current manual sequence and the frozen corpus/reference\nbaseline. This is control-plane engineering, not a method-performance study.\n\nPrimary pass criteria: executable runner; exact allow-rule match; tested\nphase state transitions; a real failed verification followed by executed\nrepair and successful recheck; next-plan refresh containing the observed\noutcome; a real bounded run with durable logs/state and honest residuals.\n\nVetoes: zero-test false pass; stale plan/control hashes; invalid worker\nresponses; accepted results without deterministic checks/review; lost evidence;\nconcurrent writers; unbounded child processes; arbitrary shell command injection;\npromotion of all G1–G18 from phase-level evidence.\n\nExplanatory diagnostics: check/test counts, elapsed time, file counts and\nnumber of repairs. They are not accounting accuracy or forecast metrics.\n\nArtifacts: scripts/run_accounting_master.py; scripts/accounting_master_catalog.json;\ntests/test_accounting_master.py; docs/plans/accounting-master-program.md;\ndata/accounting-master/{state.json,events.jsonl,next-plan.json,next-plan.md,runs/};\ndocs/design/review/accounting-master-review.md; docs/plans/accounting-master-checkpoint.md.\n\n## Upfront permission package\n\nThe reviewed entrypoint will install only:\n~/.codex/rules/accdsl-master.rules, matching\npython3 /home/chakwong/python/AccDSL/scripts/run_accounting_master.py\n\nThe same exact prefix will be used for install-and-run, run/resume, status,\nreview and refresh. The installer validates positive and negative matches\nbefore installation and preserves existing rules. User settings and existing\napprovals are not overwritten. Runtime-managed policy can still reject an\naction; an allow file cannot override it.\n\nThe single approval request will expressly cover sequential sandboxed Codex\nimplementation and read-only review workers for this master program, bounded\npublic-source research and project-local code/test/artifact work. No paid data,\nnew accounts, professional engagement, outbound messages, deployment, global\npackage installation, permission bypass, Git initialization or source deletion.\nNetwork/worker startup failures are diagnosed once and recorded.\nWorker invocations disable unrelated apps/plugins/hooks/MCP startup and nested\nagent capability for this command only. The configured model and authentication\nare retained. Workers may not start detached jobs. Child process-group identity\nis persisted; SIGTERM triggers cleanup, and resume checks for an existing prior\nworker before it permits another writer. Ambiguous ownership stops for a scoped\ndiagnostic rather than signalling an unrelated process.\n\nThe lifecycle guarantee is limited to the initial process group and ordinary\nsupervisor interruption/restart. Workers are trusted not to escape that group\nwith detached jobs; this is an explicit, unenforced operating assumption, not\ncgroup containment or protection against a malicious worker. A cgroup-based\nrunner would be a separate future hardening task if that threat model is needed.\nThe current scope does not require new host privileges for cgroup management.\nHandled signals are deferred across launch, identity capture and registration;\nthe dedicated supervisor is single-threaded. Uncatchable termination between\nfork and durable registration is outside this containment guarantee and is not\nrepresented as safe resumable completion.\n\nInternal helper calls require a one-use capability and the inherited supervisor\nlock. They cannot be started directly or overwrite a previous attempt's result.\nThe helper closes its descriptor after validating the grant; the parent retains\nthe lock, and restart cleans a positively identified abandoned worker before\nanother phase runs. Stable pidfds protect recovery signalling from PID reuse.\nRule publication is serialized and atomic, with an idempotent installation\nreceipt for recovery between publication and the authorization record.\n\n"
+  }
+}

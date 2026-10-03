@@ -1,0 +1,499 @@
+                                               TableBank: A Benchmark Dataset for Table Detection and Recognition
+
+                                                   Minghao Li1 , Lei Cui2 , Shaohan Huang2 , Furu Wei2 , Ming Zhou2 , Zhoujun Li1
+                                                         1
+                                                         State Key Lab of Software Development Environment, Beihang University, Beijing, China
+                                                                               2
+                                                                                 Microsoft Research Asia, Beijing, China
+                                                         {liminghao1630, lizj}@buaa.edu.cn, {lecu, shaohanh, fuwei, mingzhou}@microsoft.com
+
+                                                                                                     Abstract
+                                        We present TableBank, a new image-based table detection and recognition dataset built with novel weak supervision from Word and
+                                        Latex documents on the internet. Existing research for image-based table detection and recognition usually fine-tunes pre-trained
+                                        models on out-of-domain data with a few thousand human-labeled examples, which is difficult to generalize on real-world applications.
+                                        With TableBank that contains 417K high quality labeled tables, we build several strong baselines using state-of-the-art models with
+                                        deep neural networks. We make TableBank publicly available and hope it will empower more deep learning approaches in the ta-
+                                        ble detection and recognition task. The dataset and models are available at https://github.com/doc-analysis/TableBank.
+arXiv:1903.01949v2 [cs.CV] 6 Jul 2020
+
+
+
+
+                                        Keywords: TableBank, table detection and recognition, weak supervision, image-based deep learning network
+
+
+                                                             1.   Introduction                              els. It is well known that ImageNet (Russakovsky et al.,
+                                        Table detection and recognition is an important task                2015) and COCO (Lin et al., 2014) are two popular image
+                                        in many document analysis applications as tables often              classification and object detection datasets that are built in
+                                        present essential information in a structured way. It is a          a crowdsourcing way, while they are both expensive and
+                                        difficult problem due to varying layouts and formats of the         time-consuming to create, taking months or years for large
+                                        tables as shown in Figure 1. Conventional techniques for            benchmark sets. Fortunately, there exists a large number of
+                                        table analysis have been proposed based on the layout anal-         digital documents on the internet such as Word and Latex
+                                        ysis of documents. Most of these techniques fail to gener-          source files. It is instrumental if some weak supervision can
+                                        alize because they rely on handcrafted features which are           be applied to these online documents for labeling tables.
+                                        not robust to layout variations. Recently, the rapid develop-       To address the need for a standard open-domain table
+                                        ment of deep learning in computer vision has significantly          benchmark dataset, we propose a novel weak supervision
+                                        boosted the data-driven image-based approaches for table            approach to automatically create the TableBank, which is
+                                        analysis. The advantage of the image-based table analy-             orders of magnitude larger than existing human-labeled
+                                        sis lies in its robustness to document types, making no as-         datasets for table analysis. Distinct from the traditional
+                                        sumption of whether scanned images of pages or natively-            weakly supervised training set, our approach can obtain not
+                                        digital document formats. It can be applied to a wide va-           only large scale but also high quality training data. Nowa-
+                                        riety of document types to extract tables including PDF,            days, there are a great number of electronic documents on
+                                        HTML, PowerPoint as well as their scanned copies. Al-               the web such as Microsoft Word (.docx) and Latex (.tex)
+                                        though some document types may have structured tabular              files. These online documents contain mark-up tags for ta-
+                                        data, we still need a general approach to detect tables on          bles in their source code by nature. Intuitively, we can ma-
+                                        different kinds of documents. Therefore, large-scale end-           nipulate these source code by adding bounding boxes us-
+                                        to-end deep learning models make it feasible for achieving          ing the mark-up language within each document. For Word
+                                        better performance.                                                 documents, the internal Office XML code can be modified
+                                        Existing deep learning based table analysis models usually          where the borderline of each table is identified. For La-
+                                        fine-tune pre-trained object detection models with several          tex documents, the tex code can be also modified where
+                                        thousand human-labeled training instances, while still diffi-       bounding boxes of tables are recognized. In this way, high
+                                        cult to scale up in real-world applications. For instance, we       quality labeled data is created for a variety of domains such
+                                        found that models trained on data similar to Figure 1a 1b 1c        as business documents, official filings, research papers, etc,
+                                        would not perform well on Figure 1d because the table lay-          which is tremendously beneficial for large-scale table anal-
+                                        outs and colors are so different. Therefore, enlarging the          ysis tasks.
+                                        training data should be the only way to build open-domain
+                                        table analysis models with deep learning. Deep learning             The TableBank dataset totally consists of 417,234 high
+                                        models are massively more complex than most traditional             quality labeled tables as well as their original documents in
+                                        models, where many standard deep learning models today              a variety of domains. To verify the effectiveness of Table-
+                                        have hundreds of millions of free parameters and require            Bank, we build several strong baselines using state-of-the-
+                                        considerably more labeled training data. In practice, the           art models with end-to-end deep neural networks. The ta-
+                                        cost and inflexibility of hand-labeling such training sets is       ble detection model is based on the Faster R-CNN (Ren
+                                        the key bottleneck to actually deploying deep learning mod-         et al., 2015) architecture with different settings. The ta-
+                                                                                                            ble structure recognition model is based on the encoder-
+                                         The paper was finished during internship at Microsoft Research     decoder framework for image-to-text. The experiment re-
+                                         Asia.                                                              sults show that the layout and format variation has a great
+              (a)                            (b)                                (c)                           (d)
+Figure 1: Tables in electronic documents on the web with different layouts and formats. Among them, Figure (a)(b)(c)
+come from the latex format documents while Figure (d) comes from a word format document
+
+impact on the accuracy of table analysis tasks. In addition,   do not filter the document language, the Word documents
+models trained in one specific domain do not perform well      contain English, Chinese, Japanese, Arabic, and other lan-
+in the other. This suggests that there is plenty of room for   guages. This makes the dataset more diverse and robust to
+advancement in modeling and learning on the TableBank          real applications.
+dataset.                                                       Latex documents are different from Word documents be-
+                                                               cause they need other resources to be compiled into PDF
+                2.       Existing Datasets                     files. Therefore, we cannot only crawl the ‘.tex’ file from
+We introduce some existing publicly available datasets that    the internet. Instead, we use documents from the largest
+we compare as the baselines:                                   pre-print database arXiv.org as well as their source code.
+ICDAR 2013 Table Competition. The ICDAR 2013 Ta-               We download the Latex source code from 2014 to 2018
+ble Competition dataset (Göbel et al., 2013) contains 128      through bulk data access in arXiv. The language of the La-
+examples in natively-digital document format, which are        tex documents is mainly English.
+from the European Union and US Government.
+                                                               3.2.     Table Detection
+UNLV Table Dataset. The UNLV Table Dataset (Shahab
+et al., 2010) contains 427 examples in scanned image for-                                     Tables with
+mat, which are from a variety of sources including Maga-                                   bounding boxes
+zines, Newspapers, Business Letter, Annual Report, etc.                                     (special color)
+                                                                         Documents                               Annotations
+Marmot Dataset. The Marmot Dataset1 contains 2,000                    (.docx and .tex)                        by color difference
+                                                                                             Tables with
+pages in PDF format, where most of the examples are from                                   bounding boxes
+research papers.                                                                            (white color)
+DeepFigures Dataset. The DeepFigures Dataset (Siegel
+et al., 2018) includes documents with tables and figures                        Figure 2: Data processing pipeline
+from arXiv.com and PubMed database. The DeepFigures            Intuitively, we can manipulate the source code by adding
+Dataset focuses on the large scale table/figure detection      bounding boxes using the mark-up language within each
+task while it does not contain the table structure recogni-    document. The processing pipeline is shown in Figure 2.
+tion dataset.                                                  For Word documents, we add the bounding boxes to ta-
+                                                               bles through editing the internal Office XML code within
+                    3.   Data Collection                       each document. Actually, each ‘.docx’ file is a compressed
+Basically, we create the TableBank dataset using two dif-      archive file. There exists a ‘document.xml’ file in the de-
+ferent file types: Word documents and Latex documents.         compressed folder of the ‘.docx’ file. In the XML file, the
+Both file types contain mark-up tags for tables in their       code snippets between the tags ‘<w:tbl>’ and ‘</w:tbl>’
+source code by nature. Next, we introduce the details in       usually represent a table in the Word document, which is
+three steps: document acquisition, creating table detection    shown in Figure 3. We modified the code snippets in the
+dataset and table structure recognition dataset.               XML file so that the table borders can be changed into a
+                                                               distinguishable color compared to other parts of the docu-
+3.1.    Document Acquisition                                   ment. Figure 3 shows that we have added a green bounding
+We crawl Word documents from the internet. The docu-           box in the PDF file where the table is perfectly identified.
+ments are all in ‘.docx’ format since we can edit the in-      Finally, we get PDF pages from Word documents that con-
+ternal Office XML code to add bounding boxes. Since we         tain at least one table on each page.
+                                                               For Latex documents, we use a special command in the
+1                                                              Tex grammar ‘fcolorbox’ to add the bounding box to ta-
+    http://www.icst.pku.edu.cn/cpdp/data/
+    marmot_data.htm                                            bles. Typically, the tables in Latex documents are usually
+       Figure 3: The tables can be identified and labeled from “<w:tbl>” and “</w:tbl>” tags in the Office XML code
+
+in the format as follows:                                              structure recognition models usually identify the layout in-
+                                                                       formation as well as the textual content of the cells, while
+                \ begin { t a b l e }[]                                textual content recognition is not the focus of this work.
+                      \ centering                                      Therefore, we define the task as follows: given a table in the
+                      \ b e g i n { t a b u l a r }{}                  image format, generating an HTML tag sequence that rep-
+                                 ...                                   resents the arrangement of rows and columns as well as the
+                      \ end { t a b u l a r }                          type of table cells. In this way, we can automatically cre-
+                \ end { t a b l e }                                    ate the structure recognition dataset from the source code
+We insert the ‘fcolorbox’ command to the table’s code as               of Word and Latex documents. For Word documents, we
+follows and re-compile the Latex documents. Meanwhile,                 simply transform the original XML information from doc-
+we also define a special color so that the border is distin-           uments into the HTML tag sequence. For Latex documents,
+guishable. The overall process is similar to Word docu-                we first use the LaTeXML toolkit2 to generate XML from
+ments. Finally, we get PDF pages from Latex documents                  Latex, then transform the XML into HTML. A simple ex-
+that contain at least one table on each page.                          ample is shown in Figure 5, where we use ‘<cell_y>’ to
+                                                                       denotes the cells with content and ‘<cell_n>’ to represent
+   \ begin { t a b l e }[]                                             the cells without content. After filtering the noise, we cre-
+         \ centering                                                   ate a total of 145,463 training instances from the Word and
+         \ s e t l e n g t h { \ f b o x s e p }{1 p t }               Latex documents.
+         \ f c o l o r b o x { b o r d e r c o l o r }{ w h i t e }{   In the process of inferring, we get the row and column
+         \ b e g i n { t a b u l a r }{}                               structures from table structure recognition results, as well
+                    ...                                                as the content and bounding boxes of all the closely ar-
+         \ end { t a b u l a r }}                                      ranged text blocks from OCR results. Assuming a table
+   \ end { t a b l e }                                                 contains N rows, row gaps between OCR bounding boxes
+                                                                       are detected by a heuristic algorithm to split the table con-
+To obtain ground truth labels, we extract the annotations              tent blocks into N groups. Finally, we fill the blocks in the
+from the generated PDF documents. For each page in the                 ‘<cell_y>’ tag of N lines with the order from left to right.
+annotated PDF documents, we also add the bounding boxes                For example, the table in Figure 5 has two rows according
+to the tables in the original page with the white color so             to table structure recognition result, e.g. the HTML tag se-
+that the two pages align in the same position. Then, we                quence. According to the row gap between text block “1”
+simply compare two pages in the pixel-level so that we                 and text block “3”, we divide them into two groups: h1,
+can find the different pixels and get the upper left point of          2i and h3i. The first group corresponds the first row con-
+the tables as well as the width and height parameters. In              taining two ‘<cell_y>’ tags, and the second group corre-
+this way, we totally create 417,234 labeled tables from the            sponds the second row containing a ‘<cell_y>’ tag and a
+crawled documents. We randomly sample 1,000 examples                   ‘<cell_n>’ tag.
+from the dataset and manually check the bounding boxes of
+tables. We observe that only 5 of them are incorrectly la-                                   4.    Baseline
+beled, which demonstrates the high quality of this dataset.            4.1.    Table Detection
+We give several typical weak supervised labeled errors in              We use the Faster R-CNN model as the baseline. Due to the
+Figure 4.                                                              success of ImageNet and COCO competition, the Faster R-
+3.3.     Table Structure Recognition                                   CNN model has been the de facto implementation that is
+                                                                       widespread in the computer vision area. In 2013, the R-
+Table structure recognition aims to identify the row and col-          CNN model (Girshick et al., 2013) was first proposed to
+umn layout structure for the tables especially in non-digital
+document formats such as scanned images. Existing table                2
+                                                                           https://dlmf.nist.gov/LaTeXML/
+             (a) Missed                                  (b) Mixed                        (c) Incomplete                                     (d) Overlaped
+
+Figure 4: Figure (a): Missed a table; Figure (b): Two tables were annotated as one; Figure (c): One of the annotations is
+incomplete; Figure (c): Some annotations are overlaped.
+
+                                  1         2                                      4.2.   Table Structure Recognition
+                                  3
+                                                                                   We leverage the image-to-text model as the baseline. The
+  <tabular> <tr> <cell_y> <cell_y> </tr> <tr> <cell_y> <cell_n> </tr> </tabular>   image-to-text model has been widely used in image cap-
+                                                                                   tioning, video description, and many other applications. A
+Figure 5: A Table-to-HTML example where ‘<cell_y>’                                 typical image-to-text model includes an encoder for the im-
+denotes cells with content while ‘<cell_n>’ represents                             age input and a decoder for the text output. In this work,
+cells without content                                                              we use the image-to-markup model (Deng et al., 2016) as
+                                                                                   the baseline to train models on the TableBank dataset. The
+                                                                                   overall architecture of the image-to-text model is shown in
+                                                                                   Figure 7.
+
+                                                                                             encoder                                                decoder
+
+
+                                                                                                                          <tabular>          <tr>    <tdn>       …       </tabular>
+
+
+                                                                                               Conv
+                                                                                              Layers
+
+
+                                                                                                            attention
+
+
+
+
+                                                                                                                        <tabular>     <tr>      <tdn>    <tdn>       …          …
+
+
+
+
+                                                                                   Figure 7: Image-to-Text model for table structure recogni-
+                                                                                   tion
+
+
+  Figure 6: The Faster R-CNN model for table detection
+                                                                                                       5.      Experiment
+                                                                                   5.1.   Data and Metrics
+solve the object detection problem. After that, (Girshick,                         The statistics of TableBank is shown in Table 1. To evalu-
+2015) also proposed the Fast R-CNN model that improves                             ate table detection, we sample 2,000 document images from
+training and testing speed while also increasing detection                         Word and Latex documents respectively, where 1,000 im-
+accuracy. Both models use selective search to find out the                         ages for validation and 1,000 images for testing. Each sam-
+region proposals, while selective search is a slow and time-                       pled image contains at least one table. Meanwhile, we also
+consuming process affecting the performance of the net-                            evaluate our model on the ICDAR 2013 dataset to verify
+work. Distinct from two previous methods, the Faster R-                            the effectiveness of TableBank. To evaluate table structure
+CNN method introduces a Region Proposal Network (RPN)                              recognition, we sample 500 tables each for validation and
+that shares full-image convolutional features with the detec-                      testing from Word documents and Latex documents respec-
+                                                                                   tively. The size of the training set for table detection and
+tion network, thus enabling nearly cost-free region propos-
+                                                                                   table structure recognition is 415,234 and 144,463 respec-
+als. Furthermore, the model merges RPN and Fast R-CNN                              tively. The entire training and testing data have been made
+into a single network by sharing their convolutional fea-                          available to the public. For table detection, we calculate
+tures so that the network can be trained in an end-to-end                          the precision, recall, and F1 in the same way as in (Gilani
+way. The overall architecture of Faster R-CNN in shown in                          et al., 2017), where the metrics for all documents are com-
+Figure 6.                                                                          puted by summing up the area of overlap, prediction and
+ground truth. The definition is defined as follows:              we cannot simply rely on transfer learning techniques to ob-
+                                                                 tain good table detection models with small scale training
+           Area of Ground truth regions in Detected regions
+P recision =                                                 ,   data. When combining training data with Word and Latex
+                   Area of all Detected table regions
+                                                                 documents, the accuracy of larger models is comparable to
+          Area of Ground truth regions in Detected regions
+ Recall =                                                  ,     models trained on the same domain, while it performs bet-
+               Area of all Ground truth table regions
+                                                                 ter on the Word+Latex dataset. This verifies that model
+                        2 × Precision × Recall
+          F 1 Score =                           .                trained with larger data generalizes better on different do-
+                           Precision + Recall
+                                                                 mains, which illustrates the importance of creating a larger
+                                                                 benchmark dataset.
+For table structure recognition, we use the 4-gram BLEU          In addition, we also evaluate our models on the ICDAR
+score as the evaluation metric with a single reference. The      2013 table competition dataset shown in Table 3. Among
+4-gram BLEU score has the advantages of fast calculation         all the models trained with TableBank, the Latex ResNeXt-
+speed, low cost, and being easy to understand.                   152 model achieves the best F1 score of 0.9625. Further-
+                                                                 more, we compare our model with models trained with IC-
+             Task                Word      Latex    Word+Latex
+                                                                 DAR, UNLV, Marmot, and DeepFigures, which demon-
+       Table detection          163,417   253,817    417,234
+  Table structure recognition    56,866    88,597    145,463
+                                                                 strates the great potential of our TableBank dataset. This
+                                                                 also illustrates that we not only need large scale training
+               Table 1: Statistics of TableBank                  data but also high quality data. We also compare with the
+                                                                 open source Tesseract3 and Camelot4 toolkits, which are
+5.2.   Settings                                                  based on line information. The results show that image-
+                                                                 based deep learning models are significantly better than
+For table detection, we use the open source framework De-
+                                                                 conventional approaches.
+tectron (Girshick et al., 2018) to train models on the Table-
+                                                                 The evaluation results of table structure recognition are
+Bank. Detectron is a high quality and high-performance
+                                                                 shown in Table 4. We observe that the image-to-text models
+codebase for object detection research, which supports
+                                                                 also perform better on the same domain. The model trained
+many state-of-the-art algorithms. It is written in Python
+                                                                 on Word documents performs much better on the Word test
+and powered by the Caffe2 deep learning framework. In
+                                                                 set than the Latex test set and vice versa. Similarly, the
+this task, we use the Faster R-CNN algorithm with the
+                                                                 model accuracy of the Word+Latex model is comparable to
+ResNeXt (Xie et al., 2016) as the backbone network ar-
+                                                                 other models on Word and Latex domains and better on the
+chitecture, where the parameters are pre-trained on the Im-
+                                                                 mixed-domain dataset. This demonstrates that the mixed-
+ageNet dataset. All baselines are trained using 4×P100
+                                                                 domain model might generalize better in real-world appli-
+NVIDIA GPUs using data parallel sync SGD with a mini-
+                                                                 cations.
+batch size of 16 images. For other parameters, we use the
+default values in Detectron. During testing, the confidence      5.4.    Analysis
+threshold of generating bounding boxes is set to 90%.            For table detection, we sample some incorrect examples
+For table structure recognition, we use the open source          from the evaluation data of Word and Latex documents for
+framework OpenNMT (Klein et al., 2017) to train the              the case study. Figure 8 gives three typical errors of detec-
+image-to-text model. OpenNMT is an open-source ecosys-           tion results. The first error type is partial-detection, where
+tem for neural machine translation and neural sequence           only part of the tables can be identified and some infor-
+learning, which supports many encoder-decoder frame-             mation is missing. The second error type is un-detection,
+works. In this task, we train our model using the image-to-      where some tables in the documents cannot be identified.
+text method in OpenNMT. The model is also trained using          The third error type is mis-detection, where figures and
+4×P100 NVIDIA GPUs with the learning rate of 0.1 and             text blocks in the documents are sometimes identified as ta-
+batch size of 24. In this task, the vocabulary size of the       bles. Taking the ResNeXt-152 model for Word+Latex as
+output space is small, including <tabular>, </tabular>,          an example, the number of un-detected tables is 164. Com-
+<thead>, </thead>, <tbody>, </tbody>, <tr>, </tr>,               pared with ground truth tables (2,525), the un-detection rate
+<td>, </td>, <cell_y>, <cell_n>. For other parameters,           is 6.5%. Meanwhile, the number of mis-detected tables is
+we use the default values in OpenNMT.                            86 compared with the total predicted tables being 2,450.
+5.3.   Results                                                   Therefore, the mis-detection rate is 3.5%. Finally, the num-
+                                                                 ber of partial-detected tables is 57, leading to a partial-
+The evaluation results of table detection models are shown
+                                                                 detection rate of 2.3%. This illustrates that there is plenty
+in Table 2. We observe that models perform well on
+                                                                 of room to improve the accuracy of the detection models,
+the same domain. For instance, the ResNeXt-152 model
+                                                                 especially for un-detection and mis-detection cases.
+trained with Word documents achieves an F1 score of
+                                                                 We observed that some experiments show inferior accuracy
+0.9166 on the Word dataset, which is much higher than
+                                                                 during cross-domain testing. The precision of the Latex
+the F1 score (0.8094) on Latex documents. Meanwhile,
+                                                                 model is not satisfactory when tested on the Word dataset
+the ResNeXt-152 model trained with Latex documents
+                                                                 and the Word+Latex dataset. Meanwhile, the recall of the
+achieves an F1 score of 0.9810 on the Latex dataset, which
+                                                                 Word model is poor on all the test dataset, and the recall
+is also much higher than testing on the Word documents
+(0.8863). This indicates that the tables from different types    3
+                                                                     https://github.com/tesseract-ocr/tesseract
+of documents have different visual appearance. Therefore,        4
+                                                                     https://github.com/socialcopsdev/camelot
+                                                       Word                               Latex                         Word+Latex
+          Models
+                                     Precision          Recall       F1      Precision     Recall        F1     Precision Recall           F1
+     ResNeXt-101 (Word)                0.9496            0.8388     0.8908    0.9902       0.5948    0.7432       0.9594        0.7607    0.8486
+     ResNeXt-152 (Word)                0.9530            0.8829     0.9166    0.9808       0.6890    0.8094       0.9603        0.8209    0.8851
+     ResNeXt-101 (Latex)               0.8288            0.9395     0.8807    0.9854       0.9760    0.9807       0.8744        0.9512    0.9112
+     ResNeXt-152 (Latex)               0.8259            0.9562     0.8863    0.9867       0.9754    0.9810       0.8720        0.9624    0.9149
+  ResNeXt-101 (Word+Latex)             0.9557            0.8403     0.8943    0.9886       0.9694    0.9789       0.9670        0.8817    0.9224
+  ResNeXt-152 (Word+Latex)             0.9540            0.8639     0.9067    0.9885       0.9732    0.9808       0.9657        0.8989    0.9311
+
+       Table 2: Evaluation results on Word and Latex datasets with ResNeXt-{101,152} as the backbone networks
+
+                Models                       Precision     Recall     F1        Length      0-20    21-40     41-60    61-80      >80       All
+           ICDAR 2013 (train)                 0.9748       0.7997   0.8786      #Total      4,027   44,811    36,059   19,757    40,809   145,463
+                 UNLV                         0.9185       0.9639   0.9406       Ratio      0.028   0.308     0.248    0.136     0.281     1.000
+                Marmot                        0.7692       0.9844   0.8636
+              DeepFigures                     0.8527       0.9348   0.8918
+     TableBank (ResNeXt-152, Word)            0.9725       0.8528   0.9087
+                                                                                         Table 6: Length distribution in training data
+     TableBank (ResNeXt-152, Latex)           0.9658       0.9594   0.9625
+ TableBank (ResNeXt-152, Word + Latex)        0.9635       0.9039   0.9328                          6.    Related Work
+                Tesseract                     0.9439       0.7144   0.8133
+                Camelot                       0.9785       0.6856   0.8063
+                                                                              6.1.     Table Detection
+                                                                              Table detection aims to locate tables using bounding boxes
+   Table 3: Evaluation results on ICDAR 2013 dataset                          in a document. The research of table detection dates back
+                                                                              to the early 1990s. (Itonori, 1993) proposed a rule-based
+            Models                  Word        Latex       Word+Latex        approach that leverages the text block arrangement and
+     Image-to-Text (Word)           0.7507      0.6733        0.7138          ruled line position to detect table structures. At the same
+     Image-to-Text (Latex)          0.4048      0.7653        0.5818          time, (Chandran and Kasturi, 1993) designed a structural
+  Image-to-Text (Word+Latex)        0.7121      0.7647        0.7382          table detection method based on horizontal and vertical
+                                                                              lines, as well as the item blocks. Following these works,
+Table 4: Evaluation results (BLEU) for image-to-text mod-                     there is a great deal of research work (Hirayama, 1995;
+els on Word and Latex datasets                                                Green and Krishnamoorthy, 1995; Tupaj et al., 1996; Hu
+                                                                              et al., 1999; Gatos et al., 2005; Shafait and Smith, 2010)
+                                                                              focus on improving rule-based systems. Although these
+of the mixed model is also under-performed on the Word
+                                                                              methods perform well on some documents, they require ex-
+dataset and Word+Latex dataset. It shows that there is still
+                                                                              tensive human efforts to figure out better rules, while some-
+a lot of room to improve on the TableBank dataset, as well
+                                                                              times failing to generalize to documents from other sources.
+as some bad cases to be investigated especially under cross-
+                                                                              Therefore, it is inevitable to leverage statistical approaches
+domain settings.
+                                                                              in table detection.
+For table structure recognition, we observe that the model                    To address the need for generalization, statistical machine
+accuracy reduces as the length of output becomes larger.                      learning approaches have been proposed to alleviate these
+Taking the image-to-text model for Word+Latex as an ex-                       problems. (Kieninger and Dengel, 1998) was one of the
+ample, the number of exact match between the output and                       first to apply unsupervised learning method to the table de-
+ground truth is shown in Table 5. We can see that the ra-                     tection task back in 1998. Their recognition process dif-
+tio of exact match is around 50% for the HTML sequences                       fers significantly from previous approaches as it realizes
+that are less than 40 tokens. As the number of tokens be-                     a bottom-up clustering of given word segments, whereas
+comes larger, the ratio reduces dramatically to 8.6%, indi-                   conventional table structure recognizers all rely on the de-
+cating that it is more difficult to recognize big and complex                 tection of some separators such as delineation or signif-
+tables. In general, the model totally generates the correct                   icant white space to analyze a page from the top-down.
+output for 338 tables. In order to avoid the influence of the                 In 2002, (Cesarini et al., 2002) started to use supervised
+length distribution deviation in the training data, we also                   learning method by means of a hierarchical representation
+count the length distribution in the training data in Table 6.                based on the MXY tree. The algorithm can be adapted to
+We believe enlarging the training data will further improve                   recognize tables with different features by maximizing the
+the current model especially for tables with complex row                      performance on an appropriate training set. After that, ta-
+and column layouts, which will be our next-step effort.                       ble detection has been cast into a set of different machine
+                                                                              learning problems such as sequence labeling (Silva and e.,
+                                                                              2009), feature engineering with SVM (Kasar et al., 2013)
+   Length          0-20     21-40    41-60      61-80      >80       All      and also ensemble a set of models (Fan and Kim, 2015)
+   #Total            32      293      252        145        278     1,000     including Naive Bayes, logistic regression, and SVM. The
+ #Exact match        15      169      102         28         24      338
+                                                                              application of machine learning methods has significantly
+    Ratio          0.469    0.577    0.405      0.193      0.086    0.338
+                                                                              improved table detection accuracy.
+Table 5: Number of exact match between the generated                          Recently, the rapid development of deep learning in com-
+HTML tag sequence and ground truth sequence                                   puter vision has a profound impact on the data-driven
+                                                                              image-based approaches for table detection. The advan-
+                             (a)                                  (b)                                (c)
+            Figure 8: Table detection examples with (a) partial-detection, (b) un-detection and (c) mis-detection
+
+tage of the images-based table detection is two-fold: First,            chine learning-based approaches, (Hu et al., 2000) identi-
+it is robust to document types by making no assumption of               fied columns by hierarchical clustering and then spatial and
+whether scanned images of pages or natively-digital docu-               lexical criteria to classify headers, and also addressed the
+ment formats. Second, it reduces the efforts of hand-crafted            evaluating problem by designing a new paradigm “random
+feature engineering in conventional machine learning. (Hao              graph probing”.
+et al., 2016) first used convolutional neural networks in               Recently, (Schreiber et al., 2017) used the deep learning-
+table detection, where some table-like areas are selected               based object detection model with pre-processing to recog-
+first by some loose rules, and then the convolutional net-              nize the row and column structures for the ICDAR 2013
+works are built and refined to determine whether the se-                dataset. Similarly, existing methods usually leveraged no
+lected areas are tables or not. In addition, the Faster R-CNN           training data or only small scale training data for this
+model has also been used in table detection. (Schreiber et              task. Distinct from existing research, we use the TableBank
+al., 2017) presented a system that is totally data-driven and           dataset to verify the data-driven end-to-end model for struc-
+does not need any heuristics or metadata to detect as well as           ture recognition. To the best of our knowledge, the Table-
+to recognize tabular structures on the ICDAR 2013 dataset.              Bank dataset is the first large scale dataset for both table
+At the same time, (Gilani et al., 2017) achieved state-of-              detection and recognition tasks.
+the-art performance using the Faster R-CNN model on the
+UNLV dataset. Despite the success of applying deep learn-                                   7.   Conclusion
+ing models, most of these methods fine-tune pre-trained                 To empower the research of table detection and structure
+models on out-of-domain data with just a few thousand                   recognition for document analysis, we introduce the Table-
+human-labeled examples, which is still difficult to be prac-            Bank dataset, a new image-based table analysis dataset built
+ticable in real-world applications. Till now, there is not any          with online Word and Latex documents. We use the Faster
+standard benchmark training dataset for both table detec-               R-CNN model and image-to-text model as the baseline to
+tion and recognition. Therefore, we make the TableBank                  evaluate the performance of TableBank. In addition, we
+dataset publicly available and hope it can release the power            have also created testing data from Word and Latex doc-
+of many deep learning approaches.                                       uments respectively, where the model accuracy in differ-
+                                                                        ent domains is evaluated. Experiments show that image-
+6.2.    Table Structure Recognition                                     based table detection and recognition with deep learning is
+Table structure recognition aims to identify the row and                a promising research direction. We expect the TableBank
+column layout information for a table. The research of                  dataset will release the power of deep learning in the table
+table structure recognition also includes rule-based ap-                analysis task, meanwhile fosters more customized network
+proaches, machine learning approaches, and deep learning                structures to make substantial advances in this task.
+approaches. (Ramel et al., 2003) developed a method using               For future research, we will further enlarge the TableBank
+the analysis of the graphic lines to detect and extract tables.         from more domains with high quality. Moreover, we plan to
+After that, (Yildiz et al., 2005) used the ‘pdftohtml5 ’ tool           build a dataset with multiple labels such as tables, figures,
+that returns all text elements in a PDF file and computed               headings, subheadings, text blocks and more. In this way,
+horizontal overlaps of texts to recognize columns. (Has-                we may obtain fine-grained models that can distinguish dif-
+san and Baumgartner, 2007) grouped tables into three cat-               ferent parts of documents.
+egories by the principle if a table has horizontal or vertical
+ruling lines, and they developed heuristic methods to detect                           8.    Acknowledgments
+these tables. Unlike other methods designing rules for spec-            This work was supported in part by the National Natural
+ified tables, (Shigarov et al., 2016) presented a more general          Science Foundation of China (Grant Nos.U1636211,
+rule-based approach to apply to different domains. For ma-              61672081,61370126),the Beijing Advanced Innovation
+                                                                        Center for Imaging Technology(Grant No.BAICIT-
+5
+    http://pdftohtml.sourceforge.net/                                   2016001), and the Fund of the State Key Laboratory of
+Software Development Environment (Grant No.SKLSDE-               Kasar, T., Barlas, P., Adam, S., Chatelain, C., and Paquet, T.
+2019ZX-17).                                                         (2013). Learning to detect tables in scanned document
+                                                                    images using line information. In Proc. of ICDAR 2013,
+                                                                    pages 1185–1189, Aug.
+          9.   Bibliographical References
+                                                                 Kieninger, T. and Dengel, A. (1998). The t-recs table
+Cesarini, F., Marinai, S., Sarti, L., and Soda, G. (2002).          recognition and analysis system. In Document Analysis
+   Trainable table location in document images. In Ob-              Systems: Theory and Practice, pages 255–270, Berlin,
+   ject recognition supported by user interaction for service       Heidelberg. Springer Berlin Heidelberg.
+   robots, volume 3, pages 236–240 vol.3, Aug.                   Klein, G., Kim, Y., Deng, Y., Senellart, J., and Rush, A. M.
+Chandran, S. and Kasturi, R. (1993). Structural recogni-            (2017). OpenNMT: Open-source toolkit for neural ma-
+   tion of tabulated data. In Proc. of ICDAR 1993, pages            chine translation. In Proc. of ACL.
+   516–519, Oct.                                                 Lin, T., Maire, M., Belongie, S. J., Bourdev, L. D., Gir-
+Deng, Y., Kanervisto, A., and Rush, A. M. (2016). What              shick, R. B., Hays, J., Perona, P., Ramanan, D., Dollár,
+   you get is what you see: A visual markup decompiler.             P., and Zitnick, C. L. (2014). Microsoft COCO: com-
+   CoRR, abs/1609.04938.                                            mon objects in context. CoRR, abs/1405.0312.
+Fan, M. and Kim, D. S. (2015). Table region detection            Ramel, J.-Y., Crucianu, M., Vincent, N., and Faure, C.
+   on large-scale PDF files without labeled data. CoRR,             (2003). Detection, extraction and representation of ta-
+   abs/1506.08891.                                                  bles. In Seventh International Conference on Document
+Gatos, B., Danatsas, D., Pratikakis, I., and Perantonis, S. J.      Analysis and Recognition, 2003. Proceedings., pages
+   (2005). Automatic table detection in document images.            374–378. IEEE.
+   In Proc. of ICAPR 2005 - Volume Part I, ICAPR’05,             Ren, S., He, K., Girshick, R. B., and Sun, J. (2015). Faster
+   pages 609–618, Berlin, Heidelberg. Springer-Verlag.              R-CNN: towards real-time object detection with region
+Gilani, A., Qasim, S. R., Malik, I., and Shafait, F. (2017).        proposal networks. CoRR, abs/1506.01497.
+   Table detection using deep learning. In Proc. of ICDAR        Russakovsky, O., Deng, J., Su, H., Krause, J., Satheesh, S.,
+   2017, volume 01, pages 771–776, Nov.                             Ma, S., Huang, Z., Karpathy, A., Khosla, A., Bernstein,
+Girshick, R. B., Donahue, J., Darrell, T., and Ma-                  M., Berg, A. C., and Fei-Fei, L. (2015). ImageNet Large
+   lik, J. (2013). Rich feature hierarchies for accurate            Scale Visual Recognition Challenge. International Jour-
+   object detection and semantic segmentation. CoRR,                nal of Computer Vision, 115(3):211–252.
+   abs/1311.2524.                                                Schreiber, S., Agne, S., Wolf, I., Dengel, A., and Ahmed,
+Girshick, R., Radosavovic, I., Gkioxari, G., Dollár, P., and        S. (2017). Deepdesrt: Deep learning for detection and
+   He, K. (2018). Detectron. https://github.com/                    structure recognition of tables in document images. In
+   facebookresearch/detectron.                                      Proc. of ICDAR 2017, volume 01, pages 1162–1167,
+Girshick, R. B.         (2015).    Fast R-CNN.        CoRR,         Nov.
+   abs/1504.08083.                                               Shafait, F. and Smith, R. (2010). Table detection in het-
+Green, E. and Krishnamoorthy, M. (1995). Recognition of             erogeneous documents. In Document Analysis Systems
+   tables using table grammars. In Proc. of the Fourth An-          2010.
+   nual Symposium on Document Analysis and Information           Shahab, A., Shafait, F., Kieninger, T., and Dengel, A.
+   Retrieval, pages 261–278.                                        (2010). An open approach towards the benchmarking
+Göbel, M., Hassan, T., Oro, E., and Orsi, G. (2013). IC-            of table structure recognition systems. In Proceedings
+   DAR 2013 table competition. In Proc. of ICDAR 2013,              of the 9th IAPR International Workshop on Document
+   pages 1449–1453, Aug.                                            Analysis Systems, pages 113–120, New York, NY, USA.
+Hao, L., Gao, L., Yi, X., and Tang, Z. (2016). A table              ACM.
+   detection method for pdf documents based on convolu-          Shigarov, A., Mikhailov, A., and Altaev, A. (2016). Con-
+   tional neural networks. In 12th IAPR Workshop on Doc-            figurable table structure recognition in untagged pdf doc-
+   ument Analysis Systems, pages 287–292, April.                    uments. In Proceedings of the 2016 ACM Symposium
+Hassan, T. and Baumgartner, R. (2007). Table recognition            on Document Engineering, pages 119–122. ACM.
+   and understanding from pdf files. In Ninth International      Siegel, N., Lourie, N., Power, R., and Ammar, W. (2018).
+   Conference on Document Analysis and Recognition (IC-             Extracting scientific figures with distantly supervised
+   DAR 2007), volume 2, pages 1143–1147. IEEE.                      neural networks. CoRR, abs/1804.02445.
+Hirayama, Y. (1995). A method for table structure analysis       Silva and e., A. C. (2009). Learning rich hidden markov
+   using dp matching. In Proc. of ICDAR 1995, volume 2,             models in document analysis: Table location. In Proc. of
+   pages 583–586 vol.2, Aug.                                        ICDAR 2009, pages 843–847, Washington, DC, USA.
+Hu, J., Kashi, R. S., Lopresti, D. P., and Wilfong, G.              IEEE Computer Society.
+   (1999). Medium-independent table detection.                   Tupaj, S., Shi, Z., Chang, C. H., and Chang, D. C. H.
+Hu, J., Kashi, R. S., Lopresti, D. P., and Wilfong, G.              (1996). Extracting tabular information from text files. In
+   (2000). Table structure recognition and its evaluation.          EECS Department, Tufts University.
+Itonori, K. (1993). Table structure recognition based on         Xie, S., Girshick, R. B., Dollár, P., Tu, Z., and He, K.
+   textblock arrangement and ruled line position. In Proc.          (2016). Aggregated residual transformations for deep
+   of ICDAR 1993, pages 765–768, Oct.                               neural networks. CoRR, abs/1611.05431.
+Yildiz, B., Kaiser, K., and Miksch, S. (2005). pdf2table:
+  A method to extract table information from pdf files. In
+  IICAI, pages 1773–1785.
+

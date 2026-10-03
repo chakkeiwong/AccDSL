@@ -1,0 +1,1154 @@
+Article
+
+An Auditable LLM-RAG Architecture for Financial Document
+Intelligence and Decision Support
+Cristian Cosentino * , Simone Squillace                     and Fabrizio Marozzo
+
+
+                                         Department of Informatics, Modeling, Electronics and Systems Engineering (DIMES), University of Calabria,
+                                         87036 Rende, Italy; fabrizio.marozzo@unical.it (F.M.)
+                                         * Correspondence: cristian.cosentino@dimes.unical.it
+
+
+                                         Abstract
+                                         Financial analysis increasingly depends on the ability to transform heterogeneous textual
+                                         evidence into reliable, verifiable, and actionable knowledge. However, adoption in finance
+                                         requires generated outputs to be not only accurate, but also traceable and auditable. This
+                                         work presents an audit-oriented LLM-RAG architecture for financial document intelligence.
+                                         Rather than proposing a new foundation model, the contribution is a reproducible pipeline
+                                         that integrates financial document processing, hybrid retrieval, evidence-grounded gen-
+                                         eration, structured validation, and persistent audit artifacts within a state-machine-based
+                                         workflow. Designed for analyst-facing use, the system produces structured answers linked
+                                         to explicit evidence while preserving the intermediate artifacts needed to inspect, reproduce,
+                                         and validate each result. Experiments on AI-FinanceQA, a benchmark of heterogeneous
+                                         financial documents and analyst-style questions, show that hybrid retrieval with rerank-
+                                         ing improves evidence selection over single-signal baselines and that the selected LLM
+                                         backend achieves a compliance-oriented score of Scomp = 0.9527. Additional experiments
+                                         on FinQA confirm that targeted evidence selection improves numerical robustness and
+                                         semantic alignment compared with uncontrolled context expansion. Overall, the proposed
+                                         architecture provides an evidence-grounded and audit-oriented framework that supports
+                                         human review rather than replacing expert financial judgment.
+
+                                         Keywords: Retrieval-Augmented Generation (RAG); financial NLP; document intelligence;
+                                         auditability; provenance; hybrid retrieval; groundedness; evidence-based QA; compliance
+
+
+
+
+                                         1. Introduction
+                                              Financial decision-making has long been supported by quantitative models trained
+                                         on structured signals such as prices, volumes, and macroeconomic indicators. However,
+Academic Editors: Aristeidis Karras      a substantial portion of market-moving information is conveyed through unstructured
+and Massimo Cafaro                       sources, including regulated filings, quarterly reports, investor presentations, press releases,
+Received: 16 April 2026                  earnings-call transcripts, and real-time news. The growing role of textual analysis and NLP
+Revised: 15 May 2026                     in accounting and finance has therefore motivated systems that complement quantitative
+Accepted: 19 May 2026                    models with evidence extracted from documents and narratives [1,2]. In this context, Large
+Published: 26 May 2026                   Language Models (LLMs) offer new capabilities for summarizing narratives, identifying
+Copyright: © 2026 by the authors.        salient events, and extracting relevant signals from financial text at scale [3].
+Licensee MDPI, Basel, Switzerland.
+                                              Despite this potential, deploying LLMs in finance introduces a fundamental tension
+This article is an open access article
+distributed under the terms and
+                                         between usefulness and trustworthiness. Generative models may produce fluent answers
+conditions of the Creative Commons       that contain unsupported claims, incorrect attributions, or numerical errors, which is
+Attribution (CC BY) license.             particularly critical in a domain where small mistakes can affect economic, operational,
+
+
+Future Internet 2026, 18, 284                                                                                    https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                  2 of 19
+
+
+
+                                and compliance-related decisions [4]. Moreover, financial applications typically operate
+                                under stringent governance constraints: analysts and organizations must be able to justify
+                                conclusions, reconstruct the provenance of supporting evidence, and demonstrate appro-
+                                priate controls over data access and processing. Purely parametric generation is therefore
+                                problematic because it offers limited visibility into why a claim was produced and which
+                                source supports it [5].
+                                      Retrieval-Augmented Generation (RAG) mitigates part of this problem by condition-
+                                ing generation on explicit evidence retrieved from a document collection rather than relying
+                                solely on memorized model knowledge [5,6]. However, in financial settings, auditability
+                                requires more than attaching citations to generated answers. A system should preserve
+                                the processing path from the original document to the final output, including document
+                                versions, extracted text, chunks, metadata, embeddings, retrieved evidence, prompts, gen-
+                                erated answers, validation outcomes, and error states. In this paper, we use provenance to
+                                refer to the stored record of these artifacts, traceability to refer to the ability to link generated
+                                claims back to supporting evidence and processing steps, groundedness to refer to the degree
+                                to which an answer is supported by retrieved evidence, and auditability to refer to the
+                                possibility of inspecting and reproducing this evidence path.
+                                      The research gap addressed in this work is therefore not the absence of a single
+                                retrieval model, reranker, or LLM, but the lack of a reproducible methodology that connects
+                                retrieval, grounded generation, structured validation, numerical consistency, and persistent
+                                audit artifacts into one financial document workflow. Existing LLM-RAG pipelines often
+                                evaluate answer quality or retrieval quality in isolation, while providing limited support for
+                                reconstructing how an answer was produced, which evidence was used, whether numerical
+                                claims are consistent with the sources, and how failures or low-confidence outputs should
+                                be handled in compliance-sensitive scenarios.
+                                      Motivated by these requirements, this work develops an auditable LLM-RAG architec-
+                                ture for financial document intelligence and analyst-facing review. The proposed method-
+                                ology builds on established components, including retrieval-augmented generation, hybrid
+                                dense–sparse retrieval, late-interaction reranking, schema-constrained generation, and
+                                groundedness evaluation. However, the contribution of this work is not the introduction
+                                of these components in isolation, but their organization into a unified financial-document
+                                workflow in which auditability, provenance reconstruction, numerical verification, and
+                                compliance-oriented traceability are treated as first-class design requirements. The system
+                                is not intended to automate investment decisions, risk ratings, or compliance judgments.
+                                Instead, it supports human review by producing structured, evidence-linked answers
+                                together with validation signals that indicate whether the output is grounded, numerically
+                                consistent, and suitable for inspection. The architecture is orchestrated through a state-
+                                machine-based workflow that manages the document lifecycle through atomic transitions,
+                                enabling deterministic recovery, idempotent execution, and end-to-end traceability through
+                                a persistent audit trail.
+                                      To support evidence quality over long and heterogeneous inputs, the pipeline imple-
+                                ments multi-format extraction, controlled normalization, semantic chunking with overlap,
+                                and a financial enrichment layer that extracts entities, tickers, sentiment, and analyst-
+                                oriented topics. At the retrieval layer, the architecture adopts a hybrid two-stage strategy
+                                that combines dense semantic representations with sparse lexical matching, followed by
+                                multivector reranking to improve evidence ranking [7–9]. This design targets a common
+                                failure mode of financial QA, where both semantic similarity and exact matching of tickers,
+                                accounting terms, dates, percentages, currencies, and numerical expressions are neces-
+                                sary [4,10]. Finally, generation is constrained through citation anchoring, JSON-schema
+                                validation, groundedness checks, and strict handling of finance-critical tokens.
+
+
+
+                                                                                                    https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                               3 of 19
+
+
+
+                                     The main contributions of this paper are as follows:
+                                •    We propose an auditability-focused LLM-RAG methodology for financial documents,
+                                     based on state-machine orchestration, atomic state transitions, persistent provenance
+                                     artifacts, and recoverable processing states.
+                                •    We define an evidence-centric retrieval and enrichment pipeline that combines se-
+                                     mantic chunking, finance-oriented metadata extraction, dense–sparse retrieval, rank
+                                     fusion, and late-interaction reranking.
+                                •    We introduce a validation layer that combines citation anchoring, schema-constrained
+                                     JSON output, groundedness assessment, and strict numerical consistency checks for
+                                     finance-critical values.
+                                •    We evaluate the approach on AI-FinanceQA and FinQA through retrieval metrics,
+                                     groundedness, numerical consistency, structured-output compliance, latency analysis,
+                                     enrichment ablation, and an auditability-oriented demonstration.
+                                     Empirically, the evaluation shows that hybrid retrieval with reranking improves evi-
+                                dence ranking over single-signal baselines, that financial enrichment provides measurable
+                                retrieval benefits, and that the selected LLM backend achieves the strongest compliance-
+                                oriented score among the tested models. Additional experiments show that targeted
+                                evidence selection improves numerical robustness and semantic alignment compared with
+                                uncontrolled context expansion. The auditability-oriented demonstration further shows
+                                that generated outputs can be linked to persisted chunk identifiers, document versions, re-
+                                trieval artifacts, validation results, and state-transition logs. At the same time, we explicitly
+                                limit the scope of the claims: the evaluation does not demonstrate improvements in analyst
+                                productivity, financial decision quality, risk assessment, or compliance outcomes, which
+                                remain directions for future work.
+                                     The remainder of this paper is organized as follows. Section 2 reviews related work
+                                on LLMs in finance, retrieval-augmented generation, and evidence-grounded verification.
+                                Section 3 describes the proposed auditable LLM-RAG architecture. Section 4 reports the
+                                experimental setup and empirical results. Sections 5 and 6 discuss the main findings, limi-
+                                tations, practical implications, and future research directions. Finally, Section 7 concludes
+                                the paper.
+
+                                2. Related Work
+                                     Textual analysis has become an established component of financial research and
+                                practice, since relevant signals are often conveyed not only through numerical indicators
+                                but also through unstructured sources such as regulated filings, annual and quarterly
+                                reports, earnings calls, investor presentations, and specialized news. In accounting and
+                                finance, prior work has shown that textual information can complement structured data
+                                for understanding risk, strategy, disclosure, and market behavior, while also introducing
+                                methodological challenges absent in purely quantitative settings [1]. These challenges
+                                become even more pronounced in modern NLP pipelines, where technical language, long
+                                documents, numerical expressions, and heterogeneous document structures make financial
+                                text a demanding domain for language understanding and information extraction.
+                                     To support the development and evaluation of such systems, several benchmarks
+                                have been introduced for financial question answering and reasoning. FinQA formalizes
+                                numerical reasoning over financial data by requiring models to combine textual and tabular
+                                evidence in order to derive correct answers [4]. FinanceBench further highlights the diffi-
+                                culty of evidence-based financial QA by exposing factual and numerical failures that may
+                                remain hidden in fluent model outputs [11]. More recently, FinTextQA has shifted attention
+                                toward long-form financial question answering over lengthy documents, emphasizing the
+                                importance of retrieval quality, passage selection, and context construction when relevant
+
+
+                                                                                                 https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                             4 of 19
+
+
+
+                                evidence is distributed across extended reports [9]. Together, these benchmarks show
+                                that reliable financial QA requires not only linguistic fluency, but also accurate evidence
+                                retrieval, numerical consistency, and traceable support for generated answers.
+                                      In parallel, advances in semantic retrieval have strengthened the connection between
+                                information retrieval and NLP. Dense retrieval methods based on contextual embeddings
+                                make it possible to retrieve passages through conceptual similarity rather than exact key-
+                                word overlap, thereby improving coverage in cases where relevant evidence is expressed
+                                indirectly or paraphrastically [7]. However, in financial applications, semantic similar-
+                                ity alone is often insufficient. Queries frequently depend on precise lexical or symbolic
+                                matches, including company names, tickers, accounting terminology, dates, percentages,
+                                and currency values. This makes financial retrieval a natural setting for hybrid strategies
+                                that combine semantic and lexical signals.
+                                      The increasing adoption of Large Language Models in summarization and question
+                                answering has further expanded the potential of document intelligence systems, but it
+                                has also amplified concerns about reliability. When used directly, LLMs may generate
+                                outputs that are fluent and plausible yet unsupported by the underlying sources, and they
+                                may introduce misattributions or subtle numerical errors that are unacceptable in high-
+                                stakes domains. For this reason, recent work has emphasized the importance of evaluating
+                                faithfulness and groundedness, distinguishing surface-level coherence from factual support
+                                and explicit linkage to evidence [12,13]. In regulated and compliance-sensitive settings, this
+                                distinction is especially important, since system outputs must be inspectable, justifiable,
+                                and suitable for human validation rather than merely persuasive.
+                                      Retrieval-Augmented Generation (RAG) provides a principled response to these limi-
+                                tations by conditioning generation on externally retrieved evidence rather than relying only
+                                on parametric model memory [5,6]. In practice, however, the effectiveness of RAG depends
+                                heavily on the quality of the retrieval stage. In financial settings, retrieval must preserve
+                                both recall and precision, capturing semantic relevance while also retaining exact matches
+                                on critical financial terms and values. This has motivated hybrid retrieval approaches
+                                that combine sparse and dense representations, as well as multi-stage architectures in
+                                which an initial broad candidate set is refined through reranking [14,15]. Among rerank-
+                                ing approaches, late-interaction models such as ColBERT are especially relevant because
+                                they operate at token level, making them better suited to domains in which small lexical
+                                differences or numerical details can materially change the meaning of an answer. Since our
+                                setting requires preserving both semantic relevance and fine-grained lexical precision, we
+                                adopt a ColBERT-style reranking strategy in the proposed architecture [8].
+                                      Beyond retrieval itself, an important line of research concerns the evaluation of end-to-
+                                end RAG systems. Recent studies have proposed automatic metrics and evaluation frame-
+                                works that separate retrieval failures from generation failures and assess the consistency
+                                between answers and their supporting evidence [16,17]. Robustness is also increasingly
+                                recognized as a key requirement in operational deployments, since paraphrases, noisy
+                                contexts, or adversarial perturbations may lead to inconsistent and difficult-to-audit out-
+                                puts even when the underlying information need remains unchanged [18,19]. In addition,
+                                structured generation strategies have gained attention because schema-constrained outputs,
+                                such as JSON-based formats, make responses easier to validate automatically and reduce
+                                ambiguity in downstream decision-support workflows [20].
+                                      A related line of work has examined how LLM-based and evidence-driven pipelines
+                                can support analysis and reporting in data-intensive and high-stakes settings, where source
+                                traceability, content consistency, and controlled generation are essential. In this direction,
+                                prior studies have explored token-efficient summarization of large collections [21], retrieval-
+                                oriented mechanisms to improve factual accuracy in health information access [22], and
+
+
+
+                                                                                               https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                                             5 of 19
+
+
+
+                                explainable reasoning pipelines for sensitive domains such as law and finance [23]. Other
+                                works have emphasized explicit evidence support in legal question answering through
+                                retrieval-augmented and case-based strategies [24], as well as explainability and traceability
+                                in cybersecurity applications through knowledge-graph-enhanced LLM systems [25] and
+                                agentic RAG architectures for cyberattack classification and reporting [26]. Taken together,
+                                these studies suggest that retrieval grounding, source attribution, and controlled output
+                                generation are increasingly central reliability mechanisms whenever LLMs are deployed in
+                                operational decision-support workflows.
+                                      Overall, the literature suggests three main design principles that are directly relevant
+                                to financial document intelligence: first, retrieval quality is a central determinant of answer
+                                reliability; second, faithfulness and groundedness must be evaluated explicitly rather than
+                                inferred from fluency; and third, structured and evidence-linked outputs are essential
+                                when system responses are intended to support auditable and compliance-sensitive de-
+                                cision processes. These observations motivate the design of our proposed architecture,
+                                which combines hybrid retrieval, citation-grounded generation, and explicit verification
+                                mechanisms to produce financial insights that are concise, traceable, and verifiable.
+                                      Compared with generic RAG systems, the proposed contribution lies in the combi-
+                                nation of four design choices within a single financial document-intelligence workflow:
+                                persistent provenance across all processing states, retrieval that jointly preserves semantic
+                                and lexical financial evidence, schema-validated generation with citation anchoring, and
+                                explicit numerical and auditability checks. The novelty is therefore methodological and
+                                system-level: each component is known, but the paper specifies how these components
+                                are connected, validated, and audited for financial QA where small evidence and numeric
+                                errors may materially affect analyst interpretation.
+
+                                3. Materials and Methods
+                                3.1. Auditable LLM-RAG Pipeline
+                                      We present an auditability-focused LLM-RAG pipeline for financial documents, de-
+                                signed to produce structured and verifiable insights whose claims are traceable to explicit
+                                evidence. As illustrated in Figure 1, the workflow is organized into five main stages:
+                                (i ) document upload, (ii ) content extraction and normalization, (iii ) financial enrichment,
+                                (iv) hybrid indexing, and (v) grounded insight generation. The guiding principle is that
+                                each stage produces persistent artifacts, including chunks, metadata, indexed represen-
+                                tations, retrieved evidence, and validation signals, that enable end-to-end provenance
+                                reconstruction.
+
+                                            1                 2                               3                          4                        5
+
+
+
+
+                                     Document
+                                      upload
+                                                 →        Content
+                                                         extraction
+                                                                         →            Financial
+                                                                                     enrichment
+                                                                                                   →                  Hybrid
+                                                                                                                     indexing
+                                                                                                                                    →   Grounded insight
+                                                                                                                                           generation
+
+                                 · REST API          · Normalize                 · Entities                     · Dense embeddings      · Hybrid search
+                                 · PDF, DOCX         · Chunk text                · Tickers                      · Sparse BM25           · Grounded JSON
+                                 · XLSX, TXT         · Context overlap           · Sentiment                    · ColBERT vectors       · Citations
+                                 · Audit trail       · Preserve formatting       · Topics                       · Reranking             · Validation
+
+
+                                                              Lifecycle: Uploaded → Normalized → Analyzed → Indexed → Ready
+
+
+                                Figure 1. Overview of the proposed auditable LLM-RAG pipeline for financial document intelligence.
+
+                                      Methodologically, the proposed work should be understood as a design-and-
+                                evaluation study rather than as the introduction of a new foundation model or a standalone
+                                retrieval algorithm. The proposed architecture builds on established components, including
+
+
+                                                                                                                      https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                6 of 19
+
+
+
+                                retrieval-augmented generation, hybrid dense–sparse retrieval, late-interaction reranking,
+                                schema-constrained generation, and groundedness evaluation. Its originality lies in orga-
+                                nizing these components into a unified financial-document workflow in which auditability,
+                                provenance reconstruction, numerical verification, and compliance-oriented traceability
+                                are treated as first-class design requirements. The methodological contribution lies in
+                                formalizing a state-machine lifecycle for financial RAG processing, integrating finance-
+                                oriented enrichment with persistent audit trails, and validating citations and finance-critical
+                                numerical tokens as explicit objects of verification rather than as generic generated text.
+                                      Formally, let d denote an uploaded document. After extraction and normalization,
+                                the system produces a textual representation T (d), which is segmented into a sequence
+                                of chunks C (d) = {ci }in=1 . Each chunk ci is associated with metadata mi , such as entities,
+                                tickers, sentiment, topics, and confidence scores. The enriched chunks are stored in an index
+                                I that maintains chunk text, metadata, dense and sparse retrieval representations, and
+                                multivector representations for reranking. Given a query q, retrieval returns an evidence
+                                set E(q) = {ci1 , . . . , cik }, which constitutes the sole context used for generation. The final
+                                output is a structured prediction y in JSON format, enriched with chunk-level citations and
+                                groundedness metrics.
+                                      A core requirement in finance is operational traceability under heterogeneous inputs
+                                and partial failures. To this end, the pipeline is orchestrated through a finite-state workflow
+                                with the lifecycle states Uploaded, Normalized, Analyzed, Indexed, and Ready. State
+                                transitions are atomic and recorded in a persistent audit trail containing timestamps, source
+                                and target states, execution outcomes, and generated artifacts. Failures trigger a dedicated
+                                error state with diagnostic logging, while the execution model remains idempotent in order
+                                to avoid unintended reprocessing. This design ensures that every generated insight can be
+                                traced back to the exact document version, chunk set, retrieved evidence, and verification
+                                outcomes.
+                                      In Stage 1, the pipeline acquires financial documents through a document-upload
+                                interface. The system supports heterogeneous inputs, including PDF, Word, Excel, and
+                                plain-text files. At upload time, each document is assigned an internal identifier and linked
+                                to audit metadata so that all subsequent processing steps can be reconstructed and verified.
+                                      In Stage 2, each document is converted into text while preserving structure as much
+                                as possible. Controlled normalization removes non-printable characters, applies Unicode
+                                normalization, and regularizes whitespace, while preserving finance-critical patterns such
+                                as currencies, percentages, dates, and accounting notations. Since financial reports are
+                                often long and distribute relevant information across multiple sections, the normalized text
+                                T (d) is segmented with a recursive splitter that prioritizes section boundaries, paragraphs,
+                                line breaks, sentences, and whitespace. Unless otherwise stated, the main experiments use
+                                768-token chunks with 128-token overlap; both values are stored with the chunk metadata
+                                and are varied in the chunking-sensitivity experiment.
+                                      In Stage 3, each chunk ci is enriched in parallel through four analyzers: named entity
+                                recognition, ticker extraction, sentiment analysis, and topic classification. In the imple-
+                                mentation evaluated here, entity recognition is performed with a transformer-based NER
+                                component followed by financial post-processing for organizations, currencies, dates, prod-
+                                ucts, and accounting terms; ticker extraction combines regular expressions, capitalization
+                                constraints, and a ticker/company-name dictionary; sentiment analysis uses a finance-
+                                oriented sentiment classifier; and topic classification maps chunks to analyst-oriented
+                                categories such as risk factors, governance, guidance, liquidity, capital allocation, and
+                                market events. The outputs of these analyzers are aggregated through deduplication and
+                                confidence-score combination, producing structured metadata mi . Enrichment is used both
+                                as inspectable metadata and as an enhanced retrieval view appended to the chunk text.
+
+
+
+                                                                                                  https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                             7 of 19
+
+
+
+                                     In Stage 4, the enriched chunks (ci , mi ) are stored in a hybrid index that combines
+                                three complementary representations: dense embeddings for semantic similarity, sparse
+                                representations for exact lexical matching, and multivector representations supporting
+                                token-level interaction during reranking. This design reflects the characteristics of financial
+                                queries, where relevance often depends simultaneously on conceptual similarity and exact
+                                matching of precise terms and values, such as tickers, accounting terminology, dates, and
+                                numerical quantities.
+                                     In Stage 5, the system performs grounded insight generation through a retrieval-
+                                augmented pipeline. Candidate generation retrieves the top 100 dense candidates and the
+                                top 100 sparse candidates. Dense and sparse rankings are combined with reciprocal rank
+                                fusion, using the score s(c, q) = ∑r∈{d,s} 1/(60 + rankr (c, q)) for candidates that appear in
+                                either list. The fused pool is then reranked with a ColBERT-style late-interaction model [8],
+                                and the final generation context contains the top 5 chunks unless otherwise specified. The
+                                resulting evidence set E(q) is persisted through chunk identifiers, document identifiers,
+                                offsets, retrieval scores, and reranking scores to support citation anchoring and auditability.
+                                Generation is conditioned exclusively on this evidence and follows a fixed prompt template
+                                containing: system-level instructions, the JSON schema, the user query, the retrieved
+                                evidence blocks, and the instruction to cite chunk identifiers for every claim. The main
+                                experiments use temperature 0 and deterministic JSON validation with up to two automatic
+                                repair attempts for malformed outputs.
+                                     In addition to schema validation, the pipeline reduces high-risk hallucinations by
+                                computing groundedness, i.e., by verifying whether the generated content is supported
+                                by the retrieved evidence set E(q). Financial tokenization preserves numbers, currencies,
+                                and percentages as critical tokens. Critical tokens require exact matching to be consid-
+                                ered grounded, whereas non-critical tokens may be evaluated through controlled fuzzy
+                                matching. Overall groundedness, critical groundedness, and numerical consistency are
+                                recorded together with the generated output and mapped to an automatic validation sta-
+                                tus (e.g., High, Medium, Low, Requires Review, or Critical Issues), thereby supporting
+                                human-in-the-loop operation in compliance-sensitive settings.
+                                     To evaluate the proposed pipeline under realistic financial question-answering con-
+                                ditions, we constructed AI-FinanceQA, a benchmark tailored to evidence-grounded and
+                                auditability-oriented analysis over heterogeneous financial documents. Its document
+                                composition, annotation protocol, and availability are described below.
+
+                                3.2. AI-FinanceQA Benchmark: Construction and Availability
+                                     AI-FinanceQA pairs a heterogeneous financial document corpus with analyst-style
+                                questions whose answers must be supported by explicit evidence. It is designed to evaluate
+                                evidence-grounded financial question answering over long and heterogeneous documents.
+                                The benchmark used in the experiments contains 312 documents and 524 questions. The
+                                document set includes 126 regulatory filings, 58 annual reports, 44 earnings-call transcripts,
+                                39 investor presentations, and 45 market-news items. The benchmark was not drawn from
+                                a single homogeneous source. Rather, it was constructed as a composite corpus reflecting
+                                the main document categories used in financial analysis. Each document is assigned to one
+                                primary document type to avoid double counting across partially overlapping categories.
+                                Each document is versioned and normalized through the same ingestion pipeline used in
+                                deployment. To support auditability and reproducibility, we persist immutable identifiers
+                                and provenance metadata for every document, including, when available, the source
+                                reference, ingestion timestamp, text-extraction settings, content hash, chunk identifiers,
+                                chunk offsets, and the mapping between original evidence spans and normalized chunks.
+
+
+
+
+                                                                                               https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                            8 of 19
+
+
+
+                                     Regarding the empirical basis of the benchmark, regulatory filings, including 10-K
+                                and 10-Q forms, were collected from the SEC EDGAR public repository (https://www.
+                                sec.gov/edgar/search/, accessed on 21 May 2026). IFRS-style annual reports and investor
+                                presentations were retrieved in PDF format from publicly accessible corporate Investor
+                                Relations websites. Earnings-call transcripts were sourced from transcript aggregators, such
+                                as Seeking Alpha or equivalent institutional providers, depending on access and licensing.
+                                Short market-news items were collected from publicly available financial-news sources
+                                and newswire-style feeds. All documents were ingested through the same normalization
+                                pipeline, and source references, ingestion timestamps, and content hashes are stored for
+                                provenance tracking. The corpus covers documents published between 2020 and 2026,
+                                inclusive. Some sources carry licensing restrictions that prevent full redistribution of the
+                                raw corpus.
+                                     The query set is designed to reflect four classes of analyst-style information needs:
+                                descriptive extraction (142 queries), comparative analysis (118 queries), numerically criti-
+                                cal questions involving amounts, percentages, guidance changes, margins, or buybacks
+                                (154 queries), and compliance-oriented questions involving risk factors, governance, dis-
+                                closure, or forward-looking statements (110 queries). Each query is annotated with (i) a
+                                structured reference answer in the target JSON schema, (ii) one or more supporting ev-
+                                idence spans, (iii) the corresponding normalized chunk identifiers, and (iv) a label indi-
+                                cating whether the answer requires exact numerical matching. The benchmark contains
+                                1486 evidence spans, with a median of two evidence spans per query.
+                                     Two annotators independently selected minimally sufficient evidence spans and ref-
+                                erence answers using written guidelines covering numeric claims, missing information,
+                                conflicting statements, and multi-span evidence. Disagreements were resolved by a third
+                                adjudicator. Inter-annotator agreement before adjudication was Cohen’s κ = 0.76 at the
+                                evidence-presence level and κ = 0.74 at the answer-type level. The final evaluation uses
+                                a fixed document-level split to prevent leakage: 218 documents for development/index
+                                tuning, 47 for validation, and 47 for held-out testing. Unless otherwise specified, reported
+                                AI-FinanceQA results are computed on the held-out test queries; the phrase “benchmark-
+                                wide” denotes aggregation across all question categories in the held-out test set rather than
+                                evaluation on the training portion.
+
+                                4. Experimental Results
+                                     We evaluate the proposed auditable LLM-RAG pipeline on AI-FinanceQA, the bench-
+                                mark introduced in Section 3.2. Although the architecture is technology-agnostic, the ex-
+                                perimental implementation uses Qdrant as the vector database, OpenAI text-embedding-
+                                3-small for dense embeddings, SPLADE-style sparse representations, and ColBERT mul-
+                                tivectors for reranking. The main configuration uses 768-token chunks, 128-token overlap,
+                                top-100 dense candidates, top-100 sparse candidates, reciprocal-rank fusion with constant 60,
+                                ColBERT reranking, and final top-5 evidence chunks for generation.
+                                     The end-to-end workflow follows the implemented document state machine (Up-
+                                loaded, Normalized, Analyzed, Indexed, and Ready). Timestamps are recorded at each
+                                transition to enable stage-level latency accounting and audit-log inspection. Normalization
+                                converts raw inputs into plain text by removing layout artifacts and standardizing whites-
+                                pace while preserving financial symbols and numeric patterns. Each normalized chunk
+                                stores document identifier, chunk index, character offsets, token offsets, hash, enrichment
+                                metadata, dense/sparse/multivector identifiers, and processing state. These metadata
+                                are kept with the retrieved context and the generated output so that an answer can be
+                                reconstructed from the original document version to the final validation status.
+
+
+
+
+                                                                                              https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                 9 of 19
+
+
+
+                                     Table 1 summarizes the benchmark composition and the reproducibility material used
+                                in the experiments.
+
+                                Table 1. AI-FinanceQA benchmark composition and reproducibility material.
+
+ Category                               Specification
+ Document corpus
+ Total documents                        312
+ Document types and source categories   126 regulatory filings from SEC EDGAR; 58 annual reports from corporate Investor
+                                        Relations material; 44 earnings-call transcripts from transcript aggregators or equivalent
+                                        providers; 39 investor presentations from corporate Investor Relations websites; 45 market-
+                                        news items from publicly available financial-news sources and newswire-style feeds
+ Document provenance                    Versioned document identifiers, primary document type, source references when available,
+                                        ingestion timestamps, text-extraction settings, content hashes, chunk identifiers, chunk
+                                        offsets, and evidence-span mappings
+ Temporal coverage                      Documents published between 2020 and 2026, inclusive
+ Query and annotation layer
+ Total queries                          524
+ Query types                            142 descriptive extraction; 118 comparative analysis; 154 numerical questions;
+                                        110 compliance-oriented questions
+ Evidence annotations                   1486 supporting spans; median of two spans per query; each span mapped to normalized
+                                        chunk identifiers
+ Answer format                          Structured JSON with evidence chunk IDs, citation fields, numerical fields, and valida-
+                                        tion status
+ Annotation protocol                    Two independent annotators and one adjudicator; Cohen’s κ = 0.76 for evidence presence
+                                        and κ = 0.74 for answer type before adjudication
+ Evaluation and release
+ Split                                  Document-level split: 218 documents for development/index tuning, 47 for validation,
+                                        and 47 for held-out testing
+ Redistribution policy                  Full corpus not fully redistributable because of licensing constraints
+ Reproducible material                  Queries, answer schemas, prompts, JSON schemas, evaluation scripts, retrieval configura-
+                                        tion, anonymized metadata, content hashes, evidence-span offsets where permitted, and a
+                                        limited redistributable subset
+
+
+                                      Retrieved chunks are concatenated through a deterministic context builder that pre-
+                                serves chunk boundaries, metadata, and scores. The LLM produces a structured output
+                                constrained by JSON Schema, with fields for summary, insights, signals, citations,
+                                numbers, and validation_status. We apply schema validation with up to two automatic
+                                repair attempts for malformed JSON, and we persist the final validated object together
+                                with its evidence links. Generation settings are fixed across experiments unless explicitly
+                                varied: temperature 0.0, top-p 1.0, deterministic schema validation, and the same prompt
+                                structure for all backends.
+                                      We evaluate the system along five dimensions. First, retrieval quality is measured
+                                through Precision@k, Recall@k, NDCG@5, MAP, and MRR against manually adjudicated
+                                evidence chunks. A retrieved chunk is considered relevant if its identifier matches an anno-
+                                tated evidence chunk or if its normalized character span overlaps an annotated evidence
+                                span. Second, generation reliability is assessed through token-level groundedness and
+                                JSON-schema compliance. Third, numeric correctness is evaluated through exact matching
+                                of finance-critical tokens. Fourth, auditability is assessed through traceability coverage,
+                                audit-log completeness, and recovery under injected processing failures. Fifth, latency is
+                                measured both end-to-end and by pipeline stage.
+                                      Table 2 lists the main experimental settings used across the evaluation.
+
+
+
+
+                                                                                                   https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                        10 of 19
+
+
+
+                                   Table 2. Main experimental settings used in the evaluation.
+
+ Block            Parameter               Value Used in the Main Experiments
+ Indexing         Vector store            Qdrant
+ Indexing         Dense representation    OpenAI text-embedding-3-small
+ Indexing         Sparse representation   SPLADE-style sparse vectors
+ Chunking         Chunk size/overlap      768 tokens/128 tokens
+ Retrieval        Candidate pool          Top-100 dense candidates and top-100 sparse candidates
+ Retrieval        Fusion method           Reciprocal-rank fusion with constant 60
+ Retrieval        Reranking and context   ColBERT-style late interaction; final top-5 chunks used as generation context
+ Generation       Prompt structure        System instructions, JSON schema, user query, retrieved evidence blocks, and citation instruction
+ Generation       Decoding settings       Temperature 0.0, top-p 1.0
+ Validation       Output control          JSON-schema validation with up to two automatic repair attempts for malformed outputs
+
+
+                                        Groundedness is computed at token level by verifying whether each response token
+                                   can be traced to at least one retrieved chunk. Because financial answers are highly sensi-
+                                   tive to small deviations, we treat numeric tokens, including numbers, percentages, and
+                                   currencies, as critical and require exact matching for them to be considered grounded.
+                                   For non-critical tokens, we allow controlled fuzzy matching and ignore predefined fi-
+                                   nancial stop-words. In addition to overall token groundedness, we compute numerical
+                                   accuracy and a critical-groundedness score in order to isolate failures on high-risk tokens.
+                                   To summarize compliance-oriented answer quality, we define
+
+                                                                 Scomp = 0.50 · G + 0.25 · J + 0.25 · N,                                 (1)
+
+                                   where G denotes token-level groundedness, J the JSON-valid rate (schema compliance
+                                   after validation and retries), and N numerical consistency (critical-token correctness). The
+                                   weighting emphasizes evidence traceability as the primary compliance requirement while
+                                   still penalizing schema and numeric failures.
+
+                                   4.1. LLM Backend Selection
+                                         In this experiment, we keep the retrieval stack fixed (hybrid dense and sparse retrieval
+                                   with ColBERT reranking) and vary only the LLM backend. Context construction, JSON
+                                   Schema validation, citation anchoring, and groundedness scoring remain unchanged across
+                                   models in order to isolate the contribution of the generator. Figure 2 and Table 3 report
+                                   mean ± SD across the held-out AI-FinanceQA test queries for the considered metrics. The
+                                   composite score Scomp defined in Equation (1) summarizes compliance-oriented quality,
+                                   whereas latency reflects operational cost.
+                                         The results show a consistent ranking across the evaluated models. gpt-4o-mini
+                                   achieves the best overall performance, obtaining the highest groundedness, JSON-valid
+                                   rate, numerical consistency, and composite score. In particular, its gains are not limited to a
+                                   single dimension, but are observed across all compliance-relevant metrics, indicating a more
+                                   reliable balance between evidence adherence, structured-output validity, and numerical
+                                   correctness. Compared with the baseline gpt-3.5-turbo, the improvement in Scomp is
+                                   accompanied by higher groundedness and stronger numerical consistency, which are
+                                   especially important in financial question answering.
+                                         The trade-off with latency is also favorable. Although gpt-4o-mini is not the fastest
+                                   backend, its response time remains substantially lower than that of Llama-3.1-8B-Instruct
+                                   while providing better performance across all quality dimensions. Qwen2.5-7B-Instruct
+                                   and Llama-3.1-8B-Instruct both improve over the baseline, but neither matches the overall
+                                   quality of gpt-4o-mini. Based on this comparative analysis, we use gpt-4o-mini in the
+                                   subsequent experiments as the most favorable quality–latency compromise among the
+                                   evaluated backends. Because the absolute differences between backends are moderate,
+
+
+
+                                                                                                          https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                                          11 of 19
+
+
+
+                                we interpret this result as a practical configuration choice for the present implementation
+                                rather than as a general claim that one backend is universally superior across financial
+                                RAG settings.
+
+
+
+
+                                             (a)                             (b)                                                      (c)
+
+
+
+                                                                                                2000
+                                                                                                                              1591
+
+
+
+
+                                                                                          latency (ms)
+                                                                                                1500 1198 1390                         1295
+                                                                                                1000
+                                                                                                  500
+                                                                                                      0 )
+                                                                                                          line nstrucBt-Instrupctt-4o-mini
+                                                                                       -tu r b o (beans2e.5-7Ba-I-3 .1-8     g
+                                                                                gpt-3.5 Qw Llam
+
+                                                           (d)                                              (e)
+
+                                Figure 2. LLM backend selection on AI-FinanceQA. Mean±SD over the held-out benchmark queries
+                                while keeping the retrieval stack fixed and varying only the LLM backend. The composite score
+                                summarizes compliance-oriented quality (evidence groundedness, schema validity, and numerical
+                                consistency), whereas latency captures operational cost. (a) Composite score Scomp (Equation (1)).
+                                (b) Groundedness (G). (c) JSON-valid rate (J). (d) Numerical consistency (N). (e) Latency (ms).
+
+                                Table 3. Summary (mean ± SD) for LLM backend selection on AI-FinanceQA. The retrieval stack is
+                                fixed; only the LLM backend varies.
+
+ LLM Backend                    G (Groundedness)        J (JSON-Valid)        N (Numerical)                                SComp              Latency (ms)
+ gpt-3.5-turbo (baseline)        0.9291 ± 0.0170        0.9500 ± 0.0218      0.9098 ± 0.0219                      0.9295 ± 0.0549             1197.5 ± 176.9
+ Qwen2.5-7B-Instruct             0.9359 ± 0.0166        0.9667 ± 0.0179      0.9193 ± 0.0186                      0.9394 ± 0.0454             1389.8 ± 206.1
+ Llama-3.1-8B-Instruct           0.9384 ± 0.0156        0.9667 ± 0.0179      0.9224 ± 0.0189                      0.9415 ± 0.0457             1591.4 ± 235.2
+ gpt-4o-mini (selected)          0.9463 ± 0.0123        0.9833 ± 0.0128      0.9348 ± 0.0166                      0.9527 ± 0.0329             1295.3 ± 199.6
+                                Note: Bold values indicate the best performance among the evaluated LLM backends.
+
+
+                                4.2. Retrieval Ablation Study
+                                      We ablate the retrieval component by progressively enabling complementary signals:
+                                Sparse-only (lexical retrieval), Dense-only (semantic similarity), Hybrid (dense and sparse
+                                fusion), and Hybrid+Rerank (hybrid prefetch followed by ColBERT reranking). We report
+                                Precision@k for k ∈ {1, 3, 5, 10}, where k denotes the number of top-ranked chunks con-
+                                sidered in the evaluation. This protocol isolates the marginal contribution of lexical cues,
+                                dense semantics, and reranking, and matches the standard practice of evaluating hybrid
+                                pipelines at multiple cut-offs to reflect production operating points.
+                                      Figure 3 shows that hybrid retrieval consistently improves precision over single-
+                                signal baselines, confirming that lexical and semantic cues are complementary in financial
+                                text. Adding ColBERT reranking yields the best ranking quality around moderate cutoffs
+                                (notably k = 5), aligning with the two-stage design: increasing first-stage k tends to improve
+                                recall but also introduces noise and additional latency, while reranking focuses evidence at
+                                the top of the list, improving downstream groundedness.
+
+
+
+
+                                                                                                                          https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                                              12 of 19
+
+
+
+
+                                                      0.7                                              Sparse-only
+                                                                                                       Dense-only
+                                                                                                       Hybrid
+                                                                                                       Hybrid+Rerank
+                                                                                 best @k=5: Hybrid+Rerank
+                                                      0.6
+
+
+
+
+                                        Precision@k
+                                                      0.5
+                                                      0.4
+                                                      0.3
+                                                            1   3          5                                   10
+                                                                k (top-k retrieved chunks)
+                                          Figure 3. Retrieval ablation on AI-FinanceQA (Precision@k). Each curve reports mean Precision@k
+                                          over the held-out test queries; higher is better. Hybrid retrieval improves over sparse-only and
+                                          dense-only baselines, while ColBERT reranking provides the strongest gains at moderate cutoffs
+                                          (notably around k = 5), improving evidence placement at the top of the ranked list.
+
+                                               To make the retrieval evaluation consistent with the metrics described above, Table 4
+                                          reports additional retrieval metrics for the same ablation. Hybrid+Rerank obtains the best
+                                          MAP and MRR, indicating better ordering of relevant chunks, while the hybrid candidate
+                                          set improves Recall@5 over single-signal baselines. These results support the design choice
+                                          of combining lexical and semantic candidate generation before reranking.
+
+                                          Table 4. Retrieval metrics on the AI-FinanceQA held-out test split.
+
+ Retriever                 Main Signal                                    P@5                    Recall@5              NDCG@5         MAP              MRR
+ Sparse-only               Lexical                                        0.54                         0.41             0.60           0.47             0.62
+ Dense-only                Semantic                                       0.58                         0.45             0.65           0.50             0.66
+ Hybrid                    Dense+sparse                                   0.63                         0.51             0.70           0.55             0.72
+ Hybrid+Rerank             Dense+sparse+ColBERT                           0.69                         0.55             0.74           0.61             0.78
+                                          Note: Bold values indicate the best performance among the compared retrieval configurations.
+
+
+                                          4.3. Financial Enrichment Ablation
+                                                To assess whether the enrichment layer contributes measurable value, we compare
+                                          retrieval over raw chunks against retrieval over enriched chunks, keeping dense embed-
+                                          dings, sparse representations, fusion, reranking, and generation settings fixed. In the raw
+                                          condition, the retriever indexes only normalized chunk text. In the enriched condition, the
+                                          retriever indexes the normalized chunk text plus structured metadata derived from entity
+                                          recognition, ticker extraction, sentiment, and topic classification.
+                                                Table 5 shows that enriched chunks improve retrieval and downstream compliance-
+                                          oriented quality. The improvement is modest but consistent, suggesting that enrichment is
+                                          not merely an architectural feature: it helps expose financial entities, tickers, and analyst-
+                                          oriented topics that are sometimes weakly represented in the raw chunk text. The gain is
+                                          largest for ticker/entity-heavy and compliance-oriented queries, where exact lexical signals
+                                          and metadata categories help the retriever place the relevant chunk higher in the ranking.
+
+                                          Table 5. Ablation of the financial enrichment layer on AI-FinanceQA.
+
+ Condition                      Indexed Content                                                                          P@5    Recall@5      NDCG@5      Scomp
+ Raw chunks                     Normalized chunk text only                                                               0.64     0.51          0.70       0.945
+ Enriched chunks                Chunk text plus entities, tickers, sentiment, and topic labels                           0.69     0.55          0.74       0.953
+ Absolute gain                  Enriched—raw                                                                            +0.05    +0.04         +0.04      +0.008
+                                          Note: Bold values indicate the best performance between the compared enrichment conditions.
+
+
+
+
+                                                                                                                                 https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                           13 of 19
+
+
+
+                                 4.4. Chunking Sensitivity and Latency Breakdown
+                                       Finally, we analyze two operational aspects that strongly affect real deployments:
+                                 (i) chunk granularity, which controls the retriever’s resolution and the LLM context budget,
+                                 and (ii) end-to-end latency, which determines responsiveness and cost.
+                                       Figure 4a reports NDCG@5 under different chunk sizes. In our implementation,
+                                 chunking is configured through a recursive splitter with overlap; for reporting, we express
+                                 chunk size in tokens after tokenization to make the analysis comparable across documents
+                                 with different formatting and numeric density. Performance peaks at an intermediate
+                                 granularity (around ∼768 tokens), highlighting the expected trade-off: smaller chunks
+                                 improve pinpointing but fragment context, whereas larger chunks preserve narrative
+                                 continuity but dilute relevance signals and introduce unrelated content.
+                                       Figure 4b decomposes end-to-end latency across pipeline stages for two representative
+                                 inputs: a long-form 10-Q filing and a short market-news article. Stage timing is computed
+                                 from the timestamps recorded at state transitions and handler boundaries (normalization,
+                                 enrichment, indexing, retrieval/rerank, and LLM+validation). As expected, enrichment
+                                 and LLM+validation dominate overall runtime on long documents, whereas shorter docu-
+                                 ments reduce indexing/retrieval overhead and shift the bottleneck toward LLM execution.
+                                 The two-stage retriever keeps retrieval latency bounded while improving ranking quality,
+                                 enabling a practical balance between recall, precision, and responsiveness.
+
+
+                                         0.75
+                                         0.70
+                                NDCG@5
+
+
+
+
+                                                                              best 768 tokens
+                                         0.65
+                                         0.60
+                                         0.55
+                                                  400        600        800          1000
+                                                        Chunk size (tokens)
+                                           (a) Chunking sensitivity (NDCG@5)                    (b) Latency breakdown by pipeline stage
+
+                                 Figure 4. Operational analyses on AI-FinanceQA. (a): chunk-size sensitivity measured via NDCG@5,
+                                 highlighting an intermediate optimum where chunks preserve enough context while remaining
+                                 rankable. (b): end-to-end latency decomposition across pipeline stages (ingestion/normalization,
+                                 enrichment, indexing, retrieval/rerank, and LLM+validation), comparing a long regulatory filing to
+                                 a short market-news document.
+
+                                 4.5. Additional Experiments on FinQA: Answer Distance and Context-Utility
+                                       While AI-FinanceQA is used to evaluate the full auditability-oriented pipeline, we also
+                                 conduct complementary experiments on FinQA to isolate the effect of retrieval augmenta-
+                                 tion on answer quality under controlled context conditions. Specifically, this subsection
+                                 introduces a distance-based analysis on FinQA, a benchmark for financial question answer-
+                                 ing with numerical reasoning over heterogeneous evidence (text and tables) extracted from
+                                 financial reports.
+                                       We compare four inference conditions that progressively enrich the input context:
+                                 (i ) Q-only, where the model receives only the question; (ii ) Full-body, where the question
+                                 is paired with the full document body; (iii ) RAG (E(q)), where the model is conditioned on
+                                 a compact set of evidence chunks retrieved for query q; and (iv) RAG + body, combining
+                                 retrieved evidence with the full body. This design isolates the trade-off between adding
+                                 information and injecting noise through unfiltered context.
+                                       We evaluate answer quality through two complementary distances. First, we compute
+                                 a numeric distance based on relative error between predicted and reference numerical
+
+
+
+                                                                                                              https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                                                                                               14 of 19
+
+
+
+                                   values (capped to limit the influence of extreme outliers), capturing arithmetic fidelity.
+                                   Second, we compute a semantic distance as 1 − cos(·, ·) between answer representations,
+                                   capturing alignment when responses include explanatory text or intermediate statements.
+                                   Finally, we aggregate these signals into a composite distance, enabling a unified comparison
+                                   across context conditions.
+                                        Figure 5a reports the cumulative distribution of numeric distance. RAG (E(q)) concen-
+                                   trates substantially more mass at low errors than both Q-only and Full-body, indicating
+                                   that evidence selection is critical for controlling numerical deviation in financial QA. While
+                                   RAG + body remains competitive, it exhibits a weaker concentration than pure RAG, sug-
+                                   gesting that appending the full document can dilute salient signals with irrelevant content.
+                                        Figure 5b shows the distribution of semantic distance. All context-aware configu-
+                                   rations reduce semantic divergence compared to Q-only, with RAG (E(q)) achieving the
+                                   tightest distribution. This indicates that retrieval not only improves numerical fidelity but
+                                   also stabilizes the generated rationale by anchoring responses to consistent evidence.
+                                        A key requirement in real deployments is robustness to noisy or excessive context.
+                                   Figure 5c analyzes a controlled inflation setting where additional irrelevant chunks are
+                                   appended to the retrieved context. The composite distance increases monotonically as
+                                   noise grows, highlighting a predictable degradation pattern: beyond a certain context size,
+                                   extra information acts as a distractor rather than support.
+                                        Figure 5d summarizes the improvement in composite distance with respect to Q-
+                                   only. Providing the full body yields a measurable gain, but the largest improvement is
+                                   obtained by RAG (E(q)), confirming that targeted evidence selection is more effective
+                                   than raw context expansion. The RAG + body variant remains beneficial but does not
+                                   surpass pure RAG, reinforcing the practical recommendation of keeping prompts concise
+                                   and evidence-driven for financial QA.
+
+                                                   1.0                                                                                1.0
+                                                                                                            Sem. dist (1 - cos sim)
+
+
+
+
+                                                   0.8                                                                                0.8
+                                                   0.6                                                                                0.6
+                                CDF
+
+
+
+
+                                                   0.4                                        Q-only                                  0.4
+                                                                                              Full-body
+                                                   0.2                                        RAG (E(q))                              0.2
+                                                                                              RAG + body
+                                                   0.00.0                                                                             0.0
+                                                              0.2       0.4       0.6        0.8      1.0                                       Q-only              dy               (q))           dy
+                                                       Numeric distance (relative error) [capped at 1.0]                                                    Full-bo           RAG (E        RAG +
+                                                                                                                                                                                                  bo
+
+                                                                            (a)                                                                                   (b)
+
+                                                                                                                                       0.5
+                                                                                                            Comp. dist (Q-only cond)
+
+
+
+
+                                                       0.6
+                                Comp. dist ( better)
+
+
+
+
+                                                                                                                                       0.4
+                                                       0.4                                                                             0.3                              0.281
+                                                                                                                                                                                            0.243
+                                                                                                                                       0.2          0.141
+                                                       0.2                                                                             0.1
+                                                                                                                                       0.0
+                                                             0   5   10         20                     40                                            dy           (q     ))                 dy
+                                                                       Extra chunks (noise)                                                  Full-bo        RAG (E               RAG +
+                                                                                                                                                                                       bo
+
+                                                                            (c)                                                                                   (d)
+
+                                    Figure 5. Answer distance and context-utility analysis on FinQA. We compare four inference condi-
+                                    tions (Q-only, Full-body, RAG (E(q)), RAG + body) using numeric and semantic distances and their
+                                    composite aggregation. Retrieval-based evidence selection improves both numerical robustness and
+                                    semantic alignment, whereas uncontrolled context expansion increases noise sensitivity, as shown by
+                                    the inflation study. (a) Numeric distance CDF (relative error, capped). (b) Semantic distance distribu-
+                                    tion (1 − cos). (c) Context inflation curve (extra irrelevant chunks). (d) Composite-distance gain vs.
+                                    Q-only; arrows indicate the direction of improvement, with lower composite distance corresponding
+                                    to better performance.
+
+
+                                                                                                                                                                                  https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                         15 of 19
+
+
+
+                                        4.6. Auditability-Oriented Demonstration
+                                           Because auditability is a central claim of the system, we conduct a targeted demon-
+                                      stration to evaluate whether the artifacts required to reconstruct an answer are complete
+                                      and usable. For each generated answer, we check whether every insight contains at least
+                                      one citation to a persisted chunk identifier, whether the cited chunk can be resolved to the
+                                      original document version and offsets, whether the retrieval scores and validation signals
+                                      are stored with the output, and whether state transitions from upload to ready are present
+                                      in the audit log. We also inject recoverable failures during normalization, enrichment, and
+                                      indexing to verify that the state machine records the error state and resumes processing
+                                      without duplicating artifacts.
+                                           Table 6 reports the auditability checks used to verify traceability and failure recovery.
+
+                                      Table 6. Auditability-oriented checks on the AI-FinanceQA held-out test split and injected-failure runs.
+
+ Dimension                      Check                                                                                     Observed Value
+ Citation coverage              Generated insights with at least one citation                                             98.7%
+ itation resolution             Citations resolvable to persisted chunk IDs and offsets                                   97.8%
+ Artifact completeness          Outputs with complete retrieval scores, validation signals, and stored JSON artifacts     99.1%
+ Pipeline traceability          Documents with complete state-transition logs from upload to ready/error states           99.4%
+ Failure recovery               Injected recoverable failures correctly resumed without duplicated artifacts              29/30
+
+
+                                             The most common auditability failure was not an unsupported answer, but an in-
+                                        complete citation assignment for secondary explanatory sentences. These cases were still
+                                        assigned a low-confidence or requires-review validation status, but they show that au-
+                                        ditability should be evaluated as a first-class property rather than inferred from retrieval
+                                        and groundedness alone.
+
+                                        4.7. Analyst-Facing Decision-Support Example
+                                           To clarify the decision-support scope, we consider an analyst-facing example. Consider
+                                      a compliance analyst asking whether a quarterly filing contains a material change in
+                                      liquidity risk. The system retrieves the relevant liquidity-risk and debt-maturity chunks,
+                                      produces a JSON answer with a concise summary, lists the cited chunk identifiers, extracts
+                                      the reported cash, debt, maturity, and percentage values, and assigns a validation status
+                                      based on groundedness and numerical consistency. The analyst can then inspect the cited
+                                      chunks and decide whether the finding should be escalated. In this workflow, the system
+                                      supports evidence gathering, drafting, and triage; it does not make an investment decision,
+                                      assign a credit rating, or replace compliance judgment. This example aligns the decision-
+                                      support claim with the empirical evaluation, which measures evidence retrieval, grounded
+                                      answer generation, numerical consistency, traceability, and latency rather than direct effects
+                                      on analyst productivity or decision quality.
+
+                                        5. Discussion
+                                              The experimental analysis shows that an evidence-centric, auditability-focused RAG
+                                        design can improve the reliability of LLM-based financial document intelligence along
+                                        the dimensions evaluated in this paper: retrieval relevance, groundedness, numerical
+                                        consistency, structured-output compliance, traceability, and latency. These dimensions are
+                                        necessary foundations for decision support, but they do not by themselves demonstrate
+                                        improved analyst decisions or downstream financial outcomes. For this reason, the system
+                                        is framed as a financial document-intelligence pipeline for analyst-facing review rather
+                                        than as an autonomous financial decision-making system. Across heterogeneous inputs,
+                                        the pipeline maintains traceability by persisting intermediate artifacts and by orchestrating
+                                        the document lifecycle through atomic state transitions.
+
+
+                                                                                                            https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                             16 of 19
+
+
+
+                                       A key outcome is that retrieval quality—not only generation capacity—remains the
+                                dominant driver of trustworthy outputs in finance. Hybrid candidate generation (dense
+                                and sparse) consistently improves ranking quality over single-signal baselines, and late-
+                                interaction reranking further refines evidence placement at the top of the list. Practically,
+                                this reduces the probability that the LLM is conditioned on partially relevant or noisy
+                                context, thereby improving groundedness and stabilizing the downstream reasoning. In
+                                addition, enforcing structured outputs (JSON Schema) constrains the response space and
+                                supports automated validation, while citation anchoring makes each insight inspectable
+                                at the chunk level. Taken together, hybrid retrieval, reranking, and schema-guided gener-
+                                ation act as complementary controls: retrieval maximizes evidence relevance, reranking
+                                improves precision under tight cutoffs, and structured generation improves consistency
+                                and downstream auditability.
+                                       Despite these safeguards, limitations emerge that are especially relevant in high-stakes
+                                financial workflows. First, micro-errors on numerical tokens (e.g., small deviations in
+                                values, dates, or percentages) remain a critical failure mode. Even when the system applies
+                                strict handling for numbers and other finance-critical tokens, errors can still originate
+                                upstream from extraction noise (e.g., layout artifacts, OCR-like distortions, or table-to-text
+                                conversion) or from ambiguity in how a value is reported across document sections. Second,
+                                context sensitivity persists: adding large, unfiltered context can dilute salient evidence
+                                with irrelevant content, which is particularly problematic for long-form filings and for
+                                noisy news articles that mix factual statements with interpretive or opinionated passages.
+                                Third, chunking introduces an inherent trade-off: smaller chunks improve pinpointing
+                                but fragment narrative continuity, whereas larger chunks preserve context but may carry
+                                unrelated material that harms ranking and increases the risk of spurious grounding.
+                                       These observations motivate a clear operational stance: the pipeline is designed to
+                                support, not replace, expert judgment. A human-in-the-loop reviewer remains essen-
+                                tial whenever (i ) validation statuses indicate low confidence or critical issues, (ii ) crit-
+                                ical groundedness on numbers/currencies/percentages is below acceptable thresholds,
+                                (iii ) retrieved evidence spans multiple partially conflicting chunks, or (iv) the task requires
+                                distinguishing hard information from interpretive claims (common in market news and
+                                forward-looking statements). In practice, the analyst’s validation effort should focus on
+                                high-impact elements: numerical values and units, temporal references, ticker/entity attri-
+                                bution, and any claim that implies causality, guidance changes, or governance-sensitive
+                                events. Under these conditions, the system’s main value is to provide fast, structured
+                                hypotheses with explicit evidence links, enabling efficient verification and escalation rather
+                                than unaudited automation.
+
+                                6. Future Work
+                                      Future work will proceed in several directions. A first direction concerns the extension
+                                and release of AI-FinanceQA. Although the current benchmark supports the evaluation of
+                                retrieval, grounded generation, numerical consistency, and structured-output compliance,
+                                its coverage can be broadened with additional document classes and more diverse financial
+                                scenarios. We plan to expand the benchmark with redistributable public filings, investor
+                                reports, earnings-call material, regulatory documents, and synthetic cases designed to
+                                stress specific reasoning patterns. Particular attention will be given to licensing-compliant
+                                metadata for restricted sources, stable document identifiers, evidence-span annotations,
+                                and reproducibility artifacts that allow researchers to replicate the evaluation even when
+                                some original documents cannot be redistributed.
+
+
+
+
+                                                                                                https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                    17 of 19
+
+
+
+                                     A second direction concerns the evaluation of the pipeline in realistic analyst and
+                                compliance-review workflows. The current experiments assess evidence retrieval, ground-
+                                edness, numerical consistency, structured-output validity, latency, enrichment effects, and
+                                auditability-oriented properties, but they do not directly measure the impact of the system
+                                on human work. Future studies will therefore involve financial analysts and compliance
+                                reviewers in task-based evaluations. These studies will measure review time, evidence-
+                                verification accuracy, escalation quality, error detection, perceived trust, cognitive effort,
+                                and the usefulness of structured outputs and validation signals during document inspection.
+                                Such evaluations are necessary to determine whether evidence-grounded LLM-RAG sys-
+                                tems improve analyst productivity, evidence-verification quality, and review effectiveness
+                                in practice.
+                                     A third direction concerns robustness, auditability, and deployment conditions. We
+                                plan to strengthen the auditability evaluation through external audit scenarios, richer
+                                failure injection, controlled recovery tests, and checks for prompt-injection-style content
+                                embedded in financial documents. We will also test the system under more diverse
+                                operational settings, including larger document collections, streaming news, multilingual
+                                reports, OCR-heavy PDFs, complex tables, and versioned filings in which the same financial
+                                value may change across document revisions. These experiments will help assess whether
+                                the proposed architecture remains reliable, traceable, and auditable when moving from
+                                controlled benchmark settings to dynamic financial environments.
+
+                                7. Conclusions
+                                      This work presented an evidence-centric LLM-RAG architecture for financial docu-
+                                ment intelligence and evidence-grounded QA. The proposed pipeline transforms heteroge-
+                                neous financial documents into structured, auditable outputs whose claims can be traced to
+                                persisted evidence chunks and validation artifacts. The contribution is methodological and
+                                system-level: state-driven orchestration, hybrid retrieval, enrichment, schema-constrained
+                                generation, numerical consistency checks, and audit trails are connected into a single
+                                workflow designed for analyst-facing verification.
+                                      The evaluation indicates that reliability in financial LLM-RAG systems depends pri-
+                                marily on evidence quality, context controllability, and validation mechanisms. Hybrid
+                                retrieval and reranking increase the likelihood that generation is conditioned on high-utility
+                                evidence, while schema-guided outputs and automated checks constrain responses into
+                                machine-verifiable formats. At the same time, the study highlights the practical boundaries
+                                of current LLM-based automation: numerical micro-errors, ambiguous temporal references,
+                                noisy document structure, and model/API variability remain critical risks. The framework
+                                is therefore best positioned as an analyst-facing assistant that accelerates evidence gathering
+                                and drafting while preserving explicit points for expert validation.
+
+                                Author Contributions: Conceptualization, C.C. and F.M.; methodology, C.C. and F.M.; software, S.S.
+                                and C.C.; validation, C.C.; formal analysis, C.C.; investigation, S.S. and C.C.; data curation, S.S. and
+                                C.C.; writing—original draft preparation, S.S. and C.C.; writing—review and editing, C.C. and F.M.;
+                                visualization, S.S. and C.C.; supervision, F.M. All authors have read and agreed to the published
+                                version of the manuscript.
+
+                                Funding: This research received no external funding.
+
+                                Data Availability Statement: The full document corpus is subject to licensing constraints and is not
+                                fully redistributable.
+
+                                Conflicts of Interest: The authors declare no conflicts of interest.
+
+
+
+
+                                                                                                       https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                     18 of 19
+
+
+
+References
+1.    Loughran, T.; McDonald, B. Textual Analysis in Accounting and Finance: A Survey. J. Account. Res. 2016, 54, 1187–1230.
+      [CrossRef]
+2.    Du, K.; Zhao, Y.; Mao, R.; Xing, F.; Cambria, E. Natural Language Processing in Finance: A Survey. Inf. Fusion 2025, 115, 102755.
+      [CrossRef]
+3.    Lee, J.; Stevens, N.; Han, S.C.; Song, M. Large Language Models in Finance (FinLLMs). Neural Comput. Appl. 2025, 37, 24853–24867.
+      [CrossRef]
+4.    Chen, Z.; Chen, W.; Smiley, C.; Shah, S.; Borova, I.; Langdon, D.; Moussa, R.; Beane, M.; Huang, T.H.; Routledge, B.; et al. FinQA:
+      A Dataset of Numerical Reasoning over Financial Data. In Proceedings of the 2021 Conference on Empirical Methods in Natural
+      Language Processing, Punta Cana, Dominican Republic, 7–11 November 2021; pp. 3697–3711. [CrossRef]
+5.    Gao, Y.; Xiong, Y.; Gao, X.; Jia, K.; Pan, J.; Bi, Y.; Dai, Y.; Sun, J.; Wang, M.; Wang, H. Retrieval-Augmented Generation for Large
+      Language Models: A Survey. arXiv 2023, arXiv:2312.10997. [CrossRef]
+6.    Lewis, P.; Perez, E.; Piktus, A.; Petroni, F.; Karpukhin, V.; Goyal, N.; Küttler, H.; Lewis, M.; Yih, W.t.; Rocktäschel, T.; et al.
+      Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. arXiv 2020, arXiv:2005.11401. [CrossRef]
+7.    Reimers, N.; Gurevych, I. Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks. In Proceedings of the 2019
+      Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural
+      Language Processing (EMNLP-IJCNLP), Hong Kong, China, 3–7 November 2019; pp. 3982–3992. [CrossRef]
+8.    Khattab, O.; Zaharia, M. ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT. In
+      Proceedings of the 43rd International ACM SIGIR Conference on Research and Development in Information Retrieval; ACM: New York,
+      NY, USA, 2020. [CrossRef]
+9.    Chen, J.; Zhou, P.; Hua, Y.; Xin, L.; Chen, K.; Li, Z.; Zhu, B.; Liang, J. FinTextQA: A Dataset for Long-form Financial Question
+      Answering. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long
+      Papers), Bangkok, Thailand, 11–16 August 2024; pp. 6025–6047. [CrossRef]
+10.   Reddy, V.; Koncel-Kedziorski, R.; Lai, V.D.; Krumdick, M.; Lovering, C.; Tanner, C. DocFinQA: A Long-Context Financial
+      Reasoning Dataset. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 2:
+      Short Papers), Bangkok, Thailand, 11–16 August 2024; pp. 445–458. [CrossRef]
+11.   Islam, P.; Kannappan, A.; Kiela, D.; Qian, R.; Scherrer, N.; Vidgen, B. FinanceBench: A New Benchmark for Financial Question
+      Answering. arXiv 2023, arXiv:2311.11944. [CrossRef]
+12.   Zhou, W.; Zhang, S.; Poon, H.; Chen, M. Context-faithful Prompting for Large Language Models. In Proceedings of the Findings
+      of the Association for Computational Linguistics: EMNLP 2023, Singapore, 6–10 December 2023; pp. 14544–14556. [CrossRef]
+13.   Stolfo, A. Groundedness in Retrieval-augmented Long-form Generation: An Empirical Study. In Proceedings of the Findings of
+      the Association for Computational Linguistics: NAACL 2024, Mexico City, Mexico, 16–21 June 2024; pp. 1537–1552. [CrossRef]
+14.   Cheng, H.; Shen, Y.; Liu, X.; He, P.; Chen, W.; Gao, J. UnitedQA: A Hybrid Approach for Open Domain Question Answering.
+      In Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint
+      Conference on Natural Language Processing (Volume 1: Long Papers), Online, 1–6 August 2021; pp. 3080–3090. [CrossRef]
+15.   Chen, T.; Zhang, M.; Lu, J.; Bendersky, M.; Najork, M. Out-of-Domain Semantics to the Rescue! Zero-Shot Hybrid Retrieval Models.
+      In Advances in Information Retrieval; Lecture Notes in Computer Science; Springer: Cham, Switzerland, 2022; Volume 13185,
+      pp. 95–110. [CrossRef]
+16.   Es, S.; James, J.; Espinosa Anke, L.; Schockaert, S. RAGAs: Automated Evaluation of Retrieval Augmented Generation.
+      In Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics: System
+      Demonstrations, St. Julians, Malta, 17–22 March 2024; pp. 150–158. [CrossRef]
+17.   Yu, H.; Gan, A.; Zhang, K.; Tong, S.; Liu, Q.; Liu, Z. Evaluation of Retrieval-Augmented Generation: A Survey. arXiv 2024,
+      arXiv:2405.07437. [CrossRef]
+18.   Ribeiro, M.T.; Wu, T.; Guestrin, C.; Singh, S. Beyond Accuracy: Behavioral Testing of NLP Models with CheckList. In Proceedings
+      of the 58th Annual Meeting of the Association for Computational Linguistics, Online, 5–10 July 2020; pp. 4902–4912. [CrossRef]
+19.   Zhang, K.; Wu, L.; Yu, K.; Lv, G.; Zhang, D. Evaluating and Improving Robustness in Large Language Models: A Survey and
+      Future Directions. arXiv 2025, arXiv:2506.11111. [CrossRef]
+20.   Lu, Y.; Li, H.; Cong, X.; Zhang, Z.; Wu, Y.; Lin, Y.; Liu, Z.; Liu, F.; Sun, M. Learning to Generate Structured Output with Schema
+      Reinforcement Learning. In Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1:
+      Long Papers), Vienna, Austria, 27 July–1 August 2025; pp. 4905–4918. [CrossRef]
+21.   Marozzo, F.; Belcastro, L.; Cosentino, C.; Liò, P. Balanced and Token-Efficient Summarization of User Reviews via Stratified
+      Sampling and Large Language Models. In Machine Learning and Knowledge Discovery in Databases. Research Track; Lecture Notes in
+      Computer Science; Springer: Cham, Switzerland, 2026; Volume 16016, pp. 290–306. [CrossRef]
+22.   Upadhyay, R.; Viviani, M. Enhancing Health Information Retrieval with RAG by prioritizing topical relevance and factual
+      accuracy. Discov. Comput. 2025, 28, 27. [CrossRef]
+
+
+
+                                                                                                        https://doi.org/10.3390/fi18060284
+Future Internet 2026, 18, 284                                                                                                  19 of 19
+
+
+
+23.   Chu, X.; Tan, Z.; Xue, H.; Wang, G.; Mo, T.; Li, W. Domaino1s: Guiding LLM Reasoning for Explainable Answers in High-Stakes
+      Domains. arXiv 2025, arXiv:2501.14431. [CrossRef]
+24.   Wiratunga, N.; Abeyratne, R.; Jayawardena, L.; Martin, K.; Massie, S.; Nkisi-Orji, I.; Weerasinghe, R.; Liret, A.; Fleisch, B.
+      CBR-RAG: Case-Based Reasoning for Retrieval Augmented Generation in LLMs for Legal Question Answering. arXiv 2024,
+      arXiv:2404.04302. [CrossRef]
+25.   Belcastro, L.; Carlucci, C.; Cosentino, C.; Liò, P.; Marozzo, F. Enhancing network security using knowledge graphs and large
+      language models for explainable threat detection. Future Gener. Comput. Syst. 2026, 176, 108160. [CrossRef]
+26.   Blefari, F.; Cosentino, C.; Pironti, F.A.; Furfaro, A.; Marozzo, F. CyberRAG: An agentic RAG cyber attack classification and
+      reporting tool. Future Gener. Comput. Syst. 2026, 176, 108186. [CrossRef]
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.
+
+
+
+
+                                                                                                     https://doi.org/10.3390/fi18060284
+

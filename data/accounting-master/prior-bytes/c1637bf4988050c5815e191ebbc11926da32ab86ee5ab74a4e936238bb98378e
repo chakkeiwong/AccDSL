@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+"""Execute P06 deterministic checks and write conformance/result evidence."""
+from __future__ import annotations
+
+import argparse
+from collections import Counter
+from datetime import datetime, timezone
+from fractions import Fraction
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import platform
+import shlex
+import subprocess
+import sys
+import time
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_RUN = "data/accounting-master/runs/20261002T233421-cea9e631/P06"
+SOURCES = [
+    "scripts/context_chronology_v1.py", "scripts/check_accounting_p06.py",
+    "tests/test_accounting_p06.py", "docs/design/spec/context-chronology-profile-v1.md",
+    "docs/design/fixtures/p06-context-chronology-cases-v1.json",
+]
+OUTPUTS = ["data/accounting-master/deliverables/P06/conformance.json",
+           "data/accounting-master/deliverables/P06/result.md"]
+WRITABLE = set(SOURCES + OUTPUTS + ["data/accounting-master/deliverables/P06/progress.md"])
+OBLIGATIONS = ["MC02", "MC05", "MC06", "MC07", "MC10", "MC11", "MC14", "YTD", "APPROXIMATION"]
+
+
+def digest(path: Path) -> str | None:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate key: " + key)
+        result[key] = value
+    return result
+
+
+def inventory(root: Path, relative: str) -> dict[str, str]:
+    path = Path(relative)
+    if path.is_absolute() or ".." in path.parts or path.as_posix() != relative:
+        raise ValueError("inventory path must be repository-relative")
+    data = json.loads((root / path).read_text(), object_pairs_hook=unique_object)
+    if not isinstance(data, dict) or not data:
+        raise ValueError("inventory must be a nonempty path-to-SHA256 object")
+    for name, value in data.items():
+        p = Path(name)
+        if p.is_absolute() or ".." in p.parts or p.as_posix() != name or not isinstance(value, str) or len(value) != 64:
+            raise ValueError("invalid inventory entry: " + str(name))
+    return data
+
+
+def approval_reference(root: Path, relative: str) -> dict[str, str]:
+    raw = (root / relative).read_bytes()
+    record = json.loads(raw, object_pairs_hook=unique_object)
+    if not isinstance(record, dict):
+        raise ValueError("approved plan is not an object")
+    for name, verdict in (("plan", "PLAN"), ("review", "AGREE")):
+        section = record.get(name)
+        if not isinstance(section, dict) or section.get("verdict") != verdict:
+            raise ValueError(f"approved plan lacks {name} {verdict}")
+        if not isinstance(section.get("summary"), str) or any(not isinstance(section.get(k), list) for k in ("steps", "assumptions", "checks", "evidence", "issues", "residuals", "next_actions")):
+            raise ValueError("malformed approved plan")
+    if record["review"].get("issues") != []:
+        raise ValueError("approved plan has review issues")
+    plan_hash = hashlib.sha256(json.dumps(record["plan"], sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+    if record.get("plan_hash") != plan_hash:
+        raise ValueError("approved plan hash mismatch")
+    return {"path": relative, "sha256": hashlib.sha256(raw).hexdigest(), "plan_hash": plan_hash}
+
+
+def protection(root: Path, phase_inventory: str, execution_inventory: str) -> dict:
+    historical = inventory(root, phase_inventory)
+    execution = inventory(root, execution_inventory)
+    protected = sorted((set(historical) | set(execution)) - WRITABLE)
+    before = {p: digest(root / p) for p in protected}
+    changed = [p for p in protected if before[p] != execution.get(p)]
+    missing = [p for p, h in before.items() if h is None]
+    return {"historical_inventory": phase_inventory, "execution_inventory": execution_inventory,
+            "inventory_hashes": {phase_inventory: digest(root / phase_inventory), execution_inventory: digest(root / execution_inventory)},
+            "excluded_phase_files": sorted(WRITABLE), "before": before, "execution_baseline": {p: execution.get(p) for p in protected},
+            "changed_since_execution_entry": changed, "missing_before_check": missing,
+            "historical_differences": [p for p in sorted(set(historical) & set(execution)) if historical[p] != execution[p]]}
+
+
+def finish_protection(root: Path, report: dict) -> dict:
+    report["after"] = {p: digest(root / p) for p in report["before"]}
+    report["changed_during_check"] = [p for p in report["before"] if report["before"][p] != report["after"][p]]
+    report["changed_inventory_records"] = [p for p, h in report["inventory_hashes"].items() if h is None or digest(root / p) != h]
+    report["passed"] = not any(report[k] for k in ("changed_since_execution_entry", "missing_before_check", "changed_during_check", "changed_inventory_records"))
+    return report
+
+
+def run_suite(module_name: str) -> dict:
+    sys.path.insert(0, str(ROOT / "tests"))
+    stream = io.StringIO()
+    try:
+        module = __import__(module_name)
+        suite = unittest.defaultTestLoader.loadTestsFromModule(module)
+        result = unittest.TextTestRunner(stream=stream, verbosity=2).run(suite)
+        return {"module": module_name, "methods": result.testsRun, "failures": len(result.failures), "errors": len(result.errors), "skips": len(result.skipped), "passed": bool(result.wasSuccessful() and result.testsRun > 0 and not result.skipped), "output": stream.getvalue()}
+    except Exception as exc:
+        return {"module": module_name, "methods": 0, "failures": 0, "errors": 1, "skips": 0, "passed": False, "output": stream.getvalue() + repr(exc)}
+
+
+def probes() -> list[dict]:
+    """Independent criterion probes; expected values are computed here, not imported from tests."""
+    from context_chronology_v1 import (Context, MappingRule, P06Error, check_partition, compatible_context,
+                                        resolve_bullet_debt, select_evidence, subtract_cumulative, admit_uncertainty, guard_information_view)
+    rows = []
+    def observe(identifier, fn):
+        try:
+            value = fn()
+            rows.append({"id": identifier, "passed": bool(value is not False), "observed": value})
+        except Exception as exc:
+            rows.append({"id": identifier, "passed": False, "error": type(exc).__name__ + ": " + str(exc)})
+    base = {"concept":"x", "entity":"A", "perimeter":"A", "perimeter_version":"1", "basis":"G", "measurement":"m", "unit":"USD", "currency":"USD", "calendar":"gregorian", "dimensions":{}, "gross_net":"gross"}
+    observe("MC02", lambda: compatible_context(Context.from_dict(base), Context.from_dict({**base, "concept":"y"}), [MappingRule("x", "y", provenance=("probe",))])["kind"] == "equivalent")
+    observe("MC07", lambda: check_partition(["a", "b"], {"left":["a"], "right":["b"]})["complete"])
+    assertions = [{"id":"old", "available":"2025-01-01", "ingested":"2025-01-01", "supersedes":[], "source":"s"}, {"id":"new", "available":"2026-01-01", "ingested":"2026-01-01", "supersedes":["old"], "source":"s"}]
+    observe("MC05", lambda: select_evidence(assertions, "2026-12-31", timezone_name="UTC", date_only_policy="next_local_midnight")["selected_ids"] == ["new"])
+    observe("YTD", lambda: subtract_cumulative({"kind":"cumulative","amount":260,"concept":"x","context":{},"calendar":"gregorian","revision_id":"r","period":{"start":"2025-01-01","end":"2025-12-31"}}, {"kind":"cumulative","amount":110,"concept":"x","context":{},"calendar":"gregorian","revision_id":"r","period":{"start":"2025-01-01","end":"2025-06-30"}})["amount"] == 150)
+    admission = {"id":"r","kind":"ExtractionReading","scope":"s","provenance":["p"],"dependencies":[],"source":"d","locator":"p1","review_decision":"Accept"}
+    observe("MC10", lambda: admit_uncertainty(admission, known_records={"d":{"kind":"Source","locators":["p1"]}})["kind"] == "ExtractionReading")
+    debt = [{"id":"a","principal":"100","rate":"1/20","maturity":"2"}, {"id":"b","principal":"50","rate":"7/100","maturity":"2"}]
+    query = {"contract":"c","context":"x","evidence_view":"latest_available","horizon":"1","scenario":"base","requested_outputs":["interest"],"accrual_convention":"simple_actual_fraction","group_by":["rate","maturity","reset","hedge"]}
+    observe("MC11", lambda: resolve_bullet_debt(debt, query)["outputs"]["interest"] == Fraction(17, 2))
+    observe("APPROXIMATION", lambda: (lambda x: x["approximation"]["bound"] == "3/2")(resolve_bullet_debt(debt, query, approximation={"target_rate":"0.06","tolerance":"2","error_bound":"3/2","scope":"fixed_rate_interest","evidence":["probe"]})))
+    def parent_rejected():
+        try:
+            compatible_context(base, {**base, "perimeter": "Group"})
+        except P06Error as exc:
+            return exc.code == "PARENT_GROUP_MISMATCH"
+        return False
+    observe("MC06", parent_rejected)
+    observe("MC14", lambda: guard_information_view({"visible":[],"measure_id":"P","pricing_measure_id":"Q"},event_time="2025-01-01")["selection_changes_history"] is False)
+    return rows
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--approved-plan", required=True)
+    parser.add_argument("--execution-inventory", required=True)
+    parser.add_argument("--inject-failure", action="store_true", help=argparse.SUPPRESS)
+    args = parser.parse_args(argv)
+    out = Path(args.output_dir).resolve()
+    if out != ROOT / "data/accounting-master/deliverables/P06":
+        parser.error("use the declared P06 output directory")
+    started = time.monotonic(); started_utc = datetime.now(timezone.utc).isoformat()
+    phase_inventory = str(Path(args.execution_inventory).parent.parent / "phase-entry-inventory.json")
+    try:
+        approved = approval_reference(ROOT, args.approved_plan)
+        protected = protection(ROOT, phase_inventory, args.execution_inventory)
+    except (OSError, ValueError) as exc:
+        parser.error(str(exc))
+    code_before = {p: digest(ROOT / p) for p in SOURCES}
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    reports = {name: run_suite(name) for name in ("test_accounting_p06", "test_accounting_p03", "test_accounting_p04")}
+    observations = probes()
+    status = {"required": len(OBLIGATIONS), "observed": len(observations), "missing": sorted(set(OBLIGATIONS) - {x["id"] for x in observations}), "uncatalogued": sorted({x["id"] for x in observations} - set(OBLIGATIONS)), "duplicate_ids": [k for k, v in Counter(x["id"] for x in observations).items() if v != 1], "failed_observations": [x["id"] for x in observations if x.get("passed") is not True]}
+    code_after = {p: digest(ROOT / p) for p in SOURCES}
+    protected = finish_protection(ROOT, protected)
+    stable = all(code_before[p] == code_after[p] for p in SOURCES)
+    passed = (all(x["passed"] for x in reports.values()) and all(x.get("passed") for x in observations) and not status["missing"] and not status["uncatalogued"] and not status["duplicate_ids"] and protected["passed"] and stable and not args.inject_failure)
+    command_args = sys.argv[1:] if argv is None else argv
+    command = shlex.join(["CUDA_VISIBLE_DEVICES=-1", "python3", "-B", "scripts/check_accounting_p06.py"] + command_args)
+    payload = {"schema_version":"accdsl.p06.conformance.v1", "passed": bool(passed), "profile":"context-chronology-resolution-v1", "obligation_status":status, "observations":observations, "tests":reports, "protection":protected, "code_stable_during_check":stable, "provenance":{"approved_plan":approved, "phase_entry_inventory":phase_inventory, "execution_inventory":args.execution_inventory}, "hashes":code_after, "input_hashes":{p:digest(ROOT / p) for p in ["scripts/core0_ir_v1.py", "scripts/reconstruction_v1.py", "docs/plans/accounting-mission-requirements.md", "data/accounting-master/runs/20261002T180732-83972f09/P01/source-work-register.json"]}, "manifest":{"git_commit":"unavailable: existing marker is not a usable repository", "command":command, "working_directory":str(ROOT), "executable":sys.executable, "environment":{"python":platform.python_version()}, "hardware":"CPU only; CUDA_VISIBLE_DEVICES=-1; no accelerator framework imported", "random_seeds":"N/A: exact deterministic fixtures", "data_version":"p06-context-chronology-cases-v1", "started_utc":started_utc, "wall_seconds":round(time.monotonic()-started, 6), "plan":args.approved_plan, "plan_sha256":approved["sha256"], "approved_plan_hash":approved["plan_hash"], "execution_inventory":args.execution_inventory, "outputs":OUTPUTS, "result":OUTPUTS[1], "phase_contribution_files":sorted(WRITABLE)}, "requirement_coverage":{"MC02":"context-aware mappings and explicit mismatch rejection", "MC05":"chronology, availability and revision-compatible YTD", "MC06":"entity/perimeter mismatch rejection; consolidation unsupported", "MC07":"finite mappings, partition membership and overlap rejection", "MC10":"six category uncertainty admission", "MC11":"constituent/query-bound debt grouping and approximation certificate", "MC14":"dated information admission and unsupported scenario modes"}, "acceptance":{"engineering":bool(passed), "accounting_validity":"not established", "forecast_validity":"not established", "human_acceptance":"pending", "whole_gap_closure":False}}
+    out.mkdir(parents=True, exist_ok=True)
+    out.joinpath("conformance.json").write_text(json.dumps(payload, indent=2, default=str) + "\n")
+    decision = "PASS" if passed else "FAIL"
+    result_text = f'''# P06 context, chronology, and resolution result
+
+{decision}: {reports["test_accounting_p06"]["methods"]} P06 tests, {reports["test_accounting_p03"]["methods"]} P03 regression tests, and {reports["test_accounting_p04"]["methods"]} P04 regression tests executed. The conformance file records every test outcome, independent criterion probe, source hash, inventory comparison, command, and manifest.
+
+Repair replaced metadata-only harmonisation with derived identity observations, enforced reference/date/domain admission, bound resolution to constituent values, and connected selected evidence to period derivation and debt arithmetic. The runtime preserves earlier result copies and rejects conflicting revisions.
+
+The implementation supplies explicit context mappings, finite partition enumeration, supersession-DAG evidence selection, date-only next-local-midnight handling, revision-compatible YTD subtraction, six category-specific uncertainty admission, information-view guards, and query-signature-bound fixed-rate unhedged bullet-debt resolution. Exact Fraction arithmetic is used throughout the supported scalar path. An approximation is accepted only with a fixed-rate scope, declared tolerance, and a triangle-inequality error certificate.
+
+The tests independently verify 260 minus revised H1 110 equals H2 150 and reject subtraction using incompatible original H1 120. They reject parent/group, basis, measurement, currency, calendar, gross/net, overlap, omission, dangling/cyclic revision, future-information, unsupported treatment, unsupported scenario, stale-query, maturity-crossing, and missing-approximation-evidence cases. Historical byte availability marked unknown remains unresolved and is excluded from the integrated historical computation. Tests also mutate the selected H1 amount from 110 to 100: derived H2 changes from 150 to 160, and the synthetic debt interest changes from 7.5 to 8, while the preserved earlier result remains 150.
+
+Specified behaviour is recorded in the versioned profile. Implemented operations and independently tested invariants are bounded to those operations; synthetic permissions and evidence references do not establish accounting eligibility or source truth. Identity harmonisation, finite scalar historical domains, a hold policy, and exact integer-period DCF are supported; broader transformations/policies are explicitly unsupported.
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next justified action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| {decision} for bounded engineering conformance | Independent P06 probes and focused/regression suites | tests={all(x["passed"] for x in reports.values())}; protection={protected["passed"]}; stable={stable}; failed_observations={status["failed_observations"]} | finite synthetic cases and unannotated source availability | independent result review if PASS; repair if FAIL | professional accounting validity, empirical forecast validity, human acceptance, or wider MC01–MC35/G1–G18 closure |
+
+Engineering correctness, numerical validity, and interpretation remain separate. The exact outputs establish only the declared bounded operations. The strongest alternative explanation is a shared interpretation error in the synthetic fixtures; independent set and arithmetic probes reduce that risk but do not replace source or professional review. The weakest evidence is breadth: mappings, uncertainty, and grouping are finite bounded cases.
+
+Residuals: general measurement conversion, consolidation, arbitrary calendars, continuous or nonlinear uncertainty, empirical approximation validation, historical retained-byte availability, accounting validity, forecast validity, and human acceptance remain open. This phase does not rank stochastic candidates or establish a production default.
+
+Actual command: `{command}`. Python {platform.python_version()}, CPU only with accelerator devices intentionally hidden. Wall time: {payload["manifest"]["wall_seconds"]} seconds. Git provenance is unavailable; content hashes and supervisor inventories are retained in conformance.json.
+'''
+    out.joinpath("result.md").write_text(result_text)
+    print(json.dumps({"passed":bool(passed), "tests":{k:{x:v[x] for x in ("methods","failures","errors","skips","passed")} for k,v in reports.items()}, "obligations":status, "protected":protected["passed"], "stable":stable}))
+    return 0 if passed else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

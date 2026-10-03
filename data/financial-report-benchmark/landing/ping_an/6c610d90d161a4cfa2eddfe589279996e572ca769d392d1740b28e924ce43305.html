@@ -1,0 +1,78 @@
+! function () {
+    var a = APP.Class.create({
+            initialize: function () {
+                this.urlRoot = APP.config.root + "/"
+            },
+            getData: function (a, c) {
+                $.ajax({
+                    type: "get",
+                    url: "https://pa18-info.pingan.com.cn/info/portalJsonpController.do?callback=?",
+                    data: a,
+                    dataType: "jsonp",
+                    cache: !1,
+                    success: function (a) {
+                        a && a.articleList.length > 0 && !!c && c(a)
+                    },
+                    error: function (e) {}
+                })
+            }
+        }),
+        c = APP.Class.create({
+            initialize: function () {
+                this.model = new a, _.templateSettings = {
+                    evaluate: /\{\{([\s\S]+?)\}\}/g,
+                    interpolate: /\{\{=(.+?)\}\}/g,
+                    escape: /\{\{-(.+?)\}\}/g
+                }, this.loadData(1)
+            },
+            pageSpan: !0,
+            loadData: function (a) {
+                var c = {
+                    method: "articleList",
+                    channelId: 449,
+                    channelLevel: 2,
+                    number: 15,
+                    pageNumber: a                };
+                this.model.getData(c, $.proxy(this.render, this))
+            },
+            render: function (a) {
+                var c = this;
+                c.pageAll = Math.ceil(a.totalNum / a.number);
+                var g = _.template($("#J-Template").html());
+                $("#tableBox").html(g({
+                    data: a
+                })), c.tableBacColor(), c.pageSpan && (c.pageSpan = !1, $("#pagebar02").pagebar({
+                    jump: "true",
+                    totalCount: a.totalNum,
+                    totalPage: c.pageAll,
+                    perpage: a.number,
+                    page: 1,
+                    clickFunc: "gotoPageJS",
+                    jumppage: 4,
+                    prevtext: "上一页",
+                    nexttext: "下一页",
+                    endtext: "尾页"
+                }))
+            },
+            gotoPageJS: function (a) {
+                var c = $("#pagebar02").pagebar("getOptions");
+                c.page = a, $("#pagebar02").pagebar("destroy").pagebar(c), this.loadData(a)
+            },
+            tableBacColor: function () {
+                $(".tb-style-1 tr:even").children("td").css({
+                    "background-color": "#ECECEC"
+                })
+            }
+        });
+    $(function () {
+        $.paui.config({
+            combo: !0,
+            comboCss: !0,
+            comboVersion: "1.1.1",
+            comboBase: "https://www.pingan.com/paui/min.jsp"
+        }), $.paui.use(["pagebar"], function () {
+            var a = new c;
+            window.gotoPageJS = $.proxy(a.gotoPageJS, a)
+        })
+    })
+}(window);

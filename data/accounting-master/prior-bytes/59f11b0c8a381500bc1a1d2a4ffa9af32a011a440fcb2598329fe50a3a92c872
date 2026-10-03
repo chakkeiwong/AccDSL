@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Execute P04 obligations, regress P03, and retain supervisor inventory evidence."""
+import argparse
+from collections import Counter
+from datetime import datetime, timezone
+import io
+import json
+import os
+from pathlib import Path
+import platform
+import shlex
+import sys
+import time
+import unittest
+import z3
+from check_accounting_p03 import capture_protection, finish_protection, digest
+ROOT=Path(__file__).resolve().parents[1]
+INVENTORY='data/accounting-master/runs/20261002T221346-d54a6552/P04/phase-entry-inventory.json'
+PLAN='data/accounting-master/runs/20261002T221346-d54a6552/P04/approved-plan.json'
+SOURCES=['scripts/rational_solver_v1.py','scripts/reconstruction_v1.py','scripts/check_accounting_p04.py','tests/test_accounting_p04.py','docs/design/spec/reconstruction-profile-v1.md','docs/design/fixtures/p04-reconstruction-cases-v1.json']
+OUTPUTS=['data/accounting-master/deliverables/P04/'+p for p in ('conformance.json','result.md','progress.md')]
+
+def main(argv=None):
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--output-dir',required=True)
+    parser.add_argument('--execution-inventory',required=True)
+    args=parser.parse_args(argv)
+    if Path(args.output_dir).resolve()!=ROOT/'data/accounting-master/deliverables/P04':
+        parser.error('use the declared P04 output directory')
+    if args.execution_inventory!=INVENTORY:
+        parser.error('use the supplied supervisor phase-entry inventory')
+    os.environ['CUDA_VISIBLE_DEVICES']='-1'
+    started=time.monotonic();utc=datetime.now(timezone.utc).isoformat()
+    protected=capture_protection(ROOT,INVENTORY,INVENTORY,writable=SOURCES+OUTPUTS,
+                                 required_paths=('docs/design/fixtures/borrowings.json','docs/design/fixtures/northstar.json','scripts/core0_ir_v1.py'))
+    approved=json.loads((ROOT/PLAN).read_text())
+    if approved['review']['verdict']!='AGREE' or approved['review']['issues']:
+        raise ValueError('no issue-free approved plan')
+    if protected['errors'] or protected['changed_since_execution_entry'] or protected['missing_before_check']:
+        raise ValueError('protection failure before execution: '+str(protected['errors']+protected['changed_since_execution_entry']))
+    source_before={p:digest(ROOT/p) for p in SOURCES+[PLAN]}
+    sys.path.insert(0,str(ROOT/'tests'))
+    import test_accounting_p04 as p04
+    import test_accounting_p03 as p03
+    p04.OBSERVATIONS.clear();p03.OBSERVATIONS.clear()
+    reports={}
+    for name,module in [('P04',p04),('P03_regression',p03)]:
+        stream=io.StringIO();suite=unittest.defaultTestLoader.loadTestsFromModule(module)
+        result=unittest.TextTestRunner(stream=stream,verbosity=2).run(suite)
+        reports[name]={'methods':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),
+                       'skips':len(result.skipped),'passed':result.wasSuccessful() and result.testsRun>0 and not result.skipped,'output':stream.getvalue()}
+    catalog=json.loads((ROOT/SOURCES[-1]).read_text())
+    required=Counter(x['id'] for x in catalog['obligations']);observed=Counter(x['obligation'] for x in p04.OBSERVATIONS)
+    status={'required':len(required),'observed':len(observed),'missing':sorted(required.keys()-observed.keys()),
+            'uncatalogued':sorted(observed.keys()-required.keys()),
+            'duplicate_ids':sorted(k for k in required.keys()|observed.keys() if required[k]>1 or observed[k]>1),
+            'failed_observations':[x['obligation'] for x in p04.OBSERVATIONS if x.get('passed') is not True]}
+    finish_protection(ROOT,protected)
+    source_after={p:digest(ROOT/p) for p in source_before}
+    stable=all(h is not None and source_after[p]==h for p,h in source_before.items())
+    passed=all(r['passed'] for r in reports.values()) and protected['passed'] and stable and bool(required) and not any(status[k] for k in ('missing','uncatalogued','duplicate_ids','failed_observations'))
+    command=shlex.join(['python3','-B','scripts/check_accounting_p04.py']+(sys.argv[1:] if argv is None else argv))
+    payload={'schema_version':'accdsl.p04.conformance.v1','passed':bool(passed),'obligation_status':status,
+        'tests':reports,'observations':p04.OBSERVATIONS,'protection':protected,'code_stable_during_check':stable,
+        'input_source_test_hashes':dict(protected['before'],**source_before),
+        'manifest':{'git_commit':'unavailable: existing marker is not a usable repository','command':command,
+            'working_directory':str(ROOT),'executable':sys.executable,'environment':{'python':platform.python_version(),'z3':z3.get_version_string()},
+            'hardware':'CPU only; CUDA_VISIBLE_DEVICES=-1; no accelerator framework imported','random_seeds':'N/A: exact deterministic fixtures',
+            'data_version':'p04-reconstruction-cases-v1 plus preserved borrowing/Northstar fixtures','started_utc':utc,
+            'wall_seconds':round(time.monotonic()-started,6),'plan':PLAN,'plan_sha256':source_before[PLAN],
+            'execution_inventory':INVENTORY,'changed_source_code_test_files':SOURCES,'changed_files':SOURCES+OUTPUTS,
+            'outputs':OUTPUTS[:2],'result':OUTPUTS[1]},
+        'requirement_coverage':{'MC08':'shared symbols, choices, views and joint queries','MC09':'declared posting templates and bounded coverage',
+            'MC10':'six structural admission categories with provenance; external eligibility not independently certified',
+            'MC11':'unhedged additive bullet-debt grouping with retained memory','MC12':'explicit finite joint weights and retained mass',
+            'MC18':'strict bounds and unfinished cells','MC26':'exact rational linear and bounded integer numerical operations'},
+        'unsupported':catalog['unsupported'],
+        'acceptance':{'engineering':bool(passed),'accounting_validity':'not established','forecast_validity':'not established','human_acceptance':'pending','whole_gap_closure':False}}
+    decision='PASS' if passed else 'FAIL'
+    text=f'''# P04 bounded reconstruction result
+
+{decision}: {reports['P04']['methods']} P04 tests cover {status['observed']}/{status['required']} catalogued obligations; {reports['P03_regression']['methods']} P03 regression tests executed. Full executed outcomes, formulas, cell assignments, witnesses, conflicts, source hashes and proof queries are in conformance.json.
+
+Declared templates construct account and economic-state roll-forwards. Independent Fraction enumeration checks three finite input variants; a selected Northstar receivables bridge replays original events to create observations before reconstruction. P03 integration preserves alpha=1/2, isolates endpoint conditions, retains overlapping views and rejects incompatible joint extrema. Parent coverage remains one continuous cell without genuine choices.
+
+Exact debt interest ranges from 5 to 7. The rounded fixture has infimum 199/40, attained, and supremum 1407/200, unattained. Original strict feasibility precedes closure optimisation. Half-even negative ties, posting minor units, integer gaps, source conflicts, unsupported arithmetic, zero budgets and injected Unknown responses are checked. Incomplete search retains domains, predicates, ordinals and formulas; explored bounds cannot be global certificates.
+
+Recovery repairs reject lossy rational-record coercion, malformed or unsupported domains, generated-name collisions, duplicate finite values and repeated contract identities. A bounded domain with 10^30 integer values stops after one completed cell and retains its exact unvisited cardinality. An independent integer predicate oracle checks disjoint coverage of overlapping guards. Changed principal and rate inputs, including reversed endpoint order, verify that P03 bounds come from generated inputs rather than fixed expected amounts.
+
+The claimed target is the declared rational-linear family. The finite comparisons compute exactly the enumerated assignment sets; algebra supplies the continuous endpoint comparator. This establishes these tested invariants within the profile. It does not establish arbitrary-history completeness. Uncertainty admission checks validate records and declared permissions, not the truth of underlying evidence or professional accounting eligibility. Grouping covers unhedged additive bullet debt with no within-horizon maturity; year fractions are explicit assumptions. Probability atoms are declared disjoint economic hypotheses; their external interpretation is a modeling assumption.
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next justified action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| {decision} for bounded engineering checks | Independent finite sets, integration and endpoint assertions | protection={protected['passed']}; tests={all(r['passed'] for r in reports.values())}; missing={status['missing']}; duplicates={status['duplicate_ids']} | shared solver defects, omitted templates, external admission truth | independent result review if PASS; local repair if FAIL | accounting validity, empirical forecast validity, human acceptance or closure of G1–G18 |
+
+Engineering, numerical and interpretation ledgers remain separate: implementation and executed invariants are recorded above; exact results concern only declared constraints; full-company accounting and empirical forecasts remain unevaluated. No stochastic comparison or method ranking is made.
+
+The strongest alternative explanation is a shared modeling error between construction and fixtures. Independent posting replay, perturbed inputs and analytic endpoint checks reduce that risk. An in-profile counterexample would overturn this result. The weakest evidence is breadth: these are small deterministic cases, not arbitrary accounting histories.
+
+Actual command: `{command}`. Python {platform.python_version()}, Z3 {z3.get_version_string()}, CPU only with GPU devices intentionally hidden. Wall time: {payload['manifest']['wall_seconds']} seconds. Seeds: N/A, deterministic. Git provenance is unavailable; conformance.json contains content hashes and the unchanged {len(protected['before'])}-file supervisor inventory. Approved plan: `{PLAN}`. All changed files appear in the manifest.
+
+Residuals: nonlinear inference, continuous probability inference, unbounded integer search, template discovery, general aggregation equivalence, accounting validity, forecast validity and human acceptance remain open. All MC01–MC35/G1–G18 retain wider obligations.
+'''
+    out=ROOT/args.output_dir;out.mkdir(parents=True,exist_ok=True)
+    (out/'conformance.json').write_text(json.dumps(payload,indent=2)+'\n')
+    (out/'result.md').write_text(text)
+    print(json.dumps({'passed':bool(passed),'tests':{k:{x:v[x] for x in ('methods','failures','errors','skips')} for k,v in reports.items()},'obligations':status,'protected_inputs_passed':protected['passed']}))
+    return 0 if passed else 1
+
+if __name__=='__main__':
+    raise SystemExit(main())

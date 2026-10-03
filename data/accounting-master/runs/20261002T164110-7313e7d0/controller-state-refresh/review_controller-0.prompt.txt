@@ -1,0 +1,120 @@
+Perform a bounded packet-only code review. Do not use tools, read files, run commands, or reread project/mission history.
+The user authorised this precise review scope. All code and relevant evidence for this packet are supplied below; identify any missing interface assumption explicitly.
+The engineering target is resumable sequential phase execution with actual repair, fresh reviewed plans, preservation of evidence and reusable narrow command approval.
+The accepted source panel has 192 reports; source checks and scoped internal phase acceptance must never close all accounting, scientific or human-acceptance gaps.
+Find concrete defects in the assigned scope and its stated interfaces. Test counts are supporting control-plane evidence, not accounting correctness.
+Review accidental failures, ordinary handled interruption, stale state and honest acceptance. The controller and workers are trusted; hostile multi-tenant actors, deliberate detachment and an uncatchable kill between fork and durable registration are outside the stated containment guarantee. Do not add those threat models as new acceptance requirements.
+Return the required JSON: AGREE only with issues=[]; otherwise REVISE with precise code-level findings and repair instructions. Put nonblocking limitations in residuals.
+Evidence entries may name only the supplied real file paths. Do not invent tests or assertions. Keep the response under 1500 words.
+Return a JSON object with ALL these exact keys and array/string types (fill with actual findings; no extra keys): {"verdict": "AGREE", "summary": "Replace with the actual finding", "steps": [], "assumptions": [], "checks": [], "evidence": [], "issues": [], "residuals": [], "next_actions": []}
+{
+  "scope": {
+    "id": "controller",
+    "name": "Review the master program",
+    "criteria": [
+      "The current controller and tests implement the reviewed master plan without false completion or approval bypass.",
+      "Repairs execute; verification and review rerun; next plans incorporate actual findings.",
+      "Processes are bounded, writes recover atomically, one writer runs, and frozen evidence is protected."
+    ],
+    "assigned_scope": "state-refresh"
+  },
+  "packet": {
+    "packet_only": true,
+    "scope": "state-refresh",
+    "files": [
+      "scripts/run_accounting_master.py",
+      "scripts/accounting_master_support.py",
+      "tests/test_accounting_master.py"
+    ],
+    "code": {
+      "validate_catalog": "def validate_catalog(catalog):\n    phases = catalog['phases']\n    ids = [p['id'] for p in phases]\n    if len(ids) != len(set(ids)) or not phases:\n        raise MasterError('Duplicate or empty phase catalog')\n    seen = set()\n    for p in phases:\n        if not p['id'].startswith('P') or not p['id'][1:].isdigit():\n            raise MasterError('Invalid phase identifier')\n        if any(d not in seen for d in p['deps']):\n            raise MasterError('Catalog must be an ordered acyclic dependency graph')\n        if p['kind'] not in {'builtin', 'worker'} or not p['criteria'] or not p['deliverables']:\n            raise MasterError('Invalid phase contract')\n        seen.add(p['id'])\n    gaps = {g for p in phases for g in p['gaps']}\n    if gaps != {f'G{i}' for i in range(1, 19)}:\n        raise MasterError('Catalog does not preserve all G1–G18')",
+      "Master.__init__": "def __init__(self, root=ROOT, worker=None, check=None, builtin=None):\n        self.root = root.resolve()\n        self.home = self.root / 'data/accounting-master'\n        self.catalog = load_json(self.root / CATALOG)\n        validate_catalog(self.catalog)\n        self.phases = {p['id']: p for p in self.catalog['phases']}\n        self.home.mkdir(parents=True, exist_ok=True)\n        self.worker_override, self.check_override, self.builtin_override = worker, check, builtin\n        self.deadline = float('inf')\n        self.run_id = 'not-running'\n        self.lock_fd = None\n        self.protected = {}\n        self.controls = {name: digest(self.root / name) for name in CONTROLS if (self.root / name).exists()}\n        self.state_path = self.home / 'state.json'\n        self.state = load_json(self.state_path) if self.state_path.exists() else {\n            'schema_version': 'accdsl.master.state.v1', 'created_at': now(),\n            'mission_complete': False, 'gap_status': {f'G{i}': 'open' for i in range(1, 19)},\n            'phases': {p: {'status': 'pending', 'attempts': [], 'residuals': []} for p in self.phases},\n            'runs': [], 'last_outcome': None,\n        }\n        if set(self.state['phases']) != set(self.phases):\n            raise MasterError('Catalog IDs changed; an explicit state migration is required')",
+      "Master.save": "def save(self):\n        self.state['updated_at'] = now()\n        self.state['mission_complete'] = False\n        atomic_json(self.state_path, self.state)",
+      "Master.event": "def event(self, kind, **fields):\n        record = {'time': now(), 'run': self.run_id, 'event': kind, **fields}\n        with (self.home / 'events.jsonl').open('a') as stream:\n            stream.write(json.dumps(record, ensure_ascii=False, allow_nan=False) + '\\n')\n            stream.flush()\n            os.fsync(stream.fileno())\n        print(json.dumps(record, ensure_ascii=False), flush=True)",
+      "Master.check_protection": "def check_protection(self):\n        changed = verify_hashes(self.root, {**self.protected, **self.controls})\n        if changed:\n            raise ContinuationVeto('Protected evidence/controller changed: ' + ', '.join(changed[:20]))",
+      "Master.refresh": "def refresh(self):\n        # A previous accepted phase is reusable only while its recorded evidence survives.\n        for identifier, record in self.state['phases'].items():\n            if record['status'] == ACCEPTED:\n                stale = verify_hashes(self.root, record.get('evidence_hashes', {})) if record.get('evidence_hashes') else ['missing acceptance evidence']\n                if stale:\n                    record['status'] = 'stale'\n                    record['issues'] = ['Accepted evidence changed: ' + ', '.join(stale[:10])]\n        for p in self.catalog['phases']:\n            record = self.state['phases'][p['id']]\n            if record['status'] == ACCEPTED and any(self.state['phases'][d]['status'] != ACCEPTED for d in p['deps']):\n                record['status'] = 'stale'\n                record['issues'] = ['A prerequisite is no longer accepted']\n        eligible = [p['id'] for p in self.catalog['phases']\n                    if self.state['phases'][p['id']]['status'] != ACCEPTED\n                    and (self.state['phases'][p['id']]['status'] != 'blocked_external'\n                         or self.state['phases'][p['id']].get('block_signature') != self.input_fingerprint(p['id']))\n                    and all(self.state['phases'][d]['status'] == ACCEPTED for d in p['deps'])]\n        plan = {'schema_version': 'accdsl.master.next_plan.v1', 'created_at': now(),\n                'catalog_sha256': digest(self.root / CATALOG), 'controller_hashes': self.controls,\n                'last_outcome': self.state['last_outcome'], 'eligible_phases': eligible,\n                'next_phase': eligible[0] if eligible else None,\n                'phase_states': {k: v['status'] for k, v in self.state['phases'].items()},\n                'residuals': {k: v.get('residuals', []) for k, v in self.state['phases'].items()},\n                'next_actions': {k: v.get('next_actions', []) for k, v in self.state['phases'].items() if v.get('next_actions')},\n                'issues': {k: v.get('issues', []) for k, v in self.state['phases'].items() if v.get('issues')},\n                'gap_status': self.state['gap_status'], 'mission_complete': False,\n                'continuation': 'Review the next eligible slice against these actual outcomes; all gap closures require separate requirement evidence.'}\n        atomic_json(self.home / 'next-plan.json', plan)\n        lines = ['# Accounting master — refreshed next plan', '', f'Updated: {plan[\"created_at\"]}', '',\n                 f'Next eligible phase: {plan[\"next_phase\"] or \"none in this catalog\"}.',\n                 'Mission complete: **no**. Scoped phase acceptance does not close the original gaps.', '',\n                 '| Phase | State | Residual work |', '| --- | --- | --- |']\n        for identifier, record in self.state['phases'].items():\n            residual = '; '.join(record.get('residuals', [])).replace('|', '/')\n            lines.append(f'| {identifier} — {self.phases[identifier][\"name\"]} | {record[\"status\"]} | {residual} |')\n        lines.extend(['', '## Latest outcome', '', json.dumps(plan['last_outcome'], indent=2), '',\n                      '## Next action', '', plan['continuation'], ''])\n        (self.home / 'next-plan.md').write_text('\\n'.join(lines))\n        self.save()\n        return plan",
+      "Master.input_fingerprint": "def input_fingerprint(self, identifier):\n        return stable_hash({'catalog': digest(self.root / CATALOG), 'controls': self.controls,\n            'dependencies': {d: self.state['phases'][d].get('evidence_hashes', {}) for d in self.phases[identifier]['deps']}})"
+    },
+    "interfaces": {
+      "worker_modes": "implement/repair workspace-write; other roles read-only; approval never; sequential, no nested workers",
+      "protection": "check_protection verifies current hashes of frozen release/source/research/snapshot evidence and controller files; worker checks state/grant before and after",
+      "acceptance": "tests must run and pass; result review must AGREE; required deliverables and evidence must exist; all original gaps stay open",
+      "repair_limits": "two repairs per invocation; one attempt of each eligible phase per run; unchanged external blocks skipped until changed inputs or explicit retry",
+      "preservation": "before editable work, preserve source/manuscript bytes; delta goes to the result reviewer; deleted tracked files fail",
+      "controller_failure": "requires supervisor repair and fresh read-only review, never implicit approval",
+      "lifecycle_scope": "Initial process group only. Trusted workers must not detach; this is an explicit unenforced assumption, not cgroup/malicious-worker containment.",
+      "internal_helpers": "Only supervisor children with the live inherited lock, matching parent identity, one-use capability, active phase and fresh output may run. Parent retains the lock; child closes its validated copy.",
+      "source_protection": "Frozen source/release/PDF/snapshot hashes are checked across child and worker failure paths. CLI query helpers are bounded read-only local configuration inspections."
+    },
+    "verification": {
+      "passed": true,
+      "tests": 44,
+      "error": null,
+      "sha256": {
+        "scripts/run_accounting_master.py": "60bdffad032fcd1ad43289586a3e1604d3f2421c6aacf5c4bbbd5b2dca139e6f",
+        "scripts/accounting_master_support.py": "bdb4ac8756d01364303c313b540df4d625a2af499ecc380bdac75b3e47e72e54",
+        "scripts/accounting_master_catalog.json": "564f3ae9f7ddd8bab5b492ee6404174c5f36cc0fa0cab6a97c6d3382e95199b7",
+        "scripts/accounting_master_response.schema.json": "aad6a6c3c2cdfc98728bf450c0350e4b3aff3ea32664038bd73b3f8b7ce7cd6c",
+        "tests/test_accounting_master.py": "f4a922852961321ed2c8d0090c29018999af29f88b59f27fdbb77ddc7a5f7976",
+        "docs/plans/accounting-master-program.md": "647835c7ad7006ed6efc16fb7a61a8ac8b0a83d420fcc622c2e3d6a2b22ba590"
+      },
+      "log": "data/accounting-master/runs/20261002T164110-7313e7d0/controller-tests.log",
+      "checked_at": "2026-10-02T16:41:15.981340+00:00"
+    },
+    "test_names": [
+      "test_executes_real_repair_before_acceptance",
+      "test_next_phase_plan_uses_actual_previous_result",
+      "test_resume_does_not_repeat_accepted_work",
+      "test_changed_evidence_invalidates_dependents",
+      "test_zero_checks_cannot_pass_even_with_agree",
+      "test_missing_evidence_cannot_be_accepted",
+      "test_plan_review_repairs_before_implementation",
+      "test_failed_plan_review_never_executes",
+      "test_external_block_does_not_stop_independent_phase",
+      "test_unchanged_external_block_is_not_retried_on_resume",
+      "test_previous_next_actions_reach_next_phase_packet",
+      "test_preexisting_bytes_are_preserved_before_edit",
+      "test_successful_slices_do_not_close_mission_or_gaps",
+      "test_controller_mutation_is_continuation_veto",
+      "test_implementation_cannot_rewrite_approved_plan",
+      "test_worker_cannot_forge_supervisor_state",
+      "test_worker_failure_still_checks_integrity",
+      "test_malformed_worker_response_still_checks_integrity",
+      "test_test_process_integrity_veto_is_not_downgraded_to_failed_check",
+      "test_interrupted_phase_replans_before_resuming",
+      "test_exclusive_writer_lock",
+      "test_atomic_json_and_duplicate_key_rejection",
+      "test_evidence_path_escape_is_rejected",
+      "test_dependency_cycle_is_rejected",
+      "test_schema_validity_does_not_accept_wrong_role_verdict",
+      "test_process_timeout_is_bounded",
+      "test_nonreading_process_cannot_block_large_prompt",
+      "test_successful_parent_exit_also_terminates_descendant",
+      "test_startup_identity_failure_cleans_created_child",
+      "test_sigterm_during_registration_is_deferred_then_cleaned",
+      "test_unquiescent_group_after_escalation_vetoes_before_reaping",
+      "test_recovery_group_reuse_is_vetoed_before_signalling",
+      "test_resume_terminates_identified_prior_worker",
+      "test_pid_reuse_does_not_signal_unrelated_process",
+      "test_sigterm_of_supervisor_cleans_its_child",
+      "test_subprocess_shell_characters_are_literal_arguments",
+      "test_zero_test_suite_fails",
+      "test_allow_rule_has_only_fixed_entrypoint",
+      "test_worker_config_overrides_existing_bare_key",
+      "test_worker_config_rejects_ambiguous_override_key",
+      "test_atomic_rule_publication_preserves_conflicting_rule",
+      "test_rule_publication_failure_does_not_leave_partial_target",
+      "test_direct_internal_invocation_is_rejected",
+      "test_real_child_inherits_lock_and_consumes_grant_once"
+    ],
+    "controller_hashes": {
+      "scripts/run_accounting_master.py": "60bdffad032fcd1ad43289586a3e1604d3f2421c6aacf5c4bbbd5b2dca139e6f",
+      "scripts/accounting_master_support.py": "bdb4ac8756d01364303c313b540df4d625a2af499ecc380bdac75b3e47e72e54",
+      "scripts/accounting_master_catalog.json": "564f3ae9f7ddd8bab5b492ee6404174c5f36cc0fa0cab6a97c6d3382e95199b7",
+      "scripts/accounting_master_response.schema.json": "aad6a6c3c2cdfc98728bf450c0350e4b3aff3ea32664038bd73b3f8b7ce7cd6c",
+      "tests/test_accounting_master.py": "f4a922852961321ed2c8d0090c29018999af29f88b59f27fdbb77ddc7a5f7976",
+      "docs/plans/accounting-master-program.md": "647835c7ad7006ed6efc16fb7a61a8ac8b0a83d420fcc622c2e3d6a2b22ba590"
+    },
+    "reviewed_evidence_contract_and_permission_scope": "\n\nQuestion: does the master execute bounded phases, actually repair failures,\nrefresh reviewed next-phase plans, preserve evidence and resume without\nduplicate successful work or repeated approvals?\n\nComparator: the current manual sequence and the frozen corpus/reference\nbaseline. This is control-plane engineering, not a method-performance study.\n\nPrimary pass criteria: executable runner; exact allow-rule match; tested\nphase state transitions; a real failed verification followed by executed\nrepair and successful recheck; next-plan refresh containing the observed\noutcome; a real bounded run with durable logs/state and honest residuals.\n\nVetoes: zero-test false pass; stale plan/control hashes; invalid worker\nresponses; accepted results without deterministic checks/review; lost evidence;\nconcurrent writers; unbounded child processes; arbitrary shell command injection;\npromotion of all G1–G18 from phase-level evidence.\n\nExplanatory diagnostics: check/test counts, elapsed time, file counts and\nnumber of repairs. They are not accounting accuracy or forecast metrics.\n\nArtifacts: scripts/run_accounting_master.py; scripts/accounting_master_catalog.json;\ntests/test_accounting_master.py; docs/plans/accounting-master-program.md;\ndata/accounting-master/{state.json,events.jsonl,next-plan.json,next-plan.md,runs/};\ndocs/design/review/accounting-master-review.md; docs/plans/accounting-master-checkpoint.md.\n\n## Upfront permission package\n\nThe reviewed entrypoint will install only:\n~/.codex/rules/accdsl-master.rules, matching\npython3 /home/chakwong/python/AccDSL/scripts/run_accounting_master.py\n\nThe same exact prefix will be used for install-and-run, run/resume, status,\nreview and refresh. The installer validates positive and negative matches\nbefore installation and preserves existing rules. User settings and existing\napprovals are not overwritten. Runtime-managed policy can still reject an\naction; an allow file cannot override it.\n\nThe single approval request will expressly cover sequential sandboxed Codex\nimplementation and read-only review workers for this master program, bounded\npublic-source research and project-local code/test/artifact work. No paid data,\nnew accounts, professional engagement, outbound messages, deployment, global\npackage installation, permission bypass, Git initialization or source deletion.\nNetwork/worker startup failures are diagnosed once and recorded.\nWorker invocations disable unrelated apps/plugins/hooks/MCP startup and nested\nagent capability for this command only. The configured model and authentication\nare retained. Workers may not start detached jobs. Child process-group identity\nis persisted; SIGTERM triggers cleanup, and resume checks for an existing prior\nworker before it permits another writer. Ambiguous ownership stops for a scoped\ndiagnostic rather than signalling an unrelated process.\n\nThe lifecycle guarantee is limited to the initial process group and ordinary\nsupervisor interruption/restart. Workers are trusted not to escape that group\nwith detached jobs; this is an explicit, unenforced operating assumption, not\ncgroup containment or protection against a malicious worker. A cgroup-based\nrunner would be a separate future hardening task if that threat model is needed.\nThe current scope does not require new host privileges for cgroup management.\nHandled signals are deferred across launch, identity capture and registration;\nthe dedicated supervisor is single-threaded. Uncatchable termination between\nfork and durable registration is outside this containment guarantee and is not\nrepresented as safe resumable completion.\n\nInternal helper calls require a one-use capability and the inherited supervisor\nlock. They cannot be started directly or overwrite a previous attempt's result.\nThe helper closes its descriptor after validating the grant; the parent retains\nthe lock, and restart cleans a positively identified abandoned worker before\nanother phase runs. Stable pidfds protect recovery signalling from PID reuse.\nRule publication is serialized and atomic, with an idempotent installation\nreceipt for recovery between publication and the authorization record.\n\n"
+  }
+}

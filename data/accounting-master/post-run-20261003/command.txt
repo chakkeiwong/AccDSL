@@ -1,0 +1,49 @@
+python3 -B - <<'PY'
+import contextlib, hashlib, importlib.util, io, json, sys, time, unittest
+from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
+root=Path.cwd();sys.path[:0]=[str(root/'scripts'), str(root/'tests')]
+from accounting_master_support import atomic_json, digest, protected_hashes, verify_hashes
+from run_accounting_master import live_group_members
+out=root/'data/accounting-master/post-run-20261003';out.mkdir(exist_ok=True)
+if (out/'verification.json').exists():raise SystemExit('Refusing to replace prior verification')
+started=time.monotonic(); captured=io.StringIO()
+import test_accounting_p03 as suite_module
+suite_module.OBSERVATIONS.clear()
+suite=unittest.TestLoader().loadTestsFromModule(suite_module)
+with contextlib.redirect_stdout(captured),contextlib.redirect_stderr(captured):
+ result=unittest.TextTestRunner(stream=captured,verbosity=2).run(suite)
+(out/'p03-tests.log').write_text(captured.getvalue())
+state=json.loads((root/'data/accounting-master/state.json').read_text())
+plan=json.loads((root/'data/accounting-master/next-plan.json').read_text())
+manifest=json.loads((root/'data/accounting-master/runs/20261002T205123-6b8e9a16/manifest.json').read_text())
+active=json.loads((root/'data/accounting-master/active-process.json').read_text())
+catalog=json.loads((root/'docs/design/fixtures/p03-lowering-cases-v1.json').read_text())
+report=json.loads((root/'data/accounting-master/deliverables/P03/conformance.json').read_text())
+expected=Counter(x['id'] for x in catalog['obligations']);observed=Counter(x['id'] for x in suite_module.OBSERVATIONS)
+errors={'accepted_evidence':{k:verify_hashes(root,p['evidence_hashes']) for k,p in state['phases'].items() if p['status']=='accepted_internal'},
+ 'controller':verify_hashes(root,manifest['controller_hashes']),
+ 'protected_sources':verify_hashes(root,protected_hashes(root)),
+ 'p03_report_code':verify_hashes(root,report['hashes']),
+ 'p03_missing_obligations':sorted((expected-observed).elements()),
+ 'p03_extra_obligations':sorted((observed-expected).elements()),
+ 'p03_duplicate_ids':sorted(k for k in expected|observed if expected[k]!=1 or observed[k]!=1),
+ 'p03_failed_observations':[x['id'] for x in suite_module.OBSERVATIONS if x.get('passed') is not True]}
+state_matches=plan['state_sha256']==digest(root/'data/accounting-master/state.json')
+survivors=live_group_members(active['identity']['pgid'])
+passed=result.wasSuccessful() and result.testsRun>0 and not result.skipped and state_matches and not survivors and all(not v for k,v in errors.items() if k!='accepted_evidence') and all(not v for v in errors['accepted_evidence'].values())
+record={'utc':datetime.now(timezone.utc).isoformat(),'run_id':manifest['run_id'],'question':'Verify the saved boundary and surviving P03 code; do not accept P03',
+ 'passed':passed,'command':'python3 -B - (supervisor boundary verification; source saved as command.txt)',
+ 'environment':sys.version,'hardware':'CPU only; no accelerator framework imported','git_commit':None,'git_reason':'Existing marker unusable; no initialization',
+ 'seeds':'N/A: deterministic engineering checks','wall_seconds':round(time.monotonic()-started,3),
+ 'plan':'docs/plans/accounting-master-run-boundary-20261003.md','tests':{'run':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped)},
+ 'obligations_observed':len(suite_module.OBSERVATIONS),'errors':errors,'state_matches_next_plan':state_matches,'owned_survivors':survivors,'phase_states':{k:p['status'] for k,p in state['phases'].items()},
+ 'next_phase':plan['next_phase'],'eligible_phases':plan['eligible_phases'],'run_outcome':manifest['outcome'],'mission_complete':False,
+ 'p03_acceptance':'pending completed implementation response, supervisor checks and read-only result review; no acceptance promotion from these checks',
+ 'outputs':['data/accounting-master/post-run-20261003/verification.json','data/accounting-master/post-run-20261003/p03-tests.log'],
+ 'rule_sha256':digest(Path('/home/chakwong/.codex/rules/accdsl-master.rules')),'authorization_sha256':digest(root/'data/accounting-master/authorization.json')}
+atomic_json(out/'verification.json',record)
+print(json.dumps(record,indent=2))
+raise SystemExit(0 if passed else 1)
+PY

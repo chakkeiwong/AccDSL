@@ -1,0 +1,3911 @@
+{UTF-8}
+OE Quarterly Net Income=
+	Quarterly Net Income
+	~	dollars/quarter
+	~	The quarterly net income reported on the owners' equity statement.
+	|
+
+OE Net Income=
+	IS Net Income
+	~	dollars/Year
+	~	The value of net income that has flowed into the stock of retained \
+		earnings over the reporting period.
+	|
+
+Reported Dividends=
+	Drained Reported Dividends*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported dividends is calculated based on the size \
+		of the outflow from the accumulated reporting stock and the length of the \
+		reporting period.
+	|
+
+Drained Reported Issuance of Shares=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Issuance of Shares/TIME STEP , \
+		0 )
+	~	dollars/Year
+	~	Once it is time to report share issuance, the entire stock of accumulated \
+		reported issuance of shares must be drained in one time step.
+	|
+
+Initial Accumulated Reported Dividends=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Accumulated Reported Dividends= INTEG (
+	New Reported Dividends-Drained Reported Dividends,
+		Initial Accumulated Reported Dividends)
+	~	dollars
+	~	This stock represents all of the Dividends that have been paid so far this \
+		reporting period. It must wait until the end of the period to be reported \
+		on the owners' equity statement.
+	|
+
+OE Dividends=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Dividends , 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+Removal of Reported Paid in Capital=
+	IF THEN ELSE( Check Reporting=0, OE Previous Reported Paid in Capital/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is active the entire contents of the previous BS \
+		Retained Earnings stock is removed from the chain.
+	|
+
+Removal of Reported Retained Earnings=
+	IF THEN ELSE( Check Reporting=0, OE Previous Reported Retained Earnings/TIME STEP, 0\
+		)
+	~	dollars/Year
+	~	When the reporting flag is active the entire contents of the previous BS \
+		Retained Earnings stock is removed from the chain.
+	|
+
+Accumulated Reported Issuance of Shares= INTEG (
+	New Reported Issuance of Shares-Drained Reported Issuance of Shares,
+		Initial Accumulated Reported Issuance of Shares)
+	~	dollars
+	~	This stock represents all of the share issuances that have been undertaken \
+		so far this reporting period. It must wait until the end of the period to \
+		be reported on the owners' equity statement.
+	|
+
+OE Quarterly Dividends=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Dividends/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+OE Quarterly Issuance of Shares=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Issuance of Shares/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+OE Reported Paid in Capital= INTEG (
+	Latest Reported Paid in Capital-Aging of Reported Paid in Capital,
+		Initial BS Additional Paid In Capital)
+	~	dollars
+	~	This is the most recently reported level of BS Paid in Capital
+	|
+
+OE Reported Retained Earnings= INTEG (
+	Latest Reported Retained Earnings-Aging of Reported Retained Earnings,
+		Initial BS Retained Earnings)
+	~	dollars
+	~	This is the most recently reported level of BS Retained Earnings
+	|
+
+New Reported Dividends=
+	Dividends Paid
+	~	dollars/Year
+	~	Dividends are reported when they are paid to shareholders.
+	|
+
+OE Issuance of Shares=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Issuance of Shares , 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+Drained Reported Dividends=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Dividends/TIME STEP , 0 )
+	~	dollars/Year
+	~	Once it is time to report dividends, the entire stock of accumulated \
+		reported dividends must be drained in one time step.
+	|
+
+Aging of Reported Paid in Capital=
+	IF THEN ELSE( Check Reporting=0, OE Reported Paid in Capital/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is activated the entire contents of the reported \
+		BS Retained Earnings stock move down the chain in a single time step.
+	|
+
+Aging of Reported Retained Earnings=
+	IF THEN ELSE( Check Reporting=0, OE Reported Retained Earnings/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is activated the entire contents of the reported \
+		BS Retained Earnings stock move down the chain in a single time step.
+	|
+
+Reported Issuance of Shares=
+	Drained Reported Issuance of Shares*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported issuance of shares is calculated based on \
+		the size of the outflow from the accumulated reporting stock and the \
+		length of the reporting period.
+	|
+
+New Reported Issuance of Shares=
+	Capital Inflow from Share Issuance
+	~	dollars/Year
+	~	Dividends are reported when they are paid to shareholders.
+	|
+
+Latest Reported Paid in Capital=
+	IF THEN ELSE( Check Reporting=0, BS Additional Paid In Capital/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag activates the current value of BS Paid in Capital \
+		is stored in the stock of reported BS Retained Earnings over a single time \
+		step.
+	|
+
+Latest Reported Retained Earnings=
+	IF THEN ELSE( Check Reporting=0, BS Retained Earnings/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag activates the current value of BS Retained \
+		Earnings is stored in the stock of reported BS Retained Earnings over a \
+		single time step.
+	|
+
+Initial Accumulated Reported Issuance of Shares=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+OE Previous Reported Retained Earnings= INTEG (
+	Aging of Reported Retained Earnings-Removal of Reported Retained Earnings,
+		Initial BS Retained Earnings)
+	~	dollars
+	~	This is the level of BS Retained Earnings one reporting period previously
+	|
+
+OE Previous Reported Paid in Capital= INTEG (
+	Aging of Reported Paid in Capital-Removal of Reported Paid in Capital,
+		Initial BS Additional Paid In Capital)
+	~	dollars
+	~	This is the level of BS Paid in Capital one reporting period previously
+	|
+
+Reported BS Net Intangible Assets=SAMPLE IF TRUE(
+	Check Reporting=0,BS Net Intangible Assets,0)
+	~	dollars
+	~	The value of intangibles on the balance sheet is the difference between \
+		the historical cost and the total accumulated amortization.
+	|
+
+Reported BS Net Plant Property and Equipment=SAMPLE IF TRUE(
+	Check Reporting=0,BS Net Plant Property and Equipment,0)
+	~	dollars
+	~	The value of PPE on the balance sheet is the difference between the \
+		historical cost and the total accumulated depreciation.
+	|
+
+Reported BS Retained Earnings=SAMPLE IF TRUE(
+	Check Reporting=0,BS Retained Earnings,0)
+	~	dollars
+	~	The stock of retained earnings of the firm is increased by net income and \
+		decreased by dividends.
+	|
+
+Reported BS Accounts Payable=SAMPLE IF TRUE(
+	Check Reporting=0,BS Accounts Payable,0)
+	~	dollars
+	~	The level of accounts payable on the reporting date.
+	|
+
+Reported BS Total Assets=
+	Reported BS Total Current Assets+Reported BS Total Long Term Assets
+	~	dollars
+	~	The sum of all the assets on the balance sheet.
+	|
+
+Reported BS Accounts Receivable=SAMPLE IF TRUE(
+	Check Reporting=0,BS Accounts Receivable,0)
+	~	dollars
+	~	The stock of customer accounts receivable.
+	|
+
+Reported BS Total Current Liabilities=
+	Reported BS Accrued Wages+Reported BS Accounts Payable+Reported BS Short Term Debt
+	~	dollars
+	~	The sum of the components of current liabilities on the balance sheet.
+	|
+
+Reported BS Accrued Wages=SAMPLE IF TRUE(
+	Check Reporting=0,BS Accrued Wages,0)
+	~	dollars
+	~	Wages accrue in this stock until they are paid by the firm.
+	|
+
+Reported BS Total Liabilities=
+	Reported BS Total Current Liabilities+Reported BS Total Long Term Liabilities
+	~	dollars
+	~	The sum of all the liabilities on the balance sheet.
+	|
+
+Reported BS Accumulated Amortization=SAMPLE IF TRUE(
+	Check Reporting=0,BS Accumulated Amortization,0)
+	~	dollars
+	~	Amortization that accumulates over time must be recorded so that it can be \
+		displayed on the balance sheet.
+	|
+
+Reported BS Accumulated Depreciation=SAMPLE IF TRUE(
+	Check Reporting=0,BS Accumulated Depreciation,0)
+	~	dollars
+	~	Depreciation that accumulates over time must be recorded so that it can be \
+		displayed on the balance sheet.
+	|
+
+Reported BS Additional Paid In Capital=SAMPLE IF TRUE(
+	Check Reporting=0,BS Additional Paid In Capital,0)
+	~	dollars
+	~	The total value of the funds that the firm has been paid for issuing its \
+		shares.
+	|
+
+Reported BS Cash=SAMPLE IF TRUE(
+	Check Reporting=0, BS Cash , 0)
+	~	dollars
+	~	This is the accumulated balance of cash on hand for the firm.
+	|
+
+Reported BS Inventory=SAMPLE IF TRUE(
+	Check Reporting=0,BS Inventory,0)
+	~	dollars
+	~	Inventory on the balance sheet is increased by the cost of any materials \
+		and labor, and decreased when the goods are shipped.
+	|
+
+Reported BS Total Long Term Assets=
+	Reported BS Net Plant Property and Equipment+Reported BS Net Intangible Assets
+	~	dollars
+	~	The sum of the components of long term assets on the balance sheet.
+	|
+
+Reported BS Long Term Debt=SAMPLE IF TRUE(
+	Check Reporting=0,BS Long Term Debt,0)
+	~	dollars
+	~	This stock accumulates all of the debt held by the firm that does not need \
+		to be fully repaid soon.
+	|
+
+Reported Gap Between Assets and Liabilities and Equity=
+	Reported BS Total Assets-Reported BS Total Liabilities and Equity
+	~	dollars
+	~	This should always equal zero in order for the balance sheet identity to \
+		hold.
+	|
+
+Reported BS Total Liabilities and Equity=
+	Reported BS Total Liabilities+Reported BS Total Equity
+	~	dollars
+	~	The sum of liabilities and equity on the balance sheet is reported in \
+		order to test the balance sheet equation, which says that assets must \
+		always equal liabilities plus equity.
+	|
+
+Reported BS Short Term Debt=SAMPLE IF TRUE(
+	Check Reporting=0,BS Short Term Debt,0)
+	~	dollars
+	~	The balance of debt that will be repaid within a short period of time.
+	|
+
+Reported BS Total Current Assets=
+	Reported BS Cash+Reported BS Accounts Receivable+Reported BS Inventory
+	~	dollars
+	~	The sum of the components of current assets on the balance sheet.
+	|
+
+Reported BS Total Equity=
+	Reported BS Additional Paid In Capital+Reported BS Retained Earnings
+	~	dollars
+	~	The sum of the components of equity on the balance sheet.
+	|
+
+Reported BS Total Long Term Liabilities=
+	Reported BS Long Term Debt
+	~	dollars
+	~	The sum of the components of long term liabilities on the balance sheet.
+	|
+
+Quarterly Cost of Goods Sold=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Cost of Goods Sold/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+Quarterly Depreciation=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Depreciation/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+IS Cost of Goods Sold=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Cost of Goods Sold , 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+Quarterly Earnings per Share=
+	SAMPLE IF TRUE(Check Reporting=0,Quarterly Net Income/Shares Outstanding,0)
+	~	dollars/(quarter*share)
+	~	The earnings of the firm per share of stock outstanding is a common \
+		measure of the value of a firm's stock.
+	|
+
+Dividends Paid=
+	IF THEN ELSE(MODULO(Time,Dividend Payment Frequency)<=(Dividend Payment Delay+TIME STEP\
+		):AND:MODULO(Time,Dividend Payment Frequency)>=Dividend Payment Delay, Total Dividend Payment
+	/TIME STEP, 0)
+	~	dollars/Year
+	~	Once the dividend payment date occurs all of the declared dividends are \
+		paid out of the stock of retained earnings.
+	|
+
+Quarterly Interest Expense=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Interest Expense/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+Quarterly Marketing Expense=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Marketing Expense/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+IS Interest Expense=SAMPLE IF TRUE(
+	Check Reporting=0 , Reported Interest Expense, 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+IS Marketing Expense=SAMPLE IF TRUE(
+	Check Reporting=0 , Reported Marketing Expense , 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+Quarterly Research and Development Expense=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Research and Development Expense/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+Quarterly Revenue=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Revenue/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+Quarterly Selling General and Administrative Expense=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Selling General and Administrative Expense/Quarters per Year
+	, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+Quarterly Tax Expense=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Tax Expense/Quarters per Year, 0)
+	~	dollars/quarter
+	~	The most recent value of the quarterly tax expense.
+	|
+
+IS Selling General and Administrative Expense=SAMPLE IF TRUE(
+	Check Reporting=0 , Reported Selling General and Administrative Expense , 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+IS Tax Expense=SAMPLE IF TRUE(
+	Check Reporting=0 , Reported Tax Expense, 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+Quarterly Amortization=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Amortization/Quarters per Year, 0)
+	~	dollars/quarter
+	~	If the model is set to quarterly reporting then this variable should be \
+		used
+	|
+
+IS Amortization=SAMPLE IF TRUE(
+	Check Reporting=0 , Reported Amortization, 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+Short Term Debt Repayment=
+	BS Short Term Debt/Definition of Current
+	~	dollars/Year
+	~	The cash payment of short term debt is assumed to occur over some average \
+		length of time.
+	|
+
+IS Depreciation=SAMPLE IF TRUE(
+	Check Reporting=0, Reported Depreciation, 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+IS Research and Development Expense=SAMPLE IF TRUE(
+	Check Reporting=0 , Reported Research and Development Expense, 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+IS Earnings per Share=SAMPLE IF TRUE(
+	Check Reporting=0, IS Net Income/Shares Outstanding, 0)
+	~	dollars/Year/share
+	~	The earnings of the firm per share of stock outstanding is a common \
+		measure of the value of a firm's stock.
+	|
+
+IS Revenue=SAMPLE IF TRUE(
+	Check Reporting=0 , Reported Revenue , 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+Dividend Payment Frequency=
+	1
+	~	Years
+	~	The length of time between dividend payments.
+	|
+
+Quarterly Earnings Before Taxes=
+	Quarterly Operating Profit-Quarterly Interest Expense
+	~	dollars/quarter
+	~	The total earnings before taxes is often used as a simple basis to \
+		calculate a corporation's effective tax rate.
+	|
+
+Quarterly Gross Profit=
+	Quarterly Revenue-Quarterly Cost of Goods Sold
+	~	dollars/quarter
+	~	The gross profit of an enterprise is a measure of its revenue minus its \
+		cost of goods sold.
+	|
+
+Quarterly Net Income=
+	Quarterly Earnings Before Taxes-Quarterly Tax Expense
+	~	dollars/quarter
+	~	Net income is the bottom line income number on the income statement and is \
+		the most closely watched indicator of corporate performance.  It is \
+		calculated as revenue minus all expenses on the income statement.
+	|
+
+Quarterly Operating Profit=
+	Quarterly Gross Profit-Quarterly Total Operating Expenses
+	~	dollars/quarter
+	~	The operating profit of an enterprise can be calculated as its revenue \
+		minus all of its expenses before interest and taxes, or as its gross \
+		profit minus to total operating expenses.
+	|
+
+Quarterly Total Operating Expenses=
+	Quarterly Marketing Expense+Quarterly Research and Development Expense+Quarterly Selling General and Administrative Expense\
+		+Quarterly Depreciation+Quarterly Amortization
+	~	dollars/quarter
+	~	It is common to total the operating expenses of a business for reporting \
+		on the income statement.
+	|
+
+Quarters per Year=
+	4
+	~	quarters/Year
+	~	The number of quarters in a year is used to adjust values reported in \
+		those two units.
+	|
+
+Annual Reporting Switch=
+	1
+	~	Dmnl [0,1,1]
+	~	This switch determines whether the model uses an annual or quarterly \
+		reporting period.
+	|
+
+Operating Cash Outflows=
+	Cash Material Purchases+Payment of Accounts Payable+Wages Paid to Workers+Marketing Expense\
+		+Research and Development Expense+Reported Tax Expense
+	~	dollars/Year
+	~	The cash flow going out of the firm from operating activities is due to \
+		the cash payment of the various operating expenses.
+	|
+
+Increase in Retained Earnings from Net Income=
+	Net Income Flow
+	~	dollars/Year
+	~	Retained earnings is increased once net income has been reported.
+	|
+
+Reported Revenue=
+	Drained Reported Revenue*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported revenue is calculated based on the size \
+		of the outflow from the accumulated reporting stock and the length of the \
+		reporting period.
+	|
+
+Reporting Period=
+	IF THEN ELSE(Annual Reporting Switch=1, 1, 0.25)
+	~	Year
+	~	The frequency of the reporting period could be annual or quarterly.
+	|
+
+BS Additional Paid In Capital= INTEG (
+	Capital Inflow from Share Issuance,
+		Initial BS Additional Paid In Capital)
+	~	dollars
+	~	The total value of the funds that the firm has been paid for issuing its \
+		shares.
+	|
+
+Gap Between Assets and Liabilities and Equity=
+	BS Total Assets-BS Total Liabilities and Equity
+	~	dollars
+	~	This should always equal zero in order for the balance sheet identity to \
+		hold.
+	|
+
+Initial Shares Outstanding=
+	10000
+	~	shares
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The initial number of shares outstanding should be \
+		brought into the model.
+	|
+
+Average Cost per Inventory Unit=
+	BS Inventory/Units in Inventory
+	~	dollars/unit
+	~	While the vast majority of firms use the first in first out or FIFO method \
+		to calculate the value of their inventory, the potentially very large \
+		number of coflow stocks needed to track every inventory cost layer is \
+		prohibitive and against the spirit of most system dynamics models.  We \
+		have chosen to model the average cost method instead, but this decision \
+		may be important if the cost of manufacturing inventory changes very \
+		rapidly or is very important for your modelling purposes.
+	|
+
+BS Total Equity=
+	BS Additional Paid In Capital+BS Retained Earnings
+	~	dollars
+	~	The sum of the components of equity on the balance sheet.
+	|
+
+Initial BS Additional Paid In Capital=
+	500
+	~	dollars
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The initial value for this stock of equity should be \
+		brought into the model.
+	|
+
+BS Retained Earnings= INTEG (
+	Increase in Retained Earnings from Net Income-Dividends Paid,
+		Initial BS Retained Earnings)
+	~	dollars
+	~	The stock of retained earnings of the firm is increased by net income and \
+		decreased by dividends.
+	|
+
+Cost of Goods Sold=
+	Inventory Units Shipped*Average Cost per Inventory Unit
+	~	dollars/Year
+	~	The cost of goods sold is recorded only once the goods have been shipped \
+		to the customer so that this expense can be matched with the revenue it \
+		generated.
+	|
+
+Dividend per Share=
+	Total Dividend Payment/Shares Outstanding
+	~	dollars/share
+	~	The indicated dividend per share, based on the total cash spent on \
+		dividends and the number of shares outstanding.
+	|
+
+Share Price=
+	20
+	~	dollars/share
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The share price of the firm's equity should be \
+		determined by the model.
+	|
+
+Initial BS Inventory=
+	(Cost of Material Purchases+Cost of Labor Used to Create Inventory)*Units in Inventory\
+		/Inventory Units Shipped
+	~	dollars
+	~	This will initialize the stock of the value of inventory in dynamic \
+		equilibrium.
+	|
+
+Initial BS Retained Earnings=
+	Initial BS Cash+Initial BS Accounts Receivable+Initial BS Inventory+Initial BS Net Plant Property and Equipment\
+		+Initial BS Net Intangible Assets-Initial BS Accounts Payable-Initial BS Accrued Wages\
+		-Initial BS Short Term Debt-Initial BS Long Term Debt-Initial BS Additional Paid In Capital
+	~	dollars
+	~	The initial value of retained earnings is implied by the balance sheet \
+		equation and the intiial vlues of all of the assets, liabilities, and \
+		equity on the balance sheet.
+	|
+
+Total Dividend Payment=
+	50
+	~	dollars
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The decision to issue dividends must be determined \
+		through some decision rule.
+	|
+
+Shares Issued=
+	0
+	~	shares/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The decision to issue shares must be determined through \
+		some decision rule.
+	|
+
+Capital Inflow from Share Issuance=
+	Share Price*Shares Issued
+	~	dollars/Year
+	~	The capital raised through the issuance of shares increases a stock of \
+		capital in the equity section of the firm's balance sheet.
+	|
+
+Units in Inventory=
+	500
+	~	units
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The number of units in inventory should be calculated \
+		somewhere in the model of a business.
+	|
+
+Shares Outstanding= INTEG (
+	Share Issuance,
+		Initial Shares Outstanding)
+	~	shares
+	~	The number of shares that the firm has issued to the market.
+	|
+
+Dividend Payment Delay=
+	0.083
+	~	Years
+	~	The length of time in fractions of a year that indicates when dividends \
+		will be paid.
+	|
+
+Net Income Flow=
+	New Reported Revenue-New Reported Cost of Goods Sold-New Reported Marketing Expense-\
+		New Reported Research and Development Expense
+	-New Reported Selling General and Administrative Expense-New Reported Depreciation-New Reported Amortization\
+		-New Reported Interest Expense-Reported Tax Expense
+	~	dollars/Year
+	~	The flow of net income into the firm occurs as that value is accumulated, \
+		not just when it is reported.
+	|
+
+Inventory Consumption=
+	Cost of Goods Sold
+	~	dollars/Year
+	~	The value of inventory on the balance sheet decreases with the cost of \
+		goods sold.
+	|
+
+Share Issuance=
+	Shares Issued
+	~	shares/Year
+	~	The accumulation of shares outstanding occurs as shares are issued to the \
+		public.
+	|
+
+CF Investing Cash Flow=SAMPLE IF TRUE(
+	Reported Investing Cash Flow <> 0 , Reported Investing Cash Flow , 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+CF Operating Cash Flow=
+	Net Income Adjusted for Non Cash Expenses+Cash Flow from Changes to Balance Sheet Items
+	~	dollars/Year
+	~	This is the reported cash flow from operations using the indirect method.
+	|
+
+CF Total Cash Flow=
+	CF Operating Cash Flow+CF Investing Cash Flow+CF Financing Cash Flow
+	~	dollars/Year
+	~	The sum of each of the three reported cash flow categories.
+	|
+
+Accumulated Reported Financing Cash Flow= INTEG (
+	New Reported Financing Cash Flow-Drained Reported Financing Cash Flow,
+		Initial Accumulated Reported Financing Cash Flow)
+	~	dollars
+	~	This stock represents all of the Financing Cash Flows that have occurred \
+		so far this reporting period. It must wait until the end of the period to \
+		be reported on the indirect cash flow statement.
+	|
+
+Change in BS Accounts Receivable=
+	Reported BS Accounts Receivable for CF-Previous BS Accounts Receivable for CF
+	~	dollars
+	~	This is the change in total BS Accounts Receivable over the most recent \
+		reporting period.
+	|
+
+Accumulated Reported Investing Cash Flow= INTEG (
+	New Reported Investing Cash Flow-Drained Reported Investing Cash Flow,
+		Initial Accumulated Reported Investing Cash Flow)
+	~	dollars
+	~	This stock represents all of the Investing Cash Flows that have occurred \
+		so far this reporting period. It must wait until the end of the period to \
+		be reported on the indirect cash flow statement.
+	|
+
+Change in BS Inventory=
+	Reported BS Inventory for CF-Previous BS Inventory for CF
+	~	dollars
+	~	This is the change in total BS Inventory over the most recent reporting \
+		period.
+	|
+
+Drained Reported Marketing Expense=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Marketing Expense/TIME STEP , 0\
+		 )
+	~	dollars/Year
+	~	Once it is time to report Marketing Expense, the entire stock of \
+		accumulated reported Marketing Expense must be drained in one time step.
+	|
+
+Collections from Customers=
+	BS Accounts Receivable/Average Receivable Collection Time
+	~	dollars/Year
+	~	Customers pay for their orders with a delay indicated by the average \
+		collection time.
+	|
+
+Initial BS Cash=
+	Operating Cash Outflows*Target for Months of Operating Cash Outflows on Hand/Months per Year
+	~	dollars
+	~	The stock of cash is initialized so that it is at whatever target the firm \
+		establishes.
+	|
+
+Aging of Reported BS Accounts Payable=
+	IF THEN ELSE( Check Reporting=0, Reported BS Accounts Payable for CF/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is activated the entire contents of the reported \
+		BS Accounts Payable stock move down the chain in a single time step.
+	|
+
+Aging of Reported BS Accounts Receivable=
+	IF THEN ELSE( Check Reporting=0, Reported BS Accounts Receivable for CF/TIME STEP, 0\
+		)
+	~	dollars/Year
+	~	When the reporting flag is activated the entire contents of the reported \
+		BS Accounts Receivable stock move down the chain in a single time step.
+	|
+
+Aging of Reported BS Accrued Wages=
+	IF THEN ELSE( Check Reporting=0, Reported BS Accrued Wages for CF/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is activated the entire contents of the reported \
+		BS Accrued Wages stock move down the chain in a single time step.
+	|
+
+Aging of Reported BS Inventory=
+	IF THEN ELSE( Check Reporting=0, Reported BS Inventory for CF/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is activated the entire contents of the reported \
+		BS Inventory stock move down the chain in a single time step.
+	|
+
+Removal of Reported BS Accounts Payable=
+	IF THEN ELSE( Check Reporting=0, Previous BS Accounts Payable for CF/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is active the entire contents of the previous BS \
+		Accounts Payable stock is removed from the chain.
+	|
+
+Operating Cash Inflows=
+	Cash Sales+Collections from Customers
+	~	dollars/Year
+	~	The cash flow coming into the firm from operating activities is primarily \
+		caused by sales to customers.
+	|
+
+Total Cash Flow=
+	Total Operating Cash Flow+Total Investing Cash Flow+Total Financing Cash Flow
+	~	dollars/Year
+	~	This variable is the total cash flow using the direct method.
+	|
+
+Average Receivable Collection Time=
+	Days of Credit Terms Offered to Customers/Days per Year
+	~	Years
+	~	The length of time in years that customers are given to pay for their \
+		orders.
+	|
+
+Reported BS Accounts Payable for CF= INTEG (
+	Latest Reported BS Accounts Payable-Aging of Reported BS Accounts Payable,
+		Initial BS Accounts Payable)
+	~	dollars
+	~	This is the most recently reported level of BS Accounts Payable
+	|
+
+Reported BS Accounts Receivable for CF= INTEG (
+	Latest Reported BS Accounts Receivable-Aging of Reported BS Accounts Receivable,
+		Initial BS Accounts Receivable)
+	~	dollars
+	~	This is the most recently reported level of BS Accounts Receivable
+	|
+
+Reported BS Accrued Wages for CF= INTEG (
+	Latest Reported BS Accrued Wages-Aging of Reported BS Accrued Wages,
+		Initial BS Accrued Wages)
+	~	dollars
+	~	This is the most recently reported level of BS Accrued Wages
+	|
+
+Inventory Creation=
+	Cost of Labor Used to Create Inventory+Cost of Material Purchases
+	~	dollars/Year
+	~	Inventory on the balance sheet is valued at its cost to manufacture, which \
+		comes from both the cost of labor and the cost of materials.
+	|
+
+BS Accounts Receivable= INTEG (
+	Sales on Credit-Collections from Customers,
+		Initial BS Accounts Receivable)
+	~	dollars
+	~	The stock of customer accounts receivable.
+	|
+
+Cash Material Purchases=
+	Cost of Material Purchases*Fraction of Material Purchases Paid in Cash
+	~	dollars/Year
+	~	The amount of cash spent to purchase materials.
+	|
+
+Investing Cash Inflows=
+	0
+	~	dollars/Year
+	~	The cash flow coming into the firm from investing activities is caused by \
+		sales of PPE or intangible assets as well as investments in financial \
+		instruments. None of those flows are instituted in this model.
+	|
+
+Investing Cash Outflows=
+	Amount Spent on Intangible Assets+Amount Spent on Long Term Assets
+	~	dollars/Year
+	~	The cash flow going out of the firm from investing activities is caused by \
+		the purchases of tangible and intangible long term assets, as well as the \
+		purchase of financial instruments.
+	|
+
+CF Financing Cash Flow=SAMPLE IF TRUE(
+	Reported Financing Cash Flow <> 0 , Reported Financing Cash Flow , 0)
+	~	dollars/Year
+	~	This variable will hold the most recent reported value so that decisions \
+		can be made based on it.
+	|
+
+BS Cash= INTEG (
+	Cash Inflow-Cash Outflow,
+		Initial BS Cash)
+	~	dollars
+	~	This is the accumulated balance of cash on hand for the firm.
+	|
+
+BS Inventory= INTEG (
+	Inventory Creation-Inventory Consumption,
+		Initial BS Inventory)
+	~	dollars
+	~	Inventory on the balance sheet is increased by the cost of any materials \
+		and labor, and decreased when the goods are shipped.
+	|
+
+Drained Reported Depreciation=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Depreciation/TIME STEP , 0 )
+	~	dollars/Year
+	~	Once it is time to report depreciation, the entire stock of accumulated \
+		reported depreciation must be drained in one time step.
+	|
+
+Drained Reported Financing Cash Flow=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Financing Cash Flow/TIME STEP ,\
+		 0 )
+	~	dollars/Year
+	~	Once it is time to report Financing Cash Flow, the entire stock of \
+		accumulated reported Financing Cash Flow must be drained in one time step.
+	|
+
+Drained Reported Interest Expense=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Interest Expense/TIME STEP , 0 \
+		)
+	~	dollars/Year
+	~	Once it is time to report Interest Expenses, the entire stock of \
+		accumulated reported Interest Expense must be drained in one time step.
+	|
+
+Drained Reported Investing Cash Flow=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Investing Cash Flow/TIME STEP ,\
+		 0 )
+	~	dollars/Year
+	~	Once it is time to report Investing Cash Flow, the entire stock of \
+		accumulated reported Investing Cash Flow must be drained in one time step.
+	|
+
+Initial BS Accounts Receivable=
+	Sales on Credit*Average Receivable Collection Time
+	~	dollars
+	~	This initializes the stock of accounts receivable in dynamic equilibrium \
+		using little's law.
+	|
+
+Drained Reported Research and Development Expense=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Research and Development Expense\
+		/TIME STEP , 0 )
+	~	dollars/Year
+	~	Once it is time to report Research and Development Expense, the entire \
+		stock of accumulated reported Research and Development Expense must be \
+		drained in one time step.
+	|
+
+Drained Reported Revenue=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Revenue/TIME STEP , 0 )
+	~	dollars/Year
+	~	Once it is time to report revenue the entire stock of accumulated reported \
+		revenue must be drained in one time step.
+	|
+
+Drained Reported Selling General and Administrative Expense=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Selling General and Administrative Expense\
+		/TIME STEP , 0 )
+	~	dollars/Year
+	~	Once it is time to report Selling General and Administrative Expense, the \
+		entire stock of accumulated reported Selling General and Administrative \
+		Expense must be drained in one time step.
+	|
+
+Financing Cash Inflows=
+	New Debt Issued+Cash Collected from Share Issuance
+	~	dollars/Year
+	~	The cash flow coming into the firm from financing activities is caused by \
+		sales of the firm's stock and by increases to the debt issued by the firm.
+	|
+
+Financing Cash Outflows=
+	Short Term Debt Repayment+Dividends Paid
+	~	dollars/Year
+	~	The cash flow going out of the firm from financing activities occurs when \
+		the firm pays dividends, repays a loan, or repurchases stock.
+	|
+
+Previous BS Inventory for CF= INTEG (
+	Aging of Reported BS Inventory-Removal of Reported BS Inventory,
+		Initial BS Inventory)
+	~	dollars
+	~	This is the level of BS Inventory one reporting period previously
+	|
+
+Latest Reported BS Accounts Payable=
+	IF THEN ELSE( Check Reporting=0, BS Accounts Payable/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag activates the current value of BS Accounts Payable \
+		is stored in the stock of reported BS Accounts Payable over a single time \
+		step.
+	|
+
+Latest Reported BS Accounts Receivable=
+	IF THEN ELSE( Check Reporting=0, BS Accounts Receivable/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag activates the current value of BS Accounts \
+		Receivable is stored in the stock of reported BS Accounts Receivable over \
+		a single time step.
+	|
+
+Latest Reported BS Accrued Wages=
+	IF THEN ELSE( Check Reporting=0, BS Accrued Wages/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag activates the current value of BS Accrued Wages is \
+		stored in the stock of reported BS Accrued Wages over a single time step.
+	|
+
+Latest Reported BS Inventory=
+	IF THEN ELSE( Check Reporting=0, BS Inventory/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag activates the current value of BS inventory is \
+		stored in the stock of reported BS inventory over a single time step.
+	|
+
+Removal of Reported BS Inventory=
+	IF THEN ELSE( Check Reporting=0, Previous BS Inventory for CF/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is active the entire contents of the previous BS \
+		Inventory stock is removed from the chain.
+	|
+
+Cash Collected from Share Issuance=
+	Share Price*Shares Issued
+	~	dollars/Year
+	~	The flow of cash collected from sales of the firm's shares.
+	|
+
+Cash Flow from Changes to Balance Sheet Items=
+	Cash Flow from Changes to Current Assets+Cash Flow from Changes to Current Liabilities
+	~	dollars/Year
+	~	The changes to certain current assets and liabilities impacts net income \
+		differently from cash flow from operations.  These differences are \
+		adjusted for in the indirect cash flow statement.
+	|
+
+Cash Flow from Changes to Current Assets=
+	-(Change in BS Accounts Receivable+Change in BS Inventory)/One Year
+	~	dollars/Year
+	~	The difference between the balance sheet accounts must be transformed into \
+		a cash flow so that it can be used to calculate the operating cash flows \
+		using the indirect method. Any increases in current assets imply a \
+		decrease in cash flow.
+	|
+
+Cash Flow from Changes to Current Liabilities=
+	(Change in BS Accounts Payable+Change in BS Accrued Wages)/One Year
+	~	dollars/Year
+	~	The difference between the balance sheet accounts must be transformed into \
+		a cash flow so that it can be used to calculate the operating cash flows \
+		using the indirect method. Any increases in current liabilities imply an \
+		increase in cash flow.
+	|
+
+Cash Inflow=
+	Operating Cash Inflows+Investing Cash Inflows+Financing Cash Inflows
+	~	dollars/Year
+	~	The inflows of cash into the firm come from three sources, operations, \
+		investing, and financing.
+	|
+
+Inventory Units Shipped=
+	5000
+	~	units/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The number of inventory units shipped should be \
+		calculated somewhere in the model of a business.
+	|
+
+Cash Outflow=
+	Operating Cash Outflows+Investing Cash Outflows+Financing Cash Outflows
+	~	dollars/Year
+	~	The firm uses cash for three types of activities, operations, investing, \
+		and financing.
+	|
+
+Cash Sales=
+	New Reported Revenue*Fraction of Sales Collected in Cash
+	~	dollars/Year
+	~	This is the fraction of revenue that is collected in cash rather than \
+		billed to customers.
+	|
+
+Reported Financing Cash Flow=
+	Drained Reported Financing Cash Flow*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported Financing Cash Flow is calculated based \
+		on the size of the outflow from the accumulated reporting stock and the \
+		length of the reporting period.
+	|
+
+New Reported Investing Cash Flow=
+	Total Investing Cash Flow
+	~	dollars/Year
+	~	Investing cash flows that occur over the course of the year must be \
+		accumulated so that their total can be reported.
+	|
+
+Drained Reported Amortization=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Amortization/TIME STEP , 0 )
+	~	dollars/Year
+	~	Once it is time to report amortization, the entire stock of accumulated \
+		reported amortization must be drained in one time step.
+	|
+
+Drained Reported Cost of Goods Sold=
+	IF THEN ELSE(Check Reporting=0, Accumulated Reported Cost of Goods Sold/TIME STEP , \
+		0 )
+	~	dollars/Year
+	~	Once it is time to report cost of goods sold, the entire stock of \
+		accumulated reported cost of goods sold must be drained in one time step.
+	|
+
+Change in BS Accounts Payable =
+	Reported BS Accounts Payable for CF-Previous BS Accounts Payable for CF
+	~	dollars
+	~	This is the change in total BS Accounts Payable over the most recent \
+		reporting period.
+	|
+
+Reported Investing Cash Flow=
+	Drained Reported Investing Cash Flow*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported Investing Cash Flow is calculated based \
+		on the size of the outflow from the accumulated reporting stock and the \
+		length of the reporting period.
+	|
+
+Change in BS Accrued Wages=
+	Reported BS Accrued Wages for CF-Previous BS Accrued Wages for CF
+	~	dollars
+	~	This is the change in total BS Accrued Wages over the most recent \
+		reporting period.
+	|
+
+Sales on Credit=
+	New Reported Revenue*(1-Fraction of Sales Collected in Cash)
+	~	dollars/Year
+	~	Customers are typically billed after their inventory is delivered and \
+		revenue is recorded.
+	|
+
+One Year=
+	1
+	~	Year
+	~	This variable enables us to turn the difference between two balance sheet \
+		accounts into an equally sized cash flow.
+	|
+
+Target for Months of Operating Cash Outflows on Hand=
+	3
+	~	Months
+	~	A simple heuristic for the desired cash balance is to carry a certain \
+		number of months of cash expenses on hand.
+	|
+
+Previous BS Accounts Payable for CF = INTEG (
+	Aging of Reported BS Accounts Payable-Removal of Reported BS Accounts Payable,
+		Initial BS Accounts Payable )
+	~	dollars
+	~	This is the level of BS Accounts Payable one reporting period previously
+	|
+
+Cost of Labor Used to Create Inventory=
+	700
+	~	dollars/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The cost of labor used to create inventory should be \
+		calculated somewhere in the model of a business.
+	|
+
+Previous BS Accrued Wages for CF= INTEG (
+	Aging of Reported BS Accrued Wages-Removal of Reported BS Accrued Wages,
+		Initial BS Accrued Wages)
+	~	dollars
+	~	This is the level of BS Accrued Wages one reporting period previously
+	|
+
+Total Operating Cash Flow=
+	Operating Cash Inflows-Operating Cash Outflows
+	~	dollars/Year
+	~	The direct method for calculating total operating cash flows adds the \
+		actual cash inflows and outflows from all of the operating activities.
+	|
+
+Price per Inventory Unit=
+	10
+	~	dollars/unit
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The price per inventory unit should be calculated \
+		somewhere in the model of a business.
+	|
+
+Fraction of Sales Collected in Cash=
+	0.2
+	~	Dmnl [0,1]
+	~	This constant separated revenue into the fraction that is collected in \
+		cash and the fraction that is billed through accounts receivable.
+	|
+
+Removal of Reported BS Accounts Receivable=
+	IF THEN ELSE( Check Reporting=0, Previous BS Accounts Receivable for CF/TIME STEP, 0\
+		)
+	~	dollars/Year
+	~	When the reporting flag is active the entire contents of the previous BS \
+		Accounts Receivable stock is removed from the chain.
+	|
+
+Removal of Reported BS Accrued Wages=
+	IF THEN ELSE( Check Reporting=0, Previous BS Accrued Wages for CF/TIME STEP, 0)
+	~	dollars/Year
+	~	When the reporting flag is active the entire contents of the previous BS \
+		Accrued Wages stock is removed from the chain.
+	|
+
+Total Financing Cash Flow=
+	Financing Cash Inflows-Financing Cash Outflows
+	~	dollars/Year
+	~	The financing cash flows sum together in this variable that is the same \
+		under both the direct and indirect method.
+	|
+
+Initial Accumulated Reported Financing Cash Flow=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Total Investing Cash Flow=
+	Investing Cash Inflows-Investing Cash Outflows
+	~	dollars/Year
+	~	The investing cash flows sum together in this variable that is the same \
+		under both the direct and indirect method.
+	|
+
+Initial Accumulated Reported Investing Cash Flow=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+New Reported Financing Cash Flow=
+	Total Financing Cash Flow
+	~	dollars/Year
+	~	Financing cash flows that occur over the course of the year must be \
+		accumulated so that their total can be reported.
+	|
+
+Reported BS Inventory for CF= INTEG (
+	Latest Reported BS Inventory-Aging of Reported BS Inventory,
+		Initial BS Inventory)
+	~	dollars
+	~	This is the most recently reported level of BS Inventory
+	|
+
+Net Income Adjusted for Non Cash Expenses=
+	SAMPLE IF TRUE(Check Reporting = TIME STEP,IS Net Income+IS Depreciation+IS Amortization\
+		,0)
+	~	dollars/Year
+	~	Under the indirect method cash flow from operations is reconciled with net \
+		income by first adding back any non-cash expenses.
+	|
+
+Previous BS Accounts Receivable for CF= INTEG (
+	Aging of Reported BS Accounts Receivable-Removal of Reported BS Accounts Receivable,
+		Initial BS Accounts Receivable)
+	~	dollars
+	~	This is the level of BS Accounts Receivable one reporting period previously
+	|
+
+Weeks per Year=
+	52
+	~	weeks/Year
+	~	A variable to help in the integration of concepts typically measures using \
+		different time units.
+	|
+
+Frequency of Payment of Wages=
+	Weeks Between Wage Payments/Weeks per Year
+	~	Years
+	~	This variable translates the weeks between wage payments into a variable \
+		measured in years.
+	|
+
+Initial BS Accounts Payable=
+	Average Supplier Credit Terms*Cost of Material Purchases*(1-Fraction of Material Purchases Paid in Cash\
+		)
+	~	dollars
+	~	Accounts payable are initialized in dynamic equilibrium following little's \
+		law.
+	|
+
+Initial BS Accrued Wages=
+	(Selling General and Administrative Salary Costs+Cost of Labor Used to Create Inventory\
+		)*Frequency of Payment of Wages
+	~	dollars
+	~	The stock of accrued wages is initialized in dynamic equilibrium following \
+		little's law.
+	|
+
+Cost of Material Purchases=
+	100
+	~	dollars/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The cost of material purchases should be calculated \
+		somewhere in the model of a business.
+	|
+
+BS Accounts Payable= INTEG (
+	Material Purchases on Credit-Payment of Accounts Payable,
+		Initial BS Accounts Payable)
+	~	dollars
+	~	The total amount that the company will need to pay to suppliers for \
+		previous materials purchases.
+	|
+
+Initial BS Long Term Debt=
+	New Debt Issued*(Average Loan Term-Definition of Current)/(1-Debt Interest Rate*(Average Loan Term\
+		-Definition of Current))
+	~	dollars
+	~	This quantity initializes the stock of long term debt in dynamic \
+		equilibrium.
+	|
+
+Days of Credit Terms Offered to Customers=
+	90
+	~	days
+	~	The number of days that customers are given to pay for their orders.
+	|
+
+Days per Year=
+	365
+	~	days/Year
+	~	A variable to help in the integration of concepts typically measures using \
+		different time units.
+	|
+
+Initial BS Short Term Debt=
+	Definition of Current*Initial BS Long Term Debt/((1-Definition of Current*Debt Interest Rate\
+		)*(Average Loan Term-Definition of Current))
+	~	dollars
+	~	This quantity initializes the stock of short term debt in dynamic \
+		equilibrium.
+	|
+
+Weeks Between Wage Payments=
+	2
+	~	weeks
+	~	The frequency of the payment of wages in the company
+	|
+
+Marketing Expense=
+	50
+	~	dollars/Year
+	~	The flow of value consumed in marketing the firms goods and services.  The \
+		accounting model does not separate the cash flows from value flows for \
+		marketing, so if this is important for your purpose you will want to add a \
+		marketing accrual stock to short term assets or liabilities.
+	|
+
+Average Supplier Credit Terms=
+	Supplier Credit Terms in Days/Days per Year
+	~	Years
+	~	The average length of time that suppliers allow the firm to repay their \
+		accounts over.
+	|
+
+BS Accrued Wages= INTEG (
+	Value of Wages Earned By Workers-Wages Paid to Workers,
+		Initial BS Accrued Wages)
+	~	dollars
+	~	Wages accrue in this stock until they are paid by the firm.
+	|
+
+Months per Year=
+	12
+	~	Months/Year
+	~	A variable to help in the integration of concepts typically measures using \
+		different time units.
+	|
+
+New Debt Issued=
+	500
+	~	dollars/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The decision to issue debt must be determined through \
+		some decision rule.
+	|
+
+Payment of Accounts Payable=
+	BS Accounts Payable/Average Supplier Credit Terms
+	~	dollars/Year
+	~	Accounts payable are repaid over some average length of time.
+	|
+
+Supplier Credit Terms in Days=
+	45
+	~	days
+	~	The number of days on average that the firm is given to pay its suppliers.
+	|
+
+Research and Development Expense=
+	150
+	~	dollars/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The cost of research and development should be \
+		calculated somewhere in the model of a business.
+	|
+
+Fraction of Material Purchases Paid in Cash=
+	0.1
+	~	Dmnl [0,1]
+	~	If some portion of materials are paid in cash at the time of purchase then \
+		this variable will enable that to be captured by the model.
+	|
+
+Wages Paid to Workers=
+	BS Accrued Wages/Frequency of Payment of Wages
+	~	dollars/Year
+	~	Wages are paid after a short delay.
+	|
+
+Value of Wages Earned By Workers=
+	Cost of Labor Used to Create Inventory+Selling General and Administrative Salary Costs
+	~	dollars/Year
+	~	All of the wages consumed by the company will flow into the stock of \
+		accrued wages until they are paid.
+	|
+
+Material Purchases on Credit=
+	Cost of Material Purchases*(1-Fraction of Material Purchases Paid in Cash)
+	~	dollars/Year
+	~	Only the portion of material purchases done for credit will flow into the \
+		stock of accounts payable.
+	|
+
+Reported Gross Profit=
+	Reported Revenue-Reported Cost of Goods Sold
+	~	dollars/Year
+	~	The instantaneous value of cost of goods sold, for calculating the \
+		instantaneous value of the tax rate.
+	|
+
+Initial Historical Cost of Intangible Assets=
+	Initial BS Accumulated Amortization+Initial BS Net Intangible Assets
+	~	dollars
+	~	To achieve dynamic equilibrium the initial value of the historical cost of \
+		intangible assets must be equal to the total net intangibles plus the \
+		total accumulated amortization.
+	|
+
+Initial Accumulated Reported Selling General and Administrative Expense=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Initial Amortization Discontinuation=
+	Amount Spent on Intangible Assets
+	~	dollars/Year
+	~	Dynamic equilibrium for the amortization structures requires that all \
+		flows be initialized to the same value.
+	|
+
+Initial BS Accumulated Amortization=
+	Amount Spent on Intangible Assets*Intangible Asset Average Amortization Time/2
+	~	dollars
+	~	Since dynamic equilibrium for the amortization structures requires that \
+		all flows be initialized to the same value exactly half of the total \
+		historical cost of intangible assets should be in each of the stocks of \
+		net value and accumulated amortization.  Little's law determines the total \
+		level as the inflow times the average residency time.
+	|
+
+Initial BS Accumulated Depreciation=
+	Amount Spent on Long Term Assets*Tangible Asset Average Depreciation Time/2
+	~	dollars
+	~	Since dynamic equilibrium for the depreciation structures requires that \
+		all flows be initialized to the same value exactly half of the total \
+		historical cost of tangible assets should be in each of the stocks of net \
+		value and accumulated depreciation. Little's law determines the total \
+		level as the inflow times the average residency time.
+	|
+
+Accumulated Reported Selling General and Administrative Expense= INTEG (
+	New Reported Selling General and Administrative Expense-Drained Reported Selling General and Administrative Expense\
+		,
+		Initial Accumulated Reported Selling General and Administrative Expense)
+	~	dollars
+	~	This stock represents all of the Selling General and Administrative \
+		Expense that has been consumed so far this reporting period. It must wait \
+		until the end of the period to be reported on the income statement.
+	|
+
+Initial BS Net Intangible Assets=
+	Amount Spent on Intangible Assets*Intangible Asset Average Amortization Time/2
+	~	dollars
+	~	Since dynamic equilibrium for the amortization structures requires that \
+		all flows be initialized to the same value exactly half of the total \
+		historical cost of intangible assets should be in each of the stocks of \
+		net value and accumulated amortization.  Little's law determines the total \
+		level as the inflow times the average residency time.
+	|
+
+Initial BS Net Plant Property and Equipment=
+	Amount Spent on Long Term Assets*Tangible Asset Average Depreciation Time/2
+	~	dollars
+	~	Since dynamic equilibrium for the depreciation structures requires that \
+		all flows be initialized to the same value exactly half of the total \
+		historical cost of tangible assets should be in each of the stocks of net \
+		value and accumulated depreciation. Little's law determines the total \
+		level as the inflow times the average residency time.
+	|
+
+Average Loan Term=
+	10
+	~	Year
+	~	The average length of time it takes for the firm to fully repay its long \
+		term loans.
+	|
+
+Selling General and Administrative Salary Costs=
+	500
+	~	dollars/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The cost of selling general and administrative employee \
+		salaries should be calculated somewhere in the model of a business.
+	|
+
+Borrowing=
+	New Debt Issued
+	~	dollars/Year
+	~	New long term debt flows into the stock whenever the company needs to \
+		borrow.
+	|
+
+Interest on Long Term Debt=
+	BS Long Term Debt*Debt Interest Rate
+	~	dollars/Year
+	~	The interest on debt accrues as a fraction of its current balance.
+	|
+
+Interest on Short Term Debt=
+	BS Short Term Debt*Debt Interest Rate
+	~	dollars/Year
+	~	The interest on debt accrues as a fraction of its current balance.
+	|
+
+Tax Rate=
+	0.2
+	~	Dmnl
+	~	A fractional tax rate as a percentage of the earnings before taxes.
+	|
+
+Reported Earnings Before Taxes=
+	Reported Operating Profit-Reported Interest Expense
+	~	dollars/Year
+	~	The instantaneous value of earnings before taxes, for calculating the \
+		instantaneous value of the tax rate.
+	|
+
+IS Net Income=
+	IS Earnings Before Taxes-IS Tax Expense
+	~	dollars/Year
+	~	Net income is the bottom line income number on the income statement and is \
+		the most closely watched indicator of corporate performance.  It is \
+		calculated as revenue minus all expenses on the income statement.
+	|
+
+IS Operating Profit=
+	IS Gross Profit-IS Total Operating Expenses
+	~	dollars/Year
+	~	The operating profit of an enterprise can be calculated as its revenue \
+		minus all of its expenses before interest and taxes, or as its gross \
+		profit minus to total operating expenses.
+	|
+
+Definition of Current=
+	1
+	~	Year
+	~	The definition of a current asset of liability in accounting is the \
+		greater of one year or the operating cycle of the business.  In most cases \
+		one year is used.
+	|
+
+Reported Net Income=
+	Reported Earnings Before Taxes-Reported Tax Expense
+	~	dollars/Year
+	~	The instantaneous value of net income
+	|
+
+BS Long Term Debt= INTEG (
+	Borrowing+Interest on Long Term Debt-Debt Becoming Current,
+		Initial BS Long Term Debt)
+	~	dollars
+	~	This stock accumulates all of the debt held by the firm that does not need \
+		to be fully repaid soon.
+	|
+
+IS Gross Profit=
+	IS Revenue-IS Cost of Goods Sold
+	~	dollars/Year
+	~	The gross profit of an enterprise is a measure of its revenue minus its \
+		cost of goods sold.
+	|
+
+Reported Tax Expense=
+	MAX(Reported Earnings Before Taxes*Tax Rate,0)
+	~	dollars/Year
+	~	A simple formulation for instantaneous taxes due.
+	|
+
+BS Short Term Debt= INTEG (
+	Debt Becoming Current+Interest on Short Term Debt-Short Term Debt Repayment,
+		Initial BS Short Term Debt)
+	~	dollars
+	~	The balance of debt that will be repaid within a short period of time.
+	|
+
+Debt Becoming Current=
+	BS Long Term Debt/MAX(Average Loan Term-Definition of Current,TIME STEP)
+	~	dollars/Year
+	~	Long term debt moves to the stock of short term debt when it is one year \
+		away from maturity.  Because of computational difficulties with tracking \
+		which debt instrument accrues interest we propose a simple first order \
+		delay for this formulation rather than a fixed delay. We maintain \
+		numerical stability by making sure that the denominator never becomes \
+		negative for very short loan terms or very long definitions of current.
+	|
+
+Debt Interest Rate=
+	0.07
+	~	Dmnl/Year
+	~	The average annual interest rate accrued on the debt held by the company.
+	|
+
+Initial Depreciation Discontinuation=
+	Amount Spent on Long Term Assets
+	~	dollars/Year
+	~	Dynamic equilibrium for the depreciation structures requires that all \
+		flows be initialized to the same value.
+	|
+
+Reported Operating Profit=
+	Reported Gross Profit-(Reported Selling General and Administrative Expense+Reported Research and Development Expense\
+		+Reported Marketing Expense+Reported Depreciation+Reported Amortization
+	)
+	~	dollars/Year
+	~	The instantaneous value of operating profit, for calculating the \
+		instantaneous value of the tax rate.
+	|
+
+Reported Selling General and Administrative Expense=
+	Drained Reported Selling General and Administrative Expense*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported Selling General and Administrative \
+		Expense is calculated based on the size of the outflow from the \
+		accumulated reporting stock and the length of the reporting period.
+	|
+
+IS Total Operating Expenses=
+	IS Marketing Expense+IS Research and Development Expense+IS Selling General and Administrative Expense\
+		+IS Depreciation+IS Amortization
+	~	dollars/Year
+	~	It is common to total the operating expenses of a business for reporting \
+		on the income statement.
+	|
+
+New Reported Selling General and Administrative Expense=
+	Selling General and Administrative Salary Costs
+	~	dollars/Year
+	~	The Selling General and Administrative expense is reported when it has \
+		been consumed. This is typically a little before salaries are paid.
+	|
+
+BS Accumulated Depreciation= INTEG (
+	Depreciation-Discontinuation of Depreciation Accumulation,
+		Initial BS Accumulated Depreciation)
+	~	dollars
+	~	Depreciation that accumulates over time must be recorded so that it can be \
+		displayed on the balance sheet.
+	|
+
+Initial Historical Cost of PPE=
+	Initial BS Accumulated Depreciation+Initial BS Net Plant Property and Equipment
+	~	dollars
+	~	To achieve dynamic equilibrium the initial value of the historical cost of \
+		PPE must be equal to the total net PPE  plus the total accumulated \
+		depreciation.
+	|
+
+BS Net Intangible Assets= INTEG (
+	Intangible Asset Purchases-Amortization,
+		Initial BS Net Intangible Assets)
+	~	dollars
+	~	The value of intangibles on the balance sheet is the difference between \
+		the historical cost and the total accumulated amortization.
+	|
+
+Amortization=
+	Historical Cost of Intangible Assets/Intangible Asset Average Amortization Time
+	~	dollars/Year
+	~	Annual amortization is calculated using the straight line method, which is \
+		equivalent to basing the outflow from the stock of net intangible assets \
+		on the historical cost rather than the current level.
+	|
+
+Amount Spent on Intangible Assets=
+	500
+	~	dollars/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The decision to invest in intangibles must be determined \
+		through some decision rule.
+	|
+
+Amount Spent on Long Term Assets=
+	1000
+	~	dollars/Year
+	~	This is one location where the accounting model interfaces with the model \
+		of the business.  The decision to invest in long term assets must be \
+		determined through some decision rule.
+	|
+
+Discontinuation of Depreciation Accumulation=
+	Discontinuation of Depreciation
+	~	dollars/Year
+	~	When an item of PPE has been fully depreciated its value is removed from \
+		the stock of accumulated depreciation.
+	|
+
+Discontinuation of Amortization Accumulation=
+	Discontinuation of Amortization
+	~	dollars/Year
+	~	When an item of intangible assets has been fully amortized its value is \
+		removed from the stock of accumulated amortization.
+	|
+
+Discontinuation of Depreciation=
+	DELAY FIXED( Increase in Historical Cost of PPE , Tangible Asset Average Depreciation Time\
+		 , Initial Depreciation Discontinuation )
+	~	dollars/Year
+	~	Once the historical costs have spent enough time in the stock to be fully \
+		depreciated they move out of that stock so as to no longer impact annual \
+		depreciation.
+	|
+
+Intangible Asset Average Amortization Time=
+	10
+	~	Year
+	~	This is the length of time over which intangible assets are fully \
+		amortized on average.
+	|
+
+Intangible Asset Purchases=
+	Amount Spent on Intangible Assets
+	~	dollars/Year
+	~	Every dollar spent to purchase intangible assets will flow into the stock \
+		of the net value of intangible assets.
+	|
+
+Historical Cost of Plant Property and Equipment= INTEG (
+	Increase in Historical Cost of PPE-Discontinuation of Depreciation,
+		Initial Historical Cost of PPE)
+	~	dollars
+	~	This stock tracks the historical cost of plant property and equipment \
+		because the historical cost is what controls the annual depreciation \
+		expense. Once PPE is fully depreciated it moves out of this stock and no \
+		longer influences annual depreciation.
+	|
+
+BS Net Plant Property and Equipment= INTEG (
+	Capital Expenditure-Depreciation,
+		Initial BS Net Plant Property and Equipment)
+	~	dollars
+	~	The value of PPE on the balance sheet is the difference between the \
+		historical cost and the total accumulated depreciation.
+	|
+
+BS Accumulated Amortization= INTEG (
+	Amortization-Discontinuation of Amortization Accumulation,
+		Initial BS Accumulated Amortization)
+	~	dollars
+	~	Amortization that accumulates over time must be recorded so that it can be \
+		displayed on the balance sheet.
+	|
+
+Capital Expenditure=
+	Amount Spent on Long Term Assets
+	~	dollars/Year
+	~	Every dollar spent to purchase long term assets will flow into the stock \
+		of the net value of plant property and equipment.
+	|
+
+Tangible Asset Average Depreciation Time=
+	15
+	~	Year
+	~	This is the length of time over which tangible assets are fully \
+		depreciated on average.
+	|
+
+Historical Cost of Intangible Assets= INTEG (
+	Increase in Historical Cost of Intangible Assets-Discontinuation of Amortization,
+		Initial Historical Cost of Intangible Assets
+		)
+	~	dollars
+	~	This stock tracks the historical cost of intangible assets because the \
+		historical cost is what controls the annual amortization expense. Once \
+		intangibles are fully depreciated it moves out of this stock and no longer \
+		influences annual amortization.
+	|
+
+Discontinuation of Amortization=
+	DELAY FIXED(Increase in Historical Cost of Intangible Assets, Intangible Asset Average Amortization Time\
+		, Initial Amortization Discontinuation)
+	~	dollars/Year
+	~	Once the historical costs have spent enough time in the stock to be fully \
+		amortized they move out of that stock so as to no longer impact annual \
+		amortization.
+	|
+
+Increase in Historical Cost of PPE=
+	Capital Expenditure
+	~	dollars/Year
+	~	The cost of PPE increases with every dollar spent on capital expenditure.
+	|
+
+Increase in Historical Cost of Intangible Assets=
+	Intangible Asset Purchases
+	~	dollars/Year
+	~	The cost of intangible assets increases with every dollar spent on \
+		intangible asset purchases.
+	|
+
+Depreciation=
+	Historical Cost of Plant Property and Equipment/Tangible Asset Average Depreciation Time
+	~	dollars/Year
+	~	Annual depreciation is calculated using the straight line method, which is \
+		equivalent to basing the outflow from the stock of PPE on the historical \
+		cost rather than the current level.
+	|
+
+Accumulated Reported Amortization= INTEG (
+	New Reported Amortization-Drained Reported Amortization,
+		Initial Accumulated Reported Amortization)
+	~	dollars
+	~	This stock represents all of the amortization that has been created so far \
+		this reporting period. It must wait until the end of the period to be \
+		reported on the income statement.
+	|
+
+Accumulated Reported Cost of Goods Sold= INTEG (
+	New Reported Cost of Goods Sold-Drained Reported Cost of Goods Sold,
+		Initial Accumulated Reported Cost of Goods Sold)
+	~	dollars
+	~	This stock represents all of the cost of goods sold that has been consumed \
+		so far this reporting period. It must wait until the end of the period to \
+		be reported on the income statement.
+	|
+
+Accumulated Reported Depreciation= INTEG (
+	New Reported Depreciation-Drained Reported Depreciation,
+		Initial Accumulated Reported Depreciation)
+	~	dollars
+	~	This stock represents all of the Depreciation that has been consumed so \
+		far this reporting period. It must wait until the end of the period to be \
+		reported on the income statement.
+	|
+
+Accumulated Reported Interest Expense= INTEG (
+	New Reported Interest Expense-Drained Reported Interest Expense,
+		Initial Accumulated Reported Interest Expense)
+	~	dollars
+	~	This stock represents all of the Interest Expense that has been accrued so \
+		far this reporting period. It must wait until the end of the period to be \
+		reported on the income statement.
+	|
+
+Accumulated Reported Marketing Expense= INTEG (
+	New Reported Marketing Expense-Drained Reported Marketing Expense,
+		Initial Accumulated Reported Marketing Expense)
+	~	dollars
+	~	This stock represents all of the Marketing Expense that has been consumed \
+		so far this reporting period. It must wait until the end of the period to \
+		be reported on the income statement.
+	|
+
+Accumulated Reported Research and Development Expense= INTEG (
+	New Reported Research and Development Expense-Drained Reported Research and Development Expense\
+		,
+		Initial Accumulated Reported Research and Development Expense)
+	~	dollars
+	~	This stock represents all of the Research and Development Expense that has \
+		been consumed so far this reporting period. It must wait until the end of \
+		the period to be reported on the income statement.
+	|
+
+Accumulated Reported Revenue= INTEG (
+	New Reported Revenue-Drained Reported Revenue,
+		Initial Accumulated Reported Revenue
+		)
+	~	dollars
+	~	This stock represents all of the revenue that has been earned so far this \
+		reporting period. It must wait until the end of the period to be reported \
+		on the income statement.
+	|
+
+Initial Accumulated Reported Research and Development Expense=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Initial Accumulated Reported Revenue=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Reported Amortization=
+	Drained Reported Amortization*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported amortization is calculated based on the \
+		size of the outflow from the accumulated reporting stock and the length of \
+		the reporting period.
+	|
+
+Reported Cost of Goods Sold=
+	Drained Reported Cost of Goods Sold*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported cost of goods sold is calculated based on \
+		the size of the outflow from the accumulated reporting stock and the \
+		length of the reporting period.
+	|
+
+Reported Depreciation=
+	Drained Reported Depreciation*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported depreciation is calculated based on the \
+		size of the outflow from the accumulated reporting stock and the length of \
+		the reporting period.
+	|
+
+IS Earnings Before Taxes=
+	IS Operating Profit-IS Interest Expense
+	~	dollars/Year
+	~	The total earnings before taxes is often used as a simple basis to \
+		calculate a corporation's effective tax rate.
+	|
+
+New Reported Marketing Expense=
+	Marketing Expense
+	~	dollars/Year
+	~	The marketing expense is reported when it has been consumed. This is \
+		typically after the promotions have run.
+	|
+
+Check Reporting=
+	MODULO(Time, Reporting Period)
+	~	Year
+	~	This variable checks to see whether the current time step is the correct \
+		time to report results.
+	|
+
+New Reported Amortization=
+	Amortization
+	~	dollars/Year
+	~	Amortization of intangible assets is reported using a straight line \
+		method, and is conceptually very similar to depreciation
+	|
+
+New Reported Cost of Goods Sold=
+	Cost of Goods Sold
+	~	dollars/Year
+	~	The cost of goods sold are reported when the goods are transferred to the \
+		customer.
+	|
+
+New Reported Depreciation=
+	Depreciation
+	~	dollars/Year
+	~	Depreciation on tangible long term assets occurs on a straight line basis.
+	|
+
+New Reported Interest Expense=
+	Interest on Long Term Debt+Interest on Short Term Debt
+	~	dollars/Year
+	~	Interest Expenses are reported as loans remain outstanding, accruing \
+		interest at the rate they bear.
+	|
+
+New Reported Revenue=
+	Price per Inventory Unit*Inventory Units Shipped
+	~	dollars/Year
+	~	Revenue is reported when the good is transferred to the customer.
+	|
+
+Initial Accumulated Reported Marketing Expense=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+New Reported Research and Development Expense=
+	Research and Development Expense
+	~	dollars/Year
+	~	The expense from research and development is reported roughly in time with \
+		when the cash outflows from paying researchers and product designers \
+		occur, since research and development costs are not allowed to be \
+		capitalized under US GAAP.
+	|
+
+Initial Accumulated Reported Depreciation=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Initial Accumulated Reported Interest Expense=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Reported Interest Expense=
+	Drained Reported Interest Expense*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported Interest Expense is calculated based on \
+		the size of the outflow from the accumulated reporting stock and the \
+		length of the reporting period.
+	|
+
+Initial Accumulated Reported Cost of Goods Sold=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Initial Accumulated Reported Amortization=
+	0
+	~	dollars
+	~	The initial value of the reported variable should always be zero.
+	|
+
+Reported Marketing Expense=
+	Drained Reported Marketing Expense*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported Marketing Expense is calculated based on \
+		the size of the outflow from the accumulated reporting stock and the \
+		length of the reporting period.
+	|
+
+Reported Research and Development Expense=
+	Drained Reported Research and Development Expense*TIME STEP/Reporting Period
+	~	dollars/Year
+	~	The annualized value of reported Research and Development Expense is \
+		calculated based on the size of the outflow from the accumulated reporting \
+		stock and the length of the reporting period.
+	|
+
+BS Total Assets=
+	BS Total Current Assets+BS Total Long Term Assets
+	~	dollars
+	~	The sum of all the assets on the balance sheet.
+	|
+
+BS Total Current Assets=
+	BS Cash+BS Accounts Receivable+BS Inventory
+	~	dollars
+	~	The sum of the components of current assets on the balance sheet.
+	|
+
+BS Total Current Liabilities=
+	BS Accrued Wages+BS Accounts Payable+BS Short Term Debt
+	~	dollars
+	~	The sum of the components of current liabilities on the balance sheet.
+	|
+
+BS Total Liabilities=
+	BS Total Current Liabilities+BS Total Long Term Liabilities
+	~	dollars
+	~	The sum of all the liabilities on the balance sheet.
+	|
+
+BS Total Liabilities and Equity=
+	BS Total Liabilities+BS Total Equity
+	~	dollars
+	~	The sum of liabilities and equity on the balance sheet is reported in \
+		order to test the balance sheet equation, which says that assets must \
+		always equal liabilities plus equity.
+	|
+
+BS Total Long Term Assets=
+	BS Net Plant Property and Equipment+BS Net Intangible Assets
+	~	dollars
+	~	The sum of the components of long term assets on the balance sheet.
+	|
+
+BS Total Long Term Liabilities=
+	BS Long Term Debt
+	~	dollars
+	~	The sum of the components of long term liabilities on the balance sheet.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 20
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.03125
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Inputs Needed
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,Amount Spent on Long Term Assets,260,354,73,19,8,3,0,0,-1,0,0,0
+10,2,Amount Spent on Intangible Assets,266,276,70,19,8,3,0,0,-1,0,0,0
+10,3,Fraction of Material Purchases Paid in Cash,430,-329,77,28,8,3,0,0,0,0,0,0
+10,4,Cost of Material Purchases,253,-220,62,19,8,3,0,0,-1,0,0,0
+10,5,Cost of Labor Used to Create Inventory,253,-145,78,19,8,3,0,0,-1,0,0,0
+10,6,Selling General and Administrative Salary Costs,252,-8,85,28,8,3,0,0,-1,0,0,0
+10,7,New Debt Issued,264,431,40,19,8,3,0,0,0,0,0,0
+10,8,Inventory Units Shipped,250,-529,61,19,8,3,0,0,-1,0,0,0
+10,9,Price per Inventory Unit,248,-597,57,19,8,3,0,0,0,0,0,0
+10,10,Marketing Expense,257,141,40,19,8,3,0,0,-1,0,0,0
+10,11,Research and Development Expense,260,74,56,28,8,3,0,0,-1,0,0,0
+10,12,Tax Rate,437,-14,36,11,8,3,0,0,0,0,0,0
+10,13,Average Cost per Inventory Unit,185,608,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+12,14,0,99,-567,52,52,2,135,0,0,-1,0,0,0
+Revenue
+12,15,0,90,-186,54,54,2,135,0,0,-1,0,0,0
+Cost of Goods Sold
+12,16,0,89,56,58,58,2,135,0,0,-1,0,0,0
+Expenses
+12,17,0,103,376,58,58,2,135,0,0,-1,0,0,0
+Investing and Financing
+10,18,Days of Credit Terms Offered to Customers,256,-416,67,28,8,3,0,0,0,0,0,0
+12,19,0,89,-384,54,54,2,135,0,0,-1,0,0,0
+Accruals
+10,20,Fraction of Sales Collected in Cash,437,-419,71,19,8,3,0,0,0,0,0,0
+10,21,Supplier Credit Terms in Days,254,-333,60,19,8,3,0,0,0,0,0,0
+10,22,Weeks Between Wage Payments,617,-327,65,19,8,3,0,0,0,0,0,0
+10,23,Debt Interest Rate,266,488,52,19,8,3,0,0,0,0,0,0
+10,24,Target for Months of Operating Cash Outflows on Hand,624,-408,81,28,8,3,0,0,0,0,0,0
+10,25,Units in Inventory,428,-218,39,19,8,3,0,0,0,0,0,0
+10,26,Intangible Asset Average Amortization Time,480,288,104,29,8,131,0,0,0,0,0,0
+10,27,Tangible Asset Average Depreciation Time,477,358,101,29,8,131,0,0,0,0,0,0
+10,28,Average Loan Term,462,429,56,19,8,3,0,0,0,0,0,0
+10,29,Definition of Current,803,-408,49,19,8,3,0,0,0,0,0,0
+10,30,Shares Issued,249,634,57,11,8,3,0,0,0,0,0,0
+10,31,Share Price,241,711,46,11,8,3,0,0,0,0,0,0
+10,32,Total Dividend Payment,248,801,73,19,8,3,0,0,0,0,0,0
+10,33,Initial BS Additional Paid In Capital,396,710,70,28,8,3,0,0,-1,0,0,0
+10,34,Initial Shares Outstanding,402,640,52,19,8,3,0,0,-1,0,0,0
+10,35,Dividend Payment Delay,402,796,56,19,8,3,0,0,0,0,0,0
+10,36,Annual Reporting Switch,434,68,70,19,8,3,0,0,0,0,0,0
+12,37,0,98,695,58,58,2,135,0,0,-1,0,0,0
+Equity
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Current Assets
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,BS Cash,464,295,56,30,3,131,0,0,0,0,0,0
+10,2,BS Accounts Receivable,446,534,56,31,3,131,0,0,0,0,0,0
+10,3,BS Inventory,463,854,58,32,3,131,0,0,0,0,0,0
+12,4,48,290,291,10,8,0,3,0,0,-1,0,0,0
+1,5,7,1,4,0,0,22,0,0,0,-1--1--1,,1|(379,295)|
+1,6,7,4,100,0,0,22,0,0,0,-1--1--1,,1|(319,295)|
+11,7,48,344,295,6,8,34,3,0,0,1,0,0,0
+10,8,Cash Inflow,344,314,47,11,40,3,0,0,-1,0,0,0
+12,9,48,662,296,10,8,0,3,0,0,-1,0,0,0
+1,10,12,9,4,0,0,22,0,0,0,-1--1--1,,1|(619,296)|
+1,11,12,1,100,0,0,22,0,0,0,-1--1--1,,1|(547,296)|
+11,12,48,581,296,6,8,34,3,0,0,1,0,0,0
+10,13,Cash Outflow,581,315,54,11,40,3,0,0,-1,0,0,0
+12,14,48,273,536,10,8,0,3,0,0,-1,0,0,0
+1,15,17,2,4,0,0,22,0,0,0,-1--1--1,,1|(364,535)|
+1,16,17,14,100,0,0,22,0,0,0,-1--1--1,,1|(305,535)|
+11,17,48,333,535,6,8,34,3,0,0,1,0,0,0
+10,18,Sales on Credit,333,562,35,19,40,3,0,0,-1,0,0,0
+12,19,48,658,534,10,8,0,3,0,0,-1,0,0,0
+1,20,22,19,4,0,0,22,0,0,0,-1--1--1,,1|(614,533)|
+1,21,22,2,100,0,0,22,0,0,0,-1--1--1,,1|(535,533)|
+11,22,48,575,533,6,8,34,3,0,0,1,0,0,0
+10,23,Collections from Customers,575,560,66,19,40,3,0,0,-1,0,0,0
+12,24,48,292,856,10,8,0,3,0,0,-1,0,0,0
+1,25,27,3,4,0,0,22,0,0,0,-1--1--1,,1|(382,856)|
+1,26,27,24,100,0,0,22,0,0,0,-1--1--1,,1|(324,856)|
+11,27,48,353,856,6,8,34,3,0,0,1,0,0,0
+10,28,Inventory Creation,353,883,39,19,40,3,0,0,-1,0,0,0
+12,29,48,665,854,10,8,0,3,0,0,-1,0,0,0
+1,30,32,29,4,0,0,22,0,0,0,-1--1--1,,1|(624,857)|
+1,31,32,3,100,0,0,22,0,0,0,-1--1--1,,1|(551,857)|
+11,32,48,588,857,6,8,34,3,0,0,1,0,0,0
+10,33,Inventory Consumption,588,884,55,19,40,3,0,0,-1,0,0,0
+10,34,Inventory Units Shipped,775,1002,61,19,8,3,0,0,0,0,0,0
+1,35,34,54,1,0,43,0,0,64,0,-1--1--1,,1|(703,1002)|
+10,36,Fraction of Sales Collected in Cash,316,639,71,19,8,3,0,0,0,0,0,0
+10,37,Average Receivable Collection Time,583,635,80,19,8,3,0,0,0,0,0,0
+1,38,2,22,1,0,43,0,0,64,0,-1--1--1,,1|(514,499)|
+1,39,37,23,1,0,45,0,0,64,0,-1--1--1,,1|(598,605)|
+1,40,36,18,1,0,45,0,0,64,0,-1--1--1,,1|(333,616)|
+10,41,Financing Cash Inflows,180,264,65,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+10,42,Investing Cash Inflows,268,206,65,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,43,41,7,1,0,43,0,0,64,0,-1--1--1,,1|(266,249)|
+1,44,42,7,1,0,43,0,0,64,0,-1--1--1,,1|(336,237)|
+10,45,Operating Cash Inflows,363,391,68,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,46,45,8,1,0,43,0,0,64,0,-1--1--1,,1|(330,366)|
+10,47,Operating Cash Outflows,630,196,68,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,48,Investing Cash Outflows,748,246,65,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,49,Financing Cash Outflows,722,373,68,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,50,47,12,1,0,43,0,0,64,0,-1--1--1,,1|(591,226)|
+1,51,48,12,1,0,43,0,0,64,0,-1--1--1,,1|(634,258)|
+1,52,49,13,1,0,43,0,0,64,0,-1--1--1,,1|(646,360)|
+10,53,Average Cost per Inventory Unit,494,964,70,19,8,3,0,0,0,0,0,0
+10,54,Cost of Goods Sold,659,952,58,19,8,3,0,0,0,0,0,0
+1,55,53,54,1,0,43,0,0,64,0,-1--1--1,,1|(576,978)|
+1,56,54,33,1,0,43,0,0,64,0,-1--1--1,,1|(638,921)|
+10,57,Cost of Material Purchases,171,923,62,19,8,131,0,0,0,0,0,0
+1,58,57,28,1,0,43,0,0,64,0,-1--1--1,,1|(245,892)|
+10,59,Cost of Labor Used to Create Inventory,300,963,78,19,8,3,0,0,0,0,0,0
+1,60,59,28,1,0,43,0,0,64,0,-1--1--1,,1|(310,921)|
+10,61,Days of Credit Terms Offered to Customers,535,709,67,28,8,3,0,0,0,0,0,0
+1,62,61,37,1,0,43,0,0,64,0,-1--1--1,,1|(579,662)|
+10,63,Days per Year,686,709,55,11,8,3,0,0,-1,0,0,0
+1,64,63,37,1,0,45,0,0,64,0,-1--1--1,,1|(672,672)|
+10,65,New Reported Revenue,164,599,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,66,65,18,1,0,43,0,0,64,0,-1--1--1,,1|(257,568)|
+10,67,Cash Sales,172,680,45,11,8,3,0,0,0,0,0,0
+1,68,65,67,1,0,43,0,0,64,0,-1--1--1,,1|(151,636)|
+1,69,36,67,1,0,43,0,0,64,0,-1--1--1,,1|(240,666)|
+10,70,Initial BS Accounts Receivable,448,596,45,28,8,3,0,0,-1,0,0,0
+1,71,70,2,0,0,0,0,0,64,1,-1--1--1,,1|(449,573)|
+1,72,18,70,1,0,43,0,0,64,0,-1--1--1,,1|(387,585)|
+1,73,37,70,1,0,43,0,0,64,0,-1--1--1,,1|(515,598)|
+10,74,Target for Months of Operating Cash Outflows on Hand,409,155,81,28,8,3,0,0,0,0,0,0
+10,75,Initial BS Cash,462,238,58,11,8,3,0,0,-1,0,0,0
+1,76,75,1,0,0,0,0,0,64,1,-1--1--1,,1|(462,250)|
+1,77,47,75,1,0,43,0,0,64,0,-1--1--1,,1|(540,218)|
+1,78,74,75,1,0,43,0,0,64,0,-1--1--1,,1|(422,215)|
+10,79,Months per Year,561,146,50,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,80,79,75,1,0,45,0,0,64,0,-1--1--1,,1|(516,173)|
+10,81,Initial BS Inventory,467,788,43,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,82,81,3,0,0,0,0,0,64,1,-1--1--1,,1|(465,807)|
+10,83,Units in Inventory,453,1034,39,19,8,3,0,0,0,0,0,0
+1,84,3,53,1,0,43,0,0,64,0,-1--1--1,,1|(441,917)|
+1,85,83,53,1,0,45,0,0,64,0,-1--1--1,,1|(488,1001)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Long Term Assets
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,BS Net Plant Property and Equipment,381,203,85,45,3,131,0,0,0,0,0,0
+10,2,BS Net Intangible Assets,377,657,67,46,3,131,0,0,0,0,0,0
+12,3,48,105,649,10,8,0,3,0,0,-1,0,0,0
+1,4,6,2,4,0,0,22,0,0,0,-1--1--1,,1|(268,649)|
+1,5,6,3,100,0,0,22,0,0,0,-1--1--1,,1|(165,649)|
+11,6,48,221,649,6,8,34,3,0,0,1,0,0,0
+10,7,Intangible Asset Purchases,221,676,65,19,40,3,0,0,-1,0,0,0
+12,8,48,146,206,10,8,0,3,0,0,-1,0,0,0
+1,9,11,1,4,0,0,22,0,0,0,-1--1--1,,1|(261,203)|
+1,10,11,8,100,0,0,22,0,0,0,-1--1--1,,1|(185,203)|
+11,11,48,220,203,6,8,34,3,0,0,1,0,0,0
+10,12,Capital Expenditure,220,230,49,19,40,3,0,0,-1,0,0,0
+10,13,BS Accumulated Depreciation,741,191,83,46,3,131,0,0,0,0,0,0
+1,14,16,13,4,0,0,22,0,0,0,-1--1--1,,1|(616,200)|
+1,15,16,1,100,0,0,22,0,0,0,-1--1--1,,1|(514,200)|
+11,16,1132,568,200,6,8,34,131,0,0,1,0,0,0
+10,17,Depreciation,568,219,51,11,40,3,0,0,-1,0,0,0
+10,18,BS Accumulated Amortization,703,654,79,43,3,131,0,0,0,0,0,0
+1,19,21,18,4,0,0,22,0,0,0,-1--1--1,,1|(579,654)|
+1,20,21,2,100,0,0,22,0,0,0,-1--1--1,,1|(483,654)|
+11,21,1100,529,654,6,8,34,3,0,0,1,0,0,0
+10,22,Amortization,529,673,51,11,40,3,0,0,-1,0,0,0
+10,23,Intangible Asset Average Amortization Time,628,556,104,29,8,131,0,0,0,0,0,0
+10,24,Tangible Asset Average Depreciation Time,656,90,101,29,8,131,0,0,0,0,0,0
+1,25,24,16,1,0,45,0,0,64,0,-1--1--1,,1|(643,124)|
+1,26,23,21,1,0,45,0,0,64,0,-1--1--1,,1|(594,595)|
+10,27,Historical Cost of Plant Property and Equipment,394,-22,87,44,3,131,0,0,0,0,0,0
+12,28,48,156,-31,10,8,0,3,0,0,-1,0,0,0
+1,29,31,27,4,0,0,22,0,0,0,-1--1--1,,1|(270,-27)|
+1,30,31,28,100,0,0,22,0,0,0,-1--1--1,,1|(193,-27)|
+11,31,48,227,-27,6,8,34,3,0,0,1,0,0,0
+10,32,Increase in Historical Cost of PPE,227,9,69,28,40,3,0,0,-1,0,0,0
+1,33,34,27,100,0,0,22,0,0,0,-1--1--1,,1|(521,-24)|
+11,34,4844,567,-24,6,8,34,3,0,0,1,0,0,0
+10,35,Discontinuation of Depreciation,567,3,74,19,40,3,0,0,-1,0,0,0
+1,36,31,34,1,0,43,0,0,64,0,-1--1--1,,1|(357,-106)|
+1,37,11,32,1,0,43,0,0,64,0,-1--1--1,,1|(202,144)|
+1,38,27,16,1,0,43,0,0,64,0,-1--1--1,,1|(535,80)|
+1,39,24,35,1,0,45,0,0,64,0,-1--1--1,,1|(605,51)|
+10,40,Historical Cost of Intangible Assets,369,439,77,39,3,131,0,0,0,0,0,0
+1,41,42,40,100,0,0,22,0,0,0,-1--1--1,,1|(482,436)|
+11,42,4764,525,436,6,8,34,3,0,0,1,0,0,0
+10,43,Discontinuation of Amortization,525,463,74,19,40,3,0,0,-1,0,0,0
+12,44,48,100,438,10,8,0,3,0,0,-1,0,0,0
+1,45,47,40,4,0,0,22,0,0,0,-1--1--1,,1|(250,436)|
+1,46,47,44,100,0,0,22,0,0,0,-1--1--1,,1|(153,436)|
+11,47,48,202,436,6,8,34,3,0,0,1,0,0,0
+10,48,Increase in Historical Cost of Intangible Assets,202,472,84,28,40,3,0,0,-1,0,0,0
+1,49,6,48,1,0,43,0,0,64,0,-1--1--1,,1|(196,598)|
+1,50,47,42,1,0,43,0,0,64,0,-1--1--1,,1|(324,340)|
+1,51,23,43,1,0,45,0,0,64,0,-1--1--1,,1|(540,511)|
+1,52,40,21,1,0,43,0,0,64,0,-1--1--1,,1|(499,563)|
+10,53,Initial Historical Cost of PPE,394,41,61,19,8,3,0,0,-1,0,0,0
+10,54,Initial Historical Cost of Intangible Assets,349,501,82,19,8,3,0,0,-1,0,0,0
+1,55,54,40,0,0,0,0,0,64,1,-1--1--1,,1|(353,486)|
+10,56,Initial Depreciation Discontinuation,648,-71,74,19,8,3,0,0,-1,0,0,0
+1,57,56,35,0,0,0,0,0,64,1,-1--1--1,,1|(612,-38)|
+10,58,Initial Amortization Discontinuation,610,385,74,19,8,3,0,0,-1,0,0,0
+1,59,58,43,0,0,0,0,0,64,1,-1--1--1,,1|(572,419)|
+10,60,Initial BS Net Plant Property and Equipment,381,277,74,28,8,3,0,0,-1,0,0,0
+1,61,60,1,0,0,0,0,0,64,1,-1--1--1,,1|(381,255)|
+10,62,Initial BS Net Plant Property and Equipment,297,106,79,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,63,62,53,0,0,43,0,0,64,0,-1--1--1,,1|(345,72)|
+10,64,Initial BS Net Intangible Assets,377,722,69,19,8,3,0,0,-1,0,0,0
+1,65,64,2,0,0,0,0,0,64,1,-1--1--1,,1|(377,710)|
+10,66,Amount Spent on Long Term Assets,128,314,73,19,8,3,0,0,0,0,0,0
+1,67,66,12,1,0,43,0,0,64,0,-1--1--1,,1|(159,268)|
+10,68,Amount Spent on Intangible Assets,132,748,70,19,8,3,0,0,0,0,0,0
+1,69,68,7,1,0,43,0,0,64,0,-1--1--1,,1|(158,701)|
+10,70,Initial BS Accumulated Depreciation,741,269,53,28,8,3,0,0,-1,0,0,0
+1,71,70,13,0,0,0,0,0,64,1,-1--1--1,,1|(741,246)|
+10,72,Initial BS Accumulated Depreciation,472,107,56,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,73,72,53,1,0,43,0,0,64,0,-1--1--1,,1|(457,64)|
+10,74,Initial BS Accumulated Amortization,703,726,53,28,8,3,0,0,-1,0,0,0
+1,75,74,18,0,0,0,0,0,64,1,-1--1--1,,1|(703,704)|
+10,76,Initial BS Accumulated Amortization,414,571,56,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,77,Initial BS Net Intangible Assets,282,563,74,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,78,77,54,0,0,43,0,0,64,0,-1--1--1,,1|(309,536)|
+1,79,76,54,1,0,43,0,0,64,0,-1--1--1,,1|(397,531)|
+12,80,48,681,-23,10,8,0,3,0,0,-1,0,0,0
+1,81,34,80,4,0,0,22,0,0,0,-1--1--1,,1|(622,-24)|
+12,82,48,762,-19,10,8,0,3,0,0,-1,0,0,0
+1,83,85,82,4,0,0,22,0,0,0,-1--1--1,,1|(763,16)|
+1,84,85,13,100,0,0,22,0,0,0,-1--1--1,,1|(763,100)|
+11,85,48,763,50,8,6,33,3,0,0,4,0,0,0
+10,86,Discontinuation of Depreciation Accumulation,845,50,74,28,40,3,0,0,-1,0,0,0
+1,87,35,85,1,0,43,0,0,64,0,-1--1--1,,1|(708,17)|
+12,88,48,669,435,10,8,0,3,0,0,-1,0,0,0
+1,89,42,88,4,0,0,22,0,0,0,-1--1--1,,1|(595,436)|
+12,90,48,737,437,10,8,0,3,0,0,-1,0,0,0
+1,91,93,90,4,0,0,22,0,0,0,-1--1--1,,1|(737,476)|
+1,92,93,18,100,0,0,22,0,0,0,-1--1--1,,1|(737,565)|
+11,93,48,737,514,8,6,33,3,0,0,4,0,0,0
+10,94,Discontinuation of Amortization Accumulation,819,514,74,28,40,3,0,0,-1,0,0,0
+1,95,43,93,1,0,43,0,0,64,0,-1--1--1,,1|(670,477)|
+1,96,53,27,0,0,0,0,0,64,1,-1--1--1,,1|(394,22)|
+10,97,Amount Spent on Long Term Assets,844,-76,78,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,98,Amount Spent on Long Term Assets,912,307,78,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,99,Tangible Asset Average Depreciation Time,564,292,86,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,100,97,56,1,0,43,0,0,64,0,-1--1--1,,1|(750,-73)|
+1,101,99,60,0,0,43,0,0,64,0,-1--1--1,,1|(473,284)|
+1,102,99,70,0,0,43,0,0,64,0,-1--1--1,,1|(662,279)|
+1,103,98,70,0,0,43,0,0,64,0,-1--1--1,,1|(820,286)|
+1,104,66,60,1,0,43,0,0,64,0,-1--1--1,,1|(250,292)|
+10,105,Amount Spent on Intangible Assets,825,382,75,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,106,105,58,1,0,43,0,0,64,0,-1--1--1,,1|(732,381)|
+10,107,Amount Spent on Intangible Assets,871,734,75,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,108,107,74,1,0,43,0,0,64,0,-1--1--1,,1|(778,725)|
+1,109,68,64,1,0,43,0,0,64,0,-1--1--1,,1|(245,717)|
+10,110,Intangible Asset Average Amortization Time,546,754,86,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,111,110,64,1,0,43,0,0,64,0,-1--1--1,,1|(495,722)|
+1,112,110,74,1,0,43,0,0,64,0,-1--1--1,,1|(628,721)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Liabilities
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,BS Short Term Debt,585,-41,67,35,3,131,0,0,0,0,0,0
+1,2,3,1,4,0,0,22,0,0,0,-1--1--1,,1|(478,-35)|
+11,3,1308,432,-35,6,8,34,3,0,0,1,0,0,0
+10,4,Debt Becoming Current,432,-8,62,19,40,3,0,0,-1,0,0,0
+12,5,48,588,101,10,8,0,3,0,0,-1,0,0,0
+1,6,8,1,4,0,0,22,0,0,0,-1--1--1,,1|(583,18)|
+1,7,8,5,100,0,0,22,0,0,0,-1--1--1,,1|(583,73)|
+11,8,48,583,48,8,6,33,3,0,0,4,0,0,0
+10,9,Interest on Short Term Debt,658,48,67,19,40,3,0,0,-1,0,0,0
+12,10,48,837,-51,10,8,0,3,0,0,-1,0,0,0
+1,11,13,10,4,0,0,22,0,0,0,-1--1--1,,1|(786,-50)|
+1,12,13,1,100,0,0,22,0,0,0,-1--1--1,,1|(692,-50)|
+11,13,48,739,-50,6,8,34,3,0,0,1,0,0,0
+10,14,Short Term Debt Repayment,739,-23,66,19,40,3,0,0,-1,0,0,0
+10,15,Debt Interest Rate,463,105,52,19,8,3,0,0,0,0,0,0
+1,16,1,8,1,0,43,0,0,64,0,-1--1--1,,1|(538,20)|
+1,17,15,8,1,0,43,0,0,64,0,-1--1--1,,1|(563,78)|
+1,18,1,13,1,0,43,0,0,64,0,-1--1--1,,1|(680,-91)|
+10,19,BS Long Term Debt,279,-34,71,43,3,131,0,0,0,0,0,0
+1,20,3,19,100,0,0,22,0,0,0,-1--1--1,,1|(388,-35)|
+12,21,48,255,103,10,8,0,3,0,0,-1,0,0,0
+1,22,24,19,4,0,0,22,0,0,0,-1--1--1,,1|(253,27)|
+1,23,24,21,100,0,0,22,0,0,0,-1--1--1,,1|(253,76)|
+11,24,48,253,51,8,6,33,3,0,0,4,0,0,0
+10,25,Interest on Long Term Debt,327,51,66,19,40,3,0,0,-1,0,0,0
+1,26,15,25,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(381,96)|
+1,27,19,25,0,0,43,0,0,64,0,-1--1--1,,1|(306,14)|
+12,28,48,77,-38,10,8,0,3,0,0,-1,0,0,0
+1,29,31,19,4,0,0,22,0,0,0,-1--1--1,,1|(180,-38)|
+1,30,31,28,100,0,0,22,0,0,0,-1--1--1,,1|(114,-38)|
+11,31,48,147,-38,6,8,34,131,0,0,1,0,0,0
+10,32,Borrowing,147,-19,43,11,40,3,0,0,-1,0,0,0
+10,33,Average Loan Term,430,-162,56,19,8,3,0,0,0,0,0,0
+10,34,Definition of Current,592,-114,49,19,8,3,0,0,0,0,0,0
+1,35,34,3,1,0,43,0,0,64,0,-1--1--1,,1|(486,-77)|
+1,36,33,3,1,0,45,0,0,64,0,-1--1--1,,1|(438,-104)|
+1,37,19,3,1,0,43,0,0,64,0,-1--1--1,,1|(377,-70)|
+10,38,BS Accounts Payable,445,380,67,40,3,131,0,0,0,0,0,0
+12,39,48,203,378,10,8,0,3,0,0,-1,0,0,0
+1,40,42,38,4,0,0,22,0,0,0,-1--1--1,,1|(333,379)|
+1,41,42,39,100,0,0,22,0,0,0,-1--1--1,,1|(244,379)|
+11,42,48,282,379,6,8,34,3,0,0,1,0,0,0
+10,43,Material Purchases on Credit,282,406,77,19,40,3,0,0,-1,0,0,0
+10,44,Fraction of Material Purchases Paid in Cash,185,311,77,28,8,3,0,0,0,0,0,0
+1,45,44,42,1,0,45,0,0,64,0,-1--1--1,,1|(265,321)|
+10,46,Cost of Material Purchases,195,483,62,19,8,3,0,0,-1,0,0,0
+1,47,46,43,1,0,43,0,0,64,0,-1--1--1,,1|(269,457)|
+10,48,Average Supplier Credit Terms,599,295,69,19,8,3,0,0,0,0,0,0
+12,49,48,704,379,10,8,0,3,0,0,-1,0,0,0
+1,50,52,49,4,0,0,22,0,0,0,-1--1--1,,1|(651,379)|
+1,51,52,38,100,0,0,22,0,0,0,-1--1--1,,1|(554,379)|
+11,52,48,603,379,6,8,34,3,0,0,1,0,0,0
+10,53,Payment of Accounts Payable,603,406,73,19,40,3,0,0,-1,0,0,0
+1,54,38,52,1,0,43,0,0,64,0,-1--1--1,,1|(553,349)|
+1,55,48,52,1,0,45,0,0,64,0,-1--1--1,,1|(632,339)|
+10,56,BS Accrued Wages,462,597,67,38,3,131,0,0,0,0,0,0
+12,57,48,217,591,10,8,0,3,0,0,-1,0,0,0
+1,58,60,56,4,0,0,22,0,0,0,-1--1--1,,1|(352,594)|
+1,59,60,57,100,0,0,22,0,0,0,-1--1--1,,1|(262,594)|
+11,60,48,303,594,6,8,34,3,0,0,1,0,0,0
+10,61,Value of Wages Earned By Workers,303,630,78,19,40,3,0,0,-1,0,0,0
+12,62,48,729,597,10,8,0,3,0,0,-1,0,0,0
+1,63,65,62,4,0,0,22,0,0,0,-1--1--1,,1|(674,597)|
+1,64,65,56,100,0,0,22,0,0,0,-1--1--1,,1|(573,597)|
+11,65,48,624,597,6,8,34,3,0,0,1,0,0,0
+10,66,Wages Paid to Workers,624,624,58,19,40,3,0,0,-1,0,0,0
+10,67,Cost of Labor Used to Create Inventory,281,706,78,19,8,3,0,0,-1,0,0,0
+1,68,67,61,1,0,43,0,0,64,0,-1--1--1,,1|(278,681)|
+10,69,Frequency of Payment of Wages,614,723,75,19,8,3,0,0,0,0,0,0
+1,70,56,65,1,0,43,0,0,64,0,-1--1--1,,1|(569,554)|
+1,71,69,66,1,0,45,0,0,64,0,-1--1--1,,1|(647,671)|
+10,72,Selling General and Administrative Salary Costs,133,755,85,28,8,3,0,0,-1,0,0,0
+10,73,Average Cost per Inventory Unit,140,720,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,74,72,61,1,0,43,0,0,64,0,-1--1--1,,1|(167,688)|
+10,75,New Debt Issued,107,-107,40,19,8,3,0,0,0,0,0,0
+1,76,75,31,1,0,43,0,0,64,0,-1--1--1,,1|(154,-95)|
+10,77,TIME STEP,463,37,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,78,77,4,0,0,0,0,0,64,0,-1--1--1,,1|(454,24)|
+10,79,Initial BS Long Term Debt,274,-106,59,19,8,3,0,0,-1,0,0,0
+1,80,79,19,0,0,0,0,0,64,1,-1--1--1,,1|(274,-89)|
+10,81,Initial BS Short Term Debt,577,-186,60,19,8,3,0,0,-1,0,0,0
+1,82,81,1,0,0,0,0,0,64,1,-1--1--1,,1|(580,-129)|
+1,83,75,79,1,0,43,0,0,64,0,-1--1--1,,1|(177,-116)|
+1,84,33,79,1,0,43,0,0,64,0,-1--1--1,,1|(348,-103)|
+10,85,Definition of Current,175,-166,54,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,86,Debt Interest Rate,289,-179,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,87,85,79,1,0,0,0,0,64,0,-1--1--1,,1|(220,-148)|
+1,88,86,79,1,0,0,0,0,64,0,-1--1--1,,1|(291,-142)|
+10,89,Initial BS Long Term Debt,723,-225,64,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,90,89,81,1,0,43,0,0,64,0,-1--1--1,,1|(675,-201)|
+1,91,33,81,1,0,0,0,0,64,0,-1--1--1,,1|(506,-178)|
+1,92,34,81,1,0,0,0,0,64,0,-1--1--1,,1|(600,-142)|
+10,93,Debt Interest Rate,558,-266,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,94,93,81,1,0,45,0,0,64,0,-1--1--1,,1|(580,-228)|
+10,95,Initial BS Accounts Payable,439,312,73,19,8,3,0,0,-1,0,0,0
+1,96,95,38,0,0,0,0,0,64,1,-1--1--1,,1|(439,328)|
+1,97,44,95,1,0,43,0,0,64,0,-1--1--1,,1|(302,296)|
+10,98,Cost of Material Purchases,399,252,67,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,99,98,95,1,0,43,0,0,64,0,-1--1--1,,1|(437,287)|
+1,100,48,95,1,0,43,0,0,64,0,-1--1--1,,1|(515,287)|
+10,101,Days per Year,762,256,55,11,8,3,0,0,0,0,0,0
+10,102,Supplier Credit Terms in Days,620,224,60,19,8,3,0,0,0,0,0,0
+1,103,102,48,1,0,43,0,0,64,0,-1--1--1,,1|(595,254)|
+1,104,101,48,1,0,43,0,0,64,0,-1--1--1,,1|(708,282)|
+10,105,Weeks Between Wage Payments,494,787,65,19,8,3,0,0,0,0,0,0
+10,106,Weeks per Year,657,798,43,19,8,3,0,0,0,0,0,0
+1,107,106,69,1,0,43,0,0,64,0,-1--1--1,,1|(662,759)|
+1,108,105,69,1,0,43,0,0,64,0,-1--1--1,,1|(520,751)|
+10,109,Initial BS Accrued Wages,462,654,64,19,8,3,0,0,-1,0,0,0
+1,110,109,56,0,0,0,0,0,64,1,-1--1--1,,1|(462,635)|
+1,111,72,109,1,0,43,0,0,64,0,-1--1--1,,1|(294,772)|
+1,112,67,109,1,0,43,0,0,64,0,-1--1--1,,1|(361,685)|
+1,113,69,109,1,0,43,0,0,64,0,-1--1--1,,1|(556,689)|
+10,114,Cash Material Purchases,93,386,55,19,8,3,0,0,0,0,0,0
+1,115,46,114,1,0,43,0,0,64,0,-1--1--1,,1|(122,447)|
+1,116,44,114,1,0,43,0,0,64,0,-1--1--1,,1|(129,342)|
+1,117,34,13,1,0,45,0,2,192,0,-1--1--1,|12||0-0-0,1|(712,-104)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Equity
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,BS Additional Paid In Capital,414,207,69,45,3,131,0,0,0,0,0,0
+10,2,Shares Issued,100,302,57,11,8,3,0,0,0,0,0,0
+10,3,Share Price,239,309,46,11,8,3,0,0,0,0,0,0
+12,4,48,166,195,10,8,0,3,0,0,-1,0,0,0
+1,5,7,1,4,0,0,22,0,0,0,-1--1--1,,1|(305,195)|
+1,6,7,4,100,0,0,22,0,0,0,-1--1--1,,1|(215,195)|
+11,7,48,260,195,6,8,34,3,0,0,1,0,0,0
+10,8,Capital Inflow from Share Issuance,260,222,75,19,40,3,0,0,-1,0,0,0
+1,9,2,8,1,0,43,0,0,64,0,-1--1--1,,1|(130,257)|
+1,10,3,8,1,0,43,0,0,64,0,-1--1--1,,1|(239,272)|
+10,11,BS Retained Earnings,979,275,95,54,3,131,0,0,0,0,0,0
+12,12,48,1249,279,10,8,0,3,0,0,-1,0,0,0
+1,13,15,12,4,0,0,22,0,0,0,-1--1--1,,1|(1193,276)|
+1,14,15,11,100,0,0,22,0,0,0,-1--1--1,,1|(1105,276)|
+11,15,48,1142,276,6,8,34,3,0,0,1,0,0,0
+10,16,Dividends Paid,1142,295,60,11,40,3,0,0,-1,0,0,0
+12,17,48,672,270,10,8,0,3,0,0,-1,0,0,0
+1,18,20,11,4,0,0,22,0,0,0,-1--1--1,,1|(829,272)|
+1,19,20,17,100,0,0,22,0,0,0,-1--1--1,,1|(722,272)|
+11,20,48,769,272,6,8,34,3,0,0,1,0,0,0
+10,21,Increase in Retained Earnings from Net Income,769,308,82,28,40,3,0,0,-1,0,0,0
+10,22,Total Dividend Payment,1157,186,73,19,8,3,0,0,0,0,0,0
+10,23,TIME STEP,1258,228,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,24,22,15,1,0,43,0,0,64,0,-1--1--1,,1|(1127,224)|
+1,25,23,15,1,0,45,0,0,64,0,-1--1--1,,1|(1174,245)|
+10,26,Initial BS Retained Earnings,723,619,74,19,8,3,0,0,-1,0,0,0
+1,27,26,11,0,0,0,0,0,64,1,-1--1--1,,1|(833,470)|
+10,28,Initial BS Additional Paid In Capital,416,289,70,28,8,3,0,0,-1,0,0,0
+1,29,28,1,0,0,0,0,0,64,1,-1--1--1,,1|(416,263)|
+10,30,Initial BS Cash,566,667,41,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,31,Initial BS Accounts Receivable,637,727,49,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,32,Initial BS Inventory,549,600,43,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,33,Initial BS Additional Paid In Capital,903,592,70,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,34,32,26,1,0,43,0,0,64,0,-1--1--1,,1|(612,616)|
+1,35,30,26,1,0,43,0,0,64,0,-1--1--1,,1|(626,658)|
+1,36,31,26,1,0,43,0,0,64,0,-1--1--1,,1|(699,672)|
+10,37,Initial BS Accounts Payable,755,735,41,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,38,37,26,1,0,45,0,0,64,0,-1--1--1,,1|(749,673)|
+10,39,Initial BS Accrued Wages,866,686,68,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,40,39,26,1,0,45,0,0,64,0,-1--1--1,,1|(806,649)|
+1,41,33,26,1,0,45,0,0,64,0,-1--1--1,,1|(831,611)|
+10,42,Initial BS Long Term Debt,781,471,64,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,43,42,26,1,0,45,0,0,64,0,-1--1--1,,1|(763,539)|
+10,44,Initial BS Net Intangible Assets,651,480,74,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,45,44,26,1,0,43,0,0,64,0,-1--1--1,,1|(691,542)|
+10,46,Initial BS Accumulated Amortization,723,657,56,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,47,Initial BS Net Plant Property and Equipment,577,542,79,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,48,47,26,1,0,43,0,0,64,0,-1--1--1,,1|(643,585)|
+10,49,Initial BS Accumulated Depreciation,723,657,56,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,50,Initial BS Short Term Debt,859,526,65,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,51,50,26,1,0,45,0,0,64,0,-1--1--1,,1|(806,571)|
+10,52,Shares Outstanding,264,439,71,42,3,131,0,0,0,0,0,0
+12,53,48,54,437,10,8,0,3,0,0,-1,0,0,0
+1,54,56,52,4,0,0,22,0,0,0,-1--1--1,,1|(158,438)|
+1,55,56,53,100,0,0,22,0,0,0,-1--1--1,,1|(87,438)|
+11,56,48,117,438,6,8,34,3,0,0,1,0,0,0
+10,57,Share Issuance,117,465,37,19,40,3,0,0,-1,0,0,0
+1,58,2,56,1,0,43,0,0,64,0,-1--1--1,,1|(89,365)|
+10,59,Initial Shares Outstanding,264,500,52,19,8,3,0,0,-1,0,0,0
+1,60,59,52,0,0,0,0,0,64,1,-1--1--1,,1|(264,481)|
+10,61,Dividend per Share,1076,97,62,19,8,3,0,0,0,0,0,0
+10,62,Shares Outstanding,1233,96,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,63,Dividend Payment Delay,1125,376,60,19,8,3,0,0,0,0,0,0
+1,64,63,16,0,0,0,0,0,64,0,-1--1--1,,1|(1132,338)|
+10,65,Time,1216,368,30,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,66,65,16,0,0,0,0,0,64,0,-1--1--1,,1|(1183,336)|
+1,67,62,61,1,0,45,0,0,64,0,-1--1--1,,1|(1153,90)|
+1,68,22,61,1,0,43,0,0,64,0,-1--1--1,,1|(1093,142)|
+10,69,TIME STEP,769,355,54,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,70,Reported Net Income,769,355,58,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,71,Net Income Flow,711,196,50,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,72,71,20,1,0,43,0,0,64,0,-1--1--1,,1|(782,233)|
+10,73,Dividend Payment Frequency,1325,329,44,28,8,3,0,0,0,0,0,0
+1,74,73,16,0,0,0,0,0,64,0,-1--1--1,,1|(1247,314)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Income and Expenses
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,Reporting Period,449,373,41,19,8,3,0,0,0,0,0,0
+10,2,Accumulated Reported Revenue,436,188,73,39,3,131,0,0,0,0,0,0
+12,3,48,192,180,10,8,0,3,0,0,-1,0,0,0
+1,4,6,2,4,0,0,22,0,0,0,-1--1--1,,1|(325,180)|
+1,5,6,3,100,0,0,22,0,0,0,-1--1--1,,1|(239,180)|
+11,6,48,282,180,6,8,34,3,0,0,1,0,0,0
+10,7,New Reported Revenue,282,207,58,19,40,3,0,0,-1,0,0,0
+10,8,Inventory Units Shipped,198,297,66,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,9,Price per Inventory Unit,118,249,61,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,10,9,7,1,0,43,0,0,64,0,-1--1--1,,1|(180,213)|
+1,11,8,7,1,0,43,0,0,64,0,-1--1--1,,1|(213,246)|
+10,12,Check Reporting,613,116,41,19,8,3,0,0,0,0,0,0
+10,13,Time,679,47,30,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,14,Reporting Period,492,71,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,15,Check Reporting,1185,369,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,16,14,12,1,0,0,0,0,64,0,-1--1--1,,1|(561,68)|
+1,17,13,12,1,0,0,0,0,64,0,-1--1--1,,1|(680,75)|
+12,18,48,690,184,10,8,0,3,0,0,-1,0,0,0
+1,19,21,18,4,0,0,22,0,0,0,-1--1--1,,1|(637,183)|
+1,20,21,2,100,0,0,22,0,0,0,-1--1--1,,1|(545,183)|
+11,21,48,588,183,6,8,34,3,0,0,1,0,0,0
+10,22,Drained Reported Revenue,588,210,71,19,40,3,0,0,-1,0,0,0
+10,23,Reported Revenue,526,301,54,29,8,131,0,0,0,0,0,0
+1,24,1,23,1,0,45,0,0,64,0,-1--1--1,,1|(495,340)|
+1,25,22,23,1,0,43,0,0,64,0,-1--1--1,,1|(567,251)|
+10,26,TIME STEP,662,277,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,27,26,22,1,0,0,0,0,64,0,-1--1--1,,1|(663,254)|
+1,28,26,23,1,0,0,0,0,64,0,-1--1--1,,1|(621,303)|
+1,29,12,21,1,0,0,0,0,64,0,-1--1--1,,1|(599,163)|
+10,30,Initial Accumulated Reported Revenue,434,126,76,19,8,3,0,0,-1,0,0,0
+1,31,30,2,0,0,0,0,0,64,1,-1--1--1,,1|(434,140)|
+1,32,2,21,1,0,0,0,0,64,0,-1--1--1,,1|(531,156)|
+10,33,Accumulated Reported Cost of Goods Sold,409,560,73,39,3,131,0,0,0,0,0,0
+12,34,48,165,552,10,8,0,3,0,0,-1,0,0,0
+1,35,37,33,4,0,0,22,0,0,0,-1--1--1,,1|(298,552)|
+1,36,37,34,100,0,0,22,0,0,0,-1--1--1,,1|(212,552)|
+11,37,48,255,552,6,8,34,3,0,0,1,0,0,0
+10,38,New Reported Cost of Goods Sold,255,579,79,19,40,3,0,0,-1,0,0,0
+12,39,48,663,556,10,8,0,3,0,0,-1,0,0,0
+1,40,42,39,4,0,0,22,0,0,0,-1--1--1,,1|(610,555)|
+1,41,42,33,100,0,0,22,0,0,0,-1--1--1,,1|(518,555)|
+11,42,48,561,555,6,8,34,3,0,0,1,0,0,0
+10,43,Drained Reported Cost of Goods Sold,561,582,79,19,40,3,0,0,-1,0,0,0
+10,44,Reported Cost of Goods Sold,499,673,69,19,8,131,0,0,0,0,0,0
+1,45,43,44,1,0,43,0,0,64,0,-1--1--1,,1|(540,623)|
+10,46,TIME STEP,638,681,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,47,46,43,1,0,0,0,0,64,0,-1--1--1,,1|(627,625)|
+1,48,46,44,1,0,0,0,0,64,0,-1--1--1,,1|(556,687)|
+10,49,Initial Accumulated Reported Cost of Goods Sold,405,487,76,28,8,131,0,0,-1,0,0,0
+1,50,49,33,0,0,0,0,0,64,1,-1--1--1,,1|(406,511)|
+1,51,33,42,1,0,0,0,0,64,0,-1--1--1,,1|(504,528)|
+10,52,Reporting Period,407,746,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,53,52,44,1,0,45,0,0,64,0,-1--1--1,,1|(477,722)|
+10,54,Check Reporting,571,470,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,55,54,42,1,0,0,0,0,64,0,-1--1--1,,1|(576,517)|
+10,56,Cost of Goods Sold,245,671,53,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,57,56,38,1,0,43,0,0,64,0,-1--1--1,,1|(231,630)|
+10,58,Accumulated Reported Marketing Expense,400,964,73,39,3,131,0,0,0,0,0,0
+12,59,48,156,956,10,8,0,3,0,0,-1,0,0,0
+1,60,62,58,4,0,0,22,0,0,0,-1--1--1,,1|(289,956)|
+1,61,62,59,100,0,0,22,0,0,0,-1--1--1,,1|(203,956)|
+11,62,48,246,956,6,8,34,3,0,0,1,0,0,0
+10,63,New Reported Marketing Expense,246,983,79,19,40,3,0,0,-1,0,0,0
+12,64,48,654,960,10,8,0,3,0,0,-1,0,0,0
+1,65,67,64,4,0,0,22,0,0,0,-1--1--1,,1|(601,959)|
+1,66,67,58,100,0,0,22,0,0,0,-1--1--1,,1|(509,959)|
+11,67,48,552,959,6,8,34,3,0,0,1,0,0,0
+10,68,Drained Reported Marketing Expense,552,986,85,19,40,3,0,0,-1,0,0,0
+10,69,Reported Marketing Expense,490,1077,77,19,8,131,0,0,0,0,0,0
+1,70,68,69,1,0,43,0,0,64,0,-1--1--1,,1|(531,1027)|
+10,71,TIME STEP,651,1076,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,72,71,68,1,0,0,0,0,64,0,-1--1--1,,1|(630,1018)|
+1,73,71,69,1,0,0,0,0,64,0,-1--1--1,,1|(557,1091)|
+10,74,Initial Accumulated Reported Marketing Expense,396,891,79,28,8,131,0,0,-1,0,0,0
+1,75,74,58,0,0,0,0,0,64,1,-1--1--1,,1|(397,915)|
+1,76,58,67,1,0,0,0,0,64,0,-1--1--1,,1|(495,932)|
+10,77,Reporting Period,398,1150,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,78,77,69,1,0,45,0,0,64,0,-1--1--1,,1|(406,1110)|
+10,79,Check Reporting,562,874,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,80,79,67,1,0,0,0,0,64,0,-1--1--1,,1|(567,921)|
+10,81,Marketing Expense,236,1075,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,82,Average Cost per Inventory Unit,244,1097,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,83,81,63,1,0,43,0,0,64,0,-1--1--1,,1|(222,1034)|
+10,84,Accumulated Reported Research and Development Expense,383,1353,84,44,3,131,0,0,0,0,0,0
+12,85,48,133,1351,10,8,0,3,0,0,-1,0,0,0
+1,86,88,84,4,0,0,22,0,0,0,-1--1--1,,1|(260,1351)|
+1,87,88,85,100,0,0,22,0,0,0,-1--1--1,,1|(176,1351)|
+11,88,48,215,1351,6,8,34,3,0,0,1,0,0,0
+10,89,New Reported Research and Development Expense,215,1387,91,28,40,3,0,0,-1,0,0,0
+12,90,48,655,1345,10,8,0,3,0,0,-1,0,0,0
+1,91,93,90,4,0,0,22,0,0,0,-1--1--1,,1|(603,1347)|
+1,92,93,84,100,0,0,22,0,0,0,-1--1--1,,1|(508,1347)|
+11,93,48,556,1347,6,8,34,3,0,0,1,0,0,0
+10,94,Drained Reported Research and Development Expense,556,1383,91,28,40,3,0,0,-1,0,0,0
+10,95,Reported Research and Development Expense,479,1475,78,28,8,131,0,0,0,0,0,0
+1,96,94,95,1,0,43,0,0,64,0,-1--1--1,,1|(539,1426)|
+10,97,TIME STEP,653,1483,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,98,97,94,1,0,0,0,0,64,0,-1--1--1,,1|(641,1442)|
+1,99,97,95,1,0,0,0,0,64,0,-1--1--1,,1|(576,1465)|
+10,100,Initial Accumulated Reported Research and Development Expense,378,1277,95,28,8,131,0,0,-1,0,0,0
+1,101,100,84,0,0,0,0,0,64,1,-1--1--1,,1|(377,1300)|
+1,102,84,93,1,0,0,0,0,64,0,-1--1--1,,1|(473,1313)|
+10,103,Reporting Period,399,1539,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,104,103,95,1,0,45,0,0,64,0,-1--1--1,,1|(459,1515)|
+10,105,Check Reporting,544,1260,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,106,105,93,1,0,0,0,0,64,0,-1--1--1,,1|(549,1307)|
+10,107,Research and Development Expense,211,1474,61,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+10,108,Average Cost per Inventory Unit,226,1483,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,109,107,89,1,0,43,0,0,64,0,-1--1--1,,1|(196,1437)|
+10,110,Accumulated Reported Depreciation,368,2157,73,39,3,131,0,0,0,0,0,0
+12,111,48,124,2149,10,8,0,3,0,0,-1,0,0,0
+1,112,114,110,4,0,0,22,0,0,0,-1--1--1,,1|(257,2149)|
+1,113,114,111,100,0,0,22,0,0,0,-1--1--1,,1|(171,2149)|
+11,114,48,214,2149,6,8,34,3,0,0,1,0,0,0
+10,115,New Reported Depreciation,214,2176,79,19,40,3,0,0,-1,0,0,0
+12,116,48,622,2153,10,8,0,3,0,0,-1,0,0,0
+1,117,119,116,4,0,0,22,0,0,0,-1--1--1,,1|(575,2152)|
+1,118,119,110,100,0,0,22,0,0,0,-1--1--1,,1|(483,2152)|
+11,119,48,532,2152,6,8,34,3,0,0,1,0,0,0
+10,120,Drained Reported Depreciation,532,2179,85,19,40,3,0,0,-1,0,0,0
+10,121,Reported Depreciation,458,2270,55,19,8,131,0,0,0,0,0,0
+1,122,120,121,1,0,43,0,0,64,0,-1--1--1,,1|(499,2219)|
+10,123,TIME STEP,597,2278,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,124,123,120,1,0,0,0,0,64,0,-1--1--1,,1|(586,2222)|
+1,125,123,121,1,0,0,0,0,64,0,-1--1--1,,1|(515,2284)|
+10,126,Initial Accumulated Reported Depreciation,364,2084,76,28,8,131,0,0,-1,0,0,0
+1,127,126,110,0,0,0,0,0,64,1,-1--1--1,,1|(365,2108)|
+1,128,110,119,1,0,0,0,0,64,0,-1--1--1,,1|(471,2120)|
+10,129,Reporting Period,366,2343,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,130,129,121,1,0,45,0,0,64,0,-1--1--1,,1|(436,2319)|
+10,131,Check Reporting,530,2067,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,132,131,119,1,0,0,0,0,64,0,-1--1--1,,1|(541,2113)|
+10,133,Average Cost per Inventory Unit,212,2290,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,134,Depreciation,197,2265,60,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,135,134,115,1,0,43,0,0,64,0,-1--1--1,,1|(185,2227)|
+10,136,Accumulated Reported Amortization,369,2520,73,39,3,131,0,0,0,0,0,0
+12,137,48,125,2512,10,8,0,3,0,0,-1,0,0,0
+1,138,140,136,4,0,0,22,0,0,0,-1--1--1,,1|(258,2512)|
+1,139,140,137,100,0,0,22,0,0,0,-1--1--1,,1|(172,2512)|
+11,140,48,215,2512,6,8,34,3,0,0,1,0,0,0
+10,141,New Reported Amortization,215,2539,79,19,40,3,0,0,-1,0,0,0
+12,142,48,623,2516,10,8,0,3,0,0,-1,0,0,0
+1,143,145,142,4,0,0,22,0,0,0,-1--1--1,,1|(570,2515)|
+1,144,145,136,100,0,0,22,0,0,0,-1--1--1,,1|(478,2515)|
+11,145,48,521,2515,6,8,34,3,0,0,1,0,0,0
+10,146,Drained Reported Amortization,521,2542,85,19,40,3,0,0,-1,0,0,0
+10,147,Reported Amortization,459,2633,55,19,8,131,0,0,0,0,0,0
+1,148,146,147,1,0,43,0,0,64,0,-1--1--1,,1|(500,2583)|
+10,149,TIME STEP,598,2641,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,150,149,146,1,0,0,0,0,64,0,-1--1--1,,1|(587,2585)|
+1,151,149,147,1,0,0,0,0,64,0,-1--1--1,,1|(516,2647)|
+10,152,Initial Accumulated Reported Amortization,365,2447,76,28,8,131,0,0,-1,0,0,0
+1,153,152,136,0,0,0,0,0,64,1,-1--1--1,,1|(366,2471)|
+1,154,136,145,1,0,0,0,0,64,0,-1--1--1,,1|(464,2488)|
+10,155,Reporting Period,367,2706,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,156,155,147,1,0,45,0,0,64,0,-1--1--1,,1|(437,2682)|
+10,157,Check Reporting,531,2430,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,158,157,145,1,0,0,0,0,64,0,-1--1--1,,1|(536,2477)|
+10,159,Average Cost per Inventory Unit,213,2653,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,160,Amortization,221,2658,60,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,161,160,141,1,0,43,0,0,64,0,-1--1--1,,1|(183,2606)|
+10,162,IS Revenue,665,355,68,19,8,3,0,0,0,0,0,0
+1,163,23,162,1,0,43,0,0,64,0,-1--1--1,,1|(556,343)|
+10,164,IS Cost of Goods Sold,612,748,48,19,8,3,0,0,0,0,0,0
+10,165,IS Marketing Expense,621,1131,50,19,8,3,0,0,0,0,0,0
+10,166,IS Research and Development Expense,629,1546,66,28,8,3,0,0,0,0,0,0
+10,167,IS Depreciation,605,2337,72,16,8,131,0,0,0,0,0,0
+10,168,IS Amortization,601,2714,67,18,8,131,0,0,0,0,0,0
+1,169,44,164,1,0,43,0,0,64,0,-1--1--1,,1|(532,720)|
+1,170,69,165,1,0,43,0,0,64,0,-1--1--1,,1|(536,1118)|
+1,171,95,166,1,0,43,0,0,64,0,-1--1--1,,1|(536,1521)|
+1,172,121,167,1,0,43,0,0,64,0,-1--1--1,,1|(494,2319)|
+1,173,147,168,1,0,43,0,0,64,0,-1--1--1,,1|(510,2701)|
+10,174,Accumulated Reported Interest Expense,372,2914,73,39,3,131,0,0,0,0,0,0
+12,175,48,128,2906,10,8,0,3,0,0,-1,0,0,0
+1,176,178,174,4,0,0,22,0,0,0,-1--1--1,,1|(261,2906)|
+1,177,178,175,100,0,0,22,0,0,0,-1--1--1,,1|(175,2906)|
+11,178,48,218,2906,6,8,34,3,0,0,1,0,0,0
+10,179,New Reported Interest Expense,218,2933,68,19,40,3,0,0,-1,0,0,0
+12,180,48,626,2910,10,8,0,3,0,0,-1,0,0,0
+1,181,183,180,4,0,0,22,0,0,0,-1--1--1,,1|(573,2909)|
+1,182,183,174,100,0,0,22,0,0,0,-1--1--1,,1|(481,2909)|
+11,183,48,524,2909,6,8,34,3,0,0,1,0,0,0
+10,184,Drained Reported Interest Expense,524,2936,71,19,40,3,0,0,-1,0,0,0
+10,185,Reported Interest Expense,462,3027,68,19,8,131,0,0,0,0,0,0
+1,186,184,185,1,0,43,0,0,64,0,-1--1--1,,1|(503,2977)|
+10,187,TIME STEP,601,3035,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,188,187,184,1,0,0,0,0,64,0,-1--1--1,,1|(590,2979)|
+1,189,187,185,1,0,0,0,0,64,0,-1--1--1,,1|(519,3041)|
+10,190,Initial Accumulated Reported Interest Expense,368,2841,76,28,8,131,0,0,-1,0,0,0
+1,191,190,174,0,0,0,0,0,64,1,-1--1--1,,1|(369,2865)|
+1,192,174,183,1,0,0,0,0,64,0,-1--1--1,,1|(467,2882)|
+10,193,Reporting Period,370,3100,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,194,193,185,1,0,45,0,0,64,0,-1--1--1,,1|(440,3076)|
+10,195,Check Reporting,534,2824,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,196,195,183,1,0,0,0,0,64,0,-1--1--1,,1|(539,2871)|
+10,197,Average Cost per Inventory Unit,216,3047,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,198,Intangible Asset Average Amortization Time,223,3091,86,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,199,Historical Cost of Intangible Assets,223,3091,74,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,200,IS Interest Expense,595,3121,41,19,8,131,0,0,0,0,0,0
+1,201,185,200,1,0,43,0,0,64,0,-1--1--1,,1|(506,3098)|
+10,202,Interest on Long Term Debt,120,3007,71,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,203,Interest on Short Term Debt,227,3063,72,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,204,202,179,1,0,43,0,0,64,0,-1--1--1,,1|(145,2963)|
+1,205,203,179,1,0,43,0,0,64,0,-1--1--1,,1|(239,3007)|
+10,206,Reported Revenue,211,3276,43,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,207,Reported Cost of Goods Sold,209,3345,73,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,208,Reported Research and Development Expense,205,3490,83,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,209,Reported Marketing Expense,226,3420,43,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,210,Reported Depreciation,240,3614,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,211,Reported Amortization,242,3661,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,212,Reported Gross Profit,388,3342,48,19,8,3,0,0,0,0,0,0
+10,213,Reported Operating Profit,466,3488,64,19,8,3,0,0,0,0,0,0
+10,214,Reported Earnings Before Taxes,586,3637,76,19,8,3,0,0,0,0,0,0
+10,215,Reported Interest Expense,394,3732,72,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,216,206,212,1,0,43,0,0,64,0,-1--1--1,,1|(297,3289)|
+1,217,207,212,1,0,45,0,0,64,0,-1--1--1,,1|(297,3354)|
+1,218,212,213,1,0,43,0,0,64,0,-1--1--1,,1|(457,3394)|
+1,219,209,213,1,0,45,0,0,64,0,-1--1--1,,1|(326,3427)|
+1,220,208,213,1,0,45,0,0,64,0,-1--1--1,,1|(340,3476)|
+1,221,210,213,1,0,45,0,2,192,0,-1--1--1,|12||0-0-0,1|(358,3562)|
+1,222,211,213,1,0,45,0,2,192,0,-1--1--1,|12||0-0-0,1|(409,3606)|
+1,223,213,214,1,0,43,0,0,64,0,-1--1--1,,1|(534,3530)|
+1,224,215,214,1,0,45,0,0,64,0,-1--1--1,,1|(468,3670)|
+10,225,Tax Rate,738,3575,36,11,8,3,0,0,0,0,0,0
+10,226,Reported Tax Expense,778,3691,55,19,8,3,0,0,0,0,0,0
+1,227,214,226,1,0,43,0,0,64,0,-1--1--1,,1|(675,3680)|
+1,228,225,226,1,0,43,0,0,64,0,-1--1--1,,1|(772,3623)|
+10,229,Reported Net Income,691,3782,54,19,8,3,0,0,0,0,0,0
+1,230,214,229,1,0,43,0,0,64,0,-1--1--1,,1|(585,3705)|
+1,231,226,229,1,0,45,0,0,64,0,-1--1--1,,1|(771,3746)|
+10,232,IS Tax Expense,927,3649,36,19,8,3,0,0,0,0,0,0
+1,233,226,232,1,0,43,0,0,64,0,-1--1--1,,1|(849,3674)|
+10,234,Accumulated Reported Selling General and Administrative Expense,383,1742,99,46,3,131,0,0,0,0,0,0
+12,235,48,86,1724,10,8,0,3,0,0,-1,0,0,0
+1,236,238,234,4,0,0,22,0,0,0,-1--1--1,,1|(235,1727)|
+1,237,238,235,100,0,0,22,0,0,0,-1--1--1,,1|(135,1727)|
+11,238,48,180,1727,6,8,34,3,0,0,1,0,0,0
+10,239,New Reported Selling General and Administrative Expense,180,1763,95,28,40,3,0,0,-1,0,0,0
+12,240,48,684,1738,10,8,0,3,0,0,-1,0,0,0
+1,241,243,240,4,0,0,22,0,0,0,-1--1--1,,1|(631,1738)|
+1,242,243,234,100,0,0,22,0,0,0,-1--1--1,,1|(529,1738)|
+11,243,48,583,1738,6,8,34,3,0,0,1,0,0,0
+10,244,Drained Reported Selling General and Administrative Expense,583,1774,100,28,40,3,0,0,-1,0,0,0
+10,245,Reported Selling General and Administrative Expense,440,1872,95,28,8,131,0,0,0,0,0,0
+1,246,244,245,1,0,43,0,0,64,0,-1--1--1,,1|(517,1817)|
+10,247,TIME STEP,611,1862,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,248,247,244,1,0,0,0,0,64,0,-1--1--1,,1|(602,1817)|
+1,249,247,245,1,0,0,0,0,64,0,-1--1--1,,1|(512,1886)|
+10,250,Initial Accumulated Reported Selling General and Administrative Expense,355,1660,112,28,8,131,0,0,-1,0,0,0
+1,251,250,234,0,0,0,0,0,64,1,-1--1--1,,1|(363,1685)|
+1,252,234,243,1,0,0,0,0,64,0,-1--1--1,,1|(470,1699)|
+10,253,Reporting Period,358,1936,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,254,253,245,1,0,45,0,0,64,0,-1--1--1,,1|(418,1914)|
+10,255,Check Reporting,621,1670,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,256,255,243,1,0,0,0,0,64,0,-1--1--1,,1|(591,1702)|
+10,257,Selling General and Administrative Salary Costs,196,1861,85,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,258,Average Cost per Inventory Unit,204,1883,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,259,257,239,1,0,43,0,0,64,0,-1--1--1,,1|(176,1832)|
+10,260,IS Selling General and Administrative Expense,600,1940,88,28,8,3,0,0,0,0,0,0
+1,261,245,260,1,0,43,0,0,64,0,-1--1--1,,1|(471,1923)|
+10,262,Reported Selling General and Administrative Expense,216,3560,99,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,263,262,213,1,0,45,0,0,64,0,-1--1--1,,1|(350,3520)|
+10,264,Net Income Flow,1172,235,46,19,8,3,0,0,0,0,0,0
+10,265,New Reported Revenue,1273,113,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,266,New Reported Amortization,1333,305,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,267,New Reported Cost of Goods Sold,1354,174,83,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,268,New Reported Depreciation,1338,239,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,269,New Reported Interest Expense,1242,372,72,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,270,New Reported Marketing Expense,1104,336,82,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,271,New Reported Research and Development Expense,998,256,95,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,272,New Reported Selling General and Administrative Expense,1003,165,99,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,273,265,264,1,0,43,0,0,64,0,-1--1--1,,1|(1239,170)|
+1,274,267,264,1,0,45,0,0,64,0,-1--1--1,,1|(1261,202)|
+1,275,268,264,1,0,45,0,0,64,0,-1--1--1,,1|(1254,234)|
+1,276,266,264,1,0,45,0,0,64,0,-1--1--1,,1|(1243,282)|
+1,277,269,264,1,0,45,0,0,64,0,-1--1--1,,1|(1197,307)|
+1,278,270,264,1,0,45,0,0,64,0,-1--1--1,,1|(1133,284)|
+1,279,271,264,1,0,45,0,0,64,0,-1--1--1,,1|(1106,240)|
+1,280,272,264,1,0,45,0,0,64,0,-1--1--1,,1|(1113,187)|
+10,281,Reported Tax Expense,1141,118,59,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,282,281,264,1,0,45,0,0,64,0,-1--1--1,,1|(1164,153)|
+10,283,Quarters per Year,764,453,50,19,8,3,0,0,0,0,0,0
+10,284,Annual Reporting Switch,356,318,70,19,8,3,0,0,0,0,0,0
+1,285,284,1,1,0,43,0,0,64,0,-1--1--1,,1|(383,357)|
+10,286,Quarterly Revenue,632,412,37,19,8,3,0,0,0,0,0,0
+1,287,23,286,1,0,43,0,0,64,0,-1--1--1,,1|(540,368)|
+1,288,283,286,1,0,45,0,0,64,0,-1--1--1,,1|(713,417)|
+10,289,Quarterly Cost of Goods Sold,619,809,68,19,8,3,0,0,0,0,0,0
+1,290,44,289,1,0,43,0,0,64,0,-1--1--1,,1|(506,744)|
+10,291,Quarters per Year,779,848,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,292,291,289,1,0,45,0,0,64,0,-1--1--1,,1|(719,820)|
+10,293,Quarterly Marketing Expense,618,1200,77,19,8,3,0,0,0,0,0,0
+10,294,Quarters per Year,761,1233,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,295,294,293,1,0,45,0,0,64,0,-1--1--1,,1|(711,1202)|
+10,296,Quarterly Research and Development Expense,616,1607,78,28,8,3,0,0,0,0,0,0
+10,297,Quarters per Year,759,1640,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,298,297,296,1,0,45,0,0,64,0,-1--1--1,,1|(709,1612)|
+10,299,Quarterly Selling General and Administrative Expense,582,2001,95,28,8,3,0,0,0,0,0,0
+10,300,Quarters per Year,752,2042,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,301,300,299,1,0,45,0,0,64,0,-1--1--1,,1|(704,2007)|
+10,302,Quarterly Depreciation,604,2390,68,19,8,3,0,0,0,0,0,0
+10,303,Quarters per Year,753,2443,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,304,303,302,1,0,45,0,0,64,0,-1--1--1,,1|(704,2402)|
+10,305,Quarterly Amortization,582,2771,68,19,8,3,0,0,0,0,0,0
+10,306,Quarters per Year,730,2822,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,307,306,305,1,0,45,0,0,64,0,-1--1--1,,1|(681,2782)|
+10,308,Quarterly Interest Expense,598,3175,68,19,8,3,0,0,0,0,0,0
+10,309,Quarters per Year,754,3242,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,310,309,308,1,0,45,0,0,64,0,-1--1--1,,1|(699,3199)|
+1,311,69,293,1,0,43,0,0,64,0,-1--1--1,,1|(500,1144)|
+1,312,95,296,1,0,43,0,0,64,0,-1--1--1,,1|(505,1550)|
+1,313,245,299,1,0,43,0,0,64,0,-1--1--1,,1|(464,1951)|
+1,314,121,302,1,0,43,0,0,64,0,-1--1--1,,1|(472,2330)|
+1,315,147,305,1,0,43,0,0,64,0,-1--1--1,,1|(485,2724)|
+1,316,185,308,1,0,43,0,0,64,0,-1--1--1,,1|(481,3108)|
+10,317,Quarterly Tax Expense,919,3769,54,19,8,3,0,0,0,0,0,0
+1,318,226,317,1,0,43,0,0,64,0,-1--1--1,,1|(834,3742)|
+10,319,Quarters per Year,1061,3802,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,320,319,317,1,0,45,0,0,64,0,-1--1--1,,1|(1020,3765)|
+10,321,Check Reporting,794,380,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,322,321,162,1,0,0,0,0,64,0,-1--1--1,,1|(744,350)|
+1,323,321,286,1,0,0,0,0,64,0,-1--1--1,,1|(722,385)|
+10,324,Check Reporting,771,752,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,325,Check Reporting,778,1159,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,326,Check Reporting,767,1960,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,327,Check Reporting,751,2730,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,328,Check Reporting,785,1557,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,329,Check Reporting,756,2328,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,330,Check Reporting,750,3144,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,331,330,200,1,0,0,0,0,64,0,-1--1--1,,1|(690,3118)|
+1,332,330,308,1,0,0,0,0,64,0,-1--1--1,,1|(673,3158)|
+1,333,327,168,1,0,0,0,0,64,0,-1--1--1,,1|(686,2713)|
+1,334,327,305,1,0,0,0,0,64,0,-1--1--1,,1|(674,2735)|
+1,335,329,167,1,0,0,0,0,64,0,-1--1--1,,1|(690,2317)|
+1,336,329,302,1,0,0,0,0,64,0,-1--1--1,,1|(691,2364)|
+1,337,326,260,1,0,0,0,0,64,0,-1--1--1,,1|(726,1937)|
+1,338,326,299,1,0,0,0,0,64,0,-1--1--1,,1|(698,1962)|
+1,339,328,166,1,0,0,0,0,64,0,-1--1--1,,1|(717,1539)|
+1,340,328,296,1,0,0,0,0,64,0,-1--1--1,,1|(717,1574)|
+1,341,325,165,1,0,0,0,0,64,0,-1--1--1,,1|(715,1136)|
+1,342,325,293,1,0,0,0,0,64,0,-1--1--1,,1|(687,1161)|
+1,343,324,164,1,0,0,0,0,64,0,-1--1--1,,1|(709,746)|
+1,344,324,289,1,0,0,0,0,64,0,-1--1--1,,1|(704,776)|
+10,345,Check Reporting,1054,3713,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,346,345,317,1,0,0,0,0,64,0,-1--1--1,,1|(957,3721)|
+1,347,345,232,1,0,0,0,0,64,0,-1--1--1,,1|(1018,3670)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Direct Cash Flow Calculations
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,Operating Cash Inflows,237,251,60,19,8,3,0,0,-1,0,0,0
+10,2,Operating Cash Outflows,911,236,60,19,8,3,0,0,-1,0,0,0
+10,3,Investing Cash Inflows,234,426,60,19,8,3,0,0,-1,0,0,0
+10,4,Investing Cash Outflows,900,497,60,19,8,3,0,0,-1,0,0,0
+10,5,Financing Cash Inflows,268,639,64,19,8,3,0,0,-1,0,0,0
+10,6,Financing Cash Outflows,912,770,64,19,8,3,0,0,-1,0,0,0
+10,7,Cash Sales,114,182,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,8,Collections from Customers,317,174,71,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,9,7,1,1,0,43,0,0,64,0,-1--1--1,,1|(201,197)|
+1,10,8,1,0,0,43,0,0,64,0,-1--1--1,,1|(282,207)|
+10,11,Cost of Material Purchases,911,274,67,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,12,Cash Material Purchases,797,176,59,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+1,13,12,2,1,0,43,0,0,64,0,-1--1--1,,1|(827,203)|
+10,14,Payment of Accounts Payable,1032,174,78,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+1,15,14,2,1,0,43,0,0,64,0,-1--1--1,,1|(940,194)|
+10,16,New Debt Issued,138,582,44,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,17,16,5,1,0,43,0,0,64,0,-1--1--1,,1|(230,584)|
+10,18,Short Term Debt Repayment,794,696,71,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+1,19,18,6,1,0,43,0,0,64,0,-1--1--1,,1|(876,716)|
+10,20,Wages Paid to Workers,800,304,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,21,20,2,1,0,43,0,0,64,0,-1--1--1,,1|(827,261)|
+10,22,Amount Spent on Long Term Assets,1070,534,78,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,23,Amount Spent on Intangible Assets,947,430,75,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,24,23,4,1,0,43,0,0,64,0,-1--1--1,,1|(921,480)|
+1,25,22,4,1,0,43,0,0,64,0,-1--1--1,,1|(1000,504)|
+10,26,Share Price,143,802,55,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+10,27,Shares Issued,281,808,34,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,28,Cash Collected from Share Issuance,209,715,83,19,8,3,0,0,0,0,0,0
+1,29,28,5,1,0,43,0,0,64,0,-1--1--1,,1|(216,677)|
+1,30,26,28,1,0,43,0,0,64,0,-1--1--1,,1|(143,779)|
+1,31,27,28,1,0,43,0,0,64,0,-1--1--1,,1|(236,778)|
+10,32,Marketing Expense,1065,238,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,33,Research and Development Expense,995,308,61,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+1,34,32,2,1,0,43,0,0,64,0,-1--1--1,,1|(985,245)|
+1,35,33,2,1,0,43,0,0,64,0,-1--1--1,,1|(930,272)|
+10,36,Dividends Paid,1048,705,46,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,37,36,6,1,0,43,0,0,64,0,-1--1--1,,1|(975,714)|
+10,38,Total Operating Cash Flow,533,272,63,28,8,3,0,0,0,0,0,0
+1,39,1,38,1,0,43,0,0,64,0,-1--1--1,,1|(368,250)|
+1,40,2,38,1,0,45,0,0,64,0,-1--1--1,,1|(703,245)|
+10,41,Total Investing Cash Flow,534,465,59,19,8,3,0,0,0,0,0,0
+10,42,Total Financing Cash Flow,537,718,62,19,8,3,0,0,0,0,0,0
+1,43,3,41,1,0,43,0,0,64,0,-1--1--1,,1|(377,444)|
+1,44,5,42,1,0,43,0,0,64,0,-1--1--1,,1|(383,686)|
+1,45,4,41,1,0,45,0,0,64,0,-1--1--1,,1|(756,466)|
+1,46,6,42,1,0,45,0,0,64,0,-1--1--1,,1|(747,774)|
+10,47,Total Cash Flow,481,576,43,19,8,3,0,0,0,0,0,0
+10,48,Total Operating Cash Flow,651,598,63,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,49,42,47,1,0,43,0,0,64,0,-1--1--1,,1|(498,659)|
+1,50,41,47,1,0,43,0,0,64,0,-1--1--1,,1|(494,503)|
+1,51,48,47,1,0,43,0,0,64,0,-1--1--1,,1|(563,577)|
+10,52,Reported Tax Expense,917,140,59,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,53,52,2,1,0,43,0,0,64,0,-1--1--1,,1|(884,176)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Balance Sheet
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,420,-476,28,11,8,7,0,0,-1,0,0,0
+Assets
+12,2,0,484,-437,59,11,8,7,0,0,-1,0,0,0
+Current Assets
+10,3,BS Cash,524,-394,36,11,8,3,0,0,-1,0,0,0
+10,4,Cash Outflow,555,-340,36,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,5,4,3,0,1,0,0,0,64,0,-1--1--1,,1|(541,-365)|
+10,6,Cash Inflow,555,-340,56,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,7,6,3,0,1,0,0,0,64,0,-1--1--1,,1|(543,-360)|
+10,8,BS Accounts Receivable,529,-349,53,19,8,3,0,0,-1,0,0,0
+10,9,BS Inventory,531,-301,52,11,8,3,0,0,-1,0,0,0
+10,10,Sales on Credit,515,-313,40,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,11,10,8,0,1,0,0,0,64,0,-1--1--1,,1|(518,-324)|
+10,12,Collections from Customers,515,-313,71,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,13,12,8,0,1,0,0,0,64,0,-1--1--1,,1|(518,-324)|
+10,14,Inventory Consumption,521,-220,43,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,15,14,9,0,1,0,0,0,64,0,-1--1--1,,1|(525,-257)|
+10,16,Inventory Creation,521,-220,43,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,17,16,9,0,1,0,0,0,64,0,-1--1--1,,1|(525,-257)|
+10,18,BS Total Current Assets,710,-338,60,19,8,3,0,0,0,0,0,0
+1,19,3,18,1,0,43,0,0,64,0,-1--1--1,,1|(636,-391)|
+1,20,8,18,1,0,43,0,0,64,0,-1--1--1,,1|(620,-357)|
+1,21,9,18,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(636,-298)|
+12,22,0,503,-206,83,15,8,135,0,0,-1,0,0,0
+Long Term Assets
+10,23,BS Net Plant Property and Equipment,505,-151,53,28,8,3,0,0,-1,0,0,0
+10,24,BS Accumulated Depreciation,590,-91,67,19,8,3,0,0,-1,0,0,0
+10,25,BS Net Intangible Assets,515,-41,69,19,8,3,0,0,-1,0,0,0
+10,26,BS Accumulated Amortization,592,6,67,19,8,3,0,0,-1,0,0,0
+10,27,Amortization,665,96,60,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,28,27,26,0,1,0,0,0,64,0,-1--1--1,,1|(636,60)|
+10,29,Intangible Asset Purchases,540,80,69,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,30,29,25,0,1,0,0,0,64,0,-1--1--1,,1|(529,26)|
+10,31,Amortization,540,80,60,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,32,31,25,0,1,0,0,0,64,0,-1--1--1,,1|(529,30)|
+10,33,Depreciation,534,-11,60,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,34,33,24,0,1,0,0,0,64,0,-1--1--1,,1|(554,-42)|
+10,35,Depreciation,540,-114,60,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,36,35,23,0,1,0,0,0,64,0,-1--1--1,,1|(535,-119)|
+10,37,Capital Expenditure,540,-114,54,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,38,37,23,0,1,0,0,0,64,0,-1--1--1,,1|(531,-123)|
+10,39,BS Total Long Term Assets,752,-91,58,19,8,3,0,0,0,0,0,0
+1,40,23,39,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(659,-147)|
+1,41,25,39,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(687,-44)|
+10,42,BS Total Assets,839,-208,35,19,8,3,0,0,0,0,0,0
+1,43,18,42,1,0,43,0,0,64,0,-1--1--1,,1|(802,-282)|
+1,44,39,42,1,0,43,0,0,64,0,-1--1--1,,1|(820,-141)|
+12,45,0,1099,-469,38,11,8,7,0,0,-1,0,0,0
+Liabilities
+10,46,BS Accounts Payable,1229,-319,53,19,8,3,0,0,-1,0,0,0
+10,47,Payment of Accounts Payable,1135,-377,78,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,48,47,46,0,1,0,0,0,64,0,-1--1--1,,1|(1175,-351)|
+10,49,Material Purchases on Credit,1135,-377,56,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,50,49,46,0,1,0,0,0,64,0,-1--1--1,,1|(1183,-347)|
+12,51,0,1170,-434,80,18,8,135,0,0,-1,0,0,0
+Current Liabilities
+10,52,BS Accrued Wages,1220,-380,48,19,8,3,0,0,-1,0,0,0
+10,53,BS Short Term Debt,1237,-261,59,19,8,3,0,0,-1,0,0,0
+10,54,Value of Wages Earned By Workers,1215,-293,83,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,55,54,52,0,1,0,0,0,64,0,-1--1--1,,1|(1216,-329)|
+10,56,Wages Paid to Workers,1215,-293,62,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,57,56,52,0,1,0,0,0,64,0,-1--1--1,,1|(1216,-329)|
+10,58,Short Term Debt Repayment,1226,-163,71,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,59,58,53,0,1,0,0,0,64,0,-1--1--1,,1|(1230,-205)|
+10,60,Interest on Short Term Debt,1226,-163,72,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,61,60,53,0,1,0,0,0,64,0,-1--1--1,,1|(1230,-205)|
+10,62,Debt Becoming Current,1226,-163,67,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,63,62,53,0,1,0,0,0,64,0,-1--1--1,,1|(1230,-205)|
+10,64,BS Total Current Liabilities,1421,-327,67,19,8,3,0,0,0,0,0,0
+1,65,53,64,1,0,43,0,0,64,0,-1--1--1,,1|(1366,-277)|
+1,66,46,64,0,0,43,0,0,64,0,-1--1--1,,1|(1311,-322)|
+1,67,52,64,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1333,-383)|
+12,68,0,1184,-189,85,20,8,135,0,0,-1,0,0,0
+Long Term Liabilities
+10,69,BS Long Term Debt,1233,-144,58,19,8,3,0,0,-1,0,0,0
+10,70,Interest on Long Term Debt,1215,-68,71,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,71,70,69,0,1,0,0,0,64,0,-1--1--1,,1|(1221,-100)|
+10,72,Debt Becoming Current,1215,-68,67,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,73,72,69,0,1,0,0,0,64,0,-1--1--1,,1|(1221,-100)|
+10,74,Borrowing,1215,-68,52,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,75,74,69,0,1,0,0,0,64,0,-1--1--1,,1|(1220,-96)|
+10,76,BS Total Long Term Liabilities,1407,-107,61,19,8,3,0,0,0,0,0,0
+1,77,69,76,1,0,43,0,0,64,0,-1--1--1,,1|(1308,-108)|
+10,78,BS Total Liabilities,1570,-203,39,19,8,3,0,0,0,0,0,0
+1,79,64,78,1,0,43,0,0,64,0,-1--1--1,,1|(1545,-269)|
+1,80,76,78,1,0,43,0,0,64,0,-1--1--1,,1|(1511,-133)|
+12,81,0,1105,-39,27,11,8,7,0,0,-1,0,0,0
+Equity
+10,82,BS Additional Paid In Capital,1215,32,58,19,8,3,0,0,-1,0,0,0
+10,83,BS Retained Earnings,1193,110,50,19,8,3,0,0,-1,0,0,0
+10,84,Capital Inflow from Share Issuance,1203,43,78,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,85,84,82,0,1,0,0,0,64,0,-1--1--1,,1|(1203,42)|
+10,86,Increase in Retained Earnings from Net Income,1201,214,86,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,87,86,83,0,1,0,0,0,64,0,-1--1--1,,1|(1197,164)|
+10,88,Dividends Paid,1201,214,46,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,89,88,83,0,1,0,0,0,64,0,-1--1--1,,1|(1197,168)|
+10,90,BS Total Equity,1411,81,35,19,8,3,0,0,0,0,0,0
+1,91,83,90,1,0,43,0,0,64,0,-1--1--1,,1|(1308,129)|
+1,92,82,90,1,0,43,0,0,64,0,-1--1--1,,1|(1334,45)|
+10,93,BS Total Liabilities and Equity,1624,40,56,28,8,3,0,0,0,0,0,0
+1,94,90,93,1,0,43,0,0,64,0,-1--1--1,,1|(1513,83)|
+1,95,78,93,1,0,43,0,0,64,0,-1--1--1,,1|(1642,-94)|
+10,96,Initial BS Net Plant Property and Equipment,505,-104,79,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,97,96,23,0,1,0,0,0,64,1,-1--1--1,,1|(505,-121)|
+10,98,Initial BS Accumulated Depreciation,590,-53,56,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,99,98,24,0,1,0,0,0,64,1,-1--1--1,,1|(590,-70)|
+10,100,Discontinuation of Depreciation Accumulation,590,-53,79,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,101,100,24,0,1,0,0,0,64,0,-1--1--1,,1|(590,-70)|
+10,102,Initial BS Net Intangible Assets,515,-3,74,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,103,102,25,0,1,0,0,0,64,1,-1--1--1,,1|(515,-22)|
+10,104,Initial BS Accumulated Amortization,592,44,56,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,105,104,26,0,1,0,0,0,64,1,-1--1--1,,1|(592,27)|
+10,106,Discontinuation of Amortization Accumulation,592,44,79,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,107,106,26,0,1,0,0,0,64,0,-1--1--1,,1|(592,27)|
+10,108,Initial BS Cash,524,-364,41,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,109,108,3,0,1,0,0,0,64,1,-1--1--1,,1|(524,-383)|
+10,110,Initial BS Accounts Receivable,529,-311,49,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,111,110,8,0,1,0,0,0,64,1,-1--1--1,,1|(529,-327)|
+10,112,Initial BS Accrued Wages,1220,-342,68,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,113,112,52,0,1,0,0,0,64,1,-1--1--1,,1|(1220,-361)|
+10,114,Initial BS Accounts Payable,1229,-281,41,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,115,114,46,0,1,0,0,0,64,1,-1--1--1,,1|(1229,-297)|
+10,116,Initial BS Short Term Debt,1237,-223,65,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,117,116,53,0,1,0,0,0,64,1,-1--1--1,,1|(1237,-242)|
+10,118,Initial BS Long Term Debt,1233,-106,64,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,119,118,69,0,1,0,0,0,64,1,-1--1--1,,1|(1233,-125)|
+10,120,BS Total Liabilities and Equity,979,-186,56,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,121,Gap Between Assets and Liabilities and Equity,933,-290,83,28,8,3,0,0,0,0,0,0
+1,122,42,121,1,0,43,0,0,64,0,-1--1--1,,1|(856,-244)|
+1,123,120,121,1,0,45,0,0,64,0,-1--1--1,,1|(985,-234)|
+10,124,Initial BS Inventory,531,-271,43,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,125,124,9,0,1,0,0,0,64,1,-1--1--1,,1|(531,-290)|
+10,126,Initial BS Retained Earnings,1207,202,42,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,127,126,83,0,1,0,0,0,64,1,-1--1--1,,1|(1200,158)|
+10,128,Initial BS Additional Paid In Capital,1215,70,70,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,129,128,82,0,1,0,0,0,64,1,-1--1--1,,1|(1215,53)|
+12,130,0,261,258,28,11,8,7,0,0,-1,0,0,0
+Assets
+12,131,0,325,297,59,11,8,7,0,0,-1,0,0,0
+Current Assets
+10,132,Reported BS Cash,365,340,52,19,8,3,0,0,-1,0,0,0
+10,133,Reported BS Accounts Receivable,370,385,52,28,8,3,0,0,-1,0,0,0
+10,134,Reported BS Inventory,372,433,52,19,8,3,0,0,-1,0,0,0
+10,135,Reported BS Total Current Assets,551,396,74,19,8,3,0,0,0,0,0,0
+1,136,132,135,1,0,43,0,0,64,0,-1--1--1,,1|(477,343)|
+1,137,133,135,1,0,43,0,0,64,0,-1--1--1,,1|(461,377)|
+1,138,134,135,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(477,436)|
+12,139,0,344,528,83,15,8,135,0,0,-1,0,0,0
+Long Term Assets
+10,140,Reported BS Net Plant Property and Equipment,351,577,90,28,8,3,0,0,-1,0,0,0
+10,141,Reported BS Accumulated Depreciation,431,643,53,28,8,3,0,0,-1,0,0,0
+10,142,Reported BS Net Intangible Assets,356,693,69,19,8,3,0,0,-1,0,0,0
+10,143,Reported BS Accumulated Amortization,445,748,53,28,8,3,0,0,-1,0,0,0
+10,144,Reported BS Total Long Term Assets,593,643,74,19,8,3,0,0,0,0,0,0
+1,145,140,144,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(503,586)|
+1,146,142,144,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(528,690)|
+10,147,Reported BS Total Assets,680,526,52,19,8,3,0,0,0,0,0,0
+1,148,135,147,1,0,43,0,0,64,0,-1--1--1,,1|(643,452)|
+1,149,144,147,1,0,43,0,0,64,0,-1--1--1,,1|(661,593)|
+12,150,0,1094,268,38,11,8,7,0,0,-1,0,0,0
+Liabilities
+10,151,Reported BS Accounts Payable,1224,418,73,19,8,3,0,0,-1,0,0,0
+12,152,0,1165,303,80,18,8,135,0,0,-1,0,0,0
+Current Liabilities
+10,153,Reported BS Accrued Wages,1215,357,64,19,8,3,0,0,-1,0,0,0
+10,154,Reported BS Short Term Debt,1232,476,66,19,8,3,0,0,-1,0,0,0
+10,155,Reported BS Total Current Liabilities,1416,410,74,19,8,3,0,0,0,0,0,0
+1,156,154,155,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1361,460)|
+1,157,151,155,0,0,43,0,0,64,0,-1--1--1,,1|(1312,414)|
+1,158,153,155,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1328,354)|
+12,159,0,1179,548,85,20,8,135,0,0,-1,0,0,0
+Long Term Liabilities
+10,160,Reported BS Long Term Debt,1228,593,65,19,8,3,0,0,-1,0,0,0
+10,161,Reported BS Total Long Term Liabilities,1402,630,84,19,8,3,0,0,0,0,0,0
+1,162,160,161,1,0,43,0,0,64,0,-1--1--1,,1|(1303,629)|
+10,163,Reported BS Total Liabilities,1565,534,60,19,8,3,0,0,0,0,0,0
+1,164,155,163,1,0,43,0,0,64,0,-1--1--1,,1|(1540,468)|
+1,165,161,163,1,0,43,0,0,64,0,-1--1--1,,1|(1506,604)|
+12,166,0,1100,698,27,11,8,7,0,0,-1,0,0,0
+Equity
+10,167,Reported BS Additional Paid In Capital,1210,769,70,28,8,3,0,0,-1,0,0,0
+10,168,Reported BS Retained Earnings,1188,847,74,19,8,3,0,0,-1,0,0,0
+10,169,Reported BS Total Equity,1406,818,52,19,8,3,0,0,0,0,0,0
+1,170,168,169,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1303,866)|
+1,171,167,169,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1329,782)|
+10,172,Reported BS Total Liabilities and Equity,1619,777,83,19,8,3,0,0,0,0,0,0
+1,173,169,172,1,0,43,0,0,64,0,-1--1--1,,1|(1508,820)|
+1,174,163,172,1,0,43,0,0,64,0,-1--1--1,,1|(1637,643)|
+10,175,Reported BS Total Liabilities and Equity,846,536,88,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,176,Reported Gap Between Assets and Liabilities and Equity,764,415,93,28,8,3,0,0,0,0,0,0
+1,177,147,176,1,0,43,0,0,64,0,-1--1--1,,1|(689,482)|
+1,178,175,176,1,0,45,0,0,64,0,-1--1--1,,1|(829,470)|
+10,179,BS Cash,201,325,45,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,180,BS Accounts Receivable,196,373,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,181,BS Inventory,212,446,43,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,182,BS Net Plant Property and Equipment,150,573,56,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,183,BS Accumulated Depreciation,232,636,72,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,184,BS Net Intangible Assets,162,687,74,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,185,BS Accumulated Amortization,257,755,72,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,186,BS Accrued Wages,1027,348,53,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,187,BS Accounts Payable,1027,421,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,188,BS Short Term Debt,1031,470,47,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,189,179,132,1,0,0,0,0,128,0,-1--1--1,,1|(281,327)|
+1,190,180,133,1,0,0,0,0,128,0,-1--1--1,,1|(303,375)|
+1,191,181,134,1,0,0,0,0,128,0,-1--1--1,,1|(276,437)|
+1,192,182,140,1,0,0,0,0,128,0,-1--1--1,,1|(220,563)|
+1,193,183,141,1,0,0,0,0,128,0,-1--1--1,,1|(334,630)|
+1,194,184,142,1,0,0,0,0,128,0,-1--1--1,,1|(280,699)|
+1,195,185,143,1,0,0,0,0,128,0,-1--1--1,,1|(355,759)|
+1,196,186,153,1,0,0,0,0,128,0,-1--1--1,,1|(1116,345)|
+1,197,187,151,1,0,0,0,0,128,0,-1--1--1,,1|(1111,420)|
+1,198,188,154,1,0,0,0,0,128,0,-1--1--1,,1|(1125,487)|
+10,199,BS Long Term Debt,1037,598,63,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,200,BS Additional Paid In Capital,1035,754,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,201,BS Retained Earnings,1016,850,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,202,199,160,1,0,0,0,0,128,0,-1--1--1,,1|(1129,601)|
+1,203,200,167,1,0,0,0,0,128,0,-1--1--1,,1|(1109,743)|
+1,204,201,168,1,0,0,0,0,128,0,-1--1--1,,1|(1109,853)|
+10,205,Check Reporting,365,378,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,206,205,132,0,1,0,0,0,64,0,-1--1--1,,1|(365,359)|
+10,207,Check Reporting,370,432,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,208,207,133,0,1,0,0,0,64,0,-1--1--1,,1|(370,413)|
+10,209,Check Reporting,372,471,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,210,209,134,0,1,0,0,0,64,0,-1--1--1,,1|(372,452)|
+10,211,Check Reporting,351,624,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,212,211,140,0,1,0,0,0,64,0,-1--1--1,,1|(351,605)|
+10,213,Check Reporting,431,690,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,214,213,141,0,1,0,0,0,64,0,-1--1--1,,1|(431,671)|
+10,215,Check Reporting,356,731,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,216,215,142,0,1,0,0,0,64,0,-1--1--1,,1|(356,712)|
+10,217,Check Reporting,433,787,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,218,217,143,0,1,0,0,0,64,0,-1--1--1,,1|(434,778)|
+10,219,Check Reporting,1224,456,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,220,219,151,0,1,0,0,0,64,0,-1--1--1,,1|(1224,437)|
+10,221,Check Reporting,1215,395,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,222,221,153,0,1,0,0,0,64,0,-1--1--1,,1|(1215,376)|
+10,223,Check Reporting,1232,514,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,224,223,154,0,1,0,0,0,64,0,-1--1--1,,1|(1232,495)|
+10,225,Check Reporting,1228,631,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,226,225,160,0,1,0,0,0,64,0,-1--1--1,,1|(1228,612)|
+10,227,Check Reporting,1210,816,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,228,227,167,0,1,0,0,0,64,0,-1--1--1,,1|(1210,797)|
+10,229,Check Reporting,1188,885,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,230,229,168,0,1,0,0,0,64,0,-1--1--1,,1|(1188,866)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Income Statement
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,IS Revenue,129,50,46,11,8,3,0,0,-1,0,0,0
+10,2,IS Cost of Goods Sold,124,117,48,19,8,3,0,0,-1,0,0,0
+10,3,IS Marketing Expense,129,246,50,19,8,3,0,0,-1,0,0,0
+10,4,IS Research and Development Expense,132,314,66,28,8,3,0,0,-1,0,0,0
+10,5,IS Depreciation,116,444,52,19,8,3,0,0,-1,0,0,0
+10,6,IS Amortization,107,515,52,19,8,3,0,0,-1,0,0,0
+10,7,Reported Cost of Goods Sold,120,200,73,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,8,7,2,0,1,0,0,0,64,0,-1--1--1,,1|(121,165)|
+10,9,Reported Marketing Expense,122,321,43,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,10,9,3,0,1,0,0,0,64,0,-1--1--1,,1|(124,285)|
+10,11,Reported Research and Development Expense,116,437,83,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,12,11,4,0,1,0,0,0,64,0,-1--1--1,,1|(122,382)|
+10,13,Reported Depreciation,109,543,56,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,14,13,5,0,1,0,0,0,64,0,-1--1--1,,1|(111,500)|
+10,15,Reported Amortization,110,639,56,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,16,15,6,0,1,0,0,0,64,0,-1--1--1,,1|(108,583)|
+10,17,IS Interest Expense,403,569,41,19,8,3,0,0,-1,0,0,0
+10,18,Reported Interest Expense,130,622,72,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,19,18,17,0,1,0,0,0,64,0,-1--1--1,,1|(275,593)|
+10,20,Reported Revenue,129,80,43,19,8,2,17,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,21,20,1,0,17,0,0,0,64,0,-1--1--1,,1|(129,61)|
+10,22,IS Gross Profit,353,114,57,11,8,3,0,0,-1,0,0,0
+1,23,2,22,1,0,45,0,2,192,0,-1--1--1,|12||0-0-0,1|(237,146)|
+1,24,1,22,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(270,55)|
+10,25,IS Total Operating Expenses,353,327,72,19,8,3,0,0,-1,0,0,0
+1,26,6,25,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(297,460)|
+1,27,5,25,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(245,425)|
+1,28,3,25,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(301,260)|
+1,29,4,25,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(189,305)|
+10,30,IS Operating Profit,595,179,50,19,8,3,0,0,-1,0,0,0
+1,31,22,30,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(516,123)|
+1,32,25,30,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(499,274)|
+10,33,IS Earnings Before Taxes,648,433,54,19,8,3,0,0,-1,0,0,0
+1,34,30,33,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(657,305)|
+1,35,17,33,1,0,45,0,2,192,0,-1--1--1,|12||0-0-0,1|(568,521)|
+10,36,IS Net Income,851,580,55,11,8,3,0,0,0,0,0,0
+1,37,33,36,1,0,43,0,0,64,0,-1--1--1,,1|(774,490)|
+10,38,IS Tax Expense,640,669,36,19,8,3,0,0,-1,0,0,0
+10,39,Reported Tax Expense,640,707,59,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,40,39,38,0,1,0,0,0,64,0,-1--1--1,,1|(640,688)|
+1,41,38,36,1,0,45,0,0,64,0,-1--1--1,,1|(771,641)|
+10,42,IS Selling General and Administrative Expense,122,379,88,28,8,3,0,0,-1,0,0,0
+10,43,Reported Selling General and Administrative Expense,129,534,99,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,44,43,42,0,1,0,0,0,64,0,-1--1--1,,1|(125,463)|
+1,45,42,25,1,0,43,0,0,64,0,-1--1--1,,1|(240,348)|
+10,46,Quarterly Revenue,1034,16,37,19,8,3,0,0,-1,0,0,0
+10,47,Quarterly Cost of Goods Sold,1043,103,68,19,8,3,0,0,-1,0,0,0
+10,48,Reported Revenue,1042,87,43,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,49,48,46,0,1,0,0,0,64,0,-1--1--1,,1|(1038,58)|
+10,50,Quarters per Year,1042,87,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,51,50,46,0,1,0,0,0,64,0,-1--1--1,,1|(1038,58)|
+10,52,Reported Cost of Goods Sold,1017,212,73,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,53,52,47,0,1,0,0,0,64,0,-1--1--1,,1|(1027,164)|
+10,54,Quarters per Year,1017,212,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,55,54,47,0,1,0,0,0,64,0,-1--1--1,,1|(1027,164)|
+10,56,Quarterly Gross Profit,1250,58,48,19,8,3,0,0,0,0,0,0
+10,57,Quarterly Operating Profit,1434,193,64,19,8,3,0,0,0,0,0,0
+10,58,Quarterly Total Operating Expenses,1257,343,82,19,8,3,0,0,0,0,0,0
+10,59,Quarterly Marketing Expense,1006,231,77,19,8,3,0,0,-1,0,0,0
+10,60,Quarterly Research and Development Expense,1012,299,78,28,8,3,0,0,-1,0,0,0
+10,61,Quarterly Selling General and Administrative Expense,1015,376,95,28,8,3,0,0,-1,0,0,0
+10,62,Quarterly Depreciation,1015,436,52,19,8,3,0,0,-1,0,0,0
+10,63,Quarterly Amortization,1025,499,52,19,8,3,0,0,-1,0,0,0
+10,64,Reported Marketing Expense,1016,280,43,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,65,64,59,0,1,0,0,0,64,0,-1--1--1,,1|(1014,255)|
+10,66,Quarters per Year,1016,280,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,67,66,59,0,1,0,0,0,64,0,-1--1--1,,1|(1013,262)|
+10,68,Reported Research and Development Expense,1012,411,83,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,69,68,60,0,1,0,0,0,64,0,-1--1--1,,1|(1012,362)|
+10,70,Quarters per Year,1012,411,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,71,70,60,0,1,0,0,0,64,0,-1--1--1,,1|(1012,366)|
+10,72,Reported Selling General and Administrative Expense,1010,547,99,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,73,72,61,0,1,0,0,0,64,0,-1--1--1,,1|(1011,468)|
+10,74,Quarters per Year,1010,547,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,75,74,61,0,1,0,0,0,64,0,-1--1--1,,1|(1011,472)|
+10,76,Reported Depreciation,1033,664,56,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,77,76,62,0,1,0,0,0,64,0,-1--1--1,,1|(1024,556)|
+10,78,Quarters per Year,1033,664,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,79,78,62,0,1,0,0,0,64,0,-1--1--1,,1|(1024,556)|
+10,80,Reported Amortization,1120,813,56,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,81,80,63,0,1,0,0,0,64,0,-1--1--1,,1|(1074,662)|
+10,82,Quarters per Year,1120,813,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,83,82,63,0,1,0,0,0,64,0,-1--1--1,,1|(1074,662)|
+1,84,59,58,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1194,238)|
+1,85,60,58,1,0,43,0,0,64,0,-1--1--1,,1|(1116,277)|
+1,86,61,58,1,0,43,0,0,64,0,-1--1--1,,1|(1121,342)|
+1,87,62,58,1,0,43,0,0,64,0,-1--1--1,,1|(1108,439)|
+1,88,63,58,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1232,433)|
+1,89,46,56,1,0,43,0,0,64,0,-1--1--1,,1|(1141,24)|
+1,90,47,56,1,0,45,0,0,64,0,-1--1--1,,1|(1151,104)|
+1,91,58,57,1,0,45,0,0,64,0,-1--1--1,,1|(1384,288)|
+1,92,56,57,1,0,43,0,0,64,0,-1--1--1,,1|(1383,102)|
+10,93,Quarterly Interest Expense,1456,473,68,19,8,3,0,0,-1,0,0,0
+10,94,Reported Interest Expense,1398,572,72,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,95,94,93,0,1,0,0,0,64,0,-1--1--1,,1|(1423,528)|
+10,96,Quarters per Year,1398,572,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,97,96,93,0,1,0,0,0,64,0,-1--1--1,,1|(1423,528)|
+10,98,Quarterly Earnings Before Taxes,1614,356,75,19,8,3,0,0,0,0,0,0
+10,99,Quarterly Net Income,1737,556,53,19,8,3,0,0,0,0,0,0
+10,100,Quarterly Tax Expense,1555,657,54,19,8,3,0,0,-1,0,0,0
+10,101,Reported Tax Expense,1552,775,59,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,102,101,100,0,1,0,0,0,64,0,-1--1--1,,1|(1552,722)|
+10,103,Quarters per Year,1552,775,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,104,103,100,0,1,0,0,0,64,0,-1--1--1,,1|(1552,722)|
+1,105,57,98,1,0,43,0,0,64,0,-1--1--1,,1|(1564,237)|
+1,106,93,98,1,0,45,0,0,64,0,-1--1--1,,1|(1538,440)|
+1,107,100,99,1,0,45,0,0,64,0,-1--1--1,,1|(1703,625)|
+1,108,98,99,1,0,43,0,0,64,0,-1--1--1,,1|(1732,469)|
+10,109,Shares Outstanding,690,812,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,110,IS Earnings per Share,868,742,52,19,8,3,0,0,0,0,0,0
+1,111,109,110,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(814,799)|
+1,112,36,110,1,0,43,0,0,64,0,-1--1--1,,1|(870,649)|
+10,113,Reported Net Income,868,780,58,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,114,Quarterly Earnings per Share,1872,700,75,19,8,3,0,0,0,0,0,0
+10,115,Shares Outstanding,1786,791,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,116,99,114,1,0,43,0,0,64,0,-1--1--1,,1|(1819,580)|
+1,117,115,114,1,0,45,0,0,64,0,-1--1--1,,1|(1870,750)|
+10,118,Check Reporting,1034,54,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,119,118,46,0,1,0,0,0,64,0,-1--1--1,,1|(1034,35)|
+10,120,Check Reporting,1043,141,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,121,120,47,0,1,0,0,0,64,0,-1--1--1,,1|(1043,122)|
+10,122,Check Reporting,1006,269,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,123,122,59,0,1,0,0,0,64,0,-1--1--1,,1|(1006,250)|
+10,124,Check Reporting,1012,346,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,125,124,60,0,1,0,0,0,64,0,-1--1--1,,1|(1012,327)|
+10,126,Check Reporting,1015,423,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,127,126,61,0,1,0,0,0,64,0,-1--1--1,,1|(1015,404)|
+10,128,Check Reporting,1015,474,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,129,128,62,0,1,0,0,0,64,0,-1--1--1,,1|(1015,455)|
+10,130,Check Reporting,1025,537,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,131,130,63,0,1,0,0,0,64,0,-1--1--1,,1|(1025,518)|
+10,132,Check Reporting,129,80,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,133,132,1,0,1,0,0,0,64,0,-1--1--1,,1|(129,61)|
+10,134,Check Reporting,124,155,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,135,134,2,0,1,0,0,0,64,0,-1--1--1,,1|(124,136)|
+10,136,Check Reporting,129,284,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,137,136,3,0,1,0,0,0,64,0,-1--1--1,,1|(129,265)|
+10,138,Check Reporting,132,361,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,139,138,4,0,1,0,0,0,64,0,-1--1--1,,1|(132,342)|
+10,140,Check Reporting,116,482,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,141,140,5,0,1,0,0,0,64,0,-1--1--1,,1|(116,463)|
+10,142,Check Reporting,107,553,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,143,142,6,0,1,0,0,0,64,0,-1--1--1,,1|(107,534)|
+10,144,Check Reporting,122,426,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,145,144,42,0,1,0,0,0,64,0,-1--1--1,,1|(122,407)|
+10,146,Check Reporting,403,607,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,147,146,17,0,1,0,0,0,64,0,-1--1--1,,1|(403,588)|
+10,148,Check Reporting,640,707,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,149,148,38,0,1,0,0,0,64,0,-1--1--1,,1|(640,688)|
+10,150,Check Reporting,868,780,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,151,150,110,0,1,0,0,0,64,0,-1--1--1,,1|(868,761)|
+10,152,Check Reporting,1456,511,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,153,152,93,0,1,0,0,0,64,0,-1--1--1,,1|(1456,492)|
+10,154,Check Reporting,1555,695,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,155,154,100,0,1,0,0,0,64,0,-1--1--1,,1|(1555,676)|
+10,156,Check Reporting,1872,738,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,157,156,114,0,1,0,0,0,64,0,-1--1--1,,1|(1872,719)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Indirect Cash Flow Statement
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,Investing Cash Inflows,390,182,60,19,8,3,0,0,-1,0,0,0
+10,2,Investing Cash Outflows,483,290,60,19,8,3,0,0,-1,0,0,0
+10,3,Financing Cash Inflows,195,528,64,19,8,3,0,0,-1,0,0,0
+10,4,Financing Cash Outflows,458,695,64,19,8,3,0,0,-1,0,0,0
+10,5,New Debt Issued,65,471,44,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,6,5,3,1,0,43,0,0,64,0,-1--1--1,,1|(157,473)|
+10,7,Short Term Debt Repayment,307,777,71,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+1,8,7,4,1,0,43,0,0,64,0,-1--1--1,,1|(346,726)|
+10,9,Amount Spent on Long Term Assets,349,336,78,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,10,Amount Spent on Intangible Assets,289,258,75,19,8,2,0,3,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,11,10,2,1,0,43,0,0,64,0,-1--1--1,,1|(357,259)|
+1,12,9,2,1,0,43,0,0,64,0,-1--1--1,,1|(411,325)|
+10,13,Share Price,70,691,55,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+10,14,Shares Issued,208,697,34,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,15,Cash Collected from Share Issuance,136,604,83,19,8,3,0,0,0,0,0,0
+1,16,15,3,1,0,43,0,0,64,0,-1--1--1,,1|(143,566)|
+1,17,13,15,1,0,43,0,0,64,0,-1--1--1,,1|(70,668)|
+1,18,14,15,1,0,43,0,0,64,0,-1--1--1,,1|(163,667)|
+10,19,Dividends Paid,465,806,46,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,20,19,4,1,0,43,0,0,64,0,-1--1--1,,1|(473,749)|
+10,21,Total Investing Cash Flow,601,218,59,19,8,3,0,0,0,0,0,0
+10,22,Total Financing Cash Flow,503,589,62,19,8,3,0,0,0,0,0,0
+1,23,1,21,1,0,43,0,0,64,0,-1--1--1,,1|(489,198)|
+1,24,3,22,1,0,43,0,0,64,0,-1--1--1,,1|(328,571)|
+1,25,2,21,1,0,45,0,0,64,0,-1--1--1,,1|(532,263)|
+1,26,4,22,1,0,45,0,0,64,0,-1--1--1,,1|(486,665)|
+10,27,CF Total Cash Flow,1524,357,57,19,8,3,0,0,0,0,0,0
+10,28,Total Cash Flow,1718,362,48,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,29,IS Net Income,162,52,35,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+10,30,IS Amortization,255,-61,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,31,IS Depreciation,413,-72,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,32,Net Income Adjusted for Non Cash Expenses,375,60,83,28,8,3,0,0,0,0,0,0
+1,33,29,32,1,0,43,0,0,64,0,-1--1--1,,1|(247,51)|
+1,34,30,32,1,0,43,0,0,64,0,-1--1--1,,1|(344,-13)|
+1,35,31,32,1,0,43,0,0,64,0,-1--1--1,,1|(420,-15)|
+10,36,Cash Flow from Changes to Balance Sheet Items,701,-62,81,28,8,3,0,0,0,0,0,0
+10,37,CF Operating Cash Flow,636,59,54,19,8,3,0,0,0,0,0,0
+1,38,32,37,1,0,43,0,0,64,0,-1--1--1,,1|(496,53)|
+1,39,36,37,1,0,43,0,0,64,0,-1--1--1,,1|(632,1)|
+10,40,Reported BS Accounts Receivable for CF,276,-384,64,34,3,131,0,0,0,0,0,0
+10,41,Previous BS Accounts Receivable for CF,582,-387,71,35,3,131,0,0,0,0,0,0
+10,42,Change in BS Accounts Receivable,434,-275,56,28,8,3,0,0,0,0,0,0
+1,43,40,42,1,0,43,0,0,64,0,-1--1--1,,1|(313,-304)|
+1,44,41,42,1,0,45,0,0,64,0,-1--1--1,,1|(556,-297)|
+12,45,48,43,-390,10,8,0,3,0,0,-1,0,0,0
+1,46,48,40,4,0,0,22,0,0,0,-1--1--1,,1|(171,-389)|
+1,47,48,45,100,0,0,22,0,0,0,-1--1--1,,1|(85,-389)|
+11,48,48,124,-389,6,8,34,3,0,0,1,0,0,0
+10,49,Latest Reported BS Accounts Receivable,124,-362,85,19,40,3,0,0,-1,0,0,0
+1,50,52,41,4,0,0,22,0,0,0,-1--1--1,,1|(472,-386)|
+1,51,52,40,100,0,0,22,0,0,0,-1--1--1,,1|(381,-386)|
+11,52,3468,428,-386,6,8,34,3,0,0,1,0,0,0
+10,53,Aging of Reported BS Accounts Receivable,428,-349,82,29,40,131,0,0,-1,0,0,0
+12,54,48,845,-387,10,8,0,3,0,0,-1,0,0,0
+1,55,57,54,4,0,0,22,0,0,0,-1--1--1,,1|(795,-388)|
+1,56,57,41,100,0,0,22,0,0,0,-1--1--1,,1|(698,-388)|
+11,57,48,749,-388,6,8,34,3,0,0,1,0,0,0
+10,58,Removal of Reported BS Accounts Receivable,749,-352,85,28,40,3,0,0,-1,0,0,0
+10,59,Check Reporting,97,-471,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,60,TIME STEP,30,-291,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,61,59,48,1,0,43,0,0,64,0,-1--1--1,,1|(122,-431)|
+1,62,60,49,1,0,45,0,0,64,0,-1--1--1,,1|(43,-327)|
+10,63,BS Total Current Assets,124,-324,65,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,64,BS Accounts Receivable,182,-274,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+1,65,64,49,1,0,43,0,0,64,0,-1--1--1,,1|(176,-319)|
+10,66,Initial BS Accounts Receivable,279,-456,49,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,67,66,40,0,0,0,0,0,64,1,-1--1--1,,1|(278,-429)|
+10,68,Check Reporting,378,-455,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,69,TIME STEP,489,-462,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,70,69,52,1,0,45,0,0,64,0,-1--1--1,,1|(461,-418)|
+1,71,68,52,1,0,43,0,0,64,0,-1--1--1,,1|(380,-421)|
+1,72,41,58,1,0,43,0,0,64,0,-1--1--1,,1|(647,-326)|
+1,73,40,53,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(343,-327)|
+10,74,Check Reporting,667,-461,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,75,TIME STEP,786,-443,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,76,75,57,1,0,45,0,0,64,0,-1--1--1,,1|(772,-416)|
+1,77,74,57,1,0,43,0,0,64,0,-1--1--1,,1|(692,-417)|
+1,78,66,41,0,0,0,0,0,64,1,-1--1--1,,1|(412,-425)|
+10,79,Reported BS Inventory for CF,1211,-409,64,34,3,131,0,0,0,0,0,0
+10,80,Previous BS Inventory for CF,1517,-412,71,35,3,131,0,0,0,0,0,0
+10,81,Change in BS Inventory,1372,-297,56,28,8,3,0,0,0,0,0,0
+1,82,79,81,1,0,43,0,0,64,0,-1--1--1,,1|(1248,-326)|
+1,83,80,81,1,0,45,0,0,64,0,-1--1--1,,1|(1492,-328)|
+12,84,48,978,-415,10,8,0,3,0,0,-1,0,0,0
+1,85,87,79,4,0,0,22,0,0,0,-1--1--1,,1|(1106,-414)|
+1,86,87,84,100,0,0,22,0,0,0,-1--1--1,,1|(1020,-414)|
+11,87,48,1059,-414,6,8,34,3,0,0,1,0,0,0
+10,88,Latest Reported BS Inventory,1059,-387,92,19,40,3,0,0,-1,0,0,0
+1,89,91,80,4,0,0,22,0,0,0,-1--1--1,,1|(1403,-411)|
+1,90,91,79,100,0,0,22,0,0,0,-1--1--1,,1|(1312,-411)|
+11,91,3884,1355,-411,6,8,34,3,0,0,1,0,0,0
+10,92,Aging of Reported BS Inventory,1355,-376,76,27,40,131,0,0,-1,0,0,0
+12,93,48,1780,-412,10,8,0,3,0,0,-1,0,0,0
+1,94,96,93,4,0,0,22,0,0,0,-1--1--1,,1|(1730,-413)|
+1,95,96,80,100,0,0,22,0,0,0,-1--1--1,,1|(1633,-413)|
+11,96,48,1684,-413,6,8,34,3,0,0,1,0,0,0
+10,97,Removal of Reported BS Inventory,1684,-377,85,28,40,3,0,0,-1,0,0,0
+10,98,Check Reporting,1032,-496,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,99,TIME STEP,965,-316,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,100,98,87,1,0,43,0,0,64,0,-1--1--1,,1|(1057,-456)|
+1,101,99,88,1,0,45,0,0,64,0,-1--1--1,,1|(978,-352)|
+10,102,BS Total Current Assets,1059,-349,65,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,103,Check Reporting,1313,-480,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,104,TIME STEP,1424,-487,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,105,104,91,1,0,45,0,0,64,0,-1--1--1,,1|(1396,-443)|
+1,106,103,91,1,0,43,0,0,64,0,-1--1--1,,1|(1315,-446)|
+1,107,80,97,1,0,43,0,0,64,0,-1--1--1,,1|(1582,-351)|
+1,108,79,92,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1274,-356)|
+10,109,Check Reporting,1602,-486,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,110,TIME STEP,1721,-468,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,111,110,96,1,0,45,0,0,64,0,-1--1--1,,1|(1707,-441)|
+1,112,109,96,1,0,43,0,0,64,0,-1--1--1,,1|(1627,-442)|
+10,113,BS Inventory,1129,-313,43,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+10,114,BS Accounts Receivable,1059,-349,58,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,115,113,88,1,0,43,0,0,64,0,-1--1--1,,1|(1097,-350)|
+10,116,Initial BS Inventory,1201,-475,43,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,117,116,79,0,0,0,0,0,64,1,-1--1--1,,1|(1202,-456)|
+1,118,116,80,0,0,0,0,0,64,1,-1--1--1,,1|(1338,-447)|
+10,119,Cash Flow from Changes to Current Assets,855,-174,79,28,8,3,0,0,0,0,0,0
+1,120,42,119,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(592,-200)|
+1,121,81,119,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(1209,-217)|
+10,122,One Year,799,-244,37,11,8,3,0,0,0,0,0,0
+1,123,122,119,1,0,45,0,0,64,0,-1--1--1,,1|(844,-220)|
+1,124,119,36,1,0,43,0,0,64,0,-1--1--1,,1|(728,-124)|
+10,125,Reported BS Accounts Payable for CF,323,-903,64,34,3,131,0,0,0,0,0,0
+10,126,Previous BS Accounts Payable for CF,629,-906,71,35,3,131,0,0,0,0,0,0
+10,127,Change in BS Accounts Payable,481,-794,56,28,8,3,0,0,0,0,0,0
+1,128,125,127,1,0,43,0,0,64,0,-1--1--1,,1|(360,-823)|
+1,129,126,127,1,0,45,0,0,64,0,-1--1--1,,1|(603,-816)|
+12,130,48,90,-909,10,8,0,3,0,0,-1,0,0,0
+1,131,133,125,4,0,0,22,0,0,0,-1--1--1,,1|(218,-908)|
+1,132,133,130,100,0,0,22,0,0,0,-1--1--1,,1|(132,-908)|
+11,133,48,171,-908,6,8,34,3,0,0,1,0,0,0
+10,134,Latest Reported BS Accounts Payable,171,-881,92,19,40,3,0,0,-1,0,0,0
+1,135,137,126,4,0,0,22,0,0,0,-1--1--1,,1|(519,-905)|
+1,136,137,125,100,0,0,22,0,0,0,-1--1--1,,1|(428,-905)|
+11,137,3452,475,-905,6,8,34,3,0,0,1,0,0,0
+10,138,Aging of Reported BS Accounts Payable,475,-868,92,19,40,131,0,0,-1,0,0,0
+1,139,140,126,100,0,0,22,0,0,0,-1--1--1,,1|(745,-907)|
+11,140,3196,796,-907,6,8,34,3,0,0,1,0,0,0
+10,141,Removal of Reported BS Accounts Payable,796,-871,85,28,40,3,0,0,-1,0,0,0
+10,142,Check Reporting,144,-990,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,143,TIME STEP,77,-810,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,144,142,133,1,0,43,0,0,64,0,-1--1--1,,1|(169,-950)|
+1,145,143,134,1,0,45,0,0,64,0,-1--1--1,,1|(90,-846)|
+10,146,BS Total Current Assets,171,-843,65,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,147,Check Reporting,425,-974,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,148,TIME STEP,536,-981,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,149,148,137,1,0,45,0,0,64,0,-1--1--1,,1|(508,-937)|
+1,150,147,137,1,0,43,0,0,64,0,-1--1--1,,1|(427,-940)|
+1,151,126,141,1,0,43,0,0,64,0,-1--1--1,,1|(694,-845)|
+1,152,125,138,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(390,-846)|
+10,153,Check Reporting,714,-980,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,154,TIME STEP,833,-962,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,155,154,140,1,0,45,0,0,64,0,-1--1--1,,1|(819,-935)|
+1,156,153,140,1,0,43,0,0,64,0,-1--1--1,,1|(739,-936)|
+10,157,BS Accounts Payable,230,-803,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+10,158,BS Accounts Receivable,171,-843,58,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,159,157,134,1,0,43,0,0,64,0,-1--1--1,,1|(232,-846)|
+10,160,Initial BS Accounts Payable,321,-975,41,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,161,160,125,0,0,0,0,0,64,1,-1--1--1,,1|(320,-948)|
+1,162,160,126,0,0,0,0,0,64,1,-1--1--1,,1|(453,-945)|
+12,163,48,917,-906,10,8,0,3,0,0,-1,0,0,0
+1,164,140,163,4,0,0,22,0,0,0,-1--1--1,,1|(854,-907)|
+10,165,Reported BS Accrued Wages for CF,1258,-917,64,34,3,131,0,0,0,0,0,0
+10,166,Previous BS Accrued Wages for CF,1564,-920,71,35,3,131,0,0,0,0,0,0
+10,167,Change in BS Accrued Wages,1416,-808,80,19,8,3,0,0,0,0,0,0
+1,168,165,167,1,0,43,0,0,64,0,-1--1--1,,1|(1295,-837)|
+1,169,166,167,1,0,45,0,0,64,0,-1--1--1,,1|(1538,-830)|
+12,170,48,1025,-923,10,8,0,3,0,0,-1,0,0,0
+1,171,173,165,4,0,0,22,0,0,0,-1--1--1,,1|(1153,-922)|
+1,172,173,170,100,0,0,22,0,0,0,-1--1--1,,1|(1067,-922)|
+11,173,48,1106,-922,6,8,34,3,0,0,1,0,0,0
+10,174,Latest Reported BS Accrued Wages,1106,-895,80,19,40,3,0,0,-1,0,0,0
+1,175,177,166,4,0,0,22,0,0,0,-1--1--1,,1|(1454,-919)|
+1,176,177,165,100,0,0,22,0,0,0,-1--1--1,,1|(1363,-919)|
+11,177,3484,1410,-919,6,8,34,3,0,0,1,0,0,0
+10,178,Aging of Reported BS Accrued Wages,1410,-882,73,28,40,131,0,0,-1,0,0,0
+1,179,180,166,100,0,0,22,0,0,0,-1--1--1,,1|(1680,-921)|
+11,180,3244,1731,-921,6,8,34,3,0,0,1,0,0,0
+10,181,Removal of Reported BS Accrued Wages,1731,-885,97,28,40,131,0,0,-1,0,0,0
+10,182,Check Reporting,1079,-1004,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,183,TIME STEP,1012,-824,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,184,182,173,1,0,43,0,0,64,0,-1--1--1,,1|(1104,-964)|
+1,185,183,174,1,0,45,0,0,64,0,-1--1--1,,1|(1025,-860)|
+10,186,BS Total Current Assets,1106,-857,65,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,187,Check Reporting,1360,-988,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,188,TIME STEP,1471,-995,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,189,188,177,1,0,45,0,0,64,0,-1--1--1,,1|(1443,-951)|
+1,190,187,177,1,0,43,0,0,64,0,-1--1--1,,1|(1362,-954)|
+1,191,166,181,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1629,-859)|
+1,192,165,178,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1325,-860)|
+10,193,Check Reporting,1649,-994,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,194,TIME STEP,1768,-976,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,195,194,180,1,0,45,0,0,64,0,-1--1--1,,1|(1754,-949)|
+1,196,193,180,1,0,43,0,0,64,0,-1--1--1,,1|(1674,-950)|
+10,197,BS Accounts Receivable,1106,-857,58,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+12,198,48,1852,-920,10,8,0,3,0,0,-1,0,0,0
+1,199,180,198,4,0,0,22,0,0,0,-1--1--1,,1|(1789,-921)|
+10,200,BS Accounts Payable,1106,-857,58,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,201,BS Accrued Wages,1156,-819,53,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+1,202,201,174,1,0,43,0,0,64,0,-1--1--1,,1|(1158,-859)|
+10,203,Initial BS Accrued Wages,1242,-980,68,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,204,203,165,0,0,0,0,0,64,1,-1--1--1,,1|(1245,-962)|
+1,205,203,166,0,0,0,0,0,64,1,-1--1--1,,1|(1394,-951)|
+10,206,Cash Flow from Changes to Current Liabilities,864,-682,79,28,8,3,0,0,0,0,0,0
+1,207,127,206,1,0,43,0,0,64,0,-1--1--1,,1|(592,-714)|
+1,208,167,206,1,0,43,0,0,64,0,-1--1--1,,1|(1261,-724)|
+10,209,One Year,799,-761,46,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,210,209,206,1,0,45,0,0,64,0,-1--1--1,,1|(862,-732)|
+10,211,Cash Flow from Changes to Current Liabilities,929,-54,79,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12|B|128-128-128
+1,212,211,36,1,0,43,0,0,64,0,-1--1--1,,1|(818,-67)|
+10,213,Accumulated Reported Investing Cash Flow,1038,221,82,45,3,131,0,0,0,0,0,0
+12,214,48,785,207,10,8,0,3,0,0,-1,0,0,0
+1,215,217,213,4,0,0,22,0,0,0,-1--1--1,,1|(911,211)|
+1,216,217,214,100,0,0,22,0,0,0,-1--1--1,,1|(825,211)|
+11,217,48,861,211,6,8,34,3,0,0,1,0,0,0
+10,218,New Reported Investing Cash Flow,861,238,82,19,40,3,0,0,-1,0,0,0
+12,219,48,1321,211,10,8,0,3,0,0,-1,0,0,0
+1,220,222,219,4,0,0,22,0,0,0,-1--1--1,,1|(1266,211)|
+1,221,222,213,100,0,0,22,0,0,0,-1--1--1,,1|(1164,211)|
+11,222,48,1215,211,6,8,34,3,0,0,1,0,0,0
+10,223,Drained Reported Investing Cash Flow,1215,238,85,19,40,3,0,0,-1,0,0,0
+10,224,Reported Investing Cash Flow,1119,328,60,28,8,131,0,0,0,0,0,0
+1,225,223,224,1,0,43,0,0,64,0,-1--1--1,,1|(1181,281)|
+10,226,TIME STEP,1258,336,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,227,226,223,1,0,0,0,0,64,0,-1--1--1,,1|(1258,289)|
+1,228,226,224,1,0,0,0,0,64,0,-1--1--1,,1|(1176,342)|
+1,229,213,222,1,0,0,0,0,64,0,-1--1--1,,1|(1124,183)|
+10,230,Reporting Period,1027,401,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,231,230,224,1,0,45,0,0,64,0,-1--1--1,,1|(1097,377)|
+10,232,Check Reporting,1191,125,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,233,232,222,1,0,0,0,0,64,0,-1--1--1,,1|(1196,172)|
+10,234,Average Cost per Inventory Unit,873,348,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,235,CF Investing Cash Flow,1384,401,55,19,8,3,0,0,0,0,0,0
+1,236,224,235,1,0,43,0,0,64,0,-1--1--1,,1|(1230,391)|
+1,237,21,218,1,0,43,0,0,64,0,-1--1--1,,1|(710,252)|
+10,238,Initial Accumulated Reported Investing Cash Flow,1018,138,77,28,8,3,0,0,-1,0,0,0
+1,239,238,213,0,0,0,0,0,64,1,-1--1--1,,1|(1023,163)|
+10,240,CF Operating Cash Flow,1500,257,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,241,240,27,1,0,43,0,0,64,0,-1--1--1,,1|(1521,307)|
+1,242,235,27,1,0,43,0,0,64,0,-1--1--1,,1|(1432,354)|
+10,243,Accumulated Reported Financing Cash Flow,941,575,82,45,3,131,0,0,0,0,0,0
+12,244,48,688,561,10,8,0,3,0,0,-1,0,0,0
+1,245,247,243,4,0,0,22,0,0,0,-1--1--1,,1|(819,564)|
+1,246,247,244,100,0,0,22,0,0,0,-1--1--1,,1|(733,564)|
+11,247,48,774,564,6,8,34,3,0,0,1,0,0,0
+10,248,New Reported Financing Cash Flow,774,600,60,28,40,3,0,0,-1,0,0,0
+12,249,48,1224,565,10,8,0,3,0,0,-1,0,0,0
+1,250,252,249,4,0,0,22,0,0,0,-1--1--1,,1|(1169,565)|
+1,251,252,243,100,0,0,22,0,0,0,-1--1--1,,1|(1067,565)|
+11,252,48,1118,565,6,8,34,3,0,0,1,0,0,0
+10,253,Drained Reported Financing Cash Flow,1118,592,89,19,40,3,0,0,-1,0,0,0
+10,254,Reported Financing Cash Flow,1022,682,60,28,8,131,0,0,0,0,0,0
+1,255,253,254,1,0,43,0,0,64,0,-1--1--1,,1|(1084,635)|
+10,256,TIME STEP,1161,690,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,257,256,253,1,0,0,0,0,64,0,-1--1--1,,1|(1161,643)|
+1,258,256,254,1,0,0,0,0,64,0,-1--1--1,,1|(1105,683)|
+1,259,243,252,1,0,0,0,0,64,0,-1--1--1,,1|(1027,537)|
+10,260,Reporting Period,930,755,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,261,260,254,1,0,45,0,0,64,0,-1--1--1,,1|(1000,731)|
+10,262,Check Reporting,1094,479,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,263,262,252,1,0,0,0,0,64,0,-1--1--1,,1|(1099,526)|
+10,264,Average Cost per Inventory Unit,776,702,61,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,265,CF Financing Cash Flow,1523,469,54,19,8,3,0,0,0,0,0,0
+1,266,254,265,1,0,43,0,0,64,0,-1--1--1,,1|(1317,757)|
+10,267,Initial Accumulated Reported Financing Cash Flow,921,492,80,28,8,3,0,0,-1,0,0,0
+1,268,267,243,0,0,0,0,0,64,1,-1--1--1,,1|(926,517)|
+1,269,22,248,1,0,43,0,0,64,0,-1--1--1,,1|(668,605)|
+1,270,265,27,1,0,43,0,0,64,0,-1--1--1,,1|(1511,411)|
+10,271,Check Reporting,477,124,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,272,271,32,0,0,0,0,0,64,0,-1--1--1,,1|(438,100)|
+10,273,TIME STEP,271,118,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,274,273,32,0,0,0,0,0,64,0,-1--1--1,,1|(300,100)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Owners' Equity Statement
+$192-192-192,0,Arial|12|B|0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,OE Reported Retained Earnings,270,210,64,34,3,131,0,0,0,0,0,0
+10,2,OE Previous Reported Retained Earnings,576,207,71,35,3,131,0,0,0,0,0,0
+12,3,48,37,204,10,8,0,3,0,0,-1,0,0,0
+1,4,6,1,4,0,0,22,0,0,0,-1--1--1,,1|(165,205)|
+1,5,6,3,100,0,0,22,0,0,0,-1--1--1,,1|(79,205)|
+11,6,48,118,205,6,8,34,3,0,0,1,0,0,0
+10,7,Latest Reported Retained Earnings,118,232,74,19,40,3,0,0,-1,0,0,0
+1,8,10,2,4,0,0,22,0,0,0,-1--1--1,,1|(466,208)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(375,208)|
+11,10,668,422,208,6,8,34,3,0,0,1,0,0,0
+10,11,Aging of Reported Retained Earnings,422,245,74,19,40,131,0,0,-1,0,0,0
+1,12,13,2,100,0,0,22,0,0,0,-1--1--1,,1|(692,206)|
+11,13,684,743,206,6,8,34,3,0,0,1,0,0,0
+10,14,Removal of Reported Retained Earnings,743,242,75,28,40,3,0,0,-1,0,0,0
+10,15,Check Reporting,91,123,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,16,TIME STEP,30,311,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,17,15,6,1,0,43,0,0,64,0,-1--1--1,,1|(116,163)|
+1,18,16,7,1,0,45,0,0,64,0,-1--1--1,,1|(40,274)|
+10,19,Check Reporting,372,139,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,20,TIME STEP,483,132,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,21,20,10,1,0,45,0,0,64,0,-1--1--1,,1|(455,176)|
+1,22,19,10,1,0,43,0,0,64,0,-1--1--1,,1|(374,173)|
+1,23,2,14,1,0,43,0,0,64,0,-1--1--1,,1|(641,268)|
+1,24,1,11,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(337,267)|
+10,25,Check Reporting,661,133,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,26,TIME STEP,780,151,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,27,26,13,1,0,45,0,0,64,0,-1--1--1,,1|(766,178)|
+1,28,25,13,1,0,43,0,0,64,0,-1--1--1,,1|(686,177)|
+12,29,48,864,207,10,8,0,3,0,0,-1,0,0,0
+1,30,13,29,4,0,0,22,0,0,0,-1--1--1,,1|(801,206)|
+10,31,BS Retained Earnings,186,309,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,32,BS Accounts Payable,118,270,58,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,33,31,7,1,0,43,0,0,192,0,-1--1--1,,1|(127,270)|
+10,34,Initial BS Retained Earnings,261,136,42,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,35,Initial BS Accounts Payable,270,263,41,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,36,34,1,0,0,43,0,0,192,1,-1--1--1,,1|(263,163)|
+1,37,34,2,0,0,0,0,0,64,1,-1--1--1,,1|(397,165)|
+10,38,OE Net Income,272,419,52,19,8,3,0,0,-1,0,0,0
+10,39,OE Reported Paid in Capital,1220,190,64,34,3,131,0,0,0,0,0,0
+10,40,OE Previous Reported Paid in Capital,1526,187,71,35,3,131,0,0,0,0,0,0
+12,41,48,987,184,10,8,0,3,0,0,-1,0,0,0
+1,42,44,39,4,0,0,22,0,0,0,-1--1--1,,1|(1115,185)|
+1,43,44,41,100,0,0,22,0,0,0,-1--1--1,,1|(1029,185)|
+11,44,48,1068,185,6,8,34,3,0,0,1,0,0,0
+10,45,Latest Reported Paid in Capital,1068,212,65,19,40,3,0,0,-1,0,0,0
+1,46,48,40,4,0,0,22,0,0,0,-1--1--1,,1|(1416,188)|
+1,47,48,39,100,0,0,22,0,0,0,-1--1--1,,1|(1325,188)|
+11,48,604,1372,188,6,8,34,3,0,0,1,0,0,0
+10,49,Aging of Reported Paid in Capital,1372,225,73,19,40,131,0,0,-1,0,0,0
+1,50,51,40,100,0,0,22,0,0,0,-1--1--1,,1|(1642,186)|
+11,51,620,1693,186,6,8,34,3,0,0,1,0,0,0
+10,52,Removal of Reported Paid in Capital,1693,222,67,28,40,3,0,0,-1,0,0,0
+10,53,Check Reporting,1041,103,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,54,TIME STEP,980,291,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,55,53,44,1,0,43,0,0,64,0,-1--1--1,,1|(1066,143)|
+1,56,54,45,1,0,45,0,0,64,0,-1--1--1,,1|(990,254)|
+10,57,Check Reporting,1322,119,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,58,TIME STEP,1433,112,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,59,58,48,1,0,45,0,0,64,0,-1--1--1,,1|(1405,156)|
+1,60,57,48,1,0,43,0,0,64,0,-1--1--1,,1|(1324,153)|
+1,61,40,52,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1591,248)|
+1,62,39,49,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(1287,247)|
+10,63,Check Reporting,1611,113,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,64,TIME STEP,1730,131,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,65,64,51,1,0,45,0,0,64,0,-1--1--1,,1|(1716,158)|
+1,66,63,51,1,0,43,0,0,64,0,-1--1--1,,1|(1636,157)|
+12,67,48,1814,187,10,8,0,3,0,0,-1,0,0,0
+1,68,51,67,4,0,0,22,0,0,0,-1--1--1,,1|(1751,186)|
+10,69,BS Retained Earnings,1068,250,55,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,70,BS Additional Paid In Capital,1129,287,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,71,70,45,1,0,43,0,0,192,0,-1--1--1,,1|(1077,253)|
+10,72,Initial BS Additional Paid In Capital,1195,115,70,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,73,72,39,0,0,43,0,0,192,1,-1--1--1,,1|(1203,142)|
+1,74,72,40,0,0,43,0,0,192,1,-1--1--1,,1|(1353,149)|
+10,75,Accumulated Reported Dividends,301,678,73,39,3,131,0,0,0,0,0,0
+12,76,48,57,670,10,8,0,3,0,0,-1,0,0,0
+1,77,79,75,4,0,0,22,0,0,0,-1--1--1,,1|(190,670)|
+1,78,79,76,100,0,0,22,0,0,0,-1--1--1,,1|(104,670)|
+11,79,48,147,670,6,8,34,3,0,0,1,0,0,0
+10,80,New Reported Dividends,147,697,58,19,40,3,0,0,-1,0,0,0
+12,81,48,555,674,10,8,0,3,0,0,-1,0,0,0
+1,82,84,81,4,0,0,22,0,0,0,-1--1--1,,1|(502,673)|
+1,83,84,75,100,0,0,22,0,0,0,-1--1--1,,1|(410,673)|
+11,84,48,453,673,6,8,34,3,0,0,1,0,0,0
+10,85,Drained Reported Dividends,453,700,71,19,40,3,0,0,-1,0,0,0
+10,86,Reported Dividends,391,791,41,19,8,131,0,0,0,0,0,0
+1,87,85,86,1,0,43,0,0,64,0,-1--1--1,,1|(432,741)|
+10,88,TIME STEP,530,799,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,89,88,85,1,0,0,0,0,64,0,-1--1--1,,1|(519,743)|
+1,90,88,86,1,0,0,0,0,64,0,-1--1--1,,1|(448,805)|
+10,91,Initial Accumulated Reported Dividends,297,605,80,19,8,131,0,0,-1,0,0,0
+1,92,91,75,0,0,0,0,0,64,1,-1--1--1,,1|(298,624)|
+1,93,75,84,1,0,0,0,0,64,0,-1--1--1,,1|(396,646)|
+10,94,Reporting Period,299,864,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,95,94,86,1,0,45,0,0,64,0,-1--1--1,,1|(369,840)|
+10,96,Check Reporting,463,588,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,97,96,84,1,0,0,0,0,64,0,-1--1--1,,1|(468,635)|
+10,98,OE Dividends,504,866,54,11,8,3,0,0,0,0,0,0
+1,99,86,98,1,0,43,0,0,64,0,-1--1--1,,1|(424,838)|
+10,100,OE Quarterly Dividends,511,927,52,19,8,3,0,0,0,0,0,0
+1,101,86,100,1,0,43,0,0,64,0,-1--1--1,,1|(398,862)|
+10,102,Quarters per Year,671,966,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,103,102,100,1,0,45,0,0,64,0,-1--1--1,,1|(611,938)|
+10,104,Check Reporting,663,870,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,105,104,98,1,0,0,0,0,64,0,-1--1--1,,1|(601,864)|
+1,106,104,100,1,0,0,0,0,64,0,-1--1--1,,1|(596,894)|
+10,107,Dividends Paid,120,802,46,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,108,107,80,1,0,43,0,0,192,0,-1--1--1,,1|(126,745)|
+10,109,Cost of Goods Sold,147,735,53,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,110,Accumulated Reported Issuance of Shares,1224,481,73,39,3,131,0,0,0,0,0,0
+12,111,48,980,473,10,8,0,3,0,0,-1,0,0,0
+1,112,114,110,4,0,0,22,0,0,0,-1--1--1,,1|(1113,473)|
+1,113,114,111,100,0,0,22,0,0,0,-1--1--1,,1|(1027,473)|
+11,114,48,1070,473,6,8,34,3,0,0,1,0,0,0
+10,115,New Reported Issuance of Shares,1070,500,77,19,40,3,0,0,-1,0,0,0
+12,116,48,1478,477,10,8,0,3,0,0,-1,0,0,0
+1,117,119,116,4,0,0,22,0,0,0,-1--1--1,,1|(1425,476)|
+1,118,119,110,100,0,0,22,0,0,0,-1--1--1,,1|(1333,476)|
+11,119,48,1376,476,6,8,34,3,0,0,1,0,0,0
+10,120,Drained Reported Issuance of Shares,1376,503,77,19,40,3,0,0,-1,0,0,0
+10,121,Reported Issuance of Shares,1314,594,76,19,8,131,0,0,0,0,0,0
+1,122,120,121,1,0,43,0,0,64,0,-1--1--1,,1|(1355,544)|
+10,123,TIME STEP,1453,602,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,124,123,120,1,0,0,0,0,64,0,-1--1--1,,1|(1442,546)|
+1,125,123,121,1,0,0,0,0,64,0,-1--1--1,,1|(1371,608)|
+10,126,Initial Accumulated Reported Issuance of Shares,1220,408,86,28,8,131,0,0,-1,0,0,0
+1,127,126,110,0,0,0,0,0,64,1,-1--1--1,,1|(1221,432)|
+1,128,110,119,1,0,0,0,0,64,0,-1--1--1,,1|(1319,449)|
+10,129,Reporting Period,1222,667,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,130,129,121,1,0,45,0,0,64,0,-1--1--1,,1|(1292,643)|
+10,131,Check Reporting,1386,391,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,132,131,119,1,0,0,0,0,64,0,-1--1--1,,1|(1391,438)|
+10,133,OE Issuance of Shares,1427,669,61,19,8,3,0,0,0,0,0,0
+1,134,121,133,1,0,43,0,0,64,0,-1--1--1,,1|(1347,641)|
+10,135,OE Quarterly Issuance of Shares,1434,730,77,19,8,3,0,0,0,0,0,0
+1,136,121,135,1,0,43,0,0,64,0,-1--1--1,,1|(1321,665)|
+10,137,Quarters per Year,1594,769,55,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,138,137,135,1,0,45,0,0,64,0,-1--1--1,,1|(1534,741)|
+10,139,Check Reporting,1586,673,45,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,140,139,133,1,0,0,0,0,64,0,-1--1--1,,1|(1524,667)|
+1,141,139,135,1,0,0,0,0,64,0,-1--1--1,,1|(1519,697)|
+10,142,Capital Inflow from Share Issuance,1027,611,80,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,143,Dividends Paid,1070,538,46,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,144,142,115,1,0,43,0,0,192,0,-1--1--1,,1|(1030,550)|
+10,145,Reported Earnings Before Taxes,286,454,66,28,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,146,Reported Tax Expense,286,454,59,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,147,IS Net Income,132,421,35,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,148,147,38,1,0,43,0,0,192,0,-1--1--1,,1|(205,418)|
+10,149,Quarterly Net Income,378,489,58,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,151,Reporting Period,272,457,45,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,152,OE Quarterly Net Income,506,413,52,19,8,3,0,0,0,0,0,0
+10,153,Annual Reporting Switch,272,457,74,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,155,149,152,1,0,43,0,0,192,0,-1--1--1,,1|(463,451)|
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:quarter,quarters
+22:share,shares
+22:unit,units,Unit,Units
+22:Week,Weeks
+22:Year,Years
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:Supplier Credit Terms in Days
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:0
+25:20
+26:20

@@ -1,0 +1,399 @@
+"""Deterministic P06 conformance tests with independent arithmetic/set oracles."""
+from datetime import date
+from fractions import Fraction as F
+from pathlib import Path
+import copy
+import json
+import sys
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from context_chronology_v1 import (  # noqa: E402
+    Context, DebtConstituent, MappingRule, P06Engine, P06Error,
+    map_components, combine_partitions, adapt_core_context, adapt_p03_reading, adapt_p01_source,
+    admit_uncertainty, check_partition, compatible_context, guard_information_view,
+    interest_certificate, resolve_bullet_debt, select_evidence, subtract_cumulative,
+)
+
+
+def ctx(**overrides):
+    row = {
+        "concept": "revenue", "entity": "Acme", "perimeter": "Acme", "perimeter_version": "2026",
+        "basis": "GAAP", "measurement": "historical_cost", "unit": "USD", "currency": "USD",
+        "calendar": "gregorian", "dimensions": {"segment": "retail"}, "gross_net": "gross",
+    }
+    row.update(overrides)
+    return Context.from_dict(row)
+
+
+def assertions():
+    return [
+        {"id": "h1-original", "concept": "sales", "value": "120", "period": {"start": "2025-01-01", "end": "2025-06-30"}, "available": "2025-08-01", "ingested": "2025-08-02", "supersedes": [], "source": "fixture:original", "historical_byte_vintage": "unknown"},
+        {"id": "h1-revised", "concept": "sales", "value": "110", "period": {"start": "2025-01-01", "end": "2025-06-30"}, "available": "2026-02-01", "ingested": "2026-02-02", "supersedes": ["h1-original"], "source": "fixture:revision", "historical_byte_vintage": "unknown"},
+        {"id": "fy25", "concept": "sales", "value": "260", "period": {"start": "2025-01-01", "end": "2025-12-31"}, "available": "2026-02-01", "ingested": "2026-02-02", "supersedes": [], "source": "fixture:annual", "historical_byte_vintage": "unknown"},
+    ]
+
+
+class ContextPartitionTests(unittest.TestCase):
+    def test_equivalent_context_mapping_and_spelling_preserved(self):
+        source, target = ctx(concept="sales", scale="thousands", sign="credit", precision=2), ctx(concept="revenue", scale="thousands", sign="credit", precision=2)
+        rule = MappingRule("sales", "revenue", provenance=("fixture:review",))
+        witness = compatible_context(source, target, [rule], at="2026-01-01")
+        self.assertEqual(witness["kind"], "equivalent")
+        self.assertEqual(witness["source"]["concept"], "sales")
+        self.assertEqual(witness["target"]["concept"], "revenue")
+        self.assertEqual(witness["source"]["scale"], "thousands")
+        self.assertEqual(witness["source"]["precision"], 2)
+
+    def test_context_rejects_parent_basis_measurement_currency_calendar_gross_net(self):
+        for field, a, b, code in [
+            ("perimeter", "Acme", "Group", "PARENT_GROUP_MISMATCH"),
+            ("perimeter_version", "2026", "2025", "PERIMETER_VERSION_MISMATCH"),
+            ("basis", "GAAP", "IFRS", "BASIS_MISMATCH"),
+            ("measurement", "historical_cost", "fair_value", "MEASUREMENT_MISMATCH"),
+            ("currency", "USD", "EUR", "CURRENCY_MISMATCH"),
+            ("calendar", "gregorian", "fiscal_445", "CALENDAR_MISMATCH"),
+            ("gross_net", "gross", "net", "GROSS_NET_MISMATCH"),
+        ]:
+            with self.subTest(field=field):
+                with self.assertRaisesRegex(P06Error, code):
+                    compatible_context(ctx(**{field: a}), ctx(**{field: b}))
+
+    def test_expired_cycle_and_measurement_conversion_rejected(self):
+        with self.assertRaisesRegex(P06Error, "CONTEXT_MISMATCH"):
+            compatible_context(ctx(concept="a"), ctx(concept="b"), [MappingRule("a", "b", effective_end=date(2025, 1, 1), provenance=("x",))], at="2026-01-01")
+        with self.assertRaisesRegex(P06Error, "MAPPING_CYCLE"):
+            compatible_context(ctx(concept="a"), ctx(concept="b"), [MappingRule("a", "b", provenance=("x",)), MappingRule("b", "a", provenance=("y",))])
+        with self.assertRaisesRegex(P06Error, "UNSUPPORTED_MEASUREMENT_CONVERSION"):
+            compatible_context(ctx(concept="a"), ctx(concept="b"), [MappingRule("a", "b", conversion="USD_to_EUR", provenance=("x",))])
+        with self.assertRaisesRegex(P06Error, "UNSUPPORTED_MEASUREMENT_CONVERSION"):
+            compatible_context(ctx(concept="a", scale="units"), ctx(concept="a", scale="thousands"))
+
+    def test_partition_independent_enumeration_and_unknown_residual(self):
+        ok = check_partition(["e1", "e2", "e3"], {"north": ["e1"], "south": ["e2", "e3"]}, axis="geo")
+        self.assertTrue(ok["complete"])
+        for members in ({"north": ["e1", "e2"], "south": ["e2", "e3"]}, {"north": ["e1"]}):
+            with self.assertRaisesRegex(P06Error, "OVERLAPPING_PARTITION|INCOMPLETE_PARTITION"):
+                check_partition(["e1", "e2", "e3"], members, axis="geo")
+        with self.assertRaisesRegex(P06Error, "UNKNOWN_RESIDUAL"):
+            check_partition(["e1", "e2"], {"north": ["e1"]}, residual={"members": ["e2"], "known": False}, axis="geo")
+
+    def test_partition_population_and_axis_prevent_double_counting(self):
+        self.assertEqual(check_partition(["a", "b"], {"x": ["a"], "y": ["b"]}, axis="product")["axis"], "product")
+        with self.assertRaisesRegex(P06Error, "OVERLAPPING_PARTITION"):
+            check_partition(["a", "b"], {"x": ["a"], "all": ["a", "b"]}, axis="product")
+
+
+class ChronologyYTDTests(unittest.TestCase):
+    def test_original_latest_and_harmonised_selection(self):
+        rows = assertions()
+        original = select_evidence(rows, "2025-12-31", mode="original", timezone_name="UTC", date_only_policy="next_local_midnight")
+        self.assertEqual(original["selected_ids"], ["h1-original"])
+        # The original view remains anchored to the root even after a later
+        # revision becomes eligible; only latest_available removes the root.
+        original_after_revision = select_evidence(rows, "2026-12-31", mode="original", timezone_name="UTC", date_only_policy="next_local_midnight")
+        self.assertEqual(set(original_after_revision["selected_ids"]), {"h1-original", "fy25"})
+        latest = select_evidence(rows, "2026-12-31", mode="latest_available", timezone_name="UTC", date_only_policy="next_local_midnight")
+        self.assertEqual(set(latest["selected_ids"]), {"h1-revised", "fy25"})
+        harm = select_evidence(rows, "2026-12-31", mode="harmonised", timezone_name="UTC", date_only_policy="next_local_midnight", harmonisations=[{"source_id": "h1-revised", "target_id": "sales-harmonised", "review_decision": "Accept", "provenance": ["review:1"]}])
+        self.assertEqual(harm["transformations"][0]["target_id"], "sales-harmonised")
+        self.assertTrue(harm["unresolved"])
+
+    def test_cutoff_ingestion_and_date_only_boundary(self):
+        row = {"id": "d", "available": "2025-01-01", "ingested": "2025-01-01", "supersedes": [], "source": "x"}
+        before = select_evidence([row], "2025-01-01T23:59:59+00:00", timezone_name="UTC", date_only_policy="next_local_midnight")
+        equal = select_evidence([row], "2025-01-02T00:00:00+00:00", timezone_name="UTC", date_only_policy="next_local_midnight")
+        self.assertEqual(before["selected_ids"], [])
+        self.assertEqual(equal["selected_ids"], ["d"])
+        with self.assertRaisesRegex(P06Error, "DATE_ONLY_POLICY_REQUIRED"):
+            select_evidence([row], "2025-01-02", timezone_name="UTC")
+        with self.assertRaisesRegex(P06Error, "TIMEZONE_REQUIRED"):
+            select_evidence([row], "2025-01-02", date_only_policy="next_local_midnight")
+        unknown = {"id": "unknown", "available": "unknown", "supersedes": [], "source": "unretained"}
+        unresolved = select_evidence([unknown], "2026-01-01T00:00:00+00:00")
+        self.assertEqual(unresolved["selected_ids"], [])
+        self.assertIn("source_availability_unestablished", {x["reason"] for x in unresolved["unresolved"]})
+
+    def test_dangling_and_cyclic_supersession_rejected(self):
+        bad = {"id": "a", "available": "2025-01-01T00:00:00+00:00", "supersedes": ["z"], "source": "x"}
+        with self.assertRaisesRegex(P06Error, "DANGLING_SUPERSESSION"):
+            select_evidence([bad], "2026-01-01T00:00:00+00:00")
+        a = {"id": "a", "available": "2025-01-01T00:00:00+00:00", "supersedes": ["b"], "source": "x"}
+        b = {"id": "b", "available": "2025-01-01T00:00:00+00:00", "supersedes": ["a"], "source": "x"}
+        with self.assertRaisesRegex(P06Error, "SUPERSESSION_CYCLE"):
+            select_evidence([a, b], "2026-01-01T00:00:00+00:00")
+
+    def test_ytd_valid_subtraction_uses_revised_h1(self):
+        result = subtract_cumulative(
+            {"id": "fy", "kind": "cumulative", "amount": 260, "concept": "sales", "context": {"entity": "A"}, "calendar": "gregorian", "revision_id": "r2", "period": {"start": "2025-01-01", "end": "2025-12-31"}},
+            {"id": "h1", "kind": "cumulative", "amount": 110, "concept": "sales", "context": {"entity": "A"}, "calendar": "gregorian", "revision_id": "r2", "period": {"start": "2025-01-01", "end": "2025-06-30"}},
+        )
+        self.assertEqual(result["amount"], F(150))
+        self.assertEqual(result["period"], {"start": "2025-06-30", "end": "2025-12-31"})
+        with self.assertRaisesRegex(P06Error, "REVISION_INCOMPATIBLE"):
+            subtract_cumulative({"id": "fy", "kind": "cumulative", "amount": 260, "concept": "sales", "context": {"entity": "A"}, "calendar": "gregorian", "revision_id": "r2", "period": {"start": "2025-01-01", "end": "2025-12-31"}}, {"id": "h1", "kind": "cumulative", "amount": 120, "concept": "sales", "context": {"entity": "A"}, "calendar": "gregorian", "revision_id": "r1", "period": {"start": "2025-01-01", "end": "2025-06-30"}})
+
+    def test_ytd_rejects_instant_start_and_nonnested(self):
+        base = {"kind": "cumulative", "amount": 1, "concept": "x", "context": {}, "calendar": "gregorian", "revision_id": "r", "period": {"start": "2025-01-01", "end": "2025-06-30"}}
+        with self.assertRaisesRegex(P06Error, "YTD_REQUIRES_CUMULATIVE"):
+            subtract_cumulative({**base, "kind": "instant"}, base)
+        with self.assertRaisesRegex(P06Error, "PERIOD_START_MISMATCH"):
+            subtract_cumulative({**base, "period": {"start": "2025-02-01", "end": "2025-12-31"}}, base)
+        with self.assertRaisesRegex(P06Error, "REVISION_UNKNOWN"):
+            subtract_cumulative({**base, "revision_id": None, "period": {"start": "2025-01-01", "end": "2025-12-31"}}, {**base, "revision_id": None})
+
+
+def registry():
+    return {
+        "doc": {"kind": "Source", "locators": ["p1"]},
+        "memo": {"review_decision": "Accept", "package": "pkg", "scope": "demo", "eligible_treatments": ["A"]},
+        "pkg": {"kind": "AccountingPackage", "scope": "demo", "review_decision": "Accept", "start": "2025-01-01", "end": "2026-01-01", "permitted_treatments": ["A"]},
+        "input": {"review_decision": "Accept", "available_date": "2025-01-01", "value": "10"},
+        "past": {"kind": "Information", "available_date": "2025-01-01", "event_date": "2025-01-01", "information_kind": "observation"},
+        "stress": {"kind": "Information", "available_date": "2025-01-01", "event_date": "2026-01-01", "information_kind": "announced_stress"},
+    }
+
+
+def admission_cases():
+    specific = [
+        ("ExtractionReading", dict(source="doc", locator="p1", review_decision="Accept")),
+        ("HistoricalFact", dict(evidence=["memo"], reason="finite unknown", domain=["1", "2"], evidence_constraints=[{"evidence": "memo", "lower": "1", "upper": "2"}])),
+        ("AccountingElection", dict(package="pkg", permitted_treatments=["A"], election="A", effective_date="2025-01-01", eligibility_evidence="memo")),
+        ("MeasurementEstimate", dict(method="direct", measurement_date="2025-01-01", inputs={"value": "input"})),
+        ("BehaviourPolicy", dict(policy="hold", information_set=["past"], decision_time="2025-01-01")),
+        ("FutureInnovation", dict(driver="shock", future_period={"start": "2026-01-01", "end": "2027-01-01"}, decision_time="2025-01-01", scenario="base", joint_law={"measure": "real_world", "atoms":[{"id":"a","hypothesis":{"shock":0},"weight":"1"}]}, measure="real_world")),
+    ]
+    return [{"id": k, "kind": k, "scope": "demo", "provenance": ["fixture"], "dependencies": [], **v} for k,v in specific]
+
+
+class UncertaintyTests(unittest.TestCase):
+    def test_all_six_categories(self):
+        for row in admission_cases():
+            with self.subTest(kind=row["kind"]):
+                result = admit_uncertainty(row, known_records=registry(), available_information=["past"])
+                self.assertEqual(result["kind"], row["kind"])
+                if row["kind"] == "MeasurementEstimate":
+                    self.assertEqual(result["admitted_value"], F(10))
+
+    def test_category_specific_rejections(self):
+        cases = admission_cases()
+        changes = [
+            (0, {"source": "missing"}, "UNRESOLVED_ADMISSION_REFERENCE"),
+            (0, {"locator": "p2"}, "UNRESOLVED_LOCATOR"),
+            (0, {"review_decision": "Reject"}, "READING_NOT_ACCEPTED"),
+            (1, {"domain": []}, "HISTORICAL_DOMAIN_REQUIRED"),
+            (1, {"domain": ["3"]}, "HISTORICAL_CONSTRAINT_VIOLATION"),
+            (2, {"election": "B"}, "TREATMENT_NOT_PERMITTED"),
+            (2, {"effective_date": "2026-01-01"}, "PACKAGE_NOT_EFFECTIVE"),
+            (2, {"permitted_treatments": ["A", "B"]}, "TREATMENT_NOT_PERMITTED"),
+            (3, {"inputs": {"value": None}}, "MISSING_ESTIMATE_INPUT"),
+            (3, {"measurement_date": "2024-12-31"}, "ESTIMATE_INPUT_UNAVAILABLE"),
+            (3, {"method": "magic"}, "UNSUPPORTED_ESTIMATION_METHOD"),
+            (1, {"evidence_constraints": [{"lower": "1", "upper": "2"}]}, "HISTORICAL_CONSTRAINT_INVALID"),
+            (2, {"permitted_treatments": "A"}, "INVALID_TREATMENT_LIST"),
+            (5, {"joint_law": []}, "INVALID_JOINT_LAW"),
+            (4, {"information_set": ["stress"]}, "FUTURE_INFORMATION_LEAKAGE"),
+            (4, {"decision_time": "2024-12-31"}, "FUTURE_INFORMATION_LEAKAGE"),
+            (5, {"measure": "pricing"}, "INCOMPATIBLE_PROBABILITY_MEASURE"),
+            (5, {"decision_time": "2026-01-01"}, "INVALID_FUTURE_PERIOD"),
+            (5, {"scenario": "conditioned"}, "UNSUPPORTED_SCENARIO"),
+            (0, {"kind": "Mystery"}, "UNKNOWN_UNCERTAINTY_CATEGORY"),
+        ]
+        for index, patch, code in changes:
+            with self.subTest(code=code), self.assertRaisesRegex(P06Error, code):
+                admit_uncertainty({**cases[index], **patch}, known_records=registry(), available_information=["past"])
+
+    def test_dependencies_and_joint_law(self):
+        row = admission_cases()[1]
+        for known, deps, code in [({}, ["absent"], "DANGLING_DEPENDENCY"), ({"x": {"dependencies": ["absent"]}}, ["x"], "DANGLING_DEPENDENCY"), ({"x": {"dependencies": [row["id"]]}}, ["x"], "CYCLIC_DEPENDENCY")]:
+            with self.assertRaisesRegex(P06Error, code):
+                admit_uncertainty({**row, "dependencies": deps}, known_records=known)
+        innovation = admission_cases()[5]
+        for atoms in [
+            [{"id":"a","hypothesis":{"shock":0},"weight":"1/2"}],
+            [{"id":"a","hypothesis":{"shock":0},"weight":"1/2"},{"id":"b","hypothesis":{"other":1},"weight":"1/2"}],
+            [{"id":"a","hypothesis":{"shock":0},"weight":"1/2"},{"id":"b","hypothesis":{"shock":0},"weight":"1/2"}],
+        ]:
+            with self.assertRaisesRegex(P06Error, "INVALID_JOINT_LAW"):
+                admit_uncertainty({**innovation, "joint_law": {"measure":"real_world","atoms":atoms}})
+
+    def test_information_view_dates_and_modes(self):
+        view = {"visible": ["past", "stress"], "future_announced": ["stress"], "future_realised": ["outcome"], "records": registry(), "measure_id": "P", "pricing_measure_id": "Q"}
+        saved = copy.deepcopy(view)
+        self.assertFalse(guard_information_view(view, event_time="2025-01-01")["selection_changes_history"])
+        self.assertEqual(view, saved)
+        for patch, mode, code in [({"future_announced": []}, "exogenous_stress", "FUTURE_INFORMATION_LEAKAGE"), ({"visible":["outcome"]}, "exogenous_stress", "FUTURE_INFORMATION_LEAKAGE"), ({"pricing_measure_id":"P"}, "exogenous_stress", "INCOMPATIBLE_PROBABILITY_MEASURE"), ({}, "structural_intervention", "UNSUPPORTED_INFORMATION_OPERATION"), ({}, "observational_conditioning", "UNSUPPORTED_INFORMATION_OPERATION"), ({}, "typo", "UNSUPPORTED_INFORMATION_OPERATION")]:
+            with self.assertRaisesRegex(P06Error, code):
+                guard_information_view({**view, **patch}, event_time="2025-01-01", request=mode)
+
+
+class ResolutionTests(unittest.TestCase):
+    def rows(self):
+        return [DebtConstituent("a", F(100), F(5, 100), F(2)), DebtConstituent("b", F(50), F(7, 100), F(2))]
+
+    def query(self, **extra):
+        q = {"contract": "bullet-v1", "context": "usd", "evidence_view": "latest_available", "horizon": "1", "scenario": "base", "requested_outputs": ["interest", "principal"], "accrual_convention": "simple_actual_fraction", "group_by": ["rate", "maturity", "reset", "hedge"]}
+        q.update(extra)
+        return q
+
+    def test_exact_grouped_resolution_and_independent_oracle(self):
+        result = resolve_bullet_debt(self.rows(), self.query())
+        self.assertEqual(result["outputs"]["interest"], F(17, 2))
+        self.assertEqual(result["outputs"]["principal"], F(150))
+        self.assertEqual(sum(g["interest"] for g in result["groups"]), F(17, 2))
+
+    def test_query_horizon_scenario_and_grouping_sufficiency(self):
+        with self.assertRaisesRegex(P06Error, "GROUPING_INSUFFICIENT"):
+            resolve_bullet_debt(self.rows(), self.query(group_by=["maturity", "reset", "hedge"]))
+        with self.assertRaisesRegex(P06Error, "UNSUPPORTED_SCENARIO"):
+            resolve_bullet_debt(self.rows(), self.query(scenario="future_realised"))
+        with self.assertRaisesRegex(P06Error, "MATURITY_CROSSING"):
+            resolve_bullet_debt(self.rows(), self.query(horizon="3"))
+
+    def test_approximation_requires_declared_error_evidence(self):
+        with self.assertRaisesRegex(P06Error, "APPROXIMATION_EVIDENCE_REQUIRED"):
+            resolve_bullet_debt(self.rows(), self.query(), approximation={"target_rate": "0.06", "tolerance": "1", "error_bound": "1"})
+        result = resolve_bullet_debt(self.rows(), self.query(), approximation={"target_rate": "0.06", "tolerance": "2", "error_bound": "3/2", "scope": "fixed_rate_interest", "evidence": ["certificate:triangle"]})
+        self.assertEqual(result["approximation"]["error"], "1/2")
+        self.assertEqual(result["approximation"]["bound"], "3/2")
+
+    def test_stale_result_and_unsupported_dynamics(self):
+        previous = resolve_bullet_debt(self.rows(), self.query())
+        with self.assertRaisesRegex(P06Error, "STALE_RESULT"):
+            resolve_bullet_debt(self.rows(), self.query(horizon="2"), previous=previous)
+        with self.assertRaisesRegex(P06Error, "RESET_UNSUPPORTED"):
+            resolve_bullet_debt([DebtConstituent("a", F(1), F(1, 10), F(2), reset="floating")], self.query(group_by=["rate", "maturity", "reset", "hedge"]))
+
+
+class RepairRegressionTests(unittest.TestCase):
+    def test_finite_component_mapping_and_cross_axis_double_count(self):
+        source,target=ctx(concept="sales"),ctx(concept="revenue")
+        rule=MappingRule("sales","revenue",kind="component",provenance=("review",))
+        result=map_components(source,target,rule,population=["a","b"],members={"one":["a"],"two":["b"]},values={"a":"3","b":"5"},axis="product",at="2025-01-01")
+        self.assertEqual(result["amount"],8)
+        other=check_partition(["a","b"],{"north":["a","b"]},axis="geography")
+        with self.assertRaisesRegex(P06Error,"OVERLAPPING_CLASSIFICATIONS"):
+            combine_partitions([result["partition"],other])
+        with self.assertRaisesRegex(P06Error,"PARTITION_WITNESS_REQUIRED"):
+            compatible_context(source,target,[rule])
+        residual=check_partition(["a","b"],{"one":["a"]},residual={"members":["b"],"known":True},axis="x")
+        self.assertTrue(residual["complete"])
+        with self.assertRaisesRegex(P06Error,"DUPLICATE_MEMBER"):
+            check_partition(["a"],{"one":["a","a"]})
+
+    def test_transitive_revision_conflict_selectivity_and_ingestion(self):
+        base={"source":"s","available":"2025-01-01T00:00:00+00:00","ingested":"2025-01-01T00:00:00+00:00"}
+        rows=[dict(base,id="a",supersedes=[]),dict(base,id="b",supersedes=["a"],available="unknown"),dict(base,id="c",supersedes=["b"]),dict(base,id="note",supersedes=[])]
+        self.assertEqual(select_evidence(rows,"2026-01-01T00:00:00+00:00")["selected_ids"],["c","note"])
+        rows.append(dict(base,id="conflict",supersedes=["a"]))
+        self.assertEqual(set(select_evidence(rows,"2026-01-01T00:00:00+00:00")["selected_ids"]),{"c","note","conflict"})
+        rows[-1]["ingested"]="2027-01-01T00:00:00+00:00"
+        self.assertNotIn("conflict",select_evidence(rows,"2026-01-01T00:00:00+00:00",system_as_of="2026-01-01T00:00:00+00:00")["selected_ids"])
+        self.assertEqual(select_evidence(rows,"2026-01-01T00:00:00+00:00",require_known_bytes=True)["selected_ids"],[])
+
+    def test_named_zone_and_harmonisation_value_dependencies(self):
+        row={"id":"x","source":"s","available":"2025-03-09","supersedes":[],"amount":"12"}
+        kw=dict(timezone_name="America/New_York",date_only_policy="next_local_midnight")
+        self.assertEqual(select_evidence([row],"2025-03-10T03:59:59+00:00",**kw)["selected_ids"],[])
+        self.assertEqual(select_evidence([row],"2025-03-10T04:00:00+00:00",**kw)["selected_ids"],["x"])
+        h={"source_id":"x","target_id":"h","review_decision":"Accept","provenance":["review"]}
+        result=select_evidence([row],"2026-01-01T00:00:00+00:00",mode="harmonised",harmonisations=[h],**kw)
+        self.assertEqual(result["derived"][0]["amount"],"12")
+        self.assertEqual(result["derived"][0]["dependencies"],["x"])
+        with self.assertRaisesRegex(P06Error,"UNSUPPORTED_HARMONISATION"):
+            select_evidence([row],"2026-01-01T00:00:00+00:00",mode="harmonised",harmonisations=[{**h,"operation":"convert"}],**kw)
+
+    def test_ytd_malformed_period_and_exception_scope(self):
+        a={"id":"fy","kind":"cumulative","amount":"260","concept":"sales","context":{},"calendar":"gregorian","revision_id":"r2","period":{"start":"2025-01-01","end":"2026-01-01"}}
+        b={**a,"id":"h1","amount":"120","revision_id":"r1","period":{"start":"2025-01-01","end":"2025-07-01"}}
+        with self.assertRaisesRegex(P06Error,"REVISION_COMPATIBILITY_SCOPE"):
+            subtract_cumulative(a,b,revision_compatibility={"accepted":True,"scope":"anything","evidence":["memo"]})
+        scope={"total_id":"fy","earlier_id":"h1","total_revision":"r2","earlier_revision":"r1","concept":"sales","context":{},"total_period":a["period"],"earlier_period":b["period"]}
+        self.assertEqual(subtract_cumulative(a,b,revision_compatibility={"accepted":True,"scope":scope,"evidence":["memo"]})["amount"],140)
+        with self.assertRaisesRegex(P06Error,"INVALID_PERIOD"):
+            subtract_cumulative(a,{**b,"period":{"start":"2025-01-01","end":"2024-01-01"}})
+
+    def test_resolution_constituent_and_request_invalidation(self):
+        rows=ResolutionTests().rows();q=ResolutionTests().query()
+        prior=resolve_bullet_debt(rows,q)
+        changed=[DebtConstituent("a",F(101),F(1,20),F(2)),rows[1]]
+        for key,value in [("horizon","1/2"),("scenario","announced_stress"),("requested_outputs",["principal"]),("evidence_view","original"),("context","other")]:
+            with self.subTest(key=key),self.assertRaisesRegex(P06Error,"STALE_RESULT"):
+                resolve_bullet_debt(rows,{**q,key:value},previous=prior)
+            self.assertTrue(resolve_bullet_debt(rows,{**q,key:value})["fresh"])
+        with self.assertRaisesRegex(P06Error,"STALE_RESULT"):
+            resolve_bullet_debt(changed,q,previous=prior)
+        for patch,code in [({"error_bound":"1"},"APPROXIMATION_BOUND_INVALID"),({"scope":"principal"},"APPROXIMATION_EVIDENCE_REQUIRED"),({"query_signature":"stale"},"STALE_APPROXIMATION")]:
+            with self.assertRaisesRegex(P06Error,code):
+                resolve_bullet_debt(rows,q,approximation={"target_rate":"0.06","tolerance":"2","error_bound":"3/2","scope":"fixed_rate_interest","evidence":["triangle"],**patch})
+        with self.assertRaisesRegex(P06Error,"MATURITY_CROSSING"):
+            resolve_bullet_debt(rows,{**q,"horizon":"2"})
+
+    def test_checker_failed_suite_returns_false_and_nonzero(self):
+        import check_accounting_p06 as checker
+        from unittest.mock import patch
+        from contextlib import redirect_stdout
+        import io
+        failure={"methods":1,"failures":1,"errors":0,"skips":0,"passed":False,"output":"intentional failure"}
+        args=["--output-dir",str(ROOT/"data/accounting-master/deliverables/P06"),"--approved-plan",checker.DEFAULT_RUN+"/approved-plan.json","--execution-inventory",checker.DEFAULT_RUN+"/execution-1/pre-edit-files.json"]
+        with patch.object(checker,"run_suite",return_value=failure), patch.object(Path,"write_text") as writes, redirect_stdout(io.StringIO()):
+            code=checker.main(args)
+        self.assertEqual(code,1)
+        payload=json.loads(writes.call_args_list[0].args[0])
+        self.assertIs(payload["passed"],False)
+
+
+class IntegrationTests(unittest.TestCase):
+    def setup_case(self):
+        fixture=json.loads((ROOT/'docs/design/fixtures/p06-context-chronology-cases-v1.json').read_text())
+        engine=P06Engine()
+        engine.add_context("source",ctx(concept="sales"));engine.add_context("target",ctx(concept="revenue"))
+        engine.add_mapping(MappingRule("sales","revenue",provenance=("fixture",)))
+        for row in fixture["assertions"]:
+            engine.add_assertion(row)
+        request={"cutoff":"2026-12-31","timezone":"UTC","date_only_policy":"next_local_midnight","evidence_view":"latest_available","source_context":"source","target_context":"target","derive":{"total":"fy25","earlier":"h1-original"},"registry":registry(),"uncertainty":[admission_cases()[0]],"constituents":[{"id":"d","principal_from":"derived","rate":"1/20","maturity":"2"}],"query":ResolutionTests().query(context="target")}
+        return engine,request
+
+    def test_source_drives_period_and_resolution_and_freezes_prior_result(self):
+        engine,request=self.setup_case()
+        result=engine.evaluate(request)
+        self.assertEqual(result["derived"]["amount"],150)
+        self.assertEqual(result["resolution"]["outputs"]["interest"],F(15,2))
+        preserved=engine.preserve_result()
+        old=next(x for x in engine.assertions if x["id"]=="h1-revised")
+        engine.revise("h1-revised",{**old,"id":"h1-new","amount":"100","supersedes":["h1-revised"]})
+        self.assertFalse(engine.current_results)
+        new=engine.evaluate(request)
+        self.assertEqual(new["derived"]["amount"],160)
+        self.assertEqual(new["resolution"]["outputs"]["interest"],8)
+        self.assertNotEqual(result["input_sha256"],new["input_sha256"])
+        preserved["derived"]["amount"]=-1
+        self.assertEqual(engine.preserved_results["current"]["derived"]["amount"],150)
+
+    def test_revision_links_affect_selection_and_failed_mutation_is_atomic(self):
+        engine,request=self.setup_case()
+        old=next(x for x in engine.assertions if x["id"]=="h1-revised")
+        engine.revise("h1-original",{**old,"id":"competing","supersedes":["h1-original"]})
+        with self.assertRaisesRegex(P06Error,"EVIDENCE_UNAVAILABLE_OR_CONFLICTING"):
+            engine.evaluate(request)
+        before=copy.deepcopy(engine.assertions)
+        with self.assertRaisesRegex(P06Error,"DANGLING_SUPERSESSION"):
+            engine.add_assertion({"id":"bad","source":"x","supersedes":["absent"]})
+        self.assertEqual(engine.assertions,before)
+
+    def test_adapters_preserve_p03_source_and_p01_unknown(self):
+        from core0_ir_v1 import ReadingBinding
+        binding=ReadingBinding("reading","USD 100","100","USD","2025-01-01","fixture:uri","doc","2025-02-01T00:00:00+00:00","2025-02-02T00:00:00+00:00","reviewer","2025-02-02T00:00:00+00:00","reviewed","2025-03-01T00:00:00+00:00",action="Accept")
+        row=adapt_p03_reading(binding,ctx())
+        self.assertEqual(row["literal"],"USD 100");self.assertEqual(row["amount"],100)
+        core={**ctx().as_dict(),"dimensions":[{"axis":"segment","member":"retail"}]}
+        self.assertEqual(adapt_core_context(core,perimeter_version="2026",gross_net="gross",calendar="gregorian"),ctx())
+        records=json.loads((ROOT/'data/accounting-master/runs/20261002T180732-83972f09/P01/source-work-register.json').read_text())["records"]
+        adapted=adapt_p01_source(records[0])
+        selected=select_evidence([adapted],"2026-10-03T00:00:00+00:00",require_known_bytes=True)
+        self.assertEqual(selected["selected_ids"],[]);self.assertTrue(selected["unresolved"])
+
+
+if __name__ == "__main__":
+    unittest.main()

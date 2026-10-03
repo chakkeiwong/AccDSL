@@ -1,0 +1,116 @@
+{
+  "plan": {
+    "verdict": "PLAN",
+    "summary": "P03 can proceed independently of unfinished P02. Current code parses syntax and validates authored debt IR, but does not compile source programs. Implement a versioned, explicitly bounded Core 0 lowering profile with independent textual and typed entrypoints, shared semantic validation, and executable conformance checks. The prior timeout is addressed by reusing its inspection findings and limiting this planning pass to relevant interfaces. No files were changed or implementation tests run.",
+    "steps": [
+      "1. Establish the implementation boundary in new docs/design/spec/core0-lowering-profile-v1.md. Map MC02/MC04 to context and provenance, MC10 to admitted factual uncertainty and explicit assumptions, MC20 to package-controlled bindings and rejected overrides, MC23 to equivalent frontend tasks, and MC24 to parsing, binding, validation and diagnostics. Declare support for the borrowing.acc declarations plus let bindings and Boolean constraints; one USD book, the four DemoDebt account roles, one DebtMix contract, exact instant observations, closed Real symbol intervals, conditional alternatives and constant-rate stress scenarios. Enumerate every unsupported declaration, expression and uncertainty category.",
+      "2. Record the preimplementation audit and protection boundary in that profile. Add only scripts/core0_frontends_v1.py, scripts/core0_ir_v1.py, scripts/check_accounting_p03.py, tests/test_accounting_p03.py, docs/design/spec/core0-lowering-profile-v1.md and docs/design/fixtures/p03-lowering-cases-v1.json, plus the two declared P03 deliverables. Hash relevant existing inputs and protected files before work. Preserve existing grammar, schema, validators, fixtures, controller files, release-pinned files and snapshots. Stop on unexpected input changes or conflicting preexisting content; retain partial work without overwriting it.",
+      "3. Define immutable typed Program, declaration and expression constructors, CompileBindings, CompileResult and Diagnostic interfaces. CompileBindings must explicitly supply package locks, evidence/view records, accepted synthetic readings, symbol admissions, opening balances, context metadata and assumption/alternative metadata absent from surface syntax. Separate package definitions from caller-supplied evidence. Resolve only local, declared, kind-checked, digest-locked exports; reject missing bindings, wrong versions, collisions, escaping paths and unsupported exports. Never infer acceptance from a source declaration or manufacture reviewer identities, timestamps, probabilities or missing context.",
+      "4. Implement compile_source(text, bindings) using the existing grammar with retained literal tokens and source positions. Build an AST from actual declarations, preserve per-year and currency suffixes, and reject reserved identifiers explicitly. Decode JSON strings safely, retain original spelling and offsets, normalize semantic strings as specified, validate Gregorian dates, and convert decimal text directly to Fraction. Bind declaration names and lexical scopes, detect duplicate declarations/fields, unresolved references and cycles, then lower every supported node. Recognized unsupported constructs must return an explicit capability diagnostic.",
+      "5. Implement compile_program(Program, bindings) through the same binding, type/context checking and IR construction stages. Typed constructors must neither generate DSL text nor accept an unchecked IR dictionary as a compiled program. Support value, constant and external in their declared positions; references, unary operations, compatible addition/subtraction, comparisons and Boolean composition; and scalar multiplication/division with explicit quantity rules and a provably nonzero constant denominator. Reject implicit currency/rate conversions, unsupported products and unproved bounds. Keep generated IDs deterministic and independent of source offsets.",
+      "6. Implement validate_ir(ir, bindings) and a small exact expression evaluator in core0_ir_v1.py. Validate against the unchanged closed schema, then independently check references, arities, inferred types, contexts, source-reading equality, evidence cutoffs, symbol admission, assumption scope/validity, package applicability, contract fields/domains, opening balances and report bindings. Reuse sound low-level helpers where appropriate; do not weaken the existing fixture-specific validator. Preserve all alternatives over shared symbols without solving or selecting them. Emit Unknown feasibility, PartialSearch coverage, zero completed cells and one explicitly unsearched family cell for this profile, with no witnesses or solver results.",
+      "7. Preserve source spans, original display/precision, context, dependencies, assumptions and alternatives in generated records. Return a separate source map for textual offsets or typed-constructor locations. Define a semantic comparison projection that excludes frontend locations but retains economically relevant values, contexts, package locks and assumptions. Retain raw input hashes separately. Compare the original generated program with the authored IR only through documented corresponding fields; exclude authored reconstruction claims from that comparator. Neither compiler entrypoint may load core-ir-demo.json, borrowings.json or package expected-result fields to construct its output.",
+      "8. Implement independent positive programs, typed counterparts and negative cases in the new fixture/test files. Include the original borrowing source, formatting variants, a differently named program, let-bound rates, arithmetic and compound alternative conditions, a changed stress rate, and changed principal with matching new synthetic evidence/opening balances. Add schema-valid IR corruptions and invalid typed programs. Exercise exact evaluation from generated IR, stable diagnostics, immutability, repeated compilation and prohibited fixture-lookup checks.",
+      "9. Run the checks below and repair failures before producing data/accounting-master/deliverables/P03/conformance.json and result.md. The checker must write only these declared deliverables under accounting-master. Conformance must contain actual generated IR or complete semantic projections, input/code hashes, expected and observed checks, diagnostics, requirement coverage and unsupported capabilities. Result.md must record commands, environment, wall time, changed files, baseline comparisons, decision table, remaining uncertainty and next justified actions. Keep specification, implementation, tested invariants, accounting validity, forecast validity and human acceptance separate."
+    ],
+    "assumptions": [
+      "The executable target is a named Core0.1 debt-lowering profile, not the whole grammar. Package-specific USD, account roles, calendar and report mapping remain explicit profile restrictions; source identifiers and supported expressions are not matched against one complete fixture.",
+      "Missing surface metadata is supplied through explicit bindings. Synthetic review/admission records remain labeled synthetic; compiler acceptance does not imply actual human review.",
+      "Existing Python 3.11.15, Lark 1.3.1 and jsonschema 4.26.0 are available. Use these and the standard library; no dependency installation, network access, GPU use or model invocation is needed.",
+      "Skeptical audit: addressed fixture lookup, dropped unit tokens, fixture-specific validation and unsupported feasibility inheritance. The authored IR is a bounded comparator; schema success and frontend agreement are insufficient alone. Independent expression checks and semantic rejection cases answer the phase question. No timing or usability comparison is proposed.",
+      "Default audit: numeric semantics come from core-contract.md; package restrictions come from DemoDebt; conservative family status follows the absence of reconstruction. These are implementation choices with tests, not newly promoted accounting or scientific defaults. No experiment or stochastic comparison is authorized by this plan."
+    ],
+    "checks": [
+      "Run from the repository root: python3 -B -m unittest discover -s tests -p 'test_accounting_p03.py' -v. Require every mandatory case to execute and pass; skipped required cases, unexpected exceptions, missing dependencies or timeouts cannot count as success.",
+      "Run: python3 -B scripts/check_accounting_p03.py --output-dir data/accounting-master/deliverables/P03. Require a nonzero exit on any failed obligation, actual per-case observations and complete declared deliverables.",
+      "Frontend equivalence: independently construct typed programs matching each valid source case. Compare complete semantic projections, package/evidence bindings and evaluated expressions. Comments and LF/CRLF changes preserve semantics while retaining distinct source provenance.",
+      "Input sensitivity: original principal 100, fixed rate 0.05 and stressed floating rate 0.07 yield unrounded one-year interest 5 and 7 at the two endpoint assignments. A 0.09 stress yields 9 for the floating endpoint. Consistently changed principal 200 yields 10 and 14. Derive these checks independently as P × (alpha × fixed_rate + (1 − alpha) × stress_rate) × 1 year from evaluated generated fields. These verify this exact calculation, not journals or forecasting.",
+      "Lexical/binding rejection: malformed syntax, reserved names, invalid dates/escapes, duplicate declarations/fields, unknown references, cyclic lets, unresolved or ambiguous exports and missing external metadata. Specifically distinguish bare 0.05 from 0.05 per year.",
+      "Semantic rejection: first confirm schema validity for corrupted IR, then require the intended diagnostic for wrong reference kinds, arity, units, context, accepted reading, cutoff, assumption scope, package digest, contract domain, opening state or report policy. Reject unsupported rules/overrides, mappings, finite choices, uncertainty categories and expression operations through both applicable entrypoints.",
+      "Honesty and regression: verify no invented acceptance, weights, witnesses or feasibility; preserve all conditional branches and shared dependencies. Validate the existing authored fixture with its existing validator through in-memory calls. Do not execute legacy checker mains that overwrite historical reports.",
+      "Verify input immutability, repeated-run determinism and no runtime dependence on expected IR/results. Compare pre/post hashes for protected inputs and record every added or changed source, test and deliverable file. Evidence is deterministic engineering conformance; test counts are not an accounting-validity metric."
+    ],
+    "evidence": [
+      "AGENTS.md",
+      "MISSION_CONTROL.md",
+      "docs/plans/accounting-mission-requirements.md",
+      "docs/design/spec/core-0.lark",
+      "docs/design/spec/core-contract.md",
+      "docs/design/spec/core-ir.schema.json",
+      "docs/design/fixtures/borrowing.acc",
+      "docs/design/fixtures/core-ir-demo.json",
+      "docs/design/fixtures/core-demo-registry.json",
+      "docs/design/fixtures/demo-debt-package.json",
+      "scripts/core_semantics.py",
+      "scripts/check_core_contract.py",
+      "scripts/check_semantic_preparation.py",
+      "data/financial-report-benchmark/release-manifest.json",
+      "data/accounting-master/runs/20261002T180732-83972f09/P03/plan-0.log",
+      "data/accounting-master/runs/20261002T180732-83972f09/P00/result-review.json",
+      "data/accounting-master/runs/20261002T180732-83972f09/P01/result-review.json"
+    ],
+    "issues": [],
+    "residuals": [
+      "P03 implementation modules, required test file and deliverables do not yet exist. This response establishes a plan only.",
+      "Git metadata is unavailable because this directory is not a usable Git repository. Record that limitation once and use file hashes; do not initialize Git.",
+      "General package loading, events/rules, records/arrays, broader currencies/calendars, multidimensional context and cross-company mapping remain outside this executable profile. G2 and G12 remain open.",
+      "Extraction alternatives, accounting elections, measurement estimates, behavior policies, future innovations, probability measures and their general admissibility remain unimplemented. G15 remains open.",
+      "Reconstruction, feasibility proof, coverage certification, accounting execution, empirical forecast validation, authoring superiority and human acceptance require separate evidence. All wider MC and G1–G18 obligations remain intact."
+    ],
+    "next_actions": [
+      "Review this bounded plan for unresolved material objections, then implement the declared files and checks without expanding into P02 or controller repairs.",
+      "Review actual generated IR, independent variants, negative diagnostics and deterministic reports before accepting P03 implementation; require repairs for any missing acceptance obligation.",
+      "Use the resulting capability table and explicit compile bindings to scope subsequent reconstruction, mapping and uncertainty work."
+    ]
+  },
+  "review": {
+    "assumptions": [
+      "Acceptance applies only to the declared Core 0 debt-lowering profile.",
+      "Caller-supplied evidence and assumption metadata remain distinct from package definitions; synthetic acceptance records do not establish human review."
+    ],
+    "checks": [
+      "Inspected the grammar, borrowing source, closed IR schema, package registry, existing validator and relevant MC requirement rows.",
+      "Confirmed Python 3.11.15, Lark 1.3.1 and jsonschema 4.26.0 are available.",
+      "A read-only parser probe confirmed that retaining literal tokens distinguishes bare numbers, annual rates and currency amounts without modifying the grammar.",
+      "Verified that the schema permits Unknown feasibility, PartialSearch coverage and zero completed cells; compilation need not inherit the authored fixture's reconstruction claims.",
+      "Baseline and comparison audit passed: independent typed programs, source variants, exact arithmetic checks and schema-valid corruptions supplement shared-frontend agreement.",
+      "Proxy-promotion audit passed: schema validation, frontend agreement and interest calculations are explicitly insufficient for accounting validity, forecasting or DSL superiority.",
+      "Stop-condition and protection audit passed: unexpected input changes, conflicting files, missing dependencies, skipped mandatory cases and timeouts cannot count as success.",
+      "No files changed; implementation tests were not run because the proposed modules and required test file do not yet exist."
+    ],
+    "evidence": [
+      "AGENTS.md",
+      "MISSION_CONTROL.md",
+      "docs/plans/accounting-mission-requirements.md",
+      "docs/design/spec/core-0.lark",
+      "docs/design/spec/core-contract.md",
+      "docs/design/spec/core-ir.schema.json",
+      "docs/design/fixtures/borrowing.acc",
+      "docs/design/fixtures/demo-debt-package.json",
+      "docs/design/fixtures/core-demo-registry.json",
+      "scripts/core_semantics.py",
+      "scripts/check_core_contract.py",
+      "scripts/check_semantic_preparation.py",
+      "data/accounting-master/runs/20261002T180732-83972f09/P03/plan-0.log"
+    ],
+    "issues": [],
+    "next_actions": [
+      "Implement the declared versioned modules, profile, cases, tests and P03 deliverables within the reviewed boundary.",
+      "Run both specified conformance commands and repair failed obligations before result review.",
+      "Review generated IR and rejection diagnostics against independent expected semantics, including package/evidence separation and preservation of every alternative."
+    ],
+    "residuals": [
+      "Executable lowering, typed frontend equivalence and semantic rejection coverage remain to be demonstrated by implementation.",
+      "The implementation must make the promised quantity rules, metadata requirements and semantic comparison projection explicit in the profile.",
+      "General language support, cross-company mapping and broader uncertainty admission remain open under G2, G12 and G15.",
+      "Reconstruction, accounting execution, empirical forecast validity, authoring superiority and human acceptance remain outside this phase's evidence."
+    ],
+    "steps": [
+      "Reused the prior inspection findings and checked current interfaces.",
+      "Audited scope, baselines, assumptions, environment, stopping rules and proposed acceptance artifacts."
+    ],
+    "summary": "AGREE. No unresolved material objection to the bounded P03 plan. It addresses the prior parser and fixture-inheritance risks, requires actual source lowering and independent semantic checks, and preserves the wider requirements without claiming gap closure.",
+    "verdict": "AGREE"
+  },
+  "plan_hash": "961c32f2bf16986c67bc0fb5440690913a056651d29c0dcceb52788f799d067b"
+}

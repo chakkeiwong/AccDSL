@@ -1,0 +1,562 @@
+ Global Table Extractor (GTE): A Framework for Joint Table Identification and
+               Cell Structure Recognition Using Visual Context
+
+                      Xinyi Zheng                       Douglas Burdick          Lucian Popa
+                  University of Michigan                        IBM Research-Almaden
+                    zxycarol@umich.edu                          {drburdic, lpopa}@us.ibm.com
+
+                                 Xu Zhong                               Nancy Xin Ru Wang
+                            IBM Research Australia                    IBM Research-Almaden
+                           peter.zhong@au1.ibm.com                        wangnxr@ibm.com
+
+
+
+                        Abstract                                  PDF or scanned documents [1]. Since neither of these
+                                                                  widely-used document formats preserve logical table struc-
+   Documents are often used for knowledge sharing and             ture, accurate table detection and cell structure recognition
+preservation in business and science, within which are ta-        techniques are required to reconstruct the table before its
+bles that capture most of the critical data. Unfortunately,       contents can be leveraged for any subsequent analysis, such
+most documents are stored and distributed as PDF or               as question answering [22], scientific leaderboard construc-
+scanned images, which fail to preserve logical table struc-       tion [12] or knowledge base population [25]. Accurate table
+ture. Recent vision-based deep learning approaches have           extraction is possibly the most important task and a major
+been proposed to address this gap, but most still cannot          pain point in document analysis for businesses where the
+achieve state-of-the-art results. We present Global Table         computer vision community can have a significant impact.
+Extractor (GTE), a vision-guided systematic framework for         In fact, the reliance on rules, lack of labelled data and visual
+joint table detection and cell structured recognition, which      nature of table recognition in documents resembles research
+could be built on top of any object detection model. With         in the early days of object recognition in images. Table de-
+GTE-Table, we invent a new penalty based on the natu-             tection refers to detecting the boundary of a table, while cell
+ral cell containment constraint of tables to train our ta-        structure recognition generates the logical relations of cells
+ble network aided by cell location predictions. GTE-Cell          and their contents inside a table, e.g., identification of all
+is a new hierarchical cell detection network that leverages       cells within the same row or column inside the table. Al-
+table styles. Further, we design a method to automati-            though straightforward for humans, accurately reconstruct-
+cally label table and cell structure in existing documents to     ing table boundary and cell structure information from PDF
+cheaply create a large corpus of training and test data. We       or image documents is difficult for automated systems due
+use this to enhance PubTabNet with cell labels and create         to the wide variety of styles, layout and content tables have
+FinTabNet, real-world and complex scientific and financial        across heterogeneous document sources [11]. Such visual
+datasets with detailed table structure annotations to help        “clues” often conflict across sources, e.g., examples in Fig-
+train and test structure recognition. Our framework sur-          ure 1.
+passes previous state-of-the-art results on the ICDAR 2013           Unfortunately, conventional rule-based or statistical
+and ICDAR 2019 table competition in both table detection          techniques for table extraction often fail to generalize as
+and cell structure recognition. Further experiments demon-        they rely heavily on hand-crafted features like graphical
+strate a greater than 45% improvement in cell structure           lines or bold font, which are not robust to style variations
+recognition when compared to a vanilla RetinaNet object           across different document formats. Compared to these ap-
+detection model in our new out-of-domain FinTabNet.               proaches, vision-based deep learning methods have two ad-
+                                                                  vantages. First, by working directly on images, they can
+                                                                  be applied to any document renderable to an image, includ-
+1. Introduction                                                   ing PDF. They do not rely on programmatic PDF encodings
+                                                                  such as graphical line, spacing and font attributes which
+   In real world enterprise and scientific applications, cru-     rule-based approaches require. Second, if a large annotated
+cial information is often summarized in tabular form within       dataset for tables is available, models can be pretrained and
+
+
+
+                                                                697
+                                                                   to detect each cell directly instead of detecting entire rows
+                                                                   and columns separately since cells are more visually dis-
+                                                                   tinct as object units and this approach naturally supports
+                                                                   tables with rows and columns not spanning the entire ta-
+                                                                   ble. Third, current object detection models focus on the
+                                                                   local area around objects, which neglects the global style of
+                                                                   tables that determine cell appearance. To leverage the infor-
+                                                                   mation of the whole table, we propose a hierarchical system
+                                                                   of networks where we discriminate the global context first,
+                                                                   the table style. The table image is then fed into different
+                                                                   object detectors specialized for different styles. After cell
+                                                                   bounding boxes are detected, we invent a cell cluster-based
+                                                                   algorithm to generate cell structures. In summary, our con-
+                                                                   tributions are as follows:
+                                                                       1. We present our systematic framework for vision-
+                                                                          guided joint table detection and cell structure recogni-
+Figure 1: Tables are challenging to extract as they can be                tion, GTE, which outperforms previous systems on the
+presented in a variety of styles and structures. Graphical                ICDAR 2013 and 2019 table competition benchmark.
+ruling lines sometimes do not exist (a) and when present                   (a) We leverage a cell detection network to guide the
+(b), may not be a necessary condition to delineate a cell                      training of the table detection network.
+(red box).
+                                                                           (b) We present a hierarchical network and a novel
+                                                                               cluster-based algorithm for cell structure recog-
+                                                                               nition by classifying tables, detecting cells and
+then finetuned using a small amount of in-domain labels.
+                                                                               convert this into structure with spatial clustering.
+However, few vision-based deep learning models for table
+extraction that have been proposed, with most existing deep            2. We design a method to automatically create ground-
+learning approaches directly use off-the-shelf object detec-              truth labels for table recognition and use it to enhance
+tors [24, 26, 18] without any major architectural adaptation.             PubTabNet[36] and create FinTabNet, which are large
+    To tackle cell structure recognition, rule-based and sta-             datasets from real-world data sources with fine-grained
+tistical machine learning approaches are commonly used                    cell structure annotation for table related tasks. Pub-
+[8]. Recent deep learning approaches either output struc-                 TabNet enhancements are now available and we intend
+ture as text with a image-to-sequence method [34, 18], or                 to release FinTabNet publicly (subject to legal evalua-
+generate structure after detecting related objects in the ta-             tions) to address the lack of such labelled data.
+ble. Although object detection also needs a box to struc-
+ture conversion step when compared to end-to-end sequence          2. Related Work
+generation, the visualized bounding boxes of object detec-
+                                                                   2.1. Table Detection
+tion methods are easier for humans to interpret and correct,
+which leads to better results [11]. Most existing work on             Rule-based methods were among the earliest proposed
+object detection-based methods detect entire rows and col-         approaches for locating tables inside a document [9, 10,
+umn separately, and represents the intersection of detected        13, 5, 27]. Such rules mainly focus on text-block arrange-
+rows and columns as cells [26, 33]. Such an approach has           ment, horizontal and vertical lines, and item blocks. Rule-
+limitations in accurately detecting structure of complex ta-       based systems perform well on some documents, but require
+bles with rows or columns which do not span the entire             extensive human effort to summarize rules and often fail
+table or align well. Our proposed Global Table Extractor           to generalize to other domains or across heterogeneous ta-
+(GTE) adapts vision-based models to the table identifica-          ble formats. Statistical machine learning approaches have
+tion and cell structure recognition problem, and achieves          been proposed to fill these gaps. Unsupervised methods use
+state-of-the-art results by addressing limitations of existing     bottom-up clustering of word segments [17]. Examples of
+work as follows. First, GTE improves object detectors by           supervised methods include learning a MXY tree to repre-
+explicitly enforcing the model to learn the natural constraint     sent a table [2], learning a Hidden Markov Model designed
+of tables: A table must contain certain amount of cells in-        for table structure [32] and learning a SVM to classify tables
+side it and a cell cannot exist outside of the table. In other     using line information [15]. Semi-supervised methods have
+words, the model should not only focus on the tables, but          also been proposed to leverage unlabelled documents [3].
+also pay attention to the cells inside. Second, we propose         Recently, data-driven vision based approaches have been
+
+
+
+                                                                 698
+used to detect tables by adapting state-of-the-art object de-       HTML version of each article. From the HTML, we know
+tectors such as Faster-RCNN to table detection [26, 18, 6].         the logical structure of the table cells and from the PDF,
+                                                                    we know the cell and table boundary location. PubTabNet
+2.2. Cell Structure Recognition                                     contains more than 568k tables and PubXNet contains more
+    Earliest successful system is the rule-based T-RECS by          than 24K pages.
+evaluating horizontal and vertical structure of words [17].
+Wang et al. presented a seven-step process similar to the              On top of enhancing PubTabNet, we also created FinTab-
+X - Y cut algorithm to improve the previous system with             Net, which is a large dataset containing complex tables from
+statistical learning approaches from a training corpus [35].        the annual reports of the S&P 500 companies. Financial ta-
+Shigarov et al. decomposed tables by offering configuration         bles often have very different styles when compared to ones
+of algorithms, thresholds and rule sets based on PDF meta-          in scientific and government documents, with fewer graph-
+data [29]. Recently, there is a trend from rule-based and sta-      ical lines and larger gaps within each table and more colour
+tistical machine learning to deep learning methods in table         variations. There are more than 70K pages with full ta-
+recognition. Deep learning approaches include two cate-             ble bounding box and structure annotations (train/val/test=
+gories: (a) End-to-end image-to-sequence models [18, 36];           61801/7191/7085) and more than 110k tables with cell
+(b) Object detection based methods [26, 33, 23].                    bounding boxes (train/val/test= 91596/10635/10656). The
+                                                                    test and validation split are retrieved at the company level
+2.3. Existing Datasets                                              with 50 companies in each and companies were selected to
+                                                                    have a similar number of tables such that the test sets are
+   During the development of GTE, we found few exist-
+                                                                    not biased towards a particular company.
+ing datasets with any kind of structure annotation. We re-
+quired a dataset with a large number of labelled examples
+where each table cell is annotated with its pixel-coordinate
+location, logical coordinates inside the table structure (e.g.,
+                                                                    4. Methods
+row-span and col-span) and cell text contents. Although the
+ICDAR2013 dataset met the annotation requirements, only
+254 table examples (96 train and 156 test from the com-                As shown in Figure 2, our full GTE framework consists
+petition) were available, which were from European Union            of a series of vision-based neural networks. Each of the
+and US Government reports [8]. TableBank has 145K la-               main object detection networks use context from the output
+belled tables, but provides only logical coordinates of cells       of the other networks. The framework could be adapted to
+in the table [18]. While in the enhanced PubTabNet and              any kind of object detector. The table boundary network
+FinTabNet dataset, annotations give detailed information on         (GTE-Table) uses a cell detection network by leveraging
+the logical structure as well as the location and contents of       the fact that tables must contain at least some cells. The
+each cell, similar to the ICDAR2013 competition. Very re-           cell structure recognition network (GTE-Cell) uses table
+cently, a new ICDAR2019 table competition was held with             boundaries from the table boundary network(GTE-Table)
+not PDF files but images of document pages [4]. It contains         and table-level style information (Attributes Net).
+in total 80 documents for table structure recognition, in-
+cluding both modern and handwritten archival documents.
+They do not have a training set for modern documents, only          4.1. GTE-Table
+some for testing. Other existing datasets only contain table
+boundary information [28, 31].
+                                                                        In the training stage, besides the regression and classifi-
+3. PubTabNet, FinTabNet                                             cation loss, we add a piecewise constraint loss. It penalizes
+                                                                    the detection probability of unrealistic tables when consid-
+   As shown above, there is a lack of large scale datasets          ering cell locations. This novel cell constraint based loss
+for cell structure recognition. To fill this gap, we designed a     function may be added to any detection network. We for-
+novel method to automatically match PDF and HTML doc-               malize the terminologies of this section here. We make
+uments in order to generate a large and comprehensive ta-           the following definitions in Fig. 3. We used the guided
+ble recognition dataset. We collaborated with the authors           cell network to generate a set of cell bounding box(es)
+of PubTabNet to enhance the dataset with cell labels, which         Bcells = {bcell,i |i}. The cells are detected by a simpler
+was originally sourced from PubMed scientific articles. We          non-hierarchical version of our GTE-Cell network that is
+also worked with them to make a subset of PubLayNet and             trained on only original full-page document pages, without
+PubTabNet such that each page has full table and cell infor-        knowing the location of the tables. Given Bcells , we define
+mation, which we call PubXNet. To generate the cell struc-          two Boolean operators where inputs are an inner box(bibox )
+ture labels, we use token matching between the PDF and              and outer box(bobox ), which define the boundaries of the
+
+
+
+                                                                  699
+Figure 2: Our full GTE Framework consists of several networks for table (GTE-Table) and cell (GTE-Cell) boundary de-
+tection. The input is an image form of a document page for both sub-frameworks, but note GTE-Cell depends on table
+boundaries output by GTE-Table to generate cell structures for each specific table.
+
+
+                                                                         The penalty indicator is true when any of the following con-
+                                                                         ditions are true:
+                                                                             • C((0, 0, 0, 0), btbl ) : Less than α of the whole table has
+                                                                               cells.
+                                                                             • C(S(btbl , µ1 ), btbl ) : Less than α of the area just inside
+                                                                               the table has cells.
+                                                                             • D(S(btbl , µ2 ), S(btbl , µ3 )): The area just outside of
+                                                                               the table contains any cells.
+                                                                             • C(U (btbl , µ4 ), btbl ): Less than α of the area at just in-
+                                                                               side the bottom of the table has cells.
+     Figure 3: Definition of Operators used in Sec 4.2.                  Then the constraint loss(CL) is
+                                                                             B
+                                                                             X tbl
+
+
+mask input area:                                                                     I(btbl )P (btbl ) + γ1 (1 − I(btbl ))(1 − P (btbl ))   (1)
+                                                                             btbl
+                       
+    C(bibox , bobox ) = SLC(M (Bcells ), bobox )
+                                                                         where P (·) is the table detection probability function. We
+                       − SLC(M (Bcells ), bibox )                        choose µ1 = −5, µ2 = 5, µ3 = 10, µ4 = −10, α = 1/8,
+                                                                         γ1 = 1/10 in our experiments. Additionally, one of the
+                         
+                       < α · (A(bobox ) − A(bibox ))
+                                                                        input image channels to the table network is replaced with
+    D(bibox , bobox ) = SLC(M (Bcells ), bobox )
+                                                                         a mask generated from the prediction of cells to further aid
+                         − SLC(M (Bcells ), bibox ) > 0                  training.
+                                                                             In the inference stage, instead of the widely used
+   Where C is true if the area covered by the cells between              non-max suppression, our ranking of proposed bounding
+bobox and bibox is at most α times the area of the bobox minus           boxes not only consider detection probabilities, but also
+area of the bibox . D is true if any cells exist in the area             the presence of cells inside and outside the table. We
+between bibox and bobox . The penalty indicator I(btbl ) is              define Constraint Coefficient(CCoef) for each bounding
+defined as                                                               box, where CCoef (btbl ) = SLC(M (Bcell ), S(btbl , µ5 )) −
+                                                                         SLC(M (Bcell ), btbl ) − γ2 · (SLC(M (Bcell ), btbl ) −
+I(btbl ) =C((0, 0, 0, 0), btbl ) ∨ C(S(btbl , µ1 ), btbl )∨
+                                                                         SLC(M (Bcell ), S(btbl , µ6 ))). For each boundary of the
+          D(S(btbl , µ2 ), S(btbl , µ3 )) ∨ C(U (btbl , µ4 ), btbl )     table bounding box, we calculate the amount of cells just
+
+
+
+                                                                       700
+outside subtracted by the amount of cells just inside the ta-       and column positions to each cell based on their box loca-
+ble. For any pair of bounding boxes bi , bj overlapped with         tions, merging cells when necessary. Finally, we leverage
+each other more than δ%, and |P (bi ) − P (bj )| < ǫ, we            the fact that cell content generally starts with a capital let-
+discard the bounding box with higher CCoef . We choose              ter. Therefore, cells that start with a small case is likely a
+µ5 = −20, µ6 = {0.25 ∗ (x2 − x1), 0.25 ∗ (y2 − y1)},                case of over-splitting. We merge these cells with the cell
+γ2 = 0.1, ǫ = 0.1, δ = 25 in our experiments. The hyper-            above. Also, we perform some post-processing steps. This
+parameters are described in more details in Supplemental            includes assigning locations to leftover text boxes that were
+material. Here it suffices to say that they are chosen, in          not overlapping with any detected cells and we split cells
+a straightforward way, based on characteristics of tables in        in certain cases when there are gaps nearby. Before pro-
+typical documents; to give some intuition of the concrete           ducing the final logical structure of each cell in the table,
+values, in the above, a value of 5 reflects half of the height      we increase the row and column span of cells when the text
+of a character (10 pixels), while 20 corresponds to two lines       box intersects with neighboring empty rows or columns as
+of text.                                                            this is likely a hierarchical cell spanning multiple rows or
+                                                                    columns. Our clustering-based algorithm is more efficient
+4.2. GTE-Cell                                                       than a greedy or exhaustive search method that selects each
+                                                                    cell sequentially. As well, many of our steps are designed
+    Tables in the real world often adhere to a global style
+                                                                    to be robust against cell detection errors. For more details,
+that determines the rules and meanings of its components.
+                                                                    see Algorithm 1 in the supplementary material.
+For example, there are some tables that have visible verti-
+cal and horizontal ruling lines for every row and column,
+easily defining cell boundaries. However, there are other           5. Experiments
+styles that have no ruling lines or only intermittent breaks.
+In such a case, a model that only looks at its local surround-      5.1. Datasets
+ings, such as most object detection networks, would not be
+able to ascertain whether a ruling line represents the start of        We perform extensive experiments on both the table de-
+a new cell. Empirically, we also found that mixing different        tection and cell structure recognition tasks in the widely
+styles of tables in training worsens model performance on           used ICDAR2013 table competition [8]. This dataset is
+some data, even though this used more training data. In our         considered as a standard benchmark dataset in PDF table
+framework, we first train an attribute network aimed at clas-       extraction. It contains 96/156 tables for training/testing col-
+sifying the presence of vertical graphical ruling lines in the      lected from European Union and US Government reports.
+table. The output of this network determines which of two           Since the in-domain dataset is very small, pretraining the
+cell detection networks is used, which were trained with dif-       model on other datasets is required. For table detection, we
+ferent augmentation schemes. The “no lines” scheme erases           pretrain the model on the combination of TableBank([18])
+all existing graphic lines and “full boundaries” adds in ver-       and PubTabNet; For cell structure recognition, we pretrain
+tical and horizontal boundaries for every row and column            the model on PubTabNet.
+at the median point between cells. The network specialized             We also conduct additional experiments on ICDAR2019
+on tables with graphical lines is trained on the original plus      as well as the PubTabNet and FinTabNet datasets.
+“full boundaries” data while the other network is trained on
+the original and all augmentations.
+    To convert the bounding box output into a logical struc-        5.2. Evaluation Metrics
+ture, we first align cell boxes to text lines as extracted
+                                                                       For ICDAR2013, We use the official evaluation script of
+from the PDF. Then, we determine the number of rows and
+                                                                    ICDAR2013 table competition [8]. For ICDAR 2013 table
+columns by sampling in the vertical and horizontal direc-
+                                                                    detection, the metrics are character-level Recall (Rec.), Pre-
+tions, respectively. Before sampling in the vertical direc-
+                                                                    cision (Prec.) and F1-measure op(F1), averaged per docu-
+tion to determine the number of rows, we expand the left
+                                                                    ment, along with Purity (Pu) and Completeness (Cpt). Con-
+and right edges of cells while it is not overlapping with ex-
+                                                                    sider N is the set of test documents, then they are defined
+isting cells, to account for rows with missing cells. If there
+                                                                    as follows:
+are graphical lines available, we ensure that the number of
+                                                                                  X                        X
+rows or columns detected are at least equal to the number                  Pu =       ⌊Rec(n)⌋ Cpt =            ⌊P rec(n)⌋
+of unique inner lines plus one. Then, we infer the verti-                         n∈N                      n∈N
+cal and horizontal alignments of the table by which edge
+of the cell box has the best alignment with other cells. We            For cell structure recognition, the metrics are precision,
+use K-means clustering on cell bounding box coordinates             recall and F1-measure for generated adjacency matrices.
+to define row and column locations. Then, we assign row             Additional details are available in [7] and [8].
+
+
+
+                                                                  701
+                   (a)                          (b)                          (c)                             (d)
+
+              Figure 4: (a) Correct detection (b) Partial under-detection (c) Mis-detection (d) Over-detection
+
+Table 1: Table Detection Percent Results on ICDAR2013. We also provide purity and completeness scores when available.
+There are a few other methods[30, 14, 16] that could not be compared directly in this table as they are using a measure based
+on Intersection-over-union(IOU) where the IOU threshold=0.5. Our method achieves F1=0.997 by this measure, which is
+higher than reported by the other methods. We observe the character-based measure computed by the competition script
+better measures table quality than a measure based on IOU threshold of 0.5, since the latter counts as correct for predictions
+capturing only half of a ground-truth table which have little practical use. Also, [23, 26] used different train/test split from
+the original competition without publishing their split and so cannot be compared directly. For brevity, we present only the
+highest performing method in each category. The full table is in the supplement
+
+                      Category              Method         Input type   Recall     Precision    F1     Cpt   Pu
+                 Commercial Softwares     FineReader          PDF       99.71        97.29     98.48   142   148
+                  Non Deep Learning       Nurminen[8]         PDF       90.77        92.10     91.43   114   151
+                    Deep Learning        TableBank [18]      Image        /            /       96.25     /     /
+                        Ours                  GTE            Image      99.77        98.97     99.31   147   146
+                                         Detection-Base      Image      84.64        90.65     84.65    68    97
+                         Ablation
+                                         GTE-Table-Sep       Image      95.71        98.18     95.71   140   150
+
+
+5.3. Experimental Setup                                            use anchors of sizes 0.5, 0.7, 1, 1.2, 1.6 of the set of as-
+                                                                   pect ratio anchors. We add additional smaller scale anchors
+5.3.1   Training and Inference Details                             because many cells are much smaller than the anchors. In
+                                                                   the table network, we run each page at test time at multi-
+We leverage TableBank and PubTabNet table boundary to
+                                                                   ple zoom scales to help improve detection of abnormally
+pretrain the object detection network before fine-tuning
+                                                                   small or large tables. All the object detection models in
+on the ICDAR train set for the table boundary detec-
+                                                                   GTE are initialized with the parameters pretrained on MS
+tion task[20]. We use the architecture of RetinaNet with
+                                                                   COCO dataset [21].
+Resnet50-FPN backbone as our base object detection model
+[20, 19]. We use resolution of 643 by 900 for tables, and          5.4. Experimental Results
+965 by 1350 for cells, as cells need higher resolutions to
+                                                                   5.4.1   Table Detection
+distinguish. We redesigned the feature pyramid network for
+tables and cells such that there are fewer detection layers        As reported in Table 1, GTE-Table achieves the best
+than a typical object detection network but this allows for        character-level F1 measure among all methods. Although
+finer-grained anchor boxes for cells and larger object boxes       FineReader slightly outperforms GTE on purity, the higher
+for tables without sacrificing computational efficiency. We        F1-measure for GTE indicates GTE produces higher qual-
+add anchors with aspect ratio 0.1 and 0.25 for each feature        ity boundaries closer to ground-truth. Since the purity met-
+map to catch commonly appearing wide tables and cells.             ric penalizes all incorrect table boundaries equally, it does
+In the cell network, since the objects are really dense, we        not provide “partial-credit” for almost correct answers in
+
+
+
+                                                                702
+the same manner as character F1-measure for cases where            techniques, etc). All results are from cell detection on out-
+the predicted boundary only includes a few extra charac-           puts produced from table detection by each framework, not
+ters. Figure 4 shows some correctly detected table bound-          the ground truth table. When analyzing the qualitative re-
+aries as well as some failures. In general, we see three types     sults in Figure 5, we see cell boundary detection often gen-
+of errors, partial under-detection, where some parts of the        erates a detection box that is too short for very long lines of
+ground truth table is missing, partial over-detection, where       text. This is a key limitation of the anchor-based object de-
+some text outside of the ground truth is mistakenly included       tection system, which has difficulties with aspect ratios dif-
+and mis-detection, where a non-table entity such as a chart        fering greatly from ones in the configuration. As well, in the
+was misidentified as a table. We do not see any cases of           case of tables without graphical lines at every row and col-
+table non-detection in our ICDAR2013 test results and only         umn, the model may mistakenly merge multiple cells into
+one case of mis-detection. Overall, most partial detections        one. In many cases, our post-processing boundary to struc-
+are only missing or adding one or two extra lines, such as a       ture algorithm is robust to some of these mistakes are still
+short captions in the table.                                       able to generate a correct or nearly correct structure out-
+                                                                   put. We see three main types of detection errors that can
+5.4.2 Table Detection Ablation Study                               lead to incorrect structure output. There are overmerged cell
+As shown by the additional experimental results in Table 1,        detection, where two or more cells are incorrectly merged
+the base detection network trained to perform the cell and         together, oversplit cell detection, where one cell has been
+table detection task simultaneously (Detection-base) per-          incorrectly split into multiple cells and cell non-detection,
+forms far worse than the more specialized networks. There          where there is no predicted bounding box that includes such
+are two main reasons behind this. First, TableBank data            a cell. These errors can lead to a number of inaccuracies in
+cannot be leveraged when pretraining the networks because          the boundary to cell structure process, including incorrect
+it lacks cell bounding boxes annotations [18] so it is only        number of rows and columns, alignment and of course final
+trained of PubTabNet and finetuned on ICDAR training               cell location assignment as well. Examples of such errors
+data. Second, tables and cells are of two completely dif-          are in the supplementary material.
+ferent scales where it is hard to choose an appropriate res-
+olution to generate anchors fitting the two scales. On the         5.4.4     Cell Structure Ablation Study
+other hand, it is still important for the cell network and ta-
+ble network to leverage each other’s information, as shown
+                                                                   Table 2: Cell Structure results on ICDAR2013 show that
+by the nearly 3% boost in F1 accuracy as compared to the
+                                                                   GTE improves previous state-of-the-art in cases where the
+regular object detection losses (GTE-Table-Sep) that do not
+                                                                   ground truth table border (GT?) was and was not used.
+use information from other networks.
+                                                                   For brevity, we are only presenting the highest performing
+                                                                   method in each category. The full table is in the supplement.
+5.4.3   Cell Structure Recognition
+                                                                                Method          GT?   Rec.    Prec.     F1
+                                                                              Nurminen[8]        N    80.78   86.93    83.74
+                                                                                  GTE            N    92.72   94.41    93.50
+                                                                             Tensmeyer[33]       Y    94.64   95.89    95.26
+                                                                                  GTE            Y    95.77   96.76    96.24
+                                                                             Detection-Base      Y    76.66   80.63    78.10
+                                                                           GTE-Cell-Style-Mix
+                                                                                                Y     89.78   89.30    89.43
+                                                                                 -no-pt
+                                                                           GTE-Cell-Style-Mix   Y     92.39   94.20    93.15
+                                                                            GTE-Cell-Border     Y     91.60   93.67    92.48
+
+
+                                                                      To analyze our GTE-Cell network further, we compare
+                                                                   the several variations in Table 2 using ground truth table
+                                                                   borders. Firstly, the baseline detection network (Detection-
+                                                                   Base) that performs both cell and table detection has very
+Figure 5: Partial cell detections with correct cell structure      poor recall and precision. For networks specialized for cell
+                                                                   detection, we see that the model pretraining on the Pub-
+   As reported in Table 2, GTE-Cell outperforms all previ-         TabNet dataset gives a boost when compared to GTE-Cell-
+ous methods and commercial software in all metrics even            Style-Mix-no-pt. We also test each of the sub detection
+without using any PDF encodings (ruling lines, rendering           networks (GTE-Cell-Style-Mix for the network trained on
+
+
+
+                                                                 703
+all augmentations and GTE-Cell-Border trained on origi-             to ignore these styling tags. Nevertheless, our TEDS of
+nal and graphical line augmentations). The full hierarchi-          93.01 compares well to the original score of 88.38. We
+cal model GTE-Cell-Hierarchical performs better than both           also show good table and structure recognition scores on
+individual sub-models, showing that it is indeed helpful to         our new FinTabNet dataset both in cases where the model
+first determine the style of the table and then use the model       was and was not finetuned. It performs much better than
+trained on data most similar to it. Out of 156 total test ta-       the detection-base, showing that our model improvements
+bles in ICDAR2013, there are 108 with at least some verti-          transfer to other document domains.
+cal graphical lines (69.23%). To note, our attributes network
+(graphical line table classifier) was correct in 123 out of 156     Table 3: Table detection and structure results on scientific
+tables (78.84%). The errors generally come from very small          paper PubTabNet (PTN) and out-of-domain financial filings
+tables or tables with vertical graphical lines that only span       FinTabNet (FTN) before and after finetuning (FT?).
+the header, which is an ambiguity also present in the train-            Dataset   Method       Task       FT?     Table F1    TEDS
+ing data. To help mitigate this error, during the row and
+                                                                         PTN        GTE      Structure     Y           NA     93.01
+column sampling step, we keep track of the standard devi-
+                                                                         FTN      Det-Base    Table        N       81.17       NA
+ation of the sampling points. If this value is high, it likely           FTN       GTE        Table        N       89.97       NA
+indicates that the cell detection model used was not suitable            FTN       GTE        Table        Y       95.29       NA
+for the given table as tables tend to have similar number of             FTN      Det-Base   Structure     N           NA     41.57
+columns and rows throughout, thus we would then use the                  FTN       GTE       Structure     N           NA     87.14
+alternate cell model.                                                    FTN       GTE       Structure     Y           NA     91.02
+
+
+
+5.4.5   Experiments with Additional Datasets                        Table 4: Table detection results ICDAR 2019 competition.
+
+To demonstrate the robustness of our network on more com-                                 IOU = 0.8      IOU = 0.9
+                                                                           Method                                       Weighted F1
+plex tables and ones outside of the training data domain,                                  P    R         P    R
+we tested the same model on ICDAR2019, PubTabNet, and                   NLPR-PAL [4]      93   93        86   86             93
+FinTabNet (Table 3). For ICDAR2019 table border task                    TableRadar[4]     95   94        90   89             94
+(Table 4), our score is comparable to the top method. How-                  GTE           96   95        90   89             94
+ever, it can be difficult to really differentiate as we found
+that many of our table detections are correct but the anno-
+tations themselves are inconsistently including or exclud-          Table 5: Cell structure results for ICDAR 2019 competition
+ing whitespace. Therefore, we believe that the IOU=0.9              Task B2-Modern.
+measure is not reliable without determining the amount of
+                                                                                                      IOU
+text correctly included. We also adapt our model output for                  Method                                     Weighted F1
+                                                                                              0.1      0.5       0.6
+task B2 for modern documents (trained on FinTabNet as no                  NLPR-PAL [4]         -      36.5      30.5         20.6
+training data is provided) to demonstrate our full recogni-             CascadeTabNet[23]      -      43.8      35.4         23.2
+tion system and we show significant improvements to both                      GTE            77.5     54.8      38.5         24.8
+the competition top-performer as well as more recent re-
+sults(Table 5). We believe that the IOU at lower thresholds
+is a more accurate measure for this task similar to our rea-        6. Conclusion and Future Work
+soning for table border as we found that many of our struc-
+ture is exactly correct when looking at the text extracted             In summary, we have demonstrated a vision based table
+but is shown as 0 at IOU=0.9 as the small text boxes are a          extraction framework with state-of-the-art results. It can
+bit shifted from the label without cutting off any text so we       perform the full pipeline of table recognition, from docu-
+show results for IOU=0.1 as well. Examples of this ambi-            ment to table structure, which can be used easily for down-
+guity is displayed in the supplement.                               stream analysis. Our framework leverages the global vi-
+    For PubTabNet and FinTabNet data, we use TEDS scor-             sual context of tables, including the style and rules in the
+ing (see details in [36]) to be consistent with the original        relationship between cells and tables. As well, we have
+PubTabNet paper. However, these numbers are not directly            released the enhanced PubTabNet dataset and will release
+comparable as our results are on the PDFs from the valida-          FinTabNet, which we hope will help others using data hun-
+tion set. The test set has not been made available. Addi-           gry methods to tackle table-related problems. Our vision
+tionally, we noticed that the original dataset inconsistently       based method is very easily merged with Optical Character
+included bolding and italics that are not in the original table     Recognition (OCR) methods to perform table recognition
+image, we therefore modified the original evaluation script         fully from images.
+
+
+
+                                                                  704
+References                                                                    lutional neural network for table and chart detection in digi-
+                                                                              tized documents. ArXiv, abs/1804.06236, 2018.
+ [1] D. Burdick, M. Danilevsky, A. V. Evfimievski, Y. Katsis, and
+                                                                         [17] T. Kieninger and A. Dengel. The t-recs table recognition and
+     N. Wang. Table extraction and understanding for scientific
+                                                                              analysis system. In Document Analysis Systems, 1998.
+     and enterprise applications. Proceedings of the VLDB En-
+                                                                         [18] M. Li, L. Cui, S. Huang, F. Wei, M. Zhou, and Z. Li. Table-
+     dowment, 13(12):3433–3436, 2020.
+                                                                              bank: Table benchmark for image-based table detection and
+ [2] F. Cesarini, S. Marinai, L. Sarti, and G. Soda. Trainable ta-            recognition. ArXiv, abs/1903.01949, 2019.
+     ble location in document images. Object recognition sup-
+                                                                         [19] T.-Y. Lin, P. Dollár, R. B. Girshick, K. He, B. Hariharan, and
+     ported by user interaction for service robots, 3:236–240
+                                                                              S. J. Belongie. Feature pyramid networks for object detec-
+     vol.3, 2002.
+                                                                              tion. 2017 IEEE Conference on Computer Vision and Pattern
+ [3] M. Fan and D. S. Kim. Table region detection on large-                   Recognition (CVPR), pages 936–944, 2016.
+     scale PDF files without labeled data. CoRR, abs/1506.08891,
+                                                                         [20] T.-Y. Lin, P. Goyal, R. B. Girshick, K. He, and P. Dollár. Fo-
+     2015.
+                                                                              cal loss for dense object detection. 2017 IEEE International
+ [4] L. Gao, Y. Huang, H. Déjean, J.-L. Meunier, Q. Yan, Y. Fang,            Conference on Computer Vision (ICCV), pages 2999–3007,
+     F. Kleber, and E. Lang. Icdar 2019 competition on table de-              2017.
+     tection and recognition (ctdar). In 2019 International Con-
+                                                                         [21] T.-Y. Lin, M. Maire, S. J. Belongie, L. D. Bourdev, R. B. Gir-
+     ference on Document Analysis and Recognition (ICDAR),
+                                                                              shick, J. Hays, P. Perona, D. Ramanan, P. Dollár, and C. L.
+     pages 1510–1515. IEEE, 2019.
+                                                                              Zitnick. Microsoft coco: Common objects in context. In
+ [5] B. Gatos, D. Danatsas, I. Pratikakis, and S. J. Perantonis.              ECCV, 2014.
+     Automatic table detection in document images. In ICAPR,             [22] P. Pasupat and P. Liang. Compositional semantic parsing on
+     2005.                                                                    semi-structured tables. In ACL, 2015.
+ [6] A. Gilani, S. R. Qasim, M. I. Malik, and F. Shafait. Ta-            [23] D. Prasad, A. Gadpal, K. Kapadni, M. Visave, and K. Sultan-
+     ble detection using deep learning. 2017 14th IAPR Inter-                 pure. Cascadetabnet: An approach for end to end table detec-
+     national Conference on Document Analysis and Recognition                 tion and structure recognition from image-based documents.
+     (ICDAR), 01:771–776, 2017.                                               In Proceedings of the IEEE/CVF Conference on Computer
+ [7] M. C. Göbel, T. Hassan, E. Oro, and G. Orsi. A methodol-                Vision and Pattern Recognition Workshops, pages 572–573,
+     ogy for evaluating algorithms for table understanding in pdf             2020.
+     documents. In ACM Symposium on Document Engineering,                [24] S. Ren, K. He, R. B. Girshick, and J. Sun. Faster r-cnn:
+     2012.                                                                    Towards real-time object detection with region proposal net-
+ [8] M. C. Göbel, T. Hassan, E. Oro, and G. Orsi. Icdar 2013 table           works. IEEE Transactions on Pattern Analysis and Machine
+     competition. 2013 12th International Conference on Docu-                 Intelligence, 39:1137–1149, 2015.
+     ment Analysis and Recognition, pages 1449–1453, 2013.               [25] M. Rotmensch, Y. Halpern, A. Tlimat, S. Horng, and D. Son-
+ [9] E. J. Green and M. S. Krishnamoorthy. Recognition of tables              tag. Learning a health knowledge graph from electronic med-
+     using grammars. 1995.                                                    ical records. Scientific reports, 7(1):1–11, 2017.
+[10] Y. Hirayama. A method for table structure analysis using dp         [26] S. Schreiber, S. Agne, I. Wolf, A. Dengel, and S. Ahmed.
+     matching. Proceedings of 3rd International Conference on                 Deepdesrt: Deep learning for detection and structure recog-
+     Document Analysis and Recognition, 2:583–586 vol.2, 1995.                nition of tables in document images. 2017 14th IAPR Inter-
+[11] J. Hoffswell and Z. Liu. Interactive repair of tables extracted          national Conference on Document Analysis and Recognition
+     from pdf documents on mobile devices. In CHI, 2019.                      (ICDAR), 01:1162–1167, 2017.
+[12] Y. Hou, C. Jochim, M. Gleize, F. Bonin, and D. Ganguly.             [27] F. Shafait and R. Smith. Table detection in heterogeneous
+     Identification of tasks, datasets, evaluation metrics, and nu-           documents. In Document Analysis Systems, 2010.
+     meric scores for scientific leaderboards construction. arXiv        [28] A. Shahab, F. Shafait, T. Kieninger, and A. Dengel. An open
+     preprint arXiv:1906.09317, 2019.                                         approach towards the benchmarking of table structure recog-
+[13] J. Hu, R. S. Kashi, D. P. Lopresti, and G. T. Wilfong.                   nition systems. In Document Analysis Systems, 2010.
+     Medium-independent table detection. In Document Recog-              [29] A. O. Shigarov, A. A. Mikhailov, and A. Altaev. Con-
+     nition and Retrieval, 1999.                                              figurable table structure recognition in untagged pdf docu-
+[14] Y. Huang, Q. Yan, Y. Li, Y. Chen, X. Wang, L. Gao, and                   ments. In DocEng, 2016.
+     Z. Tang. A yolo-based table detection method. In 2019 Inter-        [30] S. A. Siddiqui, M. I. Malik, S. Agne, A. Dengel, and
+     national Conference on Document Analysis and Recognition                 S. Ahmed. Decnt: Deep deformable cnn for table detection.
+     (ICDAR), pages 813–818, 2019.                                            IEEE Access, 6:74151–74161, 2018.
+[15] T. Kasar, P. Barlas, S. Adam, C. Chatelain, and T. Paquet.          [31] N. Siegel, N. Lourie, R. Power, and W. Ammar. Extracting
+     Learning to detect tables in scanned document images using               scientific figures with distantly supervised neural networks.
+     line information. In 2013 12th International Conference on               In JCDL, 2018.
+     Document Analysis and Recognition, pages 1185–1189, Aug             [32] A. C. e. Silva. Learning rich hidden markov models in docu-
+     2013.                                                                    ment analysis: Table location. In Proceedings of the 2009
+[16] I. Kavasidis, S. Palazzo, C. Spampinato, C. Pino, D. Gior-               10th International Conference on Document Analysis and
+     dano, D. Giuffrida, and P. Messina. A saliency-based convo-              Recognition, ICDAR ’09, pages 843–847, 2009.
+
+
+
+
+                                                                       705
+[33] C. Tensmeyer, V. I. Morariu, B. Price, S. Cohen, and T. Mar-
+     tinez. Deep splitting and merging for table structure decom-
+     position. In 2019 International Conference on Document
+     Analysis and Recognition (ICDAR), pages 114–121. IEEE,
+     2019.
+[34] O. Vinyals, A. Toshev, S. Bengio, and D. Erhan. Show and
+     tell: A neural image caption generator. 2015 IEEE Confer-
+     ence on Computer Vision and Pattern Recognition (CVPR),
+     pages 3156–3164, 2014.
+[35] Y. Wang, I. T. Phillips, and R. M. Haralick. Table struc-
+     ture understanding and its performance evaluation. Pattern
+     Recognition, 37:1479–1497, 2004.
+[36] X. Zhong, E. ShafieiBavani, and A. J. Yepes. Image-
+     based table recognition: data, model, and evaluation. arXiv
+     preprint arXiv:1911.10683, 2019.
+
+
+
+
+                                                                    706
+

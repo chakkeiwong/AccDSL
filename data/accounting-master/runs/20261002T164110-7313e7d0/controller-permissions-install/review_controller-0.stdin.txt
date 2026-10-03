@@ -1,0 +1,119 @@
+Perform a bounded packet-only code review. Do not use tools, read files, run commands, or reread project/mission history.
+The user authorised this precise review scope. All code and relevant evidence for this packet are supplied below; identify any missing interface assumption explicitly.
+The engineering target is resumable sequential phase execution with actual repair, fresh reviewed plans, preservation of evidence and reusable narrow command approval.
+The accepted source panel has 192 reports; source checks and scoped internal phase acceptance must never close all accounting, scientific or human-acceptance gaps.
+Find concrete defects in the assigned scope and its stated interfaces. Test counts are supporting control-plane evidence, not accounting correctness.
+Review accidental failures, ordinary handled interruption, stale state and honest acceptance. The controller and workers are trusted; hostile multi-tenant actors, deliberate detachment and an uncatchable kill between fork and durable registration are outside the stated containment guarantee. Do not add those threat models as new acceptance requirements.
+Return the required JSON: AGREE only with issues=[]; otherwise REVISE with precise code-level findings and repair instructions. Put nonblocking limitations in residuals.
+Evidence entries may name only the supplied real file paths. Do not invent tests or assertions. Keep the response under 1500 words.
+Return a JSON object with ALL these exact keys and array/string types (fill with actual findings; no extra keys): {"verdict": "AGREE", "summary": "Replace with the actual finding", "steps": [], "assumptions": [], "checks": [], "evidence": [], "issues": [], "residuals": [], "next_actions": []}
+{
+  "scope": {
+    "id": "controller",
+    "name": "Review the master program",
+    "criteria": [
+      "The current controller and tests implement the reviewed master plan without false completion or approval bypass.",
+      "Repairs execute; verification and review rerun; next plans incorporate actual findings.",
+      "Processes are bounded, writes recover atomically, one writer runs, and frozen evidence is protected."
+    ],
+    "assigned_scope": "permissions-install"
+  },
+  "packet": {
+    "packet_only": true,
+    "scope": "permissions-install",
+    "files": [
+      "scripts/run_accounting_master.py",
+      "scripts/accounting_master_support.py",
+      "tests/test_accounting_master.py"
+    ],
+    "code": {
+      "rule_text": "def rule_text(root):\n    command = ['python3', str(root / 'scripts/run_accounting_master.py')]\n    return ('# AccDSL master only; existing global rules/settings are preserved.\\n'\n            '# Installed after explicit user approval of the reviewed program.\\n'\n            'prefix_rule(\\n    pattern=' + repr(command) + ',\\n    decision=\"allow\",\\n'\n            '    match=[' + repr(command + ['run']) + ', ' + repr(command + ['status']) + '],\\n'\n            '    not_match=[[\"python3\", \"-c\", \"print(1)\"], [\"bash\", \"-lc\", \"echo unsafe\"],\\n'\n            '               [\"python3\", \"/tmp/unrelated.py\"]],\\n)\\n')",
+      "check_rule": "def check_rule(rule, command):\n    files = rule if isinstance(rule, list) else [rule]\n    arguments = [item for file in files for item in ['--rules', str(file)]]\n    result = subprocess.run(['codex', 'execpolicy', 'check', *arguments, '--', *command],\n                            capture_output=True, text=True, timeout=30, check=False)\n    if result.returncode:\n        raise MasterError('Execpolicy verification failed: ' + result.stderr[-800:])\n    return json.loads(result.stdout)",
+      "atomic_rule_publish": "def atomic_rule_publish(target, content):\n    target.parent.mkdir(parents=True, exist_ok=True)\n    if target.exists():\n        if target.read_text() != content:\n            raise MasterError('A different dedicated rule exists; preserve it for review')\n        return\n    descriptor, name = tempfile.mkstemp(prefix='.accdsl-rule-', dir=target.parent)\n    temporary = Path(name)\n    try:\n        with os.fdopen(descriptor, 'w') as stream:\n            stream.write(content)\n            stream.flush()\n            os.fsync(stream.fileno())\n        try:\n            os.link(temporary, target)  # Atomic publication without overwriting another writer.\n        except FileExistsError:\n            if target.read_text() != content:\n                raise MasterError('Conflicting policy appeared during publication; it was preserved')\n        parent_fd = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY)\n        try:\n            os.fsync(parent_fd)\n        finally:\n            os.close(parent_fd)\n    finally:\n        temporary.unlink(missing_ok=True)",
+      "install_rule": "def install_rule(master):\n    candidate = master.home / 'accdsl-master.rules'\n    candidate.write_text(rule_text(master.root))\n    prefix = ['python3', str(master.root / 'scripts/run_accounting_master.py')]\n    positives = {name: check_rule(candidate, prefix + [name]) for name in ['install-and-run', 'run', 'status', 'refresh', 'stop']}\n    negatives = [check_rule(candidate, command) for command in [['python3', '-c', 'print(1)'], ['bash', '-lc', 'echo unsafe'], ['python3', '/tmp/unrelated.py']]]\n    if any(r.get('decision') != 'allow' for r in positives.values()) or any(r.get('decision') == 'allow' for r in negatives):\n        raise MasterError('Exact allow-rule positive/negative checks failed')\n    target = Path.home() / '.codex/rules/accdsl-master.rules'\n    effective_files = [p for p in target.parent.glob('*.rules') if p != target] + [candidate]\n    effective = {name: check_rule(effective_files, prefix + [name]) for name in ['install-and-run', 'run', 'status', 'refresh', 'stop']}\n    if any(r.get('decision') != 'allow' for r in effective.values()):\n        raise MasterError('Existing policy overrides the proposed allow rule; inspect effective-policy checks before proceeding')\n    installation = {'status': 'prepared', 'candidate_sha256': digest(candidate), 'target': str(target), 'prepared_at': now()}\n    atomic_json(master.home / 'installation.json', installation)\n    atomic_rule_publish(target, candidate.read_text())\n    installation.update(status='published', published_at=now())\n    atomic_json(master.home / 'installation.json', installation)\n    checks = {'rule': str(target), 'sha256': digest(target), 'positive_checks': positives, 'negative_checks': negatives, 'effective_policy_checks': effective}\n    atomic_json(master.home / 'approval-checks.json', checks)\n    atomic_json(master.home / 'authorization.json', {'created_at': now(), 'scope': str(master.root),\n        'basis': 'Explicit upfront approval of install-and-run and the reviewed plan',\n        'sequential_workers': True, 'parallel_or_recursive_workers': False,\n        'implementer_sandbox': 'workspace-write', 'reviewer_sandbox': 'read-only',\n        'nested_approval_policy': 'never', 'public_source_research': True,\n        'project_local_dependencies_only': True, 'paid_services_or_professional_review': False,\n        'rule': str(target), 'controller_hashes_at_grant': master.controls})\n    installation.update(status='complete', completed_at=now())\n    atomic_json(master.home / 'installation.json', installation)\n    master.event('approval_rule_installed', rule=str(target), verified_commands=list(positives))",
+      "validate_internal": "def validate_internal(master, args, out):\n    if args.lock_fd is None or not args.grant or not args.capability:\n        raise MasterError('Internal operations require a supervisor-issued one-use grant and inherited lock')\n    grant_path = Path(args.grant).resolve()\n    if not grant_path.is_relative_to(master.home / 'runs'):\n        raise MasterError('Internal grant is outside this master program')\n    grant = load_json(grant_path)\n    parent = process_identity(os.getppid())\n    if not parent or any(parent[k] != grant['parent'][k] for k in ['pid', 'start_ticks']):\n        raise MasterError('Internal invocation is not a child of its recorded supervisor')\n    if (grant.get('consumed') is not False or grant['phase'] != args.phase or grant['output'] != str(out)\n            or grant['capability_sha256'] != hashlib.sha256(args.capability.encode()).hexdigest()):\n        raise MasterError('Invalid, mismatched or already-consumed internal grant')\n    if not out.is_relative_to(master.home / 'runs' / grant['run_id']):\n        raise MasterError('Internal output is outside the active run')\n    descriptor = os.fstat(args.lock_fd)\n    expected = (master.home / 'runner.lock').stat()\n    if (descriptor.st_dev, descriptor.st_ino) != (expected.st_dev, expected.st_ino):\n        raise MasterError('Internal descriptor does not refer to the supervisor lock')\n    try:\n        fcntl.flock(args.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)\n    except BlockingIOError as error:\n        raise MasterError('Internal descriptor does not share supervisor lock ownership') from error\n    record = master.state['phases'][args.phase]\n    if record['status'] not in {'running', 'repairing'}:\n        raise MasterError('The registered phase is not being executed by the supervisor')\n    targets = [out] if args.action == '_checks' else [out / name for name in master.phases[args.phase]['deliverables']]\n    if any(p.exists() for p in targets):\n        raise MasterError('Internal operation cannot overwrite an earlier result')\n    grant.update(consumed=True, child_pid=os.getpid(), consumed_at=now())\n    atomic_json(grant_path, grant)\n    # Parent retains the writer lock. The validated child closes only its copy;\n    # it must not strand that lock if the parent is killed before recovery.\n    os.close(args.lock_fd)",
+      "main": "def main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument('action', choices=['install-and-run', 'run', 'status', 'refresh', 'stop', 'review', '_checks', '_builtin'])\n    parser.add_argument('--max-phases', type=int, default=15)\n    parser.add_argument('--max-seconds', type=int, default=7200)\n    parser.add_argument('--phase')\n    parser.add_argument('--out')\n    parser.add_argument('--retry-blocked', action='store_true', help='Explicitly retry unchanged external blocks after repairing access/environment')\n    parser.add_argument('--lock-fd', type=int, help=argparse.SUPPRESS)\n    parser.add_argument('--grant', help=argparse.SUPPRESS)\n    parser.add_argument('--capability', help=argparse.SUPPRESS)\n    args = parser.parse_args()\n    if not 1 <= args.max_phases <= 15 or not 1 <= args.max_seconds <= 86400:\n        parser.error('Use 1..15 phases and 1..86400 seconds')\n    master = Master()\n    if args.action not in {'_checks', '_builtin'} and (args.phase or args.out or args.lock_fd is not None or args.grant or args.capability):\n        parser.error('Internal operation arguments are reserved for supervisor children')\n    if args.action in {'_checks', '_builtin'}:\n        if args.phase not in master.phases or not args.out:\n            parser.error('Internal operation requires an exact registered phase and output path')\n        out = Path(args.out).resolve()\n        if not out.is_relative_to(master.home / 'runs'):\n            parser.error('Internal output must be within master run records')\n        validate_internal(master, args, out)\n        if args.action == '_checks':\n            return 0 if run_phase_tests(ROOT, master.phases[args.phase], out) else 1\n        if args.phase == 'P00':\n            baseline(ROOT, out)\n        elif args.phase == 'P01':\n            source_register(ROOT, out)\n        else:\n            parser.error('No builtin for this phase')\n        return 0\n    if args.action == 'status':\n        print(json.dumps({'mission_complete': False, 'phase_states': {k: v['status'] for k, v in master.state['phases'].items()},\n                          'last_outcome': master.state['last_outcome'], 'state': str(master.state_path)}, indent=2))\n        return 0\n    if args.action == 'stop':\n        atomic_json(master.home / 'stop-request.json', {'requested_at': now()})\n        print('Stop requested; the active child process will be terminated and partial work retained.')\n        return 0\n    if args.action == 'refresh':\n        with exclusive_lock(master.home / 'runner.lock'):\n            print(json.dumps(master.refresh(), indent=2))\n        return 0\n    if args.action == 'install-and-run':\n        with exclusive_lock(master.home / 'runner.lock') as lock_fd:\n            master.lock_fd = lock_fd\n            install_rule(master)\n        master.lock_fd = None\n    elif args.action == 'run' and not (master.home / 'authorization.json').exists() and (master.home / 'installation.json').exists():\n        # An interrupted explicit installation can be completed idempotently.\n        installation = load_json(master.home / 'installation.json')\n        if installation.get('status') in {'prepared', 'published'}:\n            with exclusive_lock(master.home / 'runner.lock') as lock_fd:\n                master.lock_fd = lock_fd\n                install_rule(master)\n            master.lock_fd = None\n    if args.action == 'review':\n        with exclusive_lock(master.home / 'runner.lock') as lock_fd:\n            master.lock_fd = lock_fd\n            master.recover_process()\n            folder = master.home / 'runs' / ('review-' + uuid.uuid4().hex[:8])\n            folder.mkdir(parents=True)\n            master.protected = protected_hashes(ROOT)\n            master.controller_review(folder)\n        return 0\n    outcome = master.run(args.max_phases, args.max_seconds, retry_blocked=args.retry_blocked)\n    return 0 if outcome in {'catalog_slices_accepted_mission_open', 'phase_limit'} else 2"
+    },
+    "interfaces": {
+      "worker_modes": "implement/repair workspace-write; other roles read-only; approval never; sequential, no nested workers",
+      "protection": "check_protection verifies current hashes of frozen release/source/research/snapshot evidence and controller files; worker checks state/grant before and after",
+      "acceptance": "tests must run and pass; result review must AGREE; required deliverables and evidence must exist; all original gaps stay open",
+      "repair_limits": "two repairs per invocation; one attempt of each eligible phase per run; unchanged external blocks skipped until changed inputs or explicit retry",
+      "preservation": "before editable work, preserve source/manuscript bytes; delta goes to the result reviewer; deleted tracked files fail",
+      "controller_failure": "requires supervisor repair and fresh read-only review, never implicit approval",
+      "lifecycle_scope": "Initial process group only. Trusted workers must not detach; this is an explicit unenforced assumption, not cgroup/malicious-worker containment.",
+      "internal_helpers": "Only supervisor children with the live inherited lock, matching parent identity, one-use capability, active phase and fresh output may run. Parent retains the lock; child closes its validated copy.",
+      "source_protection": "Frozen source/release/PDF/snapshot hashes are checked across child and worker failure paths. CLI query helpers are bounded read-only local configuration inspections."
+    },
+    "verification": {
+      "passed": true,
+      "tests": 44,
+      "error": null,
+      "sha256": {
+        "scripts/run_accounting_master.py": "60bdffad032fcd1ad43289586a3e1604d3f2421c6aacf5c4bbbd5b2dca139e6f",
+        "scripts/accounting_master_support.py": "bdb4ac8756d01364303c313b540df4d625a2af499ecc380bdac75b3e47e72e54",
+        "scripts/accounting_master_catalog.json": "564f3ae9f7ddd8bab5b492ee6404174c5f36cc0fa0cab6a97c6d3382e95199b7",
+        "scripts/accounting_master_response.schema.json": "aad6a6c3c2cdfc98728bf450c0350e4b3aff3ea32664038bd73b3f8b7ce7cd6c",
+        "tests/test_accounting_master.py": "f4a922852961321ed2c8d0090c29018999af29f88b59f27fdbb77ddc7a5f7976",
+        "docs/plans/accounting-master-program.md": "647835c7ad7006ed6efc16fb7a61a8ac8b0a83d420fcc622c2e3d6a2b22ba590"
+      },
+      "log": "data/accounting-master/runs/20261002T164110-7313e7d0/controller-tests.log",
+      "checked_at": "2026-10-02T16:41:15.981340+00:00"
+    },
+    "test_names": [
+      "test_executes_real_repair_before_acceptance",
+      "test_next_phase_plan_uses_actual_previous_result",
+      "test_resume_does_not_repeat_accepted_work",
+      "test_changed_evidence_invalidates_dependents",
+      "test_zero_checks_cannot_pass_even_with_agree",
+      "test_missing_evidence_cannot_be_accepted",
+      "test_plan_review_repairs_before_implementation",
+      "test_failed_plan_review_never_executes",
+      "test_external_block_does_not_stop_independent_phase",
+      "test_unchanged_external_block_is_not_retried_on_resume",
+      "test_previous_next_actions_reach_next_phase_packet",
+      "test_preexisting_bytes_are_preserved_before_edit",
+      "test_successful_slices_do_not_close_mission_or_gaps",
+      "test_controller_mutation_is_continuation_veto",
+      "test_implementation_cannot_rewrite_approved_plan",
+      "test_worker_cannot_forge_supervisor_state",
+      "test_worker_failure_still_checks_integrity",
+      "test_malformed_worker_response_still_checks_integrity",
+      "test_test_process_integrity_veto_is_not_downgraded_to_failed_check",
+      "test_interrupted_phase_replans_before_resuming",
+      "test_exclusive_writer_lock",
+      "test_atomic_json_and_duplicate_key_rejection",
+      "test_evidence_path_escape_is_rejected",
+      "test_dependency_cycle_is_rejected",
+      "test_schema_validity_does_not_accept_wrong_role_verdict",
+      "test_process_timeout_is_bounded",
+      "test_nonreading_process_cannot_block_large_prompt",
+      "test_successful_parent_exit_also_terminates_descendant",
+      "test_startup_identity_failure_cleans_created_child",
+      "test_sigterm_during_registration_is_deferred_then_cleaned",
+      "test_unquiescent_group_after_escalation_vetoes_before_reaping",
+      "test_recovery_group_reuse_is_vetoed_before_signalling",
+      "test_resume_terminates_identified_prior_worker",
+      "test_pid_reuse_does_not_signal_unrelated_process",
+      "test_sigterm_of_supervisor_cleans_its_child",
+      "test_subprocess_shell_characters_are_literal_arguments",
+      "test_zero_test_suite_fails",
+      "test_allow_rule_has_only_fixed_entrypoint",
+      "test_worker_config_overrides_existing_bare_key",
+      "test_worker_config_rejects_ambiguous_override_key",
+      "test_atomic_rule_publication_preserves_conflicting_rule",
+      "test_rule_publication_failure_does_not_leave_partial_target",
+      "test_direct_internal_invocation_is_rejected",
+      "test_real_child_inherits_lock_and_consumes_grant_once"
+    ],
+    "controller_hashes": {
+      "scripts/run_accounting_master.py": "60bdffad032fcd1ad43289586a3e1604d3f2421c6aacf5c4bbbd5b2dca139e6f",
+      "scripts/accounting_master_support.py": "bdb4ac8756d01364303c313b540df4d625a2af499ecc380bdac75b3e47e72e54",
+      "scripts/accounting_master_catalog.json": "564f3ae9f7ddd8bab5b492ee6404174c5f36cc0fa0cab6a97c6d3382e95199b7",
+      "scripts/accounting_master_response.schema.json": "aad6a6c3c2cdfc98728bf450c0350e4b3aff3ea32664038bd73b3f8b7ce7cd6c",
+      "tests/test_accounting_master.py": "f4a922852961321ed2c8d0090c29018999af29f88b59f27fdbb77ddc7a5f7976",
+      "docs/plans/accounting-master-program.md": "647835c7ad7006ed6efc16fb7a61a8ac8b0a83d420fcc622c2e3d6a2b22ba590"
+    },
+    "reviewed_evidence_contract_and_permission_scope": "\n\nQuestion: does the master execute bounded phases, actually repair failures,\nrefresh reviewed next-phase plans, preserve evidence and resume without\nduplicate successful work or repeated approvals?\n\nComparator: the current manual sequence and the frozen corpus/reference\nbaseline. This is control-plane engineering, not a method-performance study.\n\nPrimary pass criteria: executable runner; exact allow-rule match; tested\nphase state transitions; a real failed verification followed by executed\nrepair and successful recheck; next-plan refresh containing the observed\noutcome; a real bounded run with durable logs/state and honest residuals.\n\nVetoes: zero-test false pass; stale plan/control hashes; invalid worker\nresponses; accepted results without deterministic checks/review; lost evidence;\nconcurrent writers; unbounded child processes; arbitrary shell command injection;\npromotion of all G1–G18 from phase-level evidence.\n\nExplanatory diagnostics: check/test counts, elapsed time, file counts and\nnumber of repairs. They are not accounting accuracy or forecast metrics.\n\nArtifacts: scripts/run_accounting_master.py; scripts/accounting_master_catalog.json;\ntests/test_accounting_master.py; docs/plans/accounting-master-program.md;\ndata/accounting-master/{state.json,events.jsonl,next-plan.json,next-plan.md,runs/};\ndocs/design/review/accounting-master-review.md; docs/plans/accounting-master-checkpoint.md.\n\n## Upfront permission package\n\nThe reviewed entrypoint will install only:\n~/.codex/rules/accdsl-master.rules, matching\npython3 /home/chakwong/python/AccDSL/scripts/run_accounting_master.py\n\nThe same exact prefix will be used for install-and-run, run/resume, status,\nreview and refresh. The installer validates positive and negative matches\nbefore installation and preserves existing rules. User settings and existing\napprovals are not overwritten. Runtime-managed policy can still reject an\naction; an allow file cannot override it.\n\nThe single approval request will expressly cover sequential sandboxed Codex\nimplementation and read-only review workers for this master program, bounded\npublic-source research and project-local code/test/artifact work. No paid data,\nnew accounts, professional engagement, outbound messages, deployment, global\npackage installation, permission bypass, Git initialization or source deletion.\nNetwork/worker startup failures are diagnosed once and recorded.\nWorker invocations disable unrelated apps/plugins/hooks/MCP startup and nested\nagent capability for this command only. The configured model and authentication\nare retained. Workers may not start detached jobs. Child process-group identity\nis persisted; SIGTERM triggers cleanup, and resume checks for an existing prior\nworker before it permits another writer. Ambiguous ownership stops for a scoped\ndiagnostic rather than signalling an unrelated process.\n\nThe lifecycle guarantee is limited to the initial process group and ordinary\nsupervisor interruption/restart. Workers are trusted not to escape that group\nwith detached jobs; this is an explicit, unenforced operating assumption, not\ncgroup containment or protection against a malicious worker. A cgroup-based\nrunner would be a separate future hardening task if that threat model is needed.\nThe current scope does not require new host privileges for cgroup management.\nHandled signals are deferred across launch, identity capture and registration;\nthe dedicated supervisor is single-threaded. Uncatchable termination between\nfork and durable registration is outside this containment guarantee and is not\nrepresented as safe resumable completion.\n\nInternal helper calls require a one-use capability and the inherited supervisor\nlock. They cannot be started directly or overwrite a previous attempt's result.\nThe helper closes its descriptor after validating the grant; the parent retains\nthe lock, and restart cleans a positively identified abandoned worker before\nanother phase runs. Stable pidfds protect recovery signalling from PID reuse.\nRule publication is serialized and atomic, with an idempotent installation\nreceipt for recovery between publication and the authorization record.\n\n"
+  }
+}

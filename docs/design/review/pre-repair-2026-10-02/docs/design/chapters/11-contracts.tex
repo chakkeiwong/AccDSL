@@ -1,0 +1,279 @@
+\chapter{Core grammar, records and execution details}
+\label{app:contracts}
+
+\section{Core 0 grammar}
+
+The grammar below defines the declaration forms used in this document.
+Identifiers are case-sensitive Unicode names resolved to namespace-qualified
+IDs. Keywords are reserved. Strings are UTF-8 JSON-style quoted strings.
+Comments start with \code{//} and end at the line boundary. Dates have the
+lexical form \code{@YYYY-MM-DD}; currency identifiers resolve through the
+package registry. Decimal literals have no implicit currency or rate type.
+Array and record expressions are immutable values. Functions must be registered
+pure functions with typed signatures; calling an unknown function is an error.
+
+\begin{lstlisting}
+program      = "module" ident "version" string ";" { declaration } ;
+declaration  = use | source | entity | book | account | observation
+             | symbol | choice | binding | constraint | alternative
+             | contract | event | rule | scenario | report ;
+use          = "use" ident "version" string ";" ;
+source       = "source" ident "=" expression ";" ;
+entity       = "entity" ident "functional" currency ";" ;
+book         = "book" ident "entity" ident "basis" ident
+               "version" string ";" ;
+account      = "account" ident ":" account_kind "book" ident ";" ;
+account_kind = "Asset" | "Liability" | "Equity" | "Income" | "Expense" ;
+observation  = "observation" ident ":" type time_spec
+               "=" expression "from" ident ";" ;
+time_spec    = "instant" date | "period" date "to" date ;
+symbol       = "symbol" ident ":" type "in" domain
+               "because" string ";" ;
+domain       = "[" expression "," expression "]"
+             | "{" expression { "," expression } "}" ;
+choice       = "choice" ident "in" "{" ident { "," ident } "}"
+               "because" string ";" ;
+binding      = "let" ident [ ":" type ] "=" expression ";" ;
+constraint   = "constraint" ident ":" expression ";" ;
+alternative  = "alternative" ident "{" { assumption } "}" ;
+assumption   = "assume" expression ";" ;
+contract     = "contract" ident ":" ident "book" ident
+               "{" { field } "}" ;
+field        = ident "=" expression ";" ;
+event        = "event" ident "(" [ parameters ] ")" "book" ident ";" ;
+parameters   = ident ":" type { "," ident ":" type } ;
+rule         = "rule" ident "for" ident "as" ident
+               [ "overrides" ident { "," ident } ]
+               "when" expression "{" { rule_statement } "}" ;
+rule_statement = binding | "require" expression ";" | post ;
+post         = "post" "{" { posting } "}" ;
+posting      = ("debit" | "credit") ident expression ";" ;
+scenario     = "scenario" ident "{" { "set" ident "=" expression ";" } "}" ;
+report       = "report" ident "for" ident "{" { field } "}" ;
+type         = ident [ "<" type { "," type } ">" ] ;
+expression   = disjunction ;
+disjunction  = conjunction { "or" conjunction } ;
+conjunction  = comparison { "and" comparison } ;
+comparison   = sum [ ("==" | "!=" | "<" | "<=" | ">" | ">=") sum ] ;
+sum          = product { ("+" | "-") product } ;
+product      = unary { ("*" | "/") unary } ;
+unary        = [ "-" | "not" ] atom ;
+atom         = number [ currency | "per" "year" ] | string | date
+             | "true" | "false" | ident { "." ident }
+             | ident "(" [ expression { "," expression } ] ")"
+             | "(" expression ")"
+             | "[" [ expression { "," expression } ] "]"
+             | "{" { field } "}" ;
+\end{lstlisting}
+
+The \code{period} form's second date is exclusive. Symbol-domain intervals
+are closed in Core 0; open domains can be expressed by additional constraints.
+Money and rate suffixes have lexical priority over unrelated identifiers.
+The parser rejects ambiguous tokenisation, duplicate names, unresolved currency
+identifiers and chained comparisons. An identifier introduced by a choice is
+an enumeration value within that choice's namespace.
+
+Core 0 has no unbounded loops, recursion, dynamic code evaluation or arbitrary
+host calls. Contract schedules and finite input collections are supplied by
+typed packages. The \code{report} fields bind output names to typed expressions
+provided by a registered reporting template; they do not redefine the
+recognition of a transaction. Time-dependent scenario drivers are typed curves
+or processes; the illustrative \code{constant} function supplies a constant
+curve over the requested run horizon.
+
+\section{Required core record definitions}
+
+The following language-neutral definitions specify serialised meanings.
+An implementation may use classes, algebraic data types or relational tables,
+provided round-trip import/export preserves these fields.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+EvidenceView {
+  id, source_document_ids[], extraction_version_ids[],
+  cutoff: Timestamp, availability_policy_id,
+  revision_policy: Original | LatestAvailable | ExplicitSelection,
+  selected_assertion_version_ids[], review_decision_ids[]
+}
+
+Context {
+  entity_id, perimeter_version_id?, concept_id, basis_id,
+  time: Instant(Date) | Interval(start: Date, end_exclusive: Date),
+  unit_id, currency_id?, dimensions: Map<DimensionId, MemberId>,
+  taxonomy_version_id?, measurement_kind
+}
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+ObservedValue<T> =
+  Exact(T) |
+  Rounded(displayed: T, admissible_domain: Domain<T>, rule_id) |
+  Missing(reason: MissingReason)
+
+Observation<T> {
+  id, context_id, value: ObservedValue<T>, source_span_ids[],
+  literal, extraction_run_id, proposed_reading_id,
+  review_status, supersedes_id?
+}
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+Assumption {
+  id, expression_id, scope_id, rationale,
+  provenance: Analyst | EmpiricalEstimate | ImportedModel | ScenarioDesign,
+  source_refs[], valid_times, information_cutoff,
+  role: Baseline | Hypothesis | Convenience | ReviewedDefault
+}
+
+HistoryFamily {
+  id, model_scope_id, evidence_view_id, opening_state_spec,
+  shared_symbols[], finite_choices[], constraints[], alternatives[],
+  feasibility: Feasible | Infeasible | Unknown,
+  coverage: ExactWithinScope | PartialSearch | Approximate,
+  solver_result_refs[], witnesses[]
+}
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+Posting {
+  account_id, side: Debit | Credit,
+  functional_amount: NonnegativeExactMoney,
+  original_quantity?, original_currency?, valuation_ref?,
+  movement_class, counterparty_id?, lot_or_cohort_id?
+}
+
+JournalBatch {
+  id, event_id, book_id, posting_date, accrual_period?,
+  postings[], rule_version_id, measurement_refs[],
+  assumption_refs[], state_precondition_hash, explanation_ref
+}
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+ConditionalOutput {
+  context_id, history_family_id, condition_refs[], scenario_id,
+  result: Exact | Symbolic | Samples | CertifiedBounds
+          | ExploredRange | Unresolved,
+  probability_model_id?, numerical_status, completeness,
+  explanation_refs[]
+}
+\end{lstlisting}
+\end{minipage}
+
+Question marks denote explicitly optional fields. An absent field is allowed
+only when the type's conditions permit it; for example, monetary output always
+has a currency. A posted functional amount is exact and nonnegative, with side
+carrying the sign. Zero postings may be retained for traceability, but cannot
+serve as invented evidence of an economic event. The underlying measurement
+can have finer precision or a continuous symbolic domain before the declared
+posting-rounding operation.
+
+\section{Typing and partial-information rules}
+
+For expressions $x$ and $y$ in the same currency $C$, the money addition rule is
+\[
+ \frac{x:\operatorname{Money}\langle C\rangle\quad
+       y:\operatorname{Money}\langle C\rangle}
+      {x+y:\operatorname{Money}\langle C\rangle}.
+\]
+Context compatibility is a separate premise for observations. There is no
+analogous implicit rule for different currencies. Explicit conversion uses
+a dated measurement and records its rate and purpose. A rate-times-principal
+calculation is typed through a declared accrual convention; the example's
+annual simple rate and year fraction produce money in the principal's currency.
+
+Known expressions evaluate normally. Shared symbols evaluate to symbolic
+expressions subject to a joint constraint store. Missing source values cannot
+enter arithmetic until the model supplies a symbol or a conditional assumption.
+Boolean guards over symbols produce formulas, not the value false. This avoids
+the common error in which ``unknown whether impaired'' silently means
+``not impaired.'' Division requires a proven nonzero denominator or a
+partitioned domain that excludes zero; otherwise the expression remains
+unsupported for concrete execution.
+
+Logical queries first require a nonempty feasible family. An empty family
+returns \code{Infeasible}; it must not produce vacuous answers to substantive
+questions. For a nonempty family, constraint evaluation has three results.
+\code{entailed} means every state in
+the declared feasible family satisfies the proposition. \code{refuted} means
+none does. \code{undetermined} means both remain feasible or the solver has
+not decided; the response distinguishes those causes. Probabilistic truth is
+a separate query requiring a measure. A language-level Boolean value must
+never be inferred from an arbitrary probability threshold.
+
+\section{Operational rule selection}
+
+Let $V(e,h)$ be the applicable rules for event $e$ in concrete history $h$,
+after package/date selection and guard evaluation. Let $r\prec r'$ mean that
+$r'$ validly overrides $r$ through the declared acyclic graph. Define
+\[
+ \operatorname{Max}(V)=\{r\in V:\nexists r'\in V\text{ with }r\prec r'\}.
+\]
+For one required recognition operation, a singleton selects that rule; the
+empty set yields \code{UnsupportedTreatment}; a larger set yields
+\code{RuleConflict}. Multiple distinct operations, such as measurement and
+recognition, are evaluated through separate declared interfaces. A rule that
+intentionally produces no postings must belong to a supported non-recognition
+event operation, whose economic state effect is still recorded.
+
+Given a selected rule, the evaluator computes all local bindings and
+preconditions, emits proposed postings, verifies
+Equation~\eqref{eq:posting}, validates account/context restrictions and commits
+the event transaction. Failure returns the original state plus a diagnostic.
+This defines the atomicity requirement independently of the storage technology.
+
+\begin{minipage}{\linewidth}
+\section{Example run request and response}
+
+The following request executes two named conditions under one scenario. It
+does not request an aggregate probability distribution.
+
+\begin{lstlisting}
+{
+  "model": "BorrowingExample@1",
+  "evidence_view": "synthetic-2025-exact",
+  "starting_state": "after-2025-close",
+  "horizon": {"start": "2026-01-01", "end_exclusive": "2027-01-01"},
+  "conditions": ["allFixed", "allFloating"],
+  "scenarios": ["rateShock"],
+  "mode": "conditional",
+  "weight_model": null,
+  "reports": ["balance_sheet", "income", "cash_flow", "equity", "journals"],
+  "package_lock": "demonstration-packages-v1"
+}
+\end{lstlisting}
+\end{minipage}
+
+The response contains two separately labelled results with interest expense
+5 and 7, cash 90 and 88, debt 100 in both, and equity $-10$ and $-12$.
+A request for the parent symbolic family returns the formula
+$7-2\alpha$ and, under exact linear bounds, $[5,7]$ before monetary
+quantisation. The API rejects an unconditional mean request without a weight
+model. A user can instead request an arbitrary clearly labelled representative
+case, which does not stand in for the feasible family.
+
+\section{Requirement traceability}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule Requirement & Primary implementation area & Conformance cases\\\midrule
+R1 & Evidence registry and extraction adapters & T03, T09\\
+R2 & Context/version model and cutoff queries & T03, T04\\
+R3 & Types, mappings and package selection & T02, T12, T13\\
+R4 & Symbols, choices and constraint graph & T05--T10, T14\\
+R5 & Posting, closing and consolidation & T01, T11--T13\\
+R6 & Contract and behavioural interfaces & T05, T11, T15, T16\\
+R7 & Conditional output and probability types & T06, T07, T18\\
+R8 & Explanation graph and report dependencies & T09, T11--T13\\
+R9 & Capabilities and versioned modules & T02, T14--T16\\
+R10 & Run records, scheduler and replay & T03, T17, T18\\\bottomrule
+\end{tabular}
+\end{center}

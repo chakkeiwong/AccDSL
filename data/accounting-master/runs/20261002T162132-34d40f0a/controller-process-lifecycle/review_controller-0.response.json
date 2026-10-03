@@ -1,0 +1,39 @@
+{
+  "assumptions": [
+    "Workers remain in their initial process group, as explicitly required by the supplied interface; detached or malicious-worker containment is outside scope.",
+    "Missing interface assumption: no SIGCHLD handler, callback, thread, or other component reaps the subprocess before terminate_group finishes. WNOWAIT preserves identity only while that assumption holds.",
+    "Missing interface assumption: on_spawn, heartbeat, and stopped callbacks complete within bounded time. The subprocess deadline cannot interrupt a blocking callback.",
+    "Atomic state publication and protection checks are stated interfaces; their implementations and failure-path ordering are not supplied here."
+  ],
+  "checks": [
+    "Performed static review of the supplied process-lifecycle code only; used no tools, commands, files, or prior history.",
+    "Traced supervisor interruption during startup, normal leader exit with surviving descendants, and recovery signalling across PID reuse.",
+    "The packet reports 40 passing tests. Test names and hashes are supporting evidence; test bodies are unavailable, so their coverage of the identified races is not established."
+  ],
+  "evidence": [
+    "scripts/accounting_master_support.py",
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "HIGH — bounded_process leaves startup outside its cleanup guard. Popen and process_identity execute before the try/finally. SIGTERM, which catch_termination converts into KeyboardInterrupt, can arrive after the child starts but before entry into that try. An identity-read exception has the same effect. Cleanup then never runs, and on_spawn has not persisted the child identity, so recovery may have no record of the surviving writer. Repair: make launch, identity capture, and durable registration one interruption-safe startup operation. Defer handled termination signals across this interval, establish cleanup responsibility immediately when the child exists, and ensure registration failures terminate and verify the group before unwinding. Account for pending termination on signal restoration. Add targeted startup-interruption and identity-read-failure coverage.",
+    "HIGH — terminate_group reports cleanup complete without confirming descendant termination after SIGKILL. It waits for live members after SIGTERM, but after SIGKILL it waits only for proc. When the leader has already exited—the explicitly supported successful-parent-exit case—proc.wait can return immediately while a descendant still exists. SIGKILL delivery is asynchronous, and a task in uninterruptible sleep can remain alive. Setting _master_cleanup_done and returning permits phase completion or another worker without establishing group quiescence. Repair: keep the leader unreaped while boundedly checking that no live group members remain after escalation. Reap and mark cleanup complete only after that check succeeds. If the deadline expires, raise a continuation veto and retain an unresolved recovery record that prevents further work; do not mark the process finished. Cover the case where the leader exits before descendant cleanup completes.",
+    "HIGH — stop_recovered_group does not bind its member snapshot to the saved group lifetime. It validates the saved leader once, then enumerates members and opens pidfds. Unlike terminate_group, recovery does not hold an unreaped child leader. The original leader and group can disappear after the initial check, and the numeric PID/PGID can be reused before enumeration. Each subsequent identity comparison then validates a newly observed unrelated process against its own snapshot, rather than against the saved group's lifetime. Stable pidfds would reliably signal those wrong targets. Repair: acquire and validate all candidate pidfds without signalling, then revalidate that the saved leader still has the original start_ticks and PGID after collection. If that anchor disappeared or changed during collection, close the descriptors and veto cleanup. Signal only descriptors collected under that confirmed lifetime. Add a deterministic recovery-race test covering group disappearance and PGID reuse between the initial leader check and enumeration."
+  ],
+  "next_actions": [
+    "Repair startup interruption handling, post-SIGKILL quiescence verification, and recovery group-lifetime validation.",
+    "Make callback boundedness and exclusive child-reaping ownership explicit interface requirements, or enforce them.",
+    "Rerun lifecycle verification and obtain a fresh read-only review of the changed controller and test evidence before resuming phases."
+  ],
+  "residuals": [
+    "Recovery takes one member snapshot. A worker that forks during cleanup can leave an unsignalled member and trigger the final continuation veto. That is fail-closed, but automatic recovery is not guaranteed for that case.",
+    "The supplied excerpts do not establish approval publication, actual repair execution, refreshed plan content, atomic-write durability, or preservation-check ordering; those require their own scoped review.",
+    "The accepted 192-report source panel and scoped internal phase acceptance cannot close all accounting, scientific, or human-acceptance gaps. Passing control-plane tests does not establish accounting correctness."
+  ],
+  "steps": [
+    "Compared process creation and termination paths with the stated bounded execution and resumability requirements.",
+    "Checked whether process identity remains anchored through signalling and whether successful cleanup proves that the whole initial group has stopped."
+  ],
+  "summary": "Three lifecycle defects require repair: startup interruption can orphan an unregistered worker, normal cleanup can finish before descendants stop, and recovery can collect and signal a reused unrelated process group.",
+  "verdict": "REVISE"
+}
