@@ -1,100 +1,76 @@
 # Accounting master checkpoint
 
-Updated 3 October 2026, Hong Kong, during run `20261002T233421-cea9e631`.
-The user's create/review/execute instruction and original standing grant remain
-active. The catalog preserves all MC01–MC35 and G1–G18, with no missing IDs.
+Updated 9 October 2026 (Asia/Hong_Kong). Direct proposal preparation is active
+under the user's existing authority. Full readiness is **not_ready**; product
+implementation and the historical background controller remain held.
 
-## Active run and next action
+## Current candidate and checked result
 
-Tool session `78463` is running. P00–P04 are accepted internally; P05 is
-planning. Do not launch another master or edit controller files while it is
-active. Poll the session and consult current state before resuming. This is
-a dated checkpoint; saved state and events record subsequent changes.
+Current candidate: **141-page Version 2.10**, at
+`docs/design/proposal/manuscript-tax-20261009/accounting-product-proposal.pdf`.
+SHA256: `9d723b422b3d15b5545471730fe94eddba50f062e6099c32026e4f9fa61c6f20`.
 
-```text
-python3 /home/chakwong/python/AccDSL/scripts/run_accounting_master.py status
-```
+The E01/C03/C08 tax unit is complete within its declared scope: complete annual
+Note 7, twelve note units, eighteen dependencies, 109 monetary/three percentage
+cells and nine queries. Current expense 32,780 plus deferred −3,031 gives
+29,749 million expense, distinct from cash paid 26,102. Simple payable and net
+DTA bridges leave 4,901 and −1,080 unallocated. State Aid's rounded charge is
+compatible with the detailed 10,246. The later reported Ireland payment needs
+separate currency, restricted-asset and settlement records; no residual is
+assigned to an invented FX journal. A conditional settlement shows why payment
+of an existing liability need not create a second expense.
 
-After this invocation exits, resume with:
+All 148 source/arithmetic and 33 candidate/preservation checks pass. The final
+PDF retains 40 prior displays and all 66 bibliography entries, adding one
+display. Twelve rendered pages were inspected, with the new argument and
+adjacent passages read at full size. Independent/human acceptance is pending.
+[Result and limits](../../data/accounting-master/apple-tax-20261009/result.md)
+and [author review](../../data/accounting-master/apple-tax-20261009/author-review.md)
+record the exact scope. The sandbox build failed on a font-cache restriction;
+its log is retained and one trusted retry completed with clean final logs.
 
-```text
-python3 /home/chakwong/python/AccDSL/scripts/run_accounting_master.py run
-```
+## Exact next action
 
-The current invocation has the configured 7,200-second wall limit, sequential
-workers and bounded repair attempts. A budget boundary retains partial work
-and the next plan; it does not complete the mission.
+Plan and audit E01/C03 earnings per share and share-count changes. Start with
+annual A06/A16 and interim I04/I08 (annual Notes 3/10 and interim Notes 3/7),
+linked equity/cash statements, repurchase disclosures and compensation/dilution
+dependencies in annual Note 11 and interim Note 8. Preserve period-weighted
+versus closing shares, share units, purchase versus settlement, and repurchase
+authority versus obligation. See
+[data/accounting-master/next-plan.md](../../data/accounting-master/next-plan.md).
+The tax unit stops at checked integration. No next-unit run or acquisition is
+active; define its bounded population and audit before execution.
 
-- [State](../../data/accounting-master/state.json)
-- [Next plan](../../data/accounting-master/next-plan.md)
-- [Events](../../data/accounting-master/events.jsonl)
-- [Active manifest](../../data/accounting-master/runs/20261002T233421-cea9e631/manifest.json)
-- [Executable plan](accounting-master-program.md)
-- [Preserved previous checkpoint](../../data/accounting-master/checkpoints/before-p04-acceptance-20261003.md)
+## Remaining program
 
-## Current evidence
+[Current master program](accounting-master-current.md) retains the complete
+MC01–MC35/G1–G18 allocation and completion evidence. Five wider workstreams
+remain: E01 filing-package/material semantics; E05 genuine same-context conflict;
+E07 operative authority and broader methods; E08 literature/proposal support;
+and E14 interfaces/dependencies/models/terms. Forty exhibit targets, 136
+unverified publication dates and actual company/contract/cohort facts remain.
+Missing human feedback does not stop feasible internal preparation under MC35.
 
-The prior run `20261002T221346-d54a6552` ended at 23:30:11 UTC on 2 October
-with `wall_limit`, exit code 2. P03 was accepted. P04's repair/checks passed,
-but its result reviewer had only about two seconds before the run limit and
-produced no verdict. That timeout was not promoted to acceptance.
+Revenue, commitments, assets, tax and insurance adoption are delivered within
+scope. E05's 31-statement search found 290 equal pairs and no qualifying conflict;
+do not repeat it unchanged. E14's taxonomy/Arelle source unit is complete without
+runtime evidence. Four papers and recorded operative-notice routes remain
+blocked. Source retries need new premises. Detailed prior results and source
+routes are linked from the direct next plan and
+[requirements supplement](accounting-continuation-requirements-20261007.md).
 
-The resumed run began at 23:34:21 UTC. All 81 controller tests passed freshly,
-and the unchanged controller's finding adjudication was reused. The continuation
-audit retained the accepted 192-report baseline, original criteria, independent
-numerical comparators, bounded workers and distinct evidence classes. Source,
-controller and accepted-evidence hashes matched; state/plan consistency passed.
-No controller, dependency, permission or scientific-default change was required.
+## Preservation and recovery
 
-| Phase | Observed state | Scope and next work |
-| --- | --- | --- |
-| P00/P01 | Accepted internally | Frozen baseline and 192 source-context records; semantics, availability and benchmark annotations remain open. |
-| P02 | Accepted internally | Selected Apple note dispositions and reconciliations; full company and agreement semantics remain open. |
-| P03 | Accepted internally | Core 0 source/typed-input lowering; 11 tests, 101 obligations. General language, mappings and uncertainty remain open. |
-| P04 | Accepted internally at 23:58:10 UTC | Executed reconstruction/provenance repair; 21 P04 tests/obligations and 11 P03 regressions passed; clean read-only AGREE result review. |
-| P05 | Running: planning | Generate journals/statements from economic events; existing Northstar postings are the independent comparator, not event input. |
-| P08 | Needs repair, independently eligible | Prior planning interruption is resumable. |
-| P06/P07/P09–P14 | Pending | Dependencies control scheduling. |
+118 baseline files and 115 prior-unit manifest references remain intact, as do
+1,266 historical protected files, 518 upstream references and six controller
+records. The pre-V2.10 pointers are in
+`data/accounting-master/apple-tax-20261009/pointers-before/`; earlier results
+and pointers remain preserved. P19's mutable paths resolve through
+`data/accounting-master/continuation-20261007/baseline-manifest.json`.
+Do not rewrite frozen release hashes or rerun closed-unit generators into their
+bound outputs. Use this unit's render manifest/review for the current PDF.
 
-P04 now records current approval/execution provenance and preserves historical
-references. Added checks reject malformed/mismatched provenance and ensure honest
-failure reports. All 394 recorded hashes and 384 protected inputs matched. The
-reviewer independently reran 17 numerical and nine P03 tests. Four P04 and two
-P03 checker tests relied on matching supervisor evidence and inspected code
-because their writes were unavailable in the review sandbox. The reviewer
-returned AGREE, exited zero without timeout, and took 238.855 seconds.
-
-The master immediately refreshed the plan and started P05. Generation 57 matched
-saved state when inspected; all accepted P00–P04 evidence hashes matched. Earlier
-worker text saying independent acceptance is pending is superseded by the clean
-P04 review and accepted state. Accounting, forecast and human acceptance remain
-unresolved.
-
-- [P04 repair response](../../data/accounting-master/runs/20261002T233421-cea9e631/P04/execution-0/implement-0.response.json)
-- [P04 supervisor checks](../../data/accounting-master/runs/20261002T233421-cea9e631/P04/execution-0/checks.json)
-- [P04 result review](../../data/accounting-master/runs/20261002T233421-cea9e631/P04/execution-0/review_result-0.response.json)
-- [P04 review process](../../data/accounting-master/runs/20261002T233421-cea9e631/P04/execution-0/review_result-0.process.json)
-- [P04 conformance](../../data/accounting-master/deliverables/P04/conformance.json)
-
-## Approval and continuation
-
-The installed `/home/chakwong/.codex/rules/accdsl-master.rules` again returned
-`allow` for the exact absolute run command; an unrelated Python script did not
-match. This invocation resumed without new approval. Use the same entrypoint
-directly, without wrappers, environment prefixes or changing relative paths.
-Workers retain workspace-write/read-only sandboxes and `never` nested approvals.
-Managed policy remains authoritative outside the existing grant.
-
-Continue eligible phases through the runner. At exit inspect its manifest,
-state/plan consistency, phase evidence and recorded child cleanup before resume.
-Retain partial work and specific repair findings. Use `--retry-blocked` only
-after a known external access/input change. The current local policy permits
-continued internal work while human feedback is pending.
-
-No paid data, professional engagement, outreach, accounts, deployment, publication,
-global/conda installation, Git initialization or parallel/recursive workers are
-authorised. Protected release sources and historical evidence remain unchanged.
-The unusable Git marker is preserved; content hashes provide provenance.
-All G1–G18 remain open and `mission_complete` remains false. Bounded phase
-acceptance does not establish arbitrary-history completeness, full accounting
-validity, empirical forecast validity or human acceptance.
+Existing Git HEAD is `8e3b2628df8c89f7315119170b82624d536bc3e5`; no Git mutation
+occurred. Artifact hashes supplement the extensive pre-existing dirty worktree.
+Old controller state, deadlines and retries are historical. No worker is active;
+no network, install, outreach, fee or publication was undertaken.

@@ -1,0 +1,158 @@
+"""Create a separate Version 2.9, preserving all earlier sources outside insertions."""
+from pathlib import Path
+import shutil
+
+OUT=Path(__file__).resolve().parent;ROOT=OUT.parents[2]
+OLD=ROOT/'docs/design/proposal/manuscript-commitments-20261008'
+NEW=ROOT/'docs/design/proposal/manuscript-assets-20261008'
+NEW.mkdir(exist_ok=False)
+for p in OLD.rglob('*'):
+    if p.suffix in {'.tex','.bib','.lark'}:
+        q=NEW/p.relative_to(OLD);q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
+p=NEW/'accounting-product-proposal.tex';p.write_text(p.read_text().replace('Version 2.8','Version 2.9'))
+p=NEW/'sections/corporate-methods.tex';s=p.read_text();marker=r'\hypertarget{lease-and-tax-integration}'
+assert s.count(marker)==1;s=s.replace(marker,'\\input{sections/apple-operating-assets}\n\n'+marker);p.write_text(s)
+p=NEW/'sections/source-admission.tex';s=p.read_text();marker='Similarly, a straight-line depreciation policy leaves useful lives, residual\nvalues, components and available-for-use dates to be established.'
+bridge='\nSection~\\ref{sec:apple-operating-assets} tests those limits against the reported\nasset balances, depreciation and cash payments, then constructs two different\nasset books compatible with the selected amounts.'
+assert s.count(marker)==1;s=s.replace(marker,marker+bridge);p.write_text(s)
+(NEW/'sections/apple-operating-assets.tex').write_text(r"""\section{Apple: asset balances do not identify asset movements}
+\label{sec:apple-operating-assets}
+
+The preceding methods need receipts, lots, useful lives and settlement dates.
+Apple's disclosures supply some of the balances those events must explain,
+but they do not supply the events themselves. Its FIFO and straight-line
+policies narrow the permitted cost calculations without identifying the actual
+inventory lots or asset cohorts \citep[Note 1, printed p.~34]{apple2024}.
+Comparing the notes with the cash-flow statement shows why filling those
+missing inputs by subtracting balances can produce a wrong history.
+
+\subsection{An inventory adjustment is not purchases or payments}
+
+Between 28 September and 28 December 2024, components fall from 3,627 to 2,792
+million dollars while finished goods rise from 3,659 to 4,119 million. Total
+inventory falls from 7,286 to 6,911: the component changes, $-835$ and $+460$,
+sum to $-375$ million \citep[Note 5, printed p.~9]{apple2025q1}. Those two
+classes do not reveal quantities, unit costs or the transfers and sales that
+produced the balances.
+
+The quarter's cash-flow statement reports $+215$ million for inventories within
+its reconciliation of net income to operating cash \citep[printed p.~5]{apple2025q1}.
+That is an indirect reconciliation adjustment, not total cash paid to suppliers.
+Even replacing it with minus the stock change would give $+375$, a different
+quantity. The difference $215-375=-160$ million remains unexplained by these
+selected disclosures. In fiscal 2024, inventory rose from 6,331 to 7,286, while
+the cash-flow adjustment was $-1{,}046$; relative to the $-955$ stock-change
+shortcut the difference is $-91$ million \citep[printed pp.~31 and 33]{apple2024}.
+Neither residual is an identified currency effect, write-down or other journal
+entry. Production, consumption, ownership, valuation and payment histories must
+be established before they can explain the differences.
+
+\subsection{Testing a proposed fixed-asset history}
+
+The fixed-asset notes distinguish three measurements. The table shows gross
+property, plant and equipment (PP\&E), its accumulated depreciation and the
+remaining carrying amount, all in millions of dollars
+\citep[Note 5, printed p.~39]{apple2024}
+\citep[Note 5, printed p.~9]{apple2025q1}.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}Xrrr@{}}
+\toprule
+Amount & 30 Sep 2023 & 28 Sep 2024 & 28 Dec 2024\\\midrule
+Gross PP\&E & 114,599 & 119,128 & 120,615\\
+Accumulated depreciation & 70,884 & 73,448 & 74,546\\
+Net PP\&E & 43,715 & 45,680 & 46,069\\\bottomrule
+\end{tabularx}
+\end{center}
+
+Accumulated depreciation is shown here as a positive deduction: gross less
+that deduction equals net. During fiscal 2024, gross cost increases 4,529,
+accumulated depreciation increases 2,564 and net PP\&E increases 1,965.
+Yet the note reports PP\&E depreciation expense of 8.2 billion, and the
+cash-flow statement reports capital payments of 9,447 million. Its broader
+depreciation-and-amortisation adjustment is 11,445 million
+\citep[printed pp.~33 and 39]{apple2024}. These amounts differ in meaning;
+the 8.2 billion also has coarser displayed precision. The change in accumulated
+depreciation cannot be substituted for the year's depreciation charge.
+
+Consider a deliberately limited asset book to test a tempting reconstruction.
+Let $G_0,G_1$ be opening and closing gross cost and $B_0,B_1$ accumulated
+depreciation, recorded as positive amounts. Let $A$ be gross additions, $R$
+the original cost of retired assets, $d$ the depreciation charge and $S$ the
+accumulated depreciation removed with those assets. Assume there are no other
+movements and all depreciation is expensed. For this illustration, use the
+displayed amounts as exact, including $d=8{,}200$ million. The two balances
+must then satisfy
+\begin{equation}
+ G_1=G_0+A-R,\qquad B_1=B_0+d-S,\qquad 0\leq S\leq R.
+ \label{eq:apple-asset-movement}
+\end{equation}
+The inequality requires a nonnegative carrying amount for the retired assets
+in this cost model. If additions are equated with the 9,447 of cash payments,
+the gross balance requires $R=9{,}447-4{,}529=4{,}918$. The depreciation
+balance requires $S=8{,}200-2{,}564=5{,}636$. The proposed book removes more
+accumulated depreciation than original cost, by 718 million. It is infeasible
+under these combined assumptions. That finding rejects the proposed history;
+it does not establish an error in Apple's filing or identify which assumption
+must change.
+
+The result is not sensitive to small rounding differences under a specified
+rounding model. If the million-dollar balances and payment are rounded to the
+nearest million, and 8.2 billion to the nearest 0.1 billion, the excess
+$d-9{,}447+(45{,}680-43{,}715)$ lies in the closed outer envelope
+$[666.5,769.5]$ million. Its lower endpoint is
+$8{,}150-9{,}447.5+45{,}679.5-43{,}715.5=666.5$.
+This is a conditional precision check, not a verified issuer rounding rule;
+the exact tie convention remains unknown.
+
+Allowing additions to be partly unpaid provides two simple repairs. Retain
+the same selected opening and closing balances, 8,200 depreciation and 9,447
+cash payments. Assume retirement at the start of the year with zero proceeds,
+depreciation of surviving assets, and new acquisitions at year end. There are
+no opening capital payables, taxes or other asset movements. The figures below
+are constructed histories, not estimates of actual Apple transactions.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}Xrr@{}}
+\toprule
+Annual movement (USD million) & History 1 & History 2\\\midrule
+Gross additions & 10,529 & 11,529\\
+Gross cost retired & 6,000 & 7,000\\
+Accumulated depreciation removed & 5,636 & 5,636\\
+Retired carrying amount, expensed & 364 & 1,364\\
+Cash paid for additions & 9,447 & 9,447\\
+Additions remaining payable & 1,082 & 2,082\\\bottomrule
+\end{tabularx}
+\end{center}
+
+Both histories satisfy equation~\eqref{eq:apple-asset-movement}; their gross
+additions can also be allocated to match the three reported asset classes.
+For History 1, acquisition debits PP\&E cost 10,529 and credits cash 9,447 and
+a capital payable 1,082. Depreciation debits expense and credits accumulated
+depreciation by 8,200. Retirement debits accumulated depreciation 5,636 and
+loss 364, while crediting gross PP\&E cost 6,000. Net PP\&E rises 1,965 and
+cash falls 9,447, so total assets fall 7,482. Liabilities rise 1,082 and equity
+falls 8,564 through the two expenses: $1{,}082-8{,}564=-7{,}482$.
+History 2 has the same asset change but liabilities rise 2,082 and equity
+falls 9,564. These are coherent subsystem consequences, not a fit to all of
+Apple's statements or an exhaustive family of real asset histories. Neither
+history receives a probability or preference from this arithmetic.
+
+The following quarter supplies a new snapshot, not the missing annual movements.
+Its gross, accumulated and net changes are 1,487, 1,098 and 389 million,
+whereas capital payments are 2,940 and broad depreciation/amortisation is
+3,080 \citep[printed pp.~5 and 9]{apple2025q1}. The inspected interim note does
+not separately identify PP\&E depreciation expense. The lease note adds a
+related distinction: finance-lease right-of-use assets are included in PP\&E,
+while operating-lease right-of-use assets are in other noncurrent assets.
+The 1.0 billion of noncash right-of-use acquisitions covers the disclosed lease
+population \citep[Note 8, printed p.~42]{apple2024}; adding it all to PP\&E
+or to cash capital expenditure would erase that distinction.
+
+The method therefore preserves reported balances, cash payments, expense and
+unresolved movement components separately. A future cost or funding query
+still needs lot and asset ages, useful lives, residual values, impairment and
+settlement facts. The real filing has supplied constraints and ruled out one
+simple history, while leaving several different explanations open.
+""")
+print(NEW)
