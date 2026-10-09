@@ -5,13 +5,13 @@ request for the current program, its freshness and the remaining phases.
 Gap coverage audited on 8 October against the original requirements,
 G1–G18 residuals and subsequent completed work. The next deliverables and
 required completion evidence below make previously implicit obligations explicit.
-Execution updated after the bounded Apple tax unit and Version 2.10;
-the prior Version 2.9 roadmap is retained in that unit's `pointers-before/`.
+Execution updated after the bounded Apple EPS/ownership unit and Version 2.11;
+the prior Version 2.10 roadmap is retained in that unit's `pointers-before/`.
 This is the current roadmap and status map. It does not change the original
 MC01–MC35/G1–G18 requirements, frozen assessments or executable controller state.
 
 The active objective is to finish the governing accounting product-and-method
-proposal. The current manuscript is the **141-page Version 2.10**, and full
+proposal. The current manuscript is the **144-page Version 2.11**, and full
 proposal readiness remains **not_ready**. Direct internal preparation continues;
 product implementation and the former background controller are held.
 
@@ -19,13 +19,13 @@ product implementation and the former background controller are held.
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.10; latest completed work, candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; next concrete unit is E01 earnings-per-share and share-count analysis from retained Apple notes and equity dependencies |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.11; latest completed work, candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; next concrete unit is E01 debt principal/carrying-value/maturity/settlement analysis from complete retained debt notes and dependencies |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
-| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.10; original acceptance wording remains controlling |
+| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.11; original acceptance wording remains controlling |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
 | [Original master program](accounting-master-program.md) | Historical controller/campaign plan, not an up-to-date resume instruction; its P16-resume language and campaign scheduling predate direct P16–P19 completion and later repairs |
-| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.10 outputs |
+| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.11 outputs |
 | [Controller state](../../data/accounting-master/state.json) | Historical stopped state: P16 is `budget_deferred`, P17–P19 `pending`. These are not current direct-work statuses |
 | [P19 readiness assessment](../../data/accounting-master/deliverables/P19/readiness.json) | Preserved negative assessment dated 7 October; its five remaining blocker IDs still agree with the current checkpoint, but its evidence snapshot predates later repairs |
 
@@ -41,7 +41,7 @@ run that did not happen.
 | P15 | Requirements, gaps and alternatives audit | Audit delivered. Its historical status is not whole-proposal acceptance; requirement and evidence gaps continue to be maintained |
 | P16 | Whole-product architecture and initial-profile design | Scoped architecture specified and reviewed through direct work; it is a design, not an implemented product |
 | P17 | Accounting, sector, research and inference methods | Method specifications and worked examples delivered; applicable authority, real-case and literature obligations remain and are being repaired |
-| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered and extended through Version 2.10; further substantive repairs still require integration and inspection |
+| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered and extended through Version 2.11; further substantive repairs still require integration and inspection |
 | P19 | Assess full proposal readiness | Assessment completed with a **negative** verdict. A fresh assessment remains necessary after the substantive blockers are repaired |
 
 P19's completion means that an assessment was produced, not that the proposal
@@ -59,7 +59,7 @@ the G1–G18 map below preserves the other residual obligations.
 
 | Workstream | Evidence already obtained | What still has to be done |
 | --- | --- | --- |
-| E01 — Real filing-package coverage | Apple annual/interim work, all 70 known exhibit rows disposed, 26 targets located, selected assertions across 23 notes, complete bounded revenue, lease/purchase, inventory/PP&E and tax readings with policy/statement/MD&A dependencies and conditional histories, bounded taxonomy-reference resolution | Resolve the 40 outstanding exhibit targets and relevant recursive references; account for all material narrative and query dependencies. **Next: inspect retained EPS, equity, repurchase and compensation dependencies**, preserving missing actual facts |
+| E01 — Real filing-package coverage | Apple annual/interim work, all 70 known exhibit rows disposed, 26 targets located, selected assertions across 23 notes, complete bounded revenue, lease/purchase, inventory/PP&E, tax and EPS/ownership readings with policy/statement/MD&A dependencies and conditional histories, bounded taxonomy-reference resolution | Resolve the 40 outstanding exhibit targets and relevant recursive references; account for all material narrative and query dependencies. **Next: complete retained debt notes with principal, carrying-value, maturity and settlement dependencies**, preserving missing actual facts |
 | E05 — Genuine source conflict | A bounded 31-statement comparison found 290 equal matched pairs; extraction corrections and exclusions are explicit | Find a genuinely incompatible same-context pair, check precision/version/basis, and demonstrate admission, alternatives and dependent-result invalidation. Do not manufacture a conflict or repeat the unchanged completed search |
 | E07 — Accounting authority and methods | Scoped financing/bank/insurance methods; ASBE lease/tax and selected ASBE 22/25 provisions; PAA/long-tail claim; official 2025 adoption explanation and a checked Ping An original/restated-history example | Directly verify operative notices and exact later conditions; establish applicable amendment chains and actual facts; work remaining financing, bank and insurance consequences. The explanation and issuer example are delivered within scope |
 | E08 — Literature and proposal support | Retained technical-source review and ledgers; latest Caiani access evidence and six forward metadata dispositions | Recover and technically inspect blocked sources where feasible; complete relevant competitor, backward/forward, version/correction and omission work. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain blocked |
@@ -161,12 +161,12 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Plan and audit E01/C03 earnings per share and share-count changes from annual
-   A06/A16 and interim I04/I08, with equity statements, repurchase/cash rows and
-   annual/interim compensation dependencies. Preserve weighted-average versus
-   closing shares, units, authority versus obligation and settlement. Keep the
-   40-target frontier. No next-unit run has begun; completed revenue,
-   commitments, assets, tax and adoption units are dependencies.
+1. Plan and audit E01/C03 full annual Note 9/interim Note 6 debt reading, with
+   commercial-paper, term-debt, principal/carrying-value/maturity/cash and
+   currency/hedge dependencies. Preserve the earlier selected debt/coupon/holdings
+   checks; extend complete material note/query coverage rather than repeat them.
+   Keep the 40-target frontier. No next-unit run has begun. Revenue, commitments,
+   assets, tax, EPS/ownership and adoption units are completed bounded dependencies.
 2. Continue the five workstreams by evidence and dependency. A blocked source
    stops its unsupported claim; other useful internal preparation continues.
    Include publication/byte-vintage, actual company facts and the broader
@@ -262,5 +262,18 @@ preservation checks pass; twelve pages inspected. All 40 prior displays and 66
 bibliography entries survive, with one new display. The five wider blockers,
 all G1–G18 allocations and 136 unverified publication dates remain open.
 
-Latest substantive result: [Apple tax unit](../../data/accounting-master/apple-tax-20261009/result.md).
-Current manuscript: [Version 2.10 PDF](../design/proposal/manuscript-tax-20261009/accounting-product-proposal.pdf).
+Latest substantive result: [Apple EPS/ownership unit](../../data/accounting-master/apple-eps-20261009/result.md).
+Current manuscript: [Version 2.11 PDF](../design/proposal/manuscript-eps-20261009/accounting-product-proposal.pdf).
+
+
+The subsequent [Apple EPS/ownership result](../../data/accounting-master/apple-eps-20261009/result.md)
+adds six full notes and fifteen dependencies, including purchase intervals and
+straight-line compensation policy. Two conditional quantity histories reproduce
+annual and first-quarter averages and fourth-quarter quantities but leave an
+intermediate ownership query unresolved. Quarter purchases narrow to 99,790
+thousand, implying 23,735 thousand net other increases at displayed centres.
+All 167 source/arithmetic and 32 candidate/preservation checks pass; six body
+pages read at full size, seven navigation pages inspected. Version 2.11 preserves
+all 41 earlier displays and 66 bibliography entries and adds one equation.
+All five wider streams, G1–G18 allocations and 136 unverified publication dates
+remain open. The user's asset/tax checkpoint commit is `47afa90`; no push occurred.

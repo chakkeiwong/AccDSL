@@ -1,21 +1,28 @@
 # Accounting proposal — current direct next plan
 
-9 October 2026. Resume from the separate 141-page Version 2.10 at
-`docs/design/proposal/manuscript-tax-20261009/accounting-product-proposal.pdf`.
-Current result: `data/accounting-master/apple-tax-20261009/result.md`.
-Complete annual Note 7 and eighteen dependencies preserve twelve note units,
-109 monetary/three percentage cells and nine queries. Tax expense, payable,
-net deferred balance, restricted assets and settlement have separate targets.
-The simple payable/net-DTA bridges leave 4,901/−1,080 million unallocated; the
-State Aid rounded narrative is compatible with the detailed 10,246 charge.
-The reported quarter payment supports a dated settlement example but does not
-identify the dollar residual's cause or actual funding/currency journals.
-All 148 source/arithmetic and 33 candidate/preservation checks pass; twelve
-rendered pages inspected. All 40 prior displays and 66 bibliography entries
-survive, with one new diagnostic equation. One trusted build passed after the
-preserved sandbox font-cache failure.
+9 October 2026. Resume from the separate 144-page Version 2.11 at
+`docs/design/proposal/manuscript-eps-20261009/accounting-product-proposal.pdf`.
+Current result: `data/accounting-master/apple-eps-20261009/result.md`.
+Complete annual Notes 3/10/11 and interim Notes 3/7/8, with fifteen dependencies,
+preserve sixteen material units, 89 note-table numeric cells and ten queries.
+All 167 source/arithmetic and 32 candidate/preservation checks pass. The first-
+quarter comparative and fourth-quarter purchase intervals constrain the two
+conditional timing examples, which still differ at an intermediate date.
+Item 2 supplies 99,790 thousand quarter repurchases and implies 23,735 thousand
+net other share increases at displayed centres. Actual event/award identities,
+prices, journals and complete EPS methodology remain unresolved.
+All 41 previous displays and 66 bibliography entries survive, with one new
+weighted-share equation. Six body pages were read at full size; seven navigation
+pages inspected on a contact sheet. Final build logs are clean; repair history
+and superseded source/build artifacts are retained.
 PDF SHA256:
-`9d723b422b3d15b5545471730fe94eddba50f062e6099c32026e4f9fa61c6f20`.
+`63c48da717cf41e0ee0c2efc7a9a2cff9addc5101e8e36ff02c6d38003766ecb`.
+
+The prior tax result remains at `data/accounting-master/apple-tax-20261009/result.md`:
+complete annual Note 7 and eighteen dependencies; 148 source/arithmetic and
+33 candidate/preservation checks. Tax expense, payable, net deferred balance,
+restricted funds and settlement are separate; 4,901/−1,080 residuals remain
+unallocated. Version 2.10 and its frozen evidence are unchanged.
 The prior asset result remains at
 `data/accounting-master/apple-assets-20261008/result.md`: complete bounded
 annual/interim Note 5 and ten dependencies, inventory residuals and a rejected
@@ -48,23 +55,21 @@ The E05 comparison is already complete: 31 statements, 310 observations and
 to run that comparison is superseded. The corrected format premise remains:
 only one of the 24 active HTML reports contains inline numeric tags.
 
-Next concrete unit: E01/C03 earnings per share and share-count changes.
-Start from `docs/design/cases/apple/continuation-20261007/case-supplement-v1.json`,
-annual A06/A16 and interim I04/I08: annual Notes 3/10 and interim Notes 3/7.
-Inspect the complete relevant EPS/equity notes, linked statements of equity,
-repurchase/cash rows and compensation/dilution dependencies in annual Note 11
-and interim Note 8. Declare and audit the exact population before extraction
-or calculation. Distinguish income in millions from shares in thousands,
-period-weighted basic/diluted shares from dated outstanding shares, repurchase
-authority from an obligation, and transactions from their settlement. Do not
-sum quarterly weighted averages, infer cash from share-count changes or invent
-grant/vesting/forfeiture histories. The deliverable is a checked source/query
-analysis and separate manuscript integration with actual missing facts explicit.
-Preserve Version 2.10. No next-unit run or acquisition has begun.
+Next concrete unit: E01/C03 debt principal, carrying values, maturity and settlement.
+Start from complete annual Note 9 and interim Note 6 in the retained Apple
+filings and `docs/design/cases/apple/continuation-20261007/case-supplement-v1.json`.
+Include commercial-paper/term-debt disclosures, linked balance/cash/MD&A rows,
+and the currency and hedge dependencies needed by the chosen queries. Audit
+the exact population before calculation. Distinguish legal principal, carrying
+value, market value, fiscal maturity buckets and dated cash settlement. Existing
+selected debt/coupon/holdings results are dependencies, not full note closure.
+Do not repeat them unchanged or infer instruments, exchange rates, hedges or
+settlement histories from residuals. Deliver a checked source/query analysis and
+separate manuscript integration while retaining missing facts.
 
-Revenue, commitments, assets, tax and insurance adoption are completed bounded
-dependencies; do not repeat them unchanged. The tax unit made no publication-
-date repairs and does not close actual tax bases, currency or settlement facts.
+Revenue, commitments, assets, tax, EPS/ownership and insurance adoption are
+completed bounded dependencies. No next-unit run or acquisition has begun.
+This EPS unit repaired no publication dates and does not close the wider package.
 
 Keep the existing 70-row reference frontier and its 40 outstanding exhibit
 targets. Exact indenture/certificate routes already failed in the continuation
@@ -119,7 +124,9 @@ The proposal remains `not_ready`; runtime implementation and the old controller
 stay disabled. Existing user continuation authority and MC35 cover internal
 preparation. No paid engagement, outreach or publication follows from this note.
 
-Earlier P19-bound pointer bytes are in the continuation baseline. The immediate pre-V2.10 pointers are preserved at
+Earlier P19-bound pointer bytes are in the continuation baseline. The pre-V2.11 pointers are preserved at
+`data/accounting-master/apple-eps-20261009/pointers-before/`.
+The pre-V2.10 pointers are preserved at
 `data/accounting-master/apple-tax-20261009/pointers-before/`.
 The pre-V2.9 pointers are preserved at
 `data/accounting-master/apple-assets-20261008/pointers-before/`.
@@ -137,3 +144,11 @@ Do not rerun closed-unit generators into their manifest-bound outputs; save
 any necessary later verification separately.
 Use those historical copies when replaying historical manifests; never rewrite
 frozen release hashes to match current pointers.
+
+The final roadmap-link correction is recorded at
+`data/accounting-master/apple-eps-pointer-repair-20261009/repair-note.md`.
+Use `data/accounting-master/apple-eps-pointer-repair-20261009/final/run-manifest.json`
+and its adjacent `completion.json` as the next unit's cumulative preservation
+entry. The repair records preserve both the current-PDF and latest-result link
+corrections, with relocations for each previous manifest. The EPS PDF and
+substantive result are unchanged.
