@@ -1,31 +1,37 @@
 # Current accounting master program
 
-Status reconciled on 9 October 2026 (Asia/Hong_Kong), following the user's
+Status reconciled on 11 October 2026 (Asia/Hong_Kong), following the user's
 request for the current program, its freshness and the remaining phases.
 Gap coverage audited on 8 October against the original requirements,
 G1–G18 residuals and subsequent completed work. The next deliverables and
 required completion evidence below make previously implicit obligations explicit.
-Execution updated after the bounded Apple EPS/ownership unit and Version 2.11;
-the prior Version 2.10 roadmap is retained in that unit's `pointers-before/`.
+Execution updated after the complete Item 1A source retention, the cumulative
+Chapter 2 crosswalk, Version 2.24 service-access repair and Version 2.25
+Docling page-outcome audit, the 27-member component-notice audit and Version 2.26
+model/backend preparation, exact model metadata/terms TableFormer loader, EasyOCR asset and checkpoint-authority inspection, then all 32 JPMorgan filing-event records, four partial annual reports and four complete Form 10-K candidates, then the structural map and first bounded semantic supplement, and the Version 2.27 manuscript integration. The
+prior roadmap is retained in the latest unit's `pointers-before/`.
 This is the current roadmap and status map. It does not change the original
 MC01–MC35/G1–G18 requirements, frozen assessments or executable controller state.
 
 The active objective is to finish the governing accounting product-and-method
-proposal. The current manuscript is the **144-page Version 2.11**, and full
+proposal. The current manuscript is the **168-page Version 2.27**, and full
 proposal readiness remains **not_ready**. Direct internal preparation continues;
 product implementation and the former background controller are held.
+
+Current candidate SHA256:
+`933091db38e0006a0124418150b3115b608780b777aee7dfc94ba270eb77a3f0`.
 
 ## Which records are current?
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.11; latest completed work, candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; next concrete unit is E01 debt principal/carrying-value/maturity/settlement analysis from complete retained debt notes and dependencies |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.27; latest completed work, candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; next unit follows the Version 2.27 integration frontier |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
-| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.11; original acceptance wording remains controlling |
+| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.27; original acceptance wording remains controlling |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
 | [Original master program](accounting-master-program.md) | Historical controller/campaign plan, not an up-to-date resume instruction; its P16-resume language and campaign scheduling predate direct P16–P19 completion and later repairs |
-| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.11 outputs |
+| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.26 outputs |
 | [Controller state](../../data/accounting-master/state.json) | Historical stopped state: P16 is `budget_deferred`, P17–P19 `pending`. These are not current direct-work statuses |
 | [P19 readiness assessment](../../data/accounting-master/deliverables/P19/readiness.json) | Preserved negative assessment dated 7 October; its five remaining blocker IDs still agree with the current checkpoint, but its evidence snapshot predates later repairs |
 
@@ -41,7 +47,7 @@ run that did not happen.
 | P15 | Requirements, gaps and alternatives audit | Audit delivered. Its historical status is not whole-proposal acceptance; requirement and evidence gaps continue to be maintained |
 | P16 | Whole-product architecture and initial-profile design | Scoped architecture specified and reviewed through direct work; it is a design, not an implemented product |
 | P17 | Accounting, sector, research and inference methods | Method specifications and worked examples delivered; applicable authority, real-case and literature obligations remain and are being repaired |
-| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered and extended through Version 2.11; further substantive repairs still require integration and inspection |
+| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.27; further substantive repairs still require integration and inspection |
 | P19 | Assess full proposal readiness | Assessment completed with a **negative** verdict. A fresh assessment remains necessary after the substantive blockers are repaired |
 
 P19's completion means that an assessment was produced, not that the proposal
@@ -49,6 +55,17 @@ passed. The remaining proposal work primarily extends P17, feeds further P18
 integration and ends in a new P19 assessment. It is not a new P20–P24 catalog,
 and there is no reason to restart completed phases simply because the stopped
 controller's ledger is stale.
+
+## Current Version 2.27 integration
+
+The separate candidate at
+`docs/design/proposal/manuscript-jpmorgan-guarantees-20261011/accounting-product-proposal.pdf`
+is bound by the 86-check result, run manifest and four-ledger review at
+`data/accounting-master/accounting-proposal-v227-integration-20261011/`.
+It preserves all 48 displayed equations and the prior Version 2.26 tree, and
+the ordered page review remains author-only. The next source frontier covers
+operative guarantee terms, parent funding facts, historical availability and
+full package semantics. Full readiness remains `not_ready`.
 
 ## Five remaining substantive workstreams
 
@@ -59,11 +76,11 @@ the G1–G18 map below preserves the other residual obligations.
 
 | Workstream | Evidence already obtained | What still has to be done |
 | --- | --- | --- |
-| E01 — Real filing-package coverage | Apple annual/interim work, all 70 known exhibit rows disposed, 26 targets located, selected assertions across 23 notes, complete bounded revenue, lease/purchase, inventory/PP&E, tax and EPS/ownership readings with policy/statement/MD&A dependencies and conditional histories, bounded taxonomy-reference resolution | Resolve the 40 outstanding exhibit targets and relevant recursive references; account for all material narrative and query dependencies. **Next: complete retained debt notes with principal, carrying-value, maturity and settlement dependencies**, preserving missing actual facts |
+| E01 — Real filing-package coverage | Apple annual/interim work, all 70 known exhibit rows disposed, 26 targets located, selected assertions across 23 notes; complete bounded revenue, lease/purchase, inventory/PP&E, tax, EPS/ownership, debt, liquidity, segment, Note 1/perimeter, legal, pronouncement, regulation and all 28 Item 1A annual risk readings; retained Exhibit 21.1 and selected dependencies; bounded taxonomy-reference resolution; 502-record Chapter 2 crosswalk and Version 2.24 service-access bridge | Resolve 40 outstanding exhibit targets and relevant recursion; extend material narrative/query coverage and obtain actual facts. Annual retention is 28 complete/0 partial/0 unworked and interim 2 complete. The declared 19-unit crosswalk is complete at author level; independent interpretation acceptance remains open |
 | E05 — Genuine source conflict | A bounded 31-statement comparison found 290 equal matched pairs; extraction corrections and exclusions are explicit | Find a genuinely incompatible same-context pair, check precision/version/basis, and demonstrate admission, alternatives and dependent-result invalidation. Do not manufacture a conflict or repeat the unchanged completed search |
 | E07 — Accounting authority and methods | Scoped financing/bank/insurance methods; ASBE lease/tax and selected ASBE 22/25 provisions; PAA/long-tail claim; official 2025 adoption explanation and a checked Ping An original/restated-history example | Directly verify operative notices and exact later conditions; establish applicable amendment chains and actual facts; work remaining financing, bank and insurance consequences. The explanation and issuer example are delivered within scope |
 | E08 — Literature and proposal support | Retained technical-source review and ledgers; latest Caiani access evidence and six forward metadata dispositions | Recover and technically inspect blocked sources where feasible; complete relevant competitor, backward/forward, version/correction and omission work. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain blocked |
-| E14 — Reusable tools and interfaces | Bounded taxonomy graph, pinned Arelle source inspection, proposed exchanges and selected terms | Complete broader interface/failure examples, dependency/model records, applicable historical/component terms and distribution conditions. Source inspection does not establish runtime compatibility |
+| E14 — Reusable tools and interfaces | Bounded taxonomy graph, pinned Arelle source inspection, proposed exchanges and selected terms; Docling source-pinned page/timeout/placeholder exchanges and Version 2.25; 27-member component-notice matrix; Version 2.26 model/backend paths, 25 new source bodies and 93 checks; two model repository identities, seven text bodies and 40 metadata checks; TableFormer 4.0.2 source/consumer audit and 32 checks; EasyOCR 1.7.2 source/asset audit and 46 checks; CRAFT/English authority inquiry and 27 checks | Complete broader interface/failure examples, exact dependency/model records, applicable historical/component terms and distribution conditions. Source inspection and fragments do not establish runtime compatibility |
 
 In the [continuation plan](accounting-continuation-audit-20261007.md), these
 correspond to C02/C03, C04, C05, C06 and C07. C01 preservation is established;
@@ -82,7 +99,25 @@ must distinguish unit completion from the wider acceptance obligation.
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
 | E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | Match the remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
-| E14 / C07 | Extend pinned exchange/failure examples beyond the bounded Arelle preparation; complete dependency, transitive licence and model records. Resolve historical FASB applicability, XBRL Software Notice/component terms and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
+| E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); specific model rights and remaining transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
+
+The completed legal unit reads all four matter bodies in both filings and
+eight contingency/recognition/risk dependencies. The management material-loss
+assessment does not erase operating remedies, and the DMA cap does not supply
+a liability or expected loss. Q4/Q1 settlements have distinct periods; proposed
+Google remedies affect a partner-revenue channel with unknown contract economics.
+The completed pronouncement unit preserves issuer adoption plans, disclosure
+populations, transition labels and event/report clocks without supplying
+operative authority or historical amounts. The completed general-litigation reading adds the third-party indemnity,
+defense, settlement and separate insurance channels without quantified loss.
+The completed regulation unit preserves both full bodies and their changed versus
+repeated wording without treating either as a legal-event record. The completed
+risk reconciliation and annual-01–28 reading now supply a source-retention
+closure. The [Chapter 2 crosswalk](../../data/accounting-master/chapter2-source-crosswalk-20261010/result.md)
+now maps 130 assertions, 164 queries and 208 source/provenance records in 82
+author groups. Three references and the service-access bridge are repaired;
+the five associated factual queries remain unresolved. Broader material
+coverage and independent acceptance remain open.
 
 E07 retains the broader corporate obligations: actual revenue, lease, FX and
 tax facts; recognition/measurement exceptions; operative tax law; deferred-tax
@@ -161,12 +196,7 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Plan and audit E01/C03 full annual Note 9/interim Note 6 debt reading, with
-   commercial-paper, term-debt, principal/carrying-value/maturity/cash and
-   currency/hedge dependencies. Preserve the earlier selected debt/coupon/holdings
-   checks; extend complete material note/query coverage rather than repeat them.
-   Keep the 40-target frontier. No next-unit run has begun. Revenue, commitments,
-   assets, tax, EPS/ownership and adoption units are completed bounded dependencies.
+1. Continue the bounded Version 2.27 source frontier: inspect operative guarantee/registration terms, parent funding facts, historical availability and full package semantics while preserving the candidate and its 86-check integration evidence.
 2. Continue the five workstreams by evidence and dependency. A blocked source
    stops its unsupported claim; other useful internal preparation continues.
    Include publication/byte-vintage, actual company facts and the broader
@@ -194,7 +224,7 @@ bounded scope. These fifteen catalog entries are not fifteen entirely untouched
 tasks, nor are they the current authorised execution queue. Implementation
 planning must be reconciled with the completed proposal before that stage.
 
-## Audit of this status reconciliation
+## Historical audit of the original status reconciliation
 
 MC34/35 are addressed. The review compared actual P15–P19 deliverables, the
 negative readiness assessment, the executable catalog, stopped controller state,
@@ -206,8 +236,8 @@ exceptions and later implementation/validation obligations too implicit.
 The revised roadmap supplies next deliverables, completion evidence and an
 allocation of all eighteen recorded gaps.
 
-The documentation plan passes the skeptical audit because it uses the actual
-Version 2.4 baseline, distinguishes proposal preparation from later execution,
+That documentation plan passed the skeptical audit using its then-current
+Version 2.4 baseline, distinguishing proposal preparation from later execution,
 retains the substantive comparator and acceptance wording, and stops at a
 checked coverage/status map. No local count, example or build becomes a
 promotion criterion. Exact commands, environment and stop conditions for the
@@ -262,10 +292,6 @@ preservation checks pass; twelve pages inspected. All 40 prior displays and 66
 bibliography entries survive, with one new display. The five wider blockers,
 all G1–G18 allocations and 136 unverified publication dates remain open.
 
-Latest substantive result: [Apple EPS/ownership unit](../../data/accounting-master/apple-eps-20261009/result.md).
-Current manuscript: [Version 2.11 PDF](../design/proposal/manuscript-eps-20261009/accounting-product-proposal.pdf).
-
-
 The subsequent [Apple EPS/ownership result](../../data/accounting-master/apple-eps-20261009/result.md)
 adds six full notes and fifteen dependencies, including purchase intervals and
 straight-line compensation policy. Two conditional quantity histories reproduce
@@ -275,5 +301,257 @@ thousand, implying 23,735 thousand net other increases at displayed centres.
 All 167 source/arithmetic and 32 candidate/preservation checks pass; six body
 pages read at full size, seven navigation pages inspected. Version 2.11 preserves
 all 41 earlier displays and 66 bibliography entries and adds one equation.
+
+The subsequent [Apple debt result](../../data/accounting-master/apple-debt-20261009/result.md)
+adds complete annual Note 9/interim Note 6 reading, thirteen dependencies and
+79 numeric table cells. It checks the annual component bridge, commercial-paper
+net/gross limits, a scoped principal round trip and dated rate-risk targets;
+162 source/arithmetic and 33 candidate/preservation checks pass. Version 2.12
+preserves all 42 prior displays and 66 bibliography entries and adds two displays.
+Five body pages were read at full size and seven navigation pages inspected.
 All five wider streams, G1–G18 allocations and 136 unverified publication dates
-remain open. The user's asset/tax checkpoint commit is `47afa90`; no push occurred.
+remain open. The checked EPS commit is `891a803`, following asset/tax commit
+`47afa90`; no push occurred. The debt unit preserves the pre-V2.12 live records
+in its `pointers-before/` and supplies the next cumulative preservation manifest.
+
+The subsequent [Apple liquidity result](../../data/accounting-master/apple-liquidity-20261009/result.md)
+adds both full Note 4 readings, fourteen material units, thirteen dependencies,
+392 investment cells (294 unique dated cells), 90 statement cells and eleven
+queries. Restrictions, security cash/valuation and receivable concentration
+remain separate. Annual displayed subtraction 140,850 million is compatible
+with rounded MD&A 140.8 billion under conditional nearest rounding; quarter
+remainders 137,942 and 50,349 are indicative. Security residuals +8,263/−2,303,
+cash-population difference 772 and trade residuals +114/−174 remain unallocated.
+Whole-customer unions 33/44/51/62% are conditional percentage examples, not actual
+identities or losses. All 339 source/arithmetic and 35 candidate/preservation
+checks pass; six body pages read at full size and seven navigation pages inspected.
+Version 2.13 preserves all 44 prior displays and 66 bibliography entries, adding
+two displays. Final build logs are clean; the citation-anchor repair and earlier
+attempts are retained. All five wider streams, G1–G18 allocations and 136 unverified
+publication dates remain open. The unit preserves 154 baseline files, 152 prior
+manifest references and the four pre-V2.13 live records. Debt and liquidity remain
+uncommitted; no commit or push was performed in this unit.
+The subsequent [Apple segment result](../../data/accounting-master/apple-segments-20261009/result.md)
+adds full annual Note 13/interim Note 10 readings with fourteen dependencies,
+90 note and 47 used dependency monetary cells. Issuer geography, corporate
+costs, country stocks and product-region allocations remain distinct. Two
+cost allocations preserve consolidated income but produce hypothetical
+Greater China profit of 22,082/21,082 million. Two full numeric product-region
+witnesses preserve all marginals and imply 3,600/3,800-million sales changes
+under the assumed 10% shock. Qualitative-mix admission remains unresolved;
+these are not actual allocations or forecasts. All 83 source/meaning,
+107 positional/witness and 37 candidate/preservation checks pass. Version 2.14
+retains all 46 prior displays and 66 bibliography entries and adds two displays.
+Five body/adjacent pages were read at full size and seven navigation pages
+inspected separately; final build logs are clean. All wider streams and
+G1–G18 allocations remain open. The unit preserves 252 baseline files, 249
+prior manifest references and four pre-V2.14 live records. Debt, liquidity
+and segment work remain uncommitted; no push occurred.
+Segment PDF SHA256:
+`0d08e283f6d4f8e07c5231d65addfa09fd851e6133bf85dc0f7d0182c7aeeda7`.
+
+The subsequent [Apple perimeter result](../../data/accounting-master/apple-perimeter-20261009/result.md)
+reads both full Note 1 passages, thirteen body units, all eighteen Exhibit 21.1
+name/jurisdiction pairs and omission footnote, ten dependencies and nine queries.
+The issuer's positive consolidated scope remains distinct from a complete
+control graph. Singapore organized subsidiaries remain unnamed; geography,
+distribution, outsourcing/custody, tax and functional currency preserve their
+separate evidence. No actual entity graph or consolidation calculation was
+constructed. All 79 source/position/meaning and 40 candidate/preservation checks
+pass. Version 2.15 preserves all 48 prior displays and 66 bibliography entries
+unchanged. Six body/adjacent pages were read continuously at full size; seven
+navigation pages were inspected separately. One build has clean logs. The
+source-locator failure and stale-derivative-dependency repair are preserved.
+The unit preserves 178 baseline files, 176 prior manifest references and four
+pre-V2.15 live records. Debt, liquidity, segment and perimeter work remain
+uncommitted; no push occurred. Wider workstreams and all G1–G18 rows stay open.
+Perimeter PDF SHA256:
+`f2d884a034dadf98952c49f6dab71de8887171534ecbc10358ce5d376103b02b`.
+
+The subsequent [Apple legal result](../../data/accounting-master/apple-legal-20261010/result.md)
+adds eight full proceeding bodies, ten source spans, 39 exact assertions and
+eight query dispositions; 100 source and 35 candidate/preservation checks pass.
+Version 2.16 preserves all 48 displays and 66 bibliography entries. Five body
+pages were read continuously and navigation 1–7 separately; one build has
+clean logs. Allegations, reported findings, management assessments and proposed
+remedies remain distinct. No probability, numerical fine or journal is supplied.
+173 immediate protected files and 171 prior manifest references verify; all
+ancestor sets and pre-V2.16 live records are preserved. Wider streams and all
+G1–G18 rows stay open. No commit or push occurred.
+The subsequent [Apple pronouncement result](../../data/accounting-master/apple-pronouncements-20261010/result.md)
+adds four complete spans, nine units and seven queries; 38 source and 20
+candidate/preservation checks pass after fresh source revalidation. Version
+2.17 preserves 48 displays and 66 bibliography entries. Body pages 31–35 were
+read continuously, navigation 1–7 separately; one build has clean logs. Planned
+adoption is distinct from operative authority and observed adoption. 134 immediate
+baseline files, 136 prior references and all ancestor sets are preserved. The
+handoff's anticipated 35-check count is corrected; failed checker-binding
+attempts remain evidence. Wider streams/G1–G18 remain open; no commit or push.
+The subsequent [Apple litigation-risk result](../../data/accounting-master/apple-litigation-risk-20261010/result.md)
+The general-litigation risk unit retains five spans, ten units and seven
+queries: full litigation risk, bounded operational/data-security/credit-support
+paragraphs and interim incorporation. Claim against an indemnified third party,
+defense regardless of merit, settlement/operating remedy and potential insurance
+recovery are distinct. No contract, amount, probability or recovery is invented.
+All 27 source and 18 candidate/preservation checks pass; all 48 displays and 66
+bibliography entries remain. Four body/adjacent pages were read continuously,
+seven navigation pages inspected separately. A one-word page continuation was
+repaired; two builds have clean final logs. Independent/human acceptance pending.
+122 immediate protected files, 125 prior manifest references and ancestor sets
+verify. The V2.17 live records are preserved. No commit or push occurred.
+The subsequent [Apple regulation result](../../data/accounting-master/apple-regulation-20261010/result.md)
+Both full annual/interim general-regulation risk bodies are retained in two
+spans, nine units and six query dispositions. The interim adds national security
+and names executive orders/directives/enforcement priorities three times; the
+notice/trade paragraph repeats. Programs, actual compliance, violation claims
+and mitigation remain distinct. No operative rule, realised event, rate or
+financial impact is invented. All 24 source and 18 candidate/preservation checks
+pass. All 48 displays/66 bibliography entries survive. Four body/adjacent pages
+read continuously and navigation 1–7 separately; one 14.66-second clean build.
+Independent/human acceptance remains pending.
+122 immediate protected files, 125 prior references and ancestor sets verify.
+The failed phrase-count screen remains preserved; actual source occurrence
+count is three. No commit or push occurred. Wider streams/G1–G18 remain open.
+Historical Version 2.19 PDF SHA256:
+`3303c933b57375818ab171eec1f2945f4d2f98f0771139db2fd515be5d292b9f`.
+
+The remaining annual Item 1A bodies are now retained: sixteen bodies (09–17,
+20, 22–25, 27–28), 34 source claims and 20 queries. Ninety source and 70
+original-text/qualification checks pass after one documented `Safari®` PDF
+text-layer normalization; pages 12–15 and 17–20 were read in two ordered
+batches. That source-only unit retained the 166-page Version 2.23. Annual retention
+is 28 complete, 0 partial and 0 unworked; interim 2 complete. These are
+source-retention counts, not semantic acceptance. Readiness is `not_ready`;
+independent/human/domain acceptance pending.
+
+The subsequent Chapter 2 diagnosis and repair produced Version 2.24. All 33
+candidate/crosswalk/preservation checks pass, with 48 displays and 66 references
+unchanged. Final Chapter 2, its Chapter 3 boundary and navigation were inspected;
+the review remains `independent_reader_pending`. All 877 prior manifest
+references verify. This repairs author preparation, not whole-proposal readiness.
+
+Latest substantive result: [JPMorgan subsidiary and guarantee exhibits](../../data/accounting-master/jpmorgan-subsidiary-guarantees-20261011/result.md).
+Current manuscript: [Version 2.26 PDF](../design/proposal/manuscript-model-paths-20261010/accounting-product-proposal.pdf).
+
+The subsequent Docling audit inspects the same-pin base execution path and
+supplies five exact-method fragment exchanges (35 checks). No exception,
+partial-success status or restored page count establishes complete conversion;
+a timeout also does not establish worker termination. Version 2.25 adds the
+bounded explanation to Section 13.13. All 23 candidate checks pass, preserving
+48 displays and all 66 prior bibliography entries with one new source entry.
+The five-page rendered slice, navigation and new citation were inspected;
+independent/human/domain acceptance remains pending. All 1062 prior references
+verify. Annual retention remains 28 complete/0 partial/0 unworked; interim two
+complete. E14 remains open for exact locks/models/terms and later runtime work.
+
+The component-notice follow-up retains Version 2.25 unchanged and records all
+27 graph members: 21 embedded legal notice groups and six with no located
+permission. All 112 documentary checks pass; no blanket schema/distribution
+permission follows. The retained copyright page supplies no Software Notice
+link, and the earlier guessed 404 is not retried. All 1176 prior references
+verify. Historical FASB, exact transitive/model records and intended-use
+conditions remain open; readiness stays `not_ready`.
+
+The latest E14/C07 model-path audit retains 25 new same-pin source bodies,
+25 exact anchors and 91 upstream default expressions. Automatic OCR can warn
+and yield pages without an engine; code pins do not identify model bytes.
+Version 2.26 adds two Section 13.13 paragraphs. All 93 documentary/candidate
+checks pass; all 48 displays and 67 bibliography entries remain unchanged.
+Two non-executable configuration hypotheses expose exact model/package gaps.
+The 168-page PDF has clean logs; pages 137–142 and navigation 1–7 were inspected.
+No installed adapter, model weights, GPU or runtime evidence is claimed.
+All 1279 prior references verify. Next evidence is exact model metadata,
+component terms and package-loader preparation; readiness remains `not_ready`.
+
+The latest model metadata unit resolves Heron and the TableFormer bundle to
+repository commits and retains seven small card/config texts checked against
+Git blobs. Three weight hashes remain upstream metadata only. Model cards
+declare Apache-2.0 and CDLA-Permissive-2.0; the official agreements were read
+in full, with component/authority gaps retained. All 40 documentary checks
+pass. Version 2.26 is unchanged; no new distribution or runtime claim.
+All 1441 prior references verify. Next: exact TableFormer package/loader
+preparation; full readiness remains `not_ready`.
+
+The latest TableFormer loader unit identifies package 4.0.2 at its exact
+source commit and retains thirteen Git-verified source bodies and twelve method
+anchors. All 32 documentary checks pass; 1485 prior references verify. The
+loader takes the first matching checkpoint, OpenCV needs explicit provision,
+and the declared beam-size argument is unused in greedy decoding. Inference
+also consumes train.bbox; its false branch reaches an invalid None operation.
+Version 2.26 is unchanged. Runtime wiring and full dependency compatibility
+remain not checked; full readiness is not_ready.
+
+The EasyOCR 1.7.2 source/asset unit retains twelve Git-verified source
+bodies, two release records and 46 passing documentary checks. All 1539 prior
+references verify. English Reader selects CRAFT plus english_g2; disabled
+downloads fail on missing or MD5-mismatched files but still create directories.
+Checkpoint loading uses weights_only=False. No local model bytes or OCR runtime
+were checked. Version 2.26 is unchanged; full readiness is not_ready.
+
+The CRAFT/English checkpoint-authority unit retains twelve official text,
+metadata and read-only issue responses. All 27 documentary checks pass; 1595
+prior references verify. Author/model-hub links are consistent, but checkpoint
+byte equality and complete model-distribution rights remain unresolved. Source,
+checkpoint and hosted-service licence subjects stay separate. Version 2.26 is
+unchanged; full readiness remains not_ready.
+
+The E01/MC05 publication supplement identifies twelve official JPMorgan
+2018–2020 filing events with exact accessions and cover-identity checks. All 75
+checks pass; 1638 prior references verify. Event dates remain separate from
+selected-PDF historical byte availability. The frozen corpus assessment stays
+56 verified filing-date records and 136 unverified; no date-only transfer from
+ten alternate sources. Mutable SEC shard navigation and an initially ineffective
+curl size cap were repaired and recorded. Version 2.26 remains unchanged.
+
+The JPMorgan filing-event supplement adds twenty events for 2021–2025;
+together with the prior unit it identifies all 32 target annual/quarterly events.
+All 154 documentary checks pass; 1730 prior references verify. Four selected
+annual reports (2022–2025) explicitly omit Form 10-K pages. Whole-filing coverage
+is therefore not established by those PDFs. Four exact unattempted issuer
+10-K links are retained for immediate repair. All selected-byte as-of admissions
+remain withheld; the frozen 56/136 corpus date assessment is unchanged.
+Version 2.26 remains unchanged; full readiness is not_ready.
+
+The four exact JPMorgan issuer-hosted Form 10-K candidates have been
+acquired to repair the 2022–2025 annual-report omissions. All 29 final
+structural/documentary checks pass; 1913 prior references verify. Each PDF has
+Form 10-K, issuer, SEC, Item 1A and signatures evidence. The selected annual
+reports remain preserved as partial counterparts. Historical byte availability,
+full semantic completeness and regulator-byte equality remain unclaimed.
+Version 2.26 is unchanged; full readiness remains not_ready.
+
+The source-package ledger preserves four JPMorgan 2022–2025 records with
+three roles: selected annual counterpart, complete issuer 10-K candidate and
+regulator filing event. All 26 focused checks pass; 1949 prior references verify.
+No frozen corpus file changed. Source roles, hashes, omission notices, filing /
+retrieval clocks and withheld historical-byte admission remain separate. Version
+2.26 is unchanged; readiness remains not_ready.
+
+The omitted-section map binds four complete JPMorgan 10-K candidates to the
+three-role package ledger. Complete PDFs are 382/422/436/410 pages versus
+328/364/372/364-page selected annual reports; each has bounded Form 10-K, Item
+1/1A, Item 7, Item 8, Item 15 and signature anchors. All 24 checks pass; 1965
+prior references verify. This is structural source evidence only; semantic
+completeness and historical byte availability remain open. Version 2.26 is
+unchanged; readiness remains not_ready.
+
+The JPMorgan semantic supplement retains 40 bounded assertions, 67 exact passages
+and 36 dependency records across 2022–2025. All 108 source/consistency checks
+pass; 1982 inherited references verify. Parent/IHC funding restrictions, the
+2024 segment change, proxy incorporation and filed/furnished exhibit roles
+remain separate. The 2023 Item 15 page-156 reference is wrong relative to its
+target; a separate page-163 navigation correction preserves the original.
+Full package semantics and historical-byte availability remain open.
+Version 2.26 is unchanged; readiness remains not_ready.
+
+Next frontier: `data/accounting-master/accounting-package-semantic-annotation-20261011/next-source-frontier.md`.
+
+All eight JPMorgan Exhibit 21/22.2 bodies for 2022–2025 are read at author
+level: 72 dated entity/jurisdiction rows, four guarantee descriptions and 96
+exact source spans. All 147 checks pass; 2131 inherited references verify.
+The eighteen-row rosters are explicitly partial and omit Financial Company
+LLC, which Exhibit 22.2 identifies as the guaranteed issuer. Display nesting,
+ownership, funding rights and guarantee scope remain distinct. Version 2.26
+is unchanged; readiness remains not_ready.
+
+Next frontier: `data/accounting-master/jpmorgan-subsidiary-guarantees-20261011/next-source-frontier.md`.
