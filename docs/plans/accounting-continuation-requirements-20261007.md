@@ -1,24 +1,288 @@
 # Requirements supplement after the October continuation
 
-Updated 11 October 2026. Supplements the original MC01–MC35/G1–G18 acceptance
+Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptance
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Version 2.27 integration evidence
+## Latest HSBC filing event and master refresh
 
-The current manuscript is the 168-page Version 2.27 candidate at
-`docs/design/proposal/manuscript-jpmorgan-guarantees-20261011/accounting-product-proposal.pdf`,
-SHA256 `933091db38e0006a0124418150b3115b608780b777aee7dfc94ba270eb77a3f0`.
-The bounded integration passes 86 source, equation, citation, build and render
-checks, preserves all 48 displayed equations and retains the 108 semantic and
-147 Exhibit 21/22.2 source checks. It addresses the MC01/03/05/15/16/21/28/30
-and MC33–35 evidence rows by placing the reported JPMorgan entity, guarantee
-and panel-coverage boundaries in the manuscript. Full package semantics,
+E01/MC01/04/05/30/33–35; G5/G11/G13/G18. SEC metadata identifies the
+original 2023 Form 20-F filed 22 February 2024, accession
+0001089113-24-000004, with a separate UTC acceptance clock. The 490-page
+issuer-hosted Form 20-F cover agrees; it is distinct from the selected
+450-page annual PDF. All 22 source/cover checks pass. The annual cover
+visibly reads Accounts 2023 despite an extra extracted 2024. No selected-byte
+admission follows; the frozen 56/136 assessment, Version 2.37 and not_ready
+remain unchanged. Result:
+`data/accounting-master/hsbc-2023-filing-clock-20261012/result.md`.
+
+The master refresh reconciles completed source work and next actions while
+preserving all MC/G obligations. Remaining work continues P17, integrates
+material repairs through P18, and requires a fresh P19 assessment after
+substantive gaps are repaired. Runtime P00–P14 remain held. Next source work
+seeks a distinct official ASBE 25 operative-notice route; human acceptance
+does not stop feasible internal preparation. The ordinary Git mount is
+read-only, but trusted staging now works under the explicit commit request;
+that permission route supersedes the earlier blanket Git blocker.
+
+## Preserved HSBC older-group evidence
+
+E01/MC01/04/05/30/33–35; G5/G11/G13/G18. The second retained official
+archive capture binds exact selected 2018–2023 URLs to six dated annual-
+results groups. All 57 source/row/identity checks pass. Duplicate 2024/2025
+rows agree with the first capture. The 2023 group date and linked filename
+digits differ; neither establishes file release. Selected-byte admission
+stays at zero; the frozen 56/136 assessment, Version 2.37 and not_ready
+remain unchanged. Result:
+`data/accounting-master/hsbc-older-results-groups-20261012/result.md`.
+
+## Preserved HSBC 2024/2025 results-group evidence
+
+E01/MC01/04/05/30/33–35; G5/G11/G13/G18. The retained official archive
+binds 2024/2025 report links to results groups dated 19 February 2025 and
+25 February 2026. All 28 source/structure/identity checks pass. The 2025
+URL matches the selected report; the 2024 official URL is an alternate.
+The initial item-publication interpretation was withdrawn: child date
+attributes repeat group dates and do not establish file-release clocks.
+Zero selected-byte admissions; the frozen 56/136 assessment, Version 2.37
+and not_ready remain unchanged. Result:
+`data/accounting-master/hsbc-official-item-dates-20261012/result.md`.
+
+## Latest Caterpillar annual event evidence
+
+E01/MC01/04/05/30/33–35; G5/G11/G13/G18. The original 2024 Form 10-K
+event is verified in retained SEC metadata: filed 14 February 2025,
+accession 0000018230-25-000008. All 17 source/boundary checks pass. The
+selected 112-page annual wrapper embeds that Form 10-K at PDF 11; its Creed
+CEO message and dated Umpleby signatures are distinct contexts and do not
+date the whole wrapper. Selected-file availability remains unverified.
+The frozen 56/136 date assessment, Version 2.37 and full readiness
+not_ready remain unchanged. Result:
+`data/accounting-master/caterpillar-annual-filing-event-20261012/result.md`.
+
+## Preserved Apple annual filing-event evidence
+
+E01/MC01/04/05/30/33–35; G5/G11/G13/G18.
+Eight original Apple 2018–2025 Form 10-K events are identified from retained
+official SEC metadata, with 43 passing source/cover/date checks. Exact
+accessions, filing dates, acceptance clocks and selected file hashes are
+preserved. Seven selected annual PDF dates remain unverified; cover
+identity does not prove selected-byte availability on the filing date.
+The frozen 56 verified/136 unverified assessment and Version 2.37 stay
+unchanged. Full readiness is not_ready. Result:
+`data/accounting-master/apple-annual-filing-events-20261012/result.md`.
+
+## Preserved junior-debt source-only inquiry
+
+E01/E07; MC01/02/03/05/08/15/16/21/28/30/33–35.
+The bounded junior-debt inquiry passes 17 source/identity/search checks.
+The selected 2018 filing, printed 258/PDF 260, reports an issuer-trust
+liquidation and distribution of junior debentures, with a dated $659m
+carrying value. That historical passage does not identify the 2025
+instruments or reconcile the parent-only balance. The narrow current
+mapping remains unverified; no manuscript increment is warranted.
+Version 2.37 and readiness not_ready are unchanged. Result:
+`data/accounting-master/jpmorgan-junior-reconciliation-20261012/result.md`.
+
+## Current Version 2.37 source-fidelity correction
+
+E01/E07/P18; MC01/02/03/05/08/15/16/21/28/30/32–35, G4/G5/G7/G11/G13.
+The separate 174-page candidate corrects the unsupported junior-debt entity
+label on final PDF 116. All 149 integration checks pass; all other inherited
+prose, 48 displays and 75 bibliography entries remain. Twelve final page
+renders bind the bank slice, with only page 116 changed from Version 2.36.
+The corrected paragraph and its source boundary were read at normal
+resolution. Independent/human/domain/legal acceptance remains pending.
+
+The Note 20 junior-subordinated band is separately displayed after the
+Subsidiaries subtotal. The previous source unit and Version 2.36 incorrectly
+assigned it a Subsidiaries label; that claim is withdrawn. The correction
+passes 23 source/layout/arithmetic checks and 12 closeout checks. Version
+2.37 preserves the exact two-year 1,594/1,603 million residual while leaving
+legal issuer and accounting mechanism unverified. The prior source unit and
+2.36 files remain frozen; their passing checks did not detect this hierarchy
+error. Correction result:
+`data/accounting-master/jpmorgan-junior-classification-repair-20261012/result.md`.
+
+PDF: docs/design/proposal/manuscript-junior-classification-20261012/accounting-product-proposal.pdf
+SHA256: 9e6d0b433ebdbc30b65a17122dcbb2834b3c63d195b31ffaf2bea68eaa1fc880
+Result: data/accounting-master/accounting-proposal-v237-integration-20261012/result.md
+Full readiness is not_ready.
+
+## Preserved Version 2.36 — junior-debt label superseded
+
+Its entity-label claim is withdrawn by the Version 2.37 correction above.
+
+E01/E07/P18 and MC01/02/03/05/08/15/16/21/28/30/32–35 advance through
+the 2025 parent/consolidated debt population and payment-measurement
+distinction. The 174-page PDF is
+`docs/design/proposal/manuscript-debt-perimeter-20261012/accounting-product-proposal.pdf`,
+SHA256 `751965e694bb2f2825d49b53710753fc3797af2f646ce3f17d489767f13117c6`.
+All 155 integration checks pass. Inherited prose outside the insertion/title,
+48 displays and 75 bibliography entries are preserved. Twelve renders cover
+the bank slice; only page 116 changes from the inspected 2.35 renders. The
+Note 20/33 source unit passes 50 source and 47 closeout checks, with 14 rows
+and eight qualifiers. The two-year junior-subordinated residual is arithmetic
+only; instrument-level legal/accounting mapping, payment capacity and
+independent/human/domain acceptance remain open. Full readiness is
+`not_ready`. Result:
+`data/accounting-master/accounting-proposal-v236-integration-20261012/result.md`.
+
+## Preserved Version 2.35 bounded integration
+
+E01/P18, MC01/02/03/05/08/15/16/28/30/32–35 and G4/G5/G7/G11/G13
+advance through the 2025 parent-only income/cash example. The preserved
+174-page PDF is
+`docs/design/proposal/manuscript-parent-cash-20261012/accounting-product-proposal.pdf`,
+SHA256 `23d1d9da1b599bf5caee7aca7ce6559c0afa1d0ae077504800d97acd8652b7e7`.
+All 154 integration checks pass. All inherited prose outside the insertion
+and title, 48 displays and 75 bibliography entries are preserved. Twelve
+ordered renders cover the bank chapter and insurance transition. The Note 33
+source unit passes 74 source/arithmetic and 60 closeout checks, with 27 rows
+and seven qualifiers. Parent-only accounting income, cash/deposits, equity
+investments and conditional subsidiary funding remain distinct. Future
+payment capacity, current authority and independent/human/domain acceptance
+remain open. Full readiness is `not_ready`. Result:
+`data/accounting-master/accounting-proposal-v235-integration-20261012/result.md`.
+
+## Preserved Version 2.34 bounded integration
+
+E01/E07/P18, MC15/16/21/28/30/32–35 and G4/G7/G8 advance through a dated
+ASU 2016-13 explanation in the bank chapter. The preserved 173-page PDF is
+`docs/design/proposal/manuscript-historical-credit-loss-20261012/accounting-product-proposal.pdf`,
+SHA256 `2546dfc7cb6ead7a1cf1b9a95a74bc1f6b625d604a6a95440c5730df2b3ea8cb`.
+All 130 bounded integration checks pass. The inherited prose, 48 displays and
+74 prior bibliography entries remain; one FASB entry is added. Ten final
+renders and bounded author reading inspect the changed bank and bibliography
+pages. Current Codification, actual-contract applicability, broader bank
+semantics and independent/human/domain acceptance remain open. Full readiness
+is `not_ready`. Result:
+`data/accounting-master/accounting-proposal-v234-integration-20261012/result.md`.
+
+## Historical credit-loss authority preparation after Version 2.33
+
+E07/E01, MC15/16/21/29/30/34/35 and G4/G7/G8 advance through official
+ASU 2016-13 (147 source/18 closeout checks), ASU 2018-19 (72/10) and
+ASU 2019-04 (62/12). The first supplies historical selected 326-20 and
+460-10 text; the second changes nonpublic transition and operating-lease scope;
+the third clarifies reinsurance scope and adds its transition. The selected
+off-balance 326-20-15-2(c) wording is unchanged across their displayed
+versions. Later amendments, operative Codification text, company-specific
+scope and current effective dates remain open. Version 2.33 and readiness
+not_ready remained unchanged during the source-only units. Results are under data/accounting-master/asu2016-credit-loss-20261012/,
+asu2018-credit-loss-bridge-20261012/ and asu2019-credit-loss-chain-20261012/.
+Additional historical units: 2019-05 57/8, 2019-10 73/10, and the
+official-index attempt plus 2019-11 79/10. The publisher index routes
+returned Cloudflare 403 and the storage root AccessDenied. The six selected
+ASUs do not complete the later-amendment/current-Codification chain.
+
+## Preserved Version 2.33 integration evidence
+
+E01/E07/P18 and MC01/02/03/08/10/15/16/21/28/30/32–35 advance through the
+retained 2025 bank commitment case. The preserved candidate is 173-page Version
+2.33 at `docs/design/proposal/manuscript-jpmorgan-commitments-20261012/accounting-product-proposal.pdf`, SHA256 `48bce1dae3f6b23b88a540489d064258870250673a57fce0ae681cc7ce598496`.
+All 139 integration checks pass, preserving 48 displays, 74 bibliography
+entries and all earlier prose. The 123-check source unit retains 20 table
+rows, 16 exact spans and 50 documentary reconciliations; its 25 closeout
+checks pass. Eight ordered final images bind the chapter and transition.
+Distinct contractual/allowance/measurement populations and forward-purchase
+clocks remain separate. Issuer policy does not close operative ASC, actual
+contract or forecasting obligations. No E05 conflict is inferred. E01/E05/E07/
+E08/E14 and independent/human/domain acceptance remain open; readiness is
+not_ready. Result: `data/accounting-master/accounting-proposal-v233-integration-20261012/result.md`.
+
+## Preserved Version 2.32 integration evidence
+
+E14/P18 and MC23/30/31/32–35 advance through the exact candidate dependency
+example. The preserved manuscript is the 172-page Version 2.32 candidate at
+`docs/design/proposal/manuscript-bidi-dependencies-20261011/accounting-product-proposal.pdf`,
+SHA256 `8dc196a4043f382111d5bddfaf8ec0c75f9297f807ed7555d5621f6eb0703623`. All 124 integration checks pass; 48 displays, all inherited
+prose and 71 earlier bibliography entries are preserved, with three new
+software-source entries. Nine final renders bind the changed slice and new
+citations; the citation-only page defect was repaired. Author reading is
+bounded; independent/human/domain/legal acceptance remains pending.
+
+The source units pass 23/17/118 checks and retain all fifteen external
+packages in this candidate Cargo lock. Root LGPLv3-or-later, MIT/Apache
+alternatives, LLVM exceptions and Unicode conditions are distinct. A resolved
+installation, complete build graph, compatibility and distribution clearance
+remain open. Apple's two constitutional exhibits remain unresolved; the
+40-target/136-date frozen backlog is unchanged. E01/E05/E07/E08/E14 remain
+open and full readiness stays not_ready. Next read the retained bank commitment
+and allowance disclosures. Result: `data/accounting-master/accounting-proposal-v232-integration-20261011/result.md`.
+
+## Preserved Version 2.31 integration evidence
+
+The preserved manuscript is the 171-page Version 2.31 candidate at
+`docs/design/proposal/manuscript-jpmorgan-succession-20261011/accounting-product-proposal.pdf`,
+SHA256 `fb10b6363e8a31d7b53c72e945ee348ef09e41cbb37aa9bb51366632c2957c33`.
+E01/P18 and MC01/03/05/15/16/21/28/30/32–35 advance through the four-year
+succession summary reading (84/0 checks, 20 exact spans) and its 84/0 bounded
+integration. Issuer and guarantor successor identity, assumed duties and
+no-default conditions remain separate from repayment and accounting results.
+The 2022 later trustee section on PDF page 330 repairs Version 2.30's
+whole-summary absence overstatement. Eleven rendered pages, all 48 displayed
+equations and 71 bibliography entries are bound. The attempted original-text
+comparison was withdrawn for lack of inspectable evidence; E05 is still open.
+The original Indenture and supplements remain uninspected. Legal, accounting,
+independent-reader and human acceptance remain pending; full readiness is
+`not_ready`. Results:
+`data/accounting-master/accounting-proposal-v231-integration-20261011/` and
+`data/accounting-master/jpmorgan-succession-20261011/`.
+
+## Preserved Version 2.30 integration evidence
+
+The preserved manuscript is the 170-page Version 2.30 candidate at
+`docs/design/proposal/manuscript-jpmorgan-defaults-20261011/accounting-product-proposal.pdf`,
+SHA256 `253563e012fc77a9043caf518ac684f9de511b1a534c0983094601ee20244c80`.
+E01/P18 and MC01/03/05/15/16/21/28/30/32–35 advance through the four-year
+default/remedy summary reading (175/0 checks, 51 exact spans) and its bounded
+91/0 integration. Every Version 2.29 bank paragraph, all 48 displayed
+equations and 71 bibliography entries remain. The original Indenture and
+series supplements remain uninspected; legal, accounting, independent-reader
+and human acceptance remain pending. Full readiness is `not_ready`.
+Results: `data/accounting-master/accounting-proposal-v230-integration-20261011/` and
+`data/accounting-master/jpmorgan-default-remedies-20261011/`.
+
+## Version 2.29 integration evidence
+
+The preserved Version 2.29 manuscript is the 169-page candidate at
+`docs/design/proposal/manuscript-jpmorgan-balance-20261011/accounting-product-proposal.pdf`,
+SHA256 `aebe128cada22e57907e9651a43cc37b4031f2af34d951cc0bcf48dc64aa406b`.
+The bounded callable-note balance/indenture source unit passes 70/0 checks and
+the Version 2.29 integration passes 88/0 checks, preserves all 48 displayed
+equations and the complete Version 2.28 bank prose, and adds dated US$5m
+aggregate-principal observations and callable terms. The 2025 report's
+observation is as of 31 December 2024. Exhibit 4.4 and official S-3 metadata
+identify the 2016 Indenture route, but SEC Archives returned HTTP 403 for the
+original exhibit body; the Indenture and supplements remain uninspected.
+Full package semantics, historical byte availability, implementation,
+independent reading and domain/legal acceptance remain open; readiness is
+`not_ready`.
+
+The Version 2.29 result, source ledger, access receipts and render evidence are
+preserved at
+`data/accounting-master/accounting-proposal-v229-integration-20261011/` and
+`data/accounting-master/jpmorgan-callable-indentures-20261011/`. Version 2.28,
+Version 2.27 and earlier candidates remain preserved.
+
+## Version 2.28 integration evidence
+
+The preserved Version 2.28 manuscript is the 169-page candidate at
+`docs/design/proposal/manuscript-jpmorgan-terms-20261011/accounting-product-proposal.pdf`,
+SHA256 `23c4e9dd0df82a62cdfa4dcf76716f19cee7b8f47d3c50d588c66cc61791f6ab`. The bounded integration passes 112 source, equation,
+citation, build and render checks, preserves all 48 displayed equations and
+the complete Version 2.27 bank prose, and retains the 48/0 instrument-terms
+source checks alongside the 108 semantic and 147 Exhibit 21/22.2 checks. It
+addresses the MC01/03/05/15/16/21/28/30 and MC33–35 evidence rows by placing
+reported JPMorgan entity, guarantee, priority and funding boundaries in the
+manuscript. Full package semantics,
 historical byte availability, implementation, independent reading and domain
 acceptance remain open; readiness is `not_ready`.
 
-The integration result, four-ledger review and next frontier are preserved at
-`data/accounting-master/accounting-proposal-v227-integration-20261011/`.
+The Version 2.28 result, four-ledger review and next frontier are preserved at
+`data/accounting-master/accounting-proposal-v228-integration-20261011/`; Version
+2.27 remains preserved at its prior integration path.
 
 | Requirements / gap | Current checked preparation | Remaining acceptance |
 | --- | --- | --- |
@@ -47,7 +311,7 @@ The integration result, four-ledger review and next frontier are preserved at
 | MC01–05/07/10–16/19/28/30/32–35; G4–7/G11/G13–18; E01/C03/C08 | Annual-01 macroeconomic risk source preparation passes 58 checks, with four paragraphs, twelve exact dependencies and interim incorporation context. Joint demand, supplier, receivable, counterparty, debt, liquidity and fair-value channels remain distinct | No probabilities, elasticities, realised event, rates, journals or forecast; one prior dependency lacked a stored quote-hash field and is transparently re-hashed; broader risk and independent acceptance remain open |
 | MC01–05/07/10–16/19/28/30/32–35; G4–7/G11/G13–18; E01/C03/C08 | Version 2.20 integrates annual-01/02 risk channels; annual-02 six paragraphs/five dependencies, 36 source/35 original-meaning/16 candidate checks. Cumulative annual retention 7 complete/2 partial/19 unworked, interim 2 complete | Actual event/route/order/capacity, probability, loss, insurance/recognition and wider package facts remain open. The annual-06 source reading is completed below; no forecast or independent semantic acceptance |
 | MC01–05/07–12/14–16/28/30/32–35; G4–6/G11/G13–16/G18; E01/C03/C08 | Version 2.21 reads annual-03/04 competition and transition risks: 28 source and 28 source-meaning checks, three dependencies, eight claims and eight queries; 48 displays/66 bibliography entries retained | Actual products/cohorts/contracts/capacity, market share, infringement facts, margin/impairment effects and independent acceptance remain open. The annual-06 source reading is completed below; no forecast or branch weighting |
-| MC32 | Separate 164-page Version 2.21 adds competition/product-transition histories; four body/adjacent pages read continuously, navigation 1–7 separately; clean builds and 16 candidate checks | Independent reader/human/domain acceptance and wider specification/source obligations; full readiness remains `not_ready` |
+| MC32 | Separate 173-page Version 2.33 integrates the commitment population/chronology example; 139 checks, 48 unchanged displays, 74 bibliography entries and eight final rendered pages | Bounded author reading only; independent reader/human/domain acceptance and wider obligations remain; full readiness is `not_ready` |
 | MC01–05/07–12/14–16/28/30/32–35; G4–7/G11/G13–18; E01/C03/C08 | Version 2.22 retains annual-06: two paragraphs/four exact dependencies/eight claims/eight queries, 16 source/19 original-text and qualification/16 candidate checks; 165 pages, 48 displays/66 references preserved | Actual components, suppliers, quantities, terms, renewal, delivery and treatment; no forecast, route weight or independent semantic acceptance. The annual-07/08 source reading is completed below |
 | MC01–05/08/10–16/18–20/25/28/30/32–35; G4–7/G11/G13–18; E01/C03/C08 | All 28 annual Item 1A bodies and two interim bodies now have bounded retained readings; the final remaining batch adds 16 bodies, 34 source claims and 20 queries, with 90 source/70 original-text checks. That source-only unit retained Version 2.23; 48 displays/66 references retained | The bounded Chapter 2 crosswalk is completed below; referenced exhibits, operative authority, actual facts and wider semantic acceptance remain open |
 | MC01–05/08/10–16/18–20/25/28/30/32–35; G4–7/G11/G13–18; E01/C03/C08 | Version 2.24 adds the continuing-service-access bridge and repairs three references after the 502-record, 25-input Chapter 2 crosswalk; 130 assertions, 164 queries, 208 source/provenance records and 82 author groups. All 33 checks pass; 48 displays/66 references unchanged | Five service-access factual queries remain open; wider package semantics, authority and actual facts remain unresolved. Author reading is not independent/human/domain acceptance |
@@ -150,15 +414,18 @@ The regulation unit preserves the pre-V2.19 pointers under `pointers-before/`.
 All wider workstreams remain open. Annual Item 1A source retention is
 28 complete, 0 partial and 0 unworked; interim two complete. The bounded
 Chapter 2 crosswalk and Version 2.24 repair are complete at author level.
-The Docling source-grounded page/failure audit is complete. Continue E01/MC05
-with a Version 2.27 manuscript integration of the checked JPMorgan source findings, then the
-other feasible E01/E05/E07/E08/E14 queues. Counts do not certify semantics.
+The Docling source-grounded page/failure audit is complete. Continue E01
+after Version 2.37 with a bounded historical-availability subset. The
+junior-debt current mapping awaits a new direct instrument/accounting source. The Note 20/33 debt population, Note 33 cash-flow and
+Exhibit 21/22.2 evidence are complete within scope. Current Codification
+and the other E01/E05/E07/E08/E14 obligations remain open. Counts do not certify semantics.
 Independent/human acceptance is separate from continued internal preparation.
 No positive readiness, implementation, paid engagement or publication is implied.
 
-Latest source/result: `data/accounting-master/jpmorgan-subsidiary-guarantees-20261011/result.md`.
-Next frontier: `data/accounting-master/jpmorgan-subsidiary-guarantees-20261011/next-source-frontier.md`.
-Current candidate: 168-page Version 2.26, PDF SHA256 `d7c60268490921ec7edbc964ece351ebcdbd478ce422fa20b59de844e3ab48d7`.
+Latest source/result: `data/accounting-master/caterpillar-annual-filing-event-20261012/result.md`.
+Next frontier: `data/accounting-master/caterpillar-annual-filing-event-20261012/next-source-frontier.md`.
+Current candidate: 174-page Version 2.37, PDF SHA256 `9e6d0b433ebdbc30b65a17122dcbb2834b3c63d195b31ffaf2bea68eaa1fc880`; Version 2.36, Version 2.35, Version 2.34, Version 2.33, Version 2.32, Version 2.31, Version 2.30, Version 2.29, Version 2.28, Version 2.27, Version 2.26
+and earlier candidates remain preserved.
 Full readiness remains `not_ready`; independent/human/domain acceptance pending.
 
 The annual-06 unit preserves pre-Version-2.22 live pointers. The old MC32 row
@@ -291,8 +558,10 @@ level: 72 dated entity/jurisdiction rows, four guarantee descriptions and 96
 exact source spans. All 147 checks pass; 2131 inherited references verify.
 The eighteen-row rosters are explicitly partial and omit Financial Company
 LLC, which Exhibit 22.2 identifies as the guaranteed issuer. Display nesting,
-ownership, funding rights and guarantee scope remain distinct. Version 2.26
-is unchanged; readiness remains not_ready.
+ownership, funding rights and guarantee scope remain distinct. Version 2.28
+adds the bounded instrument terms and Version 2.29 adds dated callable-note
+principal and terms while preserving the prior prose and equations; readiness
+remains not_ready.
 
 MC01/03/05/15/16/21/28/30/33–35; G4/G5/G7/G11/G13/G18.
 The local Exhibit 21/22.2 bodies are read, while operative instruments,
