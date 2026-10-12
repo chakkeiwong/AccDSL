@@ -4,7 +4,21 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current Version 2.40 declaration and election timing
+## Current Version 2.41 income definitions and payout tables
+
+E07/C05/P18; MC02–05/16/19/21/25/28/30/32–35, G4/G7/G8/G13/G18.
+The 177-page candidate distinguishes Part 3 eligible retained income from
+Part 5 retained net income and explains the amended covered-bank payout tables
+on final PDF 117–118. A hypothetical history gives $2m versus $10m; supplied
+buffer inputs give 40% from Table 1 but 0% from Table 2. Actual bank facts,
+capital recognition, reporting reconciliation and supervisory conditions remain
+unresolved. All 52 source/arithmetic and 122 integration checks pass; all 48
+displays and 78 prior bibliography entries survive, with two references added.
+Eight final renders support bounded author review. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-capital-payout-dependencies-20261012/result.md`.
+
+## Preserved Version 2.40 declaration and election timing
 
 E07/C05/P18; MC02–05/19/21/25/28/30/32–35, G4/G7/G8/G13/G18.
 The 176-page candidate adds declaration timing, conditional four-prior-year
@@ -79,8 +93,9 @@ The master refresh reconciles completed source work and next actions while
 preserving all MC/G obligations. Remaining work continues P17, integrates
 material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
-the national-bank authority inquiry and Version 2.40 are complete within scope;
-next source work checks Part 3 definitions and payout limits. Human acceptance does not stop feasible internal
+the national-bank authority and Part 3 definition inquiries are complete within
+scope, integrated through Version 2.41; next source work checks capital
+eligibility and deductions in §§3.20 and 3.22. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.

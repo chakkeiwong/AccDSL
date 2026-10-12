@@ -1,0 +1,1 @@
+First 2.41 candidate: rendered review identified an unescaped emphasis command printed as emph and awkward consecutive citations. These first-build files remain as superseded diagnostics. Final candidate and render bindings are elsewhere.

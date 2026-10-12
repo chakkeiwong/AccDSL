@@ -6,6 +6,31 @@ Runtime implementation and the former background controller remain held.
 
 ## Current candidate
 
+**Version 2.41, 177 pages**
+PDF: docs/design/proposal/manuscript-payout-definitions-20261012/accounting-product-proposal.pdf
+SHA256: 8a0903f51fe5ba03a618ad186e430c8b33ed9789cc1c294410ee24b41a38fbc3
+
+The 177-page candidate distinguishes Part 3 eligible retained income from
+Part 5 retained net income and explains the amended covered-bank payout tables
+on final PDF 117–118. A hypothetical history gives $2m versus $10m; supplied
+buffer inputs give 40% from Table 1 but 0% from Table 2. Actual bank facts,
+capital recognition, reporting reconciliation and supervisory conditions remain
+unresolved. All 52 source/arithmetic and 122 integration checks pass; all 48
+displays and 78 prior bibliography entries survive, with two references added.
+Eight final renders support bounded author review. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-capital-payout-dependencies-20261012/result.md`.
+
+## Next bounded unit
+
+Inspect capital eligibility and deductions in dated §§3.20 and 3.22,
+retaining instrument conditions, ordering, elections and institution scope.
+Do not substitute reported equity or debt labels for regulatory capital or
+compute a named bank's permissible dividend. Plan:
+`docs/plans/accounting-bank-capital-recognition-20261012.md`.
+
+## Preserved Version 2.40 declaration and election timing
+
 **Version 2.40, 176 pages**
 PDF: docs/design/proposal/manuscript-dividend-timing-20261012/accounting-product-proposal.pdf
 SHA256: c06a9471f338e9ca79526a01ed1f9265512faeda163c8d2072baf1bf22c58f0c

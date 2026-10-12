@@ -1,12 +1,25 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **176-page Version 2.40**.
-PDF: docs/design/proposal/manuscript-dividend-timing-20261012/accounting-product-proposal.pdf
-SHA256: c06a9471f338e9ca79526a01ed1f9265512faeda163c8d2072baf1bf22c58f0c
-Result: data/accounting-master/national-bank-dividend-authority-20261012/result.md
+12 October 2026. Current candidate: **177-page Version 2.41**.
+PDF: docs/design/proposal/manuscript-payout-definitions-20261012/accounting-product-proposal.pdf
+SHA256: 8a0903f51fe5ba03a618ad186e430c8b33ed9789cc1c294410ee24b41a38fbc3
+Result: data/accounting-master/bank-capital-payout-dependencies-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Completed boundary
+
+The 177-page candidate distinguishes Part 3 eligible retained income from
+Part 5 retained net income and explains the amended covered-bank payout tables
+on final PDF 117–118. A hypothetical history gives $2m versus $10m; supplied
+buffer inputs give 40% from Table 1 but 0% from Table 2. Actual bank facts,
+capital recognition, reporting reconciliation and supervisory conditions remain
+unresolved. All 52 source/arithmetic and 122 integration checks pass; all 48
+displays and 78 prior bibliography entries survive, with two references added.
+Eight final renders support bounded author review. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-capital-payout-dependencies-20261012/result.md`.
+
+## Preserved Version 2.40 declaration and election timing
 
 The 176-page candidate adds declaration timing, conditional four-prior-year
 input needs and regulatory election evidence on final PDF 116–117. The
@@ -95,11 +108,11 @@ unchanged. Full readiness is not_ready. Result:
 
 ## Next bounded unit
 
-Inspect the explicit Part 3 dependencies: capital/distribution definitions
-and payout limits, comparing dated text with the retained December 2025
-amendment. Keep bank inputs, supervisory conditions and election/publication
-facts separate; do not compute the issuer's permissible dividend. Plan:
-`docs/plans/accounting-bank-capital-payout-dependencies-20261012.md`.
+Inspect capital eligibility and deductions in dated §§3.20 and 3.22,
+retaining instrument conditions, ordering, elections and institution scope.
+Do not substitute reported equity or debt labels for regulatory capital or
+compute a named bank's permissible dividend. Plan:
+`docs/plans/accounting-bank-capital-recognition-20261012.md`.
 
 ## Latest ASBE 25 access result
 
