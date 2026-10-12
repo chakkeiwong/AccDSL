@@ -6,6 +6,21 @@ Runtime implementation and the former background controller remain held.
 
 ## Current candidate
 
+**Version 2.50, 190 pages**
+PDF: docs/design/proposal/manuscript-munich-transition-20261012/accounting-product-proposal.pdf
+SHA256: b9171185897b808f35ac08dc4a75892ce24fb8948ef0fa83070aa7e8993c788c
+
+Version 2.50 adds the Munich Re transition case on PDF 143–144: method
+populations, rounded equity bridge, separate issued/held margins and dated
+issuer risk-adjustment inputs. All 133 integration checks pass; prior prose,
+48 displays and 95 references survive, with one reference added. Ten final
+pages were inspected and the final build is clean. The initial split-paragraph
+layout is preserved and repaired. Actual groups, valuation inputs, applicable
+authority and independent/human/domain acceptance remain open; not_ready.
+Result: `data/accounting-master/munich-transition-integration-20261012/result.md`.
+
+## Preserved Version 2.49 hindsight and measurement bases
+
 **Version 2.49, 187 pages**
 PDF: docs/design/proposal/manuscript-transition-bases-20261012/accounting-product-proposal.pdf
 SHA256: 51567dee834de337ec7123ff4fb9faccb695b3b275efc42bcbe879ee2cd44673
@@ -187,8 +202,8 @@ excerpts; seven renders were inspected. The net margin of -EUR22,320m is
 consistent with the rounded -EUR22.3bn bridge component. The rounded endpoint
 difference is preserved, not called a source conflict. Actual groups,
 valuation inputs, operative authority and independent interpretation remain
-open. Added author-annotation exposure is recorded. Version 2.49 stays current
-pending 2.50 integration; readiness remains not_ready.
+open. Added author-annotation exposure is recorded. Version 2.50 integrates
+the bounded example; readiness remains not_ready.
 Result: `data/accounting-master/munich-transition-disclosures-20261012/result.md`.
 
 ## Latest transition dependency source inquiry
@@ -266,10 +281,10 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Integrate the checked Munich Re transition disclosure, rounded equity bridge
-and separate issued/held margins in Version 2.50. Preserve the dated method
-populations, issuer-specific inputs and actual-group unknowns. Plan:
-`docs/plans/accounting-munich-transition-integration-20261012.md`.
+Follow the explicit report-imprint lead to inspect declared publication dates
+in the retained Munich Re 2018–2025 annual/interim sequence. Distinguish issuer
+date statements from independent historical byte availability. Plan:
+`docs/plans/accounting-munich-publication-imprints-20261012.md`.
 
 ## Preserved Version 2.41 income definitions and payout tables
 

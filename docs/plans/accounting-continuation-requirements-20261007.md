@@ -13,8 +13,8 @@ excerpts; seven renders were inspected. The net margin of -EUR22,320m is
 consistent with the rounded -EUR22.3bn bridge component. The rounded endpoint
 difference is preserved, not called a source conflict. Actual groups,
 valuation inputs, operative authority and independent interpretation remain
-open. Added author-annotation exposure is recorded. Version 2.49 stays current
-pending 2.50 integration; readiness remains not_ready.
+open. Added author-annotation exposure is recorded. Version 2.50 integrates
+the bounded example; readiness remains not_ready.
 Result: `data/accounting-master/munich-transition-disclosures-20261012/result.md`.
 
 ## Latest transition dependency source inquiry
@@ -90,7 +90,20 @@ Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
-## Current Version 2.49 hindsight and measurement bases
+## Current Version 2.50 Munich Re transition disclosure
+
+E01/C03, E07/C05, P18/C08; MC02/03/05/19/22/28/30/32–35.
+Version 2.50 adds the Munich Re transition case on PDF 143–144: method
+populations, rounded equity bridge, separate issued/held margins and dated
+issuer risk-adjustment inputs. All 133 integration checks pass; prior prose,
+48 displays and 95 references survive, with one reference added. Ten final
+pages were inspected and the final build is clean. The initial split-paragraph
+layout is preserved and repaired. Actual groups, valuation inputs, applicable
+authority and independent/human/domain acceptance remain open; not_ready.
+Result: `data/accounting-master/munich-transition-integration-20261012/result.md`.
+Next internal unit: `docs/plans/accounting-munich-publication-imprints-20261012.md`.
+
+## Preserved Version 2.49 hindsight and measurement bases
 
 E07/C05, E01/C03, P18/C08; MC05/19/22/28/30/32–35.
 Version 2.49 explains the reasonable-effort and historical-information tests
@@ -101,7 +114,7 @@ inspected and the build is clean. Actual group judgments, valuation, current
 applicability and independent/human/domain acceptance remain open. Full
 readiness stays not_ready.
 Result: `data/accounting-master/transition-dependencies-integration-20261012/result.md`.
-Next internal unit: `docs/plans/accounting-munich-transition-integration-20261012.md`.
+This historical integration is complete; current next unit is above.
 
 ## Preserved Version 2.48 transition methods and information
 
