@@ -4,8 +4,8 @@ Status reconciled on 12 October 2026 (Asia/Hong_Kong), following the user's
 request for the current program, its freshness and the remaining phases.
 The 12 October refresh reconciles the current candidate, completed source
 units and next actions against the controlling MC01–MC35/G1–G18 obligations.
-Version 2.38 adds an observed PDF visibility failure and explicit review/query
-behavior. Version 2.37 preserves the correction to the Note 20 junior-debt
+Version 2.39 distinguishes dated dividend capacity and consolidated restricted
+cash from parent cash. Version 2.38 preserves the PDF visibility/review example. Version 2.37 preserves the correction to the Note 20 junior-debt
 entity label; the subsequent junior-debt inquiry leaves legal issuer and accounting
 mechanism unresolved. Apple and Caterpillar filing-event records, eight HSBC
 annual-results group links, and the separate 2023 HSBC Form 20-F event are
@@ -15,24 +15,24 @@ remain current. Prior control bytes are preserved in each unit's
 `pointers-before/`; frozen assessments and controller state are not rewritten.
 
 The active objective is to finish the governing accounting product-and-method
-proposal. The current manuscript is the **175-page Version 2.38**, and full
+proposal. The current manuscript is the **176-page Version 2.39**, and full
 proposal readiness remains **not_ready**. Direct internal preparation continues;
 product implementation and the former background controller are held.
 
 Current candidate SHA256:
-`f77a019fcfb7af70faadc4a5f98aee31cf969713e0d1e898b7ac6a7a65749815`.
+`c23bf198be1f79bec92204b074e93a01d09d736675a2df39ea20620c2000f44b`.
 
 ## Which records are current?
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.38 and the ASBE/HSBC source inquiries; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; PDF text/render case integrated; next source unit inspects JPMorgan Note 26 funding restrictions |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.39 and the Note 26 source inquiry; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Note 26 integrated; next source unit checks primary national-bank dividend authority |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
-| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.38 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
+| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.39 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
 | [Original master program](accounting-master-program.md) | Historical controller/campaign plan, not an up-to-date resume instruction; its P16-resume language and campaign scheduling predate direct P16–P19 completion and later repairs |
-| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.38 outputs |
+| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.39 outputs |
 | [Controller state](../../data/accounting-master/state.json) | Historical stopped state: P16 is `budget_deferred`, P17–P19 `pending`. These are not current direct-work statuses |
 | [P19 readiness assessment](../../data/accounting-master/deliverables/P19/readiness.json) | Preserved negative assessment dated 7 October; its five remaining blocker IDs still agree with the current checkpoint, but its evidence snapshot predates later repairs |
 
@@ -48,7 +48,7 @@ run that did not happen.
 | P15 | Requirements, gaps and alternatives audit | Audit delivered. Its historical status is not whole-proposal acceptance; requirement and evidence gaps continue to be maintained |
 | P16 | Whole-product architecture and initial-profile design | Scoped architecture specified and reviewed through direct work; it is a design, not an implemented product |
 | P17 | Accounting, sector, research and inference methods | Method specifications and worked examples delivered; applicable authority, real-case and literature obligations remain and are being repaired |
-| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.38; further substantive repairs still require integration and inspection |
+| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.39; further substantive repairs still require integration and inspection |
 | P19 | Assess full proposal readiness | Assessment completed with a **negative** verdict. A fresh assessment remains necessary after the substantive blockers are repaired |
 
 P19's completion means that an assessment was produced, not that the proposal
@@ -59,7 +59,7 @@ controller's ledger is stale.
 
 ## Refresh audit and continuation rule
 
-The current baseline is Version 2.38; Version 2.37 and the superseded 2.36
+The current baseline is Version 2.39; Version 2.37 and the superseded 2.36
 entity-label evidence remain protected. The stopped controller is historical. Source and closeout check counts are
 engineering evidence; they are not promotion criteria for accounting validity,
 selected-file availability, human readability or whole-proposal acceptance.
@@ -74,7 +74,21 @@ succeeded on 12 October under the user's explicit commit request. The earlier
 blanket Git-blocker statement is superseded; preserve unrelated staged work
 and use the trusted path for authorized writes.
 
-## Current Version 2.38 visibility example
+## Current Version 2.39 funding distinction
+
+The separate 176-page candidate adds the checked Note 26 funding distinction
+at final PDF 116. Approximately 30.1 billion of bank dividend capacity at
+1 January 2026 differs from parent cash and 2025 subsidiary dividend receipts.
+The 29.0 billion consolidated restricted-cash total cannot be subtracted from
+parent-only cash. Seven paired rows, eight exact spans and 33 source/arithmetic
+checks support the reading; all 136 integration checks pass. All 48 displays,
+76 bibliography entries and prior prose remain. Six final renders bind the
+inspected slice. Operative law, actual future transfers and independent/human/
+domain acceptance stay open. Full readiness is not_ready.
+
+Result: `data/accounting-master/jpmorgan-funds-transfer-20261012/result.md`.
+
+## Preserved Version 2.38 visibility example
 
 The separate 175-page candidate adds the observed HSBC cover discrepancy to
 the adapter discussion on final PDF 143–144. Both extractors return an extra
@@ -467,8 +481,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect JPMorgan 2025 Note 26 and its Item 1
-   dependency for restricted resources and dated parent-funding conditions.
+1. Follow the direct next plan: inspect official national-bank dividend
+   provisions, dated editions and dependencies after the Note 26 source unit.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo

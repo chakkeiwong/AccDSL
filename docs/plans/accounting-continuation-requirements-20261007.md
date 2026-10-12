@@ -4,7 +4,22 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current Version 2.38 PDF visibility example
+## Current Version 2.39 restricted resources and funding
+
+E01/E07/P18; MC01–05/08/15/16/21/25/28/30/32–35, G4/G5/G7/G11/G13.
+The separate 176-page candidate adds the checked Note 26 funding distinction
+at final PDF 116. Approximately 30.1 billion of bank dividend capacity at
+1 January 2026 differs from parent cash and 2025 subsidiary dividend receipts.
+The 29.0 billion consolidated restricted-cash total cannot be subtracted from
+parent-only cash. Seven paired rows, eight exact spans and 33 source/arithmetic
+checks support the reading; all 136 integration checks pass. All 48 displays,
+76 bibliography entries and prior prose remain. Six final renders bind the
+inspected slice. Operative law, actual future transfers and independent/human/
+domain acceptance stay open. Full readiness is not_ready.
+
+Result: `data/accounting-master/jpmorgan-funds-transfer-20261012/result.md`.
+
+## Preserved Version 2.38 PDF visibility example
 
 E14/E01/C07/P18; MC01–05/25/27/30–35, G2/G5/G9/G11/G13/G17/G18.
 The separate 175-page candidate adds the observed HSBC cover discrepancy to
@@ -49,8 +64,8 @@ remain unchanged. Result:
 The master refresh reconciles completed source work and next actions while
 preserving all MC/G obligations. Remaining work continues P17, integrates
 material repairs through P18, and requires a fresh P19 assessment after
-substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry and cover repair, next source work
-inspects JPMorgan Note 26. Human acceptance does not stop feasible internal
+substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
+next source work inspects primary national-bank dividend authority. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.

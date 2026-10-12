@@ -1,12 +1,24 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **175-page Version 2.38**.
-PDF: docs/design/proposal/manuscript-visible-text-20261012/accounting-product-proposal.pdf
-SHA256: f77a019fcfb7af70faadc4a5f98aee31cf969713e0d1e898b7ac6a7a65749815
-Result: data/accounting-master/pdf-visible-text-fidelity-20261012/result.md
+12 October 2026. Current candidate: **176-page Version 2.39**.
+PDF: docs/design/proposal/manuscript-funds-transfer-20261012/accounting-product-proposal.pdf
+SHA256: c23bf198be1f79bec92204b074e93a01d09d736675a2df39ea20620c2000f44b
+Result: data/accounting-master/jpmorgan-funds-transfer-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Completed boundary
+
+The separate 176-page candidate adds the checked Note 26 funding distinction
+at final PDF 116. Approximately 30.1 billion of bank dividend capacity at
+1 January 2026 differs from parent cash and 2025 subsidiary dividend receipts.
+The 29.0 billion consolidated restricted-cash total cannot be subtracted from
+parent-only cash. Seven paired rows, eight exact spans and 33 source/arithmetic
+checks support the reading; all 136 integration checks pass. All 48 displays,
+76 bibliography entries and prior prose remain. Six final renders bind the
+inspected slice. Operative law, actual future transfers and independent/human/
+domain acceptance stay open. Full readiness is not_ready.
+
+## Preserved Version 2.38 visibility example
 
 The separate 175-page candidate adds the observed HSBC cover discrepancy to
 the adapter discussion on final PDF 143–144. Both extractors return an extra
@@ -70,11 +82,11 @@ unchanged. Full readiness is not_ready. Result:
 
 ## Next bounded unit
 
-Continue the retained JPMorgan 2025 Note 26 source dependency: restricted
-cash, intercompany transfer conditions and the dated bank-dividend capacity.
-Bind the note and Item 1 qualification, distinguish consolidated and parent
-quantities, and retain unresolved future funding and operative-law inputs.
-Plan: `docs/plans/accounting-jpmorgan-funds-transfer-20261012.md`.
+Continue primary national-bank dividend-authority research following Note 26.
+Verify official section identities, dated editions, conditions and dependencies;
+do not treat the issuer summary or a later current page as verified law for
+1 January 2026. Plan:
+`docs/plans/accounting-national-bank-dividend-authority-20261012.md`.
 
 ## Latest ASBE 25 access result
 
