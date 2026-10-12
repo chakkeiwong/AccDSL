@@ -58,11 +58,12 @@ availability follows.
 
 ## Exact next action
 
-Execute the [Tamer source-recovery plan](accounting-tamer-source-recovery-20261013.md).
-The retained institutional page supplies a distinct PDF link beyond the old
-failed handle route. Bound acquisition, check version identity, then inspect
-technical content before adopting any claim. The completed lease and source
-units must not be regenerated. Continue independent work after source failures.
+The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
+is closed with source-access blockers: CAPTCHA, API authentication and author
+URL access denial. No full text or technical claim was admitted. Execute the
+[Caiani source-recovery plan](accounting-caiani-source-recovery-20261013.md)
+using the distinct retained 11566/358236 repository handle. Preserve the
+completed lease/source units; continue independent work after source failures.
 
 ## Remaining program and controls
 

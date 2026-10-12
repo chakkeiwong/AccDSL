@@ -29,11 +29,13 @@ The lease case is complete and integrated into Version 2.51: 51 source and
 dates, balances, elections and maturity restrictions remain distinct from
 unknown equity adjustments, depreciation, payments and contracts. Result:
 data/accounting-master/pingan-lease-transition-20261013/result.md.
-Execute docs/plans/accounting-tamer-source-recovery-20261013.md next. The
-retained Harvard page has a distinct explicit PDF link beyond the failed
-legacy handle. Bound acquisition, verify identity, then inspect technical
-content before admitting claims. Output:
-data/accounting-master/tamer-source-recovery-20261013/.
+The Tamer source inquiry is closed with three trusted access failures;
+no full text or technical claim is admitted. Result:
+data/accounting-master/tamer-source-recovery-20261013/result.md.
+Execute docs/plans/accounting-caiani-source-recovery-20261013.md next. Use
+the distinct retained 11566/358236 repository handle; do not repeat the
+11383/Kingston failures. Output:
+data/accounting-master/caiani-source-recovery-20261013/.
 The other discovery candidates remain under publication-frontier-20261013;
 no unreviewed hit is admitted and no unchanged blocked route should be retried.
 Check completed result records before scheduling another acquisition.

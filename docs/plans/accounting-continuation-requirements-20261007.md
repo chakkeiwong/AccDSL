@@ -4,6 +4,19 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current literature-source continuation
+
+The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
+tried three distinct trusted Harvard routes: 405 CAPTCHA, 401 authentication
+required and 403 access denied. Two sandbox DNS failures were retried in the
+trusted context. No full text, technical reading or current correction check
+is claimed. Tamer remains source-blocked. Version 2.51, 193 pages and not_ready
+remain; no manuscript change follows from the access failures.
+
+P17/E08; MC08–12/18/26/29–30/32–35; G1/G3/G6/G8/G15. Continue with the
+[Caiani institutional-route plan](accounting-caiani-source-recovery-20261013.md),
+which uses the distinct 11566 handle. All five E workstreams remain open.
+
 ## Current lease result and continuation
 
 13 October 2026. **Version 2.51, 193 pages; not_ready.**
