@@ -1,12 +1,24 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **174-page Version 2.37**.
-PDF: docs/design/proposal/manuscript-junior-classification-20261012/accounting-product-proposal.pdf
-SHA256: 9e6d0b433ebdbc30b65a17122dcbb2834b3c63d195b31ffaf2bea68eaa1fc880
-Result: data/accounting-master/accounting-proposal-v237-integration-20261012/result.md
+12 October 2026. Current candidate: **175-page Version 2.38**.
+PDF: docs/design/proposal/manuscript-visible-text-20261012/accounting-product-proposal.pdf
+SHA256: f77a019fcfb7af70faadc4a5f98aee31cf969713e0d1e898b7ac6a7a65749815
+Result: data/accounting-master/pdf-visible-text-fidelity-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Completed boundary
+
+The separate 175-page candidate adds the observed HSBC cover discrepancy to
+the adapter discussion on final PDF 143–144. Both extractors return an extra
+2024 token; selected drawing records and the inspected render show that the
+earlier text is covered before Accounts 2023 is painted. Raw text, visible
+reading, rejection and historical admission remain separate. All 136 source,
+schema, preservation, citation, render-binding and build checks pass. All 48
+prior displays and 75 bibliography entries remain, with one cover source added.
+Seven final pages were inspected. Independent/human/domain acceptance remains
+pending; no parser ranking, E05 conflict or selected-byte admission follows.
+
+## Preserved Version 2.37 correction
 
 The separate 174-page candidate corrects the unsupported junior-debt entity
 label on final PDF 116. All 149 integration checks pass; all other inherited
@@ -58,12 +70,19 @@ unchanged. Full readiness is not_ready. Result:
 
 ## Next bounded unit
 
-Continue E07 through a genuinely new official publication route for the
-ASBE 25 operative notice and later implementation conditions. Start with
-the retained 2025 Ministry Q&A and the exact previously failed URLs; audit
-the new route before acquisition. Preserve the distinction between an
-explanation, operative wording and a complete amendment chain. Do not
-repeat the closed HSBC archive/filing inquiry or earlier event extraction.
+Continue the retained JPMorgan 2025 Note 26 source dependency: restricted
+cash, intercompany transfer conditions and the dated bank-dividend capacity.
+Bind the note and Item 1 qualification, distinguish consolidated and parent
+quantities, and retain unresolved future funding and operative-law inputs.
+Plan: `docs/plans/accounting-jpmorgan-funds-transfer-20261012.md`.
+
+## Latest ASBE 25 access result
+
+Six distinct discovery URLs did not obtain 财会〔2025〕12号 operative text.
+The responses cannot support a source-absence claim: searches were
+nonresponsive, unexecuted or challenged. No previous failed Ministry route
+was retried; the Q&A remains explanatory and E07 stays open. Result:
+`data/accounting-master/asbe25-operative-notice-20261012/result.md`.
 
 ## Latest HSBC filing event
 

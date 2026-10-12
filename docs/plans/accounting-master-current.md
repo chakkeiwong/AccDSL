@@ -4,8 +4,9 @@ Status reconciled on 12 October 2026 (Asia/Hong_Kong), following the user's
 request for the current program, its freshness and the remaining phases.
 The 12 October refresh reconciles the current candidate, completed source
 units and next actions against the controlling MC01–MC35/G1–G18 obligations.
-Version 2.37 corrects the unsupported entity label in the Note 20 junior-debt
-block; the subsequent junior-debt inquiry leaves legal issuer and accounting
+Version 2.38 adds an observed PDF visibility failure and explicit review/query
+behavior. Version 2.37 preserves the correction to the Note 20 junior-debt
+entity label; the subsequent junior-debt inquiry leaves legal issuer and accounting
 mechanism unresolved. Apple and Caterpillar filing-event records, eight HSBC
 annual-results group links, and the separate 2023 HSBC Form 20-F event are
 now retained. None establishes new selected-byte availability or closes a
@@ -14,24 +15,24 @@ remain current. Prior control bytes are preserved in each unit's
 `pointers-before/`; frozen assessments and controller state are not rewritten.
 
 The active objective is to finish the governing accounting product-and-method
-proposal. The current manuscript is the **174-page Version 2.37**, and full
+proposal. The current manuscript is the **175-page Version 2.38**, and full
 proposal readiness remains **not_ready**. Direct internal preparation continues;
 product implementation and the former background controller are held.
 
 Current candidate SHA256:
-`9e6d0b433ebdbc30b65a17122dcbb2834b3c63d195b31ffaf2bea68eaa1fc880`.
+`f77a019fcfb7af70faadc4a5f98aee31cf969713e0d1e898b7ac6a7a65749815`.
 
 ## Which records are current?
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.37, subsequent junior-debt inquiry and Apple/Caterpillar/HSBC source units; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; HSBC filing inquiry completed, next source work seeks a distinct official ASBE 25 operative-notice route |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.38 and the ASBE/HSBC source inquiries; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; PDF text/render case integrated; next source unit inspects JPMorgan Note 26 funding restrictions |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
-| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.37 and the latest HSBC event; source advances do not change original acceptance wording or frozen date assessments |
+| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.38 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
 | [Original master program](accounting-master-program.md) | Historical controller/campaign plan, not an up-to-date resume instruction; its P16-resume language and campaign scheduling predate direct P16–P19 completion and later repairs |
-| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.37 outputs |
+| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.38 outputs |
 | [Controller state](../../data/accounting-master/state.json) | Historical stopped state: P16 is `budget_deferred`, P17–P19 `pending`. These are not current direct-work statuses |
 | [P19 readiness assessment](../../data/accounting-master/deliverables/P19/readiness.json) | Preserved negative assessment dated 7 October; its five remaining blocker IDs still agree with the current checkpoint, but its evidence snapshot predates later repairs |
 
@@ -47,7 +48,7 @@ run that did not happen.
 | P15 | Requirements, gaps and alternatives audit | Audit delivered. Its historical status is not whole-proposal acceptance; requirement and evidence gaps continue to be maintained |
 | P16 | Whole-product architecture and initial-profile design | Scoped architecture specified and reviewed through direct work; it is a design, not an implemented product |
 | P17 | Accounting, sector, research and inference methods | Method specifications and worked examples delivered; applicable authority, real-case and literature obligations remain and are being repaired |
-| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.37; further substantive repairs still require integration and inspection |
+| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.38; further substantive repairs still require integration and inspection |
 | P19 | Assess full proposal readiness | Assessment completed with a **negative** verdict. A fresh assessment remains necessary after the substantive blockers are repaired |
 
 P19's completion means that an assessment was produced, not that the proposal
@@ -58,8 +59,8 @@ controller's ledger is stale.
 
 ## Refresh audit and continuation rule
 
-The current baseline is Version 2.37, not the superseded 2.36 entity label
-or the historical stopped controller. Source and closeout check counts are
+The current baseline is Version 2.38; Version 2.37 and the superseded 2.36
+entity-label evidence remain protected. The stopped controller is historical. Source and closeout check counts are
 engineering evidence; they are not promotion criteria for accounting validity,
 selected-file availability, human readability or whole-proposal acceptance.
 Date labels, a filing event and a different issuer-hosted copy answer
@@ -72,6 +73,30 @@ Although the ordinary session mounts .git read-only, trusted Git staging
 succeeded on 12 October under the user's explicit commit request. The earlier
 blanket Git-blocker statement is superseded; preserve unrelated staged work
 and use the trusted path for authorized writes.
+
+## Current Version 2.38 visibility example
+
+The separate 175-page candidate adds the observed HSBC cover discrepancy to
+the adapter discussion on final PDF 143–144. Both extractors return an extra
+2024 token; selected drawing records and the inspected render show that the
+earlier text is covered before Accounts 2023 is painted. Raw text, visible
+reading, rejection and historical admission remain separate. All 136 source,
+schema, preservation, citation, render-binding and build checks pass. All 48
+prior displays and 75 bibliography entries remain, with one cover source added.
+Seven final pages were inspected. Independent/human/domain acceptance remains
+pending; no parser ranking, E05 conflict or selected-byte admission follows.
+
+Result: `data/accounting-master/pdf-visible-text-fidelity-20261012/result.md`.
+
+## Latest ASBE 25 access result
+
+The six-URL new-route inquiry did not obtain the operative text of
+财会〔2025〕12号. Nonresponsive results, JavaScript/template pages and a
+challenge do not establish absence; the government page's default zero
+count was not an executed query. Prior failed Ministry notice URLs were
+not retried. E07 remains open and no manuscript authority change follows.
+The subsequent E14 cover discrepancy is now integrated in Version 2.38. Result:
+`data/accounting-master/asbe25-operative-notice-20261012/result.md`.
 
 ## Latest HSBC 2023 filing-event evidence
 
@@ -108,7 +133,7 @@ interpretation was withdrawn. Zero selected-byte admissions; the frozen
 56/136 assessment, Version 2.37 and not_ready remain unchanged. Result:
 `data/accounting-master/hsbc-official-item-dates-20261012/result.md`.
 
-## Current Version 2.37 correction
+## Preserved Version 2.37 correction
 
 The separate 174-page candidate corrects the unsupported junior-debt entity
 label on final PDF 116. All 149 integration checks pass; all other inherited
@@ -442,10 +467,10 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect a genuinely new official publication
-   route for the ASBE 25 operative notice and later implementation conditions.
-   Start from the retained 2025 Q&A and exact failed URLs; do not treat the
-   explanation as complete operative authority. Preserve completed
+1. Follow the direct next plan: inspect JPMorgan 2025 Note 26 and its Item 1
+   dependency for restricted resources and dated parent-funding conditions.
+   Preserve operative ASBE authority as unresolved until a distinct usable
+   source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo
    package audits. Do not restart closed units or retry blocked sources
    unchanged. Installation and runtime compatibility remain held.

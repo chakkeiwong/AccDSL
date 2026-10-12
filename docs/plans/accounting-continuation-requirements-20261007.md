@@ -4,7 +4,37 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Latest HSBC filing event and master refresh
+## Current Version 2.38 PDF visibility example
+
+E14/E01/C07/P18; MC01–05/25/27/30–35, G2/G5/G9/G11/G13/G17/G18.
+The separate 175-page candidate adds the observed HSBC cover discrepancy to
+the adapter discussion on final PDF 143–144. Both extractors return an extra
+2024 token; selected drawing records and the inspected render show that the
+earlier text is covered before Accounts 2023 is painted. Raw text, visible
+reading, rejection and historical admission remain separate. All 136 source,
+schema, preservation, citation, render-binding and build checks pass. All 48
+prior displays and 75 bibliography entries remain, with one cover source added.
+Seven final pages were inspected. Independent/human/domain acceptance remains
+pending; no parser ranking, E05 conflict or selected-byte admission follows.
+
+The existing annotation schema remains unchanged; six expected query outcomes
+are documentary specifications, not runtime results. Historical availability
+and the frozen 56/136 assessment are unchanged. All original MC/G requirements
+remain open to their wider acceptance evidence; full readiness is not_ready.
+Result: `data/accounting-master/pdf-visible-text-fidelity-20261012/result.md`.
+
+## Latest ASBE 25 access result
+
+E07/C05; MC02/04/05/19/22/29/30/32–35, G7/G8/G13. The six-URL inquiry
+did not obtain 财会〔2025〕12号 operative text. Nonresponsive, JavaScript,
+unexecuted-template and challenged responses support no source-absence or
+new authority claim. Previous failed Ministry notice URLs were not retried.
+The retained Q&A remains explanatory, and the operative conditions/amendment
+chain stay open. The subsequent E14 cover repair is integrated in Version 2.38; not_ready
+remains unchanged.
+Result: `data/accounting-master/asbe25-operative-notice-20261012/result.md`.
+
+## Preserved HSBC filing event and master refresh
 
 E01/MC01/04/05/30/33–35; G5/G11/G13/G18. SEC metadata identifies the
 original 2023 Form 20-F filed 22 February 2024, accession
@@ -19,9 +49,9 @@ remain unchanged. Result:
 The master refresh reconciles completed source work and next actions while
 preserving all MC/G obligations. Remaining work continues P17, integrates
 material repairs through P18, and requires a fresh P19 assessment after
-substantive gaps are repaired. Runtime P00–P14 remain held. Next source work
-seeks a distinct official ASBE 25 operative-notice route; human acceptance
-does not stop feasible internal preparation. The ordinary Git mount is
+substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry and cover repair, next source work
+inspects JPMorgan Note 26. Human acceptance does not stop feasible internal
+preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.
 
@@ -84,7 +114,7 @@ mapping remains unverified; no manuscript increment is warranted.
 Version 2.37 and readiness not_ready are unchanged. Result:
 `data/accounting-master/jpmorgan-junior-reconciliation-20261012/result.md`.
 
-## Current Version 2.37 source-fidelity correction
+## Preserved Version 2.37 source-fidelity correction
 
 E01/E07/P18; MC01/02/03/05/08/15/16/21/28/30/32–35, G4/G5/G7/G11/G13.
 The separate 174-page candidate corrects the unsupported junior-debt entity
