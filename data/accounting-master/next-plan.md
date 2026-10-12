@@ -130,12 +130,24 @@ definition sections were read selectively. No named bank was classified and no
 new manuscript version is warranted; Version 2.42 and not_ready remain.
 Result: `data/accounting-master/bank-institution-classification-20261012/result.md`.
 
+## Latest Method 1 surcharge source inquiry
+
+The Method 1 inquiry retains five successful API responses, one excluded 429,
+and two official annual-CFR editions. Ten condition groups and three distinct
+tables pass 52 source checks. The bank reference uses Method 1, while the BHC
+overall surcharge takes the greater of Methods 1 and 2. Score, determination
+and effective dates remain separate. Annual definitions agree after disclosed
+production-metadata exclusion; a January/April table-caption punctuation
+difference is preserved. Actual inputs and reporting conventions remain open.
+Version 2.42 and not_ready remain unchanged. Result:
+`data/accounting-master/bank-method1-surcharge-20261012/result.md`.
+
 ## Next bounded unit
 
-Inspect G-SIB identification and the Method 1 surcharge, score and effective
-date referenced by the amended §3.11. Keep Method 1 distinct from the holding
-company's overall surcharge and retain actual regulatory reports as missing
-inputs. Plan: `docs/plans/accounting-bank-method1-surcharge-20261012.md`.
+Inspect official FR Y-15 instructions and annual global-denominator releases
+for Method 1 reporting, rounding and date selection. Retain unresolved
+conventions rather than inventing a score calculation. Plan:
+`docs/plans/accounting-bank-method1-reporting-20261012.md`.
 
 ## Latest ASBE 25 access result
 

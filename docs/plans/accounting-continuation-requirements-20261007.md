@@ -15,6 +15,19 @@ definition sections were read selectively. No named bank was classified and no
 new manuscript version is warranted; Version 2.42 and not_ready remain.
 Result: `data/accounting-master/bank-institution-classification-20261012/result.md`.
 
+## Latest Method 1 surcharge source inquiry
+
+E07/C05; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
+The Method 1 inquiry retains five successful API responses, one excluded 429,
+and two official annual-CFR editions. Ten condition groups and three distinct
+tables pass 52 source checks. The bank reference uses Method 1, while the BHC
+overall surcharge takes the greater of Methods 1 and 2. Score, determination
+and effective dates remain separate. Annual definitions agree after disclosed
+production-metadata exclusion; a January/April table-caption punctuation
+difference is preserved. Actual inputs and reporting conventions remain open.
+Version 2.42 and not_ready remain unchanged. Result:
+`data/accounting-master/bank-method1-surcharge-20261012/result.md`.
+
 ## Current Version 2.42 capital recognition and deductions
 
 E07/C05/P18; MC02–05/16/19/21/25/28/30/32–35, G4/G7/G8/G13/G18.
@@ -121,8 +134,8 @@ material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
 the national-bank authority, Part 3 definitions and capital recognition inquiries
 are complete within scope, integrated through Version 2.42; next source work
-checks G-SIB identification and Method 1 surcharge dates after the completed
-institution-classification source map. Human acceptance does not stop feasible internal
+checks official Method 1 reporting instructions and annual denominator
+provenance after the completed surcharge source map. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.

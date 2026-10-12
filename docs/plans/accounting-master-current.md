@@ -28,8 +28,8 @@ Current candidate SHA256:
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.42 and the classification source inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; classification source map complete; next unit checks Method 1 surcharge and clocks |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.42 and the Method 1 source inquiry; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Method 1 source map complete; next unit checks reporting conventions and denominator dates |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
 | [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.42 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
@@ -126,12 +126,24 @@ definition sections were read selectively. No named bank was classified and no
 new manuscript version is warranted; Version 2.42 and not_ready remain.
 Result: `data/accounting-master/bank-institution-classification-20261012/result.md`.
 
+## Latest Method 1 surcharge source inquiry
+
+The Method 1 inquiry retains five successful API responses, one excluded 429,
+and two official annual-CFR editions. Ten condition groups and three distinct
+tables pass 52 source checks. The bank reference uses Method 1, while the BHC
+overall surcharge takes the greater of Methods 1 and 2. Score, determination
+and effective dates remain separate. Annual definitions agree after disclosed
+production-metadata exclusion; a January/April table-caption punctuation
+difference is preserved. Actual inputs and reporting conventions remain open.
+Version 2.42 and not_ready remain unchanged. Result:
+`data/accounting-master/bank-method1-surcharge-20261012/result.md`.
+
 ## Exact next action
 
-Inspect G-SIB identification and the Method 1 surcharge, score and effective
-date referenced by the amended §3.11. Keep Method 1 distinct from the holding
-company's overall surcharge and retain actual regulatory reports as missing
-inputs. Plan: `docs/plans/accounting-bank-method1-surcharge-20261012.md`.
+Inspect official FR Y-15 instructions and annual global-denominator releases
+for Method 1 reporting, rounding and date selection. Retain unresolved
+conventions rather than inventing a score calculation. Plan:
+`docs/plans/accounting-bank-method1-reporting-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -441,7 +453,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | --- | --- | --- |
 | E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Expand the note-by-note assertion and query map beyond the 32 selected assertions; include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. Continue G-SIB identification and Method 1 surcharge dates after the completed classification map. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. Continue official Method 1 reporting/denominator conventions after the completed surcharge map. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | Match the remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
@@ -540,8 +552,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect G-SIB identification and Method 1
-   surcharge dates after the completed classification source map.
+1. Follow the direct next plan: inspect official Method 1 reporting conventions
+   and annual denominators after the completed surcharge source map.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo
