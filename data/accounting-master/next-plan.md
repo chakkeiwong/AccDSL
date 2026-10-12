@@ -1,9 +1,9 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **186-page Version 2.48**.
-PDF: docs/design/proposal/manuscript-transition-20261012/accounting-product-proposal.pdf
-SHA256: de39d2cbd16ee7cb0ba79435234dd0945ba0ea9c39c3a5c4664a79c35a3eb389
-Result: data/accounting-master/insurance-transition-integration-20261012/result.md
+12 October 2026. Current candidate: **187-page Version 2.49**.
+PDF: docs/design/proposal/manuscript-transition-bases-20261012/accounting-product-proposal.pdf
+SHA256: 51567dee834de337ec7123ff4fb9faccb695b3b275efc42bcbe879ee2cd44673
+Result: data/accounting-master/transition-dependencies-integration-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Latest Method 1 rule-history inquiry
@@ -20,6 +20,17 @@ remains protected and readiness remains not_ready.
 Result: `data/accounting-master/bank-method1-rule-history-20261012/result.md`.
 
 ## Completed boundary
+
+Version 2.49 explains the reasonable-effort and historical-information tests
+on PDF 140 and market-participant valuation and own-non-performance-risk
+differences on PDF 141. All 137 integration checks pass; prior prose, 48 displays
+and 93 references survive, with two references added. Eight final pages were
+inspected and the build is clean. Actual group judgments, valuation, current
+applicability and independent/human/domain acceptance remain open. Full
+readiness stays not_ready.
+Result: `data/accounting-master/transition-dependencies-integration-20261012/result.md`.
+
+## Preserved Version 2.48 transition methods and information
 
 Version 2.48 explains transition methods and their information limits on PDF
 140–141. It retains the C5A fair-value election and C25 date exceptions and
@@ -245,7 +256,7 @@ All 55 source/edition checks pass, with 45 selected pages read, 29 exact anchors
 and ten inspected renders. Hindsight differs from an estimate prepared later;
 fair value's market-participant and own-credit assumptions differ from issued-
 insurance FCF. Actual group judgments, valuation and current applicability
-remain open. Version 2.48 stays current pending 2.49 integration; not_ready.
+remain open. Version 2.49 now integrates these distinctions; not_ready.
 Result: `data/accounting-master/transition-dependencies-20261012/result.md`.
 
 ## Latest insurance transition source inquiry
@@ -312,11 +323,10 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Integrate the newly supported hindsight, market-participant valuation and
-own-non-performance-risk distinctions in a separate Version 2.49. Preserve
-Version 2.48, historical editions, insurance-specific exceptions and actual
-group/valuation limitations. Plan:
-`docs/plans/accounting-transition-dependencies-integration-20261012.md`.
+Inspect the retained Munich Re 2023 annual report's transition methods,
+measurement assumptions and disclosed opening balances. Preserve historical
+rule/issuer distinctions, actual-input unknowns and corpus exposure. Plan:
+`docs/plans/accounting-munich-transition-disclosures-20261012.md`.
 
 ## Latest ASBE 25 access result
 

@@ -12,7 +12,7 @@ All 55 source/edition checks pass, with 45 selected pages read, 29 exact anchors
 and ten inspected renders. Hindsight differs from an estimate prepared later;
 fair value's market-participant and own-credit assumptions differ from issued-
 insurance FCF. Actual group judgments, valuation and current applicability
-remain open. Version 2.48 stays current pending 2.49 integration; not_ready.
+remain open. Version 2.49 now integrates these distinctions; not_ready.
 Result: `data/accounting-master/transition-dependencies-20261012/result.md`.
 
 ## Latest insurance transition source inquiry
@@ -77,7 +77,20 @@ Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
-## Current Version 2.48 transition methods and information
+## Current Version 2.49 hindsight and measurement bases
+
+E07/C05, E01/C03, P18/C08; MC05/19/22/28/30/32–35.
+Version 2.49 explains the reasonable-effort and historical-information tests
+on PDF 140 and market-participant valuation and own-non-performance-risk
+differences on PDF 141. All 137 integration checks pass; prior prose, 48 displays
+and 93 references survive, with two references added. Eight final pages were
+inspected and the build is clean. Actual group judgments, valuation, current
+applicability and independent/human/domain acceptance remain open. Full
+readiness stays not_ready.
+Result: `data/accounting-master/transition-dependencies-integration-20261012/result.md`.
+Next internal unit: `docs/plans/accounting-munich-transition-disclosures-20261012.md`.
+
+## Preserved Version 2.48 transition methods and information
 
 E07/C05, E01/C03, P18/C08; MC05/08/11/19/22/28/30/32–35, G7/G8/G13/G16.
 Version 2.48 explains transition methods and their information limits on PDF
@@ -88,7 +101,7 @@ Nine final pages were inspected and the final build is clean. The 43-check
 source inquiry stays frozen. AASB 108/13 details, actual group facts and
 independent/human/domain acceptance remain open; full readiness is not_ready.
 Result: `data/accounting-master/insurance-transition-integration-20261012/result.md`.
-Next internal unit: `docs/plans/accounting-transition-dependencies-integration-20261012.md`.
+This historical integration is complete; current next unit is above.
 
 ## Preserved Version 2.47 direct participation and guarantees
 
