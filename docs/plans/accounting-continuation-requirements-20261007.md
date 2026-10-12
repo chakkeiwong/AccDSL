@@ -4,6 +4,18 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest direct-participation and guarantee source inquiry
+
+The retained AASB 17 compilation supplies 19 inspected source pages and
+19 exact anchors; six source renders were inspected. Thirty source checks
+and fifteen finite arithmetic checks pass. The authored guarantee example
+leaves -10, 10 and 12 after payment at pool values 80, 100 and 120. This
+explains why the valid 10% share component does not determine the full
+exposure or CSM. Eligibility, expected measurement, loss and mitigation
+conditions remain distinct. Actual contracts and later authority remain open.
+Version 2.46 stays current until the planned 2.47 integration; not_ready.
+Result: `data/accounting-master/insurance-vfa-source-20261012/result.md`.
+
 ## Latest Apple 2018 indenture source attempt
 
 Four bounded discovery requests yielded two access refusals, a JavaScript page

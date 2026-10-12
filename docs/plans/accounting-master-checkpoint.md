@@ -132,6 +132,18 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Latest direct-participation and guarantee source inquiry
+
+The retained AASB 17 compilation supplies 19 inspected source pages and
+19 exact anchors; six source renders were inspected. Thirty source checks
+and fifteen finite arithmetic checks pass. The authored guarantee example
+leaves -10, 10 and 12 after payment at pool values 80, 100 and 120. This
+explains why the valid 10% share component does not determine the full
+exposure or CSM. Eligibility, expected measurement, loss and mitigation
+conditions remain distinct. Actual contracts and later authority remain open.
+Version 2.46 stays current until the planned 2.47 integration; not_ready.
+Result: `data/accounting-master/insurance-vfa-source-20261012/result.md`.
+
 ## Latest Apple 2018 indenture source attempt
 
 Four bounded discovery requests yielded two access refusals, a JavaScript page
@@ -172,12 +184,11 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Inspect the retained AASB 17 direct-participation and variable-fee provisions,
-including guarantees and the distinction between payoff, fulfilment cash flows
-and CSM. Preserve the historical edition boundary and Version 2.46. The Apple
-2018 indenture still lacks inspectable text; its four new discovery requests
-yielded no usable lead. Continue under:
-`docs/plans/accounting-insurance-vfa-source-20261012.md`.
+Integrate the checked direct-participation and guarantee explanation in a
+separate Version 2.47, preserving Version 2.46 and the correct conditional
+10% share example. Distinguish settlement payoff, FCF and CSM; preserve the
+historical AASB 17 edition and all wider limitations. Plan:
+`docs/plans/accounting-insurance-vfa-integration-20261012.md`.
 
 ## Preserved Version 2.41 income definitions and payout tables
 
