@@ -16,6 +16,11 @@ This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
 
+The [Ping An counterpart inquiry](../../data/accounting-master/pingan-2019-counterparts-20261013/result.md)
+retains an official 184-page ASBE report matching the selected 2019 interim
+mirror's report text, plus a nine-page statement extract. Nine renders were
+read and 29 checks pass. Board authorisation remains distinct from publication.
+
 The [Ping An archive inquiry](../../data/accounting-master/pingan-archive-fields-20261013/result.md)
 binds fifteen selected reports to exact archive attachment URLs and keeps the
 2019 ASBE mirror separate. All 123 checks pass. Distinct create/update fields,
@@ -46,10 +51,10 @@ availability follows, and Version 2.50 remains current.
 
 ## Exact next action
 
-Inspect the [two 2019 Ping An issuer-source leads](accounting-pingan-2019-counterparts-20261013.md).
-Check issuer/period, preparation basis and relation to the selected ASBE mirror.
-Both are retained discovery candidates without a recorded acquisition attempt.
-Use bounded requests and preserve wrong-basis or inaccessible dispositions.
+Work the [Ping An 2019 lease transition](accounting-pingan-lease-transition-20261013.md).
+Read all relevant report passages and retained ASBE provisions; distinguish
+opening asset/liability differences, comparative bases and subsequent changes
+from inferred equity, cash or depreciation. Integrate material design findings.
 Check prior completed evidence before selecting another source action.
 
 ## Remaining program and controls

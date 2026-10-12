@@ -952,3 +952,19 @@ MC01/03/05/28/30/33–35; G13. Version 2.50, 35 supplemental declarations,
 the frozen 56/136 assessment and not_ready remain. Next inspect the
 [two retained 2019 issuer-source leads](accounting-pingan-2019-counterparts-20261013.md)
 before deciding whether either is an ASBE counterpart to the selected mirror.
+That next inquiry is now complete, as recorded below.
+
+## E01 Ping An 2019 issuer counterpart, 13 October 2026
+
+The [counterpart inquiry](../../data/accounting-master/pingan-2019-counterparts-20261013/result.md)
+retains a full 184-page issuer-hosted ASBE report whose text layers match the
+selected mirror after its announcement page. A second issuer URL contains
+nine statement pages only. Nine renders were read; 29 source checks pass.
+The basis, review/approval events and incomplete-extract disposition remain
+separate. Full visual equivalence and historical bytes are not established.
+
+MC01/03/05/19/28/30/33–35; G11/G13. Version 2.50, 35 declarations, the
+frozen 56/136 assessment and not_ready remain. Continue the
+[2019 lease-transition inquiry](accounting-pingan-lease-transition-20261013.md)
+using actual facts and retained authority, without deriving equity or cash
+from an unqualified difference between reported balances.

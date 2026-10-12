@@ -20,10 +20,14 @@ Result: data/accounting-master/jpmorgan-filing-events-20261013/result.md.
 The Ping An archive inquiry is complete: fifteen exact attachment links and
 one distinct-source disposition; 123 checks; no new publication dates.
 Result: data/accounting-master/pingan-archive-fields-20261013/result.md.
-Execute docs/plans/accounting-pingan-2019-counterparts-20261013.md next:
-inspect two retained issuer-source leads for their actual report identity,
-accounting basis and relation to the selected 2019 ASBE mirror. Bounded output:
-data/accounting-master/pingan-2019-counterparts-20261013/.
+The 2019 counterpart inquiry is complete: a full issuer-hosted ASBE report
+matches the mirror's 184 report text layers; a second URL has nine statement
+pages only. Nine renders and 29 checks; no new publication dates. Result:
+data/accounting-master/pingan-2019-counterparts-20261013/result.md.
+Execute docs/plans/accounting-pingan-lease-transition-20261013.md next:
+read actual transition balances/elections and retained ASBE provisions, then
+work the supported dated-record and balance consequences. Output:
+data/accounting-master/pingan-lease-transition-20261013/.
 The other discovery candidates remain under publication-frontier-20261013;
 no unreviewed hit is admitted and no unchanged blocked route should be retried.
 Check completed result records before scheduling another acquisition.
