@@ -31,7 +31,7 @@ Current candidate SHA256:
 | Record | Freshness and intended use |
 | --- | --- |
 | [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.44 and the rule-history inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.44 integrated; next unit reviews the five-workstream frontier |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.44 integrated; frontier reviewed; next unit reconciles TableFormer paper and loader |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
 | [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.44 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
@@ -188,12 +188,25 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Current frontier after Version 2.44
+
+The five-workstream review is complete. The next substantive unit is E08/E14:
+the original TableFormer paper remains deferred in the historical literature
+ledger despite later loader/model preparation. Read its method/evaluation and
+compare the reported score, text source and decoder with the pinned consumer.
+This is source preparation, not installation or a parser ranking. E01's latest
+Chapter 2 crosswalk has 130 assertion, 164 query and 208 source/provenance
+records; the older 32-assertion selection is a narrower historical population.
+Forty exhibit targets, the frozen 56/136 date split, genuine conflict, wider
+accounting and four blocked papers remain open. Readiness is not_ready.
+Result: `data/accounting-master/frontier-refresh-20261012/result.md`.
+
 ## Exact next action
 
-Audit the latest evidence and dependencies for E01/E05/E07/E08/E14, correct
-stale live instructions and execute an independent ready source/specification
-unit. Preserve Version 2.44 and all held implementation boundaries. Plan:
-`docs/plans/accounting-frontier-refresh-20261012.md`.
+Read the original TableFormer technical method/evaluation and reconcile its
+reported TEDS figures with the retained model card and official 4.0.2 loader.
+Preserve Version 2.44 and keep local performance/runtime claims unevaluated.
+Plan: `docs/plans/accounting-tableformer-paper-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -501,10 +514,10 @@ must distinguish unit completion from the wider acceptance obligation.
 
 | Workstream | Next useful deliverable | Evidence required for wider completion |
 | --- | --- | --- |
-| E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Expand the note-by-note assertion and query map beyond the 32 selected assertions; include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
+| E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; refresh the wider frontier before selecting another source unit. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
-| E08 / C06 | Match the remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; the frontier review selects independent TableFormer literature/consumer work next. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E08 / C06 | Next inspect the original TableFormer method/evaluation and reconcile it with the pinned loader and model-card score; then match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
 The completed legal unit reads all four matter bodies in both filings and
@@ -602,8 +615,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: review all five remaining workstreams after
-   Version 2.44 and execute an independent ready source/specification unit.
+1. Follow the direct next plan: reconcile the original TableFormer paper,
+   model-card score and pinned loader after the completed frontier review.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo

@@ -4,6 +4,19 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current frontier after Version 2.44
+
+The five-workstream review is complete. The next substantive unit is E08/E14:
+the original TableFormer paper remains deferred in the historical literature
+ledger despite later loader/model preparation. Read its method/evaluation and
+compare the reported score, text source and decoder with the pinned consumer.
+This is source preparation, not installation or a parser ranking. E01's latest
+Chapter 2 crosswalk has 130 assertion, 164 query and 208 source/provenance
+records; the older 32-assertion selection is a narrower historical population.
+Forty exhibit targets, the frozen 56/136 date split, genuine conflict, wider
+accounting and four blocked papers remain open. Readiness is not_ready.
+Result: `data/accounting-master/frontier-refresh-20261012/result.md`.
+
 ## Current Version 2.44 score-rounding explanation
 
 E07/C05/P18; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.

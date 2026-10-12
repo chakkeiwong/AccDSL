@@ -190,12 +190,25 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Current frontier after Version 2.44
+
+The five-workstream review is complete. The next substantive unit is E08/E14:
+the original TableFormer paper remains deferred in the historical literature
+ledger despite later loader/model preparation. Read its method/evaluation and
+compare the reported score, text source and decoder with the pinned consumer.
+This is source preparation, not installation or a parser ranking. E01's latest
+Chapter 2 crosswalk has 130 assertion, 164 query and 208 source/provenance
+records; the older 32-assertion selection is a narrower historical population.
+Forty exhibit targets, the frozen 56/136 date split, genuine conflict, wider
+accounting and four blocked papers remain open. Readiness is not_ready.
+Result: `data/accounting-master/frontier-refresh-20261012/result.md`.
+
 ## Next bounded unit
 
-Audit the latest evidence and dependencies for E01/E05/E07/E08/E14, correct
-stale live instructions and execute an independent ready source/specification
-unit. Preserve Version 2.44 and all held implementation boundaries. Plan:
-`docs/plans/accounting-frontier-refresh-20261012.md`.
+Read the original TableFormer technical method/evaluation and reconcile its
+reported TEDS figures with the retained model card and official 4.0.2 loader.
+Preserve Version 2.44 and keep local performance/runtime claims unevaluated.
+Plan: `docs/plans/accounting-tableformer-paper-20261012.md`.
 
 ## Latest ASBE 25 access result
 
