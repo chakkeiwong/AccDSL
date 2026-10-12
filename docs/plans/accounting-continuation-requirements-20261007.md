@@ -13,7 +13,7 @@ leaves -10, 10 and 12 after payment at pool values 80, 100 and 120. This
 explains why the valid 10% share component does not determine the full
 exposure or CSM. Eligibility, expected measurement, loss and mitigation
 conditions remain distinct. Actual contracts and later authority remain open.
-Version 2.46 stays current until the planned 2.47 integration; not_ready.
+Version 2.47 now integrates the explanation; full readiness remains not_ready.
 Result: `data/accounting-master/insurance-vfa-source-20261012/result.md`.
 
 ## Latest Apple 2018 indenture source attempt
@@ -54,7 +54,20 @@ Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
-## Current Version 2.46 token syntax and cell geometry
+## Current Version 2.47 direct participation and guarantees
+
+E07/C05, P18/C08; MC16/19/22/28/30/32–35, G7/G8/G16.
+Version 2.47 explains direct-participation eligibility and a minimum-benefit
+guarantee on PDF 136–137. The valid 10% share calculation remains, with the
+settlement payoff, FCF and complete CSM movement distinguished. All 123
+integration checks pass; all earlier prose, 48 displays and 93 references
+remain. Eight final pages were read and the final build is clean. Thirty
+source checks and fifteen exact-arithmetic checks support the bounded addition.
+Actual contracts, measured inputs, current amendments and independent/human/
+domain acceptance remain open. Full readiness stays not_ready.
+Result: `data/accounting-master/insurance-vfa-integration-20261012/result.md`.
+
+## Preserved Version 2.46 token syntax and cell geometry
 
 E08/C06, E14/C07, P18; MC23/25/29–35, G8/G9/G10/G18.
 Version 2.46 explains token syntax versus rectangular merged-cell geometry

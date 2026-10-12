@@ -1,9 +1,9 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **183-page Version 2.46**.
-PDF: docs/design/proposal/manuscript-otsl-20261012/accounting-product-proposal.pdf
-SHA256: b13be68b6c5de2027f9f7a773dee70361feedb2c4b46a65bf81836e98418513e
-Result: data/accounting-master/otsl-integration-20261012/result.md
+12 October 2026. Current candidate: **184-page Version 2.47**.
+PDF: docs/design/proposal/manuscript-vfa-20261012/accounting-product-proposal.pdf
+SHA256: 7c7f76426717293127b4469a937eff9ddb50a543ff7fee5b4a87f309a97f40a5
+Result: data/accounting-master/insurance-vfa-integration-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Latest Method 1 rule-history inquiry
@@ -20,6 +20,18 @@ remains protected and readiness remains not_ready.
 Result: `data/accounting-master/bank-method1-rule-history-20261012/result.md`.
 
 ## Completed boundary
+
+Version 2.47 explains direct-participation eligibility and a minimum-benefit
+guarantee on PDF 136–137. The valid 10% share calculation remains, with the
+settlement payoff, FCF and complete CSM movement distinguished. All 123
+integration checks pass; all earlier prose, 48 displays and 93 references
+remain. Eight final pages were read and the final build is clean. Thirty
+source checks and fifteen exact-arithmetic checks support the bounded addition.
+Actual contracts, measured inputs, current amendments and independent/human/
+domain acceptance remain open. Full readiness stays not_ready.
+Result: `data/accounting-master/insurance-vfa-integration-20261012/result.md`.
+
+## Preserved Version 2.46 token syntax and cell geometry
 
 Version 2.46 explains token syntax versus rectangular merged-cell geometry
 on PDF 150, using the checked two-by-two counterexample and the specific
@@ -223,7 +235,7 @@ leaves -10, 10 and 12 after payment at pool values 80, 100 and 120. This
 explains why the valid 10% share component does not determine the full
 exposure or CSM. Eligibility, expected measurement, loss and mitigation
 conditions remain distinct. Actual contracts and later authority remain open.
-Version 2.46 stays current until the planned 2.47 integration; not_ready.
+Version 2.47 now integrates the explanation; full readiness remains not_ready.
 Result: `data/accounting-master/insurance-vfa-source-20261012/result.md`.
 
 ## Latest Apple 2018 indenture source attempt
@@ -266,11 +278,11 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Integrate the checked direct-participation and guarantee explanation in a
-separate Version 2.47, preserving Version 2.46 and the correct conditional
-10% share example. Distinguish settlement payoff, FCF and CSM; preserve the
-historical AASB 17 edition and all wider limitations. Plan:
-`docs/plans/accounting-insurance-vfa-integration-20261012.md`.
+Inspect the retained insurance transition provisions to distinguish full
+retrospection, modified retrospection and fair-value transition, including
+method-selection and information limits. Preserve the issuer/AASB authority
+distinction and Version 2.47. Plan:
+`docs/plans/accounting-insurance-transition-source-20261012.md`.
 
 ## Latest ASBE 25 access result
 
