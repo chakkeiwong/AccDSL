@@ -43,3 +43,16 @@ the four live controls before refresh, close once, commit the bounded unit and
 continue the next ready source/method task. Version 2.50 stays protected.
 No manuscript increment is necessary unless the findings materially change its
 explanation. Readiness remains not_ready; E01/E05/E07/E08/E14 stay open.
+
+## Recovery audit, 13 October
+
+The first checker returned 95 passes and two failures: the two 2020 records
+use `not_verified; date in URL is not treated as availability evidence`.
+Exact comparison with `not_verified` was a checker error, not a source-date
+failure. Preserve that run and its code in `recovery-before/`. Compare the
+semicolon-delimited status token and retain the original full text; also
+compare every selected record with the unchanged source-evidence baseline.
+Do not discard or rewrite the two qualifications. All seventeen renders were
+actually inspected during recovery; bind that review separately rather than
+inferring inspection from the existence of an image. The existing contract
+passes the skeptical audit with these repairs. No frozen assessment changes.

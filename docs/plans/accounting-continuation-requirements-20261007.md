@@ -1,8 +1,23 @@
 # Requirements supplement after the October continuation
 
-Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptance
+Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptance
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
+
+## Munich Re publication evidence and current continuation
+
+13 October 2026; E01/C02–C03; MC01/03/05/28/30/33–35; G13.
+The [completed date inquiry](../../data/accounting-master/munich-publication-imprints-20261012/result.md)
+records sixteen issuer-declared dates, fourteen with online labels and two
+with unspecified channels. All seventeen candidate renders were read and 115
+checks pass. Two initial legacy-status failures and their repair are preserved.
+The original 56/136 corpus assessment remains frozen; these sixteen declarations
+supplement its unverified population, leaving 120 reports outside this inquiry.
+Independent historical byte availability, time of day and timezone remain open.
+Version 2.50 stays current; E01/E05/E07/E08/E14 and not_ready remain.
+Next: [publication-frontier plan](accounting-publication-frontier-20261013.md).
+The concise [master](accounting-master-current.md) supersedes next-action prose
+in the preserved historical unit descriptions below; their evidence remains.
 
 ## Latest Munich Re transition disclosure inquiry
 
@@ -101,7 +116,7 @@ pages were inspected and the final build is clean. The initial split-paragraph
 layout is preserved and repaired. Actual groups, valuation inputs, applicable
 authority and independent/human/domain acceptance remain open; not_ready.
 Result: `data/accounting-master/munich-transition-integration-20261012/result.md`.
-Next internal unit: `docs/plans/accounting-munich-publication-imprints-20261012.md`.
+The publication-imprint follow-up is complete; see the current continuation above.
 
 ## Preserved Version 2.49 hindsight and measurement bases
 
