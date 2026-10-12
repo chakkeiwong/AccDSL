@@ -1,12 +1,26 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **177-page Version 2.41**.
-PDF: docs/design/proposal/manuscript-payout-definitions-20261012/accounting-product-proposal.pdf
-SHA256: 8a0903f51fe5ba03a618ad186e430c8b33ed9789cc1c294410ee24b41a38fbc3
-Result: data/accounting-master/bank-capital-payout-dependencies-20261012/result.md
+12 October 2026. Current candidate: **179-page Version 2.42**.
+PDF: docs/design/proposal/manuscript-capital-recognition-20261012/accounting-product-proposal.pdf
+SHA256: 59c9761e5da879bbd93ebb15068eda1f436980b9340dda4b9a32a4b3f813cfce
+Result: data/accounting-master/bank-capital-recognition-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Completed boundary
+
+The 179-page candidate explains instrument eligibility, Tier 2 recognition
+near maturity, asset-specific tax netting and AOCI elections on final PDF 123.
+The existing bank path remains hypothetical. All 37 source and 121 integration
+checks pass; 48 displays and 80 prior bibliography entries remain, with two
+references added. Seven final pages were inspected. The source map retains
+19 condition groups from 187 paragraphs and 23 footnotes; January/April
+normalized sections agree without establishing a complete amendment chain.
+Actual bank classification, contracts, tax links and supervisory facts remain
+open. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-capital-recognition-20261012/result.md`.
+
+## Preserved Version 2.41 income definitions and payout tables
 
 The 177-page candidate distinguishes Part 3 eligible retained income from
 Part 5 retained net income and explains the amended covered-bank payout tables
@@ -108,11 +122,11 @@ unchanged. Full readiness is not_ready. Result:
 
 ## Next bounded unit
 
-Inspect capital eligibility and deductions in dated §§3.20 and 3.22,
-retaining instrument conditions, ordering, elections and institution scope.
-Do not substitute reported equity or debt labels for regulatory capital or
-compute a named bank's permissible dividend. Plan:
-`docs/plans/accounting-bank-capital-recognition-20261012.md`.
+Inspect institution classification and its entry/exit clocks in dated
+§§3.100, 252.5 and 238.10. Connect the bank and parent routes to retained
+Part 3 definitions without assigning a named bank's category from a single
+balance sheet or group label. Plan:
+`docs/plans/accounting-bank-institution-classification-20261012.md`.
 
 ## Latest ASBE 25 access result
 

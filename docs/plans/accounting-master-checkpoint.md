@@ -6,6 +6,32 @@ Runtime implementation and the former background controller remain held.
 
 ## Current candidate
 
+**Version 2.42, 179 pages**
+PDF: docs/design/proposal/manuscript-capital-recognition-20261012/accounting-product-proposal.pdf
+SHA256: 59c9761e5da879bbd93ebb15068eda1f436980b9340dda4b9a32a4b3f813cfce
+
+The 179-page candidate explains instrument eligibility, Tier 2 recognition
+near maturity, asset-specific tax netting and AOCI elections on final PDF 123.
+The existing bank path remains hypothetical. All 37 source and 121 integration
+checks pass; 48 displays and 80 prior bibliography entries remain, with two
+references added. Seven final pages were inspected. The source map retains
+19 condition groups from 187 paragraphs and 23 footnotes; January/April
+normalized sections agree without establishing a complete amendment chain.
+Actual bank classification, contracts, tax links and supervisory facts remain
+open. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-capital-recognition-20261012/result.md`.
+
+## Next bounded unit
+
+Inspect institution classification and its entry/exit clocks in dated
+§§3.100, 252.5 and 238.10. Connect the bank and parent routes to retained
+Part 3 definitions without assigning a named bank's category from a single
+balance sheet or group label. Plan:
+`docs/plans/accounting-bank-institution-classification-20261012.md`.
+
+## Preserved Version 2.41 income definitions and payout tables
+
 **Version 2.41, 177 pages**
 PDF: docs/design/proposal/manuscript-payout-definitions-20261012/accounting-product-proposal.pdf
 SHA256: 8a0903f51fe5ba03a618ad186e430c8b33ed9789cc1c294410ee24b41a38fbc3
@@ -20,14 +46,6 @@ displays and 78 prior bibliography entries survive, with two references added.
 Eight final renders support bounded author review. Full readiness is not_ready.
 
 Result: `data/accounting-master/bank-capital-payout-dependencies-20261012/result.md`.
-
-## Next bounded unit
-
-Inspect capital eligibility and deductions in dated §§3.20 and 3.22,
-retaining instrument conditions, ordering, elections and institution scope.
-Do not substitute reported equity or debt labels for regulatory capital or
-compute a named bank's permissible dividend. Plan:
-`docs/plans/accounting-bank-capital-recognition-20261012.md`.
 
 ## Preserved Version 2.40 declaration and election timing
 
@@ -130,13 +148,6 @@ The frozen 56 verified/136 unverified assessment and Version 2.37 stay
 unchanged. Full readiness is not_ready. Result:
 `data/accounting-master/apple-annual-filing-events-20261012/result.md`.
 
-## Exact next action
-
-Inspect the explicit Part 3 dependencies: capital/distribution definitions
-and payout limits, comparing dated text with the retained December 2025
-amendment. Keep bank inputs, supervisory conditions and election/publication
-facts separate; do not compute the issuer's permissible dividend. Plan:
-`docs/plans/accounting-bank-capital-payout-dependencies-20261012.md`.
 
 ## Latest ASBE 25 access result
 

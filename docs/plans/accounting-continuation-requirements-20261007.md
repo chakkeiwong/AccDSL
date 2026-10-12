@@ -4,7 +4,22 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current Version 2.41 income definitions and payout tables
+## Current Version 2.42 capital recognition and deductions
+
+E07/C05/P18; MC02–05/16/19/21/25/28/30/32–35, G4/G7/G8/G13/G18.
+The 179-page candidate explains instrument eligibility, Tier 2 recognition
+near maturity, asset-specific tax netting and AOCI elections on final PDF 123.
+The existing bank path remains hypothetical. All 37 source and 121 integration
+checks pass; 48 displays and 80 prior bibliography entries remain, with two
+references added. Seven final pages were inspected. The source map retains
+19 condition groups from 187 paragraphs and 23 footnotes; January/April
+normalized sections agree without establishing a complete amendment chain.
+Actual bank classification, contracts, tax links and supervisory facts remain
+open. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-capital-recognition-20261012/result.md`.
+
+## Preserved Version 2.41 income definitions and payout tables
 
 E07/C05/P18; MC02–05/16/19/21/25/28/30/32–35, G4/G7/G8/G13/G18.
 The 177-page candidate distinguishes Part 3 eligible retained income from
@@ -93,9 +108,9 @@ The master refresh reconciles completed source work and next actions while
 preserving all MC/G obligations. Remaining work continues P17, integrates
 material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
-the national-bank authority and Part 3 definition inquiries are complete within
-scope, integrated through Version 2.41; next source work checks capital
-eligibility and deductions in §§3.20 and 3.22. Human acceptance does not stop feasible internal
+the national-bank authority, Part 3 definitions and capital recognition inquiries
+are complete within scope, integrated through Version 2.42; next source work
+checks institution classification and its clocks in §§3.100, 252.5 and 238.10. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.

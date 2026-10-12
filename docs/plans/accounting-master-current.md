@@ -4,7 +4,8 @@ Status reconciled on 12 October 2026 (Asia/Hong_Kong), following the user's
 request for the current program, its freshness and the remaining phases.
 The 12 October refresh reconciles the current candidate, completed source
 units and next actions against the controlling MC01–MC35/G1–G18 obligations.
-Version 2.41 distinguishes the two income measures and combined payout tables.
+Version 2.42 explains capital eligibility and deductions.
+Version 2.41 preserves the two income measures and combined payout tables.
 Version 2.40 preserves declaration timing and regulatory election evidence.
 Version 2.39 distinguishes dated dividend capacity and restricted cash from parent cash. Version 2.38 preserves the PDF visibility/review example. Version 2.37 preserves the correction to the Note 20 junior-debt
 entity label; the subsequent junior-debt inquiry leaves legal issuer and accounting
@@ -16,24 +17,24 @@ remain current. Prior control bytes are preserved in each unit's
 `pointers-before/`; frozen assessments and controller state are not rewritten.
 
 The active objective is to finish the governing accounting product-and-method
-proposal. The current manuscript is the **177-page Version 2.41**, and full
+proposal. The current manuscript is the **179-page Version 2.42**, and full
 proposal readiness remains **not_ready**. Direct internal preparation continues;
 product implementation and the former background controller are held.
 
 Current candidate SHA256:
-`8a0903f51fe5ba03a618ad186e430c8b33ed9789cc1c294410ee24b41a38fbc3`.
+`59c9761e5da879bbd93ebb15068eda1f436980b9340dda4b9a32a4b3f813cfce`.
 
 ## Which records are current?
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.41 and the Part 3 definition inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Part 3 definitions integrated; next unit checks capital eligibility and deductions |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.42 and the capital recognition inquiry; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; capital recognition integrated; next unit checks institution classification and clocks |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
-| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.41 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
+| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.42 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
 | [Original master program](accounting-master-program.md) | Historical controller/campaign plan, not an up-to-date resume instruction; its P16-resume language and campaign scheduling predate direct P16–P19 completion and later repairs |
-| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.41 outputs |
+| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.42 outputs |
 | [Controller state](../../data/accounting-master/state.json) | Historical stopped state: P16 is `budget_deferred`, P17–P19 `pending`. These are not current direct-work statuses |
 | [P19 readiness assessment](../../data/accounting-master/deliverables/P19/readiness.json) | Preserved negative assessment dated 7 October; its five remaining blocker IDs still agree with the current checkpoint, but its evidence snapshot predates later repairs |
 
@@ -49,7 +50,7 @@ run that did not happen.
 | P15 | Requirements, gaps and alternatives audit | Audit delivered. Its historical status is not whole-proposal acceptance; requirement and evidence gaps continue to be maintained |
 | P16 | Whole-product architecture and initial-profile design | Scoped architecture specified and reviewed through direct work; it is a design, not an implemented product |
 | P17 | Accounting, sector, research and inference methods | Method specifications and worked examples delivered; applicable authority, real-case and literature obligations remain and are being repaired |
-| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.41; further substantive repairs still require integration and inspection |
+| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.42; further substantive repairs still require integration and inspection |
 | P19 | Assess full proposal readiness | Assessment completed with a **negative** verdict. A fresh assessment remains necessary after the substantive blockers are repaired |
 
 P19's completion means that an assessment was produced, not that the proposal
@@ -60,7 +61,7 @@ controller's ledger is stale.
 
 ## Refresh audit and continuation rule
 
-The current baseline is Version 2.41; Version 2.37 and the superseded 2.36
+The current baseline is Version 2.42; Version 2.37 and the superseded 2.36
 entity-label evidence remain protected. The stopped controller is historical. Source and closeout check counts are
 engineering evidence; they are not promotion criteria for accounting validity,
 selected-file availability, human readability or whole-proposal acceptance.
@@ -75,7 +76,21 @@ succeeded on 12 October under the user's explicit commit request. The earlier
 blanket Git-blocker statement is superseded; preserve unrelated staged work
 and use the trusted path for authorized writes.
 
-## Current Version 2.41 income definitions and payout tables
+## Current Version 2.42 capital recognition and deductions
+
+The 179-page candidate explains instrument eligibility, Tier 2 recognition
+near maturity, asset-specific tax netting and AOCI elections on final PDF 123.
+The existing bank path remains hypothetical. All 37 source and 121 integration
+checks pass; 48 displays and 80 prior bibliography entries remain, with two
+references added. Seven final pages were inspected. The source map retains
+19 condition groups from 187 paragraphs and 23 footnotes; January/April
+normalized sections agree without establishing a complete amendment chain.
+Actual bank classification, contracts, tax links and supervisory facts remain
+open. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-capital-recognition-20261012/result.md`.
+
+## Preserved Version 2.41 income definitions and payout tables
 
 The 177-page candidate distinguishes Part 3 eligible retained income from
 Part 5 retained net income and explains the amended covered-bank payout tables
@@ -103,11 +118,11 @@ Result: `data/accounting-master/national-bank-dividend-authority-20261012/result
 
 ## Exact next action
 
-Inspect capital eligibility and deductions in dated §§3.20 and 3.22,
-retaining instrument conditions, ordering, elections and institution scope.
-Do not substitute reported equity or debt labels for regulatory capital or
-compute a named bank's permissible dividend. Plan:
-`docs/plans/accounting-bank-capital-recognition-20261012.md`.
+Inspect institution classification and its entry/exit clocks in dated
+§§3.100, 252.5 and 238.10. Connect the bank and parent routes to retained
+Part 3 definitions without assigning a named bank's category from a single
+balance sheet or group label. Plan:
+`docs/plans/accounting-bank-institution-classification-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -398,7 +413,7 @@ the G1–G18 map below preserves the other residual obligations.
 | --- | --- | --- |
 | E01 — Real filing-package coverage | Apple annual/interim work, all 70 known exhibit rows disposed, 26 targets located, selected assertions across 23 notes; complete bounded revenue, lease/purchase, inventory/PP&E, tax, EPS/ownership, debt, liquidity, segment, Note 1/perimeter, legal, pronouncement, regulation and all 28 Item 1A annual risk readings; retained Exhibit 21.1 and selected dependencies; bounded taxonomy-reference resolution; 502-record Chapter 2 crosswalk and Version 2.24 service-access bridge | Resolve 40 outstanding exhibit targets and relevant recursion; extend material narrative/query coverage and obtain actual facts. Annual retention is 28 complete/0 partial/0 unworked and interim 2 complete. The declared 19-unit crosswalk is complete at author level; independent interpretation acceptance remains open |
 | E05 — Genuine source conflict | A bounded 31-statement comparison found 290 equal matched pairs; extraction corrections and exclusions are explicit | Find a genuinely incompatible same-context pair, check precision/version/basis, and demonstrate admission, alternatives and dependent-result invalidation. Do not manufacture a conflict or repeat the unchanged completed search |
-| E07 — Accounting authority and methods | Scoped financing/bank/insurance methods; ASBE lease/tax and selected ASBE 22/25 provisions; PAA/long-tail claim; official 2025 adoption explanation and a checked Ping An original/restated-history example; primary national-bank dividend conditions, Version 2.40 timing and Version 2.41 income/table case | Directly verify operative notices and exact later conditions; establish applicable amendment chains and actual facts; work remaining financing, bank and insurance consequences. The explanation and issuer example are delivered within scope |
+| E07 — Accounting authority and methods | Scoped financing/bank/insurance methods; ASBE lease/tax and selected ASBE 22/25 provisions; PAA/long-tail claim; official 2025 adoption explanation and a checked Ping An original/restated-history example; primary national-bank dividend conditions, Version 2.40 timing, Version 2.41 income/table case and Version 2.42 capital reconciliation | Directly verify operative notices and exact later conditions; establish applicable amendment chains and actual facts; work remaining financing, bank and insurance consequences. The explanation and issuer example are delivered within scope |
 | E08 — Literature and proposal support | Retained technical-source review and ledgers; latest Caiani access evidence and six forward metadata dispositions | Recover and technically inspect blocked sources where feasible; complete relevant competitor, backward/forward, version/correction and omission work. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain blocked |
 | E14 — Reusable tools and interfaces | Bounded taxonomy graph, pinned Arelle source inspection, proposed exchanges and selected terms; Docling source-pinned page/timeout/placeholder exchanges and Version 2.25; 27-member component-notice matrix; Version 2.26 model/backend paths, 25 new source bodies and 93 checks; two model repository identities, seven text bodies and 40 metadata checks; TableFormer 4.0.2 source/consumer audit and 32 checks; EasyOCR 1.7.2 source/asset audit and 46 checks; CRAFT/English authority inquiry and 27 checks | Complete broader interface/failure examples, exact dependency/model records, applicable historical/component terms and distribution conditions. Source inspection and fragments do not establish runtime compatibility |
 
@@ -417,7 +432,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | --- | --- | --- |
 | E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Expand the note-by-note assertion and query map beyond the 32 selected assertions; include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. Continue the capital eligibility/deduction dependencies after the completed Part 3 income/table inquiry. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. Continue institution classification after the completed capital eligibility/deduction inquiry. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | Match the remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
@@ -516,8 +531,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect official national-bank dividend
-   provisions, dated editions and dependencies after the Note 26 source unit.
+1. Follow the direct next plan: inspect institution classification and its
+   clocks after the completed capital eligibility/deduction inquiry.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo
