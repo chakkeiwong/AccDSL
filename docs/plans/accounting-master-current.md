@@ -35,7 +35,7 @@ Current candidate SHA256:
 | Record | Freshness and intended use |
 | --- | --- |
 | [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.48 and the transition inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; Version 2.47 integrated; Version 2.48 integrated; next resolve the AASB 108/13 source dependencies |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; Version 2.47 integrated; AASB 108/13 dependency source review complete; next integrate Version 2.49 |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
 | [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.48 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
@@ -239,6 +239,17 @@ performance and independent/human acceptance remain open. The exact
 tokenization follow-up is now inspected and integrated in Version 2.46. Full readiness stays not_ready.
 Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
 
+## Latest transition dependency source inquiry
+
+Eight official requests acquired historical AASB 108 and AASB 13 primary PDFs;
+the first 2024-applicable AASB 13 result was excluded from the 2023 comparison.
+All 55 source/edition checks pass, with 45 selected pages read, 29 exact anchors
+and ten inspected renders. Hindsight differs from an estimate prepared later;
+fair value's market-participant and own-credit assumptions differ from issued-
+insurance FCF. Actual group judgments, valuation and current applicability
+remain open. Version 2.48 stays current pending 2.49 integration; not_ready.
+Result: `data/accounting-master/transition-dependencies-20261012/result.md`.
+
 ## Latest insurance transition source inquiry
 
 Ten selected AASB 17 pages, including complete Appendix C, support a map of
@@ -303,11 +314,11 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Exact next action
 
-Follow the newly acquired official AASB portal/search lead for historically
-applicable AASB 108 and AASB 13 primary text. Resolve impracticability/hindsight
-and group-fair-value dependencies without repeating the two failed PDF URLs.
-Preserve Version 2.48 and the ASBE distinction. Plan:
-`docs/plans/accounting-transition-dependencies-20261012.md`.
+Integrate the newly supported hindsight, market-participant valuation and
+own-non-performance-risk distinctions in a separate Version 2.49. Preserve
+Version 2.48, historical editions, insurance-specific exceptions and actual
+group/valuation limitations. Plan:
+`docs/plans/accounting-transition-dependencies-integration-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -617,7 +628,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | --- | --- | --- |
 | E01 / C02–C03 | The exact 5 November 2018 Apple indenture remains source-blocked after four new discovery requests; require a usable new lead before retrying. Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the Apple debt-contract inquiry remains blocked; direct-participation/guarantee preparation and Version 2.47 are complete; transition-method preparation and Version 2.48 are complete; next resolve AASB 108/13 primary-source dependencies. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the Apple debt-contract inquiry remains blocked; direct-participation/guarantee preparation and Version 2.47 are complete; transition-method preparation and Version 2.48 are complete; selected AASB 108/13 dependencies are now inspected; next integrate the supported distinctions in Version 2.49. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; the exact tokenization follow-up is now inspected (50 checks); Version 2.46 integrates the syntax/geometry distinction. Match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
@@ -716,8 +727,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: resolve the historically applicable AASB
-   108/13 dependencies through the new official index/search lead.
+1. Follow the direct next plan: integrate the checked hindsight and
+   fair-value/FCF distinctions in a separate Version 2.49.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo

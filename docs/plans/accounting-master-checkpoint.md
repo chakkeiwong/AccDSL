@@ -163,6 +163,17 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Latest transition dependency source inquiry
+
+Eight official requests acquired historical AASB 108 and AASB 13 primary PDFs;
+the first 2024-applicable AASB 13 result was excluded from the 2023 comparison.
+All 55 source/edition checks pass, with 45 selected pages read, 29 exact anchors
+and ten inspected renders. Hindsight differs from an estimate prepared later;
+fair value's market-participant and own-credit assumptions differ from issued-
+insurance FCF. Actual group judgments, valuation and current applicability
+remain open. Version 2.48 stays current pending 2.49 integration; not_ready.
+Result: `data/accounting-master/transition-dependencies-20261012/result.md`.
+
 ## Latest insurance transition source inquiry
 
 Ten selected AASB 17 pages, including complete Appendix C, support a map of
@@ -227,11 +238,11 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Follow the newly acquired official AASB portal/search lead for historically
-applicable AASB 108 and AASB 13 primary text. Resolve impracticability/hindsight
-and group-fair-value dependencies without repeating the two failed PDF URLs.
-Preserve Version 2.48 and the ASBE distinction. Plan:
-`docs/plans/accounting-transition-dependencies-20261012.md`.
+Integrate the newly supported hindsight, market-participant valuation and
+own-non-performance-risk distinctions in a separate Version 2.49. Preserve
+Version 2.48, historical editions, insurance-specific exceptions and actual
+group/valuation limitations. Plan:
+`docs/plans/accounting-transition-dependencies-integration-20261012.md`.
 
 ## Preserved Version 2.41 income definitions and payout tables
 

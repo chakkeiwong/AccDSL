@@ -4,6 +4,17 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest transition dependency source inquiry
+
+Eight official requests acquired historical AASB 108 and AASB 13 primary PDFs;
+the first 2024-applicable AASB 13 result was excluded from the 2023 comparison.
+All 55 source/edition checks pass, with 45 selected pages read, 29 exact anchors
+and ten inspected renders. Hindsight differs from an estimate prepared later;
+fair value's market-participant and own-credit assumptions differ from issued-
+insurance FCF. Actual group judgments, valuation and current applicability
+remain open. Version 2.48 stays current pending 2.49 integration; not_ready.
+Result: `data/accounting-master/transition-dependencies-20261012/result.md`.
+
 ## Latest insurance transition source inquiry
 
 Ten selected AASB 17 pages, including complete Appendix C, support a map of
@@ -77,7 +88,7 @@ Nine final pages were inspected and the final build is clean. The 43-check
 source inquiry stays frozen. AASB 108/13 details, actual group facts and
 independent/human/domain acceptance remain open; full readiness is not_ready.
 Result: `data/accounting-master/insurance-transition-integration-20261012/result.md`.
-Next internal unit: `docs/plans/accounting-transition-dependencies-20261012.md`.
+Next internal unit: `docs/plans/accounting-transition-dependencies-integration-20261012.md`.
 
 ## Preserved Version 2.47 direct participation and guarantees
 
