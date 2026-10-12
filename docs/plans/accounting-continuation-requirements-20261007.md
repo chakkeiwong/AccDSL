@@ -14,11 +14,24 @@ The retained 4.0.2 consumer uses later OTSL tokens, so release/checkpoint score
 transfer remains unsupported. Crossref pagination and the printed loss/prose
 ambiguity are preserved. Thirty-nine references have dispositions; Docling
 reference 9 identifies the exact 2023 tokenization follow-up, still unread.
-Next integrate these material boundaries in Version 2.45. The frozen 56/136
+Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
-## Current Version 2.44 score-rounding explanation
+## Current Version 2.45 TableFormer explanation
+
+E08/C06, E14/C07, P18; MC23/25/29–35, G8/G9/G10/G18.
+Version 2.45 explains TableFormer's predicted structure, externally supplied
+text and Table 4 score boundary on PDF 54–55, and adds traceable text matching
+and correction requirements on PDF 150. All 135 integration checks pass;
+48 displays and 89 prior references remain, with three references added.
+Eleven final pages were inspected and the build is clean. The original paper
+and supplement inquiry passed 60 checks. Checkpoint equivalence, downstream
+performance, the exact tokenization follow-up and independent/human acceptance
+remain open. Full readiness stays not_ready.
+Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
+
+## Preserved Version 2.44 score-rounding explanation
 
 E07/C05/P18; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
 Version 2.44 attributes the Board's nearest-basis-point score-rounding

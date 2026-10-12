@@ -6,6 +6,22 @@ Runtime implementation and the former background controller remain held.
 
 ## Current candidate
 
+**Version 2.45, 182 pages**
+PDF: docs/design/proposal/manuscript-tableformer-20261012/accounting-product-proposal.pdf
+SHA256: 0604999145379f9a2f1bffba8af039a066f15a20bfe3dd40a0e90a0d2baf4887
+
+Version 2.45 explains TableFormer's predicted structure, externally supplied
+text and Table 4 score boundary on PDF 54–55, and adds traceable text matching
+and correction requirements on PDF 150. All 135 integration checks pass;
+48 displays and 89 prior references remain, with three references added.
+Eleven final pages were inspected and the build is clean. The original paper
+and supplement inquiry passed 60 checks. Checkpoint equivalence, downstream
+performance, the exact tokenization follow-up and independent/human acceptance
+remain open. Full readiness stays not_ready.
+Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
+
+## Preserved Version 2.44 score-rounding explanation
+
 **Version 2.44, 181 pages**
 PDF: docs/design/proposal/manuscript-score-rounding-20261012/accounting-product-proposal.pdf
 SHA256: 1bb455c8f139be17908b5cec5599012ab5eae860a11b0a07f3ee4bb5bb6cecb8
@@ -110,16 +126,16 @@ The retained 4.0.2 consumer uses later OTSL tokens, so release/checkpoint score
 transfer remains unsupported. Crossref pagination and the printed loss/prose
 ambiguity are preserved. Thirty-nine references have dispositions; Docling
 reference 9 identifies the exact 2023 tokenization follow-up, still unread.
-Next integrate these material boundaries in Version 2.45. The frozen 56/136
+Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Integrate the checked TableFormer structure, supplied-text and score boundaries
-in a separate Version 2.45, preserving Version 2.44 and all old content. Then
-inspect the exact 2023 tokenization follow-up from Docling reference 9. Plan:
-`docs/plans/accounting-tableformer-integration-20261012.md`.
+Inspect the exact 2023 OTSL tokenization paper identified by Docling reference
+9, checking its representation, constraints and evaluation against the original
+2022 paper and retained 4.0.2 consumer. Preserve Version 2.45. Plan:
+`docs/plans/accounting-otsl-paper-20261012.md`.
 
 ## Preserved Version 2.41 income definitions and payout tables
 

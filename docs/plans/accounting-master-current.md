@@ -4,7 +4,8 @@ Status reconciled on 12 October 2026 (Asia/Hong_Kong), following the user's
 request for the current program, its freshness and the remaining phases.
 The 12 October refresh reconciles the current candidate, completed source
 units and next actions against the controlling MC01–MC35/G1–G18 obligations.
-Version 2.44 adds the attributed score-rounding explanation and proposal boundary.
+Version 2.45 adds the TableFormer text/structure/score distinction and adapter evidence.
+Version 2.44 preserves the attributed score-rounding explanation and proposal boundary.
 Version 2.43 preserves Method 1 inputs, reporting precision and denominator dates.
 Version 2.42 preserves capital eligibility and deductions.
 Version 2.41 preserves the two income measures and combined payout tables.
@@ -19,24 +20,24 @@ remain current. Prior control bytes are preserved in each unit's
 `pointers-before/`; frozen assessments and controller state are not rewritten.
 
 The active objective is to finish the governing accounting product-and-method
-proposal. The current manuscript is the **181-page Version 2.44**, and full
+proposal. The current manuscript is the **182-page Version 2.45**, and full
 proposal readiness remains **not_ready**. Direct internal preparation continues;
 product implementation and the former background controller are held.
 
 Current candidate SHA256:
-`1bb455c8f139be17908b5cec5599012ab5eae860a11b0a07f3ee4bb5bb6cecb8`.
+`0604999145379f9a2f1bffba8af039a066f15a20bfe3dd40a0e90a0d2baf4887`.
 
 ## Which records are current?
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.44 and the rule-history inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.44 integrated; TableFormer source comparison complete; next unit integrates its material boundaries |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.45 and the TableFormer inquiry; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.45 integrated; next unit inspects the exact OTSL tokenization paper |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
-| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.44 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
+| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.45 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
 | [Original master program](accounting-master-program.md) | Historical controller/campaign plan, not an up-to-date resume instruction; its P16-resume language and campaign scheduling predate direct P16–P19 completion and later repairs |
-| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.44 outputs |
+| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.45 outputs |
 | [Controller state](../../data/accounting-master/state.json) | Historical stopped state: P16 is `budget_deferred`, P17–P19 `pending`. These are not current direct-work statuses |
 | [P19 readiness assessment](../../data/accounting-master/deliverables/P19/readiness.json) | Preserved negative assessment dated 7 October; its five remaining blocker IDs still agree with the current checkpoint, but its evidence snapshot predates later repairs |
 
@@ -52,7 +53,7 @@ run that did not happen.
 | P15 | Requirements, gaps and alternatives audit | Audit delivered. Its historical status is not whole-proposal acceptance; requirement and evidence gaps continue to be maintained |
 | P16 | Whole-product architecture and initial-profile design | Scoped architecture specified and reviewed through direct work; it is a design, not an implemented product |
 | P17 | Accounting, sector, research and inference methods | Method specifications and worked examples delivered; applicable authority, real-case and literature obligations remain and are being repaired |
-| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.44; further substantive repairs still require integration and inspection |
+| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.45; further substantive repairs still require integration and inspection |
 | P19 | Assess full proposal readiness | Assessment completed with a **negative** verdict. A fresh assessment remains necessary after the substantive blockers are repaired |
 
 P19's completion means that an assessment was produced, not that the proposal
@@ -188,6 +189,18 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Current Version 2.45 TableFormer explanation
+
+Version 2.45 explains TableFormer's predicted structure, externally supplied
+text and Table 4 score boundary on PDF 54–55, and adds traceable text matching
+and correction requirements on PDF 150. All 135 integration checks pass;
+48 displays and 89 prior references remain, with three references added.
+Eleven final pages were inspected and the build is clean. The original paper
+and supplement inquiry passed 60 checks. Checkpoint equivalence, downstream
+performance, the exact tokenization follow-up and independent/human acceptance
+remain open. Full readiness stays not_ready.
+Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
+
 ## Latest TableFormer source inquiry
 
 The identified 2022 main paper and supplement are fully read, with twelve
@@ -198,16 +211,16 @@ The retained 4.0.2 consumer uses later OTSL tokens, so release/checkpoint score
 transfer remains unsupported. Crossref pagination and the printed loss/prose
 ambiguity are preserved. Thirty-nine references have dispositions; Docling
 reference 9 identifies the exact 2023 tokenization follow-up, still unread.
-Next integrate these material boundaries in Version 2.45. The frozen 56/136
+Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Exact next action
 
-Integrate the checked TableFormer structure, supplied-text and score boundaries
-in a separate Version 2.45, preserving Version 2.44 and all old content. Then
-inspect the exact 2023 tokenization follow-up from Docling reference 9. Plan:
-`docs/plans/accounting-tableformer-integration-20261012.md`.
+Inspect the exact 2023 OTSL tokenization paper identified by Docling reference
+9, checking its representation, constraints and evaluation against the original
+2022 paper and retained 4.0.2 consumer. Preserve Version 2.45. Plan:
+`docs/plans/accounting-otsl-paper-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -518,7 +531,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
 | E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; the frontier review selects independent TableFormer literature/consumer work next. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
-| E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Integrate the material findings, then inspect the exact 2023 tokenization follow-up and match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
+| E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; next inspect the exact 2023 tokenization follow-up and match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
 The completed legal unit reads all four matter bodies in both filings and
@@ -616,8 +629,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: integrate the checked TableFormer method,
-   text-source and score boundaries, then inspect the exact tokenization follow-up.
+1. Follow the direct next plan: inspect the exact 2023 tokenization follow-up
+   after the checked Version 2.45 method/text/score integration.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo
