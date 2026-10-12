@@ -4,6 +4,19 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest Munich Re transition disclosure inquiry
+
+The retained 2023 report supplies transition-method populations, a rounded
+opening-equity bridge and separate issued/held opening margins. All 75
+source/arithmetic checks pass across sixteen selected pages and 23 exact
+excerpts; seven renders were inspected. The net margin of -EUR22,320m is
+consistent with the rounded -EUR22.3bn bridge component. The rounded endpoint
+difference is preserved, not called a source conflict. Actual groups,
+valuation inputs, operative authority and independent interpretation remain
+open. Added author-annotation exposure is recorded. Version 2.49 stays current
+pending 2.50 integration; readiness remains not_ready.
+Result: `data/accounting-master/munich-transition-disclosures-20261012/result.md`.
+
 ## Latest transition dependency source inquiry
 
 Eight official requests acquired historical AASB 108 and AASB 13 primary PDFs;
@@ -88,7 +101,7 @@ inspected and the build is clean. Actual group judgments, valuation, current
 applicability and independent/human/domain acceptance remain open. Full
 readiness stays not_ready.
 Result: `data/accounting-master/transition-dependencies-integration-20261012/result.md`.
-Next internal unit: `docs/plans/accounting-munich-transition-disclosures-20261012.md`.
+Next internal unit: `docs/plans/accounting-munich-transition-integration-20261012.md`.
 
 ## Preserved Version 2.48 transition methods and information
 

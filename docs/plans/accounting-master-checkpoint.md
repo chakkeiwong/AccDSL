@@ -178,6 +178,19 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Latest Munich Re transition disclosure inquiry
+
+The retained 2023 report supplies transition-method populations, a rounded
+opening-equity bridge and separate issued/held opening margins. All 75
+source/arithmetic checks pass across sixteen selected pages and 23 exact
+excerpts; seven renders were inspected. The net margin of -EUR22,320m is
+consistent with the rounded -EUR22.3bn bridge component. The rounded endpoint
+difference is preserved, not called a source conflict. Actual groups,
+valuation inputs, operative authority and independent interpretation remain
+open. Added author-annotation exposure is recorded. Version 2.49 stays current
+pending 2.50 integration; readiness remains not_ready.
+Result: `data/accounting-master/munich-transition-disclosures-20261012/result.md`.
+
 ## Latest transition dependency source inquiry
 
 Eight official requests acquired historical AASB 108 and AASB 13 primary PDFs;
@@ -253,10 +266,10 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Inspect the retained Munich Re 2023 annual report's transition methods,
-measurement assumptions and disclosed opening balances. Preserve historical
-rule/issuer distinctions, actual-input unknowns and corpus exposure. Plan:
-`docs/plans/accounting-munich-transition-disclosures-20261012.md`.
+Integrate the checked Munich Re transition disclosure, rounded equity bridge
+and separate issued/held margins in Version 2.50. Preserve the dated method
+populations, issuer-specific inputs and actual-group unknowns. Plan:
+`docs/plans/accounting-munich-transition-integration-20261012.md`.
 
 ## Preserved Version 2.41 income definitions and payout tables
 

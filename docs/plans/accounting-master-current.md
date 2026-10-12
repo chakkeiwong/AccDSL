@@ -36,7 +36,7 @@ Current candidate SHA256:
 | Record | Freshness and intended use |
 | --- | --- |
 | [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.49 and the transition dependency inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; Version 2.47 integrated; Version 2.49 integrated; next inspect Munich Re transition disclosures |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; Version 2.47 integrated; Munich Re transition disclosure inquiry complete; next integrate Version 2.50 |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
 | [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.49 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
@@ -251,6 +251,19 @@ performance and independent/human acceptance remain open. The exact
 tokenization follow-up is now inspected and integrated in Version 2.46. Full readiness stays not_ready.
 Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
 
+## Latest Munich Re transition disclosure inquiry
+
+The retained 2023 report supplies transition-method populations, a rounded
+opening-equity bridge and separate issued/held opening margins. All 75
+source/arithmetic checks pass across sixteen selected pages and 23 exact
+excerpts; seven renders were inspected. The net margin of -EUR22,320m is
+consistent with the rounded -EUR22.3bn bridge component. The rounded endpoint
+difference is preserved, not called a source conflict. Actual groups,
+valuation inputs, operative authority and independent interpretation remain
+open. Added author-annotation exposure is recorded. Version 2.49 stays current
+pending 2.50 integration; readiness remains not_ready.
+Result: `data/accounting-master/munich-transition-disclosures-20261012/result.md`.
+
 ## Latest transition dependency source inquiry
 
 Eight official requests acquired historical AASB 108 and AASB 13 primary PDFs;
@@ -326,10 +339,10 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Exact next action
 
-Inspect the retained Munich Re 2023 annual report's transition methods,
-measurement assumptions and disclosed opening balances. Preserve historical
-rule/issuer distinctions, actual-input unknowns and corpus exposure. Plan:
-`docs/plans/accounting-munich-transition-disclosures-20261012.md`.
+Integrate the checked Munich Re transition disclosure, rounded equity bridge
+and separate issued/held margins in Version 2.50. Preserve the dated method
+populations, issuer-specific inputs and actual-group unknowns. Plan:
+`docs/plans/accounting-munich-transition-integration-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -639,7 +652,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | --- | --- | --- |
 | E01 / C02–C03 | The exact 5 November 2018 Apple indenture remains source-blocked after four new discovery requests; require a usable new lead before retrying. Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the Apple debt-contract inquiry remains blocked; direct-participation/guarantee preparation and Version 2.47 are complete; transition-method preparation and Version 2.48 are complete; selected AASB 108/13 dependencies are inspected and integrated in Version 2.49; next inspect Munich Re 2023 transition methods and measurement disclosures. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the Apple debt-contract inquiry remains blocked; direct-participation/guarantee preparation and Version 2.47 are complete; transition-method preparation and Version 2.48 are complete; selected AASB 108/13 dependencies are inspected and integrated in Version 2.49; the Munich Re 2023 disclosure inquiry is complete; next integrate the supported case in Version 2.50. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; the exact tokenization follow-up is now inspected (50 checks); Version 2.46 integrates the syntax/geometry distinction. Match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
@@ -738,8 +751,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect Munich Re 2023 transition methods,
-   measurement assumptions and disclosed opening balances.
+1. Follow the direct next plan: integrate the checked Munich Re transition
+   methods, rounded bridge and scoped margin evidence in Version 2.50.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo
