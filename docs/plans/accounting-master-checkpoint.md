@@ -100,25 +100,26 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
-## Current frontier after Version 2.44
+## Latest TableFormer source inquiry
 
-The five-workstream review is complete. The next substantive unit is E08/E14:
-the original TableFormer paper remains deferred in the historical literature
-ledger despite later loader/model preparation. Read its method/evaluation and
-compare the reported score, text source and decoder with the pinned consumer.
-This is source preparation, not installation or a parser ranking. E01's latest
-Chapter 2 crosswalk has 130 assertion, 164 query and 208 source/provenance
-records; the older 32-assertion selection is a narrower historical population.
-Forty exhibit targets, the frozen 56/136 date split, genuine conflict, wider
-accounting and four blocked papers remain open. Readiness is not_ready.
-Result: `data/accounting-master/frontier-refresh-20261012/result.md`.
+The identified 2022 main paper and supplement are fully read, with twelve
+selected renders and 60 passing source/preservation checks. The model-card
+95.4/90.1/93.6 row belongs to Table 4's cropped-PDF-table structure-with-content
+evaluation. Cell text comes from PDF/OCR inputs; matching can change structure.
+The retained 4.0.2 consumer uses later OTSL tokens, so release/checkpoint score
+transfer remains unsupported. Crossref pagination and the printed loss/prose
+ambiguity are preserved. Thirty-nine references have dispositions; Docling
+reference 9 identifies the exact 2023 tokenization follow-up, still unread.
+Next integrate these material boundaries in Version 2.45. The frozen 56/136
+date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
+Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Read the original TableFormer technical method/evaluation and reconcile its
-reported TEDS figures with the retained model card and official 4.0.2 loader.
-Preserve Version 2.44 and keep local performance/runtime claims unevaluated.
-Plan: `docs/plans/accounting-tableformer-paper-20261012.md`.
+Integrate the checked TableFormer structure, supplied-text and score boundaries
+in a separate Version 2.45, preserving Version 2.44 and all old content. Then
+inspect the exact 2023 tokenization follow-up from Docling reference 9. Plan:
+`docs/plans/accounting-tableformer-integration-20261012.md`.
 
 ## Preserved Version 2.41 income definitions and payout tables
 

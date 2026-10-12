@@ -4,18 +4,19 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current frontier after Version 2.44
+## Latest TableFormer source inquiry
 
-The five-workstream review is complete. The next substantive unit is E08/E14:
-the original TableFormer paper remains deferred in the historical literature
-ledger despite later loader/model preparation. Read its method/evaluation and
-compare the reported score, text source and decoder with the pinned consumer.
-This is source preparation, not installation or a parser ranking. E01's latest
-Chapter 2 crosswalk has 130 assertion, 164 query and 208 source/provenance
-records; the older 32-assertion selection is a narrower historical population.
-Forty exhibit targets, the frozen 56/136 date split, genuine conflict, wider
-accounting and four blocked papers remain open. Readiness is not_ready.
-Result: `data/accounting-master/frontier-refresh-20261012/result.md`.
+The identified 2022 main paper and supplement are fully read, with twelve
+selected renders and 60 passing source/preservation checks. The model-card
+95.4/90.1/93.6 row belongs to Table 4's cropped-PDF-table structure-with-content
+evaluation. Cell text comes from PDF/OCR inputs; matching can change structure.
+The retained 4.0.2 consumer uses later OTSL tokens, so release/checkpoint score
+transfer remains unsupported. Crossref pagination and the printed loss/prose
+ambiguity are preserved. Thirty-nine references have dispositions; Docling
+reference 9 identifies the exact 2023 tokenization follow-up, still unread.
+Next integrate these material boundaries in Version 2.45. The frozen 56/136
+date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
+Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Current Version 2.44 score-rounding explanation
 
