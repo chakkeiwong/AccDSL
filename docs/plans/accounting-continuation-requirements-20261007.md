@@ -4,6 +4,17 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest institution classification source inquiry
+
+E07/C05; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
+The classification inquiry retains eight successful official responses and
+12 located condition groups; all 48 source checks pass. Three complete
+January/April sections agree. Entry averages, four-quarter exit conditions,
+parent/bank routes and report-specific measures remain distinct. Two additional
+definition sections were read selectively. No named bank was classified and no
+new manuscript version is warranted; Version 2.42 and not_ready remain.
+Result: `data/accounting-master/bank-institution-classification-20261012/result.md`.
+
 ## Current Version 2.42 capital recognition and deductions
 
 E07/C05/P18; MC02–05/16/19/21/25/28/30/32–35, G4/G7/G8/G13/G18.
@@ -110,7 +121,8 @@ material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
 the national-bank authority, Part 3 definitions and capital recognition inquiries
 are complete within scope, integrated through Version 2.42; next source work
-checks institution classification and its clocks in §§3.100, 252.5 and 238.10. Human acceptance does not stop feasible internal
+checks G-SIB identification and Method 1 surcharge dates after the completed
+institution-classification source map. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.

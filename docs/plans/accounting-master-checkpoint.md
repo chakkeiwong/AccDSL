@@ -22,13 +22,22 @@ open. Full readiness is not_ready.
 
 Result: `data/accounting-master/bank-capital-recognition-20261012/result.md`.
 
+## Latest institution classification source inquiry
+
+The classification inquiry retains eight successful official responses and
+12 located condition groups; all 48 source checks pass. Three complete
+January/April sections agree. Entry averages, four-quarter exit conditions,
+parent/bank routes and report-specific measures remain distinct. Two additional
+definition sections were read selectively. No named bank was classified and no
+new manuscript version is warranted; Version 2.42 and not_ready remain.
+Result: `data/accounting-master/bank-institution-classification-20261012/result.md`.
+
 ## Next bounded unit
 
-Inspect institution classification and its entry/exit clocks in dated
-§§3.100, 252.5 and 238.10. Connect the bank and parent routes to retained
-Part 3 definitions without assigning a named bank's category from a single
-balance sheet or group label. Plan:
-`docs/plans/accounting-bank-institution-classification-20261012.md`.
+Inspect G-SIB identification and the Method 1 surcharge, score and effective
+date referenced by the amended §3.11. Keep Method 1 distinct from the holding
+company's overall surcharge and retain actual regulatory reports as missing
+inputs. Plan: `docs/plans/accounting-bank-method1-surcharge-20261012.md`.
 
 ## Preserved Version 2.41 income definitions and payout tables
 
