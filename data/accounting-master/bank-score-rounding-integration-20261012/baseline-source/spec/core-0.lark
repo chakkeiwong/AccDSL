@@ -1,0 +1,63 @@
+// Normative Core 0 syntax, Lark EBNF. UTF-8 input; ASCII identifiers.
+// Longest token wins; keywords cannot be declaration identifiers.
+start: "module" NAME "version" STRING ";" declaration*
+?declaration: use | source | entity | book | account | observation | symbol
+            | choice | binding | constraint | alternative | contract | event
+            | rule | scenario | report | opening
+use: "use" NAME "version" STRING ";"
+source: "source" NAME "=" expr ";"
+entity: "entity" NAME "functional" NAME ";"
+book: "book" NAME "entity" NAME "basis" NAME "version" STRING ";"
+account: "account" NAME ":" NAME "book" NAME ";"
+observation: "observation" NAME ":" type time_spec "=" expr "from" NAME ";"
+time_spec: "instant" DATE | "period" DATE "to" DATE
+symbol: "symbol" NAME ":" type "in" domain "because" STRING ";"
+domain: "[" expr "," expr "]" | "{" expr ("," expr)* "}"
+choice: "choice" NAME "in" "{" NAME ("," NAME)* "}" "because" STRING ";"
+binding: "let" NAME [":" type] "=" expr ";"
+constraint: "constraint" NAME ":" expr ";"
+alternative: "alternative" NAME "{" assumption* "}"
+assumption: "assume" expr ";"
+contract: "contract" NAME ":" NAME "book" NAME "{" field* "}"
+field: NAME "=" expr ";"
+event: "event" NAME "(" [parameters] ")" "book" NAME ";"
+parameters: NAME ":" type ("," NAME ":" type)*
+rule: "rule" NAME "for" NAME "as" NAME ["overrides" NAME ("," NAME)*] "when" expr "{" rule_statement* "}"
+?rule_statement: binding | require | post
+require: "require" expr ";"
+post: "post" "{" posting+ "}"
+posting: SIDE NAME expr ";"
+scenario: "scenario" NAME "{" setting* "}"
+setting: "set" NAME "=" expr ";"
+report: "report" NAME "for" NAME "{" field* "}"
+opening: "opening" NAME "for" NAME "from" expr ";"
+type: NAME ["<" type ("," type)* ">"]
+?expr: disjunction
+?disjunction: conjunction (OR conjunction)*
+?conjunction: comparison (AND comparison)*
+?comparison: sum [COMPARE sum]
+?sum: product (ADD product)*
+?product: unary (MUL unary)*
+?unary: UNARY unary | postfix
+?postfix: atom ("." NAME)*
+?atom: number | STRING | DATE | BOOL | call | NAME | "(" expr ")" | array | record
+call: NAME "(" [expr ("," expr)*] ")"
+number: NUMBER [NAME | "per" "year"]
+array: "[" [expr ("," expr)*] "]"
+record: "{" [record_field ("," record_field)*] "}"
+record_field: NAME ":" expr
+SIDE: "debit" | "credit"
+OR: "or"
+AND: "and"
+UNARY: "-" | "not"
+COMPARE: "==" | "!=" | "<=" | ">=" | "<" | ">"
+ADD: "+" | "-"
+MUL: "*" | "/"
+BOOL.2: "true" | "false"
+DATE: /@[0-9]{4}-[0-9]{2}-[0-9]{2}/
+NAME: /[A-Za-z_][A-Za-z0-9_]*/
+NUMBER: /(?:0|[1-9][0-9]*)(?:\.[0-9]+)?/
+STRING: /"(?:[^"\\\x00-\x1f]|\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4}))*"/
+%import common.WS
+%ignore WS
+%ignore /\/\/[^\n]*/

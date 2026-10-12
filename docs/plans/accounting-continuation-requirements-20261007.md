@@ -4,7 +4,19 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current Version 2.43 bank reporting inputs
+## Current Version 2.44 score-rounding explanation
+
+E07/C05/P18; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
+Version 2.44 attributes the Board's nearest-basis-point score-rounding
+explanation and keeps the 2026 proposed changes separate on PDF 118–119.
+All 126 integration checks pass; all 48 displays and 87 prior references
+remain, with two official references added. Eight final pages were inspected
+and the build is clean. The source inquiry passed 63 checks across 13 groups
+and 24 denominator matches. Actual bank inputs, the complete amendment chain
+and independent/human/domain acceptance stay open. Readiness remains not_ready.
+Result: `data/accounting-master/bank-score-rounding-integration-20261012/result.md`.
+
+## Preserved Version 2.43 bank reporting inputs
 
 E07/C05 and E14/C08; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
 Version 2.43 adds the Method 1 input, denominator-vintage, reporting-precision
@@ -172,8 +184,8 @@ preserving all MC/G obligations. Remaining work continues P17, integrates
 material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
 the national-bank authority, Part 3 definitions and capital recognition inquiries
-are complete within scope, integrated through Version 2.43; the rule-history inquiry is complete. Next integrate its attributed
-rounding explanation, then review all five remaining workstreams. Human acceptance does not stop feasible internal
+are complete within scope, integrated through Version 2.44; the rule-history inquiry and attributed
+rounding integration are complete. Next review all five remaining workstreams. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.

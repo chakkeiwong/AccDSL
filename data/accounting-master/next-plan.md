@@ -1,9 +1,9 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **180-page Version 2.43**.
-PDF: docs/design/proposal/manuscript-reporting-inputs-20261012/accounting-product-proposal.pdf
-SHA256: 47516cce310d21b716e5226fd159a173985f58da0528909706b6c182842fd068
-Result: data/accounting-master/bank-reporting-integration-20261012/result.md
+12 October 2026. Current candidate: **181-page Version 2.44**.
+PDF: docs/design/proposal/manuscript-score-rounding-20261012/accounting-product-proposal.pdf
+SHA256: 1bb455c8f139be17908b5cec5599012ab5eae860a11b0a07f3ee4bb5bb6cecb8
+Result: data/accounting-master/bank-score-rounding-integration-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Latest Method 1 rule-history inquiry
@@ -20,6 +20,17 @@ remains protected and readiness remains not_ready.
 Result: `data/accounting-master/bank-method1-rule-history-20261012/result.md`.
 
 ## Completed boundary
+
+Version 2.44 attributes the Board's nearest-basis-point score-rounding
+explanation and keeps the 2026 proposed changes separate on PDF 118–119.
+All 126 integration checks pass; all 48 displays and 87 prior references
+remain, with two official references added. Eight final pages were inspected
+and the build is clean. The source inquiry passed 63 checks across 13 groups
+and 24 denominator matches. Actual bank inputs, the complete amendment chain
+and independent/human/domain acceptance stay open. Readiness remains not_ready.
+Result: `data/accounting-master/bank-score-rounding-integration-20261012/result.md`.
+
+## Preserved Version 2.43 reporting inputs
 
 Version 2.43 adds the Method 1 input, denominator-vintage, reporting-precision
 and information-date explanation on final PDF 118–119. All 125 integration
@@ -181,10 +192,10 @@ not_ready remain. Result:
 
 ## Next bounded unit
 
-Integrate the official score-rounding explanation in a separate Version 2.44,
-preserving its preamble context and the proposed/operative distinction. Then
-audit all five remaining workstreams before choosing another source unit. Plan:
-`docs/plans/accounting-bank-score-rounding-integration-20261012.md`.
+Audit the latest evidence and dependencies for E01/E05/E07/E08/E14, correct
+stale live instructions and execute an independent ready source/specification
+unit. Preserve Version 2.44 and all held implementation boundaries. Plan:
+`docs/plans/accounting-frontier-refresh-20261012.md`.
 
 ## Latest ASBE 25 access result
 
