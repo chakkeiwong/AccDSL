@@ -4,6 +4,28 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current lease result and continuation
+
+13 October 2026. **Version 2.51, 193 pages; not_ready.**
+PDF: `docs/design/proposal/manuscript-pingan-leases-20261013/accounting-product-proposal.pdf`.
+SHA256: `bc0a75b20bef0d6e045cca2461b06d30cbba6d028930e88bc1afcd6831fa1961`.
+The [Ping An lease result](../../data/accounting-master/pingan-lease-transition-20261013/result.md)
+adds actual dated balances, elections and maturity restrictions with 51 source
+and 124 manuscript checks. Nine source and seven final manuscript pages were
+inspected. Earlier prose, 48 display blocks and 340 citation occurrences remain.
+Opening differences do not identify equity; net changes do not identify
+depreciation or payments. The conditional prepayment is not an actual history.
+Qualified major-contract language supplies no genuine E05 conflict.
+
+P17/E01/E07 and P18; MC01–05/07–12/15–16/19/28/30/32–35;
+G4/G5/G7/G11/G13/G15/G16. The full company, operative authority, independent
+domain and human acceptance obligations remain. All five E workstreams stay
+open. Publication evidence remains 35 supplemental declarations and the frozen
+56/136 assessment. Execute the
+[Tamer source-recovery plan](accounting-tamer-source-recovery-20261013.md) next.
+The current master supersedes next-action and current-version prose in the
+historical entries below; their scoped evidence remains unchanged.
+
 ## Henkel and HSBC declared publication dates
 
 13 October 2026; E01/C02–C03; MC01/03/05/28/30/33–35; G13.

@@ -1,8 +1,8 @@
 # Accounting proposal — direct next plan
 
-13 October 2026. Version 2.50, 190 pages; readiness **not_ready**.
-PDF: docs/design/proposal/manuscript-munich-transition-20261012/accounting-product-proposal.pdf
-SHA256: b9171185897b808f35ac08dc4a75892ce24fb8948ef0fa83070aa7e8993c788c
+13 October 2026. Version 2.51, 193 pages; readiness **not_ready**.
+PDF: docs/design/proposal/manuscript-pingan-leases-20261013/accounting-product-proposal.pdf
+SHA256: bc0a75b20bef0d6e045cca2461b06d30cbba6d028930e88bc1afcd6831fa1961
 Implementation and the old controller remain held.
 
 Completed: sixteen Munich Re declarations (115 checks), then sixteen Henkel
@@ -24,10 +24,16 @@ The 2019 counterpart inquiry is complete: a full issuer-hosted ASBE report
 matches the mirror's 184 report text layers; a second URL has nine statement
 pages only. Nine renders and 29 checks; no new publication dates. Result:
 data/accounting-master/pingan-2019-counterparts-20261013/result.md.
-Execute docs/plans/accounting-pingan-lease-transition-20261013.md next:
-read actual transition balances/elections and retained ASBE provisions, then
-work the supported dated-record and balance consequences. Output:
-data/accounting-master/pingan-lease-transition-20261013/.
+The lease case is complete and integrated into Version 2.51: 51 source and
+124 manuscript checks pass; seven final rendered pages were inspected. Actual
+dates, balances, elections and maturity restrictions remain distinct from
+unknown equity adjustments, depreciation, payments and contracts. Result:
+data/accounting-master/pingan-lease-transition-20261013/result.md.
+Execute docs/plans/accounting-tamer-source-recovery-20261013.md next. The
+retained Harvard page has a distinct explicit PDF link beyond the failed
+legacy handle. Bound acquisition, verify identity, then inspect technical
+content before admitting claims. Output:
+data/accounting-master/tamer-source-recovery-20261013/.
 The other discovery candidates remain under publication-frontier-20261013;
 no unreviewed hit is admitted and no unchanged blocked route should be retried.
 Check completed result records before scheduling another acquisition.

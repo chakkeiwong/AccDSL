@@ -59,3 +59,14 @@ records, checks and result under
 checks, assess whether the result adds material explanatory content to Version
 2.50; if so, make a separate protected manuscript candidate and inspect the
 rendered addition while preserving previous mathematics and citations.
+
+Discovery finding: full-report PDF 167 has lease-liability maturity amounts
+totalling 18,933, under the undiscounted-cash-flow heading on PDF 166. The
+balance sheet on PDF 102 reports 17,212. Preserve measurement basis before
+using their difference; it is not current-period interest expense. The
+generic cash-flow rows mentioning finance leasing concern the lending/lessor
+business, not an identified payment roll-forward for the group's lessee debt.
+PDF 88's statement about no reportable major lease contracts retains its
+materiality/reporting qualification and is not a denial that leases exist.
+Include these passages in the source scope; no same-context conflict is
+created by stripping their qualifiers.

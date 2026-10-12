@@ -3,14 +3,18 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.50, 190 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-munich-transition-20261012/accounting-product-proposal.pdf`
-SHA256: `b9171185897b808f35ac08dc4a75892ce24fb8948ef0fa83070aa7e8993c788c`.
+**Version 2.51, 193 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-pingan-leases-20261013/accounting-product-proposal.pdf`
+SHA256: `bc0a75b20bef0d6e045cca2461b06d30cbba6d028930e88bc1afcd6831fa1961`.
 
 ## Current evidence and next action
 
-Version 2.50 integrates the Munich Re transition example. Subsequent source
-inquiries now supply **35 issuer-declared publication dates**: sixteen
+Version 2.51 adds the [actual Ping An lease transition](../../data/accounting-master/pingan-lease-transition-20261013/result.md):
+51 source and 124 manuscript checks pass, with seven final renders inspected.
+The case preserves dated bases, reported elections and different liability
+measurements while retaining unknown journals, cash payments and depreciation.
+It preserves Version 2.50's Munich Re example and every earlier source passage.
+Source inquiries also supply **35 issuer-declared publication dates**: sixteen
 [Munich Re reports](../../data/accounting-master/munich-publication-imprints-20261012/result.md)
 and nineteen [Henkel/HSBC reports](../../data/accounting-master/publication-frontier-20261013/result.md).
 The latest unit read twenty pages and passed 110 source checks. Fourteen
@@ -18,7 +22,7 @@ Munich Re labels specify online publication; the other 21 declarations do not
 specify a channel. No independent historical byte availability follows.
 The frozen 56/136 corpus assessment is unchanged; 101 of its unverified
 reports still lack accepted supplemental declarations in these inquiries.
-Version 2.50 remains current; these source supplements do not require 2.51.
+Those publication supplements remain distinct from the lease integration.
 
 The [JPMorgan revalidation](../../data/accounting-master/jpmorgan-filing-events-20261013/result.md)
 adds a 285-page shared-text comparison, with only the wrapper omission note
@@ -43,10 +47,11 @@ selected mirror's report section. A second URL contains only nine statement
 pages. Nine renders and 29 checks support those distinct source dispositions.
 Neither acquisition establishes historical publication of its bytes.
 
-Next work the [actual 2019 lease transition](accounting-pingan-lease-transition-20261013.md),
-linking reported elections and balances to retained ASBE provisions and dated
-record consequences. Check completed result records before choosing work;
-unreviewed hits and undocumented clocks are not date evidence.
+Next execute the [Tamer source-recovery inquiry](accounting-tamer-source-recovery-20261013.md)
+using the new explicit institutional link retained in the earlier landing page.
+Check full-text identity and technical support before using it. Acquisition,
+technical reading and literature completeness retain separate states. Check
+completed results before choosing further work; do not repeat closed units.
 
 ## Remaining proposal phases
 
@@ -55,7 +60,7 @@ unreviewed hits and undocumented clocks are not date evidence.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.50; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.51; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Prior assessment completed with a negative verdict | Reassess all requirements and their interactions after repair; retain separate human/domain/engineering acceptance |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
@@ -65,10 +70,10 @@ as useful results arrive; the five E obligations are not new serial phases.
 
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
-| E01 / C02–C03 — Real package and chronology | Work Ping An's lease-transition facts and continue distinct date leads; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
+| E01 / C02–C03 — Real package and chronology | Continue distinct date leads; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts beyond the completed lease case | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Genuine source conflict | Select a different documented comparison from retained sources; check identity, precision, basis and revision context | An actually incompatible same-context pair and a reproducible admission, alternatives and dependent-result invalidation example. Do not repeat the closed 290-equal-pair search or manufacture a conflict |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
-| E08 / C06 — Literature | Recover the four blocked technical sources through new routes; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked |
+| E08 / C06 — Literature | Execute the bounded Tamer institutional-route inquiry, then other distinct source routes; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
 | E14 / C07 — Tools and interfaces | Extend failure/interface examples and applicable dependency/model/terms evidence | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
 
 The broader E07 queue includes revenue, leases, FX, tax, asset modification,

@@ -7,14 +7,21 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.50, 190 pages.**
-PDF: `docs/design/proposal/manuscript-munich-transition-20261012/accounting-product-proposal.pdf`
-SHA256: `b9171185897b808f35ac08dc4a75892ce24fb8948ef0fa83070aa7e8993c788c`.
-The last integration adds Munich Re's transition disclosures; 133 scoped checks
-passed. [Result](../../data/accounting-master/munich-transition-integration-20261012/result.md).
+**Version 2.51, 193 pages.**
+PDF: `docs/design/proposal/manuscript-pingan-leases-20261013/accounting-product-proposal.pdf`
+SHA256: `bc0a75b20bef0d6e045cca2461b06d30cbba6d028930e88bc1afcd6831fa1961`.
+The last integration adds Ping An's actual lease transition: 51 source checks
+and 124 manuscript checks pass; seven final rendered pages were inspected.
+[Result](../../data/accounting-master/pingan-lease-transition-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
+
+The [lease case](../../data/accounting-master/pingan-lease-transition-20261013/result.md)
+preserves the unadjusted comparative basis, actual adoption balances and
+elections, carrying amounts and undiscounted maturity buckets. Differences
+do not identify equity, depreciation or cash payments; qualifications prevent
+a false source conflict. Actual contracts and a complete journal remain open.
 
 The [Ping An counterpart inquiry](../../data/accounting-master/pingan-2019-counterparts-20261013/result.md)
 retains an official 184-page ASBE report matching the selected 2019 interim
@@ -47,15 +54,15 @@ The frozen corpus remains 56 filing dates / 136 unverified publication dates.
 Thirty-five of the latter now have supplemental issuer-declared dates; 101
 lack accepted declarations in these inquiries. These are distinct evidence
 classes. No independent historical unchanged-byte admission or intraday
-availability follows, and Version 2.50 remains current.
+availability follows.
 
 ## Exact next action
 
-Work the [Ping An 2019 lease transition](accounting-pingan-lease-transition-20261013.md).
-Read all relevant report passages and retained ASBE provisions; distinguish
-opening asset/liability differences, comparative bases and subsequent changes
-from inferred equity, cash or depreciation. Integrate material design findings.
-Check prior completed evidence before selecting another source action.
+Execute the [Tamer source-recovery plan](accounting-tamer-source-recovery-20261013.md).
+The retained institutional page supplies a distinct PDF link beyond the old
+failed handle route. Bound acquisition, check version identity, then inspect
+technical content before adopting any claim. The completed lease and source
+units must not be regenerated. Continue independent work after source failures.
 
 ## Remaining program and controls
 
