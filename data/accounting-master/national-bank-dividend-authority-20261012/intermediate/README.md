@@ -1,0 +1,1 @@
+First candidate build: adjacent citations on page 117 and bibliography acronym capitalization triggered a repair. These are superseded diagnostic files, not final render bindings. The original final-renders.json records their initial paths; corresponding PNG files are retained in this directory.

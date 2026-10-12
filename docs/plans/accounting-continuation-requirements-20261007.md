@@ -4,7 +4,21 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current Version 2.39 restricted resources and funding
+## Current Version 2.40 declaration and election timing
+
+E07/C05/P18; MC02–05/19/21/25/28/30/32–35, G4/G7/G8/G13/G18.
+The 176-page candidate adds declaration timing, conditional four-prior-year
+input needs and regulatory election evidence on final PDF 116–117. The
+1 December 2025 rule permits January early adoption before April effectiveness;
+JPMorgan later reports the Firm elected it. Public-knowledge timing, actual
+bank applicability and permissible payouts remain unresolved. All 103 source
+and 119 integration checks pass; 48 displays and all 76 prior bibliography
+entries remain, with two references added. Six final renders support the
+bounded author review. Full readiness is not_ready.
+
+Result: `data/accounting-master/national-bank-dividend-authority-20261012/result.md`.
+
+## Preserved Version 2.39 restricted resources and funding
 
 E01/E07/P18; MC01–05/08/15/16/21/25/28/30/32–35, G4/G5/G7/G11/G13.
 The separate 176-page candidate adds the checked Note 26 funding distinction
@@ -65,7 +79,8 @@ The master refresh reconciles completed source work and next actions while
 preserving all MC/G obligations. Remaining work continues P17, integrates
 material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
-next source work inspects primary national-bank dividend authority. Human acceptance does not stop feasible internal
+the national-bank authority inquiry and Version 2.40 are complete within scope;
+next source work checks Part 3 definitions and payout limits. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.

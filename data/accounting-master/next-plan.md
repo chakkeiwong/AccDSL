@@ -1,12 +1,25 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **176-page Version 2.39**.
-PDF: docs/design/proposal/manuscript-funds-transfer-20261012/accounting-product-proposal.pdf
-SHA256: c23bf198be1f79bec92204b074e93a01d09d736675a2df39ea20620c2000f44b
-Result: data/accounting-master/jpmorgan-funds-transfer-20261012/result.md
+12 October 2026. Current candidate: **176-page Version 2.40**.
+PDF: docs/design/proposal/manuscript-dividend-timing-20261012/accounting-product-proposal.pdf
+SHA256: c06a9471f338e9ca79526a01ed1f9265512faeda163c8d2072baf1bf22c58f0c
+Result: data/accounting-master/national-bank-dividend-authority-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Completed boundary
+
+The 176-page candidate adds declaration timing, conditional four-prior-year
+input needs and regulatory election evidence on final PDF 116–117. The
+1 December 2025 rule permits January early adoption before April effectiveness;
+JPMorgan later reports the Firm elected it. Public-knowledge timing, actual
+bank applicability and permissible payouts remain unresolved. All 103 source
+and 119 integration checks pass; 48 displays and all 76 prior bibliography
+entries remain, with two references added. Six final renders support the
+bounded author review. Full readiness is not_ready.
+
+Result: `data/accounting-master/national-bank-dividend-authority-20261012/result.md`.
+
+## Preserved Version 2.39 funding example
 
 The separate 176-page candidate adds the checked Note 26 funding distinction
 at final PDF 116. Approximately 30.1 billion of bank dividend capacity at
@@ -82,11 +95,11 @@ unchanged. Full readiness is not_ready. Result:
 
 ## Next bounded unit
 
-Continue primary national-bank dividend-authority research following Note 26.
-Verify official section identities, dated editions, conditions and dependencies;
-do not treat the issuer summary or a later current page as verified law for
-1 January 2026. Plan:
-`docs/plans/accounting-national-bank-dividend-authority-20261012.md`.
+Inspect the explicit Part 3 dependencies: capital/distribution definitions
+and payout limits, comparing dated text with the retained December 2025
+amendment. Keep bank inputs, supervisory conditions and election/publication
+facts separate; do not compute the issuer's permissible dividend. Plan:
+`docs/plans/accounting-bank-capital-payout-dependencies-20261012.md`.
 
 ## Latest ASBE 25 access result
 
