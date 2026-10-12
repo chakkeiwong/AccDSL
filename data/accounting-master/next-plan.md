@@ -214,6 +214,16 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Latest Apple 2018 indenture source attempt
+
+Four bounded discovery requests yielded two access refusals, a JavaScript page
+and unrelated RSS results. No contract body or usable body link was acquired;
+the old SEC and EDGAR Online routes were not repeated. Exhibit 4.19 and the
+frozen forty-target frontier remain unresolved. This is a source-specific
+acquisition failure, not evidence that the document or its terms are absent.
+Version 2.46 and not_ready remain; continue retained-source insurance work.
+Result: `data/accounting-master/apple-2018-indenture-source-20261012/result.md`.
+
 ## Latest OTSL source inquiry
 
 The identified arXiv v1 copy is fully read (14 PDF pages, ten renders); seven
@@ -244,12 +254,12 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Seek the exact Apple 5 November 2018 indenture, incorporated as annual
-Exhibit 4.19 from S-3 accession 0001193125-18-317844, through a new public
-contract-index source. Distinguish mirror identity from official-byte
-equivalence; do not retry the failed SEC or EDGAR Online routes. Preserve
-Version 2.46 and the frozen forty-target frontier. Plan:
-`docs/plans/accounting-apple-2018-indenture-source-20261012.md`.
+Inspect the retained AASB 17 direct-participation and variable-fee provisions,
+including guarantees and the distinction between payoff, fulfilment cash flows
+and CSM. Preserve the historical edition boundary and Version 2.46. The Apple
+2018 indenture still lacks inspectable text; its four new discovery requests
+yielded no usable lead. Continue under:
+`docs/plans/accounting-insurance-vfa-source-20261012.md`.
 
 ## Latest ASBE 25 access result
 

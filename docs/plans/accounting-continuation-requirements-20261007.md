@@ -4,6 +4,16 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest Apple 2018 indenture source attempt
+
+Four bounded discovery requests yielded two access refusals, a JavaScript page
+and unrelated RSS results. No contract body or usable body link was acquired;
+the old SEC and EDGAR Online routes were not repeated. Exhibit 4.19 and the
+frozen forty-target frontier remain unresolved. This is a source-specific
+acquisition failure, not evidence that the document or its terms are absent.
+Version 2.46 and not_ready remain; continue retained-source insurance work.
+Result: `data/accounting-master/apple-2018-indenture-source-20261012/result.md`.
+
 ## Latest OTSL source inquiry
 
 The identified arXiv v1 copy is fully read (14 PDF pages, ten renders); seven

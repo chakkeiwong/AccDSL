@@ -33,7 +33,7 @@ Current candidate SHA256:
 | Record | Freshness and intended use |
 | --- | --- |
 | [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.46 and the OTSL inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; next unit seeks the exact Apple 2018 indenture through a new source |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; Apple indenture access attempt complete without a body; next unit inspects retained AASB 17 variable-fee conditions |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
 | [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.46 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
@@ -214,6 +214,16 @@ performance and independent/human acceptance remain open. The exact
 tokenization follow-up is now inspected and integrated in Version 2.46. Full readiness stays not_ready.
 Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
 
+## Latest Apple 2018 indenture source attempt
+
+Four bounded discovery requests yielded two access refusals, a JavaScript page
+and unrelated RSS results. No contract body or usable body link was acquired;
+the old SEC and EDGAR Online routes were not repeated. Exhibit 4.19 and the
+frozen forty-target frontier remain unresolved. This is a source-specific
+acquisition failure, not evidence that the document or its terms are absent.
+Version 2.46 and not_ready remain; continue retained-source insurance work.
+Result: `data/accounting-master/apple-2018-indenture-source-20261012/result.md`.
+
 ## Latest OTSL source inquiry
 
 The identified arXiv v1 copy is fully read (14 PDF pages, ten renders); seven
@@ -244,12 +254,12 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Exact next action
 
-Seek the exact Apple 5 November 2018 indenture, incorporated as annual
-Exhibit 4.19 from S-3 accession 0001193125-18-317844, through a new public
-contract-index source. Distinguish mirror identity from official-byte
-equivalence; do not retry the failed SEC or EDGAR Online routes. Preserve
-Version 2.46 and the frozen forty-target frontier. Plan:
-`docs/plans/accounting-apple-2018-indenture-source-20261012.md`.
+Inspect the retained AASB 17 direct-participation and variable-fee provisions,
+including guarantees and the distinction between payoff, fulfilment cash flows
+and CSM. Preserve the historical edition boundary and Version 2.46. The Apple
+2018 indenture still lacks inspectable text; its four new discovery requests
+yielded no usable lead. Continue under:
+`docs/plans/accounting-insurance-vfa-source-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -557,9 +567,9 @@ must distinguish unit completion from the wider acceptance obligation.
 
 | Workstream | Next useful deliverable | Evidence required for wider completion |
 | --- | --- | --- |
-| E01 / C02–C03 | Seek the exact 5 November 2018 Apple indenture through a new public source, preserving mirror/official identity limits. Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
+| E01 / C02–C03 | The exact 5 November 2018 Apple indenture remains source-blocked after four new discovery requests; require a usable new lead before retrying. Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the next rotation seeks the exact Apple 2018 debt contract. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the Apple debt-contract inquiry remains blocked; the next rotation inspects retained direct-participation and guarantee conditions. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; the exact tokenization follow-up is now inspected (50 checks); Version 2.46 integrates the syntax/geometry distinction. Match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
@@ -658,8 +668,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: seek the exact Apple 2018 indenture through
-   a new public source after the completed Version 2.46 integration.
+1. Follow the direct next plan: inspect retained AASB 17 direct-participation,
+   guarantee and variable-fee conditions after the Apple source-specific block.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo
