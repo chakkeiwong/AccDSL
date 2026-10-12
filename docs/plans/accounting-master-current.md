@@ -4,7 +4,8 @@ Status reconciled on 12 October 2026 (Asia/Hong_Kong), following the user's
 request for the current program, its freshness and the remaining phases.
 The 12 October refresh reconciles the current candidate, completed source
 units and next actions against the controlling MC01–MC35/G1–G18 obligations.
-Version 2.47 adds the direct-participation and guarantee explanation.
+Version 2.48 adds transition-method and information-limit explanation.
+Version 2.47 preserves the direct-participation and guarantee explanation.
 Version 2.46 preserves the token-syntax/cell-geometry distinction and decoder source finding.
 Version 2.45 preserves the TableFormer text/structure/score distinction and adapter evidence.
 Version 2.44 preserves the attributed score-rounding explanation and proposal boundary.
@@ -22,24 +23,24 @@ remain current. Prior control bytes are preserved in each unit's
 `pointers-before/`; frozen assessments and controller state are not rewritten.
 
 The active objective is to finish the governing accounting product-and-method
-proposal. The current manuscript is the **184-page Version 2.47**, and full
+proposal. The current manuscript is the **186-page Version 2.48**, and full
 proposal readiness remains **not_ready**. Direct internal preparation continues;
 product implementation and the former background controller are held.
 
 Current candidate SHA256:
-`7c7f76426717293127b4469a937eff9ddb50a543ff7fee5b4a87f309a97f40a5`.
+`de39d2cbd16ee7cb0ba79435234dd0945ba0ea9c39c3a5c4664a79c35a3eb389`.
 
 ## Which records are current?
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.47 and the insurance guarantee inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; Version 2.47 integrated; transition source inquiry complete; next integrate Version 2.48 |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.48 and the transition inquiry; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; Version 2.47 integrated; Version 2.48 integrated; next resolve the AASB 108/13 source dependencies |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
-| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.47 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
+| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.48 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
 | [Original master program](accounting-master-program.md) | Historical controller/campaign plan, not an up-to-date resume instruction; its P16-resume language and campaign scheduling predate direct P16–P19 completion and later repairs |
-| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.47 outputs |
+| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.48 outputs |
 | [Controller state](../../data/accounting-master/state.json) | Historical stopped state: P16 is `budget_deferred`, P17–P19 `pending`. These are not current direct-work statuses |
 | [P19 readiness assessment](../../data/accounting-master/deliverables/P19/readiness.json) | Preserved negative assessment dated 7 October; its five remaining blocker IDs still agree with the current checkpoint, but its evidence snapshot predates later repairs |
 
@@ -55,7 +56,7 @@ run that did not happen.
 | P15 | Requirements, gaps and alternatives audit | Audit delivered. Its historical status is not whole-proposal acceptance; requirement and evidence gaps continue to be maintained |
 | P16 | Whole-product architecture and initial-profile design | Scoped architecture specified and reviewed through direct work; it is a design, not an implemented product |
 | P17 | Accounting, sector, research and inference methods | Method specifications and worked examples delivered; applicable authority, real-case and literature obligations remain and are being repaired |
-| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.47; further substantive repairs still require integration and inspection |
+| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.48; further substantive repairs still require integration and inspection |
 | P19 | Assess full proposal readiness | Assessment completed with a **negative** verdict. A fresh assessment remains necessary after the substantive blockers are repaired |
 
 P19's completion means that an assessment was produced, not that the proposal
@@ -66,7 +67,7 @@ controller's ledger is stale.
 
 ## Refresh audit and continuation rule
 
-The current baseline is Version 2.47; Version 2.37 and the superseded 2.36
+The current baseline is Version 2.48; Version 2.37 and the superseded 2.36
 entity-label evidence remain protected. The stopped controller is historical. Source and closeout check counts are
 engineering evidence; they are not promotion criteria for accounting validity,
 selected-file availability, human readability or whole-proposal acceptance.
@@ -191,7 +192,18 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
-## Current Version 2.47 direct participation and guarantees
+## Current Version 2.48 transition methods and information
+
+Version 2.48 explains transition methods and their information limits on PDF
+140–141. It retains the C5A fair-value election and C25 date exceptions and
+distinguishes insurance-group fair value from underlying investments. All 125
+integration checks pass; earlier prose, 48 displays and 93 references remain.
+Nine final pages were inspected and the final build is clean. The 43-check
+source inquiry stays frozen. AASB 108/13 details, actual group facts and
+independent/human/domain acceptance remain open; full readiness is not_ready.
+Result: `data/accounting-master/insurance-transition-integration-20261012/result.md`.
+
+## Preserved Version 2.47 direct participation and guarantees
 
 Version 2.47 explains direct-participation eligibility and a minimum-benefit
 guarantee on PDF 136–137. The valid 10% share calculation remains, with the
@@ -236,7 +248,7 @@ a conditional fair-value election despite feasible retrospection; C25 changes
 the transition date for earlier adjusted comparatives. The two AASB 108/13
 PDF probes returned 404; the official paginated portal is a new follow-up lead.
 No actual group, valuation or impracticability judgment is supplied. Version
-2.47 stays current pending 2.48 integration; full readiness remains not_ready.
+2.48 now integrates the explanation; full readiness remains not_ready.
 Result: `data/accounting-master/insurance-transition-source-20261012/result.md`.
 
 ## Latest direct-participation and guarantee source inquiry
@@ -291,10 +303,11 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Exact next action
 
-Integrate the checked transition-method and information-limit explanation
-in a separate Version 2.48. Preserve Version 2.47, the ASBE/AASB distinction,
-C5A/C25 exceptions and the unresolved AASB 108/13 dependencies. Plan:
-`docs/plans/accounting-insurance-transition-integration-20261012.md`.
+Follow the newly acquired official AASB portal/search lead for historically
+applicable AASB 108 and AASB 13 primary text. Resolve impracticability/hindsight
+and group-fair-value dependencies without repeating the two failed PDF URLs.
+Preserve Version 2.48 and the ASBE distinction. Plan:
+`docs/plans/accounting-transition-dependencies-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -585,7 +598,7 @@ the G1–G18 map below preserves the other residual obligations.
 | --- | --- | --- |
 | E01 — Real filing-package coverage | Apple annual/interim work, all 70 known exhibit rows disposed, 26 targets located, selected assertions across 23 notes; complete bounded revenue, lease/purchase, inventory/PP&E, tax, EPS/ownership, debt, liquidity, segment, Note 1/perimeter, legal, pronouncement, regulation and all 28 Item 1A annual risk readings; retained Exhibit 21.1 and selected dependencies; bounded taxonomy-reference resolution; 502-record Chapter 2 crosswalk and Version 2.24 service-access bridge | Resolve 40 outstanding exhibit targets and relevant recursion; extend material narrative/query coverage and obtain actual facts. Annual retention is 28 complete/0 partial/0 unworked and interim 2 complete. The declared 19-unit crosswalk is complete at author level; independent interpretation acceptance remains open |
 | E05 — Genuine source conflict | A bounded 31-statement comparison found 290 equal matched pairs; extraction corrections and exclusions are explicit | Find a genuinely incompatible same-context pair, check precision/version/basis, and demonstrate admission, alternatives and dependent-result invalidation. Do not manufacture a conflict or repeat the unchanged completed search |
-| E07 — Accounting authority and methods | Scoped financing/bank/insurance methods; ASBE lease/tax and selected ASBE 22/25 provisions; PAA/long-tail claim; official 2025 adoption explanation and a checked Ping An original/restated-history example; primary national-bank dividend conditions, Version 2.40 timing, Version 2.41 income/table case and Version 2.42 capital reconciliation; selected VFA eligibility/guarantee/mitigation provisions, an exact settlement-component example and Version 2.47 explanation | Directly verify operative notices and exact later conditions; establish applicable amendment chains and actual facts; work remaining financing, bank and insurance consequences. The explanation and issuer example are delivered within scope |
+| E07 — Accounting authority and methods | Scoped financing/bank/insurance methods; ASBE lease/tax and selected ASBE 22/25 provisions; PAA/long-tail claim; official 2025 adoption explanation and a checked Ping An original/restated-history example; primary national-bank dividend conditions, Version 2.40 timing, Version 2.41 income/table case and Version 2.42 capital reconciliation; selected VFA eligibility/guarantee/mitigation provisions, an exact settlement-component example and Version 2.47 explanation; transition method/information limits in Version 2.48 | Directly verify operative notices and exact later conditions; establish applicable amendment chains and actual facts; work remaining financing, bank and insurance consequences. The explanation and issuer example are delivered within scope |
 | E08 — Literature and proposal support | Retained technical-source review and ledgers; Caiani access evidence and six forward metadata dispositions; complete 2022 TableFormer main/supplement inspection (60 checks), exact OTSL arXiv v1 inspection (50 checks), and Version 2.45/2.46 method/score/geometry explanations | Recover and technically inspect blocked sources where feasible; complete relevant competitor, backward/forward, version/correction and omission work. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain blocked |
 | E14 — Reusable tools and interfaces | Bounded taxonomy graph, pinned Arelle source inspection, proposed exchanges and selected terms; Docling source-pinned page/timeout/placeholder exchanges and Version 2.25; 27-member component-notice matrix; Version 2.26 model/backend paths, 25 new source bodies and 93 checks; two model repository identities, seven text bodies and 40 metadata checks; TableFormer 4.0.2 source/consumer audit and 32 checks; later matching, geometry and constant-counter findings with explicit runtime limits; EasyOCR 1.7.2 source/asset audit and 46 checks; CRAFT/English authority inquiry and 27 checks | Complete broader interface/failure examples, exact dependency/model records, applicable historical/component terms and distribution conditions. Source inspection and fragments do not establish runtime compatibility |
 
@@ -604,7 +617,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | --- | --- | --- |
 | E01 / C02–C03 | The exact 5 November 2018 Apple indenture remains source-blocked after four new discovery requests; require a usable new lead before retrying. Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the Apple debt-contract inquiry remains blocked; direct-participation/guarantee preparation and Version 2.47 are complete; transition-method source preparation is complete; next integrate its information limits in Version 2.48. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the Apple debt-contract inquiry remains blocked; direct-participation/guarantee preparation and Version 2.47 are complete; transition-method preparation and Version 2.48 are complete; next resolve AASB 108/13 primary-source dependencies. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; the exact tokenization follow-up is now inspected (50 checks); Version 2.46 integrates the syntax/geometry distinction. Match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
@@ -703,8 +716,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect full, modified-retrospective and
-   fair-value insurance transition and their information limits.
+1. Follow the direct next plan: resolve the historically applicable AASB
+   108/13 dependencies through the new official index/search lead.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo

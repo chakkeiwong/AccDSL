@@ -1,9 +1,9 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **184-page Version 2.47**.
-PDF: docs/design/proposal/manuscript-vfa-20261012/accounting-product-proposal.pdf
-SHA256: 7c7f76426717293127b4469a937eff9ddb50a543ff7fee5b4a87f309a97f40a5
-Result: data/accounting-master/insurance-vfa-integration-20261012/result.md
+12 October 2026. Current candidate: **186-page Version 2.48**.
+PDF: docs/design/proposal/manuscript-transition-20261012/accounting-product-proposal.pdf
+SHA256: de39d2cbd16ee7cb0ba79435234dd0945ba0ea9c39c3a5c4664a79c35a3eb389
+Result: data/accounting-master/insurance-transition-integration-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Latest Method 1 rule-history inquiry
@@ -20,6 +20,17 @@ remains protected and readiness remains not_ready.
 Result: `data/accounting-master/bank-method1-rule-history-20261012/result.md`.
 
 ## Completed boundary
+
+Version 2.48 explains transition methods and their information limits on PDF
+140–141. It retains the C5A fair-value election and C25 date exceptions and
+distinguishes insurance-group fair value from underlying investments. All 125
+integration checks pass; earlier prose, 48 displays and 93 references remain.
+Nine final pages were inspected and the final build is clean. The 43-check
+source inquiry stays frozen. AASB 108/13 details, actual group facts and
+independent/human/domain acceptance remain open; full readiness is not_ready.
+Result: `data/accounting-master/insurance-transition-integration-20261012/result.md`.
+
+## Preserved Version 2.47 direct participation and guarantees
 
 Version 2.47 explains direct-participation eligibility and a minimum-benefit
 guarantee on PDF 136–137. The valid 10% share calculation remains, with the
@@ -235,7 +246,7 @@ a conditional fair-value election despite feasible retrospection; C25 changes
 the transition date for earlier adjusted comparatives. The two AASB 108/13
 PDF probes returned 404; the official paginated portal is a new follow-up lead.
 No actual group, valuation or impracticability judgment is supplied. Version
-2.47 stays current pending 2.48 integration; full readiness remains not_ready.
+2.48 now integrates the explanation; full readiness remains not_ready.
 Result: `data/accounting-master/insurance-transition-source-20261012/result.md`.
 
 ## Latest direct-participation and guarantee source inquiry
@@ -290,10 +301,11 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Integrate the checked transition-method and information-limit explanation
-in a separate Version 2.48. Preserve Version 2.47, the ASBE/AASB distinction,
-C5A/C25 exceptions and the unresolved AASB 108/13 dependencies. Plan:
-`docs/plans/accounting-insurance-transition-integration-20261012.md`.
+Follow the newly acquired official AASB portal/search lead for historically
+applicable AASB 108 and AASB 13 primary text. Resolve impracticability/hindsight
+and group-fair-value dependencies without repeating the two failed PDF URLs.
+Preserve Version 2.48 and the ASBE distinction. Plan:
+`docs/plans/accounting-transition-dependencies-20261012.md`.
 
 ## Latest ASBE 25 access result
 

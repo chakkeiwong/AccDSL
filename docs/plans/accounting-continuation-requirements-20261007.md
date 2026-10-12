@@ -13,7 +13,7 @@ a conditional fair-value election despite feasible retrospection; C25 changes
 the transition date for earlier adjusted comparatives. The two AASB 108/13
 PDF probes returned 404; the official paginated portal is a new follow-up lead.
 No actual group, valuation or impracticability judgment is supplied. Version
-2.47 stays current pending 2.48 integration; full readiness remains not_ready.
+2.48 now integrates the explanation; full readiness remains not_ready.
 Result: `data/accounting-master/insurance-transition-source-20261012/result.md`.
 
 ## Latest direct-participation and guarantee source inquiry
@@ -66,7 +66,20 @@ Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
-## Current Version 2.47 direct participation and guarantees
+## Current Version 2.48 transition methods and information
+
+E07/C05, E01/C03, P18/C08; MC05/08/11/19/22/28/30/32–35, G7/G8/G13/G16.
+Version 2.48 explains transition methods and their information limits on PDF
+140–141. It retains the C5A fair-value election and C25 date exceptions and
+distinguishes insurance-group fair value from underlying investments. All 125
+integration checks pass; earlier prose, 48 displays and 93 references remain.
+Nine final pages were inspected and the final build is clean. The 43-check
+source inquiry stays frozen. AASB 108/13 details, actual group facts and
+independent/human/domain acceptance remain open; full readiness is not_ready.
+Result: `data/accounting-master/insurance-transition-integration-20261012/result.md`.
+Next internal unit: `docs/plans/accounting-transition-dependencies-20261012.md`.
+
+## Preserved Version 2.47 direct participation and guarantees
 
 E07/C05, P18/C08; MC16/19/22/28/30/32–35, G7/G8/G16.
 Version 2.47 explains direct-participation eligibility and a minimum-benefit

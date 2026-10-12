@@ -1,0 +1,47 @@
+Chapter 13
+Implementation contracts
+13.1
+Reference implementation and component boundaries
+The proposed reference implementation uses Python for orchestration and a deterministic refer-
+ence evaluator, exact decimal/rational arithmetic for booked amounts, SQLite for transactional
+metadata and versioned records, and columnar files for large scenario outputs. DuckDB is an
+optional analytical reader. These are convenience choices justified by inspectability and modest
+initial scale; they do not establish production performance. The IR and conformance tests
+allow a later compiled executor without changing accounting meaning. Committed journals,
+economic deltas, receipts and branch heads belong to the one transactional store, including
+for simulation branches. Columnar files hold derived analytical exports, never independently
+writable committed books.
+accdsl/
+evidence/
+documents, spans, filing contexts, extraction versions
+model/
+typed IR, entities, books, symbols, contracts
+language/
+grammar, parser, resolver, type checker, lowering
+constraints/
+propagation, solver adapters, bounds and conflict cores
+accounting/
+rule selection, posting validation, closing, consolidation
+economics/
+contract and behavioural plugin interfaces
+execution/
+scheduler, branch state, stochastic streams, run records
+reporting/
+statements, notes, movement schedules, explanations
+storage/
+versioned records, migrations, result readers
+interfaces/
+Python API, CLI, structured import/export
+packages/
+reviewed demonstration and accounting modules
+The first service boundary is local and synchronous. A job abstraction can be added for
+extraction and simulation without requiring distributed execution. The model compiler returns
+an immutable execution plan; the executor receives that plan and run inputs. Neither should
+retrieve live market data implicitly. Input datasets and rule packages are selected and versioned
+before execution.
+13.2
+Persistent records
+The table identifies logical storage relations and their obligations; exact versioned record schemas
+determine their payloads. Candidate calculations and diagnostics remain separate from the
+committed accounting relations.
+136
