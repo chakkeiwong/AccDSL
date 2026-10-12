@@ -35,3 +35,19 @@ Evidence: `data/accounting-master/pingan-archive-fields-20261013/`. Execute a
 local structured-source inspection and hash/link check, then save the result,
 decision table and next justified source action. Broader E01/E05/E07/E08/E14
 work continues; no professional engagement or controller restart is implied.
+
+Pre-execution audit verified the current main branch and all sixteen active
+coverage rows. The mirror identity is `ping_an-2019-interim_h1`; its source
+metadata has no official article ID. The other fifteen retain article IDs.
+The archive has 86 `articleList` wrappers with fields under `content`. Preserve
+missing article `publishDate` separately from null response `publishDate`;
+`readTimes` is a counter, not a date. Protocol-relative attachment links may
+be prefixed with `https:` for comparison; do not otherwise rewrite URLs.
+The current resolver explicitly maps `createDate` to `archive_created_at`.
+Prior Ping An result notes concern accounting adoption, not these archive
+fields. This scoped inquiry therefore survives the duplicate-work audit.
+No selected PDF is replaced and no inferred timestamp is admitted. Record
+all sixteen dispositions even if the mirror cannot be linked. Field-format
+checks are engineering checks; official timezone/semantics documentation would
+be necessary for stronger chronological interpretation. No budget ladder,
+scientific ranking or stochastic inference is involved.

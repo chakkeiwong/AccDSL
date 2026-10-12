@@ -936,5 +936,19 @@ no new acquisition, event, package-gap discovery or manuscript repair claimed.
 MC01/03/05/28/30/33–35; G11/G13. Full visual equivalence, package semantics
 and historical unchanged-byte availability remain open. Version 2.50, the
 frozen 56/136 assessment, 35 supplemental declarations and not_ready remain.
-Next: [Ping An archive fields](accounting-pingan-archive-fields-20261013.md),
-a distinct attachment/clock inquiry after checking prior result coverage.
+The distinct [Ping An archive inquiry](accounting-pingan-archive-fields-20261013.md)
+has since been completed; the following entry records its result.
+
+## E01 Ping An archive fields, 13 October 2026
+
+The [source inquiry](../../data/accounting-master/pingan-archive-fields-20261013/result.md)
+binds fifteen of sixteen selected reports to exact archive attachment URLs.
+The 2019 interim ASBE mirror remains separate. All 123 source checks pass.
+Raw `creDate`, `createDate`, `updateDate`, empty timing fields and missing/null
+publication fields remain distinct. No timezone or publication semantics is
+inferred; this adds no accepted publication date or historical-byte admission.
+
+MC01/03/05/28/30/33–35; G13. Version 2.50, 35 supplemental declarations,
+the frozen 56/136 assessment and not_ready remain. Next inspect the
+[two retained 2019 issuer-source leads](accounting-pingan-2019-counterparts-20261013.md)
+before deciding whether either is an ASBE counterpart to the selected mirror.

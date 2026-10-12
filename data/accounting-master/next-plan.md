@@ -17,10 +17,13 @@ open. No new manuscript version is needed for these source supplements.
 The JPMorgan revalidation adds a 285-page text comparison (40 source checks),
 not new filings: all 32 events and four full 10-Ks were already retained.
 Result: data/accounting-master/jpmorgan-filing-events-20261013/result.md.
-Execute docs/plans/accounting-pingan-archive-fields-20261013.md next. Bind the
-sixteen selected reports to archive attachments and preserve raw create/update
-fields. The 2019 interim source uses a public mirror; do not substitute a
-same-period file. Output: data/accounting-master/pingan-archive-fields-20261013/.
+The Ping An archive inquiry is complete: fifteen exact attachment links and
+one distinct-source disposition; 123 checks; no new publication dates.
+Result: data/accounting-master/pingan-archive-fields-20261013/result.md.
+Execute docs/plans/accounting-pingan-2019-counterparts-20261013.md next:
+inspect two retained issuer-source leads for their actual report identity,
+accounting basis and relation to the selected 2019 ASBE mirror. Bounded output:
+data/accounting-master/pingan-2019-counterparts-20261013/.
 The other discovery candidates remain under publication-frontier-20261013;
 no unreviewed hit is admitted and no unchanged blocked route should be retried.
 Check completed result records before scheduling another acquisition.

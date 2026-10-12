@@ -31,11 +31,16 @@ events. The [four full 10-Ks](../../data/accounting-master/jpmorgan-complete-fil
 and [bounded semantics](../../data/accounting-master/accounting-package-semantic-annotation-20261011/result.md)
 are also complete within scope. Do not schedule their acquisition again.
 
-Next execute the [Ping An archive inquiry](accounting-pingan-archive-fields-20261013.md):
-bind the sixteen selected reports to attachment records and preserve the raw
-archive clocks. Undocumented create/update fields do not establish publication.
-The completed discovery's other source candidates remain available; unreviewed
-hits are not date evidence. Check completed result records before choosing work.
+The [Ping An archive inquiry](../../data/accounting-master/pingan-archive-fields-20261013/result.md)
+now binds fifteen reports to exact archive attachment URLs and preserves the
+2019 ASBE mirror as a distinct source. All 123 checks pass. `createDate`,
+`creDate` and `updateDate` differ; article publication fields and timezones are
+absent. This adds no accepted dates.
+
+Next inspect the [two retained 2019 issuer-source leads](accounting-pingan-2019-counterparts-20261013.md)
+for a source-supported relation to the ASBE mirror. Verify actual basis and
+content before accepting a counterpart. Check completed result records before
+choosing work; unreviewed hits and undocumented clocks are not date evidence.
 
 ## Remaining proposal phases
 
@@ -54,7 +59,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
-| E01 / C02–C03 — Real package and chronology | Inspect Ping An archive fields and continue distinct date leads; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
+| E01 / C02–C03 — Real package and chronology | Inspect the two retained Ping An 2019 issuer leads and continue distinct date leads; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Genuine source conflict | Select a different documented comparison from retained sources; check identity, precision, basis and revision context | An actually incompatible same-context pair and a reproducible admission, alternatives and dependent-result invalidation example. Do not repeat the closed 290-equal-pair search or manufacture a conflict |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Recover the four blocked technical sources through new routes; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked |

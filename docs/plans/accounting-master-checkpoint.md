@@ -16,6 +16,12 @@ This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
 
+The [Ping An archive inquiry](../../data/accounting-master/pingan-archive-fields-20261013/result.md)
+binds fifteen selected reports to exact archive attachment URLs and keeps the
+2019 ASBE mirror separate. All 123 checks pass. Distinct create/update fields,
+missing article publication fields and unknown timezones remain explicit;
+this inquiry adds no publication dates.
+
 The [JPMorgan revalidation](../../data/accounting-master/jpmorgan-filing-events-20261013/result.md)
 compares 285 shared 2025 filing/wrapper pages: 284 text layers agree exactly;
 the contents page differs only by the wrapper's omission note. Forty source
@@ -40,10 +46,10 @@ availability follows, and Version 2.50 remains current.
 
 ## Exact next action
 
-Execute the [Ping An archive inquiry](accounting-pingan-archive-fields-20261013.md).
-Bind all sixteen selected reports to retained archive attachment records where
-possible; preserve distinct create/update fields without inferring publication.
-The 2019 interim source is a public mirror and needs a separate disposition.
+Inspect the [two 2019 Ping An issuer-source leads](accounting-pingan-2019-counterparts-20261013.md).
+Check issuer/period, preparation basis and relation to the selected ASBE mirror.
+Both are retained discovery candidates without a recorded acquisition attempt.
+Use bounded requests and preserve wrong-basis or inaccessible dispositions.
 Check prior completed evidence before selecting another source action.
 
 ## Remaining program and controls
