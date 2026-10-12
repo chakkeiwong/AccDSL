@@ -1,0 +1,29 @@
+Token syntax and cell geometry require separate checks too. In the inspected
+author version of OTSL, \citet[Sections 4.1--4.3]{lysak2023otsl} use five
+tokens: C starts a cell, L joins the cell to its left, U joins the cell above,
+X joins both, and NL ends a row. Neighbor restrictions and equal row lengths
+allow invalid tokens to be detected during generation. The authors explicitly
+distinguish a syntactically valid sequence from a correct prediction.
+
+Even those local rules need a further condition to ensure rectangular merged
+cells. Consider two rows, \code{C L NL} followed by \code{U C NL}. The L has
+C to its left, the U has C above, and the first-row, first-column and
+equal-length rules are satisfied; no X occurs. Yet the first cell joins the
+top-left, top-right and bottom-left positions, leaving the bottom-right
+position to the second C. It is L-shaped. Representing it with both a two-row
+and a two-column HTML span would also occupy the second cell's position.
+This finite example shows why the six printed rules alone do not establish a
+nonoverlapping partition into rectangular cells. The proposed adapter checks
+that each merged cell occupies a complete rectangle, that cells do not overlap,
+and that every declared grid position belongs to a cell. Passing those checks
+still leaves correspondence with the source table to be established.
+
+The later decoder needs its own verification. In the retained 4.0.2 source,
+a correction described as applying to the first row uses a row counter that
+is initialized to zero and never updated. It therefore also rewrites an
+affected token on later rows \citep{tableformerconsumer2026}. This is a
+specific source-code defect relative to that stated scope; its frequency and
+effect on actual model predictions have not been measured. Neither the paper's
+syntax argument nor these partial corrections establish that a deployed
+converter enforces all the proposed checks.
+

@@ -1,9 +1,9 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **182-page Version 2.45**.
-PDF: docs/design/proposal/manuscript-tableformer-20261012/accounting-product-proposal.pdf
-SHA256: 0604999145379f9a2f1bffba8af039a066f15a20bfe3dd40a0e90a0d2baf4887
-Result: data/accounting-master/tableformer-integration-20261012/result.md
+12 October 2026. Current candidate: **183-page Version 2.46**.
+PDF: docs/design/proposal/manuscript-otsl-20261012/accounting-product-proposal.pdf
+SHA256: b13be68b6c5de2027f9f7a773dee70361feedb2c4b46a65bf81836e98418513e
+Result: data/accounting-master/otsl-integration-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Latest Method 1 rule-history inquiry
@@ -21,14 +21,26 @@ Result: `data/accounting-master/bank-method1-rule-history-20261012/result.md`.
 
 ## Completed boundary
 
+Version 2.46 explains token syntax versus rectangular merged-cell geometry
+on PDF 150, using the checked two-by-two counterexample and the specific
+later-decoder source defect. All 127 integration checks pass; all 48 displays,
+92 earlier references and prior prose remain, with one reference added.
+Eight final pages were inspected and the build is clean. The source inquiry
+passed 50 checks. Published-version equivalence, actual prediction effects,
+runtime compatibility and independent/human acceptance remain open.
+Full readiness stays not_ready. E01/E05/E07/E08/E14 remain open.
+Result: `data/accounting-master/otsl-integration-20261012/result.md`.
+
+## Preserved Version 2.45 TableFormer explanation
+
 Version 2.45 explains TableFormer's predicted structure, externally supplied
 text and Table 4 score boundary on PDF 54–55, and adds traceable text matching
 and correction requirements on PDF 150. All 135 integration checks pass;
 48 displays and 89 prior references remain, with three references added.
 Eleven final pages were inspected and the build is clean. The original paper
 and supplement inquiry passed 60 checks. Checkpoint equivalence, downstream
-performance, the exact tokenization follow-up and independent/human acceptance
-remain open. Full readiness stays not_ready.
+performance and independent/human acceptance remain open. The exact
+tokenization follow-up is now inspected and integrated in Version 2.46. Full readiness stays not_ready.
 Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
 
 ## Preserved Version 2.44 score-rounding explanation
@@ -210,7 +222,7 @@ The six printed rules accept a 2×2 sequence whose merge meanings create an
 L-shaped cell, so they do not ensure rectangular merged-cell geometry. The
 later source's first-line counter remains zero; runtime occurrence is untested.
 These are specific claim/code limits, not rejection of the token language or
-reported experiments. Add explicit geometry validation in Version 2.46.
+reported experiments. Version 2.46 now explains the extra geometry requirement.
 Published full-text equivalence, checkpoint transfer and wider source/runtime
 acceptance remain open. E01/E05/E07/E08/E14 and not_ready remain.
 Result: `data/accounting-master/otsl-paper-20261012/result.md`.
@@ -224,17 +236,20 @@ evaluation. Cell text comes from PDF/OCR inputs; matching can change structure.
 The retained 4.0.2 consumer uses later OTSL tokens, so release/checkpoint score
 transfer remains unsupported. Crossref pagination and the printed loss/prose
 ambiguity are preserved. Thirty-nine references have dispositions; Docling
-reference 9 identifies the exact 2023 tokenization follow-up, still unread.
+reference 9 identifies the exact 2023 tokenization follow-up, now inspected
+in the separate OTSL inquiry.
 Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Integrate the checked OTSL syntax/geometry distinction and specific later-code
-verification boundary in a separate Version 2.46. Preserve Version 2.45 and
-all old content, then rotate to another concrete workstream. Plan:
-`docs/plans/accounting-otsl-integration-20261012.md`.
+Seek the exact Apple 5 November 2018 indenture, incorporated as annual
+Exhibit 4.19 from S-3 accession 0001193125-18-317844, through a new public
+contract-index source. Distinguish mirror identity from official-byte
+equivalence; do not retry the failed SEC or EDGAR Online routes. Preserve
+Version 2.46 and the frozen forty-target frontier. Plan:
+`docs/plans/accounting-apple-2018-indenture-source-20261012.md`.
 
 ## Latest ASBE 25 access result
 

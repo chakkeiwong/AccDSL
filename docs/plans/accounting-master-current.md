@@ -4,7 +4,8 @@ Status reconciled on 12 October 2026 (Asia/Hong_Kong), following the user's
 request for the current program, its freshness and the remaining phases.
 The 12 October refresh reconciles the current candidate, completed source
 units and next actions against the controlling MC01–MC35/G1–G18 obligations.
-Version 2.45 adds the TableFormer text/structure/score distinction and adapter evidence.
+Version 2.46 adds the token-syntax/cell-geometry distinction and decoder source finding.
+Version 2.45 preserves the TableFormer text/structure/score distinction and adapter evidence.
 Version 2.44 preserves the attributed score-rounding explanation and proposal boundary.
 Version 2.43 preserves Method 1 inputs, reporting precision and denominator dates.
 Version 2.42 preserves capital eligibility and deductions.
@@ -20,24 +21,24 @@ remain current. Prior control bytes are preserved in each unit's
 `pointers-before/`; frozen assessments and controller state are not rewritten.
 
 The active objective is to finish the governing accounting product-and-method
-proposal. The current manuscript is the **182-page Version 2.45**, and full
+proposal. The current manuscript is the **183-page Version 2.46**, and full
 proposal readiness remains **not_ready**. Direct internal preparation continues;
 product implementation and the former background controller are held.
 
 Current candidate SHA256:
-`0604999145379f9a2f1bffba8af039a066f15a20bfe3dd40a0e90a0d2baf4887`.
+`b13be68b6c5de2027f9f7a773dee70361feedb2c4b46a65bf81836e98418513e`.
 
 ## Which records are current?
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.45 and the TableFormer inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.45 integrated; OTSL inquiry complete; next unit integrates geometry validation |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.46 and the OTSL inquiry; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.46 integrated; next unit seeks the exact Apple 2018 indenture through a new source |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
-| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.45 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
+| [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.46 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
 | [Original master program](accounting-master-program.md) | Historical controller/campaign plan, not an up-to-date resume instruction; its P16-resume language and campaign scheduling predate direct P16–P19 completion and later repairs |
-| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.45 outputs |
+| [Executable phase catalog](../../scripts/accounting_master_catalog.json) | Retains proposal phases P15–P19 and held P00–P14. It does not encode the later C01–C08 continuation or Version 2.46 outputs |
 | [Controller state](../../data/accounting-master/state.json) | Historical stopped state: P16 is `budget_deferred`, P17–P19 `pending`. These are not current direct-work statuses |
 | [P19 readiness assessment](../../data/accounting-master/deliverables/P19/readiness.json) | Preserved negative assessment dated 7 October; its five remaining blocker IDs still agree with the current checkpoint, but its evidence snapshot predates later repairs |
 
@@ -53,7 +54,7 @@ run that did not happen.
 | P15 | Requirements, gaps and alternatives audit | Audit delivered. Its historical status is not whole-proposal acceptance; requirement and evidence gaps continue to be maintained |
 | P16 | Whole-product architecture and initial-profile design | Scoped architecture specified and reviewed through direct work; it is a design, not an implemented product |
 | P17 | Accounting, sector, research and inference methods | Method specifications and worked examples delivered; applicable authority, real-case and literature obligations remain and are being repaired |
-| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.45; further substantive repairs still require integration and inspection |
+| P18 | Integrate, build and inspect the manuscript | Bounded integration delivered through Version 2.46; further substantive repairs still require integration and inspection |
 | P19 | Assess full proposal readiness | Assessment completed with a **negative** verdict. A fresh assessment remains necessary after the substantive blockers are repaired |
 
 P19's completion means that an assessment was produced, not that the proposal
@@ -64,7 +65,7 @@ controller's ledger is stale.
 
 ## Refresh audit and continuation rule
 
-The current baseline is Version 2.44; Version 2.37 and the superseded 2.36
+The current baseline is Version 2.46; Version 2.37 and the superseded 2.36
 entity-label evidence remain protected. The stopped controller is historical. Source and closeout check counts are
 engineering evidence; they are not promotion criteria for accounting validity,
 selected-file availability, human readability or whole-proposal acceptance.
@@ -79,7 +80,7 @@ succeeded on 12 October under the user's explicit commit request. The earlier
 blanket Git-blocker statement is superseded; preserve unrelated staged work
 and use the trusted path for authorized writes.
 
-## Current Version 2.44 score-rounding explanation
+## Preserved Version 2.44 score-rounding explanation
 
 Version 2.44 attributes the Board's nearest-basis-point score-rounding
 explanation and keeps the 2026 proposed changes separate on PDF 118–119.
@@ -189,7 +190,19 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
-## Current Version 2.45 TableFormer explanation
+## Current Version 2.46 token syntax and cell geometry
+
+Version 2.46 explains token syntax versus rectangular merged-cell geometry
+on PDF 150, using the checked two-by-two counterexample and the specific
+later-decoder source defect. All 127 integration checks pass; all 48 displays,
+92 earlier references and prior prose remain, with one reference added.
+Eight final pages were inspected and the build is clean. The source inquiry
+passed 50 checks. Published-version equivalence, actual prediction effects,
+runtime compatibility and independent/human acceptance remain open.
+Full readiness stays not_ready. E01/E05/E07/E08/E14 remain open.
+Result: `data/accounting-master/otsl-integration-20261012/result.md`.
+
+## Preserved Version 2.45 TableFormer explanation
 
 Version 2.45 explains TableFormer's predicted structure, externally supplied
 text and Table 4 score boundary on PDF 54–55, and adds traceable text matching
@@ -197,8 +210,8 @@ and correction requirements on PDF 150. All 135 integration checks pass;
 48 displays and 89 prior references remain, with three references added.
 Eleven final pages were inspected and the build is clean. The original paper
 and supplement inquiry passed 60 checks. Checkpoint equivalence, downstream
-performance, the exact tokenization follow-up and independent/human acceptance
-remain open. Full readiness stays not_ready.
+performance and independent/human acceptance remain open. The exact
+tokenization follow-up is now inspected and integrated in Version 2.46. Full readiness stays not_ready.
 Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
 
 ## Latest OTSL source inquiry
@@ -209,7 +222,7 @@ The six printed rules accept a 2×2 sequence whose merge meanings create an
 L-shaped cell, so they do not ensure rectangular merged-cell geometry. The
 later source's first-line counter remains zero; runtime occurrence is untested.
 These are specific claim/code limits, not rejection of the token language or
-reported experiments. Add explicit geometry validation in Version 2.46.
+reported experiments. Version 2.46 now explains the extra geometry requirement.
 Published full-text equivalence, checkpoint transfer and wider source/runtime
 acceptance remain open. E01/E05/E07/E08/E14 and not_ready remain.
 Result: `data/accounting-master/otsl-paper-20261012/result.md`.
@@ -223,17 +236,20 @@ evaluation. Cell text comes from PDF/OCR inputs; matching can change structure.
 The retained 4.0.2 consumer uses later OTSL tokens, so release/checkpoint score
 transfer remains unsupported. Crossref pagination and the printed loss/prose
 ambiguity are preserved. Thirty-nine references have dispositions; Docling
-reference 9 identifies the exact 2023 tokenization follow-up, still unread.
+reference 9 identifies the exact 2023 tokenization follow-up, now inspected
+in the separate OTSL inquiry.
 Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Exact next action
 
-Integrate the checked OTSL syntax/geometry distinction and specific later-code
-verification boundary in a separate Version 2.46. Preserve Version 2.45 and
-all old content, then rotate to another concrete workstream. Plan:
-`docs/plans/accounting-otsl-integration-20261012.md`.
+Seek the exact Apple 5 November 2018 indenture, incorporated as annual
+Exhibit 4.19 from S-3 accession 0001193125-18-317844, through a new public
+contract-index source. Distinguish mirror identity from official-byte
+equivalence; do not retry the failed SEC or EDGAR Online routes. Preserve
+Version 2.46 and the frozen forty-target frontier. Plan:
+`docs/plans/accounting-apple-2018-indenture-source-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -525,8 +541,8 @@ the G1–G18 map below preserves the other residual obligations.
 | E01 — Real filing-package coverage | Apple annual/interim work, all 70 known exhibit rows disposed, 26 targets located, selected assertions across 23 notes; complete bounded revenue, lease/purchase, inventory/PP&E, tax, EPS/ownership, debt, liquidity, segment, Note 1/perimeter, legal, pronouncement, regulation and all 28 Item 1A annual risk readings; retained Exhibit 21.1 and selected dependencies; bounded taxonomy-reference resolution; 502-record Chapter 2 crosswalk and Version 2.24 service-access bridge | Resolve 40 outstanding exhibit targets and relevant recursion; extend material narrative/query coverage and obtain actual facts. Annual retention is 28 complete/0 partial/0 unworked and interim 2 complete. The declared 19-unit crosswalk is complete at author level; independent interpretation acceptance remains open |
 | E05 — Genuine source conflict | A bounded 31-statement comparison found 290 equal matched pairs; extraction corrections and exclusions are explicit | Find a genuinely incompatible same-context pair, check precision/version/basis, and demonstrate admission, alternatives and dependent-result invalidation. Do not manufacture a conflict or repeat the unchanged completed search |
 | E07 — Accounting authority and methods | Scoped financing/bank/insurance methods; ASBE lease/tax and selected ASBE 22/25 provisions; PAA/long-tail claim; official 2025 adoption explanation and a checked Ping An original/restated-history example; primary national-bank dividend conditions, Version 2.40 timing, Version 2.41 income/table case and Version 2.42 capital reconciliation | Directly verify operative notices and exact later conditions; establish applicable amendment chains and actual facts; work remaining financing, bank and insurance consequences. The explanation and issuer example are delivered within scope |
-| E08 — Literature and proposal support | Retained technical-source review and ledgers; latest Caiani access evidence and six forward metadata dispositions | Recover and technically inspect blocked sources where feasible; complete relevant competitor, backward/forward, version/correction and omission work. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain blocked |
-| E14 — Reusable tools and interfaces | Bounded taxonomy graph, pinned Arelle source inspection, proposed exchanges and selected terms; Docling source-pinned page/timeout/placeholder exchanges and Version 2.25; 27-member component-notice matrix; Version 2.26 model/backend paths, 25 new source bodies and 93 checks; two model repository identities, seven text bodies and 40 metadata checks; TableFormer 4.0.2 source/consumer audit and 32 checks; EasyOCR 1.7.2 source/asset audit and 46 checks; CRAFT/English authority inquiry and 27 checks | Complete broader interface/failure examples, exact dependency/model records, applicable historical/component terms and distribution conditions. Source inspection and fragments do not establish runtime compatibility |
+| E08 — Literature and proposal support | Retained technical-source review and ledgers; Caiani access evidence and six forward metadata dispositions; complete 2022 TableFormer main/supplement inspection (60 checks), exact OTSL arXiv v1 inspection (50 checks), and Version 2.45/2.46 method/score/geometry explanations | Recover and technically inspect blocked sources where feasible; complete relevant competitor, backward/forward, version/correction and omission work. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain blocked |
+| E14 — Reusable tools and interfaces | Bounded taxonomy graph, pinned Arelle source inspection, proposed exchanges and selected terms; Docling source-pinned page/timeout/placeholder exchanges and Version 2.25; 27-member component-notice matrix; Version 2.26 model/backend paths, 25 new source bodies and 93 checks; two model repository identities, seven text bodies and 40 metadata checks; TableFormer 4.0.2 source/consumer audit and 32 checks; later matching, geometry and constant-counter findings with explicit runtime limits; EasyOCR 1.7.2 source/asset audit and 46 checks; CRAFT/English authority inquiry and 27 checks | Complete broader interface/failure examples, exact dependency/model records, applicable historical/component terms and distribution conditions. Source inspection and fragments do not establish runtime compatibility |
 
 In the [continuation plan](accounting-continuation-audit-20261007.md), these
 correspond to C02/C03, C04, C05, C06 and C07. C01 preservation is established;
@@ -541,10 +557,10 @@ must distinguish unit completion from the wider acceptance obligation.
 
 | Workstream | Next useful deliverable | Evidence required for wider completion |
 | --- | --- | --- |
-| E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
+| E01 / C02–C03 | Seek the exact 5 November 2018 Apple indenture through a new public source, preserving mirror/official identity limits. Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; the frontier review selects independent TableFormer literature/consumer work next. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
-| E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; the exact tokenization follow-up is now inspected (50 checks); integrate the syntax/geometry distinction and match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; TableFormer/OTSL preparation and Version 2.45/2.46 integration are complete; the next rotation seeks the exact Apple 2018 debt contract. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; the exact tokenization follow-up is now inspected (50 checks); Version 2.46 integrates the syntax/geometry distinction. Match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
 The completed legal unit reads all four matter bodies in both filings and
@@ -642,8 +658,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: integrate the checked OTSL syntax/geometry
-   distinction in Version 2.46, then rotate to another concrete workstream.
+1. Follow the direct next plan: seek the exact Apple 2018 indenture through
+   a new public source after the completed Version 2.46 integration.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo

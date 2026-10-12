@@ -12,7 +12,7 @@ The six printed rules accept a 2×2 sequence whose merge meanings create an
 L-shaped cell, so they do not ensure rectangular merged-cell geometry. The
 later source's first-line counter remains zero; runtime occurrence is untested.
 These are specific claim/code limits, not rejection of the token language or
-reported experiments. Add explicit geometry validation in Version 2.46.
+reported experiments. Version 2.46 now explains the extra geometry requirement.
 Published full-text equivalence, checkpoint transfer and wider source/runtime
 acceptance remain open. E01/E05/E07/E08/E14 and not_ready remain.
 Result: `data/accounting-master/otsl-paper-20261012/result.md`.
@@ -26,12 +26,26 @@ evaluation. Cell text comes from PDF/OCR inputs; matching can change structure.
 The retained 4.0.2 consumer uses later OTSL tokens, so release/checkpoint score
 transfer remains unsupported. Crossref pagination and the printed loss/prose
 ambiguity are preserved. Thirty-nine references have dispositions; Docling
-reference 9 identifies the exact 2023 tokenization follow-up, still unread.
+reference 9 identifies the exact 2023 tokenization follow-up, now inspected
+in the separate OTSL inquiry.
 Version 2.45 now integrates these material boundaries. The frozen 56/136
 date split, forty exhibits and E01/E05/E07/E08/E14 remain open; not_ready stays.
 Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
-## Current Version 2.45 TableFormer explanation
+## Current Version 2.46 token syntax and cell geometry
+
+E08/C06, E14/C07, P18; MC23/25/29–35, G8/G9/G10/G18.
+Version 2.46 explains token syntax versus rectangular merged-cell geometry
+on PDF 150, using the checked two-by-two counterexample and the specific
+later-decoder source defect. All 127 integration checks pass; all 48 displays,
+92 earlier references and prior prose remain, with one reference added.
+Eight final pages were inspected and the build is clean. The source inquiry
+passed 50 checks. Published-version equivalence, actual prediction effects,
+runtime compatibility and independent/human acceptance remain open.
+Full readiness stays not_ready. E01/E05/E07/E08/E14 remain open.
+Result: `data/accounting-master/otsl-integration-20261012/result.md`.
+
+## Preserved Version 2.45 TableFormer explanation
 
 E08/C06, E14/C07, P18; MC23/25/29–35, G8/G9/G10/G18.
 Version 2.45 explains TableFormer's predicted structure, externally supplied
@@ -40,8 +54,8 @@ and correction requirements on PDF 150. All 135 integration checks pass;
 48 displays and 89 prior references remain, with three references added.
 Eleven final pages were inspected and the build is clean. The original paper
 and supplement inquiry passed 60 checks. Checkpoint equivalence, downstream
-performance, the exact tokenization follow-up and independent/human acceptance
-remain open. Full readiness stays not_ready.
+performance and independent/human acceptance remain open. The exact
+tokenization follow-up is now inspected and integrated in Version 2.46. Full readiness stays not_ready.
 Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
 
 ## Preserved Version 2.44 score-rounding explanation
