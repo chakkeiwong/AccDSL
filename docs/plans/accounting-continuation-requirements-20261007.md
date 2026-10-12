@@ -923,3 +923,18 @@ remains not_ready.
 MC01/03/05/15/16/21/28/30/33–35; G4/G5/G7/G11/G13/G18.
 The local Exhibit 21/22.2 bodies are read, while operative instruments,
 actual ownership/amounts and independent acceptance remain open.
+
+## E01 JPMorgan source revalidation, 13 October 2026
+
+The [bounded revalidation](../../data/accounting-master/jpmorgan-filing-events-20261013/result.md)
+adds an exact comparison of 285 shared pages: 284 agree; the contents page
+differs only by the annual wrapper omission note. Forty source checks pass.
+All 32 filing events and four full 2022–2025 10-Ks were already retained on
+11 October. The repeated request is recorded as redundant revalidation, with
+no new acquisition, event, package-gap discovery or manuscript repair claimed.
+
+MC01/03/05/28/30/33–35; G11/G13. Full visual equivalence, package semantics
+and historical unchanged-byte availability remain open. Version 2.50, the
+frozen 56/136 assessment, 35 supplemental declarations and not_ready remain.
+Next: [Ping An archive fields](accounting-pingan-archive-fields-20261013.md),
+a distinct attachment/clock inquiry after checking prior result coverage.

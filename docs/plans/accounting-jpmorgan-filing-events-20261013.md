@@ -1,4 +1,4 @@
-# Bind two retained JPMorgan filing events to their report contexts
+# Revalidate JPMorgan sources and compare the shared 2025 text
 
 13 October 2026. P17; E01/C03; MC01/03/05/28/30/33–35; G13.
 
@@ -37,3 +37,48 @@ Evidence: `data/accounting-master/jpmorgan-filing-events-20261013/`.
 Record actual commands, source hashes, inspected pages, results and next source
 frontier. Check count is engineering evidence only. No runtime campaign,
 forecast validity, professional engagement or manuscript increment is implied.
+
+Pre-run context finding: the annual wrapper is abridged, rather than a complete
+embedded 10-K. PDF 75 explicitly excludes Form 10-K pages 1–42 and 328, and
+PDF 49 has a chairman's letter dated 6 April 2026. Record the missing-page
+obligation and do not equate the selected wrapper with the original February
+filing. Inspect those two pages and the Q3 cover/signature (PDF 1/207).
+The Q3 PDF has 358 pages, including exhibits after its numbered main filing;
+do not truncate its source identity to the financial-statement portion.
+
+The retained issuer earnings feed supplies a distinct, exact primary-document
+lead: its 2025/4th-quarter `tenkDoc` item is titled “2025 10-K” and links to
+`/content/dam/jpmc/jpmorgan-chase-and-co/investor-relations/documents/quarterly-earnings/2025/4th-quarter/corp-10k-2025.pdf`.
+After preserving the event rows, acquire that single official URL with a
+bounded 60-second request and record response headers, return code, content
+type, bytes and hash. The timeout is a convenience ceiling for one source
+request, not scientific evidence. Inspect the cover, contents and signature
+to assess whether the omitted pages have been acquired. Identity or non-PDF
+failure blocks acquisition acceptance; record the failure and continue other
+ready preparation. Acquiring the missing source does not complete semantic
+reading of all 43 omitted pages or all exhibits. This extension answers the
+newly observed package-coverage defect without changing the research target,
+frozen corpus or user-authorized internal scope. Audit passes under that limit.
+
+Acquisition returned a 410-page PDF. Its numbered pages are offset by two PDF
+pages; inspect PDF 1, 2, 3 and 330 (cover, index, business opening, signature).
+The annual wrapper's printed 43–327 corresponds to PDF 75–359; compare that
+285-page text-layer sequence to full-10K PDF 45–329. Exact text agreement is an
+explanatory identity diagnostic for the shared section only, not proof of
+historical file availability, visual equivalence or full semantic acceptance.
+Retain differing pages for inspection instead of coercing equality.
+
+## Baseline correction after inspecting the cumulative records
+
+The initial next-action choice was stale. The 11 October
+`jpmorgan-filing-events-20261011` result already identifies all 32 filing
+events, and `jpmorgan-complete-filings-20261011` already retained all four
+2022–2025 full-10K counterparts. The repeated 2025 download has exactly the
+same SHA256. Package ledger, section map and a 40-assertion semantic supplement
+also exist. Version 2.50 already explains the omitted-page distinction.
+Preserve this redundant request and its timing honestly as revalidation; do not
+claim a new source acquisition, new event, newly discovered gap or manuscript
+repair. The additional bounded result here is the exact 285-page text-layer
+comparison, including the single omission-note difference. Verify prior event
+equality and prior full-PDF identity before closure. Add these completed units
+to the concise master so they cannot become the next action again.

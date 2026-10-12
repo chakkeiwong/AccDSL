@@ -16,6 +16,13 @@ This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
 
+The [JPMorgan revalidation](../../data/accounting-master/jpmorgan-filing-events-20261013/result.md)
+compares 285 shared 2025 filing/wrapper pages: 284 text layers agree exactly;
+the contents page differs only by the wrapper's omission note. Forty source
+checks pass. All 32 filing events and four complete 2022–2025 filings were
+already retained on 11 October; this adds no acquisition or filing event.
+The current master now links those completed units to prevent repeated work.
+
 The [publication frontier](../../data/accounting-master/publication-frontier-20261013/result.md)
 adds nineteen report-specific date declarations: sixteen Henkel reports and
 HSBC's 2023–2025 annual reports. Twenty page images were read; 110 source
@@ -33,12 +40,11 @@ availability follows, and Version 2.50 remains current.
 
 ## Exact next action
 
-Execute [JPMorgan filing-event preparation](accounting-jpmorgan-filing-events-20261013.md)
-for the two active-panel periods present in the retained official SEC response:
-2025 annual and Q3. Bind form, period, accession, filing and acceptance times;
-inspect the annual wrapper/embedded filing and Q3 cover separately. Older
-shard metadata is a source lead, not inspected evidence. Continue the saved
-publication search frontier when another candidate can be resolved.
+Execute the [Ping An archive inquiry](accounting-pingan-archive-fields-20261013.md).
+Bind all sixteen selected reports to retained archive attachment records where
+possible; preserve distinct create/update fields without inferring publication.
+The 2019 interim source is a public mirror and needs a separate disposition.
+Check prior completed evidence before selecting another source action.
 
 ## Remaining program and controls
 

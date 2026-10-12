@@ -14,12 +14,16 @@ supplemental issuer declarations; 101 lack accepted declarations in these
 inquiries. Independent unchanged-byte history and intraday availability remain
 open. No new manuscript version is needed for these source supplements.
 
-Execute docs/plans/accounting-jpmorgan-filing-events-20261013.md next. The
-retained official SEC response contains the 2025 annual and Q3 filing events.
-Bind accession/form/period/filing/acceptance separately and inspect selected
-PDF context. Output: data/accounting-master/jpmorgan-filing-events-20261013/.
+The JPMorgan revalidation adds a 285-page text comparison (40 source checks),
+not new filings: all 32 events and four full 10-Ks were already retained.
+Result: data/accounting-master/jpmorgan-filing-events-20261013/result.md.
+Execute docs/plans/accounting-pingan-archive-fields-20261013.md next. Bind the
+sixteen selected reports to archive attachments and preserve raw create/update
+fields. The 2019 interim source uses a public mirror; do not substitute a
+same-period file. Output: data/accounting-master/pingan-archive-fields-20261013/.
 The other discovery candidates remain under publication-frontier-20261013;
 no unreviewed hit is admitted and no unchanged blocked route should be retried.
+Check completed result records before scheduling another acquisition.
 
 Continue ready E01/E05/E07/E08/E14 preparation; integrate material results under
 P18 and reassess P19 after substantive repairs. All MC01–MC35/G1–G18 remain.
