@@ -6,15 +6,28 @@ SHA256: 47516cce310d21b716e5226fd159a173985f58da0528909706b6c182842fd068
 Result: data/accounting-master/bank-reporting-integration-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
+## Latest Method 1 rule-history inquiry
+
+The bounded inquiry passes 63 checks over 13 condition groups and 24
+denominator matches. Nine selected renders were inspected. The Board's 2026
+proposal describes existing nearest-basis-point rounding with halves up;
+the older exact passage is 49084 n22, in the 2015 preamble's proposal recap.
+This locates an official explanation without establishing a codified explicit
+clause or the complete current amendment chain. Proposed averaging, FX,
+indicator and Method 2 ceiling changes stay separate. A bounded search found
+no final record; it does not prove absence of a final action. Version 2.43
+remains protected and readiness remains not_ready.
+Result: `data/accounting-master/bank-method1-rule-history-20261012/result.md`.
+
 ## Completed boundary
 
 Version 2.43 adds the Method 1 input, denominator-vintage, reporting-precision
 and information-date explanation on final PDF 118–119. All 125 integration
 checks pass; all 48 displays and 82 prior references remain, with five
 references added. Eight final pages were inspected. The source inquiry passed
-56 checks and verified 24 denominator entries. Actual bank inputs, score
-rounding, reporting-rule history and independent/human/domain acceptance stay
-open. Full readiness is not_ready.
+56 checks and verified 24 denominator entries. The rule-history follow-up locates an official rounding explanation. Actual
+bank inputs, the complete reporting-rule history and independent/human/domain
+acceptance stay open. Full readiness is not_ready.
 
 Result: `data/accounting-master/bank-reporting-integration-20261012/result.md`.
 
@@ -168,10 +181,10 @@ not_ready remain. Result:
 
 ## Next bounded unit
 
-Inspect the exact official denominator-index link and March 2026 proposed
-rule, preserving proposed/final/effective status and unresolved score rounding.
-Keep the checked Version 2.43 example and source boundaries. Plan:
-`docs/plans/accounting-bank-method1-rule-history-20261012.md`.
+Integrate the official score-rounding explanation in a separate Version 2.44,
+preserving its preamble context and the proposed/operative distinction. Then
+audit all five remaining workstreams before choosing another source unit. Plan:
+`docs/plans/accounting-bank-score-rounding-integration-20261012.md`.
 
 ## Latest ASBE 25 access result
 

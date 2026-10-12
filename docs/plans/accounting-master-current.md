@@ -29,8 +29,8 @@ Current candidate SHA256:
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.43 and the reporting-source inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.43 integrated; next unit checks exact denominator/rule-history leads |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.43 and the rule-history inquiry; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.43 integrated; next unit integrates the attributed rounding explanation |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
 | [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.43 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
@@ -83,9 +83,9 @@ Version 2.43 adds the Method 1 input, denominator-vintage, reporting-precision
 and information-date explanation on final PDF 118–119. All 125 integration
 checks pass; all 48 displays and 82 prior references remain, with five
 references added. Eight final pages were inspected. The source inquiry passed
-56 checks and verified 24 denominator entries. Actual bank inputs, score
-rounding, reporting-rule history and independent/human/domain acceptance stay
-open. Full readiness is not_ready.
+56 checks and verified 24 denominator entries. The rule-history follow-up locates an official rounding explanation. Actual
+bank inputs, the complete reporting-rule history and independent/human/domain
+acceptance stay open. Full readiness is not_ready.
 
 Result: `data/accounting-master/bank-reporting-integration-20261012/result.md`.
 
@@ -151,6 +151,19 @@ difference is preserved. Actual inputs and reporting conventions remain open.
 Version 2.42 and not_ready remain unchanged. Result:
 `data/accounting-master/bank-method1-surcharge-20261012/result.md`.
 
+## Latest Method 1 rule-history inquiry
+
+The bounded inquiry passes 63 checks over 13 condition groups and 24
+denominator matches. Nine selected renders were inspected. The Board's 2026
+proposal describes existing nearest-basis-point rounding with halves up;
+the older exact passage is 49084 n22, in the 2015 preamble's proposal recap.
+This locates an official explanation without establishing a codified explicit
+clause or the complete current amendment chain. Proposed averaging, FX,
+indicator and Method 2 ceiling changes stay separate. A bounded search found
+no final record; it does not prove absence of a final action. Version 2.43
+remains protected and readiness remains not_ready.
+Result: `data/accounting-master/bank-method1-rule-history-20261012/result.md`.
+
 ## Latest Method 1 reporting source inquiry
 
 The reporting inquiry retains four publications: the current-linked FR Y-15
@@ -165,10 +178,10 @@ not_ready remain. Result:
 
 ## Exact next action
 
-Inspect the exact official denominator-index link and March 2026 proposed
-rule, preserving proposed/final/effective status and unresolved score rounding.
-Keep the checked Version 2.43 example and source boundaries. Plan:
-`docs/plans/accounting-bank-method1-rule-history-20261012.md`.
+Integrate the official score-rounding explanation in a separate Version 2.44,
+preserving its preamble context and the proposed/operative distinction. Then
+audit all five remaining workstreams before choosing another source unit. Plan:
+`docs/plans/accounting-bank-score-rounding-integration-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -478,7 +491,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | --- | --- | --- |
 | E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Expand the note-by-note assertion and query map beyond the 32 selected assertions; include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. Inspect exact denominator-index and March 2026 proposed-rule leads after Version 2.43. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry is complete; integrate its attributed rounding explanation, then refresh the wider frontier. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | Match the remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
@@ -577,8 +590,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect the exact denominator-index and
-   March 2026 proposed-rule leads after the Version 2.43 integration.
+1. Follow the direct next plan: integrate the attributed rounding explanation
+   into Version 2.44, then review all five remaining workstreams.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo

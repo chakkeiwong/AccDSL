@@ -11,11 +11,24 @@ Version 2.43 adds the Method 1 input, denominator-vintage, reporting-precision
 and information-date explanation on final PDF 118–119. All 125 integration
 checks pass; all 48 displays and 82 prior references remain, with five
 references added. Eight final pages were inspected. The source inquiry passed
-56 checks and verified 24 denominator entries. Actual bank inputs, score
-rounding, reporting-rule history and independent/human/domain acceptance stay
-open. Full readiness is not_ready.
+56 checks and verified 24 denominator entries. The rule-history follow-up locates an official rounding explanation. Actual
+bank inputs, the complete reporting-rule history and independent/human/domain
+acceptance stay open. Full readiness is not_ready.
 
 Result: `data/accounting-master/bank-reporting-integration-20261012/result.md`.
+
+## Latest Method 1 rule-history inquiry
+
+The bounded inquiry passes 63 checks over 13 condition groups and 24
+denominator matches. Nine selected renders were inspected. The Board's 2026
+proposal describes existing nearest-basis-point rounding with halves up;
+the older exact passage is 49084 n22, in the 2015 preamble's proposal recap.
+This locates an official explanation without establishing a codified explicit
+clause or the complete current amendment chain. Proposed averaging, FX,
+indicator and Method 2 ceiling changes stay separate. A bounded search found
+no final record; it does not prove absence of a final action. Version 2.43
+remains protected and readiness remains not_ready.
+Result: `data/accounting-master/bank-method1-rule-history-20261012/result.md`.
 
 ## Latest Method 1 reporting source inquiry
 
@@ -159,9 +172,8 @@ preserving all MC/G obligations. Remaining work continues P17, integrates
 material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
 the national-bank authority, Part 3 definitions and capital recognition inquiries
-are complete within scope, integrated through Version 2.43; next source work
-checks the exact denominator-index and March 2026 proposed-rule leads after
-the completed reporting integration. Human acceptance does not stop feasible internal
+are complete within scope, integrated through Version 2.43; the rule-history inquiry is complete. Next integrate its attributed
+rounding explanation, then review all five remaining workstreams. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.
