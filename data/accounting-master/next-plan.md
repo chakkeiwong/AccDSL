@@ -1,12 +1,24 @@
 # Accounting proposal — direct next plan
 
-12 October 2026. Current candidate: **179-page Version 2.42**.
-PDF: docs/design/proposal/manuscript-capital-recognition-20261012/accounting-product-proposal.pdf
-SHA256: 59c9761e5da879bbd93ebb15068eda1f436980b9340dda4b9a32a4b3f813cfce
-Result: data/accounting-master/bank-capital-recognition-20261012/result.md
+12 October 2026. Current candidate: **180-page Version 2.43**.
+PDF: docs/design/proposal/manuscript-reporting-inputs-20261012/accounting-product-proposal.pdf
+SHA256: 47516cce310d21b716e5226fd159a173985f58da0528909706b6c182842fd068
+Result: data/accounting-master/bank-reporting-integration-20261012/result.md
 Readiness: not_ready. Implementation and the old controller remain held.
 
 ## Completed boundary
+
+Version 2.43 adds the Method 1 input, denominator-vintage, reporting-precision
+and information-date explanation on final PDF 118–119. All 125 integration
+checks pass; all 48 displays and 82 prior references remain, with five
+references added. Eight final pages were inspected. The source inquiry passed
+56 checks and verified 24 denominator entries. Actual bank inputs, score
+rounding, reporting-rule history and independent/human/domain acceptance stay
+open. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-reporting-integration-20261012/result.md`.
+
+## Preserved Version 2.42 capital recognition
 
 The 179-page candidate explains instrument eligibility, Tier 2 recognition
 near maturity, asset-specific tax netting and AOCI elections on final PDF 123.
@@ -156,10 +168,10 @@ not_ready remain. Result:
 
 ## Next bounded unit
 
-Integrate the checked Method 1, reporting-precision and denominator-date
-distinctions into a separate bank-chapter candidate. Preserve Version 2.42,
-the hypothetical example and unresolved score rounding. Plan:
-`docs/plans/accounting-bank-reporting-integration-20261012.md`.
+Inspect the exact official denominator-index link and March 2026 proposed
+rule, preserving proposed/final/effective status and unresolved score rounding.
+Keep the checked Version 2.43 example and source boundaries. Plan:
+`docs/plans/accounting-bank-method1-rule-history-20261012.md`.
 
 ## Latest ASBE 25 access result
 

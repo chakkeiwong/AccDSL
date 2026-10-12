@@ -4,6 +4,19 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current Version 2.43 bank reporting inputs
+
+E07/C05 and E14/C08; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
+Version 2.43 adds the Method 1 input, denominator-vintage, reporting-precision
+and information-date explanation on final PDF 118–119. All 125 integration
+checks pass; all 48 displays and 82 prior references remain, with five
+references added. Eight final pages were inspected. The source inquiry passed
+56 checks and verified 24 denominator entries. Actual bank inputs, score
+rounding, reporting-rule history and independent/human/domain acceptance stay
+open. Full readiness is not_ready.
+
+Result: `data/accounting-master/bank-reporting-integration-20261012/result.md`.
+
 ## Latest Method 1 reporting source inquiry
 
 E07/C05; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
@@ -41,7 +54,7 @@ difference is preserved. Actual inputs and reporting conventions remain open.
 Version 2.42 and not_ready remain unchanged. Result:
 `data/accounting-master/bank-method1-surcharge-20261012/result.md`.
 
-## Current Version 2.42 capital recognition and deductions
+## Preserved Version 2.42 capital recognition and deductions
 
 E07/C05/P18; MC02–05/16/19/21/25/28/30/32–35, G4/G7/G8/G13/G18.
 The 179-page candidate explains instrument eligibility, Tier 2 recognition
@@ -146,9 +159,9 @@ preserving all MC/G obligations. Remaining work continues P17, integrates
 material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
 the national-bank authority, Part 3 definitions and capital recognition inquiries
-are complete within scope, integrated through Version 2.42; next source work
-integrates checked Method 1 reporting and denominator dates after the
-completed reporting source map. Human acceptance does not stop feasible internal
+are complete within scope, integrated through Version 2.43; next source work
+checks the exact denominator-index and March 2026 proposed-rule leads after
+the completed reporting integration. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.
