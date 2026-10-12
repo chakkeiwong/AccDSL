@@ -4,6 +4,19 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest OTSL source inquiry
+
+The identified arXiv v1 copy is fully read (14 PDF pages, ten renders); seven
+resources and relevant official 4.0.2 helpers pass 50 source/diagnostic checks.
+The six printed rules accept a 2×2 sequence whose merge meanings create an
+L-shaped cell, so they do not ensure rectangular merged-cell geometry. The
+later source's first-line counter remains zero; runtime occurrence is untested.
+These are specific claim/code limits, not rejection of the token language or
+reported experiments. Add explicit geometry validation in Version 2.46.
+Published full-text equivalence, checkpoint transfer and wider source/runtime
+acceptance remain open. E01/E05/E07/E08/E14 and not_ready remain.
+Result: `data/accounting-master/otsl-paper-20261012/result.md`.
+
 ## Latest TableFormer source inquiry
 
 The identified 2022 main paper and supplement are fully read, with twelve

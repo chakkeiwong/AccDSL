@@ -32,7 +32,7 @@ Current candidate SHA256:
 | Record | Freshness and intended use |
 | --- | --- |
 | [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.45 and the TableFormer inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.45 integrated; next unit inspects the exact OTSL tokenization paper |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Version 2.45 integrated; OTSL inquiry complete; next unit integrates geometry validation |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
 | [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.45 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
@@ -201,6 +201,19 @@ performance, the exact tokenization follow-up and independent/human acceptance
 remain open. Full readiness stays not_ready.
 Result: `data/accounting-master/tableformer-integration-20261012/result.md`.
 
+## Latest OTSL source inquiry
+
+The identified arXiv v1 copy is fully read (14 PDF pages, ten renders); seven
+resources and relevant official 4.0.2 helpers pass 50 source/diagnostic checks.
+The six printed rules accept a 2×2 sequence whose merge meanings create an
+L-shaped cell, so they do not ensure rectangular merged-cell geometry. The
+later source's first-line counter remains zero; runtime occurrence is untested.
+These are specific claim/code limits, not rejection of the token language or
+reported experiments. Add explicit geometry validation in Version 2.46.
+Published full-text equivalence, checkpoint transfer and wider source/runtime
+acceptance remain open. E01/E05/E07/E08/E14 and not_ready remain.
+Result: `data/accounting-master/otsl-paper-20261012/result.md`.
+
 ## Latest TableFormer source inquiry
 
 The identified 2022 main paper and supplement are fully read, with twelve
@@ -217,10 +230,10 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Exact next action
 
-Inspect the exact 2023 OTSL tokenization paper identified by Docling reference
-9, checking its representation, constraints and evaluation against the original
-2022 paper and retained 4.0.2 consumer. Preserve Version 2.45. Plan:
-`docs/plans/accounting-otsl-paper-20261012.md`.
+Integrate the checked OTSL syntax/geometry distinction and specific later-code
+verification boundary in a separate Version 2.46. Preserve Version 2.45 and
+all old content, then rotate to another concrete workstream. Plan:
+`docs/plans/accounting-otsl-integration-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -531,7 +544,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Extend the current 130-assertion/164-query Chapter 2 crosswalk (the earlier 32 selected assertions were a narrower population); include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
 | E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. The denominator/rule-history inquiry and Version 2.44 integration are complete; the frontier review selects independent TableFormer literature/consumer work next. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
-| E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; next inspect the exact 2023 tokenization follow-up and match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
+| E08 / C06 | The TableFormer main/supplement and paper/card/consumer comparison are complete (60 checks). Version 2.45 integrates the material findings; the exact tokenization follow-up is now inspected (50 checks); integrate the syntax/geometry distinction and match remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
 The completed legal unit reads all four matter bodies in both filings and
@@ -629,8 +642,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect the exact 2023 tokenization follow-up
-   after the checked Version 2.45 method/text/score integration.
+1. Follow the direct next plan: integrate the checked OTSL syntax/geometry
+   distinction in Version 2.46, then rotate to another concrete workstream.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo

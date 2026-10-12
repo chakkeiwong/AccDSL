@@ -202,6 +202,19 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Latest OTSL source inquiry
+
+The identified arXiv v1 copy is fully read (14 PDF pages, ten renders); seven
+resources and relevant official 4.0.2 helpers pass 50 source/diagnostic checks.
+The six printed rules accept a 2×2 sequence whose merge meanings create an
+L-shaped cell, so they do not ensure rectangular merged-cell geometry. The
+later source's first-line counter remains zero; runtime occurrence is untested.
+These are specific claim/code limits, not rejection of the token language or
+reported experiments. Add explicit geometry validation in Version 2.46.
+Published full-text equivalence, checkpoint transfer and wider source/runtime
+acceptance remain open. E01/E05/E07/E08/E14 and not_ready remain.
+Result: `data/accounting-master/otsl-paper-20261012/result.md`.
+
 ## Latest TableFormer source inquiry
 
 The identified 2022 main paper and supplement are fully read, with twelve
@@ -218,10 +231,10 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Inspect the exact 2023 OTSL tokenization paper identified by Docling reference
-9, checking its representation, constraints and evaluation against the original
-2022 paper and retained 4.0.2 consumer. Preserve Version 2.45. Plan:
-`docs/plans/accounting-otsl-paper-20261012.md`.
+Integrate the checked OTSL syntax/geometry distinction and specific later-code
+verification boundary in a separate Version 2.46. Preserve Version 2.45 and
+all old content, then rotate to another concrete workstream. Plan:
+`docs/plans/accounting-otsl-integration-20261012.md`.
 
 ## Latest ASBE 25 access result
 
