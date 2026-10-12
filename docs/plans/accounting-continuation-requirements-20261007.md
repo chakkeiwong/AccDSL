@@ -4,6 +4,19 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest Method 1 reporting source inquiry
+
+E07/C05; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
+The reporting inquiry retains four publications: the current-linked FR Y-15
+form/instructions and official 2024/2025 denominator notices. Sixteen condition
+groups and 24 denominator entries pass 56 source checks; ten source renders
+were inspected. The instructions mix page dates; dollar rounding, payment
+accuracy, score rounding and report/publication/effectiveness clocks remain
+distinct. The two notices use prior-year BCBS data. Score rounding, a complete
+revision chain and actual bank inputs remain unresolved. Version 2.42 and
+not_ready remain. Result:
+`data/accounting-master/bank-method1-reporting-20261012/result.md`.
+
 ## Latest institution classification source inquiry
 
 E07/C05; MC02–05/19/21/25/28/30/32–35, G7/G8/G13/G18.
@@ -134,8 +147,8 @@ material repairs through P18, and requires a fresh P19 assessment after
 substantive gaps are repaired. Runtime P00–P14 remain held. Following the bounded ASBE inquiry, cover repair and Note 26 integration,
 the national-bank authority, Part 3 definitions and capital recognition inquiries
 are complete within scope, integrated through Version 2.42; next source work
-checks official Method 1 reporting instructions and annual denominator
-provenance after the completed surcharge source map. Human acceptance does not stop feasible internal
+integrates checked Method 1 reporting and denominator dates after the
+completed reporting source map. Human acceptance does not stop feasible internal
 preparation. The ordinary Git mount is
 read-only, but trusted staging now works under the explicit commit request;
 that permission route supersedes the earlier blanket Git blocker.

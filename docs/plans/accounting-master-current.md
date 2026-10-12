@@ -28,8 +28,8 @@ Current candidate SHA256:
 
 | Record | Freshness and intended use |
 | --- | --- |
-| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.42 and the Method 1 source inquiry; latest candidate and preservation facts |
-| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; Method 1 source map complete; next unit checks reporting conventions and denominator dates |
+| [Master checkpoint](accounting-master-checkpoint.md) | Current through Version 2.42 and the reporting-source inquiry; latest candidate and preservation facts |
+| [Direct next plan](../../data/accounting-master/next-plan.md) | Current; reporting source map complete; next unit integrates material findings |
 | [Mission requirements](accounting-mission-requirements.md) and [older product checkpoint](accounting-product-design-checkpoint.md) | Original acceptance obligations remain controlling. Their Version 1.2 assessments and post-corpus implementation instructions are historical; use the master checkpoint and supplement for current status and order |
 | [Requirements supplement](accounting-continuation-requirements-20261007.md) | Current through Version 2.42 and the latest bounded source inquiries; source advances do not change original acceptance wording or frozen date assessments |
 | [Continuation plan](accounting-continuation-audit-20261007.md) | Governs direct C01–C08 work after the negative P19 assessment; completed actions are superseded by the checkpoint. Its old “no usable Git commit” statement is superseded by the checkpoint's verified existing HEAD |
@@ -138,12 +138,24 @@ difference is preserved. Actual inputs and reporting conventions remain open.
 Version 2.42 and not_ready remain unchanged. Result:
 `data/accounting-master/bank-method1-surcharge-20261012/result.md`.
 
+## Latest Method 1 reporting source inquiry
+
+The reporting inquiry retains four publications: the current-linked FR Y-15
+form/instructions and official 2024/2025 denominator notices. Sixteen condition
+groups and 24 denominator entries pass 56 source checks; ten source renders
+were inspected. The instructions mix page dates; dollar rounding, payment
+accuracy, score rounding and report/publication/effectiveness clocks remain
+distinct. The two notices use prior-year BCBS data. Score rounding, a complete
+revision chain and actual bank inputs remain unresolved. Version 2.42 and
+not_ready remain. Result:
+`data/accounting-master/bank-method1-reporting-20261012/result.md`.
+
 ## Exact next action
 
-Inspect official FR Y-15 instructions and annual global-denominator releases
-for Method 1 reporting, rounding and date selection. Retain unresolved
-conventions rather than inventing a score calculation. Plan:
-`docs/plans/accounting-bank-method1-reporting-20261012.md`.
+Integrate the checked Method 1, reporting-precision and denominator-date
+distinctions into a separate bank-chapter candidate. Preserve Version 2.42,
+the hypothetical example and unresolved score rounding. Plan:
+`docs/plans/accounting-bank-reporting-integration-20261012.md`.
 
 ## Preserved Version 2.39 funding distinction
 
@@ -453,7 +465,7 @@ must distinguish unit completion from the wider acceptance obligation.
 | --- | --- | --- |
 | E01 / C02–C03 | Extend the existing reference frontier from the 40 outstanding targets, recording newly discovered substantive dependencies. Expand the note-by-note assertion and query map beyond the 32 selected assertions; include actual contract, holdings, entity/control and mapping facts where the query needs them | Reconcile document/reference, material-assertion and query coverage against separate declared populations. Carry each material qualification into supported constraints, explicit unknowns and all affected statements. A located document or disposed row alone cannot close an unresolved semantic obligation |
 | E05 / C04 | Select a different, documented comparison from retained or newly justified sources. Check source identity, context, precision, basis, version and supersession before treating a discrepancy as incompatible | A genuine incompatible same-context source pair, preserved readings and a reproducible admission/alternative/invalidation walkthrough. Actual human adjudication remains a separate acceptance obligation; another negative search leaves this gap open |
-| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. Continue official Method 1 reporting/denominator conventions after the completed surcharge map. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
+| E07 / C05 | Preserve the completed 2025 Q&A/Ping An comparison. Seek genuinely new routes to the original and 2025 operative notices before implementing detailed simplifications; retain later amendments and actual contract/cohort facts as open. Integrate checked Method 1 reporting/denominator findings after the completed source map. Keep the broader corporate, financing and bank queue below | An operation-by-operation map of claims to exact operative editions, amendments, applicability and required facts, with competing interpretations and checked consequences for the promised scope. One insurance example or a dated standard text cannot establish that whole map |
 | E08 / C06 | Match the remaining manuscript claims to technically inspected sources. Pursue genuinely new legitimate leads for the four blocked papers and inspect credible alternatives; record actual backward/forward and version/correction decisions | Technical method, theory, evaluation and relevant appendix support, plus official-code inspection where available; justified competitor and omission decisions across the promised scope. Unavailable sources cannot support uninspected claims, and populated ledgers alone are insufficient |
 | E14 / C07 | Preserve the completed Arelle and Docling exchange/failure preparation. Preserve the 27-member component notice audit; preserve the completed model/backend map and preserve resolved model metadata/terms and preserve the 4.0.2 TableFormer loader/config inspection (32 checks); preserve EasyOCR 1.7.2 source/asset inspection (46 checks); retain CRAFT/English checkpoint-authority findings (27 checks); the exact candidate python-bidi Cargo inventory is now inspected (23/17/118 checks), while specific model rights, actual builds and other transitive terms stay open. The Software Notice route remains unresolved; complete transitive licence and model evidence. Resolve historical FASB applicability and intended distribution conditions | Source-supported interface and version assumptions, exact applicable dependency/model/terms records and explicit unresolved conditions for each proposed use. Installation, compatibility and performance require separate later execution evidence |
 
@@ -552,8 +564,8 @@ preparation or provisional manuscript repairs.
 
 ## Remaining execution order
 
-1. Follow the direct next plan: inspect official Method 1 reporting conventions
-   and annual denominators after the completed surcharge source map.
+1. Follow the direct next plan: integrate checked Method 1 reporting
+   conventions and denominator dates into the bank chapter.
    Preserve operative ASBE authority as unresolved until a distinct usable
    source lead appears. Preserve completed
    JPMorgan/Apple/Caterpillar/HSBC event work and all fifteen candidate Cargo

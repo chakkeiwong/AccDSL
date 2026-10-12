@@ -44,12 +44,24 @@ difference is preserved. Actual inputs and reporting conventions remain open.
 Version 2.42 and not_ready remain unchanged. Result:
 `data/accounting-master/bank-method1-surcharge-20261012/result.md`.
 
+## Latest Method 1 reporting source inquiry
+
+The reporting inquiry retains four publications: the current-linked FR Y-15
+form/instructions and official 2024/2025 denominator notices. Sixteen condition
+groups and 24 denominator entries pass 56 source checks; ten source renders
+were inspected. The instructions mix page dates; dollar rounding, payment
+accuracy, score rounding and report/publication/effectiveness clocks remain
+distinct. The two notices use prior-year BCBS data. Score rounding, a complete
+revision chain and actual bank inputs remain unresolved. Version 2.42 and
+not_ready remain. Result:
+`data/accounting-master/bank-method1-reporting-20261012/result.md`.
+
 ## Next bounded unit
 
-Inspect official FR Y-15 instructions and annual global-denominator releases
-for Method 1 reporting, rounding and date selection. Retain unresolved
-conventions rather than inventing a score calculation. Plan:
-`docs/plans/accounting-bank-method1-reporting-20261012.md`.
+Integrate the checked Method 1, reporting-precision and denominator-date
+distinctions into a separate bank-chapter candidate. Preserve Version 2.42,
+the hypothetical example and unresolved score rounding. Plan:
+`docs/plans/accounting-bank-reporting-integration-20261012.md`.
 
 ## Preserved Version 2.41 income definitions and payout tables
 
