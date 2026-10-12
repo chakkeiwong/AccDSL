@@ -4,6 +4,19 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Henkel and HSBC declared publication dates
+
+13 October 2026; E01/C02–C03; MC01/03/05/28/30/33–35; G13.
+The [publication-frontier result](../../data/accounting-master/publication-frontier-20261013/result.md)
+adds sixteen Henkel and three HSBC annual/interim declarations, with twenty
+inspected pages and 110 passing source checks. Exact labels, report/period
+identity, extraction layout, separate PR-code and filename meanings remain.
+Together with Munich Re, 35 of the frozen 136 unverified reports now carry
+supplemental issuer assertions; the other 101 remain unresolved by these
+inquiries. No unchanged-byte history, intraday cutoff or new corpus acceptance
+count follows. Version 2.50 and not_ready remain. Next execute
+[JPMorgan filing-event preparation](accounting-jpmorgan-filing-events-20261013.md).
+
 ## Munich Re publication evidence and current continuation
 
 13 October 2026; E01/C02–C03; MC01/03/05/28/30/33–35; G13.
@@ -15,7 +28,7 @@ The original 56/136 corpus assessment remains frozen; these sixteen declarations
 supplement its unverified population, leaving 120 reports outside this inquiry.
 Independent historical byte availability, time of day and timezone remain open.
 Version 2.50 stays current; E01/E05/E07/E08/E14 and not_ready remain.
-Next: [publication-frontier plan](accounting-publication-frontier-20261013.md).
+The publication-frontier follow-up is now complete within scope; see the latest unit above.
 The concise [master](accounting-master-current.md) supersedes next-action prose
 in the preserved historical unit descriptions below; their evidence remains.
 

@@ -9,18 +9,22 @@ SHA256: `b9171185897b808f35ac08dc4a75892ce24fb8948ef0fa83070aa7e8993c788c`.
 
 ## Current evidence and next action
 
-Version 2.50 integrates the Munich Re transition example. The subsequent
-[publication inquiry](../../data/accounting-master/munich-publication-imprints-20261012/result.md)
-adds sixteen attributed date statements, with 115 passing source checks and
-seventeen inspected pages. Fourteen labels say online publication; the 2018/2019
-interim labels do not specify a channel. Independent historical byte availability
-remains open. The original 56/136 corpus assessment is frozen; sixteen of its
-136 unverified rows now have supplemental issuer declarations, leaving 120
-outside that inquiry. The source supplement does not require Version 2.51.
+Version 2.50 integrates the Munich Re transition example. Subsequent source
+inquiries now supply **35 issuer-declared publication dates**: sixteen
+[Munich Re reports](../../data/accounting-master/munich-publication-imprints-20261012/result.md)
+and nineteen [Henkel/HSBC reports](../../data/accounting-master/publication-frontier-20261013/result.md).
+The latest unit read twenty pages and passed 110 source checks. Fourteen
+Munich Re labels specify online publication; the other 21 declarations do not
+specify a channel. No independent historical byte availability follows.
+The frozen 56/136 corpus assessment is unchanged; 101 of its unverified
+reports still lack accepted supplemental declarations in these inquiries.
+Version 2.50 remains current; these source supplements do not require 2.51.
 
-Next execute [publication-frontier discovery](accounting-publication-frontier-20261013.md)
-for those 120 reports and inspect the next coherent issuer group. Discovery
-hits nominate pages; exact context and PDF identity determine admissibility.
+Next execute [JPMorgan filing-event preparation](accounting-jpmorgan-filing-events-20261013.md)
+for the 2025 annual and Q3 periods in the retained SEC response. Distinguish
+regulatory filing events from selected annual-wrapper and report-byte history.
+The completed discovery's other source candidates remain available for later
+contextual reading; unreviewed hits are not date evidence.
 
 ## Remaining proposal phases
 
@@ -39,7 +43,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
-| E01 / C02–C03 — Real package and chronology | Complete date discovery and contextual reading; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
+| E01 / C02–C03 — Real package and chronology | Continue the saved date frontier and retained JPMorgan filing-event evidence; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Genuine source conflict | Select a different documented comparison from retained sources; check identity, precision, basis and revision context | An actually incompatible same-context pair and a reproducible admission, alternatives and dependent-result invalidation example. Do not repeat the closed 290-equal-pair search or manufacture a conflict |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Recover the four blocked technical sources through new routes; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked |

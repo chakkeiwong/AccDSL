@@ -16,26 +16,29 @@ This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
 
-The [Munich Re date inquiry](../../data/accounting-master/munich-publication-imprints-20261012/result.md)
-records sixteen issuer-declared publication dates: fourteen online labels and
-two unspecified channels. All seventeen candidate pages were visually read.
-The repaired checker passes 115 checks; its initial two legacy-status failures
-and original code remain preserved. Selected-file identity is checked;
-independent historical availability of unchanged bytes remains unestablished.
-No manuscript increment is needed for this source supplement.
+The [publication frontier](../../data/accounting-master/publication-frontier-20261013/result.md)
+adds nineteen report-specific date declarations: sixteen Henkel reports and
+HSBC's 2023–2025 annual reports. Twenty page images were read; 110 source
+checks pass. The Henkel split-word extraction, printed PR-code distinction and
+HSBC column/filename distinctions remain explicit. The earlier
+[Munich Re inquiry](../../data/accounting-master/munich-publication-imprints-20261012/result.md)
+adds sixteen declarations and passes 115 source checks after a preserved
+legacy-status repair.
 
-The frozen corpus assessment remains 56 filing dates / 136 unverified
-publication dates. Sixteen of the latter now have supplemental issuer-declared
-dates; 120 reports remain outside that inquiry. These are different evidence
-classes and must not be collapsed into a new acceptance count.
+The frozen corpus remains 56 filing dates / 136 unverified publication dates.
+Thirty-five of the latter now have supplemental issuer-declared dates; 101
+lack accepted declarations in these inquiries. These are distinct evidence
+classes. No independent historical unchanged-byte admission or intraday
+availability follows, and Version 2.50 remains current.
 
 ## Exact next action
 
-Execute [publication-frontier discovery](accounting-publication-frontier-20261013.md)
-over those remaining 120 selected reports, then read the next coherent issuer
-group with explicit date statements. Save bounded output and retain unrelated
-event, authorisation and calendar dates separately. A negative source search
-blocks that claim, not other ready work.
+Execute [JPMorgan filing-event preparation](accounting-jpmorgan-filing-events-20261013.md)
+for the two active-panel periods present in the retained official SEC response:
+2025 annual and Q3. Bind form, period, accession, filing and acceptance times;
+inspect the annual wrapper/embedded filing and Q3 cover separately. Older
+shard metadata is a source lead, not inspected evidence. Continue the saved
+publication search frontier when another candidate can be resolved.
 
 ## Remaining program and controls
 
