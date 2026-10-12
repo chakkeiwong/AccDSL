@@ -226,6 +226,18 @@ revision chain and actual bank inputs remain unresolved. Version 2.42 and
 not_ready remain. Result:
 `data/accounting-master/bank-method1-reporting-20261012/result.md`.
 
+## Latest insurance transition source inquiry
+
+Ten selected AASB 17 pages, including complete Appendix C, support a map of
+transition routes and information limits. All 43 preservation/source checks
+pass; 25 exact excerpts and six inspected renders are retained. C5A permits
+a conditional fair-value election despite feasible retrospection; C25 changes
+the transition date for earlier adjusted comparatives. The two AASB 108/13
+PDF probes returned 404; the official paginated portal is a new follow-up lead.
+No actual group, valuation or impracticability judgment is supplied. Version
+2.47 stays current pending 2.48 integration; full readiness remains not_ready.
+Result: `data/accounting-master/insurance-transition-source-20261012/result.md`.
+
 ## Latest direct-participation and guarantee source inquiry
 
 The retained AASB 17 compilation supplies 19 inspected source pages and
@@ -278,11 +290,10 @@ Result: `data/accounting-master/tableformer-paper-20261012/result.md`.
 
 ## Next bounded unit
 
-Inspect the retained insurance transition provisions to distinguish full
-retrospection, modified retrospection and fair-value transition, including
-method-selection and information limits. Preserve the issuer/AASB authority
-distinction and Version 2.47. Plan:
-`docs/plans/accounting-insurance-transition-source-20261012.md`.
+Integrate the checked transition-method and information-limit explanation
+in a separate Version 2.48. Preserve Version 2.47, the ASBE/AASB distinction,
+C5A/C25 exceptions and the unresolved AASB 108/13 dependencies. Plan:
+`docs/plans/accounting-insurance-transition-integration-20261012.md`.
 
 ## Latest ASBE 25 access result
 

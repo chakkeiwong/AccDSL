@@ -50,3 +50,15 @@ live controls and commit scoped results, then continue ready work. Keep
 not_ready, E01/E05/E07/E08/E14, actual facts and independent/human/domain
 acceptance open. No engine, installation, GPU/model run, paid review, outreach
 or publication.
+
+Continuation audit, 12 October: C25 changes the transition-date definition when
+earlier adjusted comparatives are presented, so read C25–C33A as well as the
+planned C2–C24B. The date explanation would otherwise be incomplete. No local
+AASB 108 or AASB 13 primary copy was found in the research, paper and data
+collections. Permit up to four bounded requests to official AASB sources to
+locate historically compatible editions, retaining each response and its actual
+status. Read the exact impracticability/hindsight and fair-value dependencies
+only if obtained. A failed route blocks that dependency, not the remaining
+transition explanation. No valuation or issuer classification will be inferred
+from a downloaded text. A numerical example is unnecessary for this unit:
+method choice and information admissibility are the discriminating questions.

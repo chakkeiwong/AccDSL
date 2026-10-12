@@ -4,6 +4,18 @@ Updated 12 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest insurance transition source inquiry
+
+Ten selected AASB 17 pages, including complete Appendix C, support a map of
+transition routes and information limits. All 43 preservation/source checks
+pass; 25 exact excerpts and six inspected renders are retained. C5A permits
+a conditional fair-value election despite feasible retrospection; C25 changes
+the transition date for earlier adjusted comparatives. The two AASB 108/13
+PDF probes returned 404; the official paginated portal is a new follow-up lead.
+No actual group, valuation or impracticability judgment is supplied. Version
+2.47 stays current pending 2.48 integration; full readiness remains not_ready.
+Result: `data/accounting-master/insurance-transition-source-20261012/result.md`.
+
 ## Latest direct-participation and guarantee source inquiry
 
 The retained AASB 17 compilation supplies 19 inspected source pages and
