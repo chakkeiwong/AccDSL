@@ -82,9 +82,12 @@ is complete within its conditional scope. The
 is now also complete. The [Munich Re new-contract reading](../../data/accounting-master/munich-new-contracts-20261013/result.md)
 adds actual source distinctions and leaves the expense residual unassigned.
 The [measurement bridge](../../data/accounting-master/munich-measurement-bridge-20261013/result.md)
-is now complete within scope. Execute the [whole-program reassessment](accounting-post-insurance-readiness-20261013.md)
-next: credit the seven recent integrations and choose the next internal repair
-against the original MC/G acceptance obligations.
+is now complete within scope. The [whole-program reassessment](../../data/accounting-master/post-insurance-readiness-20261013/result.md)
+credits the seven recent integrations and preserves all original MC/G
+obligations. Its 173 integrity checks pass; twenty source judgments are carried.
+Execute the [Apple statement network](accounting-apple-statement-network-20261013.md)
+next, then address joint histories and conditional paths from its unresolved
+links. A complete statement table does not close the real-company requirement.
 
 ## Remaining program and controls
 

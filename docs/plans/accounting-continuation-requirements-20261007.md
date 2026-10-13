@@ -1177,3 +1177,19 @@ frozen 56/136 assessment and not_ready remain. Continue the
 [2019 lease-transition inquiry](accounting-pingan-lease-transition-20261013.md)
 using actual facts and retained authority, without deriving equity or cash
 from an unqualified difference between reported balances.
+
+## Whole-program reassessment after Version 2.59, 13 October 2026
+
+The [author refresh](../../data/accounting-master/post-insurance-readiness-20261013/result.md)
+updates nineteen MC descriptions and nine gap descriptions, preserving all
+35 original requirements, 18 gaps, historical classifications and negative P19.
+All 173 integrity checks pass. Twenty unchanged manuscript sources carry their
+prior judgments; no independent or human acceptance is inferred.
+
+The actual source-reference example is delivered within scope. Insurance
+transition, reinsurance recovery and acquisition examples are now worked;
+actual group valuation, operative authority and actuarial validation remain.
+MC01/03/16/28 and G5 still need a joined real-company history and path. Execute
+the [Apple statement plan](accounting-apple-statement-network-20261013.md), then
+develop its joint history/path dependencies without inventing transaction
+causes. All five E workstreams remain open. Version 2.59 and not_ready remain.

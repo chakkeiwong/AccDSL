@@ -11,11 +11,17 @@ All 68 source/arithmetic and 124 manuscript checks pass; three source images
 were newly inspected, five carried by hash, and eight final pages inspected.
 Acquisition expense attribution and actual group facts remain unresolved.
 
-Execute docs/plans/accounting-post-insurance-readiness-20261013.md.
-Reassess MC01–MC35/G1–G18 after Versions 2.53–2.59, credit completed work,
-and select the next ready repair against original acceptance evidence.
-Output: data/accounting-master/post-insurance-readiness-20261013/.
-Preserve the historical negative P19 and prior author assessment.
+The whole-program reassessment is complete:
+data/accounting-master/post-insurance-readiness-20261013/result.md.
+All 35 MC and 18 G obligations remain; 173 integrity checks pass, with twenty
+unchanged source judgments explicitly carried. Historical P19 stays negative.
+
+Execute docs/plans/accounting-apple-statement-network-20261013.md.
+Capture complete FY2024 rows from all five Apple consolidated statements, join
+reported relationships and retain unknown transaction causes. Reuse completed
+note evidence. Then develop joint historical alternatives and conditional
+paths; this table increment does not close the real-company requirement.
+Output: data/accounting-master/apple-statement-network-20261013/.
 
 All five E workstreams and broader MC/G obligations remain open. Frozen 56/136
 dates, 35 supplemental declarations and 101 without accepted supplements are
