@@ -4,9 +4,26 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current actual source-reference conflict example
+## Current insurance transition balance example
 
-13 October 2026. Version **2.53, 197 pages** is current:
+13 October 2026. Version **2.54, 199 pages** is current:
+`docs/design/proposal/manuscript-transition-balances-20261013/accounting-product-proposal.pdf`.
+SHA256: `d69f9719902989736b79fec98b1e3bb03b255c5c74eaf1bfcfb7794e6f20eec3`.
+The [result](../../data/accounting-master/insurance-transition-balances-20261013/result.md)
+advances E07, MC08/10/11/13/16/19/22/28/30/32–35 and G4/G6/G7/G15/G16.
+Section 12.9 derives the CSM/loss-component signs, liability and opening equity,
+and shows why pooling admitted groups first gives a wrong result. Forty-five
+source/arithmetic and 123 manuscript checks pass; seven final pages were read.
+All 48 prior displays and 357 citation occurrences remain; one display and
+three citations are added. Existing requirement classifications stay scoped.
+Actual valuations, group eligibility, full transition effects, current authority
+and independent/human acceptance remain open. Continue with
+`accounting-reinsurance-transition-recovery-20261013.md`. All five E workstreams
+and wider MC/G obligations remain; full readiness is **not_ready**.
+
+## Preserved actual source-reference conflict example
+
+13 October 2026. Version **2.53, 197 pages** was the candidate for this unit:
 `docs/design/proposal/manuscript-reference-conflict-20261013/accounting-product-proposal.pdf`.
 SHA256: `613aae5c7f2a46bd46aac1c595e855bc21b7145b48b3e438243629af8be1f55e`.
 The [result](../../data/accounting-master/jpmorgan-reference-conflict-20261013/result.md)
@@ -28,7 +45,7 @@ full E05 acceptance and overall readiness remain open. Next execute
 
 ## Preserved Version 2.52 full requirement reassessment
 
-13 October 2026. Version 2.52 remains the 195-page current candidate. The
+13 October 2026. Version 2.52 was the 195-page candidate for this assessment. The
 [readiness supplement](../../data/accounting-master/readiness-refresh-20261013/result.md)
 now gives current dispositions for all MC01–MC35/G1–G18, preserving original
 acceptance wording and the historical negative P19. Status counts remain

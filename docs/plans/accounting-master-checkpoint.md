@@ -7,13 +7,13 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.53, 197 pages.**
-PDF: `docs/design/proposal/manuscript-reference-conflict-20261013/accounting-product-proposal.pdf`
-SHA256: `613aae5c7f2a46bd46aac1c595e855bc21b7145b48b3e438243629af8be1f55e`.
-The last integration works the actual JPMorgan source-reference conflict
-through layered review and selective invalidation: 22 source/dependency and
-125 manuscript checks pass; four source and nine final manuscript pages were
-inspected. [Result](../../data/accounting-master/jpmorgan-reference-conflict-20261013/result.md).
+**Version 2.54, 199 pages.**
+PDF: `docs/design/proposal/manuscript-transition-balances-20261013/accounting-product-proposal.pdf`
+SHA256: `d69f9719902989736b79fec98b1e3bb03b255c5c74eaf1bfcfb7794e6f20eec3`.
+The last integration derives the conditional insurance transition balances,
+opening-equity bridge and group-pooling counterexample. All 45 source/arithmetic
+and 123 manuscript checks pass; seven final pages were inspected.
+[Result](../../data/accounting-master/insurance-transition-balances-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -71,10 +71,11 @@ with original acceptance wording and the historical negative assessment preserve
 It credits completed source/method work and keeps all five E obligations open.
 The [JPMorgan walkthrough](../../data/accounting-master/jpmorgan-reference-conflict-20261013/result.md)
 now supplies an actual source-reference example for E05, with broader and human
-acceptance still open. Execute the [insurance transition balance plan](accounting-insurance-transition-balances-20261013.md)
-next: inspect both signs of the fair-value/FCF difference, derive component
-and total liabilities, and work the opening-equity bridge. Conditional input
-values cannot establish actual insurer valuations or eligibility.
+acceptance still open. The [transition balance example](../../data/accounting-master/insurance-transition-balances-20261013/result.md)
+is now complete within its conditional scope. Execute the
+[reinsurance transition recovery plan](accounting-reinsurance-transition-recovery-20261013.md)
+next: inspect C20A and its supporting measurement/timing rules, derive the
+separate loss-recovery component and preserve unknown full-asset measurements.
 
 ## Remaining program and controls
 

@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.53, 197 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-reference-conflict-20261013/accounting-product-proposal.pdf`
-SHA256: `613aae5c7f2a46bd46aac1c595e855bc21b7145b48b3e438243629af8be1f55e`.
+**Version 2.54, 199 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-transition-balances-20261013/accounting-product-proposal.pdf`
+SHA256: `d69f9719902989736b79fec98b1e3bb03b255c5c74eaf1bfcfb7794e6f20eec3`.
 
 ## Current evidence and next action
 
@@ -72,11 +72,17 @@ final manuscript pages inspected. E05 now has a bounded actual source-reference
 case, with extraction, attribution, navigation and accounting admission kept
 separate. Broader acceptance remains open; a monetary conflict is not claimed.
 
-Next execute the [insurance transition balance plan](accounting-insurance-transition-balances-20261013.md).
-Derive both signs of the fair-value/FCF difference from the retained provisions,
-then work CSM/loss-component, liability and equity consequences. This is a
-conditional method example; actual issuer inputs and operative rules remain
+Version 2.54 integrates the [insurance transition balances](../../data/accounting-master/insurance-transition-balances-20261013/result.md):
+45 source/arithmetic and 123 manuscript checks pass, with seven final pages
+inspected. The scoped derivation separates CSM from the loss component,
+reconciles opening equity, and rejects pooling across admitted groups before
+the sign calculation. Actual valuations and broader transition effects remain
 separate obligations.
+
+Next execute the [reinsurance transition recovery plan](accounting-reinsurance-transition-recovery-20261013.md).
+Derive C20A's separate loss-recovery component, check the timing exception and
+show why the component does not identify the whole asset or reduce the issued
+liability. Conditional inputs and historical source limits remain explicit.
 
 ## Remaining proposal phases
 
@@ -85,7 +91,7 @@ separate obligations.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.53; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.54; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.52 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
