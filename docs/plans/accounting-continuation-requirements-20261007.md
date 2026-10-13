@@ -1244,3 +1244,14 @@ manuscript checks pass; five source and five final pages were read.
 MC08–11/13/16/18/28/32–35 and G1/G5/G15/G16 advance within scope;
 all original obligations and not_ready remain. Execute the
 [settlement-path inquiry](accounting-apple-settlement-paths-20261013.md).
+
+## E01 conditional settlement paths, 13 October 2026
+
+Version 2.64, 215 pages, integrates [settlement paths](../../data/accounting-master/apple-settlement-paths-20261013/result.md).
+Equal aggregate liabilities give different cash categories and intermediate
+cash dates. Independent extrema create nonexistent joint paths. Actual quarter
+residuals stay necessary conditions, not admitted transactions. All98 source/
+arithmetic and137 manuscript checks pass; five final pages read; prior source
+records carried by hash. MC08/10–11/13–16/18/28/32–35 and G1/G4/G5/G6/G14–16
+advance within scope. All original obligations and not_ready remain. Execute
+the [full-program reassessment](accounting-post-apple-readiness-20261013.md).

@@ -7,15 +7,15 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.63, 214 pages.**
-PDF: `docs/design/proposal/manuscript-apple-coupled-completion-20261013/accounting-product-proposal.pdf`
-SHA256: `9e7d5827874621a59626ec33ae6b90c214df8af2a76a2778346d21af350f74fc`.
-The latest integration derives a conditional row-preserving repair after the
-failed fixed-remainder join. Ordinary accrual offsets fail two cash-flow rows;
-the noncash alternative matches only under explicit mappings and equal taxes.
-All 57 source/arithmetic and 137 manuscript checks pass; five new source images
-and five final pages read. Actual full-company completion remains unresolved.
-[Result](../../data/accounting-master/apple-coupled-completion-20261013/result.md).
+**Version 2.64, 215 pages.**
+PDF: `docs/design/proposal/manuscript-apple-settlement-paths-20261013/accounting-product-proposal.pdf`
+SHA256: `80b65fd23021d3241ba7a7e6aa3642d7ef6a1b0ca44924993273202ef43042ba`.
+The latest integration carries the conditional histories into settlement:
+same total liabilities produce different cash categories and dates. Independent
+marginal combinations fail; actual quarterly residuals remain necessary
+conditions, not transactions. All 98 source/arithmetic and 137 manuscript checks
+pass; five final pages read. Actual full-company completion is unresolved.
+[Result](../../data/accounting-master/apple-settlement-paths-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -91,9 +91,10 @@ are complete within scope. The [history compatibility inquiry](../../data/accoun
 is also complete: the same-remainder construction fails. The
 [coupled completion inquiry](../../data/accounting-master/apple-coupled-completion-20261013/result.md)
 now distinguishes algebraic offsets, conditional detailed-row equality and
-unresolved actual admission. Execute the
-[settlement-path inquiry](accounting-apple-settlement-paths-20261013.md),
-then reassess ready work against all requirements.
+unresolved actual admission. The [settlement-path inquiry](../../data/accounting-master/apple-settlement-paths-20261013/result.md)
+now tests downstream categories, timing and query-specific aggregation. Execute
+the [full-program reassessment](accounting-post-apple-readiness-20261013.md)
+before selecting distinct ready work.
 
 ## Remaining program and controls
 
