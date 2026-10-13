@@ -1,0 +1,681 @@
+\chapter{A complete company and a real disclosure}
+\label{ch:case}
+
+\section{What a balance must remember}
+
+Northstar Components is a synthetic seller of one homogeneous good. Its
+disclosures, transactions and contract terms are specified together, so we can
+check whether reconstruction preserves a known possible history. All amounts
+in this example are currency units, not thousands. The company has no foreign
+currency, subsidiaries, leases, returns or other comprehensive income. These
+are declared features of the example, not assumptions to impose on an imported
+company. Its source package and expected results are supplied in
+\code{fixtures/northstar.json}.
+
+At the beginning of 2024, Northstar holds cash of 60, receivables of 20,
+inventory of 30 and plant costing 100 with accumulated depreciation of 20.
+It owes suppliers 20 and lenders 100. Share capital is 50 and retained earnings
+are 20. Thus assets of 190 equal liabilities of 120 plus equity of 70.
+Inventory consists of six units costing 5 each. The existing plant depreciates
+by 10 a year, with no residual value. The loan remains outstanding throughout
+2024; both possible contract types charge 5\% during that year.
+
+The six months ending June and December provide two successive observation
+periods. Here the chosen accrual convention assigns one half-year to each.
+Cash-flow dates within a half-year are not recovered from a period aggregate;
+the synthetic history supplies a feasible ordering in which inventory is
+purchased before delivery and customer receipts precede the payments they fund.
+More detailed liquidity questions require more detailed dates.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule Movement & First half & Second half\\\midrule
+Delivered sales on credit &110&150\\
+Customer collections &110&135\\
+Inventory purchases on credit &70&85\\
+Supplier payments &65&80\\
+Cost of goods delivered &75&90\\
+Payroll paid &20&22\\
+Plant purchased at period end &10&12\\
+Depreciation &5&6\\
+Interest accrued and paid &2.5&2.5\\
+Tax expense &1.5&5.9\\
+Tax paid &3.5&3.9\\
+Dividends paid &4&5\\\bottomrule
+\end{tabular}
+\end{center}
+
+Each row has an economic meaning before it has a posting. Delivery of the
+good transfers control and creates an unconditional receivable; invoicing is
+assumed simultaneous in this example. Collection settles that receivable.
+Purchases increase inventory and trade payables; paying the supplier settles
+the payable. Delivery separately removes inventory at cost. Plant purchases
+are capital expenditure, while depreciation consumes its service potential.
+The addition of 10 enters service after June and has a five-year life, producing
+one unit of second-half depreciation. The addition of 12 enters service after
+December and has a twelve-year life.
+
+Tax is deliberately simple: 20\% of positive profit before tax, with all these
+expenses deductible and no deferred tax. The first-half payment exceeds its
+tax expense by 2, leaving prepaid tax; that prepayment is used in the second
+half. A genuine corporate tax package would need jurisdiction, tax basis,
+losses, timing differences and payment schedules. The example's tax rule
+governs its own numbers only.
+
+\section{Recovering movements without inventing invoices}
+
+Suppose the annual report discloses sales of 260, cost of sales of 165 and the
+opening and closing working-capital balances, while the collection and purchase
+totals are hidden. Under Northstar's explicit no-write-off, no-acquisition and
+no-currency-effect scope, the three bridges are
+\begin{align}
+35&=20+260-C,\label{eq:ns-ar}\\
+20&=30+P-165,\\
+30&=20+P-S.
+\end{align}
+Here $C$ denotes collections, $P$ purchases and $S$ supplier payments, all in
+currency units over the same year. Substitution gives $C=245$, $P=155$ and
+$S=145$. These are identifiable aggregate movements within this model. They do
+not identify which invoice was paid on which day. If acquisitions or write-offs
+are admitted, their movement variables enter the same bridges and these totals
+may cease to be unique.
+
+The loan remains different. Write $F$ and $V$ for fixed and floating principal.
+The source imposes $F+V=100$, $F,V\geq0$ and
+$0.05F+0.05V=5$. The last equality adds no information about the split.
+Both endpoints and every intermediate allocation survive. Northstar therefore
+has identified working-capital totals and an unidentified financing exposure
+in the same joint historical family. A solver must not turn its convenient
+witness $F=0$ into the company's recovered contract.
+
+The model's historical slots are one delivery, collection, purchase, supplier
+settlement, payroll, plant addition, depreciation, interest, tax payment and
+dividend per half-year. Each slot represents a classified aggregate event.
+The interim filing supplies the information for allocating the annual movements
+between the two half-years; the annual bridges alone identify only their totals.
+The template for collection contributes $+C$ to cash and $-C$ to receivables;
+its state effect reduces the unpaid receivable pool by $C$. The purchase
+template adds inventory quantity $P/5$, inventory cost $P$ and a payable $P$.
+A cash-balance identity by itself cannot substitute for either template.
+
+\section{The complete historical statements}
+
+The corrected statements follow from those movements. Temporary income and
+expense accounts close to retained earnings at each half-year boundary;
+annual income is the sum of the two periods' classified movements, excluding
+closing entries.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule Balance & Opening & June & December\\\midrule
+Cash &60&65&74.6\\
+Receivables &20&20&35\\
+Inventory &30&25&20\\
+Plant, net &80&85&91\\
+Prepaid tax &0&2&0\\
+Total assets &190&197&220.6\\\midrule
+Trade payables &20&25&30\\
+Debt &100&100&100\\
+Share capital &50&50&50\\
+Retained earnings &20&22&40.6\\
+Liabilities and equity &190&197&220.6\\\bottomrule
+\end{tabular}
+\end{center}
+
+Annual revenue of 260 less cost of sales 165, payroll 42, depreciation 11 and
+interest 5 gives profit before tax of 37. Tax expense is 7.4 and profit is 29.6.
+Other comprehensive income is zero under the declared scope, so total
+comprehensive income is also 29.6. Equity moves from 70 to
+$70+29.6-9=90.6$ after dividends.
+
+The cash-flow statement supplies an independent reconciliation. Collections
+245 less supplier payments 145, payroll 42, interest 5 and tax payments 7.4
+produce operating cash of 45.6. Investing cash is $-22$ and financing cash
+is $-9$, giving a cash increase of 14.6. The indirect route gives the same
+operating cash: profit 29.6 plus depreciation 11, minus the receivables
+increase 15, plus the inventory decrease 10 and the payables increase 10.
+The prepaid-tax balance is zero at both annual endpoints. The two cash routes
+use different information and therefore provide a useful check on classification.
+
+\section{A correction changes what was knowable}
+
+The original interim filing reported revenue of 120 and receivables of 30.
+Ten units of revenue had been recorded before delivery. Its tax expense was
+3.5, profit 14 and equity 80. The annual filing subsequently corrected the
+interim revenue and receivable by 10 and recognised the excess tax payment as
+prepaid tax of 2. Corrected interim profit is 6 and equity is 72, as above.
+The original statement remains an accurate record of what was published, even
+though its revenue recognition was wrong under the stated delivery rule.
+
+For the temporal fixture, the original report becomes available on 1 August
+2024 and is ingested on 3 August. The correction and annual report become
+available on 2 March 2025 and are ingested on 5 March. An investor-information
+query at 1 September 2024 00:00 UTC returns 120. For this synthetic example,
+take UTC as the reporting timezone and use an instant cutoff of
+3 March 2025 at 00:00 UTC, after the correction's entire publication-date
+interval has ended. That query returns 110 when evaluated using the subsequently acquired archive. A query
+that additionally asks what the database contained on 4 March still returns
+120. Publication and ingestion answer different questions.
+
+The annual total 260 and corrected interim total 110 share revision group
+\code{v2}, so second-half revenue is $260-110=150$. Subtracting the original
+120 would yield 140, but that result mixes incompatible revisions. The query
+must reject the subtraction unless a reviewed compatibility relationship
+supports it. A later date alone does not establish such a relationship.
+
+\section{One economic scenario, several complete futures}
+
+For 2025, assume demand for 30 units at price 10, unit purchase cost 5 and a
+target closing inventory of eight units. Opening inventory is four units, so
+the purchase decision is $30+8-4=34$ units, costing 170. Deliveries cost 150,
+leaving inventory of 40. Collect 90\% of current sales and 10 of old
+receivables: $270+10=280$, leaving receivables of 55. Pay old suppliers 30
+and 130 of the new purchases, leaving payables of 40. Payroll is 50, capital
+expenditure of 20 occurs at year-end and dividends are 8.
+
+These decisions are inputs to a conditional forecast. They are not estimates
+of demand or optimal management responses. No new borrowing is available.
+Under the existing asset schedules, depreciation is $10+10/5+12/12=13$.
+The new year-end asset begins depreciation in the next period. Let
+$\alpha=F/100$. With the floating rate resetting to 7\%, interest is
+$I=7-2\alpha$. Profit before tax is
+$300-150-50-13-I=80+2\alpha$, giving tax $16+0.4\alpha$ and profit
+$64+1.6\alpha$.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule 2025 statement amount & All fixed & All floating\\\midrule
+Revenue &300&300\\
+Interest expense &5&7\\
+Tax expense &16.4&16\\
+Profit and comprehensive income &65.6&64\\
+Operating cash flow &48.6&47\\
+Investing cash flow &$-20$&$-20$\\
+Financing cash flow &$-8$&$-8$\\\midrule
+Closing cash &95.2&93.6\\
+Receivables / inventory / net plant &55 / 40 / 98&55 / 40 / 98\\
+Assets &288.2&286.6\\
+Payables / debt &40 / 100&40 / 100\\
+Equity &148.2&146.6\\\bottomrule
+\end{tabular}
+\end{center}
+
+The joint symbolic result is cash $93.6+1.6\alpha$, profit
+$64+1.6\alpha$ and equity $146.6+1.6\alpha$, with the same
+$\alpha\in[0,1]$ throughout. Selecting the smallest cash and largest equity
+independently would describe no feasible company. A requested distribution
+requires a measure over that same historical family; the accounting equations
+do not supply one.
+
+The later method schedules use the floating share $x$ rather than the fixed
+share $\alpha$ used here: $x=1-\alpha$. Both parameterisations describe the
+same joint family. Its 2025 opening cash is 74.6 and equity is 90.6; the
+forecast spends 20 on period-end capital expenditure, distributes 8 and settles
+its stipulated tax in the same year. These teaching assumptions are retained
+when the later lease example introduces a different tax-payment schedule.
+
+\section{Apple: source labels do not identify exposure}
+\label{sec:apple}
+
+The real reference package is Apple's 2024 Form 10-K and first-quarter 2025
+Form 10-Q, for fiscal dates 28 September and 28 December 2024 respectively
+\citep{apple2024,apple2025q1}. The annual balance sheet also supplies
+30 September 2023. The annual filing is archived as the company's PDF from
+AnnualReports; the interim filing is archived from SEC EDGAR with its inline
+XBRL. Apple's Note 1 describes a 52/53-week year ending on the last Saturday
+of September. Calendar-year assumptions would therefore misstate the periods.
+
+The package inventory preserves every annual PDF page and every interim
+top-level section, all thirteen annual notes and all ten interim notes.
+It records internal cross-references and externally incorporated material,
+including the proxy statement, as distinct obligations. Statement and debt
+facts below are structured; policies, other notes and exhibits retain their
+source locations and specific modelling obligations. This is complete
+inventory coverage of the acquired files, with partial semantic formalisation.
+It does not claim to reconstruct every Apple contract or to have acquired
+every incorporated external document.
+
+Apple's annual balance sheet reports assets 364,980, liabilities 308,030 and
+equity 56,950, in millions of US dollars. Note 9 reports term-debt principal
+97,341, unamortised discount/premium and issuance costs of $-321$, and hedge
+accounting adjustments of $-358$. Thus its carrying amount is
+$97{,}341-321-358=96{,}662$, split into current 10,912 and non-current
+85,750. Fair value is separately disclosed as 88.4 billion. None of these
+three measurements may replace another merely because a table calls it debt.
+
+Note 9 identifies the notes as fixed-rate, then states that interest-rate
+swaps effectively convert a portion to floating rates. Note 4 reports
+interest-rate contract notional of 14,575 at the annual date. A notional is
+neither a liability carrying amount nor sufficient information for an exact
+interest sensitivity: reset timing, remaining periods, curve conventions and
+hedge coverage still matter. The cross-reference connects the derivative to
+the borrowing without erasing either contract.
+
+At the interim date, total term-debt carrying amount is
+$10{,}848+83{,}956=94{,}804$. Cash is 30,299, total assets 344,085,
+liabilities 277,327 and equity 66,758. The interim debt note's rounded
+``94.8 billion'' and the statement's 94,804 million can coexist; their
+precision differs. Treating them as conflicting exact numbers would create
+an artificial infeasibility.
+
+These balances leave two practical financing questions open: how much cash can
+fund a payment, and when the payment falls due. The annual cash and cash
+equivalents balance of 29,943 includes 2.6 billion held in escrow and restricted
+from general use for the State Aid tax obligation. Note 4 states the inclusion
+explicitly, and Note 7 connects the escrow to that obligation
+\citep[Notes 4 and 7, printed pp.~37 and 39]{apple2024}. Subtracting the reported
+restricted component gives $29{,}943-2{,}600=27{,}343$ million as an indicative
+remainder at the displayed amounts. The restricted component is rounded to
+tenths of a billion, so this subtraction does not establish an exact freely
+available balance. The earlier case annotation that described the reported
+cash balance as excluding restricted cash was wrong relative to this footnote.
+Correcting that interpretation changes funding calculations without changing
+the issuer's reported number. It also requires revisiting any liquidity result
+that relied on the exclusion.
+
+The debt movement supplies a second reason to preserve a calculation's missing
+terms. The first-quarter cash flow statement reports repayments of term debt of
+1,009 million, while carrying amount falls by
+$96{,}662-94{,}804=1{,}858$ million. At the displayed amounts, the reconciliation is
+\[
+       94{,}804=96{,}662-1{,}009-849.
+\]
+The 849 million is the residual after the reported cash repayment; it does not
+identify an exchange loss, an income-statement charge or a particular journal.
+Explaining it requires the missing movement information, including applicable
+currency, discount/premium and hedge-accounting effects. The quarterly cash
+flow statement still reconciles independently: operating inflow 29,935 plus
+investing inflow 9,792 less financing outflow 39,371 gives the reported cash
+increase of 356, from 29,943 to 30,299 million
+\citep[statement of cash flows and Note 6]{apple2025q1}. A balanced cash bridge
+therefore does not identify the debt history.
+
+The annual filing's securities exhibit adds terms that a debt-total query
+cannot supply. Exhibit 4.1 describes two euro-denominated series bearing the
+year 2025 in their names. Its reported outstanding principal is dated
+18 October 2024, after the annual balance-sheet date. The description concerns
+Apple Inc. as issuer, rather than every subsidiary in the consolidated group
+\citep[Exhibit 4.1, pp.~3--4]{apple2024}.
+
+\begin{center}
+\begin{tabular}{lrrl}
+\toprule
+Series & Principal (EUR m) & Fiscal year & Scheduled maturity\\\midrule
+0.875\% 2025 Notes &1,250&2025&24 May 2025\\
+0.000\% 2025 Notes &1,000&2026&15 November 2025\\\bottomrule
+\end{tabular}
+\end{center}
+
+Apple's disclosed 52-week fiscal 2025 ends on 27 September 2025 under its
+last-Saturday convention. The November maturity therefore belongs to fiscal
+2026 even though the bond's name says 2025. The annual Note 9 principal-payment
+schedule uses fiscal years, whereas the instrument's stated maturity is a
+calendar date. Joining those fields on their year number would put a billion
+euros of scheduled principal into the wrong fiscal bucket. Neither the later
+holding date nor the euro principal may be silently substituted for a
+September US-dollar consolidated balance.
+
+Suppose the disclosed faces remain outstanding until scheduled maturity, with
+no early redemption, default or additional withholding-related payment, and
+euro remains the payment currency. The annual coupon on the 0.875\% series is
+then the reported face multiplied by the stated rate:
+\[
+       1{,}250\times0.00875=10.9375\quad\text{million EUR}.
+\]
+Its final scheduled principal plus annual coupon is consequently
+1,260.9375 million EUR; the zero-coupon series has 1,000 million EUR of
+scheduled principal and zero stated coupon. Both scheduled maturity dates
+fall on a Saturday. Exact settlement requires the applicable payment-adjustment
+provision and business calendar. Exhibit 4.1 is expressly a summary qualified
+by the 2013 and 2018 indentures; its payment-currency exceptions and redemption
+rights also matter. The retained 2021 indenture cannot replace those earlier
+contracts. The calculation establishes conditional scheduled amounts, while
+their exact settlement dates and subsequent holdings remain unresolved.
+
+Those missing facts have different consequences for the financial statements.
+Principal and coupon payments reduce cash, but settling principal differs from
+recognising interest expense. The latter also depends on carrying amount,
+effective-interest accrual and the treatment of discounts and hedges; Note 9
+expressly includes applicable amortisation and hedging adjustments in effective
+rates. Exchange rates, hedge designations and tax treatment can affect profit,
+other comprehensive income, retained earnings and closing debt differently.
+The cash flow statement additionally needs the payment classification and any
+associated hedge settlements. A usable answer thus carries the conditional
+euro schedule together with these unresolved dependencies. A dollar company
+forecast must supply consistent holdings, exchange, hedge and tax assumptions
+across all affected statements.
+
+To demonstrate a source-to-forecast calculation, freeze the interim balance
+sheet and apply a \emph{marginal} financing stress for a following 13-week
+period: a 200-basis-point rate increase, no principal change, no offsetting
+hedge beyond the explicitly selected exposure, immediate cash settlement and
+no tax effect. An assumed effective floating exposure $E=14{,}575$ million
+produces $0.02\times(13/52)E=72.875$ million additional interest. This exposure
+uses the annual notional as a conditional input; it is not asserted to be the
+interim net sensitivity. Under that condition, debit interest expense and
+credit cash by 72.875. The resulting marginal statements have cash 30,226.125,
+assets 344,012.125, liabilities 277,327, equity 66,685.125, profit and comprehensive
+income of $-72.875$, and operating cash flow of $-72.875$ relative to the frozen
+baseline. The balance-sheet difference equals the equity difference exactly.
+
+If exposure is instead only restricted to $0\leq E\leq14{,}575$, the
+conditional added interest lies in $[0,72.875]$ before monetary rounding. That
+restriction is a stress assumption and is not claimed to bound every real
+Apple exposure. This real case verifies evidence, context, mappings and a
+coherent marginal propagation. Northstar supplies the complete-company
+forecast; a complete Apple forecast remains dependent on its unmodelled
+operations and undisclosed terms.
+
+\section{Apple: revenue recognition and cash collection}
+\label{sec:apple-revenue}
+
+An iPhone sale can create revenue today and an obligation to provide services
+later. Apple's annual revenue note separates delivered hardware and bundled
+software from the right to receive product-related services such as iCloud,
+Siri and Maps. It allocates the price and related discounts by relative
+stand-alone selling prices. For the bundled services those prices are estimates,
+because observable separate prices are unavailable. The hardware portion is
+recognised when control transfers, generally on shipment; the service portion
+is deferred and recognised straight-line over the estimated period of provision
+\citep[Note 2, printed p.~35]{apple2024}. A historical model consequently needs
+the allocation and service cohort as well as the sale date and amount. Neither
+the product label nor the customer payment supplies those missing terms.
+
+The note describes collection shortly after control transfer or the start of
+service delivery. It does not specify one collection lag for every contract.
+Products revenue also reflects expected returns, price protection and customer
+incentives. Revenue excludes taxes collected for remittance to governments
+\citep[Notes 1--2, printed pp.~34--35]{apple2024}. Together these qualifications
+prevent a simple conversion of reported revenue into gross customer receipts.
+
+Presentation creates a second distinction. Where Apple obtains control of a
+third-party product before sale, it reports the gross amount billed. For
+third-party applications sold through the App Store, its stated treatment
+records only the retained commission in Services revenue. Services also already
+includes recognition of the deferred value of services bundled with products
+\citep[Note 2, printed p.~35]{apple2024}. Adding that recognition to reported
+Services a second time would double count it; treating Services as gross App
+Store customer spending would change the measured quantity.
+
+The product and geographic tables describe different divisions of the same
+sales. The five product/service rows sum to 391,035 million dollars in fiscal
+2024 and 124,300 million in the quarter ended 28 December 2024. The geographic
+segment sales sum to those same totals. They must not be added together.
+Apple says the product mix is generally similar across segments, except that
+iPhone represents a moderately higher share in Greater China. That qualitative
+statement does not identify a product-by-region matrix
+\citep[Notes 2 and 13, printed pp.~35--36 and 46--47]{apple2024}
+\citep[Notes 2 and 10, printed pp.~6 and 11]{apple2025q1}.
+
+\subsection{The movement that the note leaves unidentified}
+
+At 28 September 2024 Apple reports total deferred revenue of 12.8 billion
+dollars. At 28 December it reports 13.2 billion, and says that quarter's net
+sales include 3.7 billion recognised from the deferred balance at the September
+date \citep[Note 2, printed p.~6]{apple2025q1}. The balance sheet's December
+current deferred-revenue line is 8,461 million, with 8,249 million at September
+\citep[printed p.~3]{apple2025q1}. Those are current liabilities; the note's
+larger amounts are totals. The precision differs too: the total is displayed
+to tenths of a billion, whereas the current line is displayed in millions.
+
+Let $D_0$ and $D_1$ denote opening and closing total deferred revenue. During
+the quarter, let $A$ be additions to deferred revenue, $R_o$ revenue released
+from the opening balance, and $R_n$ revenue released from amounts added during
+the quarter. Let $M$ collect other signed movements, positive when they increase
+the liability. These symbols describe a balance reconciliation; $M$ is not an
+assertion that a particular adjustment occurred. In billions of dollars,
+\begin{equation}
+ D_1=D_0+A-R_o-R_n+M,
+ \qquad A-R_n+M=D_1-D_0+R_o\simeq13.2-12.8+3.7=4.1.
+ \label{eq:apple-deferred-movement}
+\end{equation}
+The source identifies $R_o$, not the whole release $R_o+R_n$. The 4.1 billion
+residual therefore measures net additions after new-origin releases and other
+movements at the displayed amounts. Calling it gross new deferrals, billings
+or cash collected would be wrong relative to what has been calculated.
+
+Rounding also matters. If each of the three displayed inputs is rounded to the
+nearest 0.1 billion, a closed outer envelope for that residual is
+$[3.95,4.25]$ billion: the lower endpoint uses $13.15-12.85+3.65$, and the
+upper uses $13.25-12.75+3.75$. This is a conditional precision calculation,
+not a verified issuer rounding rule or a bound on gross collections. Its
+endpoints leave the treatment of exact rounding ties unspecified.
+
+Two constructed histories make the missing movement visible. For this
+illustration alone, use the displayed amounts as exact inputs and set $M=0$.
+Keep the reported quarter's total revenue at 124.3 billion. The table supplies
+two different choices for $A$ and $R_n$; other recognised revenue is the
+remainder needed to match that total.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}Xrr@{}}
+\toprule
+Quarterly amount (USD billion) & History 1 & History 2\\\midrule
+New deferrals, $A$ & 4.1 & 5.1\\
+Release from those new deferrals, $R_n$ & 0 & 1.0\\
+Release from the opening balance, $R_o$ & 3.7 & 3.7\\
+Other recognised revenue & 120.6 & 119.6\\
+Closing deferred revenue & 13.2 & 13.2\\
+Total recognised revenue & 124.3 & 124.3\\\bottomrule
+\end{tabularx}
+\end{center}
+
+Both histories satisfy the selected note totals, yet their new deferrals differ
+by one billion. They are witnesses within this aggregate model, not reconstructed
+Apple contracts or a fit to every financial-statement constraint. Additional
+contract, cohort, return and movement information can rule out or refine them.
+No probability attaches to either merely because two examples were written down.
+
+The corresponding recognition entry debits deferred revenue and credits revenue
+when service is provided. Receipt or billing of consideration that creates the
+deferral instead credits deferred revenue and debits cash or, where an
+unconditional right to payment exists, a receivable. Collection of that
+receivable changes cash and receivables without creating revenue a second time.
+For example, hold History 1's other revenue cash-settled and omit costs, taxes,
+refunds and other movements solely to isolate this subsystem. Receiving its
+4.1 billion of new consideration gives revenue-side cash inflow 124.7 billion.
+If that new consideration is receivable at quarter end, cash inflow is 120.6
+billion and receivables increase 4.1 billion. In both cases the asset increase
+is 124.7, matched by a 0.4 increase in deferred revenue and 124.3 of revenue
+before omitted expenses. These conditional entries explain the identification
+problem; neither inflow is an estimate of Apple's actual cash collections.
+
+\subsection{A dated recognition expectation is not a cash forecast}
+
+At both September and December, Apple expects 64\% of the then-reported total
+deferred revenue to be realised in less than a year, 25\% within one to two
+years, 9\% within two to three years and 2\% after three years
+\citep[Note 2, printed p.~36]{apple2024}
+\citep[Note 2, printed p.~6]{apple2025q1}. These are two dated expectations
+about two balances. Multiplication at the displayed December values gives
+$13.2\times0.64=8.448$ billion in the first bucket. The corresponding September
+calculation gives 8.192 billion. Their difference does not measure revenue
+recognised during the intervening quarter: the dates, remaining horizons and
+contract populations have changed.
+
+The percentages divide an expected amount by recognition horizon. They do not
+assign probabilities to alternative histories, fix collection dates or forecast
+all future sales. The 8.448 billion calculation also cannot replace the reported
+8.461 billion current liability. Rounded amount and percentage disclosures do
+not justify an exact equality between those figures, and the query must retain
+the source's distinct description of each quantity. A future calculation that
+requires monthly service or receipts needs finer timing and payment evidence.
+
+The note leaves another part of future service unquantified. For certain
+long-term arrangements, Apple has not yet delivered the service, has no right
+to bill for it and attributes the unbilled consideration entirely to that
+undelivered service. It reports neither revenue nor an amount for those
+obligations in this passage \citep[Note 2, printed p.~35]{apple2024}. A query
+must retain an unknown amount; setting it to zero or equating it with recorded
+deferred revenue would erase the distinction the company makes.
+
+These disclosures therefore yield several different results. The total and
+current deferred balances are reported observations. The 4.1 residual is a
+derived net movement with unresolved components. The recognition buckets are
+management's dated expectations, and the excluded consideration is unquantified.
+Contract-level allocations, service lives, new-origin releases and collection
+facts remain necessary for a particular future journal path. The annual and
+interim periods also stay separate: the December 2024 quarter follows the
+September 2024 fiscal year, so subtracting it from that annual revenue cannot
+produce the year's final nine months. The complete revenue-note reading makes
+these consequences explicit while the wider Apple disclosure package remains
+only partly formalised.
+
+\section{Apple: commitments and the cash needed to fulfil them}
+\label{sec:apple-commitments}
+
+The same distinction between recognition and cash arises when Apple buys
+capacity and components. A lease liability measures one part of an existing
+obligation; a purchase commitment describes goods or services still to be
+acquired. A funding projection needs the payments arising from both, together
+with new orders and operating decisions. Adding every disclosed amount would
+mix measurements and could count the same requirement twice.
+
+\subsection{From a lease liability to future payments}
+
+At 28 September 2024, Apple's lease note reports the following amounts in
+millions of dollars \citep[Note 8, printed p.~42]{apple2024}. The maturity table
+first totals undiscounted payments and then deducts imputed interest to reach
+the recognised liability. The right-of-use assets are reported separately.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}Xrrr@{}}
+\toprule
+Amount (USD million) & Operating & Finance & Total\\\midrule
+Undiscounted lease payments & 13,518 & 1,272 & 14,790\\
+Less: imputed interest & 1,984 & 376 & 2,360\\
+Recognised lease liabilities & 11,534 & 896 & 12,430\\
+Right-of-use assets & 10,234 & 1,069 & 11,303\\\bottomrule
+\end{tabularx}
+\end{center}
+
+Thus $14{,}790-2{,}360=12{,}430$ reconciles the maturity and liability
+measurements. The recognised liability is already included in the balance
+sheet; it is not an extra cash requirement to add to 14,790. Its current
+components total $1{,}488+144=1{,}632$ million, whereas the fiscal-2025 maturity
+bucket is 1,991 million. A current carrying amount and a gross payment bucket
+answer different questions. The right-of-use asset likewise need not equal the
+remaining liability; these reported balances do not disclose the complete
+amortisation, prepayment and modification history.
+
+Apple also reports 849 million of fixed payments under additional leases that
+had not commenced. It expects them to commence in 2025--2026, with terms from
+less than one year to twenty-one years. Adding this separately disclosed amount
+to the maturity total gives $14{,}790+849=15{,}639$ million. That sum is
+consistent, under a nearest-0.1-billion rounding assumption, with the 15.6
+billion of fixed lease obligations in management's cash-requirements discussion
+\citep[printed pp.~25 and 42]{apple2024}. Numerical compatibility does not
+establish a contract-by-contract reconciliation. It neither adds 849 to the
+recognised liability nor identifies its commencement and payment dates.
+
+The remaining lease information cannot supply those dates mechanically. The
+note describes original terms typically no longer than ten years, with renewal
+options, some reasonably certain to be exercised. Its weighted-average
+remaining term of 10.3 years describes a different quantity. The reported
+3.1\% discount rate, generally based on estimated incremental borrowing rates,
+does not supply every contract's rate or the timing hidden in ``thereafter''.
+Applying that one rate to invented year-end payments would introduce new
+assumptions. The policy combining lease and nonlease components also has a
+stated scope: corporate, data-centre and retail facilities
+\citep[Notes 1 and 8, printed pp.~34 and 42]{apple2024}.
+
+Fixed and variable costs add another distinction. For 2024, Apple reports
+2.0 billion of fixed operating-lease cost, 1.9 billion of fixed operating-lease
+cash payments and 1.0 billion of noncash right-of-use assets obtained for lease
+liabilities. Variable costs across its leases were 13.8 billion; payments of
+that kind primarily depend on purchases of output from the leased assets
+\citep[Note 8, printed p.~42]{apple2024}. Historical expense is therefore not a
+fixed future cash schedule. Forecasting it requires output, price and settlement
+assumptions. Adding it to manufacturing commitments without identifying their
+relationship could double count procurement requirements.
+
+\subsection{Why a fall in commitments does not identify cash spent}
+
+The purchase note and management discussion disclose different views. Note 12
+lists 11,226 million of future payments under unconditional purchase obligations
+whose remaining terms exceed one year. Its fiscal-2025 row is 3,206 million
+\citep[Note 12, printed p.~45]{apple2024}. The term restriction selects
+contracts; it does not place every payment beyond the coming year. The note
+describes these as off-balance-sheet commitments, primarily involving supplier
+arrangements, intellectual property, content and distribution rights.
+
+Management's discussion provides additional near-term evidence. At the same
+September date it reports manufacturing purchase obligations of 53.0 billion,
+of which 52.9 billion is payable within twelve months. Other purchase
+obligations total 12.0 billion, with 4.1 billion within twelve months; that
+description includes capital assets as well as supplier, content and rights
+arrangements \citep[printed p.~25]{apple2024}. A model confined to Note 12
+would miss those reported aggregates. Conversely, subtracting 11.226 from 12.0
+and labelling the difference short-term contracts is unsupported: the category
+and term populations have not been reconciled, and the precision differs.
+
+At 28 December 2024 manufacturing obligations are 39.8 billion, all payable
+within twelve months. The interim report says contractual cash requirements
+have not changed materially since the annual filing except for commercial
+paper, manufacturing obligations and the State Aid tax payable
+\citep[printed p.~16]{apple2025q1}. That qualitative statement is not an exact
+December lease measurement or evidence that every lease remained unchanged.
+The two manufacturing totals are dated observations over changing orders and
+payment horizons. Their 13.2 billion difference does not identify purchases
+or cash paid during the quarter.
+
+To see what is missing, consider an explicitly simplified model in billions
+of dollars. Let $O_0$ and $O_1$ denote a comparable population of undelivered
+fixed-price orders at the two dates. Let $N$ be new orders and $F$ the value
+removed when goods are delivered. Assume no cancellation, price or currency
+change. Treat the displayed 53.0 and 39.8 as exact inputs for this illustration.
+These assumptions define the example; the disclosure does not establish this
+roll-forward convention for every reported obligation. The balance relation is
+\begin{equation}
+ O_1=O_0+N-F,\qquad F-N=53.0-39.8=13.2.
+ \label{eq:apple-commitment-movement}
+\end{equation}
+With no new orders, delivery is 13.2. With 5.0 of new orders, delivery is 18.2.
+Both leave the same closing undelivered amount of 39.8. The source balances
+alone cannot choose between these conditional movements; actual contract
+changes and delivery evidence could do so.
+
+Payment is a further choice. Suppose the first history's 13.2 of delivered
+goods all remain unsold inventory, with no opening payables, prepayments or tax.
+Paying on delivery debits inventory and credits cash by 13.2: total assets and
+profit do not change within this subsystem. Delivery on credit instead debits
+inventory and credits trade payables by 13.2: assets and liabilities rise
+together, with no immediate cash or profit effect. Settling that payable later
+debits the payable and credits cash; consumption, sale or impairment would
+require further entries. These examples isolate recognition and settlement.
+They are not estimates of Apple's actual purchases or payments, or a fit to
+all its financial statements. No probability follows from writing two histories.
+
+Delivery assumptions also need the narrative that surrounds the purchase
+table. Apple describes single or limited sources for some components,
+industry-wide shortages and price fluctuations, and capacity or yield
+constraints for new technologies. Suppliers may favour common components over
+custom ones. Its named manufacturing locations describe outsourced production,
+not a product-by-revenue-region allocation or ownership map
+\citep[Note 12, printed p.~46]{apple2024}. A scenario in which input availability
+changes may alter output, variable lease payments, inventory and receipts
+together. The passage motivates those dependencies without identifying their
+size or probabilities.
+
+The same note, and the interim contingency note, preserve management's dated
+assessment of unresolved legal claims. At each date, management states that
+there was not at least a reasonable possibility that Apple had incurred a
+material loss, or a material loss greater than a recorded accrual
+\citep[Note 12, printed p.~46]{apple2024}
+\citep[Note 9, printed p.~11]{apple2025q1}. It does not make litigation exposure
+zero. Contract terms, supply constraints, commencement, delivery and settlement
+must therefore remain in the historical record alongside reported balances.
+They determine which future journal paths can be supported when a funding
+question is asked.
+
+\input{sections/apple-liquidity}
+\input{sections/apple-segments}
+\input{sections/apple-perimeter}
+\input{sections/apple-legal}
+\input{sections/apple-pronouncements}
+\input{sections/apple-litigation-risk}
+\input{sections/apple-regulation}
+\input{sections/apple-disruption}
+\input{sections/apple-competition-transition}
+\input{sections/apple-component-availability}
+\input{sections/apple-quality-inventory}

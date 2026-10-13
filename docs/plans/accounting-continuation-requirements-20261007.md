@@ -4,9 +4,25 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current actual acquisition-cost disclosure example
+## Current CSM and reporting-population bridge
 
-13 October 2026. Version **2.58, 207 pages** is current:
+13 October 2026. Version **2.59, 209 pages** is current:
+`docs/design/proposal/manuscript-munich-measurement-bridge-20261013/accounting-product-proposal.pdf`.
+SHA256: `b49177e1ebd02f31804d6222bd6c1b651d05cbf66e18832d779f29c02112b9ca`.
+The [result](../../data/accounting-master/munich-measurement-bridge-20261013/result.md)
+advances E01/E07 and MC02/03/07/08/11/16/19/22/28/30/32–35,
+G4/G5/G7/G11/G12/G16. Section 12.10 reconciles actual CSM, cross-table
+references and excluded PAA balances. It preserves the distinct cash476 and
+expense435 residuals without inventing an asset or treatment allocation.
+All 68 source/arithmetic and 124 manuscript checks pass; three new source
+images and five hash-bound prior readings support eight inspected final pages.
+All 52 prior displays and 385 citations remain; one display and seven citations
+are added. Actual groups, expense attribution and human/domain acceptance
+remain open. **not_ready**. Next: `accounting-post-insurance-readiness-20261013.md`.
+
+## Preserved actual acquisition-cost disclosure example
+
+13 October 2026. Version **2.58, 207 pages** was the candidate for this unit:
 `docs/design/proposal/manuscript-munich-new-contracts-20261013/accounting-product-proposal.pdf`.
 SHA256: `7063e69f66be2d14c464f09c104cb1b3cef9db64526433b969c1fa1647fe4a74`.
 The [result](../../data/accounting-master/munich-new-contracts-20261013/result.md)

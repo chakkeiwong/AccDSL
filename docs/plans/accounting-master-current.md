@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.58, 207 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-munich-new-contracts-20261013/accounting-product-proposal.pdf`
-SHA256: `7063e69f66be2d14c464f09c104cb1b3cef9db64526433b969c1fa1647fe4a74`.
+**Version 2.59, 209 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-munich-measurement-bridge-20261013/accounting-product-proposal.pdf`
+SHA256: `b49177e1ebd02f31804d6222bd6c1b651d05cbf66e18832d779f29c02112b9ca`.
 
 ## Current evidence and next action
 
@@ -101,9 +101,15 @@ eight final pages were reviewed. It distinguishes future acquisition outflows,
 recovery revenue, expense and cash, and checks a joint rounding witness.
 The expense/revenue residual remains unexplained; no acquisition asset is inferred.
 
-Next execute the [Munich Re measurement bridge](accounting-munich-measurement-bridge-20261013.md).
-Reconcile the actual CSM movements, inspect excluded PAA populations and bound
-what differences between the two reconciliation tables can establish.
+Version 2.59 adds the [actual CSM and population bridge](../../data/accounting-master/munich-measurement-bridge-20261013/result.md):
+68 source/arithmetic and 124 manuscript checks pass; three new source images,
+five carried by hash, and eight final pages support the reading. CSM movement
+and the excluded PAA remaining-coverage balances reconcile. Acquisition cash
+differences do not identify the unresolved expense cause or a deferred asset.
+
+Next execute the [whole-program reassessment](accounting-post-insurance-readiness-20261013.md).
+Credit Versions 2.53–2.59, preserve the original obligations, and compare ready
+workstreams before selecting the next material repair.
 
 ## Remaining proposal phases
 
@@ -112,7 +118,7 @@ what differences between the two reconciliation tables can establish.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.58; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.59; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.52 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18

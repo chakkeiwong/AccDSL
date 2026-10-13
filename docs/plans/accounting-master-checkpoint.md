@@ -7,14 +7,15 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.58, 207 pages.**
-PDF: `docs/design/proposal/manuscript-munich-new-contracts-20261013/accounting-product-proposal.pdf`
-SHA256: `7063e69f66be2d14c464f09c104cb1b3cef9db64526433b969c1fa1647fe4a74`.
-The last integration reads Munich Re's actual acquisition-cost disclosures,
-preserving populations, rounding and the distinctions between future costs,
-recovery revenue, expense and cash. All 79 source/arithmetic and 124 manuscript
-checks pass; eleven source images and eight final pages were reviewed.
-[Result](../../data/accounting-master/munich-new-contracts-20261013/result.md).
+**Version 2.59, 209 pages.**
+PDF: `docs/design/proposal/manuscript-munich-measurement-bridge-20261013/accounting-product-proposal.pdf`
+SHA256: `b49177e1ebd02f31804d6222bd6c1b651d05cbf66e18832d779f29c02112b9ca`.
+The last integration reconciles actual Munich Re CSM movements and identifies
+the excluded PAA remaining-coverage population. The acquisition-expense cause
+remains unresolved. All 68 source/arithmetic and 124 manuscript checks pass;
+three source images were newly read, five were carried by matching hashes,
+and eight final manuscript pages were inspected.
+[Result](../../data/accounting-master/munich-measurement-bridge-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -80,8 +81,10 @@ is complete within its conditional scope. The
 [acquisition-incorporation example](../../data/accounting-master/insurance-acquisition-incorporation-20261013/result.md)
 is now also complete. The [Munich Re new-contract reading](../../data/accounting-master/munich-new-contracts-20261013/result.md)
 adds actual source distinctions and leaves the expense residual unassigned.
-Execute the [measurement-bridge plan](accounting-munich-measurement-bridge-20261013.md)
-next: reconcile CSM movements and inspect differences in reconciliation scopes.
+The [measurement bridge](../../data/accounting-master/munich-measurement-bridge-20261013/result.md)
+is now complete within scope. Execute the [whole-program reassessment](accounting-post-insurance-readiness-20261013.md)
+next: credit the seven recent integrations and choose the next internal repair
+against the original MC/G acceptance obligations.
 
 ## Remaining program and controls
 
