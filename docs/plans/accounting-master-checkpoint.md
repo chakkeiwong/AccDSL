@@ -7,14 +7,15 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.56, 203 pages.**
-PDF: `docs/design/proposal/manuscript-acquisition-recoverability-20261013/accounting-product-proposal.pdf`
-SHA256: `5349b23976f17ce45bb23fb08fd9a68d662cb9b852ca0317423809eb3d1c4085`.
-The last integration works acquisition-asset impairment and reversal with
-separate group and renewal tests, avoiding duplicate loss recognition. All 50
-source/arithmetic and 123 manuscript checks pass; six source images and seven
+**Version 2.57, 205 pages.**
+PDF: `docs/design/proposal/manuscript-acquisition-incorporation-20261013/accounting-product-proposal.pdf`
+SHA256: `4149d47b60561e156f5d06589ed3596525337cb128039efbf14ef488babf2fbe`.
+The last integration carries acquisition assets into initial CSM and group
+balances, then works premium receipt with unchanged equity. Its counterexample
+shows two offsetting errors that balance despite wrong components. All 44
+source/arithmetic and 123 manuscript checks pass; five source images and seven
 final manuscript pages were inspected.
-[Result](../../data/accounting-master/insurance-acquisition-recoverability-20261013/result.md).
+[Result](../../data/accounting-master/insurance-acquisition-incorporation-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -76,10 +77,11 @@ acceptance still open. The [transition balance example](../../data/accounting-ma
 is complete within its conditional scope. The [reinsurance component extension](../../data/accounting-master/reinsurance-transition-recovery-20261013/result.md)
 is also complete, while whole-asset valuation remains an explicit input.
 The [acquisition recoverability example](../../data/accounting-master/insurance-acquisition-recoverability-20261013/result.md)
-is complete within its conditional scope. Execute the
-[acquisition-incorporation plan](accounting-insurance-acquisition-incorporation-20261013.md)
-next: carry the same assets/net inflows into recognition, initial CSM and premium
-receipt, without retaining a duplicated acquisition asset or premature revenue.
+is complete within its conditional scope. The
+[acquisition-incorporation example](../../data/accounting-master/insurance-acquisition-incorporation-20261013/result.md)
+is now also complete. Execute the [Munich Re newly recognised contracts plan](accounting-munich-new-contracts-20261013.md)
+next: inspect actual acquisition-cost and initial-margin disclosures without
+converting aggregate future cash flows into identified acquisition assets.
 
 ## Remaining program and controls
 

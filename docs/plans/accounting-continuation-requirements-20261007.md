@@ -4,9 +4,25 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current acquisition-asset recoverability example
+## Current acquisition-asset incorporation example
 
-13 October 2026. Version **2.56, 203 pages** is current:
+13 October 2026. Version **2.57, 205 pages** is current:
+`docs/design/proposal/manuscript-acquisition-incorporation-20261013/accounting-product-proposal.pdf`.
+SHA256: `4149d47b60561e156f5d06589ed3596525337cb128039efbf14ef488babf2fbe`.
+The [result](../../data/accounting-master/insurance-acquisition-incorporation-20261013/result.md)
+adds E07 evidence for MC08/10/11/13/16/19/22/28/30/32–35 and
+G4/G6/G7/G15/G16. Section 12.8 works recognition, CSM10/15, group assets35/15
+and premium receipt leading to liabilities65/45 with equity90 unchanged.
+A cancelling-error example proves that balance alone misses wrong components.
+All 44 source/arithmetic and 123 manuscript checks pass; five source images
+and seven final pages were inspected. All 51 previous displays and 372 citation
+occurrences remain, with one display and four citations added. Actual inputs,
+current authority and independent/human acceptance remain open; **not_ready**.
+Next: `accounting-munich-new-contracts-20261013.md`.
+
+## Preserved acquisition-asset recoverability example
+
+13 October 2026. Version **2.56, 203 pages** was the candidate for this unit:
 `docs/design/proposal/manuscript-acquisition-recoverability-20261013/accounting-product-proposal.pdf`.
 SHA256: `5349b23976f17ce45bb23fb08fd9a68d662cb9b852ca0317423809eb3d1c4085`.
 The [result](../../data/accounting-master/insurance-acquisition-recoverability-20261013/result.md)

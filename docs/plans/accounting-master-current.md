@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.56, 203 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-acquisition-recoverability-20261013/accounting-product-proposal.pdf`
-SHA256: `5349b23976f17ce45bb23fb08fd9a68d662cb9b852ca0317423809eb3d1c4085`.
+**Version 2.57, 205 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-acquisition-incorporation-20261013/accounting-product-proposal.pdf`
+SHA256: `4149d47b60561e156f5d06589ed3596525337cb128039efbf14ef488babf2fbe`.
 
 ## Current evidence and next action
 
@@ -89,10 +89,16 @@ Version 2.56 adds [acquisition-asset recoverability](../../data/accounting-maste
 seven final pages were inspected. It separates group/renewal populations,
 avoids overlapping impairment, and reconciles reversal with unchanged cash.
 
-Next execute the [acquisition-incorporation plan](accounting-insurance-acquisition-incorporation-20261013.md).
-Carry the same acquisition assets and net inflows into group recognition,
-derive CSM and the group balances, then work premium receipt without duplicate
-assets or premature revenue.
+Version 2.57 adds the [acquisition incorporation example](../../data/accounting-master/insurance-acquisition-incorporation-20261013/result.md):
+44 source/arithmetic and 123 manuscript checks pass; five source images and
+seven final pages were inspected. It carries the same assets and net inflows
+through recognition, initial CSM and premium receipt, and shows two offsetting
+errors that survive a balance-sheet identity.
+
+Next execute the [Munich Re newly recognised contracts inquiry](accounting-munich-new-contracts-20261013.md).
+Read the actual acquisition-cost and initial-margin disclosures, preserving
+column populations, measurement approaches, signs, rounding and unknown
+acquisition-asset inputs. The earlier transition inquiry remains complete.
 
 ## Remaining proposal phases
 
@@ -101,7 +107,7 @@ assets or premature revenue.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.56; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.57; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.52 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
