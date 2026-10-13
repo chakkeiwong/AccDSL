@@ -7,6 +7,13 @@ background controller remain held.
 
 ## Current candidate
 
+The [post-adapter reassessment](../../data/accounting-master/post-adapter-readiness-20261013/result.md)
+is complete: all35 requirements/18 gaps and original statuses preserved;
+12 requirement and6 gap descriptions updated. All157 integrity checks pass.
+Twenty-one of24 source judgments are carried by exact bytes; both new
+transitive sections receive scoped evidence. Full readiness remains not_ready.
+Execute the [actual Apple occurrence inquiry](accounting-apple-inline-occurrences-20261013.md).
+
 **Version 2.69, 223 pages.**
 PDF: docs/design/proposal/manuscript-arelle-inline-values-20261013/accounting-product-proposal.pdf
 SHA256: db8cdbf471a8a890f3677f9222d10f17b73541a132970c5858683167ca000e05.
@@ -22,7 +29,7 @@ is complete: all35 requirements/18 gaps and statuses preserved,16/10
 descriptions updated,154 integrity checks pass. Twenty-two of26 sources
 carry prior judgments; three new transitive sections are separately credited.
 Three new counterparts are distinct from three already located forms now
-inspected. Actual grants and broader semantics remain unresolved. The fact-preservation inquiry is now complete within scope.
+inspected. Actual grants and broader semantics remain unresolved. The fact-preservation inquiry is complete within scope.
 
 
 Readiness **not_ready**. Independent/domain/human acceptance remains pending.
@@ -36,7 +43,7 @@ is delivered in Version2.69: transform/scale/sign are already applied by the
 value properties; assembled raw text and continuation outcomes differ from
 original bytes. All125 source/arithmetic and139 manuscript checks pass; six
 final pages inspected. No runtime/schema/accounting validation is inferred.
-Execute the [post-adapter full assessment](accounting-post-adapter-readiness-20261013.md).
+The full-program assessment is now refreshed.
 
 The [fact-preservation inquiry](../../data/accounting-master/arelle-fact-identity-20261013/result.md)
 is delivered in Version 2.68: three pinned sources, nineteen line-bound
@@ -87,7 +94,7 @@ availability follows.
 
 ## Exact next action
 
-Execute [the full-program reassessment](accounting-post-adapter-readiness-20261013.md); preserve the2.69 candidate and source-only evidence limits.
+Execute [the actual-source occurrence inquiry](accounting-apple-inline-occurrences-20261013.md); preserve the2.69 candidate and source-only evidence limits.
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
 ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
@@ -124,7 +131,7 @@ now tests downstream categories, timing and query-specific aggregation. The [pos
 is complete:148 integrity checks preserve all35 requirements/18 gaps and
 credit V2.60–2.64. The stock-plan source inquiry is now complete within
 scope, with three supplemental counterparts. The performance-award inquiry is also delivered. The version inquiry is now delivered. The post-awards reassessment is complete. Execute the
-[inline-value inquiry](accounting-arelle-inline-values-20261013.md).
+[actual occurrence inquiry](accounting-apple-inline-occurrences-20261013.md).
 The frozen40-target list and failed indenture routes remain preserved.
 
 ## Remaining program and controls
