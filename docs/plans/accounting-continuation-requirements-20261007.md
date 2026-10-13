@@ -4,7 +4,26 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current intragroup-FX result and requirement review
+## Current full requirement reassessment
+
+13 October 2026. Version 2.52 remains the 195-page current candidate. The
+[readiness supplement](../../data/accounting-master/readiness-refresh-20261013/result.md)
+now gives current dispositions for all MC01–MC35/G1–G18, preserving original
+acceptance wording and the historical negative P19. Status counts remain
+23 scoped specified/12 partial MC rows and 12 scoped specified/6 partial gaps;
+these are bounded design classifications, not a completion score. Eleven
+unchanged manuscript contracts carry forward prior judgments explicitly.
+
+Residual descriptions now credit completed Apple/JPMorgan source work, ASBE
+lease/tax integration, insurance transition/guarantee methods, FX and adapter
+failure examples. All five E workstreams stay open. The original MC04/MC27/G17
+wording does not impose a monetary-only conflict condition. Next work the
+retained JPMorgan reference disagreement through layered review and selective
+invalidation under `accounting-jpmorgan-reference-conflict-20261013.md`, keeping
+source-navigation scope, broader accounting limits and pending human acceptance
+explicit. This supplement authorises no runtime or professional engagement.
+
+## Preserved intragroup-FX result and requirement review
 
 **Version 2.52, 195 pages; not_ready.**
 PDF: `docs/design/proposal/manuscript-intragroup-fx-20261013/accounting-product-proposal.pdf`.

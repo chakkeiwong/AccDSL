@@ -65,19 +65,23 @@ found blocked repository/SSRN routes and proved the saved arXiv identifier
 belongs to an unrelated optics paper. No full text or technical claim was
 admitted in either inquiry. Preserve these source-specific limits.
 
-The [intragroup-FX case](../../data/accounting-master/intragroup-fx-20261013/result.md)
-is integrated. Execute the [readiness-refresh plan](accounting-readiness-refresh-20261013.md)
-against all 35 requirements and 18 gaps, using the current manuscript and
-latest scoped results. Preserve the earlier negative assessment; author
-preparation cannot confer independent or human acceptance. Select the next
-concrete repair from that evidence, without restarting completed units.
+The [readiness refresh](../../data/accounting-master/readiness-refresh-20261013/result.md)
+is complete: all 35 requirements and 18 gaps have current author dispositions,
+with original acceptance wording and the historical negative assessment preserved.
+It credits completed source/method work and keeps all five E obligations open.
+Execute the [JPMorgan reference-conflict plan](accounting-jpmorgan-reference-conflict-20261013.md)
+next. Reconfirm the real page-reference conflict and work extraction, meaning,
+admission and selective invalidation. The original requirements permit this
+reference example; it does not establish conflicting financial measurements or
+automatic E05 closure. Independent and human acceptance remain pending.
 
 ## Remaining program and controls
 
 [Current master program](accounting-master-current.md) gives the five open
 P19 obligations, dependencies and remaining phase order. P15/P16 scoped work is
 delivered; P17 preparation and P18 integration continue. P19's prior assessment
-was completed with a negative verdict; a fresh assessment remains necessary.
+and the current author supplement both remain negative; independent assessment
+and reassessment after substantive repair remain necessary.
 The original MC01–MC35 requirements and G1–G18 obligations remain controlling.
 [Requirements supplement](accounting-continuation-requirements-20261007.md).
 

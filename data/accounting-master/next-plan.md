@@ -39,11 +39,16 @@ data/accounting-master/caiani-source-recovery-20261013/result.md.
 The intragroup-FX case is integrated in Version 2.52: 49 source/arithmetic
 and 124 manuscript checks; six final renders inspected. Result:
 data/accounting-master/intragroup-fx-20261013/result.md.
-Execute docs/plans/accounting-readiness-refresh-20261013.md next. Assess all
-35 requirements and 18 gaps against current passages and exact scoped evidence;
-then select and execute the smallest ready substantive repair. Preserve the
-historical negative verdict and independent/human acceptance distinctions.
-Output: data/accounting-master/readiness-refresh-20261013/.
+The readiness refresh is complete, with all 35 MC and 18 G dispositions:
+data/accounting-master/readiness-refresh-20261013/result.md.
+Original acceptance wording and historical negative P19 are preserved;
+full readiness remains negative and all five E workstreams remain open.
+Execute docs/plans/accounting-jpmorgan-reference-conflict-20261013.md next.
+Reconfirm the actual 2023 page-156/page-163 reference disagreement, then work
+layered review, admission and selective invalidation. This narrower source-
+navigation example must not be promoted to a financial-measurement conflict
+or automatic E05 closure. Output:
+data/accounting-master/jpmorgan-reference-conflict-20261013/.
 The other discovery candidates remain under publication-frontier-20261013;
 no unreviewed hit is admitted and no unchanged blocked route should be retried.
 Check completed result records before scheduling another acquisition.

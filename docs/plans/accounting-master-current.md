@@ -59,10 +59,18 @@ investment eliminations, surviving profit/OCI, and cash exchange reconciliation
 under explicitly conditional facts. The six inspected final pages and exact
 source preservation support the candidate, with human/domain acceptance pending.
 
-Next execute the [readiness-refresh plan](accounting-readiness-refresh-20261013.md)
-against the original MC/G acceptance criteria, current passages and later
-scoped evidence. Preserve the negative historical assessment and select the
-next concrete internal repair; no positive readiness follows from check counts.
+The [readiness refresh](../../data/accounting-master/readiness-refresh-20261013/result.md)
+now reassesses every MC01–MC35/G1–G18 obligation. It preserves the historical
+negative verdict and original acceptance wording, with updated residual work.
+Eleven unchanged contract sources carry forward their prior judgments; changed
+passages and scoped results support the author updates. No independent review
+or positive readiness is inferred.
+
+Next execute the [JPMorgan reference-conflict plan](accounting-jpmorgan-reference-conflict-20261013.md).
+Original MC04/MC27/G17 do not restrict the conflict example to monetary amounts.
+Reconfirm the actual printed page-156/page-163 reference disagreement, then
+work layered review, query admission and selective invalidation. Keep its
+source-navigation scope explicit and E05 open pending assessment of the result.
 
 ## Remaining proposal phases
 
@@ -72,7 +80,7 @@ next concrete internal repair; no positive readiness follows from check counts.
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
 | P18 — Manuscript integration | Delivered through Version 2.52; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
-| P19 — Readiness assessment | Prior assessment completed with a negative verdict | Reassess all requirements and their interactions after repair; retain separate human/domain/engineering acceptance |
+| P19 — Readiness assessment | Historical negative assessment preserved; Version 2.52 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
 as useful results arrive; the five E obligations are not new serial phases.
@@ -82,7 +90,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
 | E01 / C02–C03 — Real package and chronology | Continue distinct date leads; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts beyond the completed lease case | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
-| E05 / C04 — Genuine source conflict | Select a different documented comparison from retained sources; check identity, precision, basis and revision context | An actually incompatible same-context pair and a reproducible admission, alternatives and dependent-result invalidation example. Do not repeat the closed 290-equal-pair search or manufacture a conflict |
+| E05 / C04 — Genuine source conflict | Work the retained JPMorgan 2023 reference disagreement after reconfirming target identity and page numbering | Actual source-to-review/admission/invalidation example, explicitly limited to navigation semantics. Retain broader accounting-conflict limits and pending human adjudication; do not repeat the closed 290-equal-pair search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
 | E14 / C07 — Tools and interfaces | Extend failure/interface examples and applicable dependency/model/terms evidence | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
@@ -114,9 +122,10 @@ literature, reuse, acceptance, narratives, mappings, clocks, information,
 uncertainty admission, economic memory, review and recovery. No five-row
 summary closes or replaces those wider obligations.
 
-The refresh audit found stale next actions and excessive completed-work history
-in active controls. Prior bytes are archived and active instructions shortened.
-The date checker repair is recorded, not treated as a source failure. Source
+The latest [53-row disposition matrix](../../data/accounting-master/readiness-refresh-20261013/dispositions.md)
+replaces stale residual descriptions, credits completed source/method repairs,
+and records the narrower-than-original E05 scheduling assumption. All five
+workstreams remain open. Prior bytes are archived. Source
 check counts, clean builds and examples remain scoped engineering evidence;
 none promotes accounting validity, empirical forecasting or human comprehension.
 
