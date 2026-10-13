@@ -1,0 +1,3 @@
+The prior unit committed as c476242 after a broad whitespace check reported whitespace in raw extraction/build logs and protected copied source files. Authored additions were then checked without such findings; all 100 unrelated staged entries were verified unchanged. Prior raw bytes remain preserved. Use bounded captured diagnostic output for subsequent checks.
+
+Environment correction: the previous unit described its interpreter as system python3. The resolved interpreter in this continuing shell is /home/chakwong/miniconda3/envs/tfgpu/bin/python3. The new manifest records this exact tfgpu interpreter. Only Python arithmetic, document, hashing and subprocess libraries were used; no TensorFlow/GPU initialization occurred.

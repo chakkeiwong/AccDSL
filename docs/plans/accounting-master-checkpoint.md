@@ -7,13 +7,14 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.54, 199 pages.**
-PDF: `docs/design/proposal/manuscript-transition-balances-20261013/accounting-product-proposal.pdf`
-SHA256: `d69f9719902989736b79fec98b1e3bb03b255c5c74eaf1bfcfb7794e6f20eec3`.
-The last integration derives the conditional insurance transition balances,
-opening-equity bridge and group-pooling counterexample. All 45 source/arithmetic
-and 123 manuscript checks pass; seven final pages were inspected.
-[Result](../../data/accounting-master/insurance-transition-balances-20261013/result.md).
+**Version 2.55, 201 pages.**
+PDF: `docs/design/proposal/manuscript-reinsurance-recovery-20261013/accounting-product-proposal.pdf`
+SHA256: `1655ce7fbf6d266d589c0c4f448cab2bb4f700e1cfb46abf5d2613a6bd5fd789`.
+The last integration derives the reinsurance transition loss-recovery component,
+its timing exception, conditional equity bridge and later upper bound. All 44
+source/arithmetic and 123 manuscript checks pass; six source images and seven
+final manuscript pages were inspected.
+[Result](../../data/accounting-master/reinsurance-transition-recovery-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -72,10 +73,11 @@ It credits completed source/method work and keeps all five E obligations open.
 The [JPMorgan walkthrough](../../data/accounting-master/jpmorgan-reference-conflict-20261013/result.md)
 now supplies an actual source-reference example for E05, with broader and human
 acceptance still open. The [transition balance example](../../data/accounting-master/insurance-transition-balances-20261013/result.md)
-is now complete within its conditional scope. Execute the
-[reinsurance transition recovery plan](accounting-reinsurance-transition-recovery-20261013.md)
-next: inspect C20A and its supporting measurement/timing rules, derive the
-separate loss-recovery component and preserve unknown full-asset measurements.
+is complete within its conditional scope. The [reinsurance component extension](../../data/accounting-master/reinsurance-transition-recovery-20261013/result.md)
+is also complete, while whole-asset valuation remains an explicit input.
+Execute the [acquisition-asset recoverability plan](accounting-insurance-acquisition-recoverability-20261013.md)
+next: inspect the allocation and overlapping impairment rules, work both tests
+without double counting, and distinguish reversal from cash recovery.
 
 ## Remaining program and controls
 

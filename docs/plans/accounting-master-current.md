@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.54, 199 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-transition-balances-20261013/accounting-product-proposal.pdf`
-SHA256: `d69f9719902989736b79fec98b1e3bb03b255c5c74eaf1bfcfb7794e6f20eec3`.
+**Version 2.55, 201 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-reinsurance-recovery-20261013/accounting-product-proposal.pdf`
+SHA256: `1655ce7fbf6d266d589c0c4f448cab2bb4f700e1cfb46abf5d2613a6bd5fd789`.
 
 ## Current evidence and next action
 
@@ -79,10 +79,14 @@ reconciles opening equity, and rejects pooling across admitted groups before
 the sign calculation. Actual valuations and broader transition effects remain
 separate obligations.
 
-Next execute the [reinsurance transition recovery plan](accounting-reinsurance-transition-recovery-20261013.md).
-Derive C20A's separate loss-recovery component, check the timing exception and
-show why the component does not identify the whole asset or reduce the issued
-liability. Conditional inputs and historical source limits remain explicit.
+Version 2.55 adds the [reinsurance transition recovery](../../data/accounting-master/reinsurance-transition-recovery-20261013/result.md):
+44 source/arithmetic and 123 manuscript checks pass; six source images and
+seven final pages were inspected. The timing exception, component/whole-asset
+distinction, conditional equity bridge and later upper bound are explicit.
+
+Next execute the [acquisition-asset recoverability plan](accounting-insurance-acquisition-recoverability-20261013.md).
+Work the group and renewal tests without double counting impairment, then
+check the reversal and cash consequences under explicit conditional inputs.
 
 ## Remaining proposal phases
 
@@ -91,7 +95,7 @@ liability. Conditional inputs and historical source limits remain explicit.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.54; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.55; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.52 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18

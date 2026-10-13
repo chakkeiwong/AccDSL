@@ -4,9 +4,26 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current insurance transition balance example
+## Current reinsurance transition recovery example
 
-13 October 2026. Version **2.54, 199 pages** is current:
+13 October 2026. Version **2.55, 201 pages** is current:
+`docs/design/proposal/manuscript-reinsurance-recovery-20261013/accounting-product-proposal.pdf`.
+SHA256: `1655ce7fbf6d266d589c0c4f448cab2bb4f700e1cfb46abf5d2613a6bd5fd789`.
+The [result](../../data/accounting-master/reinsurance-transition-recovery-20261013/result.md)
+advances E07, MC08/10/11/13/16/19/22/28/30/32–35 and G4/G6/G7/G15/G16.
+Section 12.10 derives loss recovery of 12, preserves the issued liability,
+works equity only after supplying separate complete-asset inputs, and treats
+the later 8.4 diagnostic as a bound. C20A's B119C timing exception is explicit.
+All 44 source/arithmetic and 123 manuscript checks pass; six source and seven
+final pages were inspected. All 49 previous displays and 360 citations survive;
+one display and six citations are added. Full asset valuation, actual treaty
+facts, current authority and human/domain acceptance remain open. Requirement
+classifications and **not_ready** remain. Next execute
+`accounting-insurance-acquisition-recoverability-20261013.md`.
+
+## Preserved insurance transition balance example
+
+13 October 2026. Version **2.54, 199 pages** was the candidate for this unit:
 `docs/design/proposal/manuscript-transition-balances-20261013/accounting-product-proposal.pdf`.
 SHA256: `d69f9719902989736b79fec98b1e3bb03b255c5c74eaf1bfcfb7794e6f20eec3`.
 The [result](../../data/accounting-master/insurance-transition-balances-20261013/result.md)
