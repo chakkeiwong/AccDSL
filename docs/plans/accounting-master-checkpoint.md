@@ -7,14 +7,14 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.55, 201 pages.**
-PDF: `docs/design/proposal/manuscript-reinsurance-recovery-20261013/accounting-product-proposal.pdf`
-SHA256: `1655ce7fbf6d266d589c0c4f448cab2bb4f700e1cfb46abf5d2613a6bd5fd789`.
-The last integration derives the reinsurance transition loss-recovery component,
-its timing exception, conditional equity bridge and later upper bound. All 44
+**Version 2.56, 203 pages.**
+PDF: `docs/design/proposal/manuscript-acquisition-recoverability-20261013/accounting-product-proposal.pdf`
+SHA256: `5349b23976f17ce45bb23fb08fd9a68d662cb9b852ca0317423809eb3d1c4085`.
+The last integration works acquisition-asset impairment and reversal with
+separate group and renewal tests, avoiding duplicate loss recognition. All 50
 source/arithmetic and 123 manuscript checks pass; six source images and seven
 final manuscript pages were inspected.
-[Result](../../data/accounting-master/reinsurance-transition-recovery-20261013/result.md).
+[Result](../../data/accounting-master/insurance-acquisition-recoverability-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -75,9 +75,11 @@ now supplies an actual source-reference example for E05, with broader and human
 acceptance still open. The [transition balance example](../../data/accounting-master/insurance-transition-balances-20261013/result.md)
 is complete within its conditional scope. The [reinsurance component extension](../../data/accounting-master/reinsurance-transition-recovery-20261013/result.md)
 is also complete, while whole-asset valuation remains an explicit input.
-Execute the [acquisition-asset recoverability plan](accounting-insurance-acquisition-recoverability-20261013.md)
-next: inspect the allocation and overlapping impairment rules, work both tests
-without double counting, and distinguish reversal from cash recovery.
+The [acquisition recoverability example](../../data/accounting-master/insurance-acquisition-recoverability-20261013/result.md)
+is complete within its conditional scope. Execute the
+[acquisition-incorporation plan](accounting-insurance-acquisition-incorporation-20261013.md)
+next: carry the same assets/net inflows into recognition, initial CSM and premium
+receipt, without retaining a duplicated acquisition asset or premature revenue.
 
 ## Remaining program and controls
 

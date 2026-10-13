@@ -4,9 +4,25 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current reinsurance transition recovery example
+## Current acquisition-asset recoverability example
 
-13 October 2026. Version **2.55, 201 pages** is current:
+13 October 2026. Version **2.56, 203 pages** is current:
+`docs/design/proposal/manuscript-acquisition-recoverability-20261013/accounting-product-proposal.pdf`.
+SHA256: `5349b23976f17ce45bb23fb08fd9a68d662cb9b852ca0317423809eb3d1c4085`.
+The [result](../../data/accounting-master/insurance-acquisition-recoverability-20261013/result.md)
+adds E07 method evidence for MC08/10/11/13/16/19/22/28/30/32–35 and
+G4/G6/G7/G15/G16. Section 12.7 derives impairment 25, rejects double counting
+of 5, and works reversal 15 with cash unchanged. All 50 source/arithmetic and
+123 manuscript checks pass; six source images and seven final pages were
+inspected. The 50 prior displays and 366 citations survive; one display and
+six citations are added. Actual eligibility, allocation and actuarial inputs,
+current authority and independent/human acceptance remain open. Overall
+readiness remains **not_ready**. Next:
+`accounting-insurance-acquisition-incorporation-20261013.md`.
+
+## Preserved reinsurance transition recovery example
+
+13 October 2026. Version **2.55, 201 pages** was the candidate for this unit:
 `docs/design/proposal/manuscript-reinsurance-recovery-20261013/accounting-product-proposal.pdf`.
 SHA256: `1655ce7fbf6d266d589c0c4f448cab2bb4f700e1cfb46abf5d2613a6bd5fd789`.
 The [result](../../data/accounting-master/reinsurance-transition-recovery-20261013/result.md)

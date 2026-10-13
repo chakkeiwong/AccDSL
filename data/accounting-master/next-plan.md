@@ -1,24 +1,23 @@
 # Accounting proposal — direct next plan
 
-13 October 2026. Version 2.55, 201 pages; readiness **not_ready**.
-PDF: docs/design/proposal/manuscript-reinsurance-recovery-20261013/accounting-product-proposal.pdf
-SHA256: 1655ce7fbf6d266d589c0c4f448cab2bb4f700e1cfb46abf5d2613a6bd5fd789
+13 October 2026. Version 2.56, 203 pages; readiness **not_ready**.
+PDF: docs/design/proposal/manuscript-acquisition-recoverability-20261013/accounting-product-proposal.pdf
+SHA256: 5349b23976f17ce45bb23fb08fd9a68d662cb9b852ca0317423809eb3d1c4085
 Implementation and the old controller remain held.
 
-The full readiness refresh covers MC01–MC35/G1–G18. Versions 2.53–2.55 add
-the actual JPMorgan reference-conflict walkthrough, conditional issued-group
-transition balances and the separate reinsurance loss-recovery calculation.
-Latest result: data/accounting-master/reinsurance-transition-recovery-20261013/result.md.
-All 44 source/arithmetic and 123 manuscript checks pass; six source images and
-seven final manuscript pages were inspected. Whole-asset valuations remain
-conditional inputs; do not describe the component example as a full valuation.
+The full readiness refresh covers MC01–MC35/G1–G18. Version 2.56 adds
+acquisition-asset impairment/reversal to the prior actual conflict and issued/
+held-reinsurance transition examples. Latest result:
+data/accounting-master/insurance-acquisition-recoverability-20261013/result.md.
+All 50 source/arithmetic and 123 manuscript checks pass; six source images and
+seven final pages were inspected. The inputs remain conditional method data.
 
-Execute docs/plans/accounting-insurance-acquisition-recoverability-20261013.md.
-Inspect 28A–28F, 32(a), B35A–B35D and presentation rules in the retained source.
-Work acquisition assets for expected renewal groups, overlapping impairment
-tests and reversal without double counting. Keep ordinary impairment separate
-from transition choices and cash changes. Output:
-data/accounting-master/insurance-acquisition-recoverability-20261013/.
+Execute docs/plans/accounting-insurance-acquisition-incorporation-20261013.md.
+Inspect recognition, initial CSM, asset derecognition and revenue conditions;
+carry the prior acquisition assets/net inflows into group recognition, then
+work premium receipt and the balance sheet. Do not duplicate the acquisition
+asset or recognise premium as immediate profit. Output:
+data/accounting-master/insurance-acquisition-incorporation-20261013/.
 
 All five E workstreams and broader MC/G obligations remain open. Preserve
 closed source/method inquiries and historical candidates. Frozen 56/136 dates,
