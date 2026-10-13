@@ -4,7 +4,20 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current checkpoint — Version 2.67
+## Current whole-program assessment — Version 2.67
+
+The [post-awards reassessment](../../data/accounting-master/post-awards-readiness-20261013/result.md)
+is complete: all35 requirements/18 gaps and statuses preserved,16/10
+descriptions updated,154 integrity checks pass. Twenty-two of26 sources
+carry prior judgments; three new transitive sections are separately credited.
+Three new counterparts are distinct from three already located forms now
+inspected. Actual grants and broader semantics remain unresolved. Execute
+the [Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.md).
+
+Readiness **not_ready**. This53-row assessment now controls author evidence
+descriptions; original acceptance obligations/statuses remain unchanged.
+
+## Preserved integration checkpoint — Version 2.67
 
 13 October 2026. **221 pages; not_ready**.
 PDF: docs/design/proposal/manuscript-apple-award-versions-20261013/accounting-product-proposal.pdf

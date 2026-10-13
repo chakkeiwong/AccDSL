@@ -155,8 +155,16 @@ is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
 forms now have selected substantive clauses inspected. General prorating and
 CEO continued eligibility differ; both retain later delivery. Actual-grant
 applicability and the proxy timing description remain unresolved. All104
-source and143 manuscript checks pass; five final pages inspected. Execute
-the [full-program reassessment](accounting-post-awards-readiness-20261013.md).
+source and143 manuscript checks pass; five final pages inspected. The full-program assessment is now refreshed.
+
+The [post-awards reassessment](../../data/accounting-master/post-awards-readiness-20261013/result.md)
+is complete: all35 requirements/18 gaps and statuses preserved,16/10
+descriptions updated,154 integrity checks pass. Twenty-two of26 sources
+carry prior judgments; three new transitive sections are separately credited.
+Three new counterparts are distinct from three already located forms now
+inspected. Actual grants and broader semantics remain unresolved. Execute
+the [Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.md).
+
 
 
 
@@ -169,7 +177,7 @@ the [full-program reassessment](accounting-post-awards-readiness-20261013.md).
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
 | P18 — Manuscript integration | Delivered through Version 2.67; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
-| P19 — Readiness assessment | Historical negative assessment preserved; Version 2.64 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
+| P19 — Readiness assessment | Historical negative assessment preserved; Version 2.67 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
 as useful results arrive; the five E obligations are not new serial phases.
@@ -178,11 +186,11 @@ as useful results arrive; the five E obligations are not new serial phases.
 
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
-| E01 / C02–C03 — Real package and chronology | Annual/interim joins, conditional completion and settlement/query tests delivered; three2022 plan/form counterparts acquired with selected clauses; conditional performance method delivered; retained version comparison delivered; preserve unresolved actual grants and select the next distinct source/method after full reassessment; retain unidentified actual histories and separate date/exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
+| E01 / C02–C03 — Real package and chronology | Annual/interim joins, conditional completion and settlement/query tests delivered; three2022 plan/form counterparts acquired with selected clauses; conditional performance method delivered; retained version comparison delivered; preserve unresolved actual grants and actual-grant limitations preserved; continue distinct package/authority work without repeating the award chain; retain unidentified actual histories and separate date/exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
-| E14 / C07 — Tools and interfaces | Extend failure/interface examples and applicable dependency/model/terms evidence | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
+| E14 / C07 — Tools and interfaces | Inspect pinned Arelle fact equality, duplicate grouping and occurrence preservation; retain prior cache/controller/Docling work | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
 
 The broader E07 queue includes revenue, leases, FX, tax, asset modification,
 floating-rate benchmarks, options, hedges, EPS and cross-standard financing;
@@ -211,11 +219,11 @@ literature, reuse, acceptance, narratives, mappings, clocks, information,
 uncertainty admission, economic memory, review and recovery. No five-row
 summary closes or replaces those wider obligations.
 
-The latest [53-row disposition matrix](../../data/accounting-master/post-apple-readiness-20261013/dispositions.md)
+The latest [53-row disposition matrix](../../data/accounting-master/post-awards-readiness-20261013/dispositions.md)
 replaces stale residual descriptions, credits completed source/method repairs,
-and records the narrower-than-original E05 scheduling assumption. The V2.65–2.66 supplements add three exhibit counterparts, conditional
-reserve/settlement/performance consequences and a source-specific timing question without changing any acceptance
-status. All five workstreams remain open. Prior bytes are archived. Source
+and records the narrower-than-original E05 scheduling assumption. The V2.65–2.67 supplements add three counterparts and selected
+reserve/performance/versioned-settlement consequences without changing
+acceptance statuses; the full author matrix now credits them. All five workstreams remain open. Prior bytes are archived. Source
 check counts, clean builds and examples remain scoped engineering evidence;
 none promotes accounting validity, empirical forecasting or human comprehension.
 

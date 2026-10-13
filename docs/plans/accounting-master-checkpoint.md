@@ -15,8 +15,16 @@ is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
 forms now have selected substantive clauses inspected. General prorating and
 CEO continued eligibility differ; both retain later delivery. Actual-grant
 applicability and the proxy timing description remain unresolved. All104
-source and143 manuscript checks pass; five final pages inspected. Execute
-the [full-program reassessment](accounting-post-awards-readiness-20261013.md).
+source and143 manuscript checks pass; five final pages inspected. The full-program assessment is now refreshed.
+
+The [post-awards reassessment](../../data/accounting-master/post-awards-readiness-20261013/result.md)
+is complete: all35 requirements/18 gaps and statuses preserved,16/10
+descriptions updated,154 integrity checks pass. Twenty-two of26 sources
+carry prior judgments; three new transitive sections are separately credited.
+Three new counterparts are distinct from three already located forms now
+inspected. Actual grants and broader semantics remain unresolved. Execute
+the [Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.md).
+
 
 Readiness **not_ready**. Independent/domain/human acceptance remains pending.
 The three new stock-plan counterparts remain supplemental; the three forms
@@ -99,8 +107,8 @@ unresolved actual admission. The [settlement-path inquiry](../../data/accounting
 now tests downstream categories, timing and query-specific aggregation. The [post-Apple reassessment](../../data/accounting-master/post-apple-readiness-20261013/result.md)
 is complete:148 integrity checks preserve all35 requirements/18 gaps and
 credit V2.60–2.64. The stock-plan source inquiry is now complete within
-scope, with three supplemental counterparts. The performance-award inquiry is also delivered. The version inquiry is now delivered. Execute the
-[post-awards reassessment](accounting-post-awards-readiness-20261013.md).
+scope, with three supplemental counterparts. The performance-award inquiry is also delivered. The version inquiry is now delivered. The post-awards reassessment is complete. Execute the
+[Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.md).
 The frozen40-target list and failed indenture routes remain preserved.
 
 ## Remaining program and controls
