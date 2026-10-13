@@ -4,7 +4,29 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current checkpoint — Version 2.66
+## Current checkpoint — Version 2.67
+
+13 October 2026. **221 pages; not_ready**.
+PDF: docs/design/proposal/manuscript-apple-award-versions-20261013/accounting-product-proposal.pdf
+SHA256: 28273d70fdabfb4fdf12d37f3aeec18096e9943d39ea575d2fccf70d546ceffd.
+The [award-version inquiry](../../data/accounting-master/apple-award-versions-20261013/result.md)
+is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
+forms now have selected substantive clauses inspected. General prorating and
+CEO continued eligibility differ; both retain later delivery. Actual-grant
+applicability and the proxy timing description remain unresolved. All104
+source and143 manuscript checks pass; five final pages inspected. Execute
+the [full-program reassessment](accounting-post-awards-readiness-20261013.md).
+
+MC01/03–05/08/10–11/17/28/30/32–35 and G5/G7/G11/G13/G15/G16 receive
+selected source-version and conditional-consequence evidence. All original
+obligations/statuses remain. Source identity, general versus CEO populations,
+retirement conditions and later delivery remain distinct from actual-grant
+admission. The next full assessment will credit V2.65–2.67 together.
+
+The dated entries below are historical. This checkpoint and the master next
+plan control execution; old next-action wording does not supersede them.
+
+## Preserved checkpoint — Version 2.66
 
 13 October 2026. **219 pages; not_ready**.
 PDF: docs/design/proposal/manuscript-apple-performance-award-20261013/accounting-product-proposal.pdf

@@ -7,21 +7,20 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.66, 219 pages.**
-PDF: docs/design/proposal/manuscript-apple-performance-award-20261013/accounting-product-proposal.pdf
-SHA256: d3c37127c7ede9648f680ff0577b9a8d33077b574611be806a6c201f2c8aa061.
-The [performance-award inquiry](../../data/accounting-master/apple-performance-award-20261013/result.md)
-is delivered in Version 2.66: the disclosed October2023 schedule, negative
-return cap, price-window counterexample, service fraction and cash dividend
-equivalents are integrated with explicit hypothetical inputs. All81 source
-and137 manuscript checks pass; five final pages inspected. The2022 form and
-proxy termination wording have an unresolved applicability/timing distinction.
-Inspect the already retained versions next:
-[award-version inquiry](accounting-apple-award-versions-20261013.md).
+**Version 2.67, 221 pages.**
+PDF: docs/design/proposal/manuscript-apple-award-versions-20261013/accounting-product-proposal.pdf
+SHA256: 28273d70fdabfb4fdf12d37f3aeec18096e9943d39ea575d2fccf70d546ceffd.
+The [award-version inquiry](../../data/accounting-master/apple-award-versions-20261013/result.md)
+is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
+forms now have selected substantive clauses inspected. General prorating and
+CEO continued eligibility differ; both retain later delivery. Actual-grant
+applicability and the proxy timing description remain unresolved. All104
+source and143 manuscript checks pass; five final pages inspected. Execute
+the [full-program reassessment](accounting-post-awards-readiness-20261013.md).
 
-Readiness **not_ready**; independent/domain/human acceptance remains pending.
-The three stock-plan counterparts remain supplemental;37 of the original40
-unresolved targets still lack counterparts in that supplement.
+Readiness **not_ready**. Independent/domain/human acceptance remains pending.
+The three new stock-plan counterparts remain supplemental; the three forms
+now inspected were already located. No additional acquisition count is added.
 
 ## Latest completed work
 
@@ -100,8 +99,8 @@ unresolved actual admission. The [settlement-path inquiry](../../data/accounting
 now tests downstream categories, timing and query-specific aggregation. The [post-Apple reassessment](../../data/accounting-master/post-apple-readiness-20261013/result.md)
 is complete:148 integrity checks preserve all35 requirements/18 gaps and
 credit V2.60–2.64. The stock-plan source inquiry is now complete within
-scope, with three supplemental counterparts. The performance-award inquiry is also delivered. Execute the
-[award-version inquiry](accounting-apple-award-versions-20261013.md).
+scope, with three supplemental counterparts. The performance-award inquiry is also delivered. The version inquiry is now delivered. Execute the
+[post-awards reassessment](accounting-post-awards-readiness-20261013.md).
 The frozen40-target list and failed indenture routes remain preserved.
 
 ## Remaining program and controls
