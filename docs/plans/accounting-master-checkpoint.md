@@ -7,15 +7,14 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.59, 209 pages.**
-PDF: `docs/design/proposal/manuscript-munich-measurement-bridge-20261013/accounting-product-proposal.pdf`
-SHA256: `b49177e1ebd02f31804d6222bd6c1b651d05cbf66e18832d779f29c02112b9ca`.
-The last integration reconciles actual Munich Re CSM movements and identifies
-the excluded PAA remaining-coverage population. The acquisition-expense cause
-remains unresolved. All 68 source/arithmetic and 124 manuscript checks pass;
-three source images were newly read, five were carried by matching hashes,
-and eight final manuscript pages were inspected.
-[Result](../../data/accounting-master/munich-measurement-bridge-20261013/result.md).
+**Version 2.60, 211 pages.**
+PDF: `docs/design/proposal/manuscript-apple-statement-network-20261013/accounting-product-proposal.pdf`
+SHA256: `42e5062870c4c6f3462aae2093c89f4046aef853f1659d4148cf2c1465b7fe60`.
+The latest integration joins Apple's five FY2024 statements and opening balance
+sheet: 102 amount/dash rows, 27 opening counterparts and 69 relationships.
+All 95 source/arithmetic and 146 manuscript checks pass. Five source pages
+and nine final manuscript pages were inspected; prior math and citations remain.
+[Result](../../data/accounting-master/apple-statement-network-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -85,9 +84,10 @@ The [measurement bridge](../../data/accounting-master/munich-measurement-bridge-
 is now complete within scope. The [whole-program reassessment](../../data/accounting-master/post-insurance-readiness-20261013/result.md)
 credits the seven recent integrations and preserves all original MC/G
 obligations. Its 173 integrity checks pass; twenty source judgments are carried.
-Execute the [Apple statement network](accounting-apple-statement-network-20261013.md)
-next, then address joint histories and conditional paths from its unresolved
-links. A complete statement table does not close the real-company requirement.
+The [annual statement network](../../data/accounting-master/apple-statement-network-20261013/result.md)
+is complete within scope. Execute the [interim statement join](accounting-apple-interim-network-20261013.md),
+then address joint histories and conditional paths from the unresolved links.
+Complete statement tables do not close the real-company requirement.
 
 ## Remaining program and controls
 

@@ -1193,3 +1193,17 @@ MC01/03/16/28 and G5 still need a joined real-company history and path. Execute
 the [Apple statement plan](accounting-apple-statement-network-20261013.md), then
 develop its joint history/path dependencies without inventing transaction
 causes. All five E workstreams remain open. Version 2.59 and not_ready remain.
+
+## E01 Apple annual statement network, 13 October 2026
+
+Version 2.60, 211 pages, integrates the [annual network](../../data/accounting-master/apple-statement-network-20261013/result.md):
+102 amount/dash rows, 27 opening balance-sheet counterparts, 57 displayed
+identities and 12 unexplained-difference diagnostics. All 95 source/arithmetic
+and 146 manuscript checks pass; five source and nine final pages inspected.
+Income/OCI/equity/net-assets/cash now join across the full selected statements.
+Original obligations and all prior math/citations remain. MC01–05/07–11/13/
+15–16/18/28/30/32–35 and G1/G4/G5/G11/G12/G15/G16 advance within scope.
+
+Residual causes, private transactions, complete package semantics, joint
+histories and future paths remain unfinished. Execute the [interim join](accounting-apple-interim-network-20261013.md),
+then the historical/path dependencies. Full readiness remains not_ready.
