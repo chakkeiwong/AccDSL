@@ -7,14 +7,14 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.61, 212 pages.**
-PDF: `docs/design/proposal/manuscript-apple-interim-network-20261013/accounting-product-proposal.pdf`
-SHA256: `cf44b9fb76a4d6ed47c8921912dca2c6399a795460a92f3838c4582653d86e42`.
-The latest integration joins the five FY2025 Q1 statement tables to FY2024:
-100 current rows, 27 balance comparatives and five opening equity/cash links.
-All 114 source/arithmetic and 137 manuscript checks pass. Five derived source
-views and six final manuscript pages were inspected; prior math/citations remain.
-[Result](../../data/accounting-master/apple-interim-network-20261013/result.md).
+**Version 2.62, 213 pages.**
+PDF: `docs/design/proposal/manuscript-apple-history-compatibility-20261013/accounting-product-proposal.pdf`
+SHA256: `1d13ce61e2b99da9967f2c20de19ff6158b14427244d5136d7e52620bc965de9`.
+The latest integration rejects sharing one fixed company remainder between the
+two earlier PP&E witnesses and derives necessary coupled-completion conditions.
+All 42 source/arithmetic and 135 manuscript checks pass; five final manuscript
+pages inspected. Prior source/math remains. Actual completion is not established.
+[Result](../../data/accounting-master/apple-history-compatibility-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -86,9 +86,10 @@ credits the seven recent integrations and preserves all original MC/G
 obligations. Its 173 integrity checks pass; twenty source judgments are carried.
 The [annual statement network](../../data/accounting-master/apple-statement-network-20261013/result.md)
 and [interim join](../../data/accounting-master/apple-interim-network-20261013/result.md)
-are complete within scope. Execute the [historical compatibility inquiry](accounting-apple-history-compatibility-20261013.md),
-then address the conditional completions and future paths it requires.
-Complete statement tables do not close the real-company requirement.
+are complete within scope. The [history compatibility inquiry](../../data/accounting-master/apple-history-compatibility-20261013/result.md)
+is also complete: the same-remainder construction fails, while different
+completions remain untested. Execute the [coupled completion inquiry](accounting-apple-coupled-completion-20261013.md),
+keeping detailed-row compatibility and actual source admission separate.
 
 ## Remaining program and controls
 

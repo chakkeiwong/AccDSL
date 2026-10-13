@@ -1221,3 +1221,14 @@ obligations, prior mathematics/citations and not_ready remain. Next execute the
 [history compatibility inquiry](accounting-apple-history-compatibility-20261013.md),
 then conditional completion/path work without claiming that table joins identify
 all actual journals or close the package.
+
+## E01 Apple historical compatibility, 13 October 2026
+
+Version 2.62, 213 pages, integrates the [compatibility finding](../../data/accounting-master/apple-history-compatibility-20261013/result.md).
+H1/H2 cannot share one unchanged company remainder: H2 adds 1,000 liabilities
+and removes 1,000 profit/equity, despite a balanced identity and unchanged
+asset/cash effects. Necessary opposite remainder changes are derived; existence
+is not established. All 42 source/arithmetic and 135 manuscript checks pass;
+five final pages inspected. MC08–11/13/15–16/18/28/32–35 and G1/G4/G5/
+G15/G16 advance. The expected rejection triggers the [coupled repair](accounting-apple-coupled-completion-20261013.md).
+No source-admitted full history or forecast is claimed; not_ready remains.
