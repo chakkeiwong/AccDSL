@@ -4,7 +4,23 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current scoped integration — Version 2.68
+## Current scoped integration — Version 2.69
+
+223 pages; **not_ready**.
+PDF: docs/design/proposal/manuscript-arelle-inline-values-20261013/accounting-product-proposal.pdf
+SHA256: db8cdbf471a8a890f3677f9222d10f17b73541a132970c5858683167ca000e05.
+The [inline-value inquiry](../../data/accounting-master/arelle-inline-values-20261013/result.md)
+is delivered in Version2.69: transform/scale/sign are already applied by the
+value properties; assembled raw text and continuation outcomes differ from
+original bytes. All125 source/arithmetic and139 manuscript checks pass; six
+final pages inspected. No runtime/schema/accounting validation is inferred.
+Execute the [post-adapter full assessment](accounting-post-adapter-readiness-20261013.md).
+
+MC02/03/04/07/25/27/30–35; G2/G9/G11/G12/G17/G18 receive selected E14/E01
+evidence. All35 requirements/18 gaps and original statuses remain. Version2.67
+is still the last full assessment until the scheduled refresh is completed.
+
+## Preserved scoped integration — Version 2.68
 
 222 pages; **not_ready**.
 PDF: docs/design/proposal/manuscript-arelle-fact-identity-20261013/accounting-product-proposal.pdf
@@ -15,7 +31,7 @@ findings and five constructed examples distinguish values, aspects, consistency
 and occurrence preservation. All151 source/arithmetic and142 manuscript checks
 pass; six final pages inspected. No Arelle execution or accounting admission
 follows. This is a scoped supplement to the unchanged Version2.67 full assessment.
-Execute the [inline-value inquiry](accounting-arelle-inline-values-20261013.md).
+The inline-value inquiry is now delivered in2.69.
 
 MC02/03/04/07/25/27/30–35 and G2/G9/G11/G12/G17/G18 receive
 scoped E14/E01 source/interface evidence. All35 requirements/18 gaps, original

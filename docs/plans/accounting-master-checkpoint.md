@@ -7,9 +7,9 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.68, 222 pages.**
-PDF: docs/design/proposal/manuscript-arelle-fact-identity-20261013/accounting-product-proposal.pdf
-SHA256: 2c251f9659a52933b8a8525e5fa64df30cbfdab363570d515bbdb2ef2c99a166.
+**Version 2.69, 223 pages.**
+PDF: docs/design/proposal/manuscript-arelle-inline-values-20261013/accounting-product-proposal.pdf
+SHA256: db8cdbf471a8a890f3677f9222d10f17b73541a132970c5858683167ca000e05.
 The [award-version inquiry](../../data/accounting-master/apple-award-versions-20261013/result.md)
 is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
 forms now have selected substantive clauses inspected. General prorating and
@@ -31,13 +31,20 @@ now inspected were already located. No additional acquisition count is added.
 
 ## Latest completed work
 
+The [inline-value inquiry](../../data/accounting-master/arelle-inline-values-20261013/result.md)
+is delivered in Version2.69: transform/scale/sign are already applied by the
+value properties; assembled raw text and continuation outcomes differ from
+original bytes. All125 source/arithmetic and139 manuscript checks pass; six
+final pages inspected. No runtime/schema/accounting validation is inferred.
+Execute the [post-adapter full assessment](accounting-post-adapter-readiness-20261013.md).
+
 The [fact-preservation inquiry](../../data/accounting-master/arelle-fact-identity-20261013/result.md)
 is delivered in Version 2.68: three pinned sources, nineteen line-bound
 findings and five constructed examples distinguish values, aspects, consistency
 and occurrence preservation. All151 source/arithmetic and142 manuscript checks
 pass; six final pages inspected. No Arelle execution or accounting admission
 follows. This is a scoped supplement to the unchanged Version2.67 full assessment.
-Execute the [inline-value inquiry](accounting-arelle-inline-values-20261013.md).
+The inline-value inquiry is now complete within scope.
 
 The [lease case](../../data/accounting-master/pingan-lease-transition-20261013/result.md)
 preserves the unadjusted comparative basis, actual adoption balances and
@@ -80,7 +87,7 @@ availability follows.
 
 ## Exact next action
 
-Execute [the inline-value inquiry](accounting-arelle-inline-values-20261013.md); preserve the2.68 candidate and source-only scope.
+Execute [the full-program reassessment](accounting-post-adapter-readiness-20261013.md); preserve the2.69 candidate and source-only evidence limits.
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
 ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
