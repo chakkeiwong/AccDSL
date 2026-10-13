@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.52, 195 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-intragroup-fx-20261013/accounting-product-proposal.pdf`
-SHA256: `a9de309d7c4176b799f094e9a1a91380a6506ce79c284fa6c96b16959cc52a6c`.
+**Version 2.53, 197 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-reference-conflict-20261013/accounting-product-proposal.pdf`
+SHA256: `613aae5c7f2a46bd46aac1c595e855bc21b7145b48b3e438243629af8be1f55e`.
 
 ## Current evidence and next action
 
@@ -66,11 +66,17 @@ Eleven unchanged contract sources carry forward their prior judgments; changed
 passages and scoped results support the author updates. No independent review
 or positive readiness is inferred.
 
-Next execute the [JPMorgan reference-conflict plan](accounting-jpmorgan-reference-conflict-20261013.md).
-Original MC04/MC27/G17 do not restrict the conflict example to monetary amounts.
-Reconfirm the actual printed page-156/page-163 reference disagreement, then
-work layered review, query admission and selective invalidation. Keep its
-source-navigation scope explicit and E05 open pending assessment of the result.
+Version 2.53 integrates the [actual reference-conflict walkthrough](../../data/accounting-master/jpmorgan-reference-conflict-20261013/result.md):
+22 source/dependency and 125 manuscript checks pass, with four source and nine
+final manuscript pages inspected. E05 now has a bounded actual source-reference
+case, with extraction, attribution, navigation and accounting admission kept
+separate. Broader acceptance remains open; a monetary conflict is not claimed.
+
+Next execute the [insurance transition balance plan](accounting-insurance-transition-balances-20261013.md).
+Derive both signs of the fair-value/FCF difference from the retained provisions,
+then work CSM/loss-component, liability and equity consequences. This is a
+conditional method example; actual issuer inputs and operative rules remain
+separate obligations.
 
 ## Remaining proposal phases
 
@@ -79,7 +85,7 @@ source-navigation scope explicit and E05 open pending assessment of the result.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.52; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.53; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.52 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
@@ -90,7 +96,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
 | E01 / C02–C03 — Real package and chronology | Continue distinct date leads; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts beyond the completed lease case | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
-| E05 / C04 — Genuine source conflict | Work the retained JPMorgan 2023 reference disagreement after reconfirming target identity and page numbering | Actual source-to-review/admission/invalidation example, explicitly limited to navigation semantics. Retain broader accounting-conflict limits and pending human adjudication; do not repeat the closed 290-equal-pair search |
+| E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
 | E14 / C07 — Tools and interfaces | Extend failure/interface examples and applicable dependency/model/terms evidence | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |

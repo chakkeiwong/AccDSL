@@ -4,7 +4,29 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current full requirement reassessment
+## Current actual source-reference conflict example
+
+13 October 2026. Version **2.53, 197 pages** is current:
+`docs/design/proposal/manuscript-reference-conflict-20261013/accounting-product-proposal.pdf`.
+SHA256: `613aae5c7f2a46bd46aac1c595e855bc21b7145b48b3e438243629af8be1f55e`.
+The [result](../../data/accounting-master/jpmorgan-reference-conflict-20261013/result.md)
+advances MC01/03/04/25/27/28/30/32–35, G5/G11/G15/G17/G18 and E01/E05.
+Section 3.10 works the actual 2023 page-reference disagreement, retained literal,
+refuted/admitted navigation readings, scoped queries, supersession and selective
+invalidation. The final dependency example includes negative search selection
+and changed review annotations. Four source and nine final manuscript pages
+were inspected; 22 source/dependency and 125 manuscript checks pass. All 48
+prior displays and 355 citation occurrences are preserved, with two citations
+added to an existing bibliography entry.
+
+MC04/MC27/G17 now have a bounded actual source-conflict design walkthrough;
+E05 must no longer be described as lacking any real example. Financial-
+measurement conflict and actual human/runtime adjudication remain unestablished;
+full E05 acceptance and overall readiness remain open. Next execute
+`accounting-insurance-transition-balances-20261013.md` under E07. The previous
+53-row readiness supplement remains a dated baseline for later reassessment.
+
+## Preserved Version 2.52 full requirement reassessment
 
 13 October 2026. Version 2.52 remains the 195-page current candidate. The
 [readiness supplement](../../data/accounting-master/readiness-refresh-20261013/result.md)

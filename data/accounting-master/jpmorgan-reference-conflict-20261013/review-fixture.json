@@ -1,0 +1,41 @@
+{
+  "fixture_role": "Author-specified expected behaviour, not an implemented workflow or observed human decisions",
+  "source_target": "Start of the consolidated financial statements, notes and auditor report expressly linked by Item 15 to Item 8 in the retained 2023 issuer 10-K",
+  "context": {"issuer": "JPMorgan Chase & Co.", "report_year": 2023, "version": "same retained complete issuer PDF", "unit": "printed page locator, not money", "revision_relation": "none between these two clauses", "rounding": "not applicable"},
+  "observed": {"item15_printed_reference": 156, "item8_printed_range": [163, 309], "wrong_target_pdf_page": 158, "auditor_start_pdf_page": 165, "printed_to_physical_offset_at_checked_pages": 2},
+  "decisions": [
+    {"id": "D1", "action": "Propose", "layer": "extraction", "reading": "Item15_literal_156", "expected": "retain literal and exact source"},
+    {"id": "D2", "action": "Accept", "layer": "extraction", "reading": "Item15_literal_156", "reason": "Verified literal in the page image", "expected": "accepted at extraction layer only"},
+    {"id": "D3", "action": "Accept", "layer": "attributed translation", "reading": "Item15 directs its Item8 target to printed page 156", "reason": "Retains what the issuer says, not whether the target is there", "expected": "accepted attribution; conflict annotation retained"},
+    {"id": "D4", "action": "Accept", "layer": "extraction and attributed translation", "reading": "Item8 states the target set appears on 163–309", "reason": "Verified literal, same document and explicit target link", "expected": "retain independent source assertion"},
+    {"id": "D5", "action": "Reject", "layer": "verified target location", "reading": "auditor_start_156", "reason": "Printed 156 is MD&A; actual report heading is on 163", "expected": "rejected reading retained with reason"},
+    {"id": "D6", "action": "Propose then Accept", "layer": "navigation admission", "reading": "auditor_start_163", "reason": "Item8 and actual report heading support the corrected location", "expected": "printed 163 / physical 165 for navigation only"},
+    {"id": "D7", "action": "AcceptAlternative attempted", "layer": "verified target location", "reading": "auditor_start_156", "reason": "Source assertion alone cannot overcome inspected contradictory target evidence", "expected": "reject action; retain attempt; no equal weighting or choice group of two valid targets"},
+    {"id": "D8", "action": "Supersede", "layer": "navigation admission", "reading": "legacy_accepted_start_156", "replacement": "auditor_start_163", "precondition": "Counterfactual imported mistaken prior acceptance exists; not an observed or valid new decision in this project", "expected": "append corrected view; preserve old decision and results; invalidate dependent current-use results"}
+  ],
+  "queries": [
+    {"id": "literal_query", "question": "What number and locator are transcribed from Item15, without a review-status display?", "expected": "156 with original locator; raw payload unchanged"},
+    {"id": "annotated_literal_query", "question": "What does Item15 say with current review annotations?", "expected": "156 with original locator and refreshed conflict annotation"},
+    {"id": "navigation_query", "question": "Where does the auditor report begin in the retained document?", "expected": "printed 163, physical 165, under the proposed corrected navigation view"},
+    {"id": "bounded_negative_query", "question": "Does the selected page contain the auditor-report heading?", "before_selection": 158, "expected_before": false, "after_selection": 165, "expected_after": true},
+    {"id": "global_absence_query", "question": "Does the entire filing have no auditor report?", "expected": "A one-page negative search cannot support this conclusion; the inspected page165 refutes it"},
+    {"id": "accounting_query", "question": "Does the source-reference correction admit an accounting treatment?", "expected": "No: navigation does not supply accounting inputs or authority"}
+  ],
+  "dependencies": {
+    "literal_query": ["item15_literal"],
+    "annotated_literal_query": ["item15_literal", "conflict_disposition"],
+    "navigation_query": ["navigation_selection"],
+    "bounded_negative_query": ["candidate_page_set"],
+    "coverage_summary": ["bounded_negative_query"],
+    "candidate_page_set": ["navigation_selection"],
+    "independent_statement_value": ["independent_statement_span", "statement_context"]
+  },
+  "changed_inputs": ["navigation_selection", "conflict_disposition"],
+  "expected_stale_for_new_view": ["annotated_literal_query", "navigation_query", "candidate_page_set", "bounded_negative_query", "coverage_summary"],
+  "expected_reusable_if_other_dependencies_unchanged": ["literal_query", "independent_statement_value"],
+  "preserved_in_old_view": ["legacy_accepted_start_156", "old_candidate_page_set", "old_bounded_negative_query", "old_coverage_summary"],
+  "full_e05_closed": false,
+  "financial_measurement_conflict": false,
+  "actual_human_adjudication": "pending",
+  "runtime_workflow_executed": false
+}

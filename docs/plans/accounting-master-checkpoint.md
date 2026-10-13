@@ -7,13 +7,13 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.52, 195 pages.**
-PDF: `docs/design/proposal/manuscript-intragroup-fx-20261013/accounting-product-proposal.pdf`
-SHA256: `a9de309d7c4176b799f094e9a1a91380a6506ce79c284fa6c96b16959cc52a6c`.
-The last integration works intragroup foreign-exchange elimination and
-conditional profit/OCI presentation: 49 source/arithmetic and 124 manuscript
-checks pass; six final rendered pages were inspected.
-[Result](../../data/accounting-master/intragroup-fx-20261013/result.md).
+**Version 2.53, 197 pages.**
+PDF: `docs/design/proposal/manuscript-reference-conflict-20261013/accounting-product-proposal.pdf`
+SHA256: `613aae5c7f2a46bd46aac1c595e855bc21b7145b48b3e438243629af8be1f55e`.
+The last integration works the actual JPMorgan source-reference conflict
+through layered review and selective invalidation: 22 source/dependency and
+125 manuscript checks pass; four source and nine final manuscript pages were
+inspected. [Result](../../data/accounting-master/jpmorgan-reference-conflict-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -69,11 +69,12 @@ The [readiness refresh](../../data/accounting-master/readiness-refresh-20261013/
 is complete: all 35 requirements and 18 gaps have current author dispositions,
 with original acceptance wording and the historical negative assessment preserved.
 It credits completed source/method work and keeps all five E obligations open.
-Execute the [JPMorgan reference-conflict plan](accounting-jpmorgan-reference-conflict-20261013.md)
-next. Reconfirm the real page-reference conflict and work extraction, meaning,
-admission and selective invalidation. The original requirements permit this
-reference example; it does not establish conflicting financial measurements or
-automatic E05 closure. Independent and human acceptance remain pending.
+The [JPMorgan walkthrough](../../data/accounting-master/jpmorgan-reference-conflict-20261013/result.md)
+now supplies an actual source-reference example for E05, with broader and human
+acceptance still open. Execute the [insurance transition balance plan](accounting-insurance-transition-balances-20261013.md)
+next: inspect both signs of the fair-value/FCF difference, derive component
+and total liabilities, and work the opening-equity bridge. Conditional input
+values cannot establish actual insurer valuations or eligibility.
 
 ## Remaining program and controls
 
