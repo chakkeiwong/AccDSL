@@ -47,3 +47,14 @@ determine whether a checked material finding changes the manuscript.
 Artifacts: `data/accounting-master/caiani-source-recovery-20261013/`, including
 baseline, acquisition/source records, result and manifest. Keep all MC/G and
 five E obligations active; internal preparation precedes any paid review.
+
+The first trusted handle request resolves to iris.univpm.it and returns a
+403 browser challenge. That route stops. A separate provenance problem in the
+old acquisition record deserves a bounded identity check: the requested arXiv
+ID was 1508.02248, but the excluded extraction names 1508.02253v2 and an
+unrelated sensor-network paper. Query the public arXiv abstract/API for the
+recorded identifier before any new PDF request. This is a new metadata inquiry,
+not permission to reuse the rejected copy. Only if the metadata identifies the
+intended title/authors should a version-specific PDF be fetched and checked.
+Keep all responses and the old discrepancy; no cause is inferred. The original
+eight-resource cap and all source-identity vetoes still apply.

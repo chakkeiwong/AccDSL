@@ -48,12 +48,16 @@ pages. Nine renders and 29 checks support those distinct source dispositions.
 Neither acquisition establishes historical publication of its bytes.
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
-tried three distinct trusted Harvard routes. CAPTCHA, authentication and access
-denial prevented full-text inspection; no technical support was admitted.
-Next execute the [Caiani source-recovery inquiry](accounting-caiani-source-recovery-20261013.md)
-through the untried 11566/358236 institutional handle. The different 11383 and
-Kingston failures remain closed. Acquisition, technical reading and literature
-completeness retain separate states; do not repeat completed units.
+ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
+adds a verified wrong-identifier correction; its six-resource search recovers
+no economics full text. Neither inquiry supplies technical support. Do not
+repeat those routes or use the wrong arXiv identifier.
+
+Next execute the [intragroup-FX inquiry](accounting-intragroup-fx-20261013.md)
+using retained IAS 21. The current manuscript states, but does not work through,
+the exchange result surviving loan elimination and its conditional profit/OCI
+presentation. Complete the bounded journal and statement example before
+integration; acquisition, accounting support and human acceptance stay distinct.
 
 ## Remaining proposal phases
 
@@ -75,7 +79,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 | E01 / C02–C03 — Real package and chronology | Continue distinct date leads; follow new usable leads for the 40 outstanding exhibit targets; extend material semantics and actual contract/entity facts beyond the completed lease case | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Genuine source conflict | Select a different documented comparison from retained sources; check identity, precision, basis and revision context | An actually incompatible same-context pair and a reproducible admission, alternatives and dependent-result invalidation example. Do not repeat the closed 290-equal-pair search or manufacture a conflict |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
-| E08 / C06 — Literature | Execute the bounded Caiani 11566 institutional-route inquiry, then other distinct source routes; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
+| E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
 | E14 / C07 — Tools and interfaces | Extend failure/interface examples and applicable dependency/model/terms evidence | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
 
 The broader E07 queue includes revenue, leases, FX, tax, asset modification,

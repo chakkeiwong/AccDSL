@@ -32,10 +32,14 @@ data/accounting-master/pingan-lease-transition-20261013/result.md.
 The Tamer source inquiry is closed with three trusted access failures;
 no full text or technical claim is admitted. Result:
 data/accounting-master/tamer-source-recovery-20261013/result.md.
-Execute docs/plans/accounting-caiani-source-recovery-20261013.md next. Use
-the distinct retained 11566/358236 repository handle; do not repeat the
-11383/Kingston failures. Output:
-data/accounting-master/caiani-source-recovery-20261013/.
+The Caiani inquiry also closes without full text: repository/SSRN access
+failures and unrelated search results. The recorded arXiv ID is an optics
+paper, so it is excluded from future Caiani requests. Result:
+data/accounting-master/caiani-source-recovery-20261013/result.md.
+Execute docs/plans/accounting-intragroup-fx-20261013.md next using retained
+IAS 21. Work separate/group balances and conditional profit/OCI treatment of
+an exchange result that survives elimination. Source checks precede integration.
+Output: data/accounting-master/intragroup-fx-20261013/.
 The other discovery candidates remain under publication-frontier-20261013;
 no unreviewed hit is admitted and no unchanged blocked route should be retried.
 Check completed result records before scheduling another acquisition.

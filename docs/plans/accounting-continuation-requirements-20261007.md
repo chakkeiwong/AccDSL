@@ -4,6 +4,20 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Latest literature identity correction and next method work
+
+The [Caiani source result](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
+records six distinct resources: no correct full text, two blocked source routes,
+a verified unrelated arXiv identifier and unusable discovery results. The
+recorded 1508.02248 identifier is an optics paper; the previously rejected
+artifact named yet another identifier. Neither supports the economics method.
+Original provenance survives. E08 remains open, with no new technical claim.
+
+P17/E08; MC13–14/18/23/29–32/34–35; G4/G6/G8/G9. Version 2.51, 193 pages,
+not_ready and all five E workstreams remain. Next execute the retained-source
+[intragroup-FX plan](accounting-intragroup-fx-20261013.md). The entries below
+preserve earlier decisions; the active master supplies current execution.
+
 ## Current literature-source continuation
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)

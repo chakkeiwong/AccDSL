@@ -59,11 +59,15 @@ availability follows.
 ## Exact next action
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
-is closed with source-access blockers: CAPTCHA, API authentication and author
-URL access denial. No full text or technical claim was admitted. Execute the
-[Caiani source-recovery plan](accounting-caiani-source-recovery-20261013.md)
-using the distinct retained 11566/358236 repository handle. Preserve the
-completed lease/source units; continue independent work after source failures.
+ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
+found blocked repository/SSRN routes and proved the saved arXiv identifier
+belongs to an unrelated optics paper. No full text or technical claim was
+admitted in either inquiry. Preserve these source-specific limits.
+
+Execute the [intragroup-FX plan](accounting-intragroup-fx-20261013.md) using
+retained IAS 21: work separate/group balances and explain when an exchange
+result survives elimination in profit or OCI. Source and arithmetic checks
+precede any manuscript integration. No new acquisition is needed.
 
 ## Remaining program and controls
 
