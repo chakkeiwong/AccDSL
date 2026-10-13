@@ -92,9 +92,11 @@ is also complete: the same-remainder construction fails. The
 [coupled completion inquiry](../../data/accounting-master/apple-coupled-completion-20261013/result.md)
 now distinguishes algebraic offsets, conditional detailed-row equality and
 unresolved actual admission. The [settlement-path inquiry](../../data/accounting-master/apple-settlement-paths-20261013/result.md)
-now tests downstream categories, timing and query-specific aggregation. Execute
-the [full-program reassessment](accounting-post-apple-readiness-20261013.md)
-before selecting distinct ready work.
+now tests downstream categories, timing and query-specific aggregation. The [post-Apple reassessment](../../data/accounting-master/post-apple-readiness-20261013/result.md)
+is complete:148 integrity checks preserve all35 requirements/18 gaps and
+creditV2.60–2.64. Execute the
+[stock-plan source inquiry](accounting-apple-stock-plan-source-20261013.md).
+The frozen40-target remainder is preserved; do not repeat the blocked indenture routes.
 
 ## Remaining program and controls
 

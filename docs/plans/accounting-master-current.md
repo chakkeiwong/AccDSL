@@ -130,7 +130,10 @@ The [settlement-path inquiry](../../data/accounting-master/apple-settlement-path
 is now delivered in Version 2.64: equal liability totals conceal distinct cash
 categories and dates; independent marginal pairing creates nonexistent paths.
 All 98 source/arithmetic and 137 manuscript checks pass; five final pages read.
-Execute the [full-program reassessment](accounting-post-apple-readiness-20261013.md).
+The [post-Apple reassessment](../../data/accounting-master/post-apple-readiness-20261013/result.md)
+is complete: all35 requirements/18 gaps preserved,18/10 descriptions updated,
+148 integrity checks pass. Twenty-one unchanged source judgments are carried.
+Execute the [stock-plan source inquiry](accounting-apple-stock-plan-source-20261013.md).
 
 ## Remaining proposal phases
 
@@ -140,7 +143,7 @@ Execute the [full-program reassessment](accounting-post-apple-readiness-20261013
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
 | P18 — Manuscript integration | Delivered through Version 2.64; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
-| P19 — Readiness assessment | Historical negative assessment preserved; Version 2.59 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
+| P19 — Readiness assessment | Historical negative assessment preserved; Version 2.64 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
 as useful results arrive; the five E obligations are not new serial phases.
@@ -149,7 +152,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
-| E01 / C02–C03 — Real package and chronology | Annual/interim joins, conditional completion and settlement/query tests delivered; reassess full package/material dependencies and distinct date/exhibit leads while retaining unidentified actual histories | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
+| E01 / C02–C03 — Real package and chronology | Annual/interim joins, conditional completion and settlement/query tests delivered; inspect the unresolved2022 employee stock-plan reference and award dependencies; retain unidentified actual histories and separate date/exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
@@ -182,7 +185,7 @@ literature, reuse, acceptance, narratives, mappings, clocks, information,
 uncertainty admission, economic memory, review and recovery. No five-row
 summary closes or replaces those wider obligations.
 
-The latest [53-row disposition matrix](../../data/accounting-master/post-insurance-readiness-20261013/dispositions.md)
+The latest [53-row disposition matrix](../../data/accounting-master/post-apple-readiness-20261013/dispositions.md)
 replaces stale residual descriptions, credits completed source/method repairs,
 and records the narrower-than-original E05 scheduling assumption. All five
 workstreams remain open. Prior bytes are archived. Source

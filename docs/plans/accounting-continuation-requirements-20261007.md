@@ -1255,3 +1255,16 @@ arithmetic and137 manuscript checks pass; five final pages read; prior source
 records carried by hash. MC08/10–11/13–16/18/28/32–35 and G1/G4/G5/G6/G14–16
 advance within scope. All original obligations and not_ready remain. Execute
 the [full-program reassessment](accounting-post-apple-readiness-20261013.md).
+
+## Whole-program assessment after Version2.64, 13 October 2026
+
+The [post-Apple assessment](../../data/accounting-master/post-apple-readiness-20261013/result.md)
+preserves all35 requirements and18 gaps, updating18 requirement descriptions
+and10 gap descriptions. All148 integrity checks pass. Twenty-one unchanged
+sources carry prior judgments; new inputs are separately credited. The
+annual/interim joins and conditional history/settlement work are complete
+within scope; actual company admission remains unresolved. The53-row
+[disposition matrix](../../data/accounting-master/post-apple-readiness-20261013/dispositions.md)
+now controls current author descriptions without altering original obligations.
+All E01/E05/E07/E08/E14 remain open; not_ready remains. Next execute the
+[stock-plan source inquiry](accounting-apple-stock-plan-source-20261013.md).
