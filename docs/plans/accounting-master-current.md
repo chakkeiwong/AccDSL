@@ -9,13 +9,21 @@ SHA256: `983cfceb0ae3cc6b30172b46c25a6f0a19ebcb367a44158b45e47ccd59103cfc`.
 
 ## Current evidence and next action
 
+The [post-certainty full reassessment](../../data/accounting-master/post-certainty-readiness-20261013/result.md)
+is complete: all35 requirements/18 gaps and original acceptance statuses are
+preserved. All390 integrity/preservation checks pass. Changed2.70–2.72
+sources are mapped to the current candidate; unchanged judgments are carried
+by exact bytes. A stale corporate-operations disposition was corrected.
+This is an author evidence-delta review; readiness remains not_ready.
+Execute the [SQL/null-semantics inquiry](accounting-sql-three-valued-logic-20261013.md).
+
 The [primary certainty proof inquiry](../../data/accounting-master/certain-answers-proof-source-20261013/result.md)
 is delivered in Version2.72. A26-page author preprint was recovered through
 the institutional publication list, its full proof inspected, and the guarded
 relational case clarified as closed-world input with open-world output.
 All98 source-integrity and154 manuscript checks pass. Nine final pages
 inspected; exact KR/publisher-version equivalence remains unchecked.
-Execute the [full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md).
+The [full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md) is now complete.
 
 The [certain-answer semantics audit](../../data/accounting-master/certain-answer-semantics-20261013/result.md)
 is delivered in Version 2.71. Boolean certainty, individually certain tuples
@@ -228,7 +236,7 @@ inspected. Actual grants and broader semantics remain unresolved. The fact-prese
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
 | P18 — Manuscript integration | Delivered through Version 2.72; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
-| P19 — Readiness assessment | Historical negative assessment preserved; Version 2.69 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
+| P19 — Readiness assessment | Historical negative assessment preserved; Version 2.72 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
 as useful results arrive; the five E obligations are not new serial phases.
@@ -240,7 +248,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 | E01 / C02–C03 — Real package and chronology | Annual/interim joins, conditional completion and settlement/query tests delivered; three2022 plan/form counterparts acquired with selected clauses; conditional performance method delivered; retained version comparison delivered; preserve unresolved actual grants and actual-grant limitations preserved; continue distinct package/authority work without repeating the award chain; retain unidentified actual histories and separate date/exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
-| E08 / C06 — Literature | Libkin query-certainty audit delivered in2.71 and primary proof/semantics qualification in2.72; continue distinct source/competitor/version work after full reassessment;1984 institutional discovery completed without full text; pursue genuinely new leads and wider competitor/version/omission obligations | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
+| E08 / C06 — Literature | Libkin query-certainty audit delivered in2.71 and primary proof/semantics qualification in2.72; inspect the distinct SQL/null-semantics paper after full reassessment;1984 institutional discovery completed without full text; pursue genuinely new leads and wider competitor/version/omission obligations | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
 | E14 / C07 — Tools and interfaces | Fact equality/duplicate and inline-value inquiries delivered in2.68/2.69; actual cross-filing occurrence trace delivered in2.70; retain wider interface/runtime/terms questions; retain prior cache/controller/Docling work | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
 
 The broader E07 queue includes revenue, leases, FX, tax, asset modification,
@@ -270,13 +278,13 @@ literature, reuse, acceptance, narratives, mappings, clocks, information,
 uncertainty admission, economic memory, review and recovery. No five-row
 summary closes or replaces those wider obligations.
 
-The latest [53-row disposition matrix](../../data/accounting-master/post-adapter-readiness-20261013/dispositions.md)
+The latest [53-row disposition matrix](../../data/accounting-master/post-certainty-readiness-20261013/dispositions.md)
 replaces stale residual descriptions, credits completed source/method repairs,
 and records the narrower-than-original E05 scheduling assumption. It includes
 the award preparation and V2.68–2.69 adapter-source evidence. V2.70 adds the
 actual cross-filing occurrence trace; V2.71 adds the query-certainty
-clarification; V2.72 adds the inspected primary proof and input/output distinction. These remain scoped supplements with acceptance statuses
-unchanged. All five workstreams remain open. Prior bytes are archived. Source
+clarification; V2.72 adds the inspected primary proof and input/output distinction. The full2.72 author assessment now credits these scoped supplements with
+acceptance statuses unchanged. All five workstreams remain open. Prior bytes are archived. Source
 check counts, clean builds and examples remain scoped engineering evidence;
 none promotes accounting validity, empirical forecasting or human comprehension.
 

@@ -4,6 +4,20 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current whole-program assessment — Version 2.72
+
+The [post-certainty full reassessment](../../data/accounting-master/post-certainty-readiness-20261013/result.md)
+is complete: all35 requirements/18 gaps and original acceptance statuses are
+preserved. All390 integrity/preservation checks pass. Changed2.70–2.72
+sources are mapped to the current candidate; unchanged judgments are carried
+by exact bytes. A stale corporate-operations disposition was corrected.
+This is an author evidence-delta review; readiness remains not_ready.
+Execute the [SQL/null-semantics inquiry](accounting-sql-three-valued-logic-20261013.md).
+
+All35 requirements/18 gaps and five E workstreams remain. The latest
+53-row matrix is the post-certainty Version2.72 assessment. Earlier full
+assessments and scoped supplements remain historical evidence.
+
 ## Current scoped integration — Version 2.72
 
 226 pages; **not_ready**.
@@ -16,11 +30,10 @@ the institutional publication list, its full proof inspected, and the guarded
 relational case clarified as closed-world input with open-world output.
 All98 source-integrity and154 manuscript checks pass. Nine final pages
 inspected; exact KR/publisher-version equivalence remains unchecked.
-Execute the [full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md).
+The [full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md) is complete.
 
 All35 requirements/18 gaps and original acceptance statuses remain. The
-Version2.69 full author matrix receives scoped2.70–2.72 supplements; execute
-the full reassessment next. New primary technical source support advances E08
+Version2.72 full author matrix now credits the scoped2.70–2.72 supplements. New primary technical source support advances E08
 within scope, without financial-runtime or broad survey-completion claims.
 The four originally blocked sources and all five E workstreams remain open.
 

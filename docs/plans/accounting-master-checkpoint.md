@@ -38,13 +38,21 @@ now inspected were already located. No additional acquisition count is added.
 
 ## Latest completed work
 
+The [post-certainty full reassessment](../../data/accounting-master/post-certainty-readiness-20261013/result.md)
+is complete: all35 requirements/18 gaps and original acceptance statuses are
+preserved. All390 integrity/preservation checks pass. Changed2.70–2.72
+sources are mapped to the current candidate; unchanged judgments are carried
+by exact bytes. A stale corporate-operations disposition was corrected.
+This is an author evidence-delta review; readiness remains not_ready.
+Execute the [SQL/null-semantics inquiry](accounting-sql-three-valued-logic-20261013.md).
+
 The [primary certainty proof inquiry](../../data/accounting-master/certain-answers-proof-source-20261013/result.md)
 is delivered in Version2.72. A26-page author preprint was recovered through
 the institutional publication list, its full proof inspected, and the guarded
 relational case clarified as closed-world input with open-world output.
 All98 source-integrity and154 manuscript checks pass. Nine final pages
 inspected; exact KR/publisher-version equivalence remains unchecked.
-Execute the [full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md).
+The [full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md) is now complete.
 
 The [certain-answer semantics audit](../../data/accounting-master/certain-answer-semantics-20261013/result.md)
 is delivered in Version 2.71. Boolean certainty, individually certain tuples
@@ -124,7 +132,7 @@ availability follows.
 
 ## Exact next action
 
-Execute [the full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md); preserve the2.72 candidate and source-specific access limits.
+Execute [the SQL/null-semantics inquiry](accounting-sql-three-valued-logic-20261013.md); preserve the2.72 candidate and source-specific access limits.
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
 ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
