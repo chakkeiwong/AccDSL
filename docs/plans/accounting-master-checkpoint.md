@@ -7,14 +7,15 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.62, 213 pages.**
-PDF: `docs/design/proposal/manuscript-apple-history-compatibility-20261013/accounting-product-proposal.pdf`
-SHA256: `1d13ce61e2b99da9967f2c20de19ff6158b14427244d5136d7e52620bc965de9`.
-The latest integration rejects sharing one fixed company remainder between the
-two earlier PP&E witnesses and derives necessary coupled-completion conditions.
-All 42 source/arithmetic and 135 manuscript checks pass; five final manuscript
-pages inspected. Prior source/math remains. Actual completion is not established.
-[Result](../../data/accounting-master/apple-history-compatibility-20261013/result.md).
+**Version 2.63, 214 pages.**
+PDF: `docs/design/proposal/manuscript-apple-coupled-completion-20261013/accounting-product-proposal.pdf`
+SHA256: `9e7d5827874621a59626ec33ae6b90c214df8af2a76a2778346d21af350f74fc`.
+The latest integration derives a conditional row-preserving repair after the
+failed fixed-remainder join. Ordinary accrual offsets fail two cash-flow rows;
+the noncash alternative matches only under explicit mappings and equal taxes.
+All 57 source/arithmetic and 137 manuscript checks pass; five new source images
+and five final pages read. Actual full-company completion remains unresolved.
+[Result](../../data/accounting-master/apple-coupled-completion-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -87,9 +88,12 @@ obligations. Its 173 integrity checks pass; twenty source judgments are carried.
 The [annual statement network](../../data/accounting-master/apple-statement-network-20261013/result.md)
 and [interim join](../../data/accounting-master/apple-interim-network-20261013/result.md)
 are complete within scope. The [history compatibility inquiry](../../data/accounting-master/apple-history-compatibility-20261013/result.md)
-is also complete: the same-remainder construction fails, while different
-completions remain untested. Execute the [coupled completion inquiry](accounting-apple-coupled-completion-20261013.md),
-keeping detailed-row compatibility and actual source admission separate.
+is also complete: the same-remainder construction fails. The
+[coupled completion inquiry](../../data/accounting-master/apple-coupled-completion-20261013/result.md)
+now distinguishes algebraic offsets, conditional detailed-row equality and
+unresolved actual admission. Execute the
+[settlement-path inquiry](accounting-apple-settlement-paths-20261013.md),
+then reassess ready work against all requirements.
 
 ## Remaining program and controls
 

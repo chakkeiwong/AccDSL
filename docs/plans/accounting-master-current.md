@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.62, 213 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-apple-history-compatibility-20261013/accounting-product-proposal.pdf`
-SHA256: `1d13ce61e2b99da9967f2c20de19ff6158b14427244d5136d7e52620bc965de9`.
+**Version 2.63, 214 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-apple-coupled-completion-20261013/accounting-product-proposal.pdf`
+SHA256: `9e7d5827874621a59626ec33ae6b90c214df8af2a76a2778346d21af350f74fc`.
 
 ## Current evidence and next action
 
@@ -120,9 +120,14 @@ comparisons and five opening component links join the annual endpoints. All
 114 source/arithmetic and 137 manuscript checks pass. The [historical compatibility inquiry](../../data/accounting-master/apple-history-compatibility-20261013/result.md)
 is complete: it rejects H1/H2 sharing one fixed company remainder and derives
 necessary branch-dependent conditions. Version 2.62 passes 42 source/arithmetic
-and 135 manuscript checks, preserving prior math/citations. Execute the
-[coupled completion inquiry](accounting-apple-coupled-completion-20261013.md).
-Necessary remainder conditions do not establish actual completion or a forecast.
+and 135 manuscript checks, preserving prior math/citations. The
+[coupled completion inquiry](../../data/accounting-master/apple-coupled-completion-20261013/result.md)
+is delivered in Version 2.63: ordinary-accrual offsets fail two cash-flow rows;
+an explicit noncash mapping preserves all annual row differences conditionally.
+All 57 source/arithmetic and 137 manuscript checks pass; five source and five
+final pages read. Actual obligation/mapping/base feasibility remains unresolved.
+Execute the [settlement-path inquiry](accounting-apple-settlement-paths-20261013.md),
+then reassess distinct ready work against the full program.
 
 ## Remaining proposal phases
 
@@ -131,7 +136,7 @@ Necessary remainder conditions do not establish actual completion or a forecast.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.62; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.63; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.59 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
@@ -141,7 +146,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
-| E01 / C02–C03 — Real package and chronology | Annual and next-quarter joins delivered; test coupled completions after the fixed-remainder rejection, then conditional paths, preserving missing facts; continue distinct date and exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
+| E01 / C02–C03 — Real package and chronology | Annual/interim joins and conditional completion test delivered; carry distinct liabilities into settlement paths and query-specific aggregation, preserving missing facts; continue distinct date and exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |

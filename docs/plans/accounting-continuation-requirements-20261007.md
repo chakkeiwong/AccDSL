@@ -1232,3 +1232,15 @@ is not established. All 42 source/arithmetic and 135 manuscript checks pass;
 five final pages inspected. MC08–11/13/15–16/18/28/32–35 and G1/G4/G5/
 G15/G16 advance. The expected rejection triggers the [coupled repair](accounting-apple-coupled-completion-20261013.md).
 No source-admitted full history or forecast is claimed; not_ready remains.
+
+## E01 conditional coupled completion, 13 October 2026
+
+Version 2.63, 214 pages, integrates the [row-level repair](../../data/accounting-master/apple-coupled-completion-20261013/result.md).
+An ordinary accrual offset keeps totals but changes two reported cash-flow
+rows. A disjoint noncash mapping cancels all annual row differences only
+under explicit event, classification, tax and feasible-base hypotheses.
+Actual full completion remains unresolved. All57 source/arithmetic and137
+manuscript checks pass; five source and five final pages were read.
+MC08–11/13/16/18/28/32–35 and G1/G5/G15/G16 advance within scope;
+all original obligations and not_ready remain. Execute the
+[settlement-path inquiry](accounting-apple-settlement-paths-20261013.md).
