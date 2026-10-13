@@ -4,7 +4,32 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current checkpoint — Version 2.65
+## Current checkpoint — Version 2.66
+
+13 October 2026. **219 pages; not_ready**.
+PDF: docs/design/proposal/manuscript-apple-performance-award-20261013/accounting-product-proposal.pdf
+SHA256: d3c37127c7ede9648f680ff0577b9a8d33077b574611be806a6c201f2c8aa061.
+The [performance-award inquiry](../../data/accounting-master/apple-performance-award-20261013/result.md)
+is delivered in Version 2.66: the disclosed October2023 schedule, negative
+return cap, price-window counterexample, service fraction and cash dividend
+equivalents are integrated with explicit hypothetical inputs. All81 source
+and137 manuscript checks pass; five final pages inspected. The2022 form and
+proxy termination wording have an unresolved applicability/timing distinction.
+Inspect the already retained versions next:
+[award-version inquiry](accounting-apple-award-versions-20261013.md).
+
+MC01/03–05/08/10–11/17/28/30/32–35 advance within the stated source and
+conditional-method scope; G5/G7/G11/G15/G16 remain open. No insurance or
+new accounting-standard authority is supplied. All62 displays/426 citation
+occurrences are retained in this candidate, including two displays and nine
+citations added to V2.65. Exact rank conversion, dividend/corporate-action
+implementation, actual grants, timing applicability and accounting valuation
+remain unresolved. No requirement or readiness status is promoted.
+
+The dated sections below preserve earlier assessments and their then-current
+next actions. This checkpoint and the master next plan control execution.
+
+## Preserved checkpoint — Version 2.65
 
 13 October 2026. **217 pages; not_ready**.
 PDF: docs/design/proposal/manuscript-apple-stock-plan-20261013/accounting-product-proposal.pdf

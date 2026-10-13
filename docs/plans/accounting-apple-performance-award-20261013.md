@@ -1,6 +1,6 @@
 # Inspect the performance-award method and missing grant facts
 
-13 October 2026. P17/P18; E01/E07; MC01/03–05/08/10–11/17/19/22/28/30/32–35;
+13 October 2026. P17/P18; E01/E07; MC01/03–05/08/10–11/17/28/30/32–35;
 G5/G7/G11/G15/G16. Follow the newly retained 4 March 2022 filing, Exhibit 10.3,
 and the already retained 2025 proxy. Keep V2.65 and its source hashes protected.
 
@@ -35,6 +35,12 @@ unresolved. An illustrative schedule is a hypothesis, never an actual grant.
 Skeptical audit passes for a bounded source/conditional-method unit. The likely
 failure is a correct interpolation of the wrong grant or of an invented rank.
 Distinguishing form, named grant and numerical illustration prevents that error.
+Pre-execution correction: MC22 (insurance) was copied into the initial mapping
+without relevance and is removed; this contract inquiry also supplies no new
+MC19 accounting-standard authority. The 2025 proxy discloses the October 2023
+grant schedule and separately reports September 2020 grant results. Preserve
+both populations and periods; a displayed rounded payout is not an exact
+reproduction from rounded TSR inputs.
 No network fetch or market-data campaign is initially needed. Runtime and the
 controller remain held.
 

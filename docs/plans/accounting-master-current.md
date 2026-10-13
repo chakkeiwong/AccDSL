@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.65, 217 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-apple-stock-plan-20261013/accounting-product-proposal.pdf`
-SHA256: `92293e585a0e030e7f66647db69eb2ed26996377b4ab92d0b409fb2c972aa454`.
+**Version 2.66, 219 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-apple-performance-award-20261013/accounting-product-proposal.pdf`
+SHA256: `d3c37127c7ede9648f680ff0577b9a8d33077b574611be806a6c201f2c8aa061`.
 
 ## Current evidence and next action
 
@@ -140,8 +140,17 @@ checks pass. Six final pages read; all earlier math/citations preserved.
 The frozen 40 unresolved reference labels remain unchanged; this dated
 supplement supplies three counterparts, leaving 37 without one here.
 Actual grants, current amendments, tax/expense/EPS methods and complete
-company semantics remain unresolved. Execute the
-[performance-award inquiry](accounting-apple-performance-award-20261013.md).
+company semantics remain unresolved. The performance-method work is now complete within scope.
+
+The [performance-award inquiry](../../data/accounting-master/apple-performance-award-20261013/result.md)
+is delivered in Version 2.66: the disclosed October2023 schedule, negative
+return cap, price-window counterexample, service fraction and cash dividend
+equivalents are integrated with explicit hypothetical inputs. All81 source
+and137 manuscript checks pass; five final pages inspected. The2022 form and
+proxy termination wording have an unresolved applicability/timing distinction.
+Inspect the already retained versions next:
+[award-version inquiry](accounting-apple-award-versions-20261013.md).
+
 
 
 ## Remaining proposal phases
@@ -151,7 +160,7 @@ company semantics remain unresolved. Execute the
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.65; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.66; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.64 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
@@ -161,7 +170,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
-| E01 / C02–C03 — Real package and chronology | Annual/interim joins, conditional completion and settlement/query tests delivered; three2022 plan/form counterparts acquired with selected clauses; inspect performance method and grant dependencies; retain unidentified actual histories and separate date/exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
+| E01 / C02–C03 — Real package and chronology | Annual/interim joins, conditional completion and settlement/query tests delivered; three2022 plan/form counterparts acquired with selected clauses; conditional performance method delivered; inspect retained form versions and unresolved grant applicability; retain unidentified actual histories and separate date/exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
@@ -196,8 +205,8 @@ summary closes or replaces those wider obligations.
 
 The latest [53-row disposition matrix](../../data/accounting-master/post-apple-readiness-20261013/dispositions.md)
 replaces stale residual descriptions, credits completed source/method repairs,
-and records the narrower-than-original E05 scheduling assumption. The V2.65 source/method supplement adds three exhibit counterparts and
-conditional reserve/settlement consequences without changing any acceptance
+and records the narrower-than-original E05 scheduling assumption. The V2.65–2.66 supplements add three exhibit counterparts, conditional
+reserve/settlement/performance consequences and a source-specific timing question without changing any acceptance
 status. All five workstreams remain open. Prior bytes are archived. Source
 check counts, clean builds and examples remain scoped engineering evidence;
 none promotes accounting validity, empirical forecasting or human comprehension.
