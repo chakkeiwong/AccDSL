@@ -4,9 +4,26 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current acquisition-asset incorporation example
+## Current actual acquisition-cost disclosure example
 
-13 October 2026. Version **2.57, 205 pages** is current:
+13 October 2026. Version **2.58, 207 pages** is current:
+`docs/design/proposal/manuscript-munich-new-contracts-20261013/accounting-product-proposal.pdf`.
+SHA256: `7063e69f66be2d14c464f09c104cb1b3cef9db64526433b969c1fa1647fe4a74`.
+The [result](../../data/accounting-master/munich-new-contracts-20261013/result.md)
+advances E01/E07 and MC02/03/08/10/11/16/19/22/28/30/32–35,
+G4/G5/G7/G11/G15/G16. Section 12.9 preserves actual future acquisition costs,
+recovery revenue, expense/cash and CSM population differences. A hypothetical
+joint rounding witness supports consistency without recovering hidden values.
+All 79 source/arithmetic and 124 manuscript checks pass; eleven source images
+and eight final pages were reviewed. All 52 prior displays and 376 citations
+remain, with nine citations added. The expense residual435 and group assets
+remain unidentified; current authority and human/domain acceptance stay open.
+Readiness remains **not_ready**. Next:
+`accounting-munich-measurement-bridge-20261013.md`.
+
+## Preserved acquisition-asset incorporation example
+
+13 October 2026. Version **2.57, 205 pages** was the candidate for this unit:
 `docs/design/proposal/manuscript-acquisition-incorporation-20261013/accounting-product-proposal.pdf`.
 SHA256: `4149d47b60561e156f5d06589ed3596525337cb128039efbf14ef488babf2fbe`.
 The [result](../../data/accounting-master/insurance-acquisition-incorporation-20261013/result.md)

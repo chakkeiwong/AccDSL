@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.57, 205 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-acquisition-incorporation-20261013/accounting-product-proposal.pdf`
-SHA256: `4149d47b60561e156f5d06589ed3596525337cb128039efbf14ef488babf2fbe`.
+**Version 2.58, 207 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-munich-new-contracts-20261013/accounting-product-proposal.pdf`
+SHA256: `7063e69f66be2d14c464f09c104cb1b3cef9db64526433b969c1fa1647fe4a74`.
 
 ## Current evidence and next action
 
@@ -95,10 +95,15 @@ seven final pages were inspected. It carries the same assets and net inflows
 through recognition, initial CSM and premium receipt, and shows two offsetting
 errors that survive a balance-sheet identity.
 
-Next execute the [Munich Re newly recognised contracts inquiry](accounting-munich-new-contracts-20261013.md).
-Read the actual acquisition-cost and initial-margin disclosures, preserving
-column populations, measurement approaches, signs, rounding and unknown
-acquisition-asset inputs. The earlier transition inquiry remains complete.
+Version 2.58 adds the [actual Munich Re acquisition-cost reading](../../data/accounting-master/munich-new-contracts-20261013/result.md):
+79 source/arithmetic and 124 manuscript checks pass; eleven source images and
+eight final pages were reviewed. It distinguishes future acquisition outflows,
+recovery revenue, expense and cash, and checks a joint rounding witness.
+The expense/revenue residual remains unexplained; no acquisition asset is inferred.
+
+Next execute the [Munich Re measurement bridge](accounting-munich-measurement-bridge-20261013.md).
+Reconcile the actual CSM movements, inspect excluded PAA populations and bound
+what differences between the two reconciliation tables can establish.
 
 ## Remaining proposal phases
 
@@ -107,7 +112,7 @@ acquisition-asset inputs. The earlier transition inquiry remains complete.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.57; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.58; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.52 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18

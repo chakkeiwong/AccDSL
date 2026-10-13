@@ -48,3 +48,10 @@ baseline, source-page records, calculation checks, interpretation/result and
 manifest. CPU-only document/arithmetic work; no stochastic comparison or GPU
 use. After source validation, build/inspect any manuscript candidate, refresh
 the four live controls, commit explicit paths and continue a ready gap repair.
+
+Adaptive source audit before freezing: printed230–231 also report acquisition
+expense637 and acquisition cash978, versus acquisition recovery revenue202.
+Inspect these two pages and qualify the manuscript's cited expense-allocation
+policy with the actual differing rows. Their residual435 is not automatically
+assigned to the disclosed PAA expensing election. The selected table reading
+remains valid, but a complete expense explanation needs further scoped work.

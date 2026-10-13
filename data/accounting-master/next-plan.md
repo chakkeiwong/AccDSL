@@ -1,22 +1,22 @@
 # Accounting proposal — direct next plan
 
-13 October 2026. Version 2.57, 205 pages; readiness **not_ready**.
-PDF: docs/design/proposal/manuscript-acquisition-incorporation-20261013/accounting-product-proposal.pdf
-SHA256: 4149d47b60561e156f5d06589ed3596525337cb128039efbf14ef488babf2fbe
+13 October 2026. Version 2.58, 207 pages; readiness **not_ready**.
+PDF: docs/design/proposal/manuscript-munich-new-contracts-20261013/accounting-product-proposal.pdf
+SHA256: 7063e69f66be2d14c464f09c104cb1b3cef9db64526433b969c1fa1647fe4a74
 Implementation and the old controller remain held.
 
-The full readiness refresh covers MC01–MC35/G1–G18. Version 2.57 completes
-the conditional acquisition-asset recognition/CSM/premium bridge. Latest result:
-data/accounting-master/insurance-acquisition-incorporation-20261013/result.md.
-All 44 source/arithmetic and 123 manuscript checks pass; five source images and
-seven final pages were inspected. The inputs remain conditional method data.
+The full readiness refresh covers MC01–MC35/G1–G18. Version 2.58 adds actual
+Munich Re acquisition-cost distinctions and a bounded rounding witness. Result:
+data/accounting-master/munich-new-contracts-20261013/result.md.
+All 79 source/arithmetic and 124 manuscript checks pass; eleven source images
+and eight final pages were reviewed. Actual groups/prior assets remain unknown.
 
-Execute docs/plans/accounting-munich-new-contracts-20261013.md.
-Read Munich Re's actual newly recognised contract and acquisition-cost tables,
-checking scope, signs, rounded totals and measurement approaches. Keep future
-cash flows distinct from previously recognised acquisition assets; preserve
-unknown group facts. Output: data/accounting-master/munich-new-contracts-20261013/.
-Do not repeat the completed Munich transition inquiry.
+Execute docs/plans/accounting-munich-measurement-bridge-20261013.md.
+Reconcile CSM opening, new business, service, estimates and other movements.
+Inspect measurement-component versus liability-component populations before
+interpreting acquisition cash/expense differences. Preserve unassigned residuals.
+Output: data/accounting-master/munich-measurement-bridge-20261013/.
+Do not repeat the completed transition or new-contract inquiries.
 
 All five E workstreams and broader MC/G obligations remain open. Preserve
 closed source/method inquiries and historical candidates. Frozen 56/136 dates,

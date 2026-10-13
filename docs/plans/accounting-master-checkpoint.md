@@ -7,15 +7,14 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.57, 205 pages.**
-PDF: `docs/design/proposal/manuscript-acquisition-incorporation-20261013/accounting-product-proposal.pdf`
-SHA256: `4149d47b60561e156f5d06589ed3596525337cb128039efbf14ef488babf2fbe`.
-The last integration carries acquisition assets into initial CSM and group
-balances, then works premium receipt with unchanged equity. Its counterexample
-shows two offsetting errors that balance despite wrong components. All 44
-source/arithmetic and 123 manuscript checks pass; five source images and seven
-final manuscript pages were inspected.
-[Result](../../data/accounting-master/insurance-acquisition-incorporation-20261013/result.md).
+**Version 2.58, 207 pages.**
+PDF: `docs/design/proposal/manuscript-munich-new-contracts-20261013/accounting-product-proposal.pdf`
+SHA256: `7063e69f66be2d14c464f09c104cb1b3cef9db64526433b969c1fa1647fe4a74`.
+The last integration reads Munich Re's actual acquisition-cost disclosures,
+preserving populations, rounding and the distinctions between future costs,
+recovery revenue, expense and cash. All 79 source/arithmetic and 124 manuscript
+checks pass; eleven source images and eight final pages were reviewed.
+[Result](../../data/accounting-master/munich-new-contracts-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -79,9 +78,10 @@ is also complete, while whole-asset valuation remains an explicit input.
 The [acquisition recoverability example](../../data/accounting-master/insurance-acquisition-recoverability-20261013/result.md)
 is complete within its conditional scope. The
 [acquisition-incorporation example](../../data/accounting-master/insurance-acquisition-incorporation-20261013/result.md)
-is now also complete. Execute the [Munich Re newly recognised contracts plan](accounting-munich-new-contracts-20261013.md)
-next: inspect actual acquisition-cost and initial-margin disclosures without
-converting aggregate future cash flows into identified acquisition assets.
+is now also complete. The [Munich Re new-contract reading](../../data/accounting-master/munich-new-contracts-20261013/result.md)
+adds actual source distinctions and leaves the expense residual unassigned.
+Execute the [measurement-bridge plan](accounting-munich-measurement-bridge-20261013.md)
+next: reconcile CSM movements and inspect differences in reconciliation scopes.
 
 ## Remaining program and controls
 
