@@ -7,9 +7,9 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.67, 221 pages.**
-PDF: docs/design/proposal/manuscript-apple-award-versions-20261013/accounting-product-proposal.pdf
-SHA256: 28273d70fdabfb4fdf12d37f3aeec18096e9943d39ea575d2fccf70d546ceffd.
+**Version 2.68, 222 pages.**
+PDF: docs/design/proposal/manuscript-arelle-fact-identity-20261013/accounting-product-proposal.pdf
+SHA256: 2c251f9659a52933b8a8525e5fa64df30cbfdab363570d515bbdb2ef2c99a166.
 The [award-version inquiry](../../data/accounting-master/apple-award-versions-20261013/result.md)
 is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
 forms now have selected substantive clauses inspected. General prorating and
@@ -22,8 +22,7 @@ is complete: all35 requirements/18 gaps and statuses preserved,16/10
 descriptions updated,154 integrity checks pass. Twenty-two of26 sources
 carry prior judgments; three new transitive sections are separately credited.
 Three new counterparts are distinct from three already located forms now
-inspected. Actual grants and broader semantics remain unresolved. Execute
-the [Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.md).
+inspected. Actual grants and broader semantics remain unresolved. The fact-preservation inquiry is now complete within scope.
 
 
 Readiness **not_ready**. Independent/domain/human acceptance remains pending.
@@ -31,6 +30,14 @@ The three new stock-plan counterparts remain supplemental; the three forms
 now inspected were already located. No additional acquisition count is added.
 
 ## Latest completed work
+
+The [fact-preservation inquiry](../../data/accounting-master/arelle-fact-identity-20261013/result.md)
+is delivered in Version 2.68: three pinned sources, nineteen line-bound
+findings and five constructed examples distinguish values, aspects, consistency
+and occurrence preservation. All151 source/arithmetic and142 manuscript checks
+pass; six final pages inspected. No Arelle execution or accounting admission
+follows. This is a scoped supplement to the unchanged Version2.67 full assessment.
+Execute the [inline-value inquiry](accounting-arelle-inline-values-20261013.md).
 
 The [lease case](../../data/accounting-master/pingan-lease-transition-20261013/result.md)
 preserves the unadjusted comparative basis, actual adoption balances and
@@ -73,6 +80,8 @@ availability follows.
 
 ## Exact next action
 
+Execute [the inline-value inquiry](accounting-arelle-inline-values-20261013.md); preserve the2.68 candidate and source-only scope.
+
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
 ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
 found blocked repository/SSRN routes and proved the saved arXiv identifier
@@ -108,7 +117,7 @@ now tests downstream categories, timing and query-specific aggregation. The [pos
 is complete:148 integrity checks preserve all35 requirements/18 gaps and
 credit V2.60–2.64. The stock-plan source inquiry is now complete within
 scope, with three supplemental counterparts. The performance-award inquiry is also delivered. The version inquiry is now delivered. The post-awards reassessment is complete. Execute the
-[Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.md).
+[inline-value inquiry](accounting-arelle-inline-values-20261013.md).
 The frozen40-target list and failed indenture routes remain preserved.
 
 ## Remaining program and controls

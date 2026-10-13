@@ -3,11 +3,19 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.67, 221 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-apple-award-versions-20261013/accounting-product-proposal.pdf`
-SHA256: `28273d70fdabfb4fdf12d37f3aeec18096e9943d39ea575d2fccf70d546ceffd`.
+**Version 2.68, 222 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-arelle-fact-identity-20261013/accounting-product-proposal.pdf`
+SHA256: `2c251f9659a52933b8a8525e5fa64df30cbfdab363570d515bbdb2ef2c99a166`.
 
 ## Current evidence and next action
+
+The [fact-preservation inquiry](../../data/accounting-master/arelle-fact-identity-20261013/result.md)
+is delivered in Version 2.68: three pinned sources, nineteen line-bound
+findings and five constructed examples distinguish values, aspects, consistency
+and occurrence preservation. All151 source/arithmetic and142 manuscript checks
+pass; six final pages inspected. No Arelle execution or accounting admission
+follows. This is a scoped supplement to the unchanged Version2.67 full assessment.
+Execute the [inline-value inquiry](accounting-arelle-inline-values-20261013.md).
 
 Version 2.51 added the [actual Ping An lease transition](../../data/accounting-master/pingan-lease-transition-20261013/result.md):
 51 source and 124 manuscript checks pass, with seven final renders inspected.
@@ -162,8 +170,7 @@ is complete: all35 requirements/18 gaps and statuses preserved,16/10
 descriptions updated,154 integrity checks pass. Twenty-two of26 sources
 carry prior judgments; three new transitive sections are separately credited.
 Three new counterparts are distinct from three already located forms now
-inspected. Actual grants and broader semantics remain unresolved. Execute
-the [Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.md).
+inspected. Actual grants and broader semantics remain unresolved. The fact-preservation inquiry is now complete within scope.
 
 
 
@@ -176,7 +183,7 @@ the [Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.67; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.68; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.67 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
@@ -190,7 +197,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 | E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
-| E14 / C07 — Tools and interfaces | Inspect pinned Arelle fact equality, duplicate grouping and occurrence preservation; retain prior cache/controller/Docling work | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
+| E14 / C07 — Tools and interfaces | Fact equality/duplicate inquiry delivered in2.68; inspect pinned inline transformations and original occurrences; retain prior cache/controller/Docling work | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
 
 The broader E07 queue includes revenue, leases, FX, tax, asset modification,
 floating-rate benchmarks, options, hedges, EPS and cross-standard financing;

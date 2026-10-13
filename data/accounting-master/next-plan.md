@@ -1,23 +1,24 @@
 # Accounting proposal — direct next plan
 
-13 October 2026. Version2.67,221 pages; **not_ready**.
-PDF: docs/design/proposal/manuscript-apple-award-versions-20261013/accounting-product-proposal.pdf
-SHA256: 28273d70fdabfb4fdf12d37f3aeec18096e9943d39ea575d2fccf70d546ceffd
+13 October 2026. Version2.68,222 pages; **not_ready**.
+PDF: docs/design/proposal/manuscript-arelle-fact-identity-20261013/accounting-product-proposal.pdf
+SHA256: 2c251f9659a52933b8a8525e5fa64df30cbfdab363570d515bbdb2ef2c99a166
 Implementation and historical controller remain held.
 
-V2.65–2.67 and the full master assessment are complete within scope:
-data/accounting-master/post-awards-readiness-20261013/result.md.
-All35 requirements/18 gaps preserved;16/10 descriptions updated. All154
-integrity checks pass. Twenty-two source judgments carried; new sections
-separately credited. Actual grant and whole-company admission stay open.
+The fact-preservation inquiry is complete within selected source scope:
+data/accounting-master/arelle-fact-identity-20261013/result.md.
+All151 source/arithmetic and142 manuscript checks pass; six final pages read.
+All62 earlier displays and435 earlier citations preserved; eight citations added.
+The Version2.67 post-awards53-row assessment remains the last full review;
+this is a scoped E14/E01 supplement, not independent acceptance.
 
-Execute docs/plans/accounting-arelle-fact-identity-20261013.md.
-Inspect pinned source semantics for fact equality and duplicate grouping;
-preserve occurrence, context, unit, precision and validation state. No runtime
-installation/execution. Do not repeat completed cache/controller inquiries.
+Execute docs/plans/accounting-arelle-inline-values-20261013.md.
+Follow pinned inline transform, sign, scale and continuation paths while
+preserving the original occurrence. No Arelle installation/import/execution.
+Do not repeat completed cache/controller or fact-equality inquiries.
 
 P17/P18 continue; P19 stays negative. All five E workstreams remain open.
 Frozen40 unresolved references, three supplements and37 without counterparts
-remain; three already located forms now have selected substantive inspection.
-Publication56/136,35 supplements and101 remaining are unchanged. Preserve100
-unrelated staged entries. Human acceptance blocks promotion, not preparation.
+remain. Publication56/136,35 supplements and101 remaining are unchanged.
+Preserve100 unrelated staged entries. Human acceptance blocks promotion,
+not feasible internal preparation.

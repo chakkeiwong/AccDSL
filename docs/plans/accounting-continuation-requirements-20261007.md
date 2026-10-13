@@ -4,6 +4,24 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current scoped integration — Version 2.68
+
+222 pages; **not_ready**.
+PDF: docs/design/proposal/manuscript-arelle-fact-identity-20261013/accounting-product-proposal.pdf
+SHA256: 2c251f9659a52933b8a8525e5fa64df30cbfdab363570d515bbdb2ef2c99a166.
+The [fact-preservation inquiry](../../data/accounting-master/arelle-fact-identity-20261013/result.md)
+is delivered in Version 2.68: three pinned sources, nineteen line-bound
+findings and five constructed examples distinguish values, aspects, consistency
+and occurrence preservation. All151 source/arithmetic and142 manuscript checks
+pass; six final pages inspected. No Arelle execution or accounting admission
+follows. This is a scoped supplement to the unchanged Version2.67 full assessment.
+Execute the [inline-value inquiry](accounting-arelle-inline-values-20261013.md).
+
+MC02/03/04/07/25/27/30–35 and G2/G9/G11/G12/G17/G18 receive
+scoped E14/E01 source/interface evidence. All35 requirements/18 gaps, original
+wording and statuses remain. The following53-row review is the last full
+assessment; this integration does not claim a new whole-program review.
+
 ## Current whole-program assessment — Version 2.67
 
 The [post-awards reassessment](../../data/accounting-master/post-awards-readiness-20261013/result.md)
@@ -11,8 +29,7 @@ is complete: all35 requirements/18 gaps and statuses preserved,16/10
 descriptions updated,154 integrity checks pass. Twenty-two of26 sources
 carry prior judgments; three new transitive sections are separately credited.
 Three new counterparts are distinct from three already located forms now
-inspected. Actual grants and broader semantics remain unresolved. Execute
-the [Arelle fact-preservation inquiry](accounting-arelle-fact-identity-20261013.md).
+inspected. Actual grants and broader semantics remain unresolved. The fact-preservation inquiry is now delivered in2.68; continue the inline-value inquiry above.
 
 Readiness **not_ready**. This53-row assessment now controls author evidence
 descriptions; original acceptance obligations/statuses remain unchanged.
