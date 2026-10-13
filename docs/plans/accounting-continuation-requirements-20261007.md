@@ -4,6 +4,17 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current source disposition after Version2.70
+
+The [incomplete-information source inquiry](../../data/accounting-master/incomplete-information-source-20261013/result.md)
+completed four distinct discovery requests without recovering the1984 paper.
+All99 checks pass; original SOURCE_BLOCKED status and proposal2.70 remain.
+Unsupported generated discovery leads were rejected and preserved as rejected.
+Execute the [retained Libkin semantics audit](accounting-certain-answer-semantics-20261013.md).
+
+All35 requirements/18 gaps, four blocked foundational texts and readiness
+**not_ready** remain. No manuscript or full-assessment change follows.
+
 ## Current scoped integration — Version 2.70
 
 225 pages; **not_ready**.

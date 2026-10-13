@@ -38,13 +38,19 @@ now inspected were already located. No additional acquisition count is added.
 
 ## Latest completed work
 
+The [incomplete-information source inquiry](../../data/accounting-master/incomplete-information-source-20261013/result.md)
+completed four distinct discovery requests without recovering the1984 paper.
+All99 checks pass; original SOURCE_BLOCKED status and proposal2.70 remain.
+Unsupported generated discovery leads were rejected and preserved as rejected.
+Execute the [retained Libkin semantics audit](accounting-certain-answer-semantics-20261013.md).
+
 The [actual occurrence inquiry](../../data/accounting-master/apple-inline-occurrences-20261013/result.md)
 is delivered in Version2.70. The annual HTML had no inline tags; the repaired
 scope compares next-quarter comparative facts with the prior annual instance.
 Five selected occurrences per source match under explicit context/unit/accuracy
 checks; equity repeats remain distinct. All154 source and148 manuscript checks
 pass, with five final pages inspected. This adds scoped E01/E14 evidence to the
-Version2.69 full assessment. Execute the [incomplete-information source inquiry](accounting-incomplete-information-source-20261013.md).
+Version2.69 full assessment. The incomplete-information source inquiry is now complete with no full text recovered.
 
 The [inline-value inquiry](../../data/accounting-master/arelle-inline-values-20261013/result.md)
 is delivered in Version2.69: transform/scale/sign are already applied by the
@@ -102,7 +108,7 @@ availability follows.
 
 ## Exact next action
 
-Execute [the incomplete-information source inquiry](accounting-incomplete-information-source-20261013.md); preserve the2.70 candidate and source-only evidence limits.
+Execute [the retained Libkin semantics audit](accounting-certain-answer-semantics-20261013.md); preserve the2.70 candidate and source-specific access limits.
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
 ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)

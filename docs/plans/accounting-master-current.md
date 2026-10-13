@@ -9,13 +9,19 @@ SHA256: `7de5398b78b0ce8fc078d40aeebcf936e776e0d4a8f852e14b996d840823cad7`.
 
 ## Current evidence and next action
 
+The [incomplete-information source inquiry](../../data/accounting-master/incomplete-information-source-20261013/result.md)
+completed four distinct discovery requests without recovering the1984 paper.
+All99 checks pass; original SOURCE_BLOCKED status and proposal2.70 remain.
+Unsupported generated discovery leads were rejected and preserved as rejected.
+Execute the [retained Libkin semantics audit](accounting-certain-answer-semantics-20261013.md).
+
 The [actual occurrence inquiry](../../data/accounting-master/apple-inline-occurrences-20261013/result.md)
 is delivered in Version2.70. The annual HTML had no inline tags; the repaired
 scope compares next-quarter comparative facts with the prior annual instance.
 Five selected occurrences per source match under explicit context/unit/accuracy
 checks; equity repeats remain distinct. All154 source and148 manuscript checks
 pass, with five final pages inspected. This adds scoped E01/E14 evidence to the
-Version2.69 full assessment. Execute the [incomplete-information source inquiry](accounting-incomplete-information-source-20261013.md).
+Version2.69 full assessment. The incomplete-information source inquiry is now complete with no full text recovered.
 
 The [post-adapter reassessment](../../data/accounting-master/post-adapter-readiness-20261013/result.md)
 is complete: all35 requirements/18 gaps and original statuses preserved;
@@ -218,7 +224,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 | E01 / C02–C03 — Real package and chronology | Annual/interim joins, conditional completion and settlement/query tests delivered; three2022 plan/form counterparts acquired with selected clauses; conditional performance method delivered; retained version comparison delivered; preserve unresolved actual grants and actual-grant limitations preserved; continue distinct package/authority work without repeating the award chain; retain unidentified actual histories and separate date/exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
-| E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
+| E08 / C06 — Literature | Audit retained Libkin query-certainty semantics;1984 institutional discovery also completed without full text; pursue genuinely new leads and wider competitor/version/omission obligations | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |
 | E14 / C07 — Tools and interfaces | Fact equality/duplicate and inline-value inquiries delivered in2.68/2.69; actual cross-filing occurrence trace delivered in2.70; retain wider interface/runtime/terms questions; retain prior cache/controller/Docling work | Exact version/interface/terms records. Source inspection does not establish runtime compatibility, actual distribution rights or performance |
 
 The broader E07 queue includes revenue, leases, FX, tax, asset modification,
