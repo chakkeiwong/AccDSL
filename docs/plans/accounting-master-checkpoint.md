@@ -7,16 +7,21 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.64, 215 pages.**
-PDF: `docs/design/proposal/manuscript-apple-settlement-paths-20261013/accounting-product-proposal.pdf`
-SHA256: `80b65fd23021d3241ba7a7e6aa3642d7ef6a1b0ca44924993273202ef43042ba`.
-The latest integration carries the conditional histories into settlement:
-same total liabilities produce different cash categories and dates. Independent
-marginal combinations fail; actual quarterly residuals remain necessary
-conditions, not transactions. All 98 source/arithmetic and 137 manuscript checks
-pass; five final pages read. Actual full-company completion is unresolved.
-[Result](../../data/accounting-master/apple-settlement-paths-20261013/result.md).
-This is a design candidate, with independent/domain/human acceptance pending.
+**Version 2.65, 217 pages.**
+PDF: docs/design/proposal/manuscript-apple-stock-plan-20261013/accounting-product-proposal.pdf
+SHA256: 92293e585a0e030e7f66647db69eb2ed26996377b4ab92d0b409fb2c972aa454.
+The [stock-plan inquiry](../../data/accounting-master/apple-stock-plan-source-20261013/result.md)
+is delivered in Version 2.65: three exact filing exhibits retained, selected
+capacity/award/settlement clauses inspected, 75 source and 141 manuscript
+checks pass. Six final pages read; all earlier math/citations preserved.
+The frozen 40 unresolved reference labels remain unchanged; this dated
+supplement supplies three counterparts, leaving 37 without one here.
+Actual grants, current amendments, tax/expense/EPS methods and complete
+company semantics remain unresolved. Execute the
+[performance-award inquiry](accounting-apple-performance-award-20261013.md).
+
+This is a design candidate; readiness **not_ready**. Independent/domain/human
+acceptance remains pending while internal preparation continues.
 
 ## Latest completed work
 
@@ -94,9 +99,10 @@ now distinguishes algebraic offsets, conditional detailed-row equality and
 unresolved actual admission. The [settlement-path inquiry](../../data/accounting-master/apple-settlement-paths-20261013/result.md)
 now tests downstream categories, timing and query-specific aggregation. The [post-Apple reassessment](../../data/accounting-master/post-apple-readiness-20261013/result.md)
 is complete:148 integrity checks preserve all35 requirements/18 gaps and
-creditV2.60–2.64. Execute the
-[stock-plan source inquiry](accounting-apple-stock-plan-source-20261013.md).
-The frozen40-target remainder is preserved; do not repeat the blocked indenture routes.
+credit V2.60–2.64. The stock-plan source inquiry is now complete within
+scope, with three supplemental counterparts. Execute the
+[performance-award inquiry](accounting-apple-performance-award-20261013.md).
+The frozen40-target list and failed indenture routes remain preserved.
 
 ## Remaining program and controls
 

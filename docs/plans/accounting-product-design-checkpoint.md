@@ -1,4 +1,10 @@
-# Active checkpoint
+# Historical corpus and initial-design checkpoint
+
+Current proposal execution is recorded in
+[the master checkpoint](accounting-master-checkpoint.md) and
+[current master program](accounting-master-current.md).
+The dated actions below preserve the 2 October state; they do not supersede
+the current proposal-only work or the usable Git repository.
 
 Updated: 2 October 2026 (Asia/Hong_Kong), after multi-year source-corpus
 acceptance following the expanded-audit repair. The user directed us to do all

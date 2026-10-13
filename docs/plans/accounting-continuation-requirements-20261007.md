@@ -4,9 +4,35 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current CSM and reporting-population bridge
+## Current checkpoint — Version 2.65
 
-13 October 2026. Version **2.59, 209 pages** is current:
+13 October 2026. **217 pages; not_ready**.
+PDF: docs/design/proposal/manuscript-apple-stock-plan-20261013/accounting-product-proposal.pdf
+SHA256: 92293e585a0e030e7f66647db69eb2ed26996377b4ab92d0b409fb2c972aa454.
+The [stock-plan inquiry](../../data/accounting-master/apple-stock-plan-source-20261013/result.md)
+is delivered in Version 2.65: three exact filing exhibits retained, selected
+capacity/award/settlement clauses inspected, 75 source and 141 manuscript
+checks pass. Six final pages read; all earlier math/citations preserved.
+The frozen 40 unresolved reference labels remain unchanged; this dated
+supplement supplies three counterparts, leaving 37 without one here.
+Actual grants, current amendments, tax/expense/EPS methods and complete
+company semantics remain unresolved. Execute the
+[performance-award inquiry](accounting-apple-performance-award-20261013.md).
+
+The following dated sections preserve prior assessments and their then-current
+next actions. Their old “current” wording does not supersede this checkpoint.
+The full V2.64 assessment still controls all 35 requirement and 18 gap statuses;
+this addition improves evidence within those statuses.
+
+| Obligations | New evidence | Remaining obligation |
+| --- | --- | --- |
+| MC01/03/04/05; G5/G11 | Three source counterparts, exact dates and selected meanings | Full material semantics, amendment chain and historical availability |
+| MC08/10/11/17; G7/G15/G16 | Reserve/delivery counterexample and agreement-specific settlement | Actual grants, performance, tax/expense/EPS and complete scenario treatment |
+| MC28/30/32–35 | Checked arithmetic, additive integration, source/render records | Independent/domain/human acceptance and wider research/method obligations |
+
+## Preserved CSM and reporting-population bridge
+
+13 October 2026. Version **2.59, 209 pages** was current for that unit:
 `docs/design/proposal/manuscript-munich-measurement-bridge-20261013/accounting-product-proposal.pdf`.
 SHA256: `b49177e1ebd02f31804d6222bd6c1b651d05cbf66e18832d779f29c02112b9ca`.
 The [result](../../data/accounting-master/munich-measurement-bridge-20261013/result.md)
