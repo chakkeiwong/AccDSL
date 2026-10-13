@@ -1,0 +1,142 @@
+\hypertarget{state-and-event-order}{%
+\section{State and event order}\label{method-bank-methods-state-and-event-order}}
+
+The dated credit methods use the selected amortised-cost, interest and impairment provisions of AASB 9 \citep{aasb9dated}. The following loan has different inputs from the earlier liquidity example, so its allowance and final equity are calculated separately.
+
+BankState contains cash/reserves by settlement venue and currency; deposits by customer, access rights and maturity; assets by contract, gross carrying amount, allowance, original EIR, accrued cash flows, collateral and credit state; undrawn commitments; funding lines and covenants; accounting equity; regulatory mappings; and evidence/information views. LoanState separately retains origination credit risk and current risk, SICR finding, credit-impaired/POCI status, forbearance, modification, write-off and recovery history. Aggregating by today's loan balance alone loses both staging evidence and later response to shocks.
+
+Each time step first admits information known then, forms permitted credit and liquidity forecasts, chooses behavior under that information, and schedules due events. Accrual, actual settlement, impairment measurement and regulatory queries have separate business identities. A deposit received from outside debits cash/reserves and credits deposit liability. A loan credited to the borrower's deposit debits loans and credits deposits without initially transferring reserves; a transfer to another bank then debits deposits and credits reserves. A loan paid directly outside instead debits loan/credits reserves. These two funding paths cannot be treated as identical cash events. Deposit interest debits interest expense/credits deposit or accrued payable; withdrawal requires settlement funds.
+
+\hypertarget{expected-credit-loss}{%
+\section{Expected credit loss}\label{method-bank-methods-expected-credit-loss}}
+
+For each admitted scenario j and date t, calculate contractual due flows minus the cash expected to be received, including supported collateral/enforcement cash and timing; discount the shortfall under the applicable original EIR or specified exception. With mutually exclusive exhaustive scenario weights w\_j, ECL is the sum of w\_j times those present-value shortfalls. Default-time hazards must be converted to disjoint default-time probabilities; summing cumulative PDs over dates counts the same default repeatedly. Collateral recoveries cannot be credited both in LGD and as a second recovery cash flow. A shorthand PD\ensuremath{\times}LGD\ensuremath{\times}EAD is admissible only if its definitions and discounting reproduce the specified cash-shortfall calculation; it is not a universal replacement.
+
+Expected credit loss (ECL) measures the discounted expected cash shortfall. A significant increase in credit risk (SICR) changes the general method's default horizon. Purchased or originated credit-impaired (POCI) assets follow a separate method. For the general approach, twelve-month ECL considers lifetime shortfalls arising from possible defaults during the next twelve months; it is not just unpaid cash in those twelve months. SICR uses the change in lifetime default risk since initial recognition, reasonable forward-looking information and the applicable rebuttable presumptions. Do not install a two-times-PD or 30-day rule as an unconditional universal trigger. Lifetime ECL follows a supported SICR finding; cure needs a supported reversal of that finding. Subsequently credit-impaired assets use original EIR on amortised cost for interest in subsequent periods; POCI has a separate credit-adjusted-rate and cumulative-change method.
+
+The 2017 ASBE~22 text makes the two horizons explicit. Article~47 defines
+credit loss as the present value of all contractual cash flows less expected
+receipts; a late receipt can therefore create a loss even when its nominal
+amount is paid in full. Article~48 limits twelve-month ECL by the date of the
+possible default event, while retaining the resulting cash shortfalls over the
+asset's life. Article~52 assesses changes in default risk, rather than changes
+in the allowance, and Article~58 requires probability weighting, time value
+and reasonable, supportable information \citep[Articles 47--48, 52, 58]{mofasbe22}.
+These provisions support the following dated comparison. Article~84 states
+1 January 2018, but applying the standard to a particular company also requires
+its issuance schedule, subsequent amendments and adoption facts.
+
+The general measurement interface requires scenario\_cashflows, law\_ref, information\_view, horizon\_admission, credit\_assessment and discount\_rule. An unweighted history set can produce conditional losses or loss bounds, but cannot produce an unbiased probability-weighted ECL by silently using equal weights. Return measurement\_unresolved for the ECL claim. Trade receivables and certain other assets use the separately applicable simplified approach; the general loan staging rule must not overwrite AASB 9.5.5.15--16.
+
+\hypertarget{full-loan-and-allowance-roll-forward}{%
+\section{Full loan and allowance roll-forward}\label{method-bank-methods-full-loan-and-allowance-roll-forward}}
+
+Assume a fixed-rate non-POCI amortised-cost loan held to collect its contractual cash flows, originated for 100, with one terminal payment 121 two years later, original EIR 10\%, no fees, collateral, modifications, FX or taxes. Since no payment falls due before maturity, an earlier default in this example is a separately established qualitative credit event, such as financial distress under the admitted default definition; it is not a missed instalment. Article~52 of ASBE~22 requires a definition consistent with credit-risk management and consideration of qualitative indicators \citep{mofasbe22}. At origination the assumed lifetime scenarios are: default in the first twelve months with probability 0.1, default during the following year with probability 0.1, and no default with probability 0.8. Either default gives terminal collection 60.5. The first twelve-month ECL includes lifetime loss from the first scenario only: 0.1\ensuremath{\times}(121\ensuremath{-}60.5)/1.1\ensuremath{^2}=5; initial lifetime ECL would be 10. Debit loan 100/ credit cash 100; debit impairment 5/credit allowance 5. Gross 100, allowance 5, net 95.
+
+\enlargethispage{\baselineskip}
+At year-one accrual the loan has survived the first window and is not yet credit-impaired: debit gross loan 10/credit interest 10. Survival alone would give remaining default probability 0.1/0.9=1/9. A subsequent, separately admitted credit forecast revises that conditional probability to 0.2; it is an authored forecast update, not a Bayes calculation from survival alone. Its lifetime weights are 0.8/0.2, with a separately established SICR finding; ECL=0.2\ensuremath{\times}60.5/1.1=11. Debit impairment 6/ credit allowance 6. Gross 110, allowance 11, net 99. The ratio change alone is not the defined SICR test. Only twelve months remain, so twelve-month and lifetime ECL both equal 11 under this revised forecast. This amount cannot distinguish the two classifications.
+
+Immediately afterward, a distinct, ordered credit-impairment event changes expected maturity collections to 60.5. This is a forecast mean, not a guaranteed or maximum recovery. Required allowance is 110\ensuremath{-}60.5/1.1=55; debit impairment 44/credit allowance 44. Net 55. ASBE~22 Article~59(5) measures this non-POCI credit-impaired asset by gross balance less discounted expected receipts. Articles~38 and 39(2) then make amortised cost, after the allowance, the basis for subsequent-period interest \citep{mofasbe22}.
+
+The bank is assumed still to have reasonable prospects of fuller recovery before maturity. The separate finding that some contractual cash will not reasonably be recovered first arises at settlement on this branch. If that finding arose earlier, ASBE~22 Article~43 would require the corresponding earlier write-off. Expected collections alone do not justify postponing an already-required write-off.
+
+In the next full year interest revenue is 55\ensuremath{\times}10\%=5.5. The gross contractual accretion is 11. One consistent decomposed posting debits gross loan 11, credits interest revenue 5.5 and allowance 5.5: gross 121, allowance 60.5, net 60.5. The allowance increase of 5.5 is attributed to discount unwind in its roll-forward, with no additional impairment expense in this posting. This reconciles gross and net-interest bases without counting the same expected loss again. Collect 60.5: debit cash/credit gross 60.5. When no reasonable expectation of remaining recovery is established, debit allowance 60.5/credit gross 60.5. Both balances reach zero. A mere delinquency is not that write-off finding. Subsequent unexpected cash recovery is recorded with its own recovery-income method and evidence; it does not restore an old live receivable by default.
+
+\begin{longtable}[]{@{}lrrrrr@{}}
+\toprule
+\begin{minipage}[b]{0.11\columnwidth}\raggedright
+Moment\strut
+\end{minipage} & \begin{minipage}[b]{0.14\columnwidth}\raggedleft
+Cash, opening 200\strut
+\end{minipage} & \begin{minipage}[b]{0.14\columnwidth}\raggedleft
+Gross loan\strut
+\end{minipage} & \begin{minipage}[b]{0.14\columnwidth}\raggedleft
+Allowance\strut
+\end{minipage} & \begin{minipage}[b]{0.14\columnwidth}\raggedleft
+Deposit liability\strut
+\end{minipage} & \begin{minipage}[b]{0.14\columnwidth}\raggedleft
+Equity, opening 20\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+Initial loan and allowance\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+100\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+100\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+5\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+180\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+15\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+Year-one accrual and SICR\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+100\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+110\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+11\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+180\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+19\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+Credit impairment\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+100\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+110\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+55\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+180\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+\ensuremath{-}25\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+Maturity accrual\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+100\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+121\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+60.5\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+180\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+\ensuremath{-}19.5\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+Collection and write-off\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+160.5\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+180\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
+\ensuremath{-}19.5\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Total interest 15.5 less impairment 55 is loss 39.5, equal to 100 advanced minus 60.5 received. The negative equity state survives; no missing branch or capital plug restores solvency. These five dates jointly test allowance, recognition and bank balance-sheet arithmetic. The same loss cannot also be deducted directly from gross before the stated write-off.
+
+For a non-derecognized loan modification, AASB 9.5.4.3 requires gross PV at original EIR and a modification result, then allowance and SICR reassessment under 5.5.12. For example gross 110 changed to a single future 110 at original 10\% gives revised gross 100 and modification loss 10 before any allowance change. ASBE~22 Articles~42 and 56 similarly separate remeasurement of a non-derecognised asset from its credit-risk reassessment \citep{mofasbe22}. This is separate from the financing method's issuer-liability ten-percent test. A derecognition decision requires its own asset conditions and cannot reuse that threshold.
+
+\newpage
+\hypertarget{funding-capital-and-decision-policies}{%
+\section{Funding, capital and decision policies}\label{method-bank-methods-funding-capital-and-decision-policies}}
+
+Liquidity simulation settles the dated net payment queue by venue/currency, respecting encumbrance, available cash, committed line terms and admissible actions. Haircut/eligibility and transferability come from a versioned policy; market value alone is not available liquidity. With cash 20, due withdrawal 30 and an admitted usable facility 8, even a full draw leaves shortfall 2. Record the default/unresolved settlement according to the event's legal model. Raising exactly 2 of new equity without an investor event is an invented financing source. Interbank contagion requires explicit counterparties and settlement priorities; it cannot be inferred from aggregate deposits.
+
+A RegulatoryAssessment reads an accounting view and an independent jurisdiction, date, perimeter, eligibility, deductions and exposure-weight policy. It outputs capital components, RWA/exposure measures, liquidity measures and reconciliations with their distinct denominators. Illustratively, equity 20 minus an assumed regulatory deduction 2 yields capital 18; assumed RWA 125 gives 14.4\%. Those inputs are synthetic, not a Basel rule, national capital approval or default threshold. No binding capital-policy numbers have been inspected for a target bank here. Use the Basel/national source and actual bank facts before real admission.
+
+Behavior under capital/liquidity constraints is a separate economic model. Specify feasible actions, objectives, information set and ties before solving; failure to find an action returns policy\_failure or default under the stated contract. Halaj/Behn sources can motivate candidate behavior but cannot calibrate it for an individual bank. A forecast experiment must compare simple fixed-book, contractual runoff and explicitly estimated policy baselines with time-safe data, before claiming a predictive improvement. CECL and other bases retain separate authority/method branches in the dated-authority discussion.

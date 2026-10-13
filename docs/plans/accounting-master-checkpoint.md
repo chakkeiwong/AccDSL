@@ -7,12 +7,13 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.51, 193 pages.**
-PDF: `docs/design/proposal/manuscript-pingan-leases-20261013/accounting-product-proposal.pdf`
-SHA256: `bc0a75b20bef0d6e045cca2461b06d30cbba6d028930e88bc1afcd6831fa1961`.
-The last integration adds Ping An's actual lease transition: 51 source checks
-and 124 manuscript checks pass; seven final rendered pages were inspected.
-[Result](../../data/accounting-master/pingan-lease-transition-20261013/result.md).
+**Version 2.52, 195 pages.**
+PDF: `docs/design/proposal/manuscript-intragroup-fx-20261013/accounting-product-proposal.pdf`
+SHA256: `a9de309d7c4176b799f094e9a1a91380a6506ce79c284fa6c96b16959cc52a6c`.
+The last integration works intragroup foreign-exchange elimination and
+conditional profit/OCI presentation: 49 source/arithmetic and 124 manuscript
+checks pass; six final rendered pages were inspected.
+[Result](../../data/accounting-master/intragroup-fx-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -64,10 +65,12 @@ found blocked repository/SSRN routes and proved the saved arXiv identifier
 belongs to an unrelated optics paper. No full text or technical claim was
 admitted in either inquiry. Preserve these source-specific limits.
 
-Execute the [intragroup-FX plan](accounting-intragroup-fx-20261013.md) using
-retained IAS 21: work separate/group balances and explain when an exchange
-result survives elimination in profit or OCI. Source and arithmetic checks
-precede any manuscript integration. No new acquisition is needed.
+The [intragroup-FX case](../../data/accounting-master/intragroup-fx-20261013/result.md)
+is integrated. Execute the [readiness-refresh plan](accounting-readiness-refresh-20261013.md)
+against all 35 requirements and 18 gaps, using the current manuscript and
+latest scoped results. Preserve the earlier negative assessment; author
+preparation cannot confer independent or human acceptance. Select the next
+concrete repair from that evidence, without restarting completed units.
 
 ## Remaining program and controls
 

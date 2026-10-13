@@ -57,3 +57,17 @@ addition improves the manuscript only after the source and balance checks.
 Preserve Version 2.51, all prior source content and frozen corpus/controller
 records. Any new candidate needs a bounded integration plan, a clean build,
 render inspection and separate pending human/domain acceptance.
+
+Pre-calculation refinement after reading IAS 21.24/32/33/45 and IFRS 10.B86:
+use established snapshots rather than new loan origination. Add EUR20 of
+subsidiary paid-in equity and its USD24 parent investment at the 1.2 opening
+rate. Parent balances are cash 56, investment 24 and receivable 120 against
+equity 200; subsidiary balances are EUR cash 120, payable 100 and equity 20.
+This preserves the same group opening cash/equity 200 while making both the
+ordinary translation component and loan component visible. All opening reserve
+balances are zero. The target is an FX-only measurement step with currency
+carrying amounts and non-FX valuation inputs fixed; it does not prescribe a
+zero-interest financing contract or an entire reporting period with no accrual.
+Functional currencies and control are established assumptions, not inferred
+from these stripped-down balances. The separate investment uses its given
+historical-cost amount; no goodwill/NCI/tax/hedge/impairment is introduced.

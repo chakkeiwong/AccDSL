@@ -1,8 +1,8 @@
 # Accounting proposal — direct next plan
 
-13 October 2026. Version 2.51, 193 pages; readiness **not_ready**.
-PDF: docs/design/proposal/manuscript-pingan-leases-20261013/accounting-product-proposal.pdf
-SHA256: bc0a75b20bef0d6e045cca2461b06d30cbba6d028930e88bc1afcd6831fa1961
+13 October 2026. Version 2.52, 195 pages; readiness **not_ready**.
+PDF: docs/design/proposal/manuscript-intragroup-fx-20261013/accounting-product-proposal.pdf
+SHA256: a9de309d7c4176b799f094e9a1a91380a6506ce79c284fa6c96b16959cc52a6c
 Implementation and the old controller remain held.
 
 Completed: sixteen Munich Re declarations (115 checks), then sixteen Henkel
@@ -36,10 +36,14 @@ The Caiani inquiry also closes without full text: repository/SSRN access
 failures and unrelated search results. The recorded arXiv ID is an optics
 paper, so it is excluded from future Caiani requests. Result:
 data/accounting-master/caiani-source-recovery-20261013/result.md.
-Execute docs/plans/accounting-intragroup-fx-20261013.md next using retained
-IAS 21. Work separate/group balances and conditional profit/OCI treatment of
-an exchange result that survives elimination. Source checks precede integration.
-Output: data/accounting-master/intragroup-fx-20261013/.
+The intragroup-FX case is integrated in Version 2.52: 49 source/arithmetic
+and 124 manuscript checks; six final renders inspected. Result:
+data/accounting-master/intragroup-fx-20261013/result.md.
+Execute docs/plans/accounting-readiness-refresh-20261013.md next. Assess all
+35 requirements and 18 gaps against current passages and exact scoped evidence;
+then select and execute the smallest ready substantive repair. Preserve the
+historical negative verdict and independent/human acceptance distinctions.
+Output: data/accounting-master/readiness-refresh-20261013/.
 The other discovery candidates remain under publication-frontier-20261013;
 no unreviewed hit is admitted and no unchanged blocked route should be retried.
 Check completed result records before scheduling another acquisition.

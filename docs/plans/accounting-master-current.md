@@ -3,13 +3,13 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.51, 193 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-pingan-leases-20261013/accounting-product-proposal.pdf`
-SHA256: `bc0a75b20bef0d6e045cca2461b06d30cbba6d028930e88bc1afcd6831fa1961`.
+**Version 2.52, 195 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-intragroup-fx-20261013/accounting-product-proposal.pdf`
+SHA256: `a9de309d7c4176b799f094e9a1a91380a6506ce79c284fa6c96b16959cc52a6c`.
 
 ## Current evidence and next action
 
-Version 2.51 adds the [actual Ping An lease transition](../../data/accounting-master/pingan-lease-transition-20261013/result.md):
+Version 2.51 added the [actual Ping An lease transition](../../data/accounting-master/pingan-lease-transition-20261013/result.md):
 51 source and 124 manuscript checks pass, with seven final renders inspected.
 The case preserves dated bases, reported elections and different liability
 measurements while retaining unknown journals, cash payments and depreciation.
@@ -53,11 +53,16 @@ adds a verified wrong-identifier correction; its six-resource search recovers
 no economics full text. Neither inquiry supplies technical support. Do not
 repeat those routes or use the wrong arXiv identifier.
 
-Next execute the [intragroup-FX inquiry](accounting-intragroup-fx-20261013.md)
-using retained IAS 21. The current manuscript states, but does not work through,
-the exchange result surviving loan elimination and its conditional profit/OCI
-presentation. Complete the bounded journal and statement example before
-integration; acquisition, accounting support and human acceptance stay distinct.
+Version 2.52 integrates the [intragroup-FX example](../../data/accounting-master/intragroup-fx-20261013/result.md).
+All 49 source/arithmetic and 124 manuscript checks pass. It works the loan and
+investment eliminations, surviving profit/OCI, and cash exchange reconciliation
+under explicitly conditional facts. The six inspected final pages and exact
+source preservation support the candidate, with human/domain acceptance pending.
+
+Next execute the [readiness-refresh plan](accounting-readiness-refresh-20261013.md)
+against the original MC/G acceptance criteria, current passages and later
+scoped evidence. Preserve the negative historical assessment and select the
+next concrete internal repair; no positive readiness follows from check counts.
 
 ## Remaining proposal phases
 
@@ -66,7 +71,7 @@ integration; acquisition, accounting support and human acceptance stay distinct.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.51; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.52; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Prior assessment completed with a negative verdict | Reassess all requirements and their interactions after repair; retain separate human/domain/engineering acceptance |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18

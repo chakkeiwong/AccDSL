@@ -1,0 +1,166 @@
+\chapter{Architecture and reuse}
+\label{ch:architecture}
+
+\section{One representation, several authoring methods}
+
+The architectural centre is a typed intermediate representation (IR), not a
+text parser. A document extractor, a human editor, a Python library and the
+AccDSL compiler all create the same records. This allows a modeller to begin
+with a reviewed structured file and later add convenient notation. It also
+allows source extraction to improve without changing accounting semantics.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=7mm,>=Latex,
+ box/.style={draw=ink,rounded corners,align=center,text width=112mm,
+ minimum height=10mm,font=\small,fill=papergray}]
+\node[box] (e) {Documents and tagged filings\\immutable evidence, source spans and reporting contexts};
+\node[box,below=of e] (h) {Typed historical representation\\observations, entities, contracts, mappings and constraints};
+\node[box,below=of h] (i) {Compatible histories and declared assumptions\\discrete alternatives, continuous families, optional weights};
+\node[box,below=of i] (s) {Scenario execution\\economic events, accounting rules and balanced journal batches};
+\node[box,below=of s] (r) {Reports and conditional results\\statements, movement schedules, bounds and explanations};
+\draw[->] (e)--(h);\draw[->] (h)--(i);\draw[->] (i)--(s);\draw[->] (s)--(r);
+\end{tikzpicture}
+\caption{The simulation path. Every transformation records its inputs and
+assumptions; the source record remains available throughout.}
+\label{fig:architecture}
+\end{figure}
+
+Evidence storage and economic modelling must remain separate. If a company
+reports 100 of borrowing, a model can assume two loans of 60 and 40 without
+creating a new reported fact that the company disclosed those loans. The
+contract library consumes the assumed terms, the accounting module consumes
+the resulting events, and the explanation graph records the assumption at
+each affected result.
+
+\section{Why a DSL, and when another approach is better}
+
+The strongest baseline is a typed schema, SQL storage and ordinary Python
+code. That combination can implement the whole product. Its disadvantage is
+that repeated accounting requirements can become conventions scattered across
+functions: implicit currency conversion, missing period checks, hidden default
+values and duplicated rule selection. A bounded language makes these
+requirements part of typing and compilation. Its costs are language
+maintenance, diagnostics, migration and training.
+
+\begin{longtable}{L{29mm}L{51mm}L{56mm}}
+\toprule Approach & Useful role & Limitation for this product\\\midrule\endhead
+Typed schema and Python & Reference executor, flexible economic models,
+initial authoring API & Domain restrictions require disciplined APIs or a
+validator; arbitrary code complicates static analysis and provenance.\\
+XBRL and OIM & Tagged evidence, contexts, dimensions, taxonomies and exchange &
+Reported facts and reporting relationships do not recover hidden economic
+histories or specify scenario behaviour.\\
+Ledger languages & Recording known transactions, balance checks, export and
+differential testing & Alternatives, source interpretation and contract
+exposure need additional semantics.\\
+Knowledge graph / SQL & Relationships, lineage, temporal queries and evidence
+navigation & A graph or schema alone does not define event execution or the
+probability meaning of alternatives.\\
+Rules / Catala & Dated policy logic, defaults, exceptions, traceable rule
+evaluation & Ledger state, event scheduling and ensembles require an enclosing
+runtime.\\
+Probabilistic program & Priors, likelihoods and inference over model parameters &
+Needs declared probability measures; cannot turn unspecified ambiguity into
+probability or supply accounting rules.\\
+Spreadsheets & Familiar review and small transparent financial models &
+Versioned evidence, shared unknowns and branching histories are difficult to
+govern as the model grows.\\
+AccDSL over shared IR & Common domain checks, reusable templates, explicit
+alternatives and deterministic posting semantics & Requires implementation and
+evaluation; broad notation without stable semantics would add cost.\\
+\bottomrule
+\end{longtable}
+
+The decision is to implement the IR, validators and Python reference API first,
+then the textual frontend. The same conformance cases must pass through both
+frontends. If the DSL fails to reduce ambiguity in representative authoring
+tasks, the IR and library remain useful. This is a reversible product decision,
+not a claim that a new language is inherently better than a library.
+
+\section{Open-source components}
+
+The following survey uses official repository descriptions, licence files and
+selected source interfaces archived on 2 October 2026. It is a source
+inspection, not an executed integration or performance evaluation. The
+machine-readable tool ledger records retrieval paths and available version
+metadata. Dependencies must be pinned when implementation begins; a branch
+name observed during this survey is not a release requirement.
+
+\begin{longtable}{L{26mm}L{71mm}L{39mm}}
+\toprule Component & Proposed use and checked boundary & Licence / decision\\\midrule\endhead
+Arelle & Parse and validate XBRL/iXBRL. Inspected \code{ModelFact}, context and
+unit accessors. Preserve taxonomy extensions and full contexts when importing.
+& Apache-2.0 core; first-choice adapter.\\
+Docling & PDF layout, text and table conversion. Inspected converter interface;
+retain page coordinates and extraction settings. & MIT code; assess model
+licences separately. Candidate.\\
+Table Transformer & Table extraction baseline associated with PubTables-1M;
+check finance-domain performance before selection. & MIT; repository marked
+archived in inspected metadata. Baseline, not a maintenance default.\\
+Beancount & Posting and transaction data types; export selected concrete
+branches and compare balances. & GPL-2.0 project metadata; integration and
+redistribution choice needed. Optional adapter.\\
+Ledger & Known-journal reference and export. Inspected transaction balancing
+code and manual date/assertion behaviour. & BSD-style licence; optional
+reference tool.\\
+hledger & Alternative ledger import/export and accounting checks. Repository
+documentation inspected. & GPL-3.0 project metadata; optional process adapter.\\
+Catala & Potential backend for deterministic policy modules; defaults and
+exceptions have useful semantics. & Apache-2.0; prototype only after core
+execution semantics stabilise.\\
+ACTUS & Contract schedules, payoffs and transitions; external risk-factor
+interface. Verify event schedules against ACTUS tests. & Service Apache-2.0;
+technical specification CC-BY-SA-4.0. Candidate contract adapter.\\
+QuantLib & Calendars, cash flows and valuation. Floating coupon source separates
+fixing dates and pricing. Accounting treatment remains external. & Modified
+BSD-style licence; candidate valuation adapter.\\
+OpenFisca & Versioned tax-benefit formulas as a rule-system reference; inspected
+variable/formula metadata. Corporate-tax coverage must be supplied. & AGPL-3.0;
+optional, not the core runtime.\\
+Z3 & Finite alternatives, logical compatibility, linear constraints and conflict
+explanations. & MIT licence text; first solver candidate.\\
+DuckDB & Local analytical queries over extracted facts and results. & MIT;
+candidate alongside SQLite transactional storage.\\
+Stan & Continuous probabilistic models and diagnostics with an explicit target.
+Inspected model interface and paper. & BSD-3-Clause; optional inference backend.\\
+Pyro / PyMC & Alternative probabilistic backends for model-specific inference.
+Pyro design paper and project descriptions inspected. & Apache-2.0 / Apache-2.0
+licence texts; optional, no default selection.\\
+\bottomrule
+\end{longtable}
+
+The licence entries identify the inspected projects, not a legal conclusion
+about every combination of code, models and datasets. The default product
+architecture can communicate with optional tools through explicit adapters.
+This does not, by itself, settle redistribution obligations. That question is
+resolved when a concrete dependency and distribution method are selected.
+
+XBRL's Open Information Model supplies standardised facts with concepts,
+entities, periods, units and dimensions \citep{xbrloim}. Those facts are an
+excellent ingestion source. AccDSL retains their original contexts and
+decimals rather than flattening them immediately into a company-by-year table.
+Calculation relationships can help validate reporting totals, but are not a
+general description of the transactions that generated those totals.
+
+\section{Responsibilities that AccDSL must implement}
+
+AccDSL owns the evidence and temporal model, typed accounting concepts, shared
+unknowns and alternatives, rule-package selection, journal validation,
+consolidation provenance and report explanations. It also owns the distinction
+between feasible sets and distributions. These responsibilities cannot be
+delegated implicitly to whichever parser or solver is convenient.
+
+External components receive narrow requests and return typed responses.
+A contract adapter returns scheduled events, cash-flow quantities, state
+changes and source/model references; it does not directly mutate the ledger.
+A valuation adapter returns a measure, currency, date, method and numerical
+status; the accounting package decides whether and where to recognise the
+change. A solver returns feasibility or bounds with scope and completeness
+status. A language model proposes source-linked mappings or interpretations;
+it cannot commit an unsupported assertion as fact.
+
+The architecture consequently permits deterministic reference execution,
+alternative solvers and later acceleration without changing the meaning of a
+historical observation or a journal entry. Performance work begins only after
+the same semantic cases pass through these interfaces.

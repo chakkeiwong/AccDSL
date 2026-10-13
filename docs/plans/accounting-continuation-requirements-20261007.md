@@ -4,6 +4,26 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current intragroup-FX result and requirement review
+
+**Version 2.52, 195 pages; not_ready.**
+PDF: `docs/design/proposal/manuscript-intragroup-fx-20261013/accounting-product-proposal.pdf`.
+SHA256: `a9de309d7c4176b799f094e9a1a91380a6506ce79c284fa6c96b16959cc52a6c`.
+The [intragroup-FX result](../../data/accounting-master/intragroup-fx-20261013/result.md)
+adds a checked separate/group journal and cash bridge: 49 source/arithmetic
+and 124 manuscript checks pass, with seven source and six final manuscript
+renders inspected. Group cash/equity of 212 reconciles to profit/OCI of 10/2
+or 0/12 under different explicit settlement facts. The parent's separate gain
+remains 10. This is an FX-only measurement step, not loan origination or a
+complete period; real-company facts and current-rule completeness stay open.
+
+P17/E07/P18; MC02/06/08/10–11/13/15–16/19/28/30/32–35;
+G4/G7/G12/G15/G16. All previous prose, 48 display blocks and 349 citation
+occurrences survive. All five E obligations remain. Execute the
+[readiness-refresh plan](accounting-readiness-refresh-20261013.md) to reconcile
+current support with all original acceptance criteria before selecting the next
+substantive repair. Earlier next-action text below is historical.
+
 ## Latest literature identity correction and next method work
 
 The [Caiani source result](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
