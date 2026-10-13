@@ -1,25 +1,26 @@
 # Accounting proposal — direct next plan
 
-13 October 2026. Version 2.60, 211 pages; readiness **not_ready**.
-PDF: docs/design/proposal/manuscript-apple-statement-network-20261013/accounting-product-proposal.pdf
-SHA256: 42e5062870c4c6f3462aae2093c89f4046aef853f1659d4148cf2c1465b7fe60
+13 October 2026. Version 2.61, 212 pages; readiness **not_ready**.
+PDF: docs/design/proposal/manuscript-apple-interim-network-20261013/accounting-product-proposal.pdf
+SHA256: cf44b9fb76a4d6ed47c8921912dca2c6399a795460a92f3838c4582653d86e42
 Implementation and the old controller remain held.
 
-The annual Apple statement join is complete within scope:
-data/accounting-master/apple-statement-network-20261013/result.md.
-102 amount/dash rows, 27 opening counterparts, 95 source/arithmetic and 146
-manuscript checks pass. Five source and nine final pages inspected.
+The annual and interim Apple joins are complete within scope. Latest result:
+data/accounting-master/apple-interim-network-20261013/result.md.
+100 current-quarter rows, 27 balance comparatives and five opening component
+links; 114 source/arithmetic and 137 manuscript checks pass. Five derived source
+views and six final pages inspected. Prior math/citations are preserved.
 
-Execute docs/plans/accounting-apple-interim-network-20261013.md.
-Join all five current-quarter statements to FY2024 endpoints. Preserve dates,
-units, source dashes and unexplained differences. Then test joint historical
-alternatives and conditional paths; do not claim complete package/forecast
-evidence from table consistency. Output: data/accounting-master/apple-interim-network-20261013/.
+Execute docs/plans/accounting-apple-history-compatibility-20261013.md.
+Test the earlier PP&E local histories against a fixed company remainder, derive
+necessary branch-dependent completion conditions and retain missing facts.
+A failed combination rejects that combination, not the research direction.
+Then develop justified conditional completions and future-path dependencies.
+Output: data/accounting-master/apple-history-compatibility-20261013/.
 
-The Version 2.59 reassessment preserves all MC01–MC35/G1–G18 obligations;
-all five E workstreams and historical negative P19 remain. Frozen 56/136 dates,
-35 supplemental declarations and 101 without accepted supplements are unchanged.
-Do not repeat closed units or unchanged blocked source routes. Human acceptance
-blocks promotion, not internal preparation. No paid review, outreach, publication
-or runtime campaign. Preserve the 100 unrelated staged entries and use explicit
-paths with trusted Git writes for authorised commits.
+All MC01–MC35/G1–G18 and E01/E05/E07/E08/E14 remain controlling. The latest
+full author reassessment is Version 2.59; historical P19 remains negative.
+Frozen 56/136 dates, 35 supplemental declarations and 101 without accepted
+supplements are unchanged. Human acceptance blocks promotion, not preparation.
+No paid review, outreach, publication or runtime campaign. Preserve 100 unrelated
+staged entries; use explicit paths and trusted Git writes for authorised commits.

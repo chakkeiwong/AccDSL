@@ -7,14 +7,14 @@ background controller remain held.
 
 ## Current candidate
 
-**Version 2.60, 211 pages.**
-PDF: `docs/design/proposal/manuscript-apple-statement-network-20261013/accounting-product-proposal.pdf`
-SHA256: `42e5062870c4c6f3462aae2093c89f4046aef853f1659d4148cf2c1465b7fe60`.
-The latest integration joins Apple's five FY2024 statements and opening balance
-sheet: 102 amount/dash rows, 27 opening counterparts and 69 relationships.
-All 95 source/arithmetic and 146 manuscript checks pass. Five source pages
-and nine final manuscript pages were inspected; prior math and citations remain.
-[Result](../../data/accounting-master/apple-statement-network-20261013/result.md).
+**Version 2.61, 212 pages.**
+PDF: `docs/design/proposal/manuscript-apple-interim-network-20261013/accounting-product-proposal.pdf`
+SHA256: `cf44b9fb76a4d6ed47c8921912dca2c6399a795460a92f3838c4582653d86e42`.
+The latest integration joins the five FY2025 Q1 statement tables to FY2024:
+100 current rows, 27 balance comparatives and five opening equity/cash links.
+All 114 source/arithmetic and 137 manuscript checks pass. Five derived source
+views and six final manuscript pages were inspected; prior math/citations remain.
+[Result](../../data/accounting-master/apple-interim-network-20261013/result.md).
 This is a design candidate, with independent/domain/human acceptance pending.
 
 ## Latest completed work
@@ -85,8 +85,9 @@ is now complete within scope. The [whole-program reassessment](../../data/accoun
 credits the seven recent integrations and preserves all original MC/G
 obligations. Its 173 integrity checks pass; twenty source judgments are carried.
 The [annual statement network](../../data/accounting-master/apple-statement-network-20261013/result.md)
-is complete within scope. Execute the [interim statement join](accounting-apple-interim-network-20261013.md),
-then address joint histories and conditional paths from the unresolved links.
+and [interim join](../../data/accounting-master/apple-interim-network-20261013/result.md)
+are complete within scope. Execute the [historical compatibility inquiry](accounting-apple-history-compatibility-20261013.md),
+then address the conditional completions and future paths it requires.
 Complete statement tables do not close the real-company requirement.
 
 ## Remaining program and controls

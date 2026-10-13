@@ -3,9 +3,9 @@
 Refreshed 13 October 2026 (Asia/Hong_Kong) against the active checkpoint,
 MC01–MC35/G1–G18 obligations and the preserved negative P19 assessment.
 The active objective is the governing accounting product-and-method proposal.
-**Version 2.60, 211 pages; readiness not_ready.**
-PDF: `docs/design/proposal/manuscript-apple-statement-network-20261013/accounting-product-proposal.pdf`
-SHA256: `42e5062870c4c6f3462aae2093c89f4046aef853f1659d4148cf2c1465b7fe60`.
+**Version 2.61, 212 pages; readiness not_ready.**
+PDF: `docs/design/proposal/manuscript-apple-interim-network-20261013/accounting-product-proposal.pdf`
+SHA256: `cf44b9fb76a4d6ed47c8921912dca2c6399a795460a92f3838c4582653d86e42`.
 
 ## Current evidence and next action
 
@@ -114,9 +114,13 @@ The [annual Apple statement network](../../data/accounting-master/apple-statemen
 is complete within scope and integrated as Version 2.60: 102 amount/dash rows,
 27 opening counterparts, 95 source/arithmetic and 146 manuscript checks pass.
 All earlier math/citations remain; five source and nine final pages inspected.
-Execute the [interim statement join](accounting-apple-interim-network-20261013.md),
-then develop joint historical alternatives and conditional paths. Neither
-statement join closes the whole-package or real-forecast obligations.
+The [interim statement join](../../data/accounting-master/apple-interim-network-20261013/result.md)
+is now delivered as Version 2.61: 100 current-quarter rows, all 27 balance
+comparisons and five opening component links join the annual endpoints. All
+114 source/arithmetic and 137 manuscript checks pass. Execute the
+[historical compatibility inquiry](accounting-apple-history-compatibility-20261013.md),
+testing whether earlier local alternatives share a coherent company history.
+The joined tables do not close whole-package or real-forecast obligations.
 
 ## Remaining proposal phases
 
@@ -125,7 +129,7 @@ statement join closes the whole-package or real-forecast obligations.
 | P15 — Requirements/gaps | Scoped audit delivered | Maintain requirement coverage and newly discovered gaps |
 | P16 — Architecture | Scoped design delivered | Keep contracts consistent as evidence changes; independent implementability remains pending |
 | P17 — Methods and sources | Active direct preparation | Complete the five evidence workstreams below and wider gap obligations |
-| P18 — Manuscript integration | Delivered through Version 2.60; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
+| P18 — Manuscript integration | Delivered through Version 2.61; recurring | Integrate material findings, preserve mathematics and qualifications, build and inspect each candidate |
 | P19 — Readiness assessment | Historical negative assessment preserved; Version 2.59 author refresh complete, still negative | Reassess substantive repairs and their interactions; independent/human/domain/engineering acceptance remains separate |
 
 P19's completed assessment does not mean acceptance. P17 source work feeds P18
@@ -135,7 +139,7 @@ as useful results arrive; the five E obligations are not new serial phases.
 
 | Obligation | Next useful internal work | Evidence still required |
 | --- | --- | --- |
-| E01 / C02–C03 — Real package and chronology | Annual FY2024 join delivered; join the complete next-quarter statements, then historical alternatives and conditional paths; continue distinct date and exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
+| E01 / C02–C03 — Real package and chronology | Annual and next-quarter joins delivered; test joint historical alternatives and conditional paths, preserving missing facts; continue distinct date and exhibit leads | Separate document/reference, material-assertion and query coverage; source-bound meanings or explicit unknowns and consequences. Historical availability remains distinct from declared dates |
 | E05 / C04 — Source conflict and review | Bounded actual source-reference walkthrough delivered in Section 3.10; maintain its selective dependency examples | Independent/human review and later workflow execution remain pending. Financial-measurement conflict has not been established; do not describe the actual source-reference example as missing or rerun the closed search |
 | E07 / C05 — Accounting authority and methods | Follow distinct usable authority leads; extend actual corporate, financing, bank and insurance facts and consequences | Exact operative editions, amendment chains, applicability, competing interpretations and operation-level consequences. Current ASC and operative ASBE notices remain unresolved |
 | E08 / C06 — Literature | Follow genuinely new full-text leads beyond the closed Tamer/Caiani attempts; finish relevant competitors, citations, versions/corrections and omission checks | Technical source support for consequential claims. McCarthy 1982, Caiani 2016, Imielinski/Lipski 1984 and Tamer 2010 remain source-blocked until evidence changes that status |

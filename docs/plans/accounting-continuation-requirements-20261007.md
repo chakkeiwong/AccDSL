@@ -1207,3 +1207,17 @@ Original obligations and all prior math/citations remain. MC01–05/07–11/13/
 Residual causes, private transactions, complete package semantics, joint
 histories and future paths remain unfinished. Execute the [interim join](accounting-apple-interim-network-20261013.md),
 then the historical/path dependencies. Full readiness remains not_ready.
+
+## E01 Apple annual/interim join, 13 October 2026
+
+Version 2.61, 212 pages, integrates the [interim interval](../../data/accounting-master/apple-interim-network-20261013/result.md):
+100 current-quarter rows and all 27 balance comparisons plus five opening
+components match the annual endpoints. All 114 source/arithmetic and 137
+manuscript checks pass. Five source views and six final pages inspected.
+The prior comparative quarter, actual opening balances, omitted rows and
+unallocated differences remain distinct. MC01–05/07–11/13/15–16/18/28/30/
+32–35 and G1/G4/G5/G11/G12/G13/G15/G16 advance within scope. Original
+obligations, prior mathematics/citations and not_ready remain. Next execute the
+[history compatibility inquiry](accounting-apple-history-compatibility-20261013.md),
+then conditional completion/path work without claiming that table joins identify
+all actual journals or close the package.
