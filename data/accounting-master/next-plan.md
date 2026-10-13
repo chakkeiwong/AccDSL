@@ -1,22 +1,23 @@
 # Accounting proposal — direct next plan
 
-13 October2026. Version2.70,225 pages; **not_ready**.
-PDF: docs/design/proposal/manuscript-apple-inline-occurrences-20261013/accounting-product-proposal.pdf
-SHA256: 7de5398b78b0ce8fc078d40aeebcf936e776e0d4a8f852e14b996d840823cad7
+13 October2026. Version2.71,226 pages; **not_ready**.
+PDF: docs/design/proposal/manuscript-certain-answers-20261013/accounting-product-proposal.pdf
+SHA256: c5a7da2fea6df602c0d1a5c4f9830ba1394e90d5e097a56684e52657fdbbd228.
 Implementation and historical controller remain held.
 
-The incomplete-information source inquiry is complete without full-text recovery:
-data/accounting-master/incomplete-information-source-20261013/result.md.
-Four distinct requests and99 checks; original1984 SOURCE_BLOCKED status stays.
-Unsupported discovery leads were explicitly rejected. No technical claim added.
-Version2.69 remains the last full53-row assessment;2.70 is a scoped E01/E14
-supplement. Reference/publication counts and original obligations remain.
+The retained Libkin audit is delivered in2.71:
+data/accounting-master/certain-answer-semantics-20261013/result.md.
+All102 source/arithmetic and155 manuscript checks pass; eight final pages
+inspected. Boolean certainty, certain tuples and full answer families have
+explicitly different meanings. Existing empty/undecided safeguards survive.
+The surveyed general theorem refers to a distinct primary proof source.
 
-Execute docs/plans/accounting-certain-answer-semantics-20261013.md.
-Audit the retained Libkin primary paper and current query contracts; do not
-substitute it for the inaccessible original or assume mathematical transfer.
-Source access blocks its route, not independent ready master work.
+Execute docs/plans/accounting-certain-answers-proof-source-20261013.md.
+Recover that exact cited source through bounded supported leads, then inspect
+its technical conditions before claiming proof support or transfer.
 
-P17/P18 continue; P19 stays negative; all five E workstreams remain open.
-Preserve100 unrelated staged entries. Human acceptance blocks promotion,
-not feasible internal preparation.
+Version2.69 remains the last full53-row assessment, supplemented by2.70/2.71.
+All35 requirements/18 gaps and all five E workstreams remain controlling.
+P17/P18 continue; P19 stays negative. Frozen source/reference/publication counts
+remain unchanged. Preserve100 unrelated staged entries. Human acceptance
+blocks promotion, not feasible internal preparation.

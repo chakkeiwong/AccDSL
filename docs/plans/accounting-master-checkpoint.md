@@ -14,9 +14,9 @@ Twenty-one of24 source judgments are carried by exact bytes; both new
 transitive sections receive scoped evidence. Full readiness remains not_ready.
 The actual occurrence inquiry is now delivered in2.70.
 
-**Version 2.70, 225 pages.**
-PDF: docs/design/proposal/manuscript-apple-inline-occurrences-20261013/accounting-product-proposal.pdf
-SHA256: 7de5398b78b0ce8fc078d40aeebcf936e776e0d4a8f852e14b996d840823cad7.
+**Version 2.71, 226 pages.**
+PDF: docs/design/proposal/manuscript-certain-answers-20261013/accounting-product-proposal.pdf
+SHA256: c5a7da2fea6df602c0d1a5c4f9830ba1394e90d5e097a56684e52657fdbbd228.
 The [award-version inquiry](../../data/accounting-master/apple-award-versions-20261013/result.md)
 is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
 forms now have selected substantive clauses inspected. General prorating and
@@ -38,11 +38,19 @@ now inspected were already located. No additional acquisition count is added.
 
 ## Latest completed work
 
+The [certain-answer semantics audit](../../data/accounting-master/certain-answer-semantics-20261013/result.md)
+is delivered in Version 2.71. Boolean certainty, individually certain tuples
+and answer families are distinguished; the constructed payable example and
+full-family proof conditions are checked. All102 source/arithmetic and155
+manuscript checks pass; eight final pages inspected. This is a scoped E08
+supplement to the Version2.69 full assessment, with all original statuses
+unchanged. Execute the [primary proof-source inquiry](accounting-certain-answers-proof-source-20261013.md).
+
 The [incomplete-information source inquiry](../../data/accounting-master/incomplete-information-source-20261013/result.md)
 completed four distinct discovery requests without recovering the1984 paper.
 All99 checks pass; original SOURCE_BLOCKED status and proposal2.70 remain.
 Unsupported generated discovery leads were rejected and preserved as rejected.
-Execute the [retained Libkin semantics audit](accounting-certain-answer-semantics-20261013.md).
+The [retained Libkin semantics audit](accounting-certain-answer-semantics-20261013.md) is now delivered in2.71.
 
 The [actual occurrence inquiry](../../data/accounting-master/apple-inline-occurrences-20261013/result.md)
 is delivered in Version2.70. The annual HTML had no inline tags; the repaired
@@ -108,7 +116,7 @@ availability follows.
 
 ## Exact next action
 
-Execute [the retained Libkin semantics audit](accounting-certain-answer-semantics-20261013.md); preserve the2.70 candidate and source-specific access limits.
+Execute [the primary proof-source inquiry](accounting-certain-answers-proof-source-20261013.md); preserve the2.71 candidate and source-specific access limits.
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
 ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)
@@ -144,8 +152,8 @@ unresolved actual admission. The [settlement-path inquiry](../../data/accounting
 now tests downstream categories, timing and query-specific aggregation. The [post-Apple reassessment](../../data/accounting-master/post-apple-readiness-20261013/result.md)
 is complete:148 integrity checks preserve all35 requirements/18 gaps and
 credit V2.60–2.64. The stock-plan source inquiry is now complete within
-scope, with three supplemental counterparts. The performance-award inquiry is also delivered. The version inquiry is now delivered. The post-awards reassessment is complete. Execute the
-[actual occurrence inquiry](accounting-apple-inline-occurrences-20261013.md).
+scope, with three supplemental counterparts. The performance-award inquiry is also delivered. The version inquiry is now delivered. The post-awards reassessment and
+[actual occurrence inquiry](accounting-apple-inline-occurrences-20261013.md) are complete.
 The frozen40-target list and failed indenture routes remain preserved.
 
 ## Remaining program and controls

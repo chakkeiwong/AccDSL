@@ -1,0 +1,121 @@
+set if S contains just a null value, no matter what R
+contains. This goes against our intuition, of course: we
+know that if |R| > |S|, then R −S cannot possibly be
+empty, but SQL tells us that it is. As [26] nicely put
+it, “those SQL features are . . . fundamentally at odds
+with the way the world behaves”; a more damning as-
+sertion “you can never trust the answers you get from a
+database with nulls” is found in [24].
+How did we get there?
+The approach to evaluating
+queries with nulls dates back to Codd’s paper [21] from
+1975, in which the 3-valued logic approach is advocated.
+Problems with it were caught early [37]: a simple query
+SELECT p_id
+FROM Pay
+WHERE order = "oid1"
+OR
+order <> "oid1"
+when evaluated on the database shown above, produces
+the empty table, and yet intuitively we expected the
+answer to be ‘pid1’. Indeed, no matter what non-null
+value we replace the null with, this is what the query
+will produce.
+The idea of answering queries consistently with every
+possible interpretation of nulls, ﬁrst proposed in [37] as
+a way of ﬁxing some problems with Codd’s 3-valued
+approach, led to the notion of certain answers, now
+the standard way of answering queries over incomplete
+databases. It was ﬁrst properly deﬁned by [54]. The
+deﬁnition relies on the notion of a semantics of an in-
+complete database D, denoted by [[D]], which is the set
+of all complete databases D′ that D can represent. For
+instance, such databases can be obtained by replacing
+nulls by values (but this is not the only possibility).
+Then, given a relational query Q and an incomplete
+database D, certain answers were deﬁned as
+certain(Q, D) =
+\
+{Q(D′) | D′ ∈[[D]]},
+(1)
+i.e., they consist of tuples that belong to the answer no
+matter how the missing information is interpreted.
+In the theory community, certain answers have be-
+come the way for answering queries over incomplete
+databases, used across a variety of applications such
+as query answering using views [1, 39], data integration
+[43], data exchange [7], inconsistency management [15],
+and data cleaning [30].
+However, this more disciplined approach, compared to
+SQL’s 3-valued logic, does not come for free. Let Q be
+a Boolean (i.e., true/false) query. Then certain(Q, D) is
+true iﬀQ is true in every D′ ∈[[D]]. Thus computing
+certain answers becomes a form of validity (i.e., check-
+ing if a sentence is true in all structures). In fact, when
+Q comes from relational calculus, then under the open-
+world-semantics (to be deﬁned later), ﬁnding certain
+answers is exactly the validity problem. However, this
+is an undecidable problem, as was shown by Church
+and Turing back in the 1930s. Actually, the problem
+we look at is slightly diﬀerent – we are only concerned
+
+[RIGHT COLUMN]
+about ﬁnite structures – but that does not make it eas-
+ier. A detailed study of the complexity of ﬁnding cer-
+tain answers was initiated by [3] which showed hardness
+results, coNP-hard and up. In fact, high complexity
+bounds are widespread in applications of incomplete-
+ness as well, with classes such as coNP, Πp
+2, Pspace,
+coNEXP, and so on being regularly mentioned, even
+for data complexity.
+So, where does this bring us? We can summarize the
+state of aﬀairs roughly as follows:
+Practice:
+• sacriﬁce correctness for eﬃciency;
+• the same query evaluation engine for complete
+and incomplete data;
+Theory:
+• correctness at the expense of eﬃciency;
+• new semantics for query answering in the pres-
+ence of incompleteness.
+The picture looks quite bleak: it is almost 40 years
+since nulls were introduced, and yet the practice has
+taught generations to live with incorrect answers, while
+the theory is not really addressing the right problems.
+What can we do?
+First, we have to recognize that we live in the real world,
+and no database vendors will change their products if we
+oﬀer them radical solutions, like completely new query
+evaluation algorithms. Indeed, it took them many years
+to make DBMSs as eﬃcient as they are today, and sig-
+niﬁcant changes in basic query processing algorithms
+will result in years worth of work to adjust other ele-
+ments of their products. We can, perhaps, suggest small
+and easily implementable changes. And we deﬁnitely
+can suggest new algorithms for specialized products.
+Second, we must develop a theory applicable to a vari-
+ety of models: relational, XML, graph data, with diﬀer-
+ent types of incomplete information. But we also need
+a good testbed for such a general theory. Nulls seen
+in earlier examples correspond to SQL’s view of miss-
+ing information in standalone databases. But we can
+have incompleteness due to a multitude of other reasons,
+in particular, data interoperability. Incompleteness in-
+evitably arises when we move data between diﬀerent
+applications, such as in data integration and exchange
+scenarios [5, 7, 29, 43]. For example, suppose that from
+the Order relation, we want to build a database of cus-
+tomers and their preferences. Such a transformation is
+usually speciﬁed by rules known as schema mappings
+[7], for instance,
+Order(i, p) →Cust(x), Pref(x, p)
+saying that if an order was placed for a product p, then
+a customer x must exist who placed that order, and
+that customer x prefers product p.
+From the tuple
+Order(oid1,pr1), this rule will generate tuples Cust(⊥)
+and Pref(⊥,pr1), and from the tuple Order(oid2,pr2)
+it will generate Cust(⊥′) and Pref(⊥′,pr2). Note that
+it is important for us to remember that, while the val-
+ues ⊥and ⊥′ are not yet known, when ⊥is replaced

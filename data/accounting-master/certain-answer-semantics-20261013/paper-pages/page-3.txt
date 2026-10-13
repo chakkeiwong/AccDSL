@@ -1,0 +1,128 @@
+by some value c in Cust(⊥), it must be replaced by the
+same value c in Pref(⊥,pr1), and likewise for ⊥′. On
+the other hand, ⊥and ⊥′ may be replaced by the same,
+or by diﬀerent constants – there are no restrictions.
+What this example tells us is that we must have a mech-
+anism for saying that some nulls should always be re-
+placed by the same constant. Such nulls are known as
+na¨ıve, or marked nulls [2, 40]. They are the most com-
+mon model of nulls used in integration/exchange tasks
+[7, 29, 43] and in fact have been implemented as part of
+schema mapping and data exchange tools [38, 55].
+Thus, while the approach to incompleteness we are
+about to present does not assume any particular data
+model, we shall be using, as the main illustration, the
+model of na¨ıve nulls in relations (of course SQL’s nulls
+are just a special case of it). In this model the stan-
+dard interpretation of nulls is that a value is missing.
+This is not the only possibility: other nulls, such as
+‘non-applicable’ or ‘no-information’ exist as well [44,
+67]. However, all the results that we show here apply
+regardless of the nature of nulls: all that we need is a
+deﬁnition of the semantics of incomplete databases for
+results to work.
+Plan of the paper Our goal is to make an attempt at
+building applicable theory of incompleteness. We start
+by recalling the basics of existing relational theory of
+incomplete information in Section 2. In Section 3 we
+discuss a number of serious shortcomings of this theory.
+In Section 4 we explain the basics of a diﬀerent ap-
+proach to incompleteness, based on a duality between
+objects and queries. Combining the two, we present a
+simple model of incomplete objects (not just relational
+databases) that lets us deﬁne the notion of certainty in
+a principled way. We do it in Section 5, and show that
+there are actually two diﬀerent notions of certainty: one
+represents it as an object, and the other as the knowl-
+edge we possess about that object.
+We then use the new notions of certainty to apply them
+to query answers and extract what should rightly be
+called certain answers to queries. This is done in Sec-
+tion 6, which shows that sometimes it is actually very
+easy to compute certain answers using existing query
+evaluation technology. The key is the right notion of the
+semantics, of both input databases and query answers,
+and the right representational mechanism for query an-
+swers. Section 7 outlines directions for further work.
+2.
+RELATIONAL INCOMPLETENESS
+We now present formal deﬁnitions for some of the basic
+notions related to incomplete information in relational
+databases, see [2, 34, 40, 66]. But ﬁrst, we brieﬂy recall
+the main languages we deal with here, cf. [2]. The basic
+language will be relational algebra, on the procedural
+side, and ﬁrst-order logic (FO), or relational calculus,
+
+[RIGHT COLUMN]
+on the declarative side. The selection-projection-join-
+union fragment of relational algebra is also referred to
+as the positive relational algebra (the diﬀerence opera-
+tor is removed). Logically, it corresponds to the ∃, ∧, ∨-
+fragment of FO, also known as existential positive for-
+mulae. In terms of its expressiveness, it is exactly the
+same as unions of conjunctive queries, denoted by UCQ.
+Recall that conjunctive queries are select-project-join,
+or ∃, ∧-queries; queries in UCQ are their unions.
+Incomplete databases and their semantics
+We assume that databases are populated by two types
+of elements: constants (such as numbers, strings, etc.)
+and nulls. The set of constants is denoted by Const and
+the set of nulls by Null. These are countably inﬁnite
+sets. Nulls will be denoted by ⊥, sometimes with sub-
+or superscripts.
+A relational schema is a set of relation names with asso-
+ciated arities. An incomplete relational instance D as-
+signs to each k-ary relation symbol S from the schema
+a k-ary relation over Const ∪Null, i.e., a ﬁnite subset of
+(Const ∪Null)k.
+Such incomplete relational instances
+are referred to as na¨ıve databases [2, 40]; note that
+a null ⊥∈Null can appear multiple times.
+If each
+null ⊥∈Null appears at most once, we speak of Codd
+databases; these model SQL’s nulls. If we talk about
+single relations, it is common to refer to them as na¨ıve
+tables and Codd tables.
+We write Const(D) and Null(D) for the sets of constants
+and nulls that occur in a database D. The active do-
+main of D is adom(D) = Const(D) ∪Null(D). A com-
+plete database D has no nulls, i.e., adom(D) ⊆Const.
+Below, R is a na¨ıve table and S is a Codd table:
+R:
+⊥
+1
+⊥′
+2
+⊥′
+⊥
+S:
+⊥1
+1
+⊥2
+2
+⊥3
+⊥4
+with Const(R) = Const(S) = {1, 2} and Null(R) =
+{⊥, ⊥′} and Null(S) = {⊥1, ⊥2, ⊥3, ⊥4}.
+Each incomplete database can represent many possi-
+ble complete databases.
+The exact set of complete
+databases it represents is the semantics of an incomplete
+database. The semantics is by no means unique, but
+in this paper we concentrate on the two most common
+ones, based on open-world and close-world assumptions
+[40, 58], usually abbreviated as owa and cwa. The key
+notion for both is a valuation of nulls, which is a map-
+ping v : Null(D) →Const. This mapping associates a
+constant value with each null. It naturally extends to
+databases: v(D) is simply the result of replacing each
+null ⊥∈adom(D) by v(⊥).
+With that, we deﬁne cwa and owa semantics as follows:
+[[D]]cwa
+=
+{D′ | D′ = v(D), v is a valuation}
+[[D]]owa
+=
+{D′ | D′ ⊇v(D), v is a valuation}
+Under cwa, we believe that an incomplete database
+represents information fully, except some missing val-

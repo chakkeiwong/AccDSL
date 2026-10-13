@@ -1,0 +1,120 @@
+relations over attributes A, B. Then na¨ıve evaluation
+computes {1}, while the certain answer is ∅.
+If na¨ıve evaluation works, i.e., (4) holds, computing cer-
+tain answers can be done by a straightforward query
+evaluation following by an extra selection operation,
+throwing out tuples with nulls (or simply adding IS
+NOT NULL conditions in the WHERE clause of the original
+query). Thus, we do not need to invent new evaluation
+techniques.
+As for the complexity of computing certain answers, for
+full relational algebra (ﬁrst-order logic) it is undecid-
+able under [[ ]]owa and coNP-complete under [[ ]]cwa, for
+data complexity (that is, for a ﬁxed query, when only
+database is the input), see [3, 33]. This makes it pro-
+hibitively expensive under cwa, and plain impossible
+under owa, but the good news is that due to (4), the
+complexity is very low (AC0 ⊊DLogSpace) for posi-
+tive relational algebra queries.
+It is a general phenomenon that by going away from
+positive queries, one loses tractability of ﬁnding cer-
+tain answers, demonstrated for many problems related
+to handling incompleteness in databases [7, 13, 15, 17,
+18, 29, 43, 53, 62, 66]. There are some classes extend-
+ing UCQs for which certain answers can be computed
+tractably – for instance, Boolean combinations of con-
+junctive queries [33] – but the algorithms, despite hav-
+ing polynomial time bounds, are too complicated to be
+eﬃciently implemented on top of existing DBMSs.
+3.
+CRITIQUE OF THEORY
+There has been plenty of criticism of practical ap-
+proaches to incomplete information, in particular SQL’s
+treatment of nulls, see, e.g., [24, 25, 26], but the the-
+oretical approaches have so far been spared. We put
+an end to it now. In fact much of theoretical research
+on incomplete information took the notions of strong
+and weak representation systems and certain answers
+as sacrosanct but we shall argue that their untouchable
+status needs to be re-examined.
+Semantics of query answers. Let us look at the seem-
+ingly uncontroversial (2) saying that if we are lucky
+enough to get A satisfying [[A]] = Q([[D]]), then A should
+be viewed as the answer to Q on D. At the ﬁrst glance it
+looks like a reasonable condition, but nonetheless there
+is one assumption built into it that is not unassailable.
+Note that (2) requires that both the input database D,
+and the answer A, be interpreted under the same se-
+mantics [[ ]]. However, a priori, there is no reason for
+it. Why, for instance, should the answer to a query be
+interpreted under cwa if this is the semantics of the
+input?
+Why intersection? The equivalence ∼L used in the def-
+inition of weak representation systems looks quite ad
+hoc. Actually it is: it was deﬁned that way to ensure
+
+[RIGHT COLUMN]
+compositionality, but its essence is really going from
+the very strong requirement (2) to a weaker one that
+only certain answers need to be produced. And certain
+answers are deﬁned as the intersection of all possible
+answers. Again, at ﬁrst this looks very reasonable: we
+want tuples that will be in the answer no matter how
+nulls are interpreted. But a closer examination reveals
+some problems. To start with, there are models other
+than relational. What can one do, for instance, for XML
+queries returning documents? (A side remark: much of
+the work on incompleteness in XML has been restricted
+to XML-to-relational queries, for this very reason [4, 9,
+13, 33].) But even more importantly, how do we know
+that we do not lose important information by taking in-
+tersection and removing information from the answer?
+Are certain answers certain? Actually,
+the standard
+intersection-based certain answers need not be. Inter-
+section takes some tuples away from potential answers.
+At ﬁrst the intuition appears to be ﬁne: removing tuples
+from what is certain, we seem to retain only informa-
+tion we are certain about. However, removing tuples
+amounts to removing data, not information.
+In fact,
+the process can actually add information: for instance,
+under cwa, by removing a tuple we gain information
+that it is not in the answer.
+Hence, certain answers
+deﬁned by (1) cannot be called certain in all scenarios.
+Semantics and informativeness. Above, we alluded to
+the possibility of comparing incomplete databases in
+terms of their informativeness. This is a line of work
+that was pursued in the 1990s, rather independently
+of the rest of the work on incompleteness [16, 49, 57,
+64]. The idea was to deﬁne orderings stating that one
+database has more information than another, albeit for
+primitive models, such as Codd tables. Having an or-
+dering describing informativeness could be important
+for deciding what the proper semantics of query an-
+swers is, bringing us back to our ﬁrst point of discus-
+sion. Indeed, it is expected that one should get more
+informative answers from more informative databases.
+However, there was no real attempt to tie the ordering-
+based approach with the basics such as representation
+systems and certain answers, and this needs to be done.
+Are objects suﬃciently expressive to be query answers?
+We are used to queries returning database objects
+– tables, XML documents, graphs.
+But are these
+suﬃciently expressive to describe answers on incom-
+plete databases?
+Speciﬁcally, are these suﬃciently
+expressive to represent sets Q([[D]])?
+Such sets may
+well be inﬁnite, and describing them may require a
+more complex representation mechanism than simple
+database objects: an example of that was already seen
+when we looked at conditional tables. But is it always
+possible – and necessary – to have representations that
+look like database relations, while they are not?
+Can high complexity bounds be avoided?
+Too
+much
+work has been done on showing high complexity

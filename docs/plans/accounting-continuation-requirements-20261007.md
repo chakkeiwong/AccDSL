@@ -4,7 +4,33 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current source disposition after Version2.70
+## Current scoped integration — Version 2.71
+
+226 pages; **not_ready**.
+PDF: docs/design/proposal/manuscript-certain-answers-20261013/accounting-product-proposal.pdf
+SHA256: c5a7da2fea6df602c0d1a5c4f9830ba1394e90d5e097a56684e52657fdbbd228.
+
+The [certain-answer semantics audit](../../data/accounting-master/certain-answer-semantics-20261013/result.md)
+is delivered in Version 2.71. Boolean certainty, individually certain tuples
+and answer families are distinguished; the constructed payable example and
+full-family proof conditions are checked. All102 source/arithmetic and155
+manuscript checks pass; eight final pages inspected. This is a scoped E08
+supplement to the Version2.69 full assessment, with all original statuses
+unchanged. Execute the [primary proof-source inquiry](accounting-certain-answers-proof-source-20261013.md).
+
+All35 requirements/18 gaps, all five E workstreams and original acceptance
+wording/statuses remain. MC08/09/11/26/29/30/32–35 receive bounded query-
+semantics evidence; no requirement closure or runtime conformance is inferred.
+The last full53-row author matrix remains the post-adapter Version2.69
+assessment, supplemented by2.70 and2.71.
+
+## Preserved evidence history
+
+The entries below record prior completed units and their then-current next
+actions. Those directives are historical; execute only the current next plan
+above. Their original scope and evidence remain preserved.
+
+## Preserved source disposition after Version2.70
 
 The [incomplete-information source inquiry](../../data/accounting-master/incomplete-information-source-20261013/result.md)
 completed four distinct discovery requests without recovering the1984 paper.
@@ -15,7 +41,7 @@ Execute the [retained Libkin semantics audit](accounting-certain-answer-semantic
 All35 requirements/18 gaps, four blocked foundational texts and readiness
 **not_ready** remain. No manuscript or full-assessment change follows.
 
-## Current scoped integration — Version 2.70
+## Preserved scoped integration — Version 2.70
 
 225 pages; **not_ready**.
 PDF: docs/design/proposal/manuscript-apple-inline-occurrences-20261013/accounting-product-proposal.pdf

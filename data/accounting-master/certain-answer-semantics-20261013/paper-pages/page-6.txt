@@ -1,0 +1,133 @@
+bounds.
+A typical picture looks like this: a class of
+queries, often a fragment of positive relational algebra,
+can be evaluated eﬃciently; beyond that, intractability
+or even undecidability of data complexity is shown.
+Such results, while occasionally requiring nontrivial
+machinery, are becoming completely standard – but is
+this really the direction the ﬁeld should be going in?
+And how much of this owes to the rigid setting (basic
+semantics, certain answers) that one is unwilling to
+tweak and experiment with? In fact, very often high
+complexity is shown in the setting where the semantics
+of input databases is the same as the semantics of
+query answers. So perhaps there is another reason to
+reconsider that assumption.
+Thus, despite an extensive literature and cast-in-stone
+notions of representation systems and certain answers,
+theoreticians do not actually know that much about
+handling incomplete information in databases. There
+are very basic questions that are still lacking adequate
+answers; among them:
+• What is the semantics of query answers? When
+can/should it be the same as the semantics of input
+databases?
+• Is taking intersection the only way to deﬁne certain
+answers?
+• What does it mean to have a more informative
+data set?
+• How do informativeness and semantics relate?
+• How can we represent answers to queries over in-
+complete databases?
+• When can we rely on existing query evaluation al-
+gorithms to produce meaningful answers?
+It may seem that neither theory nor practice has good
+answers to a persistent and ubiquitous problem of han-
+dling incomplete information.
+But perhaps we can
+view this positively rather than negatively: this sim-
+ply means that we are back at square one, and an eﬀort
+must be made to develop a proper theory and to apply
+it. Both sides must show some ﬂexibility – in tweak-
+ing both deﬁnitions and products – but ﬁrst questions
+posed above (and many others) need to be answered.
+This paper does not claim to provide all such answers,
+far from it. But we shall at least attempt to outline an
+approach: one has to start somewhere, after all. Our
+idea is to bind together three directions of work on in-
+complete information:
+1. the standard database approach based on repre-
+sentation systems and certain answers;
+2. the approach from the knowledge representation
+community, based on viewing databases as logical
+theories, pioneered by Reiter [58, 60] in the 1980s;
+and
+3. the approach based on the ideas from program-
+ming semantics that used orderings to describe in-
+formation content, proposed in the 1990s [16, 49].
+
+[RIGHT COLUMN]
+4.
+DUALITY:
+INCOMPLETE
+DATA
+AS
+QUERIES
+We now describe an alternative way of looking at incom-
+plete databases that dates back to [58, 60]. It proved
+to be more popular with the knowledge representation
+community than with the mainstream database com-
+munity. More importantly for us, it developed the idea
+of duality between queries and databases (ﬁrst noticed
+in [19]) for incompletely speciﬁed databases.
+We start with an example. Consider an incomplete rela-
+tion R = {(1, ⊥), (⊥, 2)}. It can be viewed as a tableau
+of a Boolean conjunctive query QR = ∃x R(1, x) ∧
+R(x, 2). Complete databases satisfying this query are
+precisely the databases in the semantics of R under
+owa.
+If we let ModC(ϕ) stand for all the models of
+a formula ϕ among complete databases, then our ob-
+servation can be formulated as
+ModC(QR) = [[R]]owa .
+(5)
+This tells us that the semantics of an incomplete
+database can be deﬁned by a logical formula. This can
+be extended for other semantics: for instance, the for-
+mula
+Qcwa
+R
+= ∃x
+
+
+R(1, x) ∧R(x, 2)
+∧∀y, z (R(y, z) →
+
+y = 1 ∧z = x
+∨
+y = x ∧z = 2
+
+
+
+has the property that ModC(Qcwa
+R
+) = [[R]]cwa. In gen-
+eral, the approach of [58, 60] was to view a database as
+a logical theory, i.e., a collection Φ of formulae. A ﬁnite
+Φ = {ϕ1, . . . , ϕn} can of course be viewed as a single
+formula ϕ1 ∧. . . ∧ϕn.
+What is the advantage of viewing incomplete databases
+as logical theories?
+An immediate beneﬁt is that we
+can cast the query answering problem as logical impli-
+cation, or, closer to the database language, as query
+containment.
+Indeed, suppose we have an database D given as a the-
+ory Φ so that ModC(Φ) = [[D]]. Take a Boolean query
+Q. For it to be true in every database in [[D]] it has
+to be true in every model of Φ; thus, Q is true with
+certainty iﬀit is logically implied by Φ, i.e., Φ |= Q. If
+Φ happens to be a single query Q′, as in our examples
+above, this amounts to checking implication Q′ |= Q,
+or, as database literature prefers to call it, containment
+of Q′ in Q. Thus, ﬁnding certain answers is a special
+case of logical implication or query containment.
+The connection gives us further insights. Suppose we
+have an incomplete database D, a Boolean conjunctive
+query Q, and we would like to know whether the certain
+answer to Q is true on D. As in (5), we have a Boolean
+conjunctive query QD so that ModC(QD) = [[D]]owa.
+Thus, under owa, certain(Q, D) is true iﬀQD is con-
+tained in Q. By a well known fact about conjunctive
+queries, this happens if and only if the tableau of QD
+satisﬁes Q – but the tableau of QD is D itself. Hence,

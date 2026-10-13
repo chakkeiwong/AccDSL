@@ -1,0 +1,104 @@
+Incomplete Data: What We
+Leoni
+School of
+University
+libkin@in
+ABSTRACT
+Incomplete data is ubiquitous: the more data we accu-
+mulate and the more widespread tools for integrating
+and exchanging data become, the more instances of in-
+completeness we have. And yet the subject is poorly
+handled by both practice and theory. Many queries for
+which students get full marks in their undergraduate
+courses will not work correctly in the presence of in-
+complete data, but these ways of evaluating queries are
+cast in stone – SQL standard. We have many theoreti-
+cal results on handling incomplete data but they are, by
+and large, about showing high complexity bounds, and
+thus are often dismissed by practitioners. Even worse,
+we have a basic theoretical notion of what it means to
+answer queries over incomplete data, and yet this is not
+at all what practical systems do.
+Is there a way out of this predicament? Can we have
+a theory of incompleteness that will appeal to theoreti-
+cians and practitioners alike, by explaining incomplete-
+ness and being at the same time implementable and use-
+ful for applications? After giving a critique of both the
+practice and the theory of handling incompleteness in
+databases, the paper outlines a possible way out of this
+crisis. The key idea is to combine three hitherto used
+approaches to incompleteness: one based on certain an-
+swers and representation systems, one based on viewing
+incomplete databases as logical theories, and one based
+on orderings expressing relative value of information.
+Categories and Subject Descriptors
+H.2.1 [Database Management]:
+Logical Design—
+Data Models; H.2.1 [Database Management]: Lan-
+guages—Query Languages; H.2.4 [Database Manage-
+ment]: Systems—Query Processing
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for proﬁt or commercial advantage and that copies bear this notice and the full citation
+on the ﬁrst page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior speciﬁc permission
+and/or a fee. Request permissions from permissions@acm.org.
+PODS’14, June 22–27, 2014, Snowbird, UT, USA.
+Copyright is held by the owner/author(s). Publication rights licensed to ACM.
+ACM 978-1-4503-2375-8/14/06 ...$15.00. http://dx.doi.org/10.1145/2594538.2594551
+.
+
+[RIGHT COLUMN]
+ent Wrong, and How to Fix It
+id Libkin
+f Informatics
+of Edinburgh
+nf.ed.ac.uk
+General Terms
+Theory, Languages, Algorithms
+Keywords
+Incomplete information, query evaluation
+1.
+INTRODUCTION
+The need to handle incomplete data was recognized
+early in the development of relational database sys-
+tems: already in the 1970s, Codd developed the basis
+of what would become null-related features of commer-
+cial DBMSs [21, 22]. His proposal for a single one-size-
+ﬁts-all null value, its propagation through arithmetic
+and Boolean operations, and the use of the three-valued
+logic for computing with nulls was largely reﬂected in
+the SQL standard. It has, however, quickly become ap-
+parent that the adopted design of null-related features
+has a number of deﬁciencies, and it has become one of
+the most criticized aspects of SQL design [24, 26].
+To
+illustrate
+one
+of
+the
+best
+known
+points
+of
+such criticism, consider a database of orders and
+payments, with relations Order(o_id,product) and
+Pay(p_id,order,amount): the ﬁrst gives order ids and
+products they are for, the other indicates that a pay-
+ment with a given id was made for an order. We want
+to check if there are unpaid orders. A student who has
+taken a basic database course will immediately produce
+SELECT o_id FROM Order
+WHERE o_id NOT IN (SELECT order FROM Pay)
+expecting to get full marks.
+But now take Order =
+{(oid1, pr1), (oid2, pr2)}, and Pay = {(pid1, ⊥, 100)},
+where ⊥indicates null value. We know that at least one
+order has not been paid for, and yet the above query
+happily returns the empty set, indicating that no cus-
+tomers need to be chased for their payments! The prob-
+lem easily confounds SQL programmers: consider a sim-
+ple query R−S, where R and S are single-attribute rela-
+tions, written as SELECT R.A FROM R WHERE R.A NOT
+IN (SELECT S.A FROM S). It will produce the empty

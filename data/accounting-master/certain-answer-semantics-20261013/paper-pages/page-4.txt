@@ -1,0 +1,154 @@
+ues. Thus, databases represented by it are obtained by
+substituting values for nulls. Under owa, the database
+is open to adding new facts: thus, after substituting
+values for nulls, one can add new tuples.
+For instance, relation R1 below belongs to both [[R]]cwa
+and [[R]]owa, for R depicted above (as it is obtained by
+valuation ⊥7→3, ⊥′ 7→4), and relation R2 is in [[R]]owa,
+as it also adds the tuple (5, 6, 7):
+R1:
+3
+1
+4
+2
+4
+3
+R2:
+3
+1
+4
+2
+4
+3
+5
+6
+7
+A more expressive representation mechanism for incom-
+plete information is that of conditional tables. Such a
+table is of the form
+D =
+
+
+
+condition
+t1
+c1
+· · ·
+· · ·
+tn
+cn
+,
+c
+
+
+
+where t1, . . . , tn are tuples and c, c1, . . . , cn are condi-
+tions: Boolean combinations of statements x = y, where
+x, y ∈Const ∪Null. Note that conditions may use nulls
+not present in the tuples. Conditional tables are usually
+viewed under the closed-world semantics [[D]]cwa which
+consists of databases {v(ti) | v(ci) = true, i ≤n},
+where v is a valuation so that v(c) is true. For example,
+consider a conditional table
+D =
+
+
+condition
+1
+⊥= 1
+0
+⊥= 0
+,
+(⊥= 0) ∨(⊥= 1)
+
+
+The only valuations satisfying (⊥= 0) ∨(⊥= 1) are
+⊥7→0 and ⊥7→1. Hence [[C]]cwa = {{0}, {1}}; condi-
+tional tables thus can encode disjunctions: C says that
+either 0 or 1 is in the database.
+Query answering
+Fix a semantics [[ ]] of incompleteness, and assume we
+are given a query Q and an incomplete database D.
+Of course we know how to evaluate Q on complete
+databases. So the key object for us to work with is
+Q([[D]]) = {Q(D′) | D′ ∈[[D]]}
+of query answers on all databases that are possibly rep-
+resented by D. If we have an incomplete database that
+represents this set, then we have our query answer.
+That is, if there is a table A (for answer) such that
+[[A]] = Q([[D]]),
+(2)
+then we declare A to be the answer to Q on D.
+Indeed, we get a single table that captures exactly
+the space of all possible query answers.
+If this hap-
+pens for all incomplete database from some class K
+(Codd/na¨ıve/conditional tables, or others) and for all
+queries Q from a language L, then we say that K forms
+a strong representation system for L under [[ ]].
+
+[RIGHT COLUMN]
+Strong representation systems, as the name suggest,
+are quite strong, and thus are hard to come by.
+The best known example is that of conditional ta-
+bles for full relational algebra (equivalently,
+ﬁrst-
+order logic) under [[ ]]cwa, see [40].
+To give an ex-
+ample,
+let us revisit the query R −S.
+If our
+database D has R = {1, 2} and S
+= {⊥}, then
+Q([[D]]cwa) = {{1, 2}, {1}, {2}}, depending on whether
+the null ⊥is instantiated into 1, or 2, or another con-
+stant. This can be represented by a conditional table
+condition
+1
+⊥′ = 1 ∨⊥′ = 2
+2
+⊥′ ̸= 1
+Indeed, going over possible values of ⊥′, one can see
+that it generates exactly Q([[D]]cwa). One problem with
+such an answer is that it is hardly meaningful to hu-
+mans, and one probably would not be happy getting
+this answer from a DBMS.
+Since (2) is too strong a condition, one tries to replace
+it by
+[[A]] ∼Q([[D]])
+(3)
+where ∼is some equivalence relation.
+This idea led
+to the notion of a weak representation system based on
+the following equivalence. For two sets of instances, I1
+and I2, and a query language L, we let I1 ∼L I2 if
+T{q(D′) | D′ ∈I1} = T{q(D′) | D′ ∈I2} for each q
+in L. If (3) holds for ∼L over a class K of instances
+for each query Q ∈L, we say that K forms a weak
+representation system for L under semantics [[ ]]. The
+best known examples are, under both [[ ]]owa and [[ ]]cwa:
+• Codd tables for selection/projection queries; and
+• Na¨ıve tables for UCQs (positive relational algebra).
+The key reason weak representation systems are of in-
+terest is that they let us compute certain answers.
+Given an instance D, let Dcmpl be the complete part
+of it, i.e., all the tuples in D without nulls. Then, if
+we have a weak representation system, it follows that
+Acmpl = certain(Q, D). Thus, certain answers are ob-
+tained by keeping the complete portion of the answer
+given by (3).
+What makes the connection particularly attractive is
+that sometimes A is just Q(D), i.e., one na¨ıvely evalu-
+ates Q on D as if nulls were the usual values. In such
+a case, when A in (3) equals Q(D), we say that naive
+evaluation works for Q. It then follows that
+Q(D)cmpl = certain(Q, D).
+(4)
+It is known that na¨ıve evaluation works for UCQs under
+both open and closed world semantics [40]. Moreover,
+under owa, the result is optimal for FO: if we have a
+Boolean (yes/no) FO query and na¨ıve evaluation works
+for it, then it is equivalent to a UCQ, i.e., a positive
+relational algebra query [51]. To see how na¨ıve evalu-
+ation fails for non-positive queries, consider the query
+πA(R −S) where R = {(1, ⊥)} and S = {(1, ⊥′)} are
