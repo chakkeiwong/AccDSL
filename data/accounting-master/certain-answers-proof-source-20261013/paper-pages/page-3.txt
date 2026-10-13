@@ -1,0 +1,49 @@
+   Thus, in all these applications, spanning a large spectrum of data management and knowledge represen-
+tation tasks, certain answers are the standard way of deﬁning answers to queries. While the exact semantics
+of possible worlds changes, the deﬁnition of certain answers stays intact.
+   The question that we address here is the following: Is this standard “one-size-ﬁts-all” deﬁnition really
+the right one to use for all the semantics, and all the applications? The answer, as we shall argue, is negative:
+the standard intersection semantics leads to many problems, and crucially to producing meaningless query
+answers.
+   To argue that this is the case, and to explain basic ideas behind the approach we present, note that in
+the database ﬁeld, one tends to operate with objects (i.e., relations, XML documents, graph databases, etc.).
+In particular, queries take objects and return objects. Thus, the idea behind certain answers is to ﬁnd an
+object A representing the set of objects Q([[D]]) = {Q(D′) | D′ ∈[[D]]}. Such an object A must contain
+information common to all the objects in Q([[D]]): that is, it must be no more informative than any of the
+objects in Q([[D]]). The deﬁnition of cert∩uses the intersection operator as a means of extracting such
+common information.
+  Now take a simple example: we have a relation R = {(1, 2), (3, ⊥)} in a database D, where ⊥repre-
+sents a null, or a missing value. The query Q returns R itself. Then cert∩(Q, D) = {(1, 2)} under every
+reasonable semantics of incompleteness. But is it less informative than all of Q(D′) for D′ ∈[[D]]? The
+answer depends on the semantics. Under the common open-world semantics, the answer is yes: in fact
+(1, 2) is precisely the greatest lower bound of Q([[D]]) under the ordering whose meaning is “being less
+informative”. But under the equally common closed-world semantics, the answer is no. Even worse, (1, 2)
+is not less informative than any of the answers Q(D′) for D′ ∈[[D]] which are of the form {(1, 2), (3, n)}
+for different values n. Indeed, under the closed world semantics, the answer {(1, 2)} contains additional
+information that no tuple except (1, 2) is present. Thus, returning just (1, 2) in this case makes no sense at
+all.
+   The problem with returning the single tuple (1, 2) as the certain answer becomes even more pronounced
+if we follow the approach, pioneered by [3], that views databases as logical theories and query answering
+as logical implication. The fact R(1, 2) is certainly implied by the database. But is it the only fact that is
+implied? Of course not: under the open-world semantics, we can deduce ∃x R(1, 2)∧R(3, x) with certainty,
+adding the fact that there is a tuple whose ﬁrst component is 3. And under the closed world semantics, we
+know for certain even more, for instance ∃x∀y (y = 1 ∨y = 2 ∨y = 3 ∨y = x), since we cannot expand
+the domain of the database.
+   Even from this simple example, we learn a few lessons:
+
+   • certain answers can be presented as both objects and logical formulae;
+
+   • they depend on both logical languages and semantics used; and
+
+   • taking intersection and removing missing values from the answers is not always the right way to
+     compute them.
+
+   Note that viewing answers as formulae brings us closer to knowledge bases. The difference though
+is that while in databases we start with objects and produce objects, and in querying knowledge bases we
+start with logical theories and produce logical theories, here we may also combine the two, starting with an
+object, and returning a formula, or a theory, as the result.
+   The goal of this paper is to develop an alternative framework for handling certain answers to queries. For
+that, we combine the approaches to viewing databases as objects [2] and as logical theories [3], rather than
+treat them separately. In addition, we bring in ideas from another approach, based on ordering incomplete
+
+                                          3

@@ -1,0 +1,48 @@
+   For the “classical” way of deﬁning certain answers, which involves throwing away tuples with nulls
+and computing intersection, the notion of na¨ıve evaluation involves computing Q(D) and throwing away
+tuples with nulls [2, 21]. Note that using the new notion of certain answers, namely certO(Q, D), for the
+same classes of queries we no longer need to throw away tuples containing nulls: simply computing Q(D)
+does the job. Returning to the example from the introduction, if we have a database D with a relation
+RD = {(1, 2), (3, ⊥)} and a query Q that returns that relation, the classical na¨ıve evaluation produces a
+single tuple (1, 2), while certO(Q, D) returns RD itself, as expected.
+   The operator πC that simply keeps all tuples that only use constants, is monotone (i.e., preserves infor-
+mativeness) with respect ⪯OWA. Thus, if we use the OWA semantics for answers, it is harmless, but still it
+may unnecessarily eliminate tuples from answers, as we have seen (not to mention that it costs us computa-
+tionally). Furthermore, for other orderings, such as ⪯CWA and ⪯WCWA, it is not even monotone, as the above
+example of RD = {(1, 2), (3, ⊥)} shows. Thus, the use of the intersection operator is not necessary under
+OWA and is rather problematic under WCWA and CWA.
+
+Example 2. We now show how Theorem 2, together with descriptions of representation systems for OWA
+and CWA, immediately yields results presented in Example 1.
+    Recall that we have a database D with a single relation R with tuples (1, 2) and (3, ⊥). Consider the
+identity query Q (i.e., a query that simply returns R). We can view it as a query from DOWA(σ2) to DOWA(σ2);
+recall that σ2 is the vocabulary of a single binary relation. For the representation system on DOWA we use
+∃Pos formulae, as before. Clearly Q is generic and preserves informativeness (i.e., is monotone), and thus
+□K[[D]]OWA = certK(Q, D) = δD by Theorem 2. The latter is the positive diagram of D as we saw, and
+hence □K[[D]]OWA = ∃zR(1, 2) ∧R(3, z), as was stated in Example 1.
+   Next we consider the query πC eliminating tuples with nulls as a query from DOWA(σ2) to DCOWA(σ2),
+where the range of the latter is restricted only to databases without nulls. Again this query is monotone and
+generic, and it is easy to see that with the class of ground atoms and their conjunctions, DCOWA(σ) forms a
+representation system. Hence Theorem 2 tells us that certK(πC, D) = □K[[D]]OWA = δπC(D) (with respect
+to the representation system based on conjunctions of ground atoms). Since the semantics remains to be
+OWA, we get δπC(D) = R(1, 2), again as stated in Example 1.
+    Finally, we can consider the identity query Q as a query from DCWA(σ2) to DCWA(σ2). We know what
+representation system to use for CWA: it is the one based on Pos∀G formulae. Query Q is clearly monotone
+and generic, and hence again by Theorem 2 we have certK(Q, D) = □K[[D]]CWA = δD, where the latter,
+in the Pos∀G representation system is given by ∃z  R(1, 2) ∧R(3, z) ∧∀x, y R(x, y) →  (x = 1 ∧y =
+2) ∨(x = 3 ∧y = z)    .
+
+7.3. Closed world query answering
+  We have seen that under CWA, we have the largest class of queries for which certain answers can be
+found by straightforward query evaluation, applying Theorem 2. We now have a deeper look at Pos∀G
+queries and provide more intuition about their power, both in terms of their logical expressiveness, and their
+procedural implementation in terms of relational algebra.
+  We ﬁrst extend the class Pos∀G syntactically. Deﬁne a class ∃Pos0 as follows:
+
+   •  if x and y are distinct variables, then x = y is in ∃Pos0;
+   •  if ¯x is an n-tuple of distinct variables and R is a relation symbol of arity n, then R(¯x) is in ∃Pos0;
+   •  if ϕ1(¯x) and ϕ2(¯x) are formulae in ∃Pos0, then ψ(¯x) = ϕ1(¯x) ∨ϕ2(¯x) is in ∃Pos0;
+   •  if ϕ1(¯x1) and ϕ2(¯x2) are formulae in ∃Pos0, and ¯x1, ¯x2 have no variables in common, then ψ(¯x1, ¯x2) =
+      ϕ1(¯x1) ∧ϕ2(¯x2) is in ∃Pos0;
+
+                                          21

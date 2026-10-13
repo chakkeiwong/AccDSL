@@ -14,9 +14,9 @@ Twenty-one of24 source judgments are carried by exact bytes; both new
 transitive sections receive scoped evidence. Full readiness remains not_ready.
 The actual occurrence inquiry is now delivered in2.70.
 
-**Version 2.71, 226 pages.**
-PDF: docs/design/proposal/manuscript-certain-answers-20261013/accounting-product-proposal.pdf
-SHA256: c5a7da2fea6df602c0d1a5c4f9830ba1394e90d5e097a56684e52657fdbbd228.
+**Version 2.72, 226 pages.**
+PDF: docs/design/proposal/manuscript-query-proof-20261013/accounting-product-proposal.pdf
+SHA256: 983cfceb0ae3cc6b30172b46c25a6f0a19ebcb367a44158b45e47ccd59103cfc.
 The [award-version inquiry](../../data/accounting-master/apple-award-versions-20261013/result.md)
 is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
 forms now have selected substantive clauses inspected. General prorating and
@@ -38,13 +38,21 @@ now inspected were already located. No additional acquisition count is added.
 
 ## Latest completed work
 
+The [primary certainty proof inquiry](../../data/accounting-master/certain-answers-proof-source-20261013/result.md)
+is delivered in Version2.72. A26-page author preprint was recovered through
+the institutional publication list, its full proof inspected, and the guarded
+relational case clarified as closed-world input with open-world output.
+All98 source-integrity and154 manuscript checks pass. Nine final pages
+inspected; exact KR/publisher-version equivalence remains unchecked.
+Execute the [full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md).
+
 The [certain-answer semantics audit](../../data/accounting-master/certain-answer-semantics-20261013/result.md)
 is delivered in Version 2.71. Boolean certainty, individually certain tuples
 and answer families are distinguished; the constructed payable example and
 full-family proof conditions are checked. All102 source/arithmetic and155
 manuscript checks pass; eight final pages inspected. This is a scoped E08
 supplement to the Version2.69 full assessment, with all original statuses
-unchanged. Execute the [primary proof-source inquiry](accounting-certain-answers-proof-source-20261013.md).
+unchanged. The [primary proof-source inquiry](accounting-certain-answers-proof-source-20261013.md) is now delivered in2.72.
 
 The [incomplete-information source inquiry](../../data/accounting-master/incomplete-information-source-20261013/result.md)
 completed four distinct discovery requests without recovering the1984 paper.
@@ -116,7 +124,7 @@ availability follows.
 
 ## Exact next action
 
-Execute [the primary proof-source inquiry](accounting-certain-answers-proof-source-20261013.md); preserve the2.71 candidate and source-specific access limits.
+Execute [the full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md); preserve the2.72 candidate and source-specific access limits.
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
 ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)

@@ -4,7 +4,27 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
-## Current scoped integration — Version 2.71
+## Current scoped integration — Version 2.72
+
+226 pages; **not_ready**.
+PDF: docs/design/proposal/manuscript-query-proof-20261013/accounting-product-proposal.pdf
+SHA256: 983cfceb0ae3cc6b30172b46c25a6f0a19ebcb367a44158b45e47ccd59103cfc.
+
+The [primary certainty proof inquiry](../../data/accounting-master/certain-answers-proof-source-20261013/result.md)
+is delivered in Version2.72. A26-page author preprint was recovered through
+the institutional publication list, its full proof inspected, and the guarded
+relational case clarified as closed-world input with open-world output.
+All98 source-integrity and154 manuscript checks pass. Nine final pages
+inspected; exact KR/publisher-version equivalence remains unchecked.
+Execute the [full post-certainty reassessment](accounting-post-certainty-readiness-20261013.md).
+
+All35 requirements/18 gaps and original acceptance statuses remain. The
+Version2.69 full author matrix receives scoped2.70–2.72 supplements; execute
+the full reassessment next. New primary technical source support advances E08
+within scope, without financial-runtime or broad survey-completion claims.
+The four originally blocked sources and all five E workstreams remain open.
+
+## Preserved scoped integration — Version 2.71
 
 226 pages; **not_ready**.
 PDF: docs/design/proposal/manuscript-certain-answers-20261013/accounting-product-proposal.pdf
