@@ -4,6 +4,22 @@ Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptanc
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
 
+## Current scoped integration — Version 2.70
+
+225 pages; **not_ready**.
+PDF: docs/design/proposal/manuscript-apple-inline-occurrences-20261013/accounting-product-proposal.pdf
+SHA256: 7de5398b78b0ce8fc078d40aeebcf936e776e0d4a8f852e14b996d840823cad7.
+The [actual occurrence inquiry](../../data/accounting-master/apple-inline-occurrences-20261013/result.md)
+is delivered in Version2.70. The annual HTML had no inline tags; the repaired
+scope compares next-quarter comparative facts with the prior annual instance.
+Five selected occurrences per source match under explicit context/unit/accuracy
+checks; equity repeats remain distinct. All154 source and148 manuscript checks
+pass, with five final pages inspected. This adds scoped E01/E14 evidence to the
+Version2.69 full assessment. Execute the [incomplete-information source inquiry](accounting-incomplete-information-source-20261013.md).
+
+All35 requirements/18 gaps and original acceptance statuses remain. The2.69
+whole-program assessment is supplemented, not described as a new full review.
+
 ## Current whole-program assessment — Version 2.69
 
 The [post-adapter reassessment](../../data/accounting-master/post-adapter-readiness-20261013/result.md)

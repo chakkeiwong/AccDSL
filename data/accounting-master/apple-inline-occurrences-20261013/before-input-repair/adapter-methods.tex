@@ -1,0 +1,259 @@
+\section{A successful extraction can still lose the fact}
+
+Consider an Inline XBRL amount whose literal is \code{1,234}, whose admitted
+numeric transform treats the comma as grouping, whose scale is $-3$, and whose
+context and unit identify a particular dollar observation. The resulting amount
+is $1234\times10^{-3}=1.234$. Scaling that normalized value again gives 0.001234
+and is wrong. An adapter must retain the literal, transform, scale, context,
+unit, nil status and original occurrence so that this error can be found.
+
+The same principle applies to dates and dimensions. A lexical instant of
+31 December remains distinct from the exclusive 1 January boundary used for
+an interval. Publication and ingestion are separate timestamps. Two equal
+numbers with different contexts remain separate occurrences. A nil fact is
+unknown, not zero. Dropping a typed dimension or context reference yields a
+preservation failure for that fact even if the resulting Markdown looks clear.
+
+A PDF can preserve characters that the reader never sees. The retained HSBC
+2023 annual report has a cover reading ``Annual Report and Accounts 2023'',
+but both PyMuPDF and Poppler also return 2024 in the extracted cover text
+\citep[cover, physical PDF p.~1]{hsbc2023annualcover}. Inspection of the drawing
+order explains the discrepancy: the earlier 2024 text is covered by an opaque
+dark rectangle, after which the 2023 text is painted. This is an observed
+difference between extracted characters and the visible title. It does not
+establish an accounting contradiction or explain why the file was constructed
+that way. Agreement between two text extractors would not resolve it.
+
+The proposed exchange keeps the original PDF, the unchanged raw extraction,
+the page locator and a render from the same bytes. The annotation's
+\code{literal} retains both years; separate \code{readings} record the raw
+extraction and the proposed visible title. A linked inspection record identifies
+the extractor versions and options, rendered image, relevant drawing order and
+reviewer. Thus a raw-text search still finds 2024, while the inspected cover
+supports a visible report-year reading of 2023. Rejecting 2024 as the visible
+report year must not delete its extracted occurrence. The current example has
+author inspection; independent adjudication remains pending.
+
+\begingroup
+\clubpenalty=10000
+If an earlier review had already accepted 2024 as the report year, the correction
+would require a new reading and an explicit \code{Supersede} decision. Results
+depending on that reading would need revalidation in the new evidence view;
+frozen earlier results would retain their original evidence. This follows the
+review rules already stated above. Even after the visible title is resolved,
+the cover year supplies no publication or availability timestamp for these
+particular bytes. An as-of query must therefore retain the unresolved
+availability condition. This single-page case motivates preservation and review
+behavior; it supplies no extraction-accuracy ranking or general visibility
+test for other pages.
+\par\endgroup
+
+
+The inspected Arelle interfaces support native XBRL contexts, dimensions,
+transformations and validation. Its internal object IDs do not replace stable
+source identity. The inspected Docling source offers useful layout and table
+proposals, but its examined XBRL graph path does not retain every required
+fact/context/unit/typed-dimension field. That path needs a preservation sidecar
+or must report unsupported conversion for affected records. These are source
+audit findings, not measured accuracy rankings of the tools.
+
+A returned layout conversion can also conceal missing pages. At the pinned
+Docling implementation, the timeout branch assigns \code{PARTIAL\_SUCCESS}
+when pages were expected, even if none finished. The public \code{convert\_all}
+interface permits that status through \code{raises\_on\_error=True} if the
+remaining stages return normally. Thus absence of an exception cannot establish
+that a three-page request produced any extracted content. The assembly code
+can restore missing page numbers with empty page objects; counting those objects
+does not count successful processing \citep{doclingpinned2026}. These are
+source-derived failure cases, not observed failures on Apple's filing.
+
+The proposed exchange therefore keeps the original page inventory, requested
+range, successfully processed pages, empty placeholders and structured errors
+separate. If only page two was requested and processed, that is success on the
+declared subset; pages one and three remain outside the conversion claim. If
+the three-page request times out before any page finishes, all three remain
+unprocessed despite the partial-success status. Retain the source and the
+unfinished pages for another attempt. A deadline is also distinct from stopped
+execution: the inspected shutdown code waits for worker threads for a bounded
+time and can report that a thread is still alive. Later execution must confirm
+termination within its isolated process before treating the attempt as stopped
+\citep{doclingpinned2026}.
+
+A requested processing stage may also remain unperformed. In the same Docling
+source, automatic OCR selects among engines according to platform, installed
+packages, languages and runtime availability. If it selects no engine and has
+recorded no language-specific rejection, it logs a warning; the subsequent call
+returns the pages without OCR. Language-specific rejection can instead produce
+an exception. Thus \code{do\_ocr=True} records a request, not evidence that text
+recognition occurred. The proposed adapter records the requested mode, selected
+engine and model identity, and processing outcome for each page. A page that
+requires OCR but did not receive it remains unprocessed, even if other stages
+produced layout regions \citep{doclingpinned2026}.
+
+Identifying the engine still leaves its model to be fixed. The inspected default
+layout preset names Heron at revision \code{main}, while the TableFormer
+downloader names the model repository's \code{v2.3.0} tag. Neither name supplies
+the hashes of the weights and preprocessing files actually used. The proposed
+adapter binds those files, configurations and dependency versions before use.
+Disabling remote inference services also does not disable model acquisition:
+the layout helper downloads when no artifact directory is supplied. With a
+supplied directory it requires the model's subfolder, but finding that folder
+does not check its contents against the requested revision. Local file
+verification and later isolated execution must therefore establish the intended
+offline behavior; a source setting alone cannot do so \citep{doclingpinned2026}.
+
+The text supplied to table recognition also needs an identity. The retained
+\code{docling-ibm-models}~4.0.2 consumer uses OTSL cell and span tokens, converts
+them to HTML, and merges text from separately supplied PDF cells
+\citep{tableformerconsumer2026}. This is a later representation than the
+original paper's HTML sequence. The Docling report explicitly describes a
+subsequent token-language refinement \citep[Section 3]{nassar2024}; neither
+that statement nor a model-card score identifies the later files with the
+paper's experimental checkpoints.
+
+The proposed adapter therefore retains the source page and crop, the supplied
+text cells and their locations, the predicted table cells, and the assignments
+and structural changes made during matching. If a correction combines columns
+or adds a cell for unmatched text, a reviewer must be able to recover the
+earlier structure and the text that prompted the change. Text obtained from an
+OCR engine also retains that engine's identity and outcome. A resulting table
+remains a proposal until its cell content, context and accounting interpretation
+have been checked; a well-formed HTML table alone cannot settle those questions.
+
+
+Token syntax and cell geometry require separate checks too. In the inspected
+author version of OTSL, \citet[Sections 4.1--4.3]{lysak2023otsl} use five
+tokens: C starts a cell, L joins the cell to its left, U joins the cell above,
+X joins both, and NL ends a row. Neighbor restrictions and equal row lengths
+allow invalid tokens to be detected during generation. The authors explicitly
+distinguish a syntactically valid sequence from a correct prediction.
+
+Even those local rules need a further condition to ensure rectangular merged
+cells. Consider two rows, \code{C L NL} followed by \code{U C NL}. The L has
+C to its left, the U has C above, and the first-row, first-column and
+equal-length rules are satisfied; no X occurs. Yet the first cell joins the
+top-left, top-right and bottom-left positions, leaving the bottom-right
+position to the second C. It is L-shaped. Representing it with both a two-row
+and a two-column HTML span would also occupy the second cell's position.
+This finite example shows why the six printed rules alone do not establish a
+nonoverlapping partition into rectangular cells. The proposed adapter checks
+that each merged cell occupies a complete rectangle, that cells do not overlap,
+and that every declared grid position belongs to a cell. Passing those checks
+still leaves correspondence with the source table to be established.
+
+The later decoder needs its own verification. In the retained 4.0.2 source,
+a correction described as applying to the first row uses a row counter that
+is initialized to zero and never updated. It therefore also rewrites an
+affected token on later rows \citep{tableformerconsumer2026}. This is a
+specific source-code defect relative to that stated scope; its frequency and
+effect on actual model predictions have not been measured. Neither the paper's
+syntax argument nor these partial corrections establish that a deployed
+converter enforces all the proposed checks.
+
+
+The retained Apple annual filing makes the dependency problem concrete. Its
+issuer archive includes the instance, the issuer's schema and its calculation,
+definition, label and presentation linkbases. Those files also refer to US GAAP
+and SEC Reporting Taxonomy definitions, SEC schemas and XBRL definitions held
+elsewhere. The issuer archive alone therefore cannot supply every definition
+needed to interpret its tagged facts. For this particular archive, a static
+inspection now resolves the recorded imports, link references and typed-domain
+references to retained files, checks target namespaces and fragment identifiers,
+and checks that instance facts have declared concepts, contexts and units.
+This establishes a source dependency map. XML Schema and XBRL validation, the
+issuer's interpretation of each concept, and the completeness of the wider
+disclosure package remain separate questions.
+
+An offline parser needs more than a map of intended filenames. At the inspected
+Arelle source version, the cache lookup can return a local pathname when the
+file is absent; subsequent loading records an \code{IOerror}. The proposed
+adapter must check each mapped file and its hash before loading, retain the
+missing dependency and affected records, and return an unresolved-dependency
+result. It must not infer successful retrieval from a nonempty pathname or
+silently substitute a newer taxonomy. Original schemas remain unchanged;
+an external resolver or isolated cache associates their declared addresses
+with the retained bytes. Any built-in cache fallback must belong to the same
+checked source set \citep{arellepinned2026}.
+
+Nor is a successful API return necessarily a validation verdict. In the same
+source version, the controller's return value takes accumulated validation
+errors into account only when \code{validationExitCode} is enabled. The proposed
+adapter sets it explicitly, requests validation, disables automatic formula
+execution, and examines the returned status, diagnostic messages and model
+errors together. It keeps the model open while copying the necessary facts,
+contexts, units and original occurrence references, then closes the session.
+One session runs at a time in its owning thread within a process; the inspected
+API uses shared package and plugin state. These are source-grounded interface
+requirements for a later implementation, not results from an executed Arelle
+adapter \citep{arellepinned2026}.
+
+\input{sections/arelle-inline-values}
+
+\input{sections/arelle-inline-values}
+
+\input{sections/arelle-fact-identity}
+
+Each adapter therefore pins code, dependency, model and taxonomy versions,
+licenses, input and output schemas, transformations and field-loss behavior.
+Preparation preserves bytes and receipts before parsing, inventories the
+package, attaches occurrences and contexts, records normalization, checks
+required fields independently and submits candidates for review. Partial
+conversion retains both successful units and the exact failures or unexplored
+frontier. Conversion counts cannot accept a package or an accounting treatment.
+
+The proposed extraction comparison uses the same retained files, roots, budgets
+and taxonomy resources. Manual located source units and transparent native
+extraction provide the reference; applicable pdfplumber/Arelle configurations,
+plain Docling and explicit context/footnote repairs form the candidate ladder.
+Transcription, context, table structure, mapping, source support, retention,
+historical admission and cost are separate outcomes. Lost hashes or locators,
+look-ahead, silent omissions and untracked downloads veto the affected exchange.
+The current 31 development annotations cannot establish a heldout accuracy
+ranking, and cell counts within one report are not independent observations.
+
+Reuse also has distribution conditions. Arelle's Apache and Docling's MIT code
+licenses do not by themselves clear every model, taxonomy or dataset. ACTUS
+technical-specification reuse retains its share-alike obligations; QuantLib,
+Z3 and ledger tools retain their own code and dependency terms. The Beancount
+and hledger comparison needs an explicit distribution boundary for copyleft
+components. License admission records actual versions, notices, models and
+data, rather than treating a repository's headline license as universal.
+
+\enlargethispage{\baselineskip}
+EasyOCR makes the dependency question concrete. Version~1.7.2 requires
+\code{python-bidi} without a version constraint and imports its
+\code{get\_display} function when the OCR module loads. Although the call
+reorders Arabic recognition results, selecting English does not remove the
+import or package requirement. In the inspected \code{python-bidi}~0.6.11
+source, this import selects a Rust-backed implementation; the older Python
+implementation has a different import path. Its own source states
+LGPLv3-or-later terms. The inspected release is a candidate for dependency
+analysis, and its source-level call signature alone does not establish
+compatibility with an installed OCR configuration
+\citep{easyocr172source,pythonbidi0611source}.
+
+The same package shows why an accompanying notice still needs checking. Its
+third-party list names older PyO3 and \code{unicode-bidi} versions than its
+bundled Cargo lockfile. The exact locked sources retain MIT-or-Apache terms,
+so the version discrepancy does not demonstrate a licence conflict. Other
+locked packages add conditions: \code{target-lexicon} includes the LLVM
+exception to Apache~2.0, while generated \code{unicode-ident} tables require
+Unicode data-file terms alongside the chosen MIT or Apache licence
+\citep{pythonbidi0611source,bidirustsources2026}. The adapter must therefore
+bind the selected build and retain each applicable notice. Verified source
+archives help prepare that decision; actual wheel contents, model rights
+and the intended distribution still need separate assessment.
+
+The actual taxonomy notices show why that distinction changes the design.
+The inspected FASB notices permit specified financial reporting and unchanged
+incorporation in works that explain or assist implementation, subject to their
+notice and third-party conditions. They do not provide a general permission to
+edit taxonomy definitions. Keeping the original files and recording location
+mappings separately respects that distinction. The notices retrieved for this
+inspection are unversioned; their relationship to the terms attached to the
+2024 files still needs to be established before a distribution decision.
+XBRL's public-document notice separately directs software and schemas to a
+Software Notice, so permission for an explanatory document cannot simply be
+applied to a schema bundle. Exact dependency licences, component-specific terms
+and the intended distribution remain explicit preparation tasks
+\citep{fasbtaxonomyuses,fasbsrtuses,xbrlcopyright}.

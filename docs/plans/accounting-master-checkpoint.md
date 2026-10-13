@@ -12,11 +12,11 @@ is complete: all35 requirements/18 gaps and original statuses preserved;
 12 requirement and6 gap descriptions updated. All157 integrity checks pass.
 Twenty-one of24 source judgments are carried by exact bytes; both new
 transitive sections receive scoped evidence. Full readiness remains not_ready.
-Execute the [actual Apple occurrence inquiry](accounting-apple-inline-occurrences-20261013.md).
+The actual occurrence inquiry is now delivered in2.70.
 
-**Version 2.69, 223 pages.**
-PDF: docs/design/proposal/manuscript-arelle-inline-values-20261013/accounting-product-proposal.pdf
-SHA256: db8cdbf471a8a890f3677f9222d10f17b73541a132970c5858683167ca000e05.
+**Version 2.70, 225 pages.**
+PDF: docs/design/proposal/manuscript-apple-inline-occurrences-20261013/accounting-product-proposal.pdf
+SHA256: 7de5398b78b0ce8fc078d40aeebcf936e776e0d4a8f852e14b996d840823cad7.
 The [award-version inquiry](../../data/accounting-master/apple-award-versions-20261013/result.md)
 is delivered in Version 2.67: already retained2022 CEO and2024 general/CEO
 forms now have selected substantive clauses inspected. General prorating and
@@ -37,6 +37,14 @@ The three new stock-plan counterparts remain supplemental; the three forms
 now inspected were already located. No additional acquisition count is added.
 
 ## Latest completed work
+
+The [actual occurrence inquiry](../../data/accounting-master/apple-inline-occurrences-20261013/result.md)
+is delivered in Version2.70. The annual HTML had no inline tags; the repaired
+scope compares next-quarter comparative facts with the prior annual instance.
+Five selected occurrences per source match under explicit context/unit/accuracy
+checks; equity repeats remain distinct. All154 source and148 manuscript checks
+pass, with five final pages inspected. This adds scoped E01/E14 evidence to the
+Version2.69 full assessment. Execute the [incomplete-information source inquiry](accounting-incomplete-information-source-20261013.md).
 
 The [inline-value inquiry](../../data/accounting-master/arelle-inline-values-20261013/result.md)
 is delivered in Version2.69: transform/scale/sign are already applied by the
@@ -94,7 +102,7 @@ availability follows.
 
 ## Exact next action
 
-Execute [the actual-source occurrence inquiry](accounting-apple-inline-occurrences-20261013.md); preserve the2.69 candidate and source-only evidence limits.
+Execute [the incomplete-information source inquiry](accounting-incomplete-information-source-20261013.md); preserve the2.70 candidate and source-only evidence limits.
 
 The [Tamer inquiry](../../data/accounting-master/tamer-source-recovery-20261013/result.md)
 ended with three access blockers. The [Caiani inquiry](../../data/accounting-master/caiani-source-recovery-20261013/result.md)

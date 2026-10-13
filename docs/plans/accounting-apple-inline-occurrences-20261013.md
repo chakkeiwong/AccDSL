@@ -5,8 +5,9 @@ G2/G5/G9/G11/G12/G17/G18. Protected proposal2.69; **not_ready**.
 
 Question: do selected actual statement occurrences preserve a reconstructible
 path from source spelling, transform, sign and scale to the retained instance
-amount, with matching concept/context/unit/accuracy? Comparator: original
-issuer HTML, already retained instance and existing annual statement network.
+amount, with matching concept/context/unit/accuracy? Comparator: the retained next-quarter inline HTML comparative columns, prior
+annual instance and existing annual/interim statement networks. This is a
+cross-filing endpoint comparison, not a same-filing extraction round trip.
 Use a small explicit fact selection with all matching occurrences inventoried.
 No Arelle import/installation, adapter implementation or general validation.
 
@@ -40,3 +41,17 @@ source receipts/locators, checked trace, result and manifest. Integrate only a
 material new actual example, preserve prior text/math/citations, build/inspect,
 refresh controls, commit explicit paths and preserve100 unrelated staged entries.
 Human/domain acceptance remains pending; implementation/controller stay held.
+
+## Premise repair before numeric tracing
+
+The proposed annual HTML is an EDGAR Online HTML converter output with zero
+inline numeric tags and no inline namespace. Its original hash/receipt is valid,
+but it cannot answer an inline source question. The retained next-quarter SEC
+HTML has525 inline numeric facts and contains28September2024 comparative
+endpoints. Compare four selected balance-sheet concepts at that date with the
+retained annual instance. This explicitly changes the evidence target to a
+cross-filing comparison; it cannot prove that the annual instance was produced
+from the later HTML. Inspect full contexts/units, all occurrences and selected
+2020 num-dot-decimal transform before arithmetic. Preserve the original plan
+and source-format result. This scope repair stays within authorized internal
+source research and does not require new permission.

@@ -1,20 +1,21 @@
 # Accounting proposal — direct next plan
 
-13 October2026. Version2.69,223 pages; **not_ready**.
-PDF: docs/design/proposal/manuscript-arelle-inline-values-20261013/accounting-product-proposal.pdf
-SHA256: db8cdbf471a8a890f3677f9222d10f17b73541a132970c5858683167ca000e05
+13 October2026. Version2.70,225 pages; **not_ready**.
+PDF: docs/design/proposal/manuscript-apple-inline-occurrences-20261013/accounting-product-proposal.pdf
+SHA256: 7de5398b78b0ce8fc078d40aeebcf936e776e0d4a8f852e14b996d840823cad7
 Implementation and historical controller remain held.
 
-The post-adapter full-program assessment is complete:
-data/accounting-master/post-adapter-readiness-20261013/result.md.
-All35 requirements/18 gaps and original statuses preserved;12/6 descriptions
-updated;157 integrity checks pass. Twenty-one of24 compared source judgments
-are carried; two new transitive sections are credited within static scope.
+The actual occurrence inquiry is complete within repaired cross-filing scope:
+data/accounting-master/apple-inline-occurrences-20261013/result.md.
+All154 source/arithmetic and148 manuscript checks pass; two derived source
+views and five final pages inspected. Version2.69 remains the last full53-row
+assessment;2.70 is a scoped E01/E14 supplement. Earlier equations/citations
+and the wrong-input build/repair record are preserved.
 
-Execute docs/plans/accounting-apple-inline-occurrences-20261013.md.
-Trace selected actual issuer inline amounts to retained instance counterparts,
-with source identity, complete selected contexts/units and precision. No Arelle
-execution, schema-validation claim or general adapter implementation.
+Execute docs/plans/accounting-incomplete-information-source-20261013.md.
+Investigate a distinct legitimate source route for Imielinski/Lipski1984;
+do not repeat the blocked ACM PDF route or treat metadata as technical support.
+Source-specific access failure does not stop independent ready master work.
 
 P17/P18 continue; P19 stays negative; all five E workstreams remain open.
 Reference/publication counts unchanged. Preserve100 unrelated staged entries.
