@@ -19,8 +19,9 @@ P2 retains its 5,608-check result and P3a2 its 19,815-check result.
    scoped claim/source result and official XBRL route repair.
 2. R07 has no technical/render veto after the all-349-page scan, eight contact sheets, unique labels, clean build and targeted inspection.
 3. R08 contains all 53 current rows, six interaction decisions and a staged first implementation slice.
-4. Preserve all 13 corporate, 5 financing, 7 bank, 3 group and 8 insurance original-row promises; continue ready R03 residuals and keep human/domain review pending.
-5. Assemble the exact independent technical review packet from Version 3.14, R04/R06, R07 and R08.
+4. R03 residual audits are delivered for admitted financing (69 checks), bank (53 checks) and insurance (2,705 checks); preserve their wider residuals and continue any source-backed repair.
+5. Preserve all 13 corporate, 5 financing, 7 bank, 3 group and 8 insurance original-row promises; keep human/domain review pending.
+6. Assemble the exact independent technical review packet from Version 3.14, R03–R08.
 
 Audit each next work unit before execution. A failed candidate triggers repair;
 an absent required source/input blocks its dependent claim. Continue other

@@ -30,6 +30,8 @@ the scoped MC update is `requirements-successor-p2-residuals-20261016.md`.
 All-zero CGU allocation remains source-unsupported; actual valuations, law and
 facts remain separate dependencies. No original row is closed wholesale.
 
+R03 financing, bank and insurance residual audits add 69, 53 and 2,705 scoped checks respectively, all with zero failures; their residuals remain explicit.
+
 P3a2 FinancingComponents/2 attempt 02 passes **19,815 independent documentary
 checks, zero failures**: 66 methods, 53 cases, 160 transitions, 1,378 exchanges
 and 135 reports. Both acknowledgement-loss worlds are checked for every
