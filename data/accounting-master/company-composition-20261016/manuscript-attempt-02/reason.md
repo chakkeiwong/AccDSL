@@ -1,0 +1,1 @@
+Rendered review of physical page 20 found sale labels touching the entity boxes. Preserve this compiled candidate before widening the arrows and placing their labels above the group boundary. Arithmetic and sources are unchanged.
