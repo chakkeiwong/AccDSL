@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. Twelve original rows reviewed;189 outside this continuation. All201 original rows/statuses remain unchanged. Counts are coverage, not closure.
+28 October2026. Fifteen original rows reviewed;186 outside this continuation. All201 original rows/statuses remain unchanged. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -11,10 +11,13 @@
 | SIM-F010 | A disclosed external guarantee with no settlement cash retains opening6 and liabilities7/3. This does not test adding a hidden guarantee to an admissible history family. | Execute the original hidden-contract alternative within a declared company family and retain structural completeness limits. |
 | SIM-F014 | Repeated pre-reset interest5 equalities retain fixed, floating and interior feasible mixtures; no posterior is assigned. | New rate-reset observations and probability updates need their own declared source and likelihood assumptions. |
 | SIM-F019 | The policy probe preserves its exact parent, first-year history and every non-target input. It is a deterministic paired-path comparison, not a study across heterogeneous worlds. | Pair the same policies across each retained joint history using one declared information set; preserve the full conditional outcome table. |
+| SIM-F022 | Bridge principal cap30 less fee1 supplies29 for need30; the declared family is infeasible. Removing the fee changes the answer. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
+| SIM-F023 | No admitted bridge/term offer constrains its draw to zero; an absent offer cannot finance the payment. Real offer authentication remains outside this synthetic case. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
+| SIM-F024 | A day5 term issue cannot fund the day4 payment; every dated cash prefix is required even where final cash is positive. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
 | SIM-F043 | The exact Machine20 case now executes: identical first-close reports and carrying value20, then next charges10 and20 under supplied lives2 and1. All native years complete. | Retain this native annual-method evidence; broader asset methods, industry applicability and package acceptance remain open. |
 | SIM-F066 | Year-qualified event IDs and the saved policy-parent hash are checked. The original refinancing and tax/ownership-cache invalidation case was not executed here. | Trace the original refinancing operation through tax and ownership cache dependencies; reject stale identities and compare the complete rebuilt path. |
 | X07 | Synthetic relationship/asset records explicitly retain unknown identities and no actual-source admission. No partial actual issuer claim disclosure was passed through method admission here. | Bind one source-backed partial population to method admission and prove that missing counterparties/instruments and unknown completeness survive the join. |
 | X20 | The original retained continuous-guards result explicitly checks refusal_retains_due and forgotten_payable_is_wrong. New trade over-settlement is related, not a replacement for accrued-interest preservation. | Retain the exact original accrued-payable evidence; extend to additional payment/default methods only under their own declared inputs and source support. |
 | X32 | The retained symbolic certificate refuses wrong bindings, parameter substitution and unused parameters. The new policy-parent rejection checks a related path identity, not all parameter occurrences. | Use the exact symbolic occurrence certificate for its selected profile; inspect new method declarations separately before broader composition. |
 
-Latest guarantee result: data/accounting-master/company-state-guarantee-failures-20261028/result.md. The prior11-row supplement is preserved in navigation-before.json there.
+Latest funding result: data/accounting-master/company-state-funding-failures-20261028/result.md. Previous dispositions remain in navigation-before.json there.

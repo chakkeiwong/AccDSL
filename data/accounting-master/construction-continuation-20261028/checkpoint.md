@@ -1,5 +1,21 @@
 # Construction continuation checkpoint
 
+## Exact funding failure constraints — 28 October2026
+
+SIM-F022/023/024 have98 passing checks across14 finite cases and3
+target-changing controls. The existing rational solver preserves fee/cap,
+admitted-offer and every dated cash-prefix constraint. Day5 cash cannot
+fund day4 maturity; full sale removes term eligibility; half-sale H2 reaches
+the exact price53/80 boundary. This is a new explicit finite encoding, not
+general event execution or a tested nonanticipative policy. Result:
+data/accounting-master/company-state-funding-failures-20261028/result.md.
+
+Fifteen original failure rows are reviewed;186 remain outside this pass.
+All201 original statuses and40 task criteria persist. Main reading is288/831;
+resume289. T01 remains definition-complete, C04/R04 in_progress, releases
+not_ready and empirical E3 deferred. Continue ready internal work.
+
+
 ## Guarantee omission and unpaid-contract review — 28 October2026
 
 The unchanged SectorCompany/1 reference passes244 checks across46 cases.
