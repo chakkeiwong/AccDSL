@@ -151,6 +151,34 @@ supply no invented history. Wrong contexts and stale identities are invalid;
 other owners, cross-profile joins and actor/public information requests remain
 unsupported until their meanings and exact mappings are specified.
 
+## Explicit policy effects
+
+CompanyPolicyEffectRequest/1 now binds a supplied SettlementPolicyDraft/1 to
+one of three audit-only effects. generate_inputs delegates to the retained
+generator, verifies its materialization and executes the child through guarded
+population admission. The result preserves both the generation status and the
+native execution status; generated inputs need not form an executable history.
+
+validate_equalities checks whether executed selected claim allocations equal
+the prescribed amounts. compare_targets reports signed actual-minus-target
+differences with no equality verdict. Both inspect the unchanged supplied path,
+attach its complete native result and create no accounting postings. The
+relation is explicitly equality for this bounded validator; tolerance, bounds
+and other constraint languages are unsupported.
+
+An unexecuted collection has no realized allocation. Its comparison remains
+unresolved, while any earlier known differences and violations survive. An
+executed zero is retained as zero. Unknown openings supply no population.
+Requests bind path/source hashes and context, refuse other owners and actor
+views, and confer no authority or information admission. Implementation and
+144 checks are retained in company-state-policy-effects-20261028 under
+data/accounting-master.
+
+This distinction follows the source comparison in rea-policy-and-state.md:
+a derived input, a restriction and a target have different consequences even
+when they contain identical numbers. Commitments, policy amendments and actual
+decision rules still require separate definitions.
+
 ## Return semantics and unresolved work
 
 The guarded result preserves the full native result, exact input identity and

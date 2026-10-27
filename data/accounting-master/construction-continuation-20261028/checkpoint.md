@@ -1,5 +1,27 @@
 # Construction continuation checkpoint
 
+## Policy survey and explicit native effects — 28 October 2026
+
+The complete Geerts/McCarthy2006 policy article is read and retained, with
+technical anchors, metadata and all six live survey ledgers updated. It
+distinguishes derived descriptions, validation rules and targets; its patterns
+are heuristic and nonexhaustive. Commitments and direct implementation/empirical
+competitors remain separate reading tasks. See company-state-rea-policy-reading-20261028/result.md
+under data/accounting-master and rea-policy-and-state.md in the research directory.
+
+The native CompanyPolicyEffectRequest/1 now keeps generation, exact-equality
+validation and target comparison separate.144 checks across19 cases preserve
+full native outcomes, unknown openings and unexecuted allocations. A failed
+target does not become a failed transaction; generated inputs still face all
+native guards. Result: data/accounting-master/company-state-policy-effects-20261028/result.md.
+
+Next: common native-owner meanings and actor/operation definitions; primary
+commitment/extended-ontology reading; remaining original failure dispositions
+and ordered manuscript review. T01/S01/C04 remain in_progress. All40 task
+criteria and dependency edges are preserved. S1–S5 partial, S6 held, E3 deferred;
+selected5.55-R1 and unselected5.56-D1 remain not_ready.
+
+
 28 October 2026. Active master: docs/plans/company-state-research-release-program-20261028.md.
 Live graph: data/accounting-master/unified-program-20261028/program.json.
 

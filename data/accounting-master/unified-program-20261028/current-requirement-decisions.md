@@ -40,3 +40,12 @@ in current-requirement-decisions.json and the original-condition crosswalk.
 | MC33 | C04, R05, R06, R07 | Tie each of201 original failures to specific evidence; verify declared case populations, scientific claims and source meaning before independent accounting/reader/implementation acceptance. |
 | MC34 | U00, R06 | Synchronize original-condition mappings, current task actions, new evidence and reset memo; all114 rows,156 clauses,18 packages and201 original failure records remain active. |
 | MC35 | R06, R07 | Finish feasible internal sources/facts/calculations/design first; prepare specific proposed answer, opposing interpretation and consequences before any authorized professional referral. |
+
+## Policy-effect continuation, 28 October 2026
+
+MC08/10/13/18/19/26/28/32/35 now have bounded three-role native evidence in
+company-state-policy-effects-20261028/result.md under data/accounting-master.
+The REA2006 primary reading supports source-anchored distinctions and updates
+the six ledgers (MC29/30 included). These supplements do not replace original
+acceptance decisions. Common owners, commitments, actual authority and actor
+access remain open; T01/S01/C04 statuses are unchanged.
