@@ -1,5 +1,225 @@
 # AccDSL mission requirements and acceptance evidence
 
+## Unresolved opening admission repaired — 28 October 2026
+
+The guarded population entrypoint passes 114 checks, preserving native unknown
+opening inputs, invalid/unsupported outcomes, complete earlier years and
+unexecuted suffixes. Use company-state-population-admission-20261028/admission.py
+under data/accounting-master when opening executability is unknown. The earlier
+claim/cohort inspectors require an executable opening. Failed probes and the
+source-refusal ordering repair remain recorded; successful prior outputs match.
+
+Current result: data/accounting-master/company-state-population-admission-20261028/result.md.
+The full checkpoint and remaining work are in
+data/accounting-master/construction-continuation-20261028/checkpoint.md.
+All broad task/release statuses are unchanged; empirical E3 remains deferred.
+
+## Asset cohorts and original failure review — 28 October 2026
+
+Native fixed-asset construction now passes 120 checks over nine cohorts, six
+additions and 21 annual cohort reads. Equal current reports can imply different
+future depreciation when lives or service dates differ. The original Machine20
+failure discriminator passes 11 additional checks: equal carrying value20, then
+charges10 versus20. Eight original failure rows are individually dispositioned;
+193 remain outside this pass. Related examples are not substituted for the
+original guarantee, refinancing or source-admission tests.
+
+The live specification now includes native-population-construction.md under
+docs/design/research/company-state-program-20261028/. Cohort results are in
+data/accounting-master/company-state-asset-cohort-dependencies-20261028/result.md.
+Current failure review and recovery state are in
+data/accounting-master/construction-continuation-20261028/.
+
+Next: remaining resource/contract populations, source-backed sector/basis
+construction, original failure dispositions, primary competitors and ordered
+review. No broad task or release status changes. Selected 5.55-R1 remains
+not_ready; 5.56-D1 remains unselected/not_ready; empirical E3 remains deferred.
+
+## Relationship construction and policy continuation — 28 October 2026
+
+The REA primary reading is complete for the retained 1982 article; later
+extensions and competitors remain open. Existing native claim operations now
+have a 137-check relationship inspector covering 63 events, 14 lifetime claims
+and 72 creation/allocation links. Equal financial reports can retain different
+claim balances. The existing policy connection passes 110 checks against its
+exact price-revision parent; a fully collected claim rejects the unchanged
+later collection as over-settlement. The initial wrong-parent attempt and its
+repair are preserved. No counterparty, legal identity or actor access is invented.
+
+Results: data/accounting-master/company-state-rea-reading-20261028/result.md;
+company-state-relationship-dependencies-20261028/result.md and policy-result.md
+under data/accounting-master. Full recovery checkpoint:
+data/accounting-master/construction-continuation-20261028/checkpoint.md.
+
+Next: resource/contract populations, sector/basis dependencies, actual issuer
+rights/access, remaining primary/competing survey, failure dispositions and
+ordered review. All 40 task statuses and original conditions remain unchanged.
+Selected 5.55-R1 stays not_ready; 5.56-D1 stays unselected/not_ready. E3 deferred.
+
+## Actual-source measurements and operation dependencies — 28 October 2026
+
+The program review reuses the completed certified temporal/native join rather
+than rebuilding it. New retained Apple feed/HTML/XBRL timing evidence passes
+45 checks, with historical publication and actor receipt still unresolved.
+The source-backed debt adapter passes124 checks: twelve native reported
+quantities from thirteen occurrences, three printed reconciliations, and a
+separate issuance-period reading. Exact issuer-extension meaning is preserved;
+reported totals do not become legal instruments or a complete company opening.
+
+Native affine dependency inspection passes264 checks over42 queries,11 event
+prefixes and all three full retained histories. It separates output dependencies
+from feasibility constraints and removes no variables. Failed attempts and
+repairs are retained. Results are under data/accounting-master/:
+company-state-source-timing-20261028/result.md,
+company-state-debt-measurement-20261028/result.md, and
+company-state-operation-dependencies-20261028/result.md.
+
+The forty-task master and all original acceptance conditions remain active.
+Selected5.55-R1 stays not_ready;5.56-D1 stays an unselected provisional draft.
+Next: operation/population and industry/basis construction; source-backed legal
+instruments, authority/access; primary/competing survey, full failure review and
+ordered reading. Empirical E3 remains deferred. No global continuation veto.
+
+## Connected research and certified history families — 28 October 2026
+
+The reviewed unified program remains active; selected5.55-R1 remains not_ready.
+Current results are data/accounting-master/unified-program-20261028/revisions-result.md
+and certified-join-result.md in that directory. The original114 acceptance rows,
+156 clauses,18 packages and201 failure records remain unchanged and open where
+previously open. Existing5.56-D1 provisional integration is preserved.
+
+The source continuation recovers and technically inspects Arya et al.(2000),
+reproducing its inverse-accounting estimator under23 exact checks. Filtering,
+smoothing, credit pricing, accounting valuation and accrual-duration readings
+extend the connected survey. The new research supplement compiles to eight pages;
+all pages are visually reviewed. Direct valuation competitors, forensic empirical
+methods, reporting incentives, causal and sector branches remain incomplete.
+
+The revision/access adapter passes12 unit tests and78 full-history checks. A
+separate join reuses the existing certified joint-clock family engine and
+preserves complete native histories, every source outcome and temporal support,
+unknown clocks, retractions, conflicts and budget remainder. Its final run passes
+421 checks across28 cases and47 complete-history replays, with nine adversarial
+unit tests. The join requires explicit proposed source meanings; it is a
+cross-case composition test, not actual issuer interpretation or actor knowledge.
+No simulated policy receives its full audit record. All admission flags stay false.
+
+Next: supported common source/quantity/issuer semantics; operation-driven state
+construction and industry/basis composition; broad primary/competing literature;
+source reliability, strategic reporting and causal assumptions; full201-failure
+and ordered-document review. Live next actions and evidence are in program.json
+and current-requirement-decisions.md under the unified-program directory.
+S1–S5 remain partial, S6 held, E3 deferred. No new timed campaign or release promotion.
+
+## Provisional integration and information-history continuation — 28 October 2026
+
+Retained issuer continuation also binds Apple2024 Note9 to13 selected XBRL
+occurrences:111 checks distinguish principal97,341, carrying debt96,662 and
+next reported principal bucket10,930 from current carrying10,912 (USD million).
+Exact instrument/payment/swap/legal-clock mappings remain open; the15 issuer
+dependency rows and180 target obligations are preserved. Result:
+data/accounting-master/company-state-debt-source-20261028/result.md.
+
+The live master remains docs/plans/company-state-research-release-program-20261028.md
+with its dependency graph under data/accounting-master/unified-program-20261028/.
+A protected, unselected5.56-D1 draft now integrates company-state construction,
+information timing, claim/liquidity and forensic alternatives in both volumes.
+Main844/simulation272 pages compile and reproduce every normalized page from a
+separate copy. The545-file draft verifies; selected5.55-R1's452 files remain
+unchanged/not_ready. The new chapter does not close the broad research program.
+Result: data/accounting-master/company-state-manuscript-20261028/result.md.
+Draft: docs/design/proposal/manuscript-state-v556d1-20261028/README.md.
+
+Nine retained state units have896 current checks. The separate57-check finite
+state theory and115-check source-conjunction repair retain their own scopes.
+New continuation adds950 exact uncertain-availability checks and177 linear-
+revision checks, with full native histories. Results:
+data/accounting-master/company-state-clock-uncertainty-20261028/result.md and
+data/accounting-master/company-state-revision-lineage-20261028/result.md.
+These supplied-clock/authority references are separate from the draft; they do
+not establish actual source admission, joint uncertainty/revision semantics,
+actor knowledge or complete company state. Earlier dated counts remain history.
+
+Next: supported issuer source/authority and actor access; joint clock/revision
+semantics; common operation/sector/basis construction; remaining primary and
+competing literature; connected valuation/forensic cases and ordered review.
+The original114 acceptance rows,156 clauses,18 packages and201 failure rows
+remain unchanged. S1–S5 partial, S6 held and empirical E3 deferred. No global
+continuation veto, professional outreach, deployment or release promotion.
+
+## Unified company-state research and release program — 28 October 2026
+
+Active plan: docs/plans/company-state-research-release-program-20261028.md.
+Live dependency graph and exact original-condition maps:
+data/accounting-master/unified-program-20261028/. Validate/list ready work with
+python3 -B scripts/check_company_state_program.py. Current requirement-level
+actions are in that directory's current-requirement-decisions.md; execution
+and remaining work are in execution-result.md and reset-memo.md.
+
+The program preserves114 original rows,156 clauses,18 packages and201 failure
+records. This execution adds a connected survey protocol/six ledgers, a
+seven-page research draft,57 exact state/information/causal checks and115
+source-intersection checks; nine adversarial program tests pass. The broader
+survey, general state constructor, source-backed industry/basis composition,
+revision/reliability and independent acceptance remain open. Counts confer no
+release acceptance.
+
+Reuse completed native history/observation bindings and the scoped114-check
+information bridge. A new adversarial case finds its source-overwrite defect;
+the separate conjunctive interval successor preserves conflicting assertions
+and full native histories. Do not treat the old selector as general evidence
+conjunction. Existing frozen evidence and selected5.55-R1 stay unchanged and
+not_ready. E3 remains deferred; the earlier timed effort stays concluded.
+Historical sections below retain their dates and are superseded for ordering
+by the live graph.
+
+## Bounded state-construction evidence — 28 October 2026
+
+The inventory/debt, insurance component and observation-construction units add
+194, 181 and 109 exact checks under MC08–11, MC13, MC15–19, MC26 and MC28–32.
+The connected derivation is docs/design/research/company-state-inference-20261028/state-construction.md;
+results are data/accounting-master/company-state-{sequence,insurance,construction}-20261028/result.md.
+Equal current totals do not preserve the tested future accounting operations;
+public and system information views remain distinct. Evidence is synthetic and
+conditional. General source-to-state construction, broader sectors, stochastic
+and behavioral laws, valuation/forensic links and manuscript integration remain
+open. These additive records change no original requirement or acceptance text.
+Subsequent native measurement/history/observation bindings pass 65/120/43
+checks; the connected claim/evidence example passes33. Full results are in the
+matching company-state-*-20261028 directories. These retain source/admission
+boundaries and do not turn supplied hypotheses into actual issuer facts.
+
+## Connected valuation and forensic research gap — 28 October 2026
+
+The user's broader requirement extends company-state construction/inference
+to accounting-based valuation, future cash-flow simulation, risk pricing,
+earnings quality, reporting incentives and forensic reconstruction. The
+[expanded plan](company-state-valuation-forensics-20261028.md) and
+[initial connected synthesis](../design/research/company-state-valuation-forensics-20261028/synthesis.md)
+document shared questions, scoped inspected sources and exact reconciliation
+examples. Existing sources in the original collection must be integrated as
+well as supplemented. A source list, anomaly screen, price fit or accounting
+identity does not establish complete state identification, forensic misconduct,
+forecast validity or release readiness. Broad technical survey, explicit
+source-to-model connections, industry cases and validation remain open under
+MC08–11, MC13, MC15–18, MC26, MC28–32 and MC35. Original acceptance wording
+and counts are preserved.
+
+## Open company-state construction and inference gap — 28 October 2026
+
+The user's clarification identifies a central missing synthesis under
+MC08–11, MC13, MC15–18, MC26 and MC28–32. Existing hidden-state examples and
+filtering literature do not establish how to construct a sufficiently rich
+company state, separate sector mechanisms from reporting-basis memory, map
+disclosure histories to observations, and identify or infer the unknown state.
+The [audited plan](company-state-inference-20261028.md) and
+[initial research synthesis](../design/research/company-state-inference-20261028/assessment.md)
+begin that repair with retained primary sources, exact inspected anchors and
+small Bayesian counterexamples. State sufficiency, inverse-accounting reading,
+industry/cross-basis comparisons, model criticism and integrated validation
+remain open. No original requirement text or acceptance count is revised, and
+this preliminary survey does not close a requirement or promote release status.
+
 ## Supervised continuation — 28 October 2026
 
 The user renewed execution and authorised commit/push. Commit 455dfd8 was
