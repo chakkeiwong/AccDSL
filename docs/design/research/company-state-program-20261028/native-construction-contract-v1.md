@@ -131,6 +131,26 @@ reductions: aggregate receivables hide claim allocations, and equal plant
 carrying amounts hide future depreciation. These examples do not prove that
 the retained state is minimal or sufficient for arbitrary industry operations.
 
+## Typed requests for reports and histories
+
+CompanyStateInspectionRequest/1 now supplies a closed audit request for this
+single native owner. The request names the owner, canonical path digest, raw
+source digest, entity/book/currency and explicit audit-only archival information
+use. Its nonempty query list supports annual_report(period_start),
+event_prefix(year_index, operation_id), claim_history(claim_id) and
+asset_history(asset_id), each with a distinct query ID. Additional fields,
+missing qualifiers and duplicate query IDs are refused. The schema and exact
+dispatcher are in company-state-typed-request-20261028 under data/accounting-master.
+
+An annual query delegates to the native report view. An event query returns
+the complete recorded population prefix only if the event executed. Claim and
+asset histories include origin and all executed prefix states in which the
+identity is present. An absent supplied identity is not evidence of absence
+from a real company. Unknown openings retain their native obligations and
+supply no invented history. Wrong contexts and stale identities are invalid;
+other owners, cross-profile joins and actor/public information requests remain
+unsupported until their meanings and exact mappings are specified.
+
 ## Return semantics and unresolved work
 
 The guarded result preserves the full native result, exact input identity and

@@ -3,6 +3,14 @@
 28 October 2026. T01 remains in_progress. Reviewed draft:
 docs/design/research/company-state-program-20261028/native-construction-contract-v1.md.
 
+Continuation: the first closed request is now implemented for the exact
+CompanyOperationPathDraft/1 audit owner.102 checks preserve annual reports,
+year-qualified prefixes and claim/asset histories, with native missing-input
+outcomes. The remaining-definition entries below now refer to common meanings
+across native profile families and actual actor/operation requirements, not
+the absence of any typed request. Result:
+data/accounting-master/company-state-typed-request-20261028/result.md.
+
 The original criterion is: economic/contract state, accounting memory,
 parameters, actor information, histories and changing populations distinguished;
 refusal and historical query dependencies traced. The bounded contract now

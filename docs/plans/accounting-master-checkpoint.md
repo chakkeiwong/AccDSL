@@ -1,5 +1,19 @@
 # Accounting master checkpoint
 
+## Typed native state/history request — 28 October 2026
+
+The single-owner CompanyStateInspectionRequest/1 passes102 checks across12
+queries and18 controls. Annual reports, year-qualified prefixes and claim/asset
+histories preserve native outcomes, origins and missing populations. Unsupported
+owners, joins and actor/public information requests remain explicit refusals.
+The date-pattern authoring failure and repair are retained. Result:
+data/accounting-master/company-state-typed-request-20261028/result.md.
+
+Next: common state and query/population meanings across exact native owners;
+only justified owner/actor mappings. T01 stays in_progress; sector implementation
+remains T05 and actual-source/actor admission T03/C01. Original acceptance
+conditions and release statuses are unchanged; E3 remains deferred.
+
 ## Common construction contract and sequencing repair — 28 October 2026
 
 All14 native company-operation kinds now have a source-reviewed dependency

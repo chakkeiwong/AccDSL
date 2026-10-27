@@ -68,8 +68,14 @@ The common native construction contract is now drafted and reviewed in
 docs/design/research/company-state-program-20261028/native-construction-contract-v1.md
 and common-contract-review.md here. T01 remains in_progress because its common
 typed request across exact native owners, history queries and actor requirements
-is still a definition gap. Next: specify and bind that request, preserving
-native partial outcomes, unknown populations and explicit unsupported joins.
+is still a broader definition gap. A first closed typed audit request is now
+implemented for the exact CompanyOperationPathDraft/1 owner:102 checks,12 queries
+and18 controls in company-state-typed-request-20261028/attempt-02 under
+data/accounting-master. Its annual/prefix/claim/asset queries preserve native
+results and unknowns. Cross-profile and actor/public information requests are
+explicitly unsupported. Attempt-01's date-pattern authoring failure is retained.
+Next: review common state meanings and supported query/population coverage
+across exact native owners; add only justified mappings and actor semantics.
 Industry/basis implementation remains
 T05; actual source/actor identity remains T03/C01. Survey: REA policy/commitment
 extensions and direct database/user evaluation competitors. Continue individual
