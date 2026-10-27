@@ -1,4 +1,28 @@
-# Ordered reading reaches physical page288
+# Ordered reading reaches physical page300
+
+## Continuation through300 — 28 October2026
+
+Twelve actual pages289–300 are now read in two six-page segments, each carrying
+the exact previous exit.77 and67 exact checks pass,144 additional checks in
+this continuation. Across265–300 the recorded reading covers36 pages with327
+local arithmetic checks. Neither count substitutes for whole-document review.
+
+Annual and interim statement bridges preserve stock/flow and population
+boundaries. Deferred-revenue and commitment examples distinguish net movements
+from gross additions, delivery, billing and cash. Cash restrictions, securities
+valuation, customer overlap and geographic cost allocation retain different
+meanings and unresolved histories. No new substantive defect was confirmed in
+these twelve pages; external source authority was not newly inspected.
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Retain pages289–300 as author-read | Actual ordered images and page-specific judgments |279 source hashes,831 page texts, continuity and12 renders pass |531 unread main pages and separate review layers | Continue301 | Independent or human acceptance |
+| Retain local calculations |144 exact checks and explicit premises | No local arithmetic veto | Source applicability, actual contracts, later contradictions | Continue source and whole-document work | General simulator or accounting correctness |
+
+Post-run red team: individually coherent note examples may not join into one
+actual company history. The manuscript itself preserves this limit. A later
+contradiction, changed source or unsupported premise would reopen the affected
+judgment. Frozen manuscripts and release statuses remain unchanged.
 
 ## Continuation through288 — 28 October2026
 

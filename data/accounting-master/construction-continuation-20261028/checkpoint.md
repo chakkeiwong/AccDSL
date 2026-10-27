@@ -1,5 +1,19 @@
 # Construction continuation checkpoint
 
+## Ordered main reading through300 — 28 October2026
+
+Twelve further rendered pages289–300 are read in order with144 exact local
+arithmetic checks. Annual/interim statement joins, deferred-revenue histories,
+commitments, liquidity restrictions, customer overlap and segment allocation
+retain their unresolved contracts and dates. Sources279, page texts831 and
+entry/exit continuity verify. Result: company-state-ordered-review-20261028/result.md
+under data/accounting-master. Resume physical301;531 main pages remain.
+
+This is author reading only. Node/equation, simulation, successor-delta and
+independent/human review remain incomplete. S06 is in_progress; original task
+criteria and releases are unchanged. E3 remains deferred. Continue ready work.
+
+
 ## Financing survey and plan repair — 28 October 2026
 
 S06 is now in_progress. Its stale request to repeat section3.6/Maliar work
