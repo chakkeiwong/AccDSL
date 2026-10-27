@@ -1,0 +1,179 @@
+{
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "CompanyNativeRequest/1"
+    },
+    "capability": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "operation": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "implementation_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "payload_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "byte_length": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "sha256",
+          "byte_length"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "population": {
+      "type": "object",
+      "properties": {
+        "scope": {
+          "const": "supplied_native_input"
+        },
+        "actual_company_coverage": {
+          "const": "unknown"
+        }
+      },
+      "required": [
+        "scope",
+        "actual_company_coverage"
+      ],
+      "additionalProperties": false
+    },
+    "information": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "use": {
+              "const": "audit_only"
+            },
+            "view": {
+              "const": "archival_exogenous_stress"
+            }
+          },
+          "required": [
+            "use",
+            "view"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "use": {
+              "enum": [
+                "actor_observation",
+                "actor_action"
+              ]
+            },
+            "actor_id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "economic_time": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "decision_cutoff": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "system_cutoff": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "observation_or_action": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "receipt_evidence_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "authority_evidence_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          },
+          "required": [
+            "use",
+            "actor_id",
+            "economic_time",
+            "decision_cutoff",
+            "system_cutoff",
+            "observation_or_action",
+            "receipt_evidence_refs",
+            "authority_evidence_refs"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "joins": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S"
+      }
+    }
+  },
+  "required": [
+    "profile",
+    "capability",
+    "operation",
+    "implementation_sha256",
+    "payload",
+    "payload_sha256",
+    "resources",
+    "population",
+    "information",
+    "joins"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

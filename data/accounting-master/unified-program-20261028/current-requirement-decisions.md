@@ -49,3 +49,7 @@ The REA2006 primary reading supports source-anchored distinctions and updates
 the six ledgers (MC29/30 included). These supplements do not replace original
 acceptance decisions. Common owners, commitments, actual authority and actor
 access remain open; T01/S01/C04 statuses are unchanged.
+
+## T01 definition review, 28 October 2026
+
+T01 completes its original definition criterion under the internal review in data/accounting-master/construction-continuation-20261028/t01-definition-review.md. Common owner/request/actor definitions and304 checks add scoped evidence for MC08/09/10/13/18/19/20/24/25/28/32. The full extended-REA reading adds S01 evidence with critic/version limitations. No original requirement, closure package or release acceptance is changed; actual source and sector obligations remain.

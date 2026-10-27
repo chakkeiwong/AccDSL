@@ -1,5 +1,34 @@
 # Accounting master checkpoint
 
+## Common native request and T01 definition review — 28 October 2026
+
+T01 is complete against its unchanged definition criterion: economic/contract
+state, accounting memory, parameters, actor information, histories, changing
+populations, refusal dependencies and historical queries are now explicitly
+distinguished and traced to their native owners. Internal review is recorded
+in construction-continuation-20261028/t01-definition-review.md under
+data/accounting-master. This does not complete the DSL or its general constructor.
+
+CompanyNativeRequest/1 passes304 checks over39 cases for three fixed audit
+capabilities, preserving entire native results, partial/unknown histories and
+seven interim PAA reports. The27-profile owner review preserves16 existing
+compatibility edges. Actor requirements are typed and linked to the existing
+bank information contracts; actual actor requests remain unsupported by this
+caller. Result: data/accounting-master/company-state-common-request-20261028/result.md.
+
+The19-page extended-REA author manuscript is fully read, with commitment/event
+distinctions and all six survey ledgers updated. Published-version equivalence
+and Lampe's discussion remain open; the latter has retained access failures.
+No source critic's position is inferred from metadata.
+
+Next: individual original failure cases, connected survey competitors and
+ordered manuscript reading; continue actual-source/actor admission separately.
+T04/T05/T07 retain their incomplete survey prerequisites. All40 task criteria
+and edges,114 acceptance rows,156 clauses,18 packages and201 failure rows remain.
+Only T01 task status advances. S1–S5 remain partial, S6 held, E3 deferred;
+selected5.55-R1 and unselected5.56-D1 remain not_ready.
+
+
 ## Typed native state/history request — 28 October 2026
 
 The single-owner CompanyStateInspectionRequest/1 passes102 checks across12
