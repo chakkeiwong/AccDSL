@@ -1,5 +1,22 @@
 # Current AccDSL master program
 
+## Guarantee omission and unpaid-contract review — 28 October2026
+
+The unchanged SectorCompany/1 reference passes244 checks across46 cases.
+Missing guarantee fields never become zero, but native null ECL/service
+inputs remain unsupported. A separate pinned input inspector passes313
+checks across35 cases, retaining omitted/null pointers and full native
+outcomes; source refusal takes precedence. A known never-paid guarantee
+remains a liability. Hidden-contract family expansion remains unimplemented.
+Result: data/accounting-master/company-state-guarantee-failures-20261028/result.md.
+
+Twelve original failure rows are individually reviewed;189 remain outside
+this pass. Original records, statuses and all40 task criteria are unchanged.
+Ordered main reading is288/831; resume289. T01 is definition-complete;
+C04/R04 remain in_progress, release not_ready and empirical E3 deferred.
+Continue ready failure, source/survey and manuscript work. No global veto.
+
+
 ## Ordered manuscript review through288 — 28 October2026
 
 Actual rendered reading advances from276 to288/831 on the retained5.52-R2

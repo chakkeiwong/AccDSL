@@ -1,13 +1,14 @@
 # Current original failure dispositions
 
-28 October2026. Eleven individually inspected rows;190 remain outside this continuation. Original statuses and all201 records are unchanged.
+28 October2026. Twelve original rows reviewed;189 outside this continuation. All201 original rows/statuses remain unchanged. Counts are coverage, not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
-| SIM-F004 | Unknown control transfer and useful life are retained as unresolved; no missing-guarantee case was executed in this continuation. | Execute the original omitted guarantee field through an applicable guarantee method, preserving the unresolved amount and structural omission. |
+| SIM-F004 | Exact omitted guarantee fields refuse without zero imputation. The separate inspector preserves omitted/null pointers and entire native outcomes; explicit zero stays known. Native null ECL/service inputs remain unsupported. | Connect disclosed unknowns to a declared reconstruction family; the finite inspector neither admits sources nor constructs unknown contracts. |
 | SIM-F005 | Both fixed/floating endpoints and an interior mixture satisfy principal100 and historical interest5; the continuous native family remains explicit. | Continue actual-contract/source admission and complete financial history execution separately; three witness points do not exhaust the family. |
 | SIM-F007 | Interest7 and cash90 each occur marginally but are jointly infeasible; the complete declared family satisfies cash+interest=95. | Extend only with explicit extra flows or changed templates; this scoped debt relation cannot stand in for whole-company cash. |
 | SIM-F009 | The same feasible family under zero max_cells returns PartialSearch/Unknown with the full unvisited formula, never infeasible. | Inspect other resource/timeout/backend cases separately; no wall-clock timeout was induced. |
+| SIM-F010 | A disclosed external guarantee with no settlement cash retains opening6 and liabilities7/3. This does not test adding a hidden guarantee to an admissible history family. | Execute the original hidden-contract alternative within a declared company family and retain structural completeness limits. |
 | SIM-F014 | Repeated pre-reset interest5 equalities retain fixed, floating and interior feasible mixtures; no posterior is assigned. | New rate-reset observations and probability updates need their own declared source and likelihood assumptions. |
 | SIM-F019 | The policy probe preserves its exact parent, first-year history and every non-target input. It is a deterministic paired-path comparison, not a study across heterogeneous worlds. | Pair the same policies across each retained joint history using one declared information set; preserve the full conditional outcome table. |
 | SIM-F043 | The exact Machine20 case now executes: identical first-close reports and carrying value20, then next charges10 and20 under supplied lives2 and1. All native years complete. | Retain this native annual-method evidence; broader asset methods, industry applicability and package acceptance remain open. |
@@ -16,4 +17,4 @@
 | X20 | The original retained continuous-guards result explicitly checks refusal_retains_due and forgotten_payable_is_wrong. New trade over-settlement is related, not a replacement for accrued-interest preservation. | Retain the exact original accrued-payable evidence; extend to additional payment/default methods only under their own declared inputs and source support. |
 | X32 | The retained symbolic certificate refuses wrong bindings, parameter substitution and unused parameters. The new policy-parent rejection checks a related path identity, not all parameter occurrences. | Use the exact symbolic occurrence certificate for its selected profile; inspect new method declarations separately before broader composition. |
 
-SIM-F005/007/009/014 now have exact scoped solver evidence in company-state-original-debt-failures-20261028/result.md under data/accounting-master. The earlier eight-row review is preserved in that directory navigation-before. Counts do not close C04 or the broader packages.
+Latest guarantee result: data/accounting-master/company-state-guarantee-failures-20261028/result.md. The prior11-row supplement is preserved in navigation-before.json there.
