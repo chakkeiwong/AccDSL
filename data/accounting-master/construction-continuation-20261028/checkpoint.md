@@ -53,10 +53,27 @@ failure-dispositions.json/md here.193 remain outside this pass. Only SIM-F043
 has its exact original discriminator newly executed; related new tests do not
 substitute for the missing guarantee/refinancing/real-source cases.
 
-Next ready construction: extend the remaining native resource/contract
-populations, supported sector/basis memory and actor semantics. Survey: REA
-policy/commitment extensions and direct database/user evaluation competitors.
-Continue individual failure dispositions and ordered manuscript review.
+Sequencing audit found a practical loop in T01's remaining-work prose: it
+requested industry/basis implementation assigned to T05, which depends on T01.
+The ownership repair preserves every original task criterion, edge and status.
+Read docs/plans/company-state-construction-sequencing-review-20261028.md.
+
+All14 native operation kinds now have a source-reviewed dependency inventory
+and45 checks with10 additional controls in
+data/accounting-master/company-state-native-operation-coverage-20261028/attempt-02.
+The first attempt's two-day-interest expectation was wrong; its repair and
+failed result remain. This is not exhaustive per-guard conformance.
+
+The common native construction contract is now drafted and reviewed in
+docs/design/research/company-state-program-20261028/native-construction-contract-v1.md
+and common-contract-review.md here. T01 remains in_progress because its common
+typed request across exact native owners, history queries and actor requirements
+is still a definition gap. Next: specify and bind that request, preserving
+native partial outcomes, unknown populations and explicit unsupported joins.
+Industry/basis implementation remains
+T05; actual source/actor identity remains T03/C01. Survey: REA policy/commitment
+extensions and direct database/user evaluation competitors. Continue individual
+failure dispositions and ordered manuscript review.
 One-shot refresh_relationships.py and refresh_cohorts.py also have backup
 directories; do not rerun them. New outputs require new attempt directories.
 
@@ -65,3 +82,7 @@ partial, S6 held and empirical E3 deferred. Selected 5.55-R1 remains not_ready;
 5.56-D1 remains unselected/not_ready. Do not rerun their one-shot builders or
 the construction refresh_program.py, whose backup directory already exists.
 No global continuation veto has fired.
+
+Commits6404f0eb and5d275970 are pushed to origin/main. They preserve new
+claim/cohort/admission units and the refreshed master/direct evidence references.
+Other pre-existing working-tree changes remain; no blanket staging was used.

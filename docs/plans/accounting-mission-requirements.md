@@ -1,5 +1,24 @@
 # AccDSL mission requirements and acceptance evidence
 
+## Common construction contract and sequencing repair — 28 October 2026
+
+All14 native company-operation kinds now have a source-reviewed dependency
+inventory;45 checks and10 new guard controls pass. The first interest probe
+was corrected for its two-day accrual and retained. The common implementer
+draft is native-construction-contract-v1.md under
+docs/design/research/company-state-program-20261028/.
+
+The program review repairs a practical loop in T01's remaining-work prose:
+sector/basis implementation belongs to dependent T05, and actual source/actor
+admission to T03/C01. Every original criterion, dependency and status remains.
+T01 stays in_progress: its next deliverable is a typed common request bound
+to exact native owners, historical queries and actor requirements, with
+unsupported joins and unknown population scope preserved.
+
+Current review: data/accounting-master/construction-continuation-20261028/common-contract-review.md.
+The full checkpoint is checkpoint.md in that directory. S1-S5 remain partial,
+S6 held, E3 deferred; both selected/provisional release statuses are unchanged.
+
 ## Unresolved opening admission repaired — 28 October 2026
 
 The guarded population entrypoint passes 114 checks, preserving native unknown

@@ -1,0 +1,432 @@
+{
+  "profile": "NativeCompanyOperationDependencyInventory/1",
+  "scope": "Source-inspected CompanyOperationsDraft/1 and its current native annual path only",
+  "operations": [
+    {
+      "kind": "purchase",
+      "reads": [
+        "payload.units",
+        "payload.claim_id",
+        "inventory.unit_cost",
+        "inventory_units",
+        "claims"
+      ],
+      "guards": [
+        "fresh_claim_id",
+        "nonnegative_units"
+      ],
+      "accounts_written": [
+        "inventory",
+        "payables"
+      ],
+      "memory_or_reports_written": [
+        "inventory_units",
+        "claims"
+      ],
+      "unresolved_scope": [
+        "actual_goods_title",
+        "supplier_identity"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "delivery",
+      "reads": [
+        "payload.units",
+        "payload.unit_price",
+        "payload.control_transferred",
+        "payload.claim_id",
+        "inventory.unit_cost",
+        "inventory_units",
+        "claims"
+      ],
+      "guards": [
+        "fresh_claim_id",
+        "control_transferred",
+        "inventory_sufficient"
+      ],
+      "accounts_written": [
+        "receivables",
+        "revenue",
+        "cost_of_sales",
+        "inventory"
+      ],
+      "memory_or_reports_written": [
+        "inventory_units",
+        "claims"
+      ],
+      "unresolved_scope": [
+        "legal_control_evidence",
+        "customer_identity"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "supplier_payment",
+      "reads": [
+        "payload.allocations",
+        "claims.ledger",
+        "claims.outstanding",
+        "cash"
+      ],
+      "guards": [
+        "no_duplicate_allocation",
+        "recognised_claim",
+        "correct_ledger",
+        "no_over_settlement",
+        "cash_available"
+      ],
+      "accounts_written": [
+        "payables",
+        "cash"
+      ],
+      "memory_or_reports_written": [
+        "claims.settled",
+        "claims.outstanding",
+        "operating_flows"
+      ],
+      "unresolved_scope": [
+        "payment_authority",
+        "bank_finality"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "collection",
+      "reads": [
+        "payload.allocations",
+        "claims.ledger",
+        "claims.outstanding"
+      ],
+      "guards": [
+        "no_duplicate_allocation",
+        "recognised_claim",
+        "correct_ledger",
+        "no_over_settlement"
+      ],
+      "accounts_written": [
+        "cash",
+        "receivables"
+      ],
+      "memory_or_reports_written": [
+        "claims.settled",
+        "claims.outstanding",
+        "operating_flows"
+      ],
+      "unresolved_scope": [
+        "actual_receipt",
+        "counterparty"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "facility_draw",
+      "reads": [
+        "loan.principal",
+        "facility.id",
+        "facility.limit",
+        "facility.reserved",
+        "facility.eligible",
+        "facility_drawn"
+      ],
+      "guards": [
+        "known_eligible",
+        "principal_within_headroom"
+      ],
+      "accounts_written": [
+        "cash",
+        "debt"
+      ],
+      "memory_or_reports_written": [
+        "facility_drawn",
+        "financing_flows"
+      ],
+      "unresolved_scope": [
+        "actual_facility_right",
+        "lender_funding"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "facility_interest",
+      "reads": [
+        "loan.principal",
+        "loan.annual_rate",
+        "loan.day_count",
+        "loan.interest_cash_class",
+        "facility_draw.at",
+        "facility_repayment.at",
+        "cash"
+      ],
+      "guards": [
+        "bridge_dates",
+        "cash_available"
+      ],
+      "accounts_written": [
+        "interest",
+        "cash"
+      ],
+      "memory_or_reports_written": [
+        "operating_flows"
+      ],
+      "unresolved_scope": [
+        "fees",
+        "variable_coupon_terms"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "facility_repayment",
+      "reads": [
+        "loan.principal",
+        "facility_drawn",
+        "cash"
+      ],
+      "guards": [
+        "no_undrawn_repayment",
+        "cash_available"
+      ],
+      "accounts_written": [
+        "debt",
+        "cash"
+      ],
+      "memory_or_reports_written": [
+        "facility_drawn",
+        "financing_flows"
+      ],
+      "unresolved_scope": [
+        "prepayment_terms",
+        "redraw_rights"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "payroll",
+      "reads": [
+        "payload.amount",
+        "cash"
+      ],
+      "guards": [
+        "nonnegative_amount",
+        "cash_available"
+      ],
+      "accounts_written": [
+        "payroll",
+        "cash"
+      ],
+      "memory_or_reports_written": [
+        "operating_flows"
+      ],
+      "unresolved_scope": [
+        "employee_population",
+        "payroll_accruals"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "plant_addition",
+      "reads": [
+        "payload.asset_id",
+        "payload.cost",
+        "payload.life",
+        "payload.in_service",
+        "operation.at",
+        "period",
+        "assets",
+        "cash"
+      ],
+      "guards": [
+        "fresh_asset_id",
+        "positive_life",
+        "service_not_before_acquisition",
+        "supported_service_timing",
+        "cash_available"
+      ],
+      "accounts_written": [
+        "plant_cost",
+        "cash"
+      ],
+      "memory_or_reports_written": [
+        "assets",
+        "investing_flows",
+        "plant_additions"
+      ],
+      "unresolved_scope": [
+        "legal_title",
+        "location",
+        "disposal_rules"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "depreciation",
+      "reads": [
+        "assets.cost",
+        "assets.life",
+        "assets.accumulated",
+        "assets.in_service",
+        "period.start",
+        "depreciation_method"
+      ],
+      "guards": [
+        "service_eligibility",
+        "remaining_cost_cap"
+      ],
+      "accounts_written": [
+        "depreciation",
+        "accum_depreciation"
+      ],
+      "memory_or_reports_written": [
+        "assets.accumulated"
+      ],
+      "unresolved_scope": [
+        "impairment",
+        "residual_values",
+        "midyear_proration"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "interest",
+      "reads": [
+        "debt.principal",
+        "debt.fixed_rate",
+        "debt.floating_rate",
+        "debt.floating_share",
+        "debt.coupon_years",
+        "cash"
+      ],
+      "guards": [
+        "annual_coupon_only",
+        "share_domain",
+        "cash_available"
+      ],
+      "accounts_written": [
+        "interest",
+        "cash"
+      ],
+      "memory_or_reports_written": [
+        "operating_flows"
+      ],
+      "unresolved_scope": [
+        "term_structure",
+        "reset_calendar",
+        "covenants"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "tax",
+      "reads": [
+        "revenue",
+        "temporary_expense_accounts",
+        "tax.rate",
+        "tax.method",
+        "cash"
+      ],
+      "guards": [
+        "nonnegative_pretax_income",
+        "tax_rate_domain",
+        "cash_available"
+      ],
+      "accounts_written": [
+        "tax",
+        "cash"
+      ],
+      "memory_or_reports_written": [
+        "operating_flows"
+      ],
+      "unresolved_scope": [
+        "loss_carryforwards",
+        "tax_basis_differences",
+        "deferred_tax"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "dividend",
+      "reads": [
+        "payload.amount",
+        "cash",
+        "retained"
+      ],
+      "guards": [
+        "nonnegative_amount",
+        "cash_available"
+      ],
+      "accounts_written": [
+        "retained",
+        "cash"
+      ],
+      "memory_or_reports_written": [
+        "dividends",
+        "financing_flows"
+      ],
+      "unresolved_scope": [
+        "legal_distributability",
+        "board_authority",
+        "shareholder_rights"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    },
+    {
+      "kind": "close",
+      "reads": [
+        "all_temporary_accounts",
+        "retained",
+        "opening_balances",
+        "flows",
+        "dividends"
+      ],
+      "guards": [
+        "final_operation",
+        "balance_identity",
+        "indirect_cfo_identity",
+        "equity_bridge"
+      ],
+      "accounts_written": [
+        "all_temporary_accounts",
+        "retained"
+      ],
+      "memory_or_reports_written": [
+        "income",
+        "profit",
+        "annual_report",
+        "closing_memory"
+      ],
+      "unresolved_scope": [
+        "regulatory_reporting",
+        "historical_source_admission"
+      ],
+      "inspection": "native source reviewed; scoped exact controls separately listed"
+    }
+  ],
+  "global_requirements": [
+    "closed schema, canonical nonnegative rational inputs and source/opening/context identities",
+    "full calendar year, chronological operations, single-operation cardinality and annual-tail dates",
+    "opening ledger balance, homogeneous inventory cost, claim totals and asset totals",
+    "debt/facility controls and supported method constants",
+    "nonnegative intermediate cash, balanced journal and claim/asset control totals after each applied event"
+  ],
+  "reporting_dependencies": [
+    "opening balances",
+    "annual income accumulated before close",
+    "classified cash flows",
+    "all dated journals",
+    "closing balances"
+  ],
+  "carry_dependencies": [
+    "consecutive periods",
+    "facility identity",
+    "complete prior run",
+    "claim lifetime carry",
+    "asset service/life/accumulation",
+    "conditional origin chain"
+  ],
+  "limitations": [
+    "guard inventory is source-reviewed, not a generic static extractor",
+    "not every guard is independently exercised in this continuation",
+    "no actual source, actor, legal or standards admission",
+    "other profiles and sectors remain separate responsibilities"
+  ]
+}
