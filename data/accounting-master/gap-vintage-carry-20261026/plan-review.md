@@ -1,0 +1,1 @@
+The plan docs/plans/accounting-gap-refresh-20261026.md remains applicable. This successor preserves its22 deltas and16 challenges, adding only three inspected result deltas and the semantic-duplicate counterexample. Whole requirements remain open; no independent all-row revalidation is inferred. The current two-date financing plan is retained as the next active work.

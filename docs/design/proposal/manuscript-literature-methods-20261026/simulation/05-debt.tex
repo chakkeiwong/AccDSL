@@ -1,0 +1,141 @@
+\chapter[Debt contracts and financing]{Debt is a dated contract, not a balancing amount}
+\label{sim:debt}
+
+Debt issuance joins a cash transaction today to promises about future payments and creditor rights. A journal can record proceeds and a liability without describing those promises. A structural model can describe the promises without supplying the accounting measurement. Scenario simulation needs both, together with a financing policy and a model of whether counterparties accept the proposed issue. Confusing these layers can make a company appear liquid while its funding equation is economically inconsistent.
+
+\section{Five amounts that should not share one symbol}
+For a debt instrument distinguish face or promised payment $F$, gross proceeds $P$, net cash received $P-f$ after issuance costs $f$, accounting carrying amount $B$, and market value $V_D$. They may coincide in a simple par loan at inception. They need not coincide for discounted debt, transaction costs, accrued interest, modifications or subsequent market changes.
+
+The gross contractual promise is relevant to redemption. Net cash is relevant to liquidity. Carrying amount is relevant to the balance sheet under the selected basis. Market value is relevant to valuation or repurchase. A debt-to-equity covenant may use yet another defined measure. Reusing one variable called debt for all of these quantities creates errors that can remain hidden in a par, no-fee example.
+
+A debt record also needs currency, lender, borrower, issue and settlement dates, maturity, coupon or reset rule, day count, amortization, seniority, collateral, covenants, options and modification rights. Unknown terms remain unknown. A model can support a bounded profile without implementing every clause, but its unsupported terms must not silently default to benign values.
+
+\section{The one-period pricing equation}
+Consider a loan issued at date zero and settled at date one. Let $D$ be the date-one default indicator. If there is no default, the lender receives promised amount $F$. If default occurs, the lender receives actual recovery $R$, measured in date-one currency units. Let $r$ be a risk-free one-period rate. Under the illustrative assumption that discounting the expected payoff at $r$ is appropriate, lender break-even is
+\begin{equation}
+ P(1+r)=\mathbb E[(1-D)F+DR].
+ \label{sim:debt-pricing}
+\end{equation}
+This equation is a pricing assumption for the example. Under physical probabilities, discounting at a risk-free rate requires an appropriate risk-neutrality or pricing justification. More generally, with stochastic discount factor $M$,
+\begin{equation}
+ P=\mathbb E[M((1-D)F+DR)].
+ \label{sim:sdf-pricing}
+\end{equation}
+An explicitly justified pricing measure can provide an equivalent formulation. A real-world default probability is not automatically a risk-neutral probability.
+
+Define the promised yield $y$ by $F=P(1+y)$ for positive proceeds and a single final payment. Then
+\begin{equation}
+ P=\frac{F}{1+y}.
+ \label{sim:proceeds-face}
+\end{equation}
+The yield is a ratio of the promised repayment to the price, not the realized return in default. With coupons or multiple dates, a yield-to-maturity equation replaces this simple relation and may have additional conventions. The cash schedule remains the primitive description.
+
+\section{The convention problem in the supplied note}
+The user-supplied lecture note by Chak Wong adapts the risky-debt model of \citet[Section 3.6]{strebulaev2012} to residual-based deep learning \citep{user2026riskynote}. It correctly recognizes that equity value, default and debt pricing interact. Its inherited debt convention requires repair before implementation.
+
+The retained December 2012 source's equation (3.26) raises $b'/(1+\widetilde r)$ at issuance and carries $b'$ into the next period's inherited debt. That use makes $b'$ a promised repayment. Equation (3.27), however, equates $b'(1+r)$ to an expected payoff whose nondefault leg is $b'(1+\widetilde r)$. That use makes $b'$ cash advanced. Both printed equations were inspected in the retained primary source; the mismatch is not merely a transcription error in the supplied note. The publisher's current correction status has not been cleared.
+
+The consistent face-value convention uses $F$ for the next promised payment and $P$ for issuance cash, as in equations \eqref{sim:debt-pricing}--\eqref{sim:proceeds-face}. Substituting gives
+\begin{equation}
+ \frac{F(1+r)}{1+y}=\mathbb E[(1-D)F+DR].
+ \label{sim:face-price}
+\end{equation}
+Multiplying by $1+y$ yields
+\begin{equation}
+ F(1+r)=(1+y)\mathbb E[(1-D)F+DR].
+\end{equation}
+The multiplier applies to recovery as well as to the nondefault payoff. Omitting it on recovery changes the equation when recovery is positive. Alternatively one can formulate the entire model in proceeds units, but then future liability state, repayment and recovery arguments must change consistently. Renaming one symbol in the pricing equation is insufficient.
+
+\section{An exact positive-recovery diagnostic}
+Hold face at 100, default probability at 0.1, recovery at 40 and the risk-free rate at 0.05. These are synthetic inputs chosen to expose the convention. The expected payoff is
+\begin{equation}
+ 0.9(100)+0.1(40)=94.
+\end{equation}
+Thus
+\begin{align}
+ P&=\frac{94}{1.05}=\frac{1880}{21}\approx89.52381,\\
+ y&=\frac{100}{P}-1=\frac{11}{94}\approx0.1170213.
+\end{align}
+The promised yield exceeds the risk-free rate because the lender does not always receive the promise. The expected payoff discounted at five per cent exactly equals the proceeds by construction.
+
+Under the conflicting printed convention, solving $105=0.9(100)(1+y)+0.1(40)$ gives $y=11/90$. Its implied proceeds are $9000/101$. Applying the actual payoff 94 to those proceeds leaves
+\begin{equation}
+ 94-1.05\left(\frac{9000}{101}\right)=\frac{44}{101}\approx0.43564.
+\end{equation}
+This is a lender break-even residual measured in date-one cash. It is not a rounding error. Zero recovery or no default can conceal the mismatch, so a no-default smoke test is inadequate. Positive recovery is the discriminating case.
+
+\section{Recovery needs its own definition}
+Recovery can mean a fraction of face, a fraction of market value before default, a share of realized collateral, or a cash distribution after costs and delays. These meanings are not interchangeable. If recovery is $R=\rho F$, the one-period expected payoff is $F[1-p+p\rho]$ when default probability is $p$. If $R$ is an absolute asset distribution, scaling face does not generally scale recovery.
+
+For delayed recovery at date two, discounting it as a date-one payment is wrong. A stochastic discount-factor formulation must use the payment's actual date. Recovery uncertainty can be correlated with default and aggregate conditions; replacing it by an unconditional mean can misprice the claim.
+
+Multiple creditors require an allocation rule. Suppose distributable assets after costs are 70, senior claims are 60 and junior claims are 50. Under an assumed strict priority waterfall without other rights, senior recovery is 60 and junior recovery 10. Paying both creditors 70 per cent would distribute 77 and violate the available asset constraint. The example illustrates conservation and priority, not a legal conclusion for a particular jurisdiction. Actual enforceability, security and restructuring rules need admitted authority.
+
+\section{Default is a transition, not deletion}
+An inability or decision not to pay can lead to arrears, cure periods, waiver, acceleration, restructuring, enforcement or liquidation. The contract and legal process determine which transitions are available. A simulator that sets debt and equity to zero at a default flag loses unpaid claims, assets, recovery timing and operating consequences.
+
+A useful state includes scheduled obligation, amount paid, arrears, default status, acceleration status and recovery process. A missed payment can create an arrears balance even if operations continue. A covenant breach can restrict dividends without immediate acceleration. A waiver can restore eligibility subject to fees and revised terms.
+
+Limited liability concerns shareholders' obligations and the value of their claim under the model. It does not require book equity to remain nonnegative. Negative book equity, negative market equity before applying limited liability, cash shortage and legal default are different concepts. Their relationships must be modeled rather than inferred from a single sign test.
+
+\section{Refinancing creates a new problem}
+A maturing debt of 100 cannot be repaid by writing a new debt balance of 100 unless a financing transaction supplies the cash in time. Suppose new face 100 sells for 90 and issuance fees are 2. Net proceeds are 88, leaving a shortfall of 12 before considering cash reserves. Treating face as cash hides that shortfall.
+
+If the company requires net proceeds of 100 and the price is 0.9 per unit face with a fee of 2, required face is $(100+2)/0.9=113.333\ldots$. Increasing face may itself worsen price or violate capacity. The funding calculation is then coupled to the pricing and eligibility problem.
+
+A committed facility may provide capacity but still have draw conditions, currency limits, borrowing-base constraints or expiry dates. An uncommitted facility is not guaranteed funding. A refinancing policy should distinguish request, offer, acceptance and settlement. Failure at any stage leaves a residual funding need and possible distress transitions.
+
+\section{Cash, debt and net debt}
+Some structural models use a signed debt variable, with negative debt interpreted as cash. This is economical in a stylized model, but cannot automatically represent a company with cash and debt simultaneously. Restricted cash may not repay a particular obligation. Cash in one subsidiary or currency may not be available to another. Gross debt can affect covenants and refinancing even when net debt is small.
+
+Consider cash 100 and debt 100. Net debt is zero. If cash is unrestricted in the borrowing entity and repayment is allowed without cost, netting may be adequate for a particular valuation question. If cash is pledged to another creditor or held in a subsidiary subject to transfer restrictions, netting destroys liquidity information. The same net balance describes different payment capacity.
+
+AccDSL should therefore preserve gross instruments and cash accounts in the general representation. A net-debt reduction is a query-specific abstraction requiring explicit conditions. It should not become the universal state merely because a numerical paper uses it successfully in a simpler economic model.
+
+\section{Coupons, accrual and effective interest}
+Contractual coupon determines a payment schedule. Accounting interest expense can differ because of discount, premium, fees or measurement rules. For a simple illustrative amortized-cost schedule with effective rate $i$, carrying amount evolves as
+\begin{equation}
+ B_{t+1}=B_t+iB_t-\text{cash coupon}_{t+1}-\text{principal paid}_{t+1},
+\end{equation}
+subject to the selected accounting treatment and any additional events. The effective-interest term is not automatically a cash payment.
+
+Suppose a zero-coupon promise of 100 is issued for 90 for one year. With no fees, an effective rate $100/90-1$ accretes carrying amount from 90 to 100. Cash is received at issuance and paid at maturity. Charging 10 as both accretion and a coupon payment would double count the financing cost.
+
+Conversely, a floating coupon can reset while an accounting measurement follows its own applicable rules. A simulation should generate contractual cash first from terms, then calculate accounting consequences under an admitted basis. A generic rate shock on interest expense cannot substitute for these two mechanisms in every instrument.
+
+\section{Issuance costs and tax timing}
+A fee can be paid to an intermediary at issuance, deducted from proceeds, financed separately or incurred conditionally. Its cash timing should be explicit. The accounting allocation between expense and carrying amount depends on the applicable standard and facts. A model cannot infer that allocation merely from the fact that cash was paid.
+
+The retained structural source and supplied lecture include a simplifying treatment that credits the present value of a future interest tax benefit at issuance. That can be part of an economic valuation convention. It must not be posted as an actual contemporaneous tax receipt without a separate tax mechanism. A present value is not a cash settlement.
+
+Tax losses, deduction limits, jurisdiction, timing and the availability of taxable income can all affect realization. A scenario that assumes every interest expense produces immediate cash tax savings may overstate liquidity in distress. The proposed design keeps tax cash payments, tax expense, deferred tax and economic tax-benefit valuation separate, then links them under explicit rules.
+
+\section{Options and amendments}
+A callable bond gives the issuer an exercise right; a puttable bond gives a holder a right. Their exercise can depend on rates, liquidity, transaction costs and information. Replacing the schedule with the contractual final maturity ignores these options. Exercising automatically whenever it appears favorable assumes a policy and ignores possible constraints.
+
+An amendment can change coupon, maturity, collateral or covenants. It needs an effective date, consent requirements, fees and accounting treatment. A revised schedule should supersede future obligations consistently while retaining the original agreement and past payments. Applying both old and new coupons after amendment creates duplicate obligations; erasing the old contract destroys provenance.
+
+Where a clause is unknown, the family can contain alternative exercise rights or amendment paths. Those alternatives should be activated only by their premises. A model should not give the borrower an option that belongs to the lender, nor assume the lender consents to a concession because it improves borrower liquidity.
+
+\section{Pricing and policy interact}
+A debt price can depend on future investment, payouts and refinancing because these affect repayment. The issuer's policy can depend on the price offered. Solving the two separately while holding inconsistent policies fixed can produce a price that is correct for a different company behavior.
+
+The structural-finance survey \citet[Sections 3.4--3.6]{strebulaev2012} is useful for this interaction. The newer working paper \citet[Sections 2.1.3--2.1.5 and 3]{duarte2026} also solves bond pricing and equity value jointly under its own timing, recovery and tax assumptions. Those assumptions differ from the lecture's model; it is not a drop-in correction.
+
+A general AccDSL financing service can accept a declared price or offer as an input. That supports conditional simulation without claiming equilibrium. An optional equilibrium service may solve pricing and policy together, with separate numerical evidence. The interface should identify which service supplied the offer and what assumptions support it.
+
+\section{Credit supply and rationing}
+A fair price does not imply an unlimited quantity is available. Lenders can face capital, liquidity, concentration or mandate constraints. A borrower may be unable to issue enough securities at any admissible terms. A model that solves only lender break-even can miss rationing.
+
+Bank stress and balance-sheet models such as \citet{halaj2016,behn2019} provide examples where financing and adjustment depend on constraints. Their institutional settings should not be transferred mechanically to a corporate issuer. The general lesson is that a financing transaction needs a counterparty and feasible quantity, not only an interest rate.
+
+An offer curve can therefore specify price, maximum quantity, conditions and expiry. A policy chooses among feasible offers or records no acceptable offer. If the curve is uncertain, results remain conditional on alternative credit-supply assumptions. A scenario can deliberately freeze refinancing, but that restriction should be visible as a stress premise.
+
+\input{simulation/lit-05-debt-12}
+
+\section{Implementation proposal}
+The debt module should maintain immutable contract versions, a dated obligation schedule, current economic state and separate accounting measurements. Events include issue, draw, reset, accrue, coupon, amortize, redeem, amend, breach, cure, accelerate, restructure and recover. Each event has preconditions, amounts, dates and successor state.
+
+Existing repository methods already cover bounded issue, accrual, coupon, redemption and conversion calculations, and newer declared methods preserve timing and debt memory. They are useful foundations. They do not by themselves establish a general pricing model, market capacity, legal default process or complete instrument admission. The extension should compose with their checked boundaries rather than describe those capabilities as absent.
+
+The smallest discriminating financing fixture should include proceeds different from face, positive recovery, a fee paid at issuance, a maturity shortfall and an unavailable refinancing offer. A second fixture should add two creditors with priority and delayed recovery. A third should test unknown rate terms and a covenant boundary. Passing these checks establishes the specified mechanics; empirical pricing validity and legal applicability require separate evidence.

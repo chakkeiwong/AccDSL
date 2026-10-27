@@ -1,0 +1,52 @@
+
+
+\subsection*{Resume the annual book from its last committed operation}
+
+A saved balance sheet is not enough to restart this simulation.  After the
+first inventory sale, the remaining unit still carries its acquisition identity,
+while each tax payable belongs to an assessment and retains any settlements.
+The next operation must also be known: repeating the sale would change both
+stock and cash even if the repeated journal balanced.  The optional
+\texttt{Annual\allowbreak{}Inventory\allowbreak{}Store/1} therefore preserves the
+complete annual request, the full period book and the ordered operation history.
+
+The local store records the evaluated opening before attempting annual
+operations.  Each later transaction records one attempted operation together
+with its complete result and its position in the original request.  A successful
+sale advances both the attempt position and the successful transaction history.
+A refused sale advances the attempt position but leaves the last valid financial
+state unchanged.  The refusal and all remaining operations stay visible, and
+that immutable request stops.  Repairing its assumptions creates a different
+request rather than rewriting the recorded history.
+
+An explicit operation budget permits work to pause between transactions.
+While operations remain unattempted, the stored result says that it is paused;
+it does not turn a valid partial-year statement into a completed run.  A caller
+can also supply the position it expected before a batch.  If that batch has
+already committed, a retry returns the checked current result without applying
+another sale.  If the caller expects a position that has not been reached, the
+store rejects the request.
+
+In the running example, the first sale leaves cash of 467, one recovered unit
+costing 10, and the carried tax payable of \(41/4\).  Closing and reopening the
+store retains all 26 accounts and their associated histories.  Continuing through
+the declared tax assessment and period carry preserves the residual unit; its
+sale in the following year gives cash of 482 and a payable of \(49/4\), exactly
+as uninterrupted execution does.  The complete statements and refused prefixes,
+not merely these selected balances, are compared in the reference checks.
+
+Reopening checks the saved request, implementation identities, row order and
+content hashes, then recomputes each committed prefix through the same financial
+evaluator.  This catches altered balances even when a stored hash has also
+been changed.  Replayed calculation has no external financial side effects.
+A new operation uses the loaded full state directly; reopening deliberately
+pays the cost of replay to validate that state.
+
+The implementation uses one local SQLite writer and an atomic transaction for
+each operation result.  In the process-exit checks, termination before commit
+leaves the preceding result, while termination after commit retains exactly one
+new result.  A fresh process can then reopen and continue.  These checks support
+local restart behavior for this finite annual profile.  They do not establish
+hardware power-loss durability, concurrent-writer correctness, efficient scaling
+or authenticity against an attacker who controls the entire database.  Family
+scheduling, migration and broader execution profiles remain separate work.

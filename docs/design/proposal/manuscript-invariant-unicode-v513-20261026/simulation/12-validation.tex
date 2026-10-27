@@ -1,0 +1,137 @@
+\chapter[Validation and failure analysis]{Validation, adversarial cases, and the limits of a simulation}
+\label{sim:validation}
+
+A credible simulator should fail intelligibly when its premises are insufficient. It should also be tested against cases where a plausible implementation gives a confident but wrong answer. The purpose of validation is not to accumulate a large count of passing assertions. It is to distinguish errors in evidence, representation, economics, accounting, information, numerical calculation and interpretation. Each class requires a different test and a different repair.
+
+\section{What is being validated}
+There are at least three separate questions. Does the implementation compute the specified model? Is the specified model mathematically and economically coherent? Does the model usefully describe the company or decision under study? A passing unit test can answer part of the first question. It cannot answer the third by itself.
+
+For example, a simulator can correctly implement unlimited borrowing at a fixed rate. That implementation may pass every accounting reconciliation. It remains unsuitable for a claim about refinancing risk unless unlimited borrowing is an appropriate premise. Conversely, a realistic financing model can be implemented with the wrong proceeds convention. The two failures should not be blurred into a generic low accuracy score.
+
+A validation record should state the claimed target, quantity actually computed, comparison method and interpretation. If the target is a worst-case cash bound but the method reports a sampled minimum, the mismatch is explicit. The sampled result may still be useful as a witness; it should not inherit the stronger claim.
+
+\section{An extensible failure taxonomy}
+No finite catalogue can prove that every possible simulation failure has been anticipated. New contracts, standards, behaviors and software interactions can create new cases. A systematic taxonomy is nevertheless valuable because it exposes the dimensions along which failures arise and guides new tests.
+
+The taxonomy used here follows the calculation: evidence admission, historical reconstruction, economic state, actor information, scenario definition, feasible behavior, financing, accounting, aggregation, approximation and reporting. Cross-cutting dimensions include time, units, entity, dependence, precision and provenance. A failure can occupy several categories. A maturity error, for example, affects evidence, timing, financing and liquidity.
+
+Coverage should be expressed by mechanisms and boundaries, not only by scenario count. One thousand random rate paths do not test a missing conversion clause. A single carefully designed positive-recovery case can expose a proceeds-versus-face error that many no-default paths miss.
+
+\section{Evidence admission failures}
+A value can be extracted from the wrong row, assigned the wrong sign, scaled by the wrong unit or associated with the wrong period. A note can be omitted because it is a scanned image. A cross-reference can point to an incorporated document outside the downloaded filing. An amended filing can be mistaken for the original.
+
+Tests should include duplicate labels with different contexts, negative values in parentheses, mixed currencies, overlapping periods and rounded totals. The expected result should preserve uncertainty where the source is ambiguous. A parser that always returns a number may look complete while inventing precision.
+
+A source coverage report should distinguish retrieved, parsed, interpreted and modeled content. These are different achievements. Retrieving every page does not establish semantic completeness. A passage that cannot be formalized should remain linked to the model as unresolved material rather than disappearing from the scope claim.
+
+\section{Reconstruction failures}
+Historical balances can reconcile while hidden gross flows are wrong. A net borrowing change can conceal large issuance and repayment. A net share change can conceal issuance and repurchase at different prices. An aggregate receivable can conceal concentration. Tests should use pairs of histories with the same observed totals and different future responses.
+
+The family should include both histories when evidence permits them. A selected witness should be labeled as selected. If a regularizer removes one, the result should identify the selection assumption and its consequences. A duplicate encoding of one history must not alter probabilities or set membership.
+
+Infeasibility tests should distinguish source contradiction from solver failure. Deliberately conflicting exact observations should produce an interpretable conflict. Deliberately difficult but feasible constraints should not be reported impossible merely because the budget expires. Unsupported instruments should remain outside the solved profile with their economic significance visible.
+
+\section{State sufficiency failures}
+A state can omit a quantity that matters later: accrued interest, remaining loss carryforward, asset age, covenant cure clock, collateral ownership, unpaid dividends or option exercise status. Current statements may still match. A multi-period replay reveals the omission.
+
+A useful test starts from two histories with equal proposed compressed state but different omitted quantities. Apply the same future policy and shocks. If outcomes differ, the compression is insufficient for that query. If observations differ and later decisions change, the information component is insufficient even when immediate cash agrees.
+
+The repair is to retain the missing state or restrict the compression's claimed domain. Adding a balancing adjustment after the divergence hides the cause. A state variable should be justified by future dependence, not by its convenience in a data schema.
+
+\section{Information failures}
+Look-ahead can enter through restated data, future prices, a sampled shock passed to a policy, or a compressed state containing private information the actor lacks. It can also enter through training labels if a purported real-time decision uses features calculated from the full future path.
+
+A nonanticipativity test changes future unobserved data while holding current information fixed and checks current actions. A publication test shifts a disclosure after the decision cutoff and checks that it no longer influences that decision. A private-information test permits an informed manager to respond to a known contract while preventing a public analyst from treating it as observed.
+
+These tests must inspect policy inputs and execution, not merely documentation. An interface can claim to hide future information while a cached feature leaks it. Provenance should connect each decision input to an information rule and availability time.
+
+\section{Scenario-definition failures}
+A shock can be applied twice, applied to the wrong rate, or applied for the wrong fraction of a year. A currency depreciation can be inverted. A rate shock can affect a fixed coupon that should not reset. A scenario can change both demand and price while being described as a pure volume shock.
+
+Metamorphic tests are useful when exact full outcomes are hard to specify. A zero shock should reproduce the baseline under unchanged policies and information. Splitting one identical contract into two proportional pieces should preserve aggregate cash when no nonlinear clause is introduced. Changing currency units consistently should scale monetary outputs without changing dimensionless decisions.
+
+These invariances have premises. Contract splitting can change fees, concentration limits or legal rights. A test should enforce invariance only where the model says it holds. Otherwise the test itself becomes an incorrect economic requirement.
+
+\section{Financing failures}
+Face can be mistaken for proceeds, net cash for gross cash, coupon for effective interest, or book debt for market value. Refinancing can be assumed available without an offer. A fee can be charged twice. Recovery can be distributed beyond available assets. A conversion can coincide with an unlinked redemption.
+
+The positive-recovery diagnostic in Chapter \ref{sim:debt} is a primary fixture because it distinguishes two conventions that agree in simpler cases. Additional tests should use discounted issuance, delayed settlement, binding capacity, failed subscription, priority and recovery delay.
+
+A no-funding result is economically meaningful only after the method has correctly evaluated the admitted offers and actions. A numerical pricing failure should be reported separately. If the model omits a financing channel, the conclusion is conditional on that omission; it is not proof that the real company has no financing option.
+
+\section{Accounting failures}
+A journal can balance while mapping borrowing to revenue, treating a valuation change as cash, or recognizing a transaction twice. A reporting aggregation can combine different perimeters or bases. A cash-flow label from an economic model can be mapped incorrectly to a standard's category.
+
+Tests need event-specific expected postings under explicitly supplied rules. They should reconcile physical quantities, cash, obligations and accounting balances. Where authority or facts are unresolved, the expected result may be a refusal or conditional treatment, not a forced entry.
+
+A standard-specific test establishes behavior under the retained authority version and admitted facts. It does not establish universal compliance across jurisdictions and dates. The rule package should preserve applicability conditions, source passages and unresolved interpretations.
+
+\section{Aggregation and dependence failures}
+Independent marginal ranges can create impossible combinations. Stagewise worst cases can switch persistent types. A mean state can cross a nonlinear threshold differently from every original state. A scenario reduction can remove the path causing a maturity shortfall.
+
+Tests should retain a full small reference family and compare exact joint paths with the compressed representation. Check outputs, observations, feasible actions and policy values, not just means. Include a case where fixed-action sequences agree but adaptive decisions differ.
+
+A failed exact aggregation test can still motivate an approximate method with bounds. It should not be repaired by weakening the test until the original claim passes. State whether the target changed and quantify the consequence for the decision.
+
+\section{Approximation failures}
+Particles can lose a persistent contract type. Importance sampling can omit support. A surrogate can extrapolate beyond training. A numerical tolerance can classify a covenant incorrectly. A Monte Carlo sample can contain no rare defaults while the true modeled probability is positive.
+
+A small exact reference provides a baseline. Coverage checks verify that rare or boundary regions are visited or bounded. Replications and uncertainty intervals assess stochastic estimates. Distinct seeds are not independent evidence if every run shares the same misspecified transition or omitted mechanism.
+
+A computational diagnostic should be assigned a role before interpretation. It may veto validity, explain behavior, trigger repair or support promotion under a declared criterion. A low loss can nominate a candidate; it does not automatically promote it to a default solver.
+
+\section{Terminal and horizon failures}
+A model can postpone default beyond the horizon, refinance indefinitely without repayment, or liquidate assets at an unrealistic terminal value. Extending the horizon can reveal that an apparently safe policy merely shifts the problem.
+
+Tests should compare adjacent horizons under consistent continuation assumptions and inspect obligations remaining at the end. A terminal balance sheet should retain outstanding debt, contingent rights and future commitments. A clean closing cash number is not a complete account of solvency.
+
+The terminal rule should be part of every policy comparison. Using a favorable terminal value for one method and zero for another is an unfair comparison. A finite-horizon model can still be useful, but its conclusion should state what remains outside the horizon.
+
+\section{Interaction failures}
+Individually correct modules can compose incorrectly. A debt amendment can change future interest while a cached tax calculation uses the old schedule. A share conversion can update ownership but leave diluted earnings per share on the old count. A group transfer can be recorded in both entities but omitted from elimination.
+
+Composition tests should follow complete event sequences across modules. They should check shared identities, dates, units and versions. A module's standalone test suite cannot certify every interaction. The most valuable sequences are those crossing boundaries: refinancing plus fees plus tax, conversion plus ownership plus reporting, or default plus collateral plus recovery.
+
+A failed interaction should be localized to its violated relation. Re-running a broad test suite without understanding the failure can obscure whether the model, adapter or shared state is wrong. The repair should preserve unaffected evidence and explicitly update dependent results.
+
+\section{A hierarchy of reference calculations}
+Start with hand-reconstructible exact cases using rational arithmetic. Then use finite-state enumeration for learning and policy tests. Add independent numerical quadrature or refined grids for continuous small models. Only then compare scalable approximate methods on the same target.
+
+A reference calculation must itself be audited. Coarse grids, truncation and arbitrary terminal values can bias it. Agreement between two implementations sharing the same mistake is not strong validation. Independent derivations and different computational routes are valuable where the economic conclusion is important.
+
+The hierarchy is not a requirement to solve every real company exactly. It establishes local semantics and numerical behavior before applying methods to larger unresolved settings. The large application retains its own evidence and domain limitations.
+
+\section{Empirical validation}
+Forecast validation requires a defined prediction target, information cutoff, evaluation period and benchmark. A statement reconstruction evaluated against the same statements it was constrained to match is not an out-of-sample forecast test. A restated target can differ from the information that was observable at prediction time.
+
+Probabilistic forecasts need scoring methods appropriate to their target. The proper-scoring literature represented in the inherited bibliography by \citet{gneiting2007proper} motivates evaluating distributions rather than only point means. Applicability still requires a correctly defined observed outcome and a forecast distribution produced without leakage.
+
+Set-valued predictions need measures of coverage and informativeness under a declared evaluation design. A very broad set can cover every outcome while offering little decision value. Narrowness without coverage is also inadequate. The tradeoff should be stated before comparing methods.
+
+\section{No empirical result is claimed here}
+The examples in this part are exact or analytic diagnostics of proposed semantics. They are not fitted company forecasts, evidence of profitability or rankings of simulation methods. No neural training campaign or stochastic benchmark is performed as part of this writing task.
+
+This distinction keeps the next research step clear. A future empirical study must choose companies, evidence cutoffs, scenarios, baselines, outcomes and uncertainty analysis. It should preserve the question separately from the implementation checklist and state what result would invalidate the harness rather than merely reject a candidate method.
+
+A negative result can reveal a bad implementation, insufficient tuning, an inadequate observation model or a weak economic mechanism. These explanations require different follow-up. Treating every failure as rejection of the entire direction would waste the diagnostic information.
+
+\section{Failure behavior is part of the specification}
+The system should return different statuses for unsupported instrument, contradictory evidence, undecided feasibility, infeasible action, economic default, numerical nonconvergence and completed approximation. A result can contain several statuses across regions.
+
+Unsuccessful regions must not disappear from aggregate results. Renormalizing probabilities after dropping numerical failures changes the distribution, often favorably if difficult cases are distressed. A report should state unresolved probability mass when a measure exists, or unresolved feasible regions otherwise.
+
+A completed run also needs a trace to its assumptions and evidence. Reproducibility requires exact versions of source views, rules, methods and numerical settings. A content hash identifies a file; it does not prove the file's correctness. Both provenance and substantive validation are needed.
+
+\section{From catalogue to implementation work}
+The proposed failure catalogue should be machine-readable enough to link each mechanism to a fixture, expected outcome and relevant chapter, while the manuscript explains why the failure matters. New cases can be added without claiming that the catalogue is exhaustive.
+
+Implementation can proceed by vertical slices. A slice reconstructs a bounded history family, applies a scenario and policy, generates events and journals, produces statements and reports unresolved regions. This is more discriminating than implementing isolated formula modules without a source-to-result case.
+
+The first slice should preserve ambiguous debt type, issue proceeds distinct from face, a binding financing limit and actor information. Later slices add ownership rights, group transfer constraints, persistent tax state and approximate inference. Each slice should retain the wider open scope rather than redefine the mission to match what is easiest to execute.
+
+\section{What successful completion would mean}
+For this document, success means an explicit and traceable argument, checked illustrative calculations, preserved prior work, inspected source support and a clear account of proposed methods and their failure cases. It does not mean that all methods are implemented or that the product is ready for unrestricted use.
+
+For the simulator, success is query-specific. It means the implementation computes the declared target within its stated evidence and numerical guarantees, preserves unsupported regions, and explains the economic dependence of the result. Whole-company applicability requires coverage of the actual company's material contracts, events and reporting basis.
+
+The following worked chapters apply these principles to complete small problems. Their purpose is to make the design reconstructible: the reader can follow observations through competing histories, decisions, financing, journals and outcomes, and see exactly where a different assumption changes the answer.

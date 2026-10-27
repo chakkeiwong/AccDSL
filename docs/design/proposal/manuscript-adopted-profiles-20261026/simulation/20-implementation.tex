@@ -1,0 +1,130 @@
+\chapter[Implementing the proposed methods]{Implementing the proposed methods without losing their meaning}
+\label{sim:implementation}
+
+The preceding chapters define what a result means. Implementation should preserve that meaning across extraction, reconstruction, simulation and reporting. The engineering choices in this chapter are proposals and can be replaced. The essential requirements are stable: evidence is not an assumption, a history family is not a sample, actor information is not global state, a financing request is not cash, and numerical failure is not default.
+
+\section{Evidence records}
+An evidence assertion needs a source identifier and exact location, value or text, concept, entity, dimensions, units, basis, period and precision. It also needs publication and ingestion information, extraction method and review status. A correction links to the assertion it revises instead of deleting it.
+
+The record should preserve original text alongside normalized values. A normalized number can be checked against the source, and an unresolved phrase remains visible. A mapping from source label to model concept is a separate interpretation with its own support. This allows the mapping to change without pretending the source changed.
+
+An evidence view selects assertions for a particular cutoff and purpose. It can represent as-published, currently restated or analyst-reviewed information. The view should be immutable once used for a frozen result. A new correction creates a new view and an explicit dependency change.
+
+\section{Assumptions as first-class inputs}
+An assumption record identifies the quantity or relation supplied, its scope, provenance and role. Examples include a fixed management payout policy, an offer price, a prior over debt types or a terminal liquidation rule. A convenient default should be marked as a hypothesis or baseline rather than disguised as observed evidence.
+
+Assumptions can conflict. A policy allowing unlimited borrowing conflicts with an offer cap if both claim to govern the same action. The system should detect or expose such inconsistencies. Precedence rules must be explicit; silently favoring whichever input was loaded last is unsafe.
+
+Sensitivity should vary assumptions by identity. If one assumption supplies both customer delay and credit loss, changing only one derived field can produce an inconsistent variant. A structured assumption relation makes the intended intervention and its dependencies visible.
+
+\section{History families}
+A history family contains shared economic records, persistent unknowns, domains, constraints, interpretation alternatives and source support. It records the domain for which completeness is claimed and the method used to construct it. Optional witnesses are members, not substitutes for the family.
+
+Continuous variables should retain units and bounds. Discrete choices should retain mutually exclusive premises where appropriate. Cross-time identity should connect a loan, customer or asset across periods. A new contract version is a dated event, not a reassignment of an old unknown.
+
+The family can expose queries for feasibility, witnesses, possible answers, certain answers and bounds. A probability operation requires an attached measure record. The API should not offer an unconditional mean for an unweighted family without requesting or selecting an explicitly declared measure.
+
+\section{Contract and security state}
+A contract record identifies parties, currency, dates, obligations, rights and clauses. Its execution state records remaining principal, accrued amounts, past exercise and breach status. Accounting carrying values are separate measurements linked to the contract.
+
+A security register identifies classes, units, holders or categories, rights and settlement status. It distinguishes authorized, subscribed, issued, outstanding, treasury and potentially issuable units where the profile needs them. Conversion links the extinguished claim to created shares.
+
+Unknown clauses should remain typed unknowns or alternatives. An unsupported clause should block only claims depending on it, with an explicit reason. A simple loan profile can still calculate unaffected payments while refusing a general default or option valuation. This is more useful than either inventing a default clause or refusing every calculation.
+
+\section{Actor information}
+Each actor has an information specification: observable variables, private facts, report channels, lags and memory. Policies receive a view constructed from that specification. They should not receive the full simulated world and rely on programmers to remember which fields are forbidden.
+
+A policy invocation records its decision time and input view. Tests can then check that changing unobserved future data leaves the action unchanged. A manager's private contract knowledge can be included without exposing it as actual public evidence.
+
+Randomized policies need a declared randomization source independent of unavailable future information. Reusing a shock draw as a policy coin can create unintended dependence. Economic random variables should have stable identities and explicit coupling, not depend on incidental call order.
+
+\section{Scenario definitions}
+A scenario identifies external paths or distributions, interventions, horizon, event timing and policy treatment. It distinguishes a deterministic stress from observational conditioning and a causal intervention. A scenario can also define alternative future observation processes.
+
+Shock units should be typed: a two-percentage-point rate increase differs from a two per cent proportional increase. Currency rates need orientation. Price levels differ from returns. The scenario layer should reject ambiguous conversions rather than rely on labels.
+
+A scenario version should include the underlying risk-process and observation versions. Changing a future disclosure rule can change policy values even when the rate path is unchanged. The cache and provenance system must recognize that dependency.
+
+\section{Event proposals and admission}
+A policy proposes an action. The event service checks contractual rights, resource availability, counterparty acceptance and timing. An accepted action creates dated events; a rejected action returns a reason and leaves the state unchanged except for any explicitly modeled attempt cost.
+
+Financing proposals should include requested cash or quantity, eligible offers and settlement conditions. The service calculates proceeds, fees, promises and ownership consequences. It does not infer unlimited supply from a balance identity.
+
+Admission can be conditional over a history region. If an unknown covenant makes an offer feasible in some histories and infeasible in others, the service returns guarded outcomes. It should not choose one witness merely to avoid branching.
+
+\section{Ordering events}
+The scheduler orders economic events by effective time and declared precedence. Same-time events can still have dependencies: proceeds must arrive before they fund payment, and a reset can occur before or after accrual according to contract terms. A total ordering chosen arbitrarily by event identifier can change results.
+
+A partial-order representation can express independent events and necessary precedences. If simultaneous equations are genuinely required, they should be passed to a solver rather than forced into a sequential order. The result should distinguish an unresolved ordering from numerical nonconvergence.
+
+Time conversion needs explicit precision and timezone rules. A local midnight, 23:59:59 and next-day midnight are not interchangeable in a boundary-sensitive query. The existing exact timing work in the repository is a foundation; external contract adapters must preserve its distinctions or state their loss of precision.
+
+\section{Accounting rule application}
+After an admitted economic event, the accounting service selects a rule under the declared basis, jurisdiction, entity facts and effective period. It produces a complete posting bundle and supporting measurements. Missing authority or facts can yield conditional treatments or a typed refusal.
+
+Posting bundles are validated atomically. They reconcile debits and credits, currencies, account contexts and event-specific quantities. An event identifier prevents duplicate application. Reversal and correction events refer to the original bundle rather than editing it invisibly.
+
+The reporting service aggregates within a specified perimeter and period. It preserves source-to-event-to-journal-to-line provenance. A consolidated report can eliminate internal balances while retaining the underlying entity records for liquidity and legal-entity analysis.
+
+\section{Symbolic execution}
+A symbolic state contains expressions and constraints rather than one numeric company. An event whose rule is common across the region can update expressions directly. A guard partitions the region only when its truth changes the relevant event or output.
+
+The executor should preserve coverage of the parent region and distinguish disjoint alternatives from overlapping descriptions. Overlap can duplicate probability mass if weights are attached. A symbolic union should therefore use semantic region identity rather than merely concatenating records.
+
+Simplification can share subexpressions and eliminate variables under checked projection rules. Any approximation records an outer or inner relation, error target and scope. A witness extracted from an outer approximation must be validated before being presented as a possible history.
+
+\section{Optional probability measures}
+A measure record identifies support, weights or densities, parameterization, conditioning variables and source assumptions. It is attached to economic variables and histories, not to the number of stored nodes. Duplicate encodings should not change the measure.
+
+Updates record likelihood and evidence identity. Reusing the same evidence twice should be detected where the model treats it as one observation. Correlated sources require a joint observation model or an explicit approximation.
+
+Simulation can carry both the retained feasible family and an approximate measure. A particle filter's support loss does not delete the original family. A user can request probability estimates under one measure and robust bounds over the family without conflating them.
+
+\section{Query planning}
+A query names outputs, dates, actors, scenarios, policies and acceptable guarantees. The planner traces dependencies through contracts, guards, observations and reports. It selects exact symbolic calculation, optimization, enumeration or approximation according to the admitted profile.
+
+The planner should prefer the smallest method that answers the question. An affine interest range does not require a million paths. A policy-sensitive signal problem cannot be answered by a fixed-path cash table. A worst-case query cannot be answered by an unlabeled Monte Carlo minimum.
+
+Resource budgets are explicit. If the selected exact method cannot finish, the planner may return bounds or ask for an allowed approximation according to the request. It should not silently downgrade a guarantee. Useful partial results include verified witnesses and certified safe regions with unresolved remainder.
+
+\section{Result records}
+A result identifies its target and scope, evidence and assumptions, conditional regions, values or formulas, measure if any, numerical status and provenance. It can contain exact values, intervals, distributions, witnesses and unresolved statuses together. Their semantics should be explicit.
+
+Possible failure, certain failure and unresolved failure are different answers. A breach is different from default. An infeasible proposed action differs from a company with no feasible action in the modeled class. An unsupported mechanism differs from numerical failure. These distinctions should survive both machine output and reader-facing explanation.
+
+Aggregates must retain unresolved regions or mass. If some paths fail numerically, reporting only successful paths can bias results. The system should state what portion of the admitted family or probability remains unevaluated and avoid renormalization unless that conditional target is explicitly requested.
+
+\section{A small request sequence}
+A user asks whether cash can fall below 14 after a rate and customer shock. The system selects an evidence view and reconstructs the four-history family of Chapter \ref{sim:company-case}. It applies the stated events, obtains cash formula $33-18c-2f$, and solves the threshold condition.
+
+The result returns the concentrated floating witness with cash 13 and the other three outcomes. It states that no probabilities are attached. If the user adds a committed facility, the event service checks its timing and eligibility, creates a draw in the required region and recomputes debt and cash.
+
+If a new source excludes the concentrated floating combination, the family version changes and the query's dependency triggers recomputation. The old result remains reproducible. This sequence demonstrates the intended workflow without requiring every possible company to be instantiated as a separate database.
+
+\section{DSL and typed-library authoring}
+A textual language can make scenario and contract definitions readable and reviewable. A typed library can offer direct programmatic construction. Both should lower to the same intermediate representation and be compared on the same tasks. The DSL is not justified merely by its existence.
+
+Equivalent authored inputs should produce equivalent IR and results. Syntax convenience should not alter uncertainty or timing. A textual default that silently assumes a rate or probability would be especially dangerous because it can look like a declarative fact.
+
+The existing repository includes language, expression, method and event work that should be reused where it matches these semantics. New records should be added only when an included operation cannot be expressed adequately. The design should avoid rebuilding a parallel incompatible representation for the new chapters.
+
+\section{Adapters to external components}
+An external contract engine can propose schedules and payoffs. An optimization package can solve a declared mathematical problem. A probabilistic library can approximate a posterior. Each adapter needs input and output semantics, version identity, numerical conventions and failure mapping.
+
+The ACTUS inspection illustrates the boundary: contract events do not supply accounting journals, and local-time schedules do not automatically preserve exact timestamps. A double-valued payoff is not exact rational evidence merely because its printed decimal matches a fixture.
+
+Adapters should be checked against small independent cases and preserve unsupported outcomes. A service exception must not become zero cash flow. A missing risk series must not silently carry forward an unrelated value. Dependency and license review remain necessary before selecting a runtime, but no external adoption is claimed by this manuscript.
+
+\section{Incremental implementation}
+The first vertical slice should support a bounded history family, exact event timing, simple debt and equity offers, actor information and coherent statements. It should include both successful and refused paths. The worked company and refinancing cases provide expected outcomes.
+
+The next slice can add class rights, conversion, group transfers and persistent tax or asset state. Later work can add nonlinear pricing, partially observed policy optimization and controlled approximation. Each stage should preserve the full mission's open requirements rather than imply that a small slice closes whole-company representation.
+
+A slice is complete only when its source-to-result behavior is checked and its unsupported scope is explicit. A collection of isolated module tests is useful but insufficient for composition. The critical interactions are where financing, information and accounting meet.
+
+\section{Review and release evidence}
+A release should preserve model and source versions, exact fixture results, numerical validation where applicable and rendered documentation. Engineering conformance, accounting authority, scientific validity and human comprehension remain separate evidence categories.
+
+A clean PDF or passing arithmetic script does not establish product readiness. A reader-facing explanation must still make assumptions and derivations understandable. A human review can identify comprehension problems that mechanical checks miss; its absence does not prevent provisional drafting but does prevent claiming that acceptance occurred.
+
+The stable documentation links should point to a built, identified candidate with an honest status. Historical manuscripts and hashes remain available. This allows the design to advance without rewriting evidence from earlier stages or confusing the newest document with a completed system.

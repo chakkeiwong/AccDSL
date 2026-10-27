@@ -1,0 +1,57 @@
+\section{Repayment changes tomorrow's feasible payments}
+\label{sim:two-date-continuous-memory}
+
+The previous payment calculation ends as soon as interest has been settled. A facility used to make that payment may have to be repaid before the next coupon. To see why the horizon matters, carry the same company forward for one more date. The fixed or floating coupon interpretation persists, as does the existence or absence of the facility. The two reference rates may vary independently within the earlier interval. This rectangular rate family is an assumption for the example, not a probability model.
+
+The facility permits one draw of 1 during the two-date horizon and charges the same immediate fee of 0.25. A first-date draw must be repaid on the second date, after an operating cash receipt and before the second coupon. Repayment extinguishes the facility debt but does not restore the right to draw. The original principal of 100 matures beyond the horizon. We omit tax and interest on the facility to isolate the timing of cash and the persistence of the drawing restriction.
+
+Let $I_1$ and $I_2$ denote the two coupons and $R$ the operating cash receipt on the second date. In the fixed interpretation both coupons are 5. In the floating interpretation each is calculated from its own reference rate using the earlier floor and cap. Receiving one coupon of 5 does not by itself reveal the debt type: floating debt can produce the same amount. Nor does it reveal whether the facility exists.
+
+\subsection{The first order leaves a different second opening}
+
+Ordinary payment on the first date leaves cash $5.5-I_1$. Drawing and paying leaves $6.25-I_1$ and facility debt of 1. On the second date the operating receipt increases cash and income by $R$, after which any outstanding facility debt is repaid. Cash available before paying the second coupon is therefore
+\begin{equation}
+ C_2=
+ \begin{cases}
+  5.5+R-I_1,&\text{after ordinary first-date payment},\\
+  5.25+R-I_1,&\text{after a first-date draw}.
+ \end{cases}
+\end{equation}
+The second line follows by adding $R$ to $6.25-I_1$ and subtracting the repayment of 1. Although the facility improved first-date liquidity, its fee leaves less cash available over the complete two-date sequence.
+
+Compare two supplied receipt amounts, $R=6$ and $R=7$. When both coupons are 6, the first payment requires a draw and leaves cash 0.25. The consequences at the second date are:
+\begin{center}
+\begin{tabular}{rrrr}
+\toprule
+Operating receipt & Cash after repayment & Coupon due & Payment result\\
+\midrule
+6 & 5.25 & 6 & Refused; payable 6 remains\\
+7 & 6.25 & 6 & Paid; cash 0.25 remains\\
+\bottomrule
+\end{tabular}
+\end{center}
+The receipt of 6 cannot fund the second coupon. Omitting repayment would incorrectly show 6.25 cash. Allowing another draw would also reverse the answer: the extra 1 less its 0.25 fee exactly fills the 0.75 shortfall. Both mistakes erase a consequence of the first decision.
+
+Before either payment order, the second coupon accrues as interest expense and interest payable. A refused order leaves that payable and the earlier receipt, repayment and fee entries intact. If a first-date order already refuses, this particular reference returns that incomplete prefix without inventing second-date states. Modeling later default, recovery or renegotiation requires additional events.
+
+\subsection{The relevant boundary now joins both rates}
+
+Following a first-date draw, ordinary second payment requires $C_2-I_2\geq0$. Substituting the cash expression gives
+\begin{equation}
+ I_1+I_2\leq5.25+R.
+\end{equation}
+For a receipt of 6, the boundary is $I_1+I_2=11.25$. Within the interior floating-coupon pieces it becomes a diagonal boundary in the two rates, $100r_1+100r_2=11.25$. Separate bounds on the two marginal rates do not describe which joint histories cross it. Equality permits payment; larger coupon totals cause refusal.
+
+For a receipt of 7, the corresponding bound is 12.25. Each coupon is at most 6, so their sum is at most 12 and ordinary second payment is feasible throughout the first-draw region. After ordinary first payment, $I_1\leq5.5$; even the receipt of 6 then supplies at least 6 before the next coupon. The failure with the smaller receipt is thus concentrated in histories that needed an earlier draw and then face a sufficiently large combined coupon.
+
+The exact comparison first takes the products of the earlier point and open rate intervals. It then splits those regions at the later linear cash conditions. Every resulting balance and journal amount is affine in $(r_1,r_2)$, while each action condition has a fixed truth value. The independent financial calculation uses the closed-form cash expressions above. It checks that accepted regions cover exactly the feasible domains, that refusals cover the remainder, and that both calculations produce the same complete journal and financial state.
+
+The geometric calculation also retains strict boundaries. On a bounded region described by rational linear inequalities, its closed relaxation is generated by finitely many vertices. The average of all those vertices satisfies a required strict inequality whenever at least one vertex satisfies it strictly: every other vertex has nonpositive slack, so their average remains strictly negative. If all vertices lie on its boundary, no point of the closed region can satisfy that inequality strictly. Applying this reasoning to every strict constraint decides whether the original region contains a point. Extremum attainment is checked by adding the optimizing equality and testing the resulting face in the same way. These arguments apply to the supplied bounded linear regions; a nonlinear or unbounded problem needs another method. The financial comparator shares these geometric primitives, so its agreement does not constitute an independent solver validation.
+
+\subsection{More cash does not reveal a hidden contract}
+
+With a committed facility and a receipt of 7, the refined first-date signal supports the same initial rule as before: pay when the trigger is false and draw when it is true. On the second date the manager observes whether the coupon exceeds 5.5 and whether available cash covers it, together with the earlier signal and chosen order. Ordinary payment is feasible throughout this family.
+
+Some histories also permit a second-date draw: the first coupon was paid without drawing, the facility remains unused and the second coupon exceeds 5.5. There are two such reachable observation classes in this example, and either ordinary payment or drawing is feasible in each. Consequently four policies satisfy the stipulated feasibility conditions. This count does not rank their value. Optional borrowing incurs the fee and leaves debt beyond the current horizon.
+
+Under the coarse first-date signal, the manager still cannot distinguish histories requiring opposite first orders. Raising the later receipt does not repair that information problem. Retaining histories without a facility also leaves some first payments unfunded. A correct continuation therefore preserves contractual memory, cash timing and the information available to the actor together. Renewing the facility, redrawing the debt type or revealing an unobserved trigger would change the problem being solved.\footnote{Complete symbolic states, accepted-domain checks, geometric diagnostics and the retained journal-identity repairs are in \path{data/accounting-master/two-date-continuous-memory-20261026/}. The accepted run is \path{attempt-04/}. This is an exact small reference; demand-driven two-date compression, checkpoint/resume guarantees, source revision invalidation and integration with the common typed executor remain separate work.}

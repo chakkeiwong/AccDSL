@@ -1,0 +1,1388 @@
+{
+  "schema_version": "accdsl.proposal.time.fixtures.v1",
+  "product_implemented": false,
+  "human_acceptance": "pending",
+  "scope": "Synthetic design examples; the prototype fixture supplies only historical arithmetic inspiration. No issuer restatement or authority claim.",
+  "input_rules": "Each case starts from base_records, adds additional_records, applies top-level overrides, removes remove_fields, then filters record_subset when present. Dot-path overrides in arithmetic cases replace that context field. Output ordering is immaterial. Missing output value means no financial result. Base review_snapshot is an explicit design choice, not a clock fallback.",
+  "base_records": [
+    {
+      "id": "h1-original",
+      "value": "120",
+      "context": {
+        "entity": "Demo",
+        "perimeter": "single-v1",
+        "concept": "revenue",
+        "dimensions": {},
+        "currency": "USD",
+        "unit": "USD",
+        "scale": "1",
+        "basis": "synthetic-disclosed",
+        "calendar": "Gregorian-v1",
+        "period_start": "2024-01-01",
+        "period_end_exclusive": "2024-07-01"
+      },
+      "economic_scope": "reported flow over the stated interval",
+      "publication": "2024-08-01T00:00:00Z",
+      "ingestion": "2024-08-03T00:00:00Z",
+      "review": {
+        "extraction": "accepted",
+        "interpretation": "accepted",
+        "at": "2024-08-04T00:00:00Z"
+      },
+      "source": {
+        "inline_utf8": "Synthetic h1-original value 120",
+        "sha256": "54ea7a17744ca3c2bea8073a40f766074df6d4e6285a51dbd6004c44befb2548",
+        "current_integrity": "verified",
+        "public_byte_vintage": "established_synthetic",
+        "ingestion_receipt": "verified_synthetic"
+      },
+      "vintage": "v1",
+      "supersedes": []
+    },
+    {
+      "id": "h1-restated",
+      "value": "110",
+      "context": {
+        "entity": "Demo",
+        "perimeter": "single-v1",
+        "concept": "revenue",
+        "dimensions": {},
+        "currency": "USD",
+        "unit": "USD",
+        "scale": "1",
+        "basis": "synthetic-disclosed",
+        "calendar": "Gregorian-v1",
+        "period_start": "2024-01-01",
+        "period_end_exclusive": "2024-07-01"
+      },
+      "economic_scope": "reported flow over the stated interval",
+      "publication": "2025-03-02T00:00:00Z",
+      "ingestion": "2025-03-05T00:00:00Z",
+      "review": {
+        "extraction": "accepted",
+        "interpretation": "accepted",
+        "at": "2025-03-06T00:00:00Z"
+      },
+      "source": {
+        "inline_utf8": "Synthetic h1-restated value 110",
+        "sha256": "841aa1d0978c17ea9ca064768c52f03ddb4bb6329fe8eb414555260e839a957a",
+        "current_integrity": "verified",
+        "public_byte_vintage": "established_synthetic",
+        "ingestion_receipt": "verified_synthetic"
+      },
+      "vintage": "v2",
+      "supersedes": [
+        "h1-original"
+      ]
+    },
+    {
+      "id": "fy",
+      "value": "260",
+      "context": {
+        "entity": "Demo",
+        "perimeter": "single-v1",
+        "concept": "revenue",
+        "dimensions": {},
+        "currency": "USD",
+        "unit": "USD",
+        "scale": "1",
+        "basis": "synthetic-disclosed",
+        "calendar": "Gregorian-v1",
+        "period_start": "2024-01-01",
+        "period_end_exclusive": "2025-01-01"
+      },
+      "economic_scope": "reported flow over the stated interval",
+      "publication": "2025-03-02T00:00:00Z",
+      "ingestion": "2025-03-05T00:00:00Z",
+      "review": {
+        "extraction": "accepted",
+        "interpretation": "accepted",
+        "at": "2025-03-06T00:00:00Z"
+      },
+      "source": {
+        "inline_utf8": "Synthetic fy value 260",
+        "sha256": "f40b464253f6abdd5973d40ec8deaaeb06f8799bc5aea510c580c4c1d204cb1a",
+        "current_integrity": "verified",
+        "public_byte_vintage": "established_synthetic",
+        "ingestion_receipt": "verified_synthetic"
+      },
+      "vintage": "v2",
+      "supersedes": []
+    }
+  ],
+  "base_request": {
+    "admission_mode": "investor_information",
+    "selection": "latest_available",
+    "cutoff": "2025-03-03T00:00:00Z",
+    "review_snapshot": "2025-03-07T00:00:00Z",
+    "requested_layer": "accepted_interpretation",
+    "target": "revenue",
+    "assumptions": []
+  },
+  "selection_cases": [
+    {
+      "id": "T-before-revision",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2024-09-01T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "supported",
+        "excluded": {
+          "h1-restated": "PUBLICATION_AFTER_CUTOFF",
+          "fy": "PUBLICATION_AFTER_CUTOFF"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-investor-late-ingest",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-restated",
+          "fy"
+        ],
+        "status": "supported",
+        "excluded": {
+          "h1-original": "SUPERSEDED_BY_ELIGIBLE_VERSION"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-system-before-ingest",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "system_as_of",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-04T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": [],
+          "system_as_of": "2025-03-04T00:00:00Z"
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "supported",
+        "excluded": {
+          "h1-restated": "INGESTED_AFTER_SYSTEM_TIME",
+          "fy": "INGESTED_AFTER_SYSTEM_TIME"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-system-after-review",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "system_as_of",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": [],
+          "system_as_of": "2025-03-07T00:00:00Z"
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-restated",
+          "fy"
+        ],
+        "status": "supported",
+        "excluded": {
+          "h1-original": "SUPERSEDED_BY_ELIGIBLE_VERSION"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-original",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "original",
+          "cutoff": "2025-03-07T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original",
+          "fy"
+        ],
+        "status": "supported",
+        "excluded": {
+          "h1-restated": "NOT_LINEAGE_ROOT"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-system-before-review",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "system_as_of",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-05T12:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": [],
+          "system_as_of": "2025-03-05T12:00:00Z"
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-restated": "REVIEW_NOT_YET_ACCEPTED",
+          "fy": "REVIEW_NOT_YET_ACCEPTED"
+        }
+      }
+    },
+    {
+      "id": "T-ingestion-absent-system",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "system_as_of",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": [],
+          "system_as_of": "2025-03-07T00:00:00Z"
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {}
+        },
+        "remove_fields": {
+          "h1-original": [
+            "ingestion"
+          ]
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "INGESTION_ABSENT"
+        }
+      }
+    },
+    {
+      "id": "T-ingestion-null-system",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "system_as_of",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": [],
+          "system_as_of": "2025-03-07T00:00:00Z"
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "ingestion": null
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "INGESTION_UNKNOWN"
+        }
+      }
+    },
+    {
+      "id": "T-ingestion-absent-investor",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {}
+        },
+        "remove_fields": {
+          "h1-original": [
+            "ingestion"
+          ]
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "supported",
+        "excluded": {},
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-ingestion-null-investor",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "ingestion": null
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "supported",
+        "excluded": {},
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-publication-unknown-investor",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": null
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "PUBLICATION_UNKNOWN"
+        }
+      }
+    },
+    {
+      "id": "T-publication-unknown-pure-system",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "system_as_of",
+          "selection": "latest_available",
+          "cutoff": null,
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": [],
+          "system_as_of": "2025-03-07T00:00:00Z"
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": null
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "supported",
+        "excluded": {},
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-publication-unknown-archive",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "archival_exploration",
+          "selection": "latest_available",
+          "cutoff": null,
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": null
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "archival_only",
+        "excluded": {},
+        "unresolved": {},
+        "historical_admissibility": "unestablished"
+      }
+    },
+    {
+      "id": "T-publication-unknown-archive-cutoff",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "archival_exploration",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": null
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "PUBLICATION_UNKNOWN"
+        },
+        "archival_candidates": [
+          "h1-original"
+        ]
+      }
+    },
+    {
+      "id": "T-public-bytes-unverified",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "source": {
+              "inline_utf8": "Synthetic h1-original value 120",
+              "sha256": "54ea7a17744ca3c2bea8073a40f766074df6d4e6285a51dbd6004c44befb2548",
+              "current_integrity": "verified",
+              "public_byte_vintage": "unknown",
+              "ingestion_receipt": "verified_synthetic"
+            }
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "HISTORICAL_BYTES_UNVERIFIED"
+        }
+      }
+    },
+    {
+      "id": "T-system-receipt-unverified",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "system_as_of",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": [],
+          "system_as_of": "2025-03-07T00:00:00Z"
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "source": {
+              "inline_utf8": "Synthetic h1-original value 120",
+              "sha256": "54ea7a17744ca3c2bea8073a40f766074df6d4e6285a51dbd6004c44befb2548",
+              "current_integrity": "verified",
+              "public_byte_vintage": "established_synthetic",
+              "ingestion_receipt": "unknown"
+            }
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "INGESTION_RECEIPT_UNVERIFIED"
+        }
+      }
+    },
+    {
+      "id": "T-source-integrity-failed",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "source": {
+              "inline_utf8": "Synthetic altered h1-original value 121",
+              "sha256": "54ea7a17744ca3c2bea8073a40f766074df6d4e6285a51dbd6004c44befb2548",
+              "current_integrity": "mismatch",
+              "public_byte_vintage": "established_synthetic",
+              "ingestion_receipt": "verified_synthetic"
+            }
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "rejected",
+        "excluded": {
+          "h1-original": "SOURCE_HASH_MISMATCH"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-timezone-before",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2024-07-31T15:59:59Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": "2024-08-01T00:00:00+08:00"
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "supported",
+        "excluded": {
+          "h1-original": "PUBLICATION_AFTER_CUTOFF"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-timezone-equal",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2024-07-31T16:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": "2024-08-01T00:00:00+08:00"
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "supported",
+        "excluded": {},
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-date-only-within",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2024-08-01T04:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": {
+              "date": "2024-08-01",
+              "timezone": "Asia/Hong_Kong"
+            }
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "PUBLICATION_PRECISION_UNRESOLVED"
+        }
+      }
+    },
+    {
+      "id": "T-date-only-end",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2024-08-01T16:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": {
+              "date": "2024-08-01",
+              "timezone": "Asia/Hong_Kong"
+            }
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original"
+        ],
+        "status": "supported",
+        "excluded": {},
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-date-only-no-zone",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": {
+              "date": "2024-08-01",
+              "timezone": null
+            }
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "PUBLICATION_TIMEZONE_UNKNOWN"
+        }
+      }
+    },
+    {
+      "id": "T-timestamp-no-zone",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "publication": "2024-08-01T00:00:00"
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "rejected",
+        "excluded": {
+          "h1-original": "MISSING_TIMEZONE"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-ingestion-date-within",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "system_as_of",
+          "selection": "latest_available",
+          "cutoff": null,
+          "review_snapshot": "2024-08-03T12:00:00Z",
+          "requested_layer": "raw",
+          "target": "revenue",
+          "assumptions": [],
+          "system_as_of": "2024-08-03T12:00:00Z"
+        },
+        "record_subset": [
+          "h1-original"
+        ],
+        "overrides": {
+          "h1-original": {
+            "ingestion": {
+              "date": "2024-08-03",
+              "timezone": "UTC"
+            }
+          }
+        },
+        "remove_fields": {
+          "h1-original": []
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-original": "INGESTION_PRECISION_UNRESOLVED"
+        }
+      }
+    },
+    {
+      "id": "T-selective-revision",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "all_disclosed_values",
+          "assumptions": []
+        },
+        "additional_records": [
+          {
+            "id": "cost-h1",
+            "value": "30",
+            "context": {
+              "entity": "Demo",
+              "perimeter": "single-v1",
+              "concept": "cost",
+              "dimensions": {},
+              "currency": "USD",
+              "unit": "USD",
+              "scale": "1",
+              "basis": "synthetic-disclosed",
+              "calendar": "Gregorian-v1",
+              "period_start": "2024-01-01",
+              "period_end_exclusive": "2024-07-01"
+            },
+            "economic_scope": "reported flow over the stated interval",
+            "publication": "2024-08-01T00:00:00Z",
+            "ingestion": "2024-08-03T00:00:00Z",
+            "review": {
+              "extraction": "accepted",
+              "interpretation": "accepted",
+              "at": "2024-08-04T00:00:00Z"
+            },
+            "source": {
+              "inline_utf8": "Synthetic cost-h1 value 30",
+              "sha256": "a71e37b6812cbb5eb1681e6fdbb906529fb47eeafc97ea171986ddb64d91a3c6",
+              "current_integrity": "verified",
+              "public_byte_vintage": "established_synthetic",
+              "ingestion_receipt": "verified_synthetic"
+            },
+            "vintage": "v1",
+            "supersedes": []
+          }
+        ]
+      },
+      "expected": {
+        "selected": [
+          "h1-restated",
+          "fy",
+          "cost-h1"
+        ],
+        "status": "supported",
+        "excluded": {
+          "h1-original": "SUPERSEDED_BY_ELIGIBLE_VERSION"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-conflicting-leaves",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "additional_records": [
+          {
+            "id": "h1-other",
+            "value": "115",
+            "context": {
+              "entity": "Demo",
+              "perimeter": "single-v1",
+              "concept": "revenue",
+              "dimensions": {},
+              "currency": "USD",
+              "unit": "USD",
+              "scale": "1",
+              "basis": "synthetic-disclosed",
+              "calendar": "Gregorian-v1",
+              "period_start": "2024-01-01",
+              "period_end_exclusive": "2024-07-01"
+            },
+            "economic_scope": "reported flow over the stated interval",
+            "publication": "2025-03-02T00:00:00Z",
+            "ingestion": "2025-03-05T00:00:00Z",
+            "review": {
+              "extraction": "accepted",
+              "interpretation": "accepted",
+              "at": "2025-03-06T00:00:00Z"
+            },
+            "source": {
+              "inline_utf8": "Synthetic h1-other value 115",
+              "sha256": "adc54c3c728fb22dd84a452c24857ad5873c621357a50158f5f987e8ce3e8f80",
+              "current_integrity": "verified",
+              "public_byte_vintage": "established_synthetic",
+              "ingestion_receipt": "verified_synthetic"
+            },
+            "vintage": "v2-other",
+            "supersedes": []
+          }
+        ]
+      },
+      "expected": {
+        "selected": [
+          "h1-restated",
+          "fy",
+          "h1-other"
+        ],
+        "status": "unresolved",
+        "excluded": {
+          "h1-original": "SUPERSEDED_BY_ELIGIBLE_VERSION"
+        },
+        "unresolved": {
+          "revenue:H1": "CONFLICTING_VERSIONS"
+        }
+      }
+    },
+    {
+      "id": "T-unknown-new-version",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "overrides": {
+          "h1-restated": {
+            "publication": null
+          }
+        }
+      },
+      "expected": {
+        "selected": [
+          "h1-original",
+          "fy"
+        ],
+        "status": "unresolved",
+        "excluded": {},
+        "unresolved": {
+          "h1-restated": "PUBLICATION_UNKNOWN"
+        }
+      }
+    },
+    {
+      "id": "T-cycle",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-original",
+          "h1-restated"
+        ],
+        "overrides": {
+          "h1-original": {
+            "supersedes": [
+              "h1-restated"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "rejected",
+        "excluded": {
+          "revenue:H1": "SUPERSESSION_CYCLE"
+        },
+        "unresolved": {}
+      }
+    },
+    {
+      "id": "T-missing-ancestor",
+      "kind": "synthetic",
+      "input": {
+        "records": "base_records",
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "latest_available",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "record_subset": [
+          "h1-restated"
+        ],
+        "overrides": {
+          "h1-restated": {
+            "supersedes": [
+              "unknown-assertion"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "selected": [],
+        "status": "rejected",
+        "excluded": {
+          "h1-restated": "MISSING_SUPERSESSION_TARGET"
+        },
+        "unresolved": {}
+      }
+    }
+  ],
+  "arithmetic_cases": [
+    {
+      "id": "T-subtract-valid",
+      "input": {
+        "operation": "FY_minus_H1",
+        "record_ids": [
+          "fy",
+          "h1-restated"
+        ],
+        "revision_compatibility": "explicit shared v2 for these quantities",
+        "source_admission": "T-investor-late-ingest"
+      },
+      "expected": {
+        "status": "supported",
+        "value": "150",
+        "period": {
+          "start": "2024-07-01",
+          "end_exclusive": "2025-01-01"
+        },
+        "formula": "260 - 110",
+        "lineage": [
+          "fy",
+          "h1-restated"
+        ]
+      }
+    },
+    {
+      "id": "T-subtract-vintage",
+      "input": {
+        "operation": "FY_minus_H1",
+        "record_ids": [
+          "fy",
+          "h1-original"
+        ],
+        "revision_compatibility": null,
+        "source_admission": "T-original"
+      },
+      "expected": {
+        "status": "rejected",
+        "reason": "INCOMPATIBLE_REVISION",
+        "value": null,
+        "arithmetic_only": "260 - 120 = 140 is not an admitted H2 result"
+      }
+    },
+    {
+      "id": "T-subtract-calendar",
+      "input": {
+        "operation": "FY_minus_H1",
+        "record_ids": [
+          "fy",
+          "h1-restated"
+        ],
+        "overrides": {
+          "fy.context.calendar": "retail-53-week-v1"
+        },
+        "compatibility_bridge": null
+      },
+      "expected": {
+        "status": "rejected",
+        "reason": "INCOMPATIBLE_CALENDAR",
+        "value": null
+      }
+    },
+    {
+      "id": "T-subtract-perimeter",
+      "input": {
+        "operation": "FY_minus_H1",
+        "record_ids": [
+          "fy",
+          "h1-restated"
+        ],
+        "overrides": {
+          "fy.context.perimeter": "includes-acquired-subsidiary-v2"
+        },
+        "compatibility_bridge": null
+      },
+      "expected": {
+        "status": "rejected",
+        "reason": "INCOMPATIBLE_PERIMETER",
+        "value": null
+      }
+    },
+    {
+      "id": "T-subtract-not-prefix",
+      "input": {
+        "operation": "FY_minus_H1",
+        "record_ids": [
+          "fy",
+          "h1-restated"
+        ],
+        "overrides": {
+          "h1-restated.context.period_start": "2024-02-01"
+        },
+        "compatibility_bridge": null
+      },
+      "expected": {
+        "status": "rejected",
+        "reason": "INTERVAL_NOT_PREFIX",
+        "value": null
+      }
+    }
+  ],
+  "transform_cases": [
+    {
+      "id": "T-harmonised-assumption",
+      "kind": "synthetic",
+      "input": {
+        "records": [
+          "h1-original"
+        ],
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "harmonised",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "transform": {
+          "id": "bridge-minus-10",
+          "source_ids": [
+            "h1-original"
+          ],
+          "formula": "120 - 10",
+          "target_basis": "illustrative-v2-compatible",
+          "publication": "2025-03-02T00:00:00Z",
+          "reviewed_at": "2025-03-02T00:00:00Z",
+          "support": "synthetic explicit analyst assumption; no accounting authority",
+          "assumption_id": "bridge-assumed"
+        }
+      },
+      "expected": {
+        "status": "conditional",
+        "derived_id": "h1-harmonised",
+        "value": "110",
+        "original_value_retained": "120",
+        "lineage": [
+          "h1-original",
+          "bridge-minus-10"
+        ],
+        "assumption_ids": [
+          "bridge-assumed"
+        ],
+        "issuer_restatement_claim": false
+      }
+    },
+    {
+      "id": "T-harmonised-missing",
+      "kind": "synthetic",
+      "input": {
+        "records": [
+          "h1-original"
+        ],
+        "request": {
+          "admission_mode": "investor_information",
+          "selection": "harmonised",
+          "cutoff": "2025-03-03T00:00:00Z",
+          "review_snapshot": "2025-03-07T00:00:00Z",
+          "requested_layer": "accepted_interpretation",
+          "target": "revenue",
+          "assumptions": []
+        },
+        "transform": null
+      },
+      "expected": {
+        "status": "unsupported",
+        "reason": "HARMONISATION_UNSUPPORTED",
+        "derived_value": null,
+        "original_value_retained": "120"
+      }
+    },
+    {
+      "id": "T-estimate-authority-missing",
+      "kind": "synthetic",
+      "input": {
+        "claimed_change_kind": "prospective_estimate",
+        "effective_date": "2025-01-01",
+        "authority": null,
+        "opening_bridge": null
+      },
+      "expected": {
+        "status": "unsupported",
+        "reason": "TREATMENT_UNSUPPORTED",
+        "reclassify_prior_periods": false
+      }
+    }
+  ],
+  "inherited_source": {
+    "path": "docs/design/fixtures/temporal.json",
+    "sha256": "05b3eeac1b201f835fde5bb24143c6328d491dd1c4b704ab73710a396c341a8a",
+    "locator": "assertions and expected_valid_h2; synthetic example"
+  },
+  "nonclaims": [
+    "No temporal runtime executed",
+    "No genuine conflicting-disclosure pair established",
+    "No accounting change-treatment authority established",
+    "No forecast validation or human acceptance"
+  ]
+}

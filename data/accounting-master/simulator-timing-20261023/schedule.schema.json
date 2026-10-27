@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SettlementScheduleDraft/1 documentary body",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "projection_ref", "horizon", "funding_knowledge", "events"],
+  "properties": {
+    "profile": {"const": "SettlementScheduleDraft/1"},
+    "projection_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "schema", "digest"],
+      "properties": {
+        "kind": {"const": "Projection"},
+        "schema": {"const": "accdsl.corporate.projection.v1"},
+        "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "horizon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end_exclusive"],
+      "properties": {
+        "start": {"$ref": "#/$defs/instant"},
+        "end_exclusive": {"$ref": "#/$defs/instant"}
+      }
+    },
+    "funding_knowledge": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["tag", "assumption"], "properties": {"tag": {"const": "known_none"}, "assumption": {"type": "string", "minLength": 1}}},
+        {"$ref": "#/$defs/unknown"}
+      ]
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_kind", "at", "after"],
+        "properties": {
+          "event_kind": {"$ref": "#/$defs/name"},
+          "at": {"oneOf": [{"$ref": "#/$defs/instant"}, {"$ref": "#/$defs/unknown"}]},
+          "after": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/name"}}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*$"},
+    "instant": {"type": "string", "format": "date-time", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "unknown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "reason", "obligations"],
+      "properties": {
+        "tag": {"const": "unknown"},
+        "reason": {"type": "string", "minLength": 1},
+        "obligations": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

@@ -1,0 +1,3 @@
+# Git checkpoint — 28 October 2026
+
+All 452 selected-package files passed byte and size verification and are in the index. The checkpoint preserves accumulated source, documentation and bounded evidence. Local-only omissions are indexed in local-only-files.jsonl; no files were deleted. This is not a complete clone-reproduction claim. Credential-pattern hits were inspected: URL word fragments and an existing downloaded JavaScript PEM serializer label were false positives; no credential was identified. Historical whitespace findings are retained to preserve exact evidence bytes. The separate compatibility continuation is not part of this first checkpoint.

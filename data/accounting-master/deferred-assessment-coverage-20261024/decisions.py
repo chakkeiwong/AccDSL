@@ -1,0 +1,13 @@
+EVIDENCE={'deferred':'shared-deferred-assessment-20261024','manuscript':'deferred-assessment-integration-20261024'}
+UPDATES={}
+def add(ids,advance,residual,next_action):
+    for key in ids.split():UPDATES[key]={'evidence':['deferred','manuscript'],'advance':advance,'residual':residual,'next_action':next_action,'full_requirement_closed':False,'acceptance':'not_promoted'}
+add('MC05','Deferred proposal retains actual assessment date and prior financial interval.','New-period assessment and repeated carry remain absent.','Carry the actual assessed state through an explicit successor interface.')
+add('MC11 MC13 I05','Complete 26-account proposal preserves actual cash, current tax, component and loss histories.','Frozen carry accepts the older current-tax request only.','Bind full deferred result and recognition schedule in compatible provisional carry.')
+add('MC16 G4 P17-04.10','Explicit gross deferred measurement, shared capacity and incremental profit-or-loss journal reconcile.','Actual recovery, alternative allocation, offset and operative law remain unadmitted.','Preserve current assumptions and schedule through carry; broaden methods separately.')
+add('MC24 G2','Closed deferred request validates full item population, bases and complete apply.','General tax language and multiyear authoring remain incomplete.','Specify a distinct assessed-state carry caller rather than project away the journal.')
+add('MC26','328 checks,31 cases,12 focused and27 regression methods cover signs,capacity,allocations and statements.','Exact conditional arithmetic does not validate actual recovery forecasts or accounting admission.','Check assessed profit transfer and exact schedule archive independently.')
+add('MC28','DTA10 to8 and DTL4 to10 yield expense8 without cash;loss deductions share capacity.','Synthetic declared recovery is not a real-company year.','Carry actual assessed amounts and preserve the wider company-case queue.')
+add('MC32','Version3.85 protects174 sources and284 displays;actual pages1,8,99,439–442 reviewed.','Dense navigation and whole-document/domain/human acceptance remain open.','Explain assessed carry and remaining annual requirements without promotion.')
+add('MC33 MC34 MC35','Deferred assessment repaired internally with explicit source and model boundaries.','No phase or whole requirement closes;S6 held,S7 deferred.','Continue compatible carry and new-period assessment preparations.')
+add('P17-04.11','A conditional deferred journal now exists on the reassessed book.','The older carry cannot preserve it automatically;annual admission remains absent.','Implement explicit provisional carry binding full deferred result and unknowns.')

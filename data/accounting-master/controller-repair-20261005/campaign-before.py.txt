@@ -1,0 +1,94 @@
+    def campaign(self, seconds=172800, max_phases=15, require_review=True):
+        """Continue authorized proposal invocations under one durable deadline."""
+        with exclusive_lock(self.home / 'campaign.lock'):
+            path = self.home / 'campaign.json'
+            if path.exists():
+                campaign = load_json(path)
+            else:
+                started = time.monotonic()
+                campaign = {'schema_version': 'accdsl.master.campaign.v1', 'status': 'prepared',
+                    'started_at': now(), 'started_monotonic': started,
+                    'deadline_monotonic': started + seconds, 'allowance_seconds': seconds,
+                    'boot_id': boot_identity(), 'invocations': [], 'consecutive_no_progress': 0,
+                    'plan': 'docs/plans/accounting-master-campaign-20261005.md',
+                    'mission_complete': False, 'product_implementation_enabled': False}
+            campaign_remaining(campaign)  # Resume never silently grants more time.
+            if campaign.get('status') == 'budget_exhausted':
+                return 'budget_exhausted'
+            if campaign.get('status') == 'proposal_ready':
+                with exclusive_lock(self.home / 'runner.lock'):
+                    self.reload_state()
+                    if self.proposal_gate()['ready']:
+                        return 'proposal_ready'
+                campaign.update(status='needs_supervisor_repair', reason='Prior campaign readiness no longer matches current evidence')
+                atomic_json(path, campaign)
+                return campaign['status']
+            if (not isinstance(campaign.get('invocations'), list)
+                    or type(campaign.get('consecutive_no_progress')) is not int
+                    or campaign['consecutive_no_progress'] < 0):
+                raise ContinuationVeto('Invalid campaign progress record')
+            campaign.update(status='running', supervisor=process_identity(os.getpid()), resumed_at=now())
+            atomic_json(path, campaign)
+            limits = self.catalog['limits']
+            admission = (worker_seconds('plan', limits) + worker_seconds('review_plan', limits)
+                         + worker_seconds('implement', limits)
+                         + limits.get('verification_reserve_seconds', 0) + 180)
+            try:
+                while True:
+                    remaining = campaign_remaining(campaign)
+                    campaign['remaining_seconds'] = round(remaining, 3)
+                    if (self.home / 'stop-request.json').exists():
+                        campaign['status'] = 'stop_requested'
+                        break
+                    if campaign['consecutive_no_progress'] >= 2:
+                        campaign['status'] = 'needs_supervisor_repair'
+                        campaign['reason'] = 'Two invocations without substantive file or new phase-acceptance progress'
+                        break
+                    if remaining < admission:
+                        campaign['status'] = 'budget_exhausted'
+                        campaign['reason'] = f'Need {admission:g} seconds for startup and a full useful cycle; have {remaining:.1f}'
+                        break
+                    before_accepted = {p for p, r in self.state['phases'].items() if r['status'] == ACCEPTED}
+                    previous_runs = len(self.state['runs'])
+                    allowance = min(limits.get('run_seconds', 7200), int(remaining))
+                    campaign.update(next_invocation_seconds=allowance, updated_at=now())
+                    atomic_json(path, campaign)
+                    outcome = self.run(max_phases=max_phases, seconds=allowance,
+                                       require_review=require_review, resume_stop=False,
+                                       campaign_deadline=campaign['deadline_monotonic'])
+                    if len(self.state['runs']) <= previous_runs:
+                        raise ContinuationVeto('Campaign invocation produced no run record')
+                    run_name = self.state['runs'][-1]
+                    progress = campaign_progress(self.root, local_path(self.root, run_name),
+                                                 before_accepted, self.state)
+                    campaign['invocations'].append({'run': run_name, 'outcome': outcome,
+                        'completed_at': now(), **progress})
+                    campaign['consecutive_no_progress'] = (0 if progress['progress']
+                        else campaign['consecutive_no_progress'] + 1)
+                    campaign['remaining_seconds'] = round(campaign_remaining(campaign), 3)
+                    atomic_json(path, campaign)
+                    if outcome == 'proposal_reviewed_implementation_held':
+                        campaign['status'] = 'proposal_ready'
+                        break
+                    if outcome in {'stop_requested', 'interrupted', 'continuation_veto'}:
+                        campaign['status'] = outcome
+                        break
+                    if outcome not in {'phase_limit', 'budget_exhausted', 'wall_limit',
+                                       'remaining_work_requires_repair_or_dependency'}:
+                        campaign.update(status='needs_supervisor_repair', reason='Unexpected invocation outcome: ' + outcome)
+                        break
+                    plan = load_json(self.home / 'next-plan.json')
+                    if not plan.get('eligible_phases'):
+                        campaign.update(status='needs_supervisor_repair', reason='No eligible proposal phase; inspect preserved findings')
+                        break
+                    self.event('campaign_continuing', previous_outcome=outcome,
+                               remaining_seconds=campaign['remaining_seconds'], progress=progress['progress'])
+            except (MasterError, ValueError, OSError, KeyboardInterrupt) as error:
+                campaign.update(status='continuation_veto' if isinstance(error, ContinuationVeto) else 'interrupted',
+                                reason=f'{type(error).__name__}: {error}')
+            finally:
+                campaign.update(updated_at=now(), supervisor=None)
+                atomic_json(path, campaign)
+            self.event('campaign_finished', status=campaign['status'], invocations=len(campaign['invocations']))
+            return campaign['status']
+

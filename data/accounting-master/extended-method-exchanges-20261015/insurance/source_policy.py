@@ -1,0 +1,35 @@
+"""Pinned retained historical sources and method-specific clauses."""
+BASE='docs/design/research/p08-v3-preparation/'
+RAW=BASE+'eu-2023-1803-original.pdf'
+TEXT=BASE+'eu-2023-1803-original.txt'
+RAW_SHA='e4fde71d4db44ef7c6c74055a564c8cb071340442b63185ff1700c86a64579e5'
+TEXT_SHA='37f207b1ecdde43e3971cf076f127576d3d7810c791385ba5b1c35f110f17664'
+METHOD_FILES=['docs/design/proposal/methods/'+p for p in (
+ 'insurance-treaty-changes-20261015.md','insurance-modification-values-20261015.tex',
+ 'insurance-paa-cost-finance-20261015.tex','insurance-variable-fee-20261015.tex',
+ 'insurance-finance-process-20261015.tex')]
+ANCHORS={
+ 'grouping.assess@1':'IFRS17.14-24',
+ 'acquisition.allocate@1':'IFRS17.28A-28D.B35A-B35B',
+ 'acquisition.recoverability@1':'IFRS17.28E-28F.B35C-B35D',
+ 'gmm.recognize@1':'IFRS17.32-38.47-49',
+ 'gmm.future@1':'IFRS17.44c.48-50',
+ 'gmm.service@1':'IFRS17.44e.B119-B125',
+ 'reinsurance.recognize@1':'IFRS17.62-66B.B119C-B119E',
+ 'reinsurance.change@1':'IFRS17.50.66c.B119F',
+ 'reinsurance.nonperformance@1':'IFRS17.63.67',
+ 'reinsurance.settle@1':'IFRS17.66.78-85.B119F',
+ 'modification.replace@1':'IFRS17.72-77',
+ 'contract.transfer@1':'IFRS17.74-77',
+ 'paa.recognize@1':'IFRS17.53-59',
+ 'paa.service@1':'IFRS17.55.B126',
+ 'paa.onerous@1':'IFRS17.57-58',
+ 'paa.claim@1':'IFRS17.59b.B72eiii',
+ 'paa.finance@1':'IFRS17.88b.B72eiii.B133',
+ 'paa.settle@1':'IFRS17.59b.74',
+ 'vfa.recognize@1':'IFRS17.45.B101-B109',
+ 'vfa.pool@1':'IFRS17.45.89a.B111-B113',
+ 'vfa.service@1':'IFRS17.45e.85.B119-B125',
+ 'vfa.guarantee@1':'IFRS17.45.48.B113-B118',
+ 'vfa.settle@1':'IFRS17.85.B120',
+ 'finance.variable@1':'IFRS17.88b.B132'}

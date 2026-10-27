@@ -1,0 +1,1 @@
+Exact source preservation, checked erasure/lift reasoning and bounded rendered author review support provisional 5.42. Financial corrections must preserve assertion history separately from economic continuity. Financing evidence and all original rows are preserved.

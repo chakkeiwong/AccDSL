@@ -1,0 +1,185 @@
+\section{Binding a return obligation to its applicable equations}
+\label{sec:requirement-successors}
+
+A return obligation connects several different quantities: the number of goods
+expected to be returned, the refund per unit, the carrying amount recoverable
+from each return, and the balances already recorded. Checking their relationship
+requires more than scalar bounds. The quantities must come from the intended
+record, their units must combine correctly, and the equation must apply to the
+state being examined. The successor requirement references make those three
+steps explicit while preserving the first reference's supplied-input semantics.
+
+Consider the retained conditional return example for legal entity P and its
+2025 annual period. In its unsettled opening, expected returns are two units,
+the refund is 20 dollars per unit, and the cost is 12 dollars per unit. Estimated
+handling and deterioration reduce recovery by three and one dollars per unit,
+respectively. These are supplied assumptions in a finite example. Its selected
+opening equations are
+\begin{align}
+  L_{\mathrm{refund}} &= q p = 2\times20 = 40, \\
+  A_{\mathrm{recovery}} &= q(c-h-d)
+    = 2(12-3-1)=16.
+\end{align}
+Here $q$ is a quantity of goods; $p,c,h,d$ are dollars per unit; and both balances
+are dollar amounts. The example's separate zero-tax-base conditions and supplied
+tax rate of one quarter give the selected deferred-tax amounts 10 and 4. Those
+premises belong to the retained conditional method. The equations alone establish
+neither the premises nor the broader recognition and measurement treatment.
+
+\subsection{Select the record before checking its amounts}
+
+An input such as the refund balance must identify the exact record and field
+from which it is read. Otherwise an equation could pass using a revised record,
+another legal entity, or a consolidated amount that happens to share the same
+number. The binder requires the caller to supply a plan, the selected method
+definition, a selected-field schema, and the raw record bytes. It resolves
+content identities from those supplied registries; it does not fetch files or
+follow executable references.
+
+The plan names the definition's canonical digest. Each named record has a raw
+SHA256 digest and a schema digest, and each binding names an input, record and
+JSON pointer. The input's source reference must equal
+\code{sha256:RAW\_DIGEST\#POINTER}. The schema declares the field's complete type,
+role, encoding and missing-path policy. Type, context and role must agree exactly
+with the method input. All declared inputs must be mapped once, and every named
+record must be used. Missing registry entries are unsupported; stale hashes,
+duplicate mappings and undeclared field selections are invalid.
+
+The raw decoder rejects duplicate keys, floating-point numerals, nonfinite
+values, malformed UTF-8 and non-ASCII object keys. Unicode string values remain
+available. Pointer escapes are checked before traversal, including when an
+earlier part of the path is absent. A malformed pointer is an invalid request,
+whereas an absent well-formed path follows the declared missing policy. Traversing
+a scalar as though it were a collection is invalid. These distinctions prevent a
+bad selector from being treated as merely unavailable financial information.
+
+The three encoding choices also carry substantive meaning. A scalar is read as
+a known value of its declared type. The explicitly selected legacy convention
+treats the string \emph{unknown} as an unresolved value. A tagged binding supplies
+its own known value or unknown reason. The missing-path policy is either invalid
+or unresolved; unresolved paths receive the reason
+\code{missing\_declared\_path}. None of these conventions supplies zero. A text
+field using the scalar convention can contain the known word \emph{unknown}.
+
+A successful binding returns the values and their record, pointer, schema,
+type, role and source identity. The selected requirements are then assessed on
+those values. Binding can therefore succeed while a method condition is invalid
+or unresolved. Exact identity makes the calculation reproducible; the caller
+still has to justify the schema's economic meaning and the source's authority.
+The conformance examples that serialize supplied values into canonical records
+identify those records as derived projections, rather than original filing bytes.
+
+\subsection{Multiply quantities without erasing their units}
+
+The dimensional successor, \code{MethodRequirements/2}, adds multiplication and
+separates dimensions and scale from the context map. A rational type contains
+its kind, context, dimension exponents and a positive rational scale. The
+context identifies such matters as entity, legal book, component, period and
+basis. A dimension name denotes a caller-declared quantity such as dollars or
+return units. Zero exponents are omitted; exponents are bounded integers.
+
+For two rational inputs in exactly the same context, let $a,b$ be their rational
+coefficients, $s_a,s_b$ their scales and $d_{a,k},d_{b,k}$ the exponents of dimension
+$k$. Multiplication produces
+\[
+ (ab,\ s_a s_b,\ \{k\mapsto d_{a,k}+d_{b,k}\}).
+\]
+Thus a return-unit quantity multiplied by dollars per return unit gives dollars:
+the unit exponent cancels and the dollar exponent remains one. This rule defines
+the local type calculation. It uses exact rational arithmetic and validates the
+resulting type; it performs no inferred currency or scale conversion.
+
+Addition, subtraction and comparison require exact agreement of context,
+dimensions and scale. A dollar amount at scale one cannot be added directly to
+a dollar amount at scale one thousand. Two different currencies do not match,
+and a legal-book amount cannot be exchanged for a consolidated observation.
+A conversion or allocation needs a separately specified relation. An older v1
+context string that happens to contain a currency name is never promoted
+automatically to this dimensional type.
+
+The implementation lowers products to internal typed inputs, uses the preserved
+scalar evaluator for the remaining operations, and restores the original
+dependencies and unknown reasons in public findings. Internal product identities
+and the reserved context keys used to encode dimensions are unavailable to caller
+declarations in the dimensional versions. If a factor is unknown, the product
+remains unknown even when another factor is zero. This follows the declared
+conservative evaluation rule; it is not a symbolic proof about all admissible
+histories.
+
+\subsection{An inactive equation does not settle an unknown fact}
+
+The unsettled return equation is inappropriate once the example's obligation
+has been settled. \code{MethodRequirements/3} therefore adds a Boolean guard and
+its exact dependency list to each requirement. The body predicate retains its
+own dependency list. For the unsettled allocation, the guard is the negation of
+the supplied settlement indicator; a separate settled requirement checks the
+corresponding zero balance. The caller must author these conditions explicitly.
+
+Guard evaluation has three distinct consequences. A true guard activates the
+body's ordinary true, false or unknown result. A false guard marks the requirement
+\code{not\_applicable}, even when the body is false or unknown. An unknown guard
+leaves the requirement unresolved, even when its body happens to be true. The
+result retains guard truth, body truth, activation and all original dependencies.
+The interpreter checks structure and types in every branch before assessment;
+an inactive branch cannot hide an unsupported operator or malformed value.
+
+Some facts remain necessary independently of whether a particular equation is
+active. A separate \code{required\_known} list declares those inputs. If the
+refund balance is required but unknown, making the unsettled equation inactive
+does not make the balance known. The result remains unresolved on that separate
+condition. When all requirements are inactive and no other condition fails, the
+summary is \code{no\_active\_requirements}. It does not assert that an accounting
+method has been satisfied or can run.
+
+For the zero-tax-base example, an equation's false guard also must not hide a
+method limitation. Its zero-base scope checks are independently active: a known
+nonzero base remains unsupported by the selected method, even though the
+corresponding zero-base equation is inactive. This is why applicability, mandatory
+knowledge and supported scope have separate declarations. Their adequacy remains
+a question for the method's designer, supported by its source and state evidence.
+
+\subsection{Keep versions explicit through authoring and exchange}
+
+The new \code{MethodRequirementExchange/2} selects exactly one of the three
+requirement profiles. It carries the full definition, selected digest, values
+and available-capability names. The new text header names both the exchange and
+requirement versions; input and constant declarations carry complete type
+objects. The first two requirement versions use \code{require}; v3 uses
+\code{guarded}, including separate guard and body dependencies and expressions.
+Every v3 text document must contain exactly one \code{required\_known} list,
+including an explicit empty list when intended. Omitting it is invalid.
+
+The following fragment shows the guarded return relation after its quantity,
+price, balance and settlement inputs have been declared. As in the preceding
+reference, the display wraps one declaration for readability; the executable
+text places each complete declaration on one line.
+\begin{lstlisting}
+guarded "refund_allocation" invalid unresolved
+  ["settled"] ["expected","refund","refund_per_unit"]
+  ["retained-unsettled-zero-tax-base-premises"]
+  (not (ref "settled"))
+  (eq (ref "refund")
+      (mul (ref "expected") (ref "refund_per_unit")));
+\end{lstlisting}
+The complete document supplies the remaining declarations and its exact content
+digest. Changing the guard, a type, a required-known list or a source reference
+changes the selected definition. An unknown profile or incompatible declaration
+is rejected. Profile names select a closed set of preserved evaluators; they
+cannot name a caller-provided module or callback.
+
+The corresponding \code{MethodInputBinding/2} requires a
+\code{RequirementInputSchema/2} that explicitly names the expected requirement
+profile. It retains the original full types and original plan, method, schema
+and raw-record identities. Internally, a separately identified v1 representation
+reuses the protected byte and pointer validation. This representation checks
+binding only and is never assessed as the method. The original selected evaluator
+receives the bound values, preserving dimensions, guards and unresolved reasons.
+
+The recorded comparisons cover 32 cases, including 29 retained examples, and
+59 combined unit-test methods. Full selected assessments agree across typed
+definitions, text, exchange and binding; independently authored syntax and
+adversarial changes supplement the roundtrips. These are deterministic checks
+of the stated language fragment. Collection membership, identity order and selected shared-book conditions are
+made explicit in the following section. State effects, replay and reporting
+still require complete method semantics. Selected requirements can explain why
+an input is usable or why work must wait; they do not authorize those transitions.

@@ -1,8 +1,336 @@
 # Requirements supplement after the October continuation
 
-Updated 13 October 2026. Supplements the original MC01–MC35/G1–G18 acceptance
+Updated 15 October 2026. Supplements the original MC01–MC35/G1–G18 acceptance
 and exact P19 negative assessment. Requirement wording and frozen phase evidence
 are unchanged. Current checkpoint: `accounting-master-checkpoint.md`.
+
+## Extended method exchanges in progress — 15 October 2026
+
+R03-P1 maps all46 operation rows and protects204 inputs. CorporateComponents/5
+retains /1–/4 and passes7,160 documentary checks across93 supported finite
+methods plus one unresolved settlement boundary,161 transitions in61 paths,
+670 exchanges and28 annual reports. Complete customer advance/invoice/collection,
+separate additions, variable consideration and cost-recovery fallback have
+typed positive/adverse paths. Actual nonzero-cost return settlement is unspecified.
+Result: data/accounting-master/extended-method-exchanges-20261015/corporate-v5/result.md.
+All13 corporate rows are reconciled in the sibling p2-coverage-reconciliation.md;
+P2 residual methods/authority and P5 combined-company joins remain open.
+Next ready work: P3 financing/bank/group and P4 insurance successors, then P5
+integration, R04/R06 residuals, R07 and all53/interactions R08. Active PDF:
+Version3.13,340 pages. Full readiness is not_ready; runtime/empirical work is held.
+
+## Insurance models, modification values and dependence — 15 October 2026
+
+R03-O is integrated in Version 3.13, 340 pages. Eight groups pass 121 exact checks; 136 preservation/build checks and ten final pages were inspected. Result: data/accounting-master/insurance-model-branches-20261015/result.md. Modification values, PAA costs/claim finance, VFA service/mitigation and variable-payment OCI have conditional methods. The joint claim-law family preserves dependence. Actual valuation, closed profiles and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Retained options and asset classification — 15 October 2026
+
+R03-N is integrated in Version 3.12, 335 pages. Seven groups pass 104 exact checks; 125 preservation/build checks and seven final pages were inspected. Result: data/accounting-master/bank-options-classification-20261015/result.md. Conditional calls, puts, collars and amortised-cost transfers preserve net exposure; debt/equity measurement and disposal follow distinct classification findings. Pricing, actual admission, closed profiles and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Amendment dates, award costs and net-hedge timing — 15 October 2026
+
+R03-M is integrated in Version 3.11, 332 pages. Eight groups pass 75 exact checks; 126 preservation/build checks and eight final pages were inspected. Result: data/accounting-master/financing-modifications-net-hedges-20261015/result.md. Binding amendment, discharge and delivery, original/incremental award costs, cash-to-equity modifications and gross/net hedge timing are explicit conditional methods. Closed profiles and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Opening production, pension funding and restoration cash — 15 October 2026
+
+R03-L is integrated in Version 3.10, 329 pages. Six groups pass 58 exact checks; 121 preservation/build checks and five final pages were inspected. Result: data/accounting-master/corporate-cohorts-funding-20261015/result.md. FIFO/average opening work, abnormal loss and pension availability/funding are explicit. The restoration cash classification remains a provisional interpretation with its competing consequence retained. Closed profiles and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Group joins, restatement and exchangeability — 15 October 2026
+
+R03-K is integrated in Version 3.09, 326 pages. Seven groups pass 73 exact checks; 119 preservation/build checks and six final pages were inspected. Result: data/accounting-master/group-restatement-exchangeability-20261015/result.md. Reporting-date balance elimination is distinguished from transaction control intervals; inflation, tax opening and dated exchangeability procedures remain conditional. Closed profiles and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Partial treaties and insurance finance — 15 October 2026
+
+R03-J is integrated in Version 3.08, 322 pages: covered-subset treaties, changed estimates, CSM/loss ordering and finance profit/OCI allocation. Five groups pass 58 exact checks; 115 preservation/build checks and six final pages were inspected. Result: data/accounting-master/insurance-treaty-changes-20261015/result.md. Actual valuation, wider branches and closed exchanges remain open; readiness stays not_ready.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Revolving facilities, fees and transfers — 15 October 2026
+
+R03-I is integrated in Version 3.07, 319 pages: partial/revolving funding and ECL, fee purpose and effective interest, eligible partial transfers, retained-risk funding and guarantee continuing involvement. Eight groups pass 74 exact checks; 116 preservation/build checks and six final pages were inspected. Result: data/accounting-master/bank-transfer-fees-20261015/result.md. Actual facts, complex branches and closed exchanges remain open; readiness stays not_ready.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Award conditions and participation — 15 October 2026
+
+R03-H2 is integrated in Version 3.06, 316 pages: service/market/non-market conditions, cancellation, cash remeasurement, settlement choice and participation/EPS have conditional methods. Eleven groups pass 79 exact checks; 113 preservation/build checks and six final rendered pages were inspected. Result: data/accounting-master/awards-participation-20261015/result.md. Valuation, further financing methods and complete exchanges remain open. Full readiness stays not_ready.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Hedge components and rebalancing — 15 October 2026
+
+R03-H1 is integrated in Version 3.05, 313 pages. Separate time-value reserves, transaction/time-period treatment, aligned terms and prospective rebalancing have source-supported conditional methods. Six groups pass 69 exact checks; 112 preservation/build checks and six final rendered pages were inspected. Result: data/accounting-master/financing-components-20261015/result.md. Complex component valuation and the other financing methods remain open; full readiness is not_ready.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Impairment and tax-origin methods — 15 October 2026
+
+R03-G is integrated in Version 3.04, 310 pages. Corporate-asset ordering, partial/NCI goodwill, revalued tax origins, acquisition/investment tax and the historical Pillar Two accounting exception have conditional methods. Six case groups pass 39 exact checks and 113 preservation/build checks; final pages 1 and 124–127 were inspected. Result: data/accounting-master/impairment-tax-repairs-20261015/result.md. Full readiness remains not_ready.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Corporate event methods — 15 October 2026
+
+R03-F is integrated in Version 3.03, 307 pages: major-inspection replacement, homogeneous lease scope decrease and usage payments, benefits curtailment/settlement/ceiling ordering and multi-employer classification. Five conditional cases pass 33 exact arithmetic/conservation checks; five final rendered pages were inspected. Result: data/accounting-master/corporate-event-repairs-20261015/result.md. Actual valuations and heterogeneous rights remain conditional; remaining methods and extended profile closure keep R03 and readiness open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Selected adapter and next method repairs — 15 October 2026
+
+R06's finite source-selection/exchange increment is integrated in Version 3.02, 304 pages. It pins 51 retained source premises and eleven complete documentary exchanges; 1,255 source/schema/semantic checks pass. Four final rendered pages were inspected. Result: data/accounting-master/selected-reuse-20261015/result.md. The exact transitive environment, runtime translation and component-specific terms remain explicitly unresolved; no converter ran. Full readiness stays not_ready.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Future validation design — 15 October 2026
+
+R05 is integrated in Version 3.01 (303 pages): target-specific future protocols distinguish exact conformance, extraction, predictive, sector, numerical/causal and usability evidence. Forecast origins, partly elapsed periods, first-release outcomes, exposure, unresolved mass and uncertainty are explicit. 148 protocol/source/arithmetic checks and 110 preservation/build checks passed; seven final rendered pages were inspected. Result: data/accounting-master/future-validation-20261015/result.md. Actual eligible data, budgets, inference designs and empirical results remain separate pre-run dependencies. Full readiness remains not_ready.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Literature reconciliation and next work — 15 October 2026
+
+R04's scoped reconciliation is delivered: 44 inherited consequential claims reviewed, 20 source-specific claim records appended, and 78 integrity/disposition checks passed. All six ledgers preserve historical rows and dates; four blocked originals remain blocked. Result: data/accounting-master/consequential-literature-20261015/result.md. Version 3.00 and its PDF are unchanged. Broad literature/proof coverage, named R03 design residuals, validation, dependency decisions and final assessment remain open; full readiness stays not_ready.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Corporate methods and next work — 15 October 2026
+
+R03-E's finite corporate repair is integrated in Version 3.00: twelve operating/restoration histories and three tax branches; 559 exact arithmetic/source checks and 111 preservation/build checks pass; eight rendered pages inspected. Restoration, assurance, mixed contracts, WIP/joint products, deferred supplier terms and uncertain tax have conditional methods. Result: data/accounting-master/finite-method-decisions-20261015/corporate/result.md. Required remaining design is explicit in corporate/residual-disposition.md and ../residual-followup.md; R03/P17 remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Group bindings — 15 October 2026
+
+R03-D's finite group binding is integrated in Version 2.99: 22 documentary exchanges, 1,516 independent financial/closure/world checks and 106 preservation/build checks pass; five rendered pages inspected. Exact entities, books, control/perimeter, rate direction/time, NCI history and separate disposal branches connect to common request/replay rules. Result: data/accounting-master/finite-method-decisions-20261015/group/result.md. Broader group methods, actual facts, runtime and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Bank restructuring — 15 October 2026
+
+R03-C's finite bank repair is integrated in Version 2.98: seven histories, 224 independent documentary checks and 106 preservation/build checks pass; seven rendered pages inspected. Modification, credit-impairment cure, delayed collateral, write-off and confirmed funding retain distinct evidence and timing. Result: data/accounting-master/finite-method-decisions-20261015/bank/result.md. Actual calibration, broader methods and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Insurance valuation — 15 October 2026
+
+R03-B's finite insurance valuation and acquisition/treaty interaction are integrated in Version 2.97: six histories, 433 independent documentary checks and 105 preservation/build checks pass; eight rendered pages were inspected. The guarantee price is derived by replication; physical probabilities and nonfinancial risk adjustment stay separate. Timely/late treaty recognition and acquisition transfer retain different income histories. Result: data/accounting-master/finite-method-decisions-20261015/insurance/result.md. Actual calibration, wider insurance methods, R03 and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Financing repair — 15 October 2026
+
+R03-A's scoped financing repair is integrated in Version 2.96: nine cases, 302 independent checks and 103 preservation/build checks pass; seven rendered pages were inspected. Repurchase/inducement allocation, cash-flow reserve transfers, fair-value hedge amortisation and conditional benchmark reform are explicit. Historical authority, actual valuations and broader financing residuals remain distinct. Result: data/accounting-master/finite-method-decisions-20261015/financing/result.md. R03 and full readiness remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Real-package completion — 15 October 2026
+
+R02 is delivered within its finite documentary scope in Version 2.95: 31 connected exchanges, 4,760 independent checks and 103 preservation/build checks pass; eight rendered pages were inspected. The Apple package preserves reported tokens, conditional histories and joint settlements, missing feasible remainder and exact-byte clocks, plus separate original/later views. JPMorgan conflict remains company-specific. Result: data/accounting-master/real-package-connection-20261015/result.md. Actual histories, full readiness and independent/human acceptance remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Corporate completion — 15 October 2026
+
+R01 is delivered as a finite documentary specification in Version 2.94: 70 connected exchanges, 724 independent checks and 101 preservation/build checks pass; eight rendered pages were inspected. Historical journals feed the scenario opening; typed unknowns, time admission, conditional interpretations, separate transaction owners and complete recovery worlds are explicit. Result: data/accounting-master/corporate-portable-20261015/result.md. Runtime, full readiness and independent/human acceptance remain open.
+
+Next: closed successor method profiles and complete exchanges under docs/plans/accounting-extended-method-exchanges-20261015.md; closed extended exchanges and R07/R08 stay open. Runtime and empirical execution remain held.
+
+## Convergence audit and finite continuation — 15 October 2026
+
+The Version2.93 convergence audit now preserves all53 original obligations with
+located current support, specific residuals and classified dependencies:
+data/accounting-master/convergence-audit-20261015/evidence-ledger.json.
+Its52 evidence files are retained as exact snapshots;81 protected files and
+the100-entry unrelated index remain unchanged. Integrity checks do not grant
+substantive acceptance or replace the negative Version2.72 full assessment.
+
+Corporate, group/financing, bank, insurance and real-package interactions were
+inspected. The audit found a corporate request/result closure gap. R01 now
+supplies its finite exact documentary exchanges in Version 2.94.
+Insurance already has scoped exact exchanges. Apple and JPMorgan source/review
+work is credited without inventing private histories or joining companies.
+
+The finite repair queue is
+data/accounting-master/convergence-audit-20261015/repair-queue.md.
+R01 corporate closure → R02 real-package connection; R03 methods/sector scope,
+R04 consequential literature, R05 future validation design and R06 reuse locks
+feed R07 whole-candidate integration and R08 assessment/review/staging.
+R01 and R02 are delivered within their documentary scopes. The immediate plan is
+docs/plans/accounting-finite-method-decisions-20261015.md.
+Continue ready units after local failures; human feedback blocks acceptance,
+not provisional repairs. No runtime/controller, installation, external outreach,
+paid review or publication is authorized.
+
+## Current scoped progress — Version 2.93
+
+274 pages; **not_ready**.
+PDF: `docs/design/proposal/manuscript-insurance-branches-20261015/accounting-product-proposal.pdf`
+SHA256: `ff035c08ffaa7c70f6e086bb85a05a019ec43db00057da76d264270633b11f15`.
+
+P17-04/11's production-cost method is integrated in Version 2.93: 218 exact calculation/admission checks, 26 source checks and 101 preservation/build checks pass; seven rendered pages were inspected. Normal capacity, low/high/idle output, abnormal waste, unsold stock and noncash production depreciation connect through journals and pretax statements. Balanced wrong allocations are rejected. Tax remains explicitly uncomputed. Result: data/accounting-master/p17-completion-20261014/P17-04/production-cost/result.md. P17/E07/E14 remain open.
+
+P17-04/08/11's error-versus-estimate bridge is integrated in Version 2.92: 198 exact calculation/semantic checks, 33 source checks and 100 preservation/build checks pass; seven rendered pages were inspected. Prior authorization, original availability, comparative and opening-equity tax effects, current-quarter correction and duplicate guards are explicit. Private-entity EPS scope is sourced; actual admission and broader EPS/restatement interactions remain. Result: data/accounting-master/p17-completion-20261014/P17-04/error-estimate/result.md. P17/E07/E14 remain open.
+
+P17-08/10/11's sector-evidence revision supplement is integrated in Version 2.91: 29 composition traces, 235 independent checks, 22 EPS financing-repair checks and 100 preservation/build checks pass; seven rendered pages were inspected. Time admission, candidate membership, frozen/current results and exact replay preserve committed books. The EPS coupon schedule is now explicit and the after-coupon conversion transfer is corrected from9600 to9200; EPS values are unchanged. Result: data/accounting-master/p17-completion-20261014/P17-08/sector-revision/result.md. P17/E01/E07/E14 remain open.
+
+P17-05/11's EPS lifecycle is integrated in Version 2.90: 105 exact calculation/admission checks, 31 source checks and 97 preservation/build checks pass; six rendered pages were inspected. Dated shares, split adjustments, attributed earnings, sequential dilution and actual conversion/lapse cases preserve separate monetary events. The retained historical IAS33 text and supplied terms do not establish current issuer compliance or award valuation. Result: data/accounting-master/p17-completion-20261014/P17-05/eps-lifecycle/result.md. This advances scoped MC02/06/07/11/13/15–17/19/20/24–28/30/32–35; P17/E07/E14 remain open.
+
+P17-06/11's bank-prudential connection is integrated in Version 2.89: 108 exact accounting/capital/decision checks, 32 source checks and 97 preservation/build checks pass; eight rendered pages were inspected. One conditional US national-bank book connects earnings, eligible capital, allowance-cap ordering, exposures and a separately supplied leverage average. The frozen 1 January2026 rule snapshot and older instruction cross-check do not establish actual-date compliance or payout permission. Result: data/accounting-master/p17-completion-20261014/P17-06/prudential-connection/result.md. This advances scoped MC02/05/13–17/19–21/24–28/30/32–35; P17/E07/E14 remain open.
+
+P17-10/11's connected-insurance atomic-commit specification is integrated in Version 2.88: 27 complete exchanges, 2,428 independent exchange checks and 95 preservation/build checks pass; seven rendered pages were inspected. Four distinct events preserve component and journal changes, published dependency closure, replay before freshness and both lost-acknowledgement worlds. Result: data/accounting-master/p17-completion-20261014/P17-10/insurance-atomic/result.md. This advances scoped MC02/04/11/13/18/20/22/24/25/27/28/32–35; P17/E07/E14 remain open.
+
+P17-10's reserving-adapter contract is integrated in Version 2.87: 18 complete exchanges, 1,115 independent exchange checks and 93 preservation/build checks pass; six rendered pages were inspected. The native zero-coercion limitation, process-law identity, partial/cancelled draws and resume limits are explicit. Result: data/accounting-master/p17-completion-20261014/P17-10/reserving-adapter/result.md. This advances scoped MC11/12/20/23–27/30–35; P17/E07/E14 remain open.
+
+P17-09's bootstrap-consistency audit is integrated in Version 2.86: 53 exact and 86 preservation/build checks pass; eight rendered pages were inspected. The final published source, conditioning target, backward-law obligation and corrected reserve center are explicit. All six literature ledgers preserve historical records. Result: data/accounting-master/p17-completion-20261014/P17-09/bootstrap-consistency/result.md. P17/E07/E08 remain open.
+
+P17-09 reserving uncertainty is delivered in Version2.85:46 exact and85 preservation/build checks pass; seven rendered pages inspected. Two-stage prediction, process-law identity, shared-fit dependence, sparse-data refusal and one-year re-estimation are specified. All six literature ledgers retain their historical records. Result: data/accounting-master/p17-completion-20261014/P17-09/reserving-bootstrap/result.md. P17/E07/E08 remain open.
+
+P17-08’s [query-resolution cases](../../data/accounting-master/p17-completion-20261014/P17-08/query-resolution/result.md)
+are delivered in 2.84: 671 exact numerical/dependency checks, 13 semantic
+comparisons of 17 specified exchanges, and 84 preservation/build checks pass;
+five pages are inspected. Exact-real bounds, output rounding and cent-grid
+inputs stay distinct; sector memory and unresolved mass survive query changes.
+P17-08 and broader mapping/continuous/interaction obligations remain open.
+
+P17-07’s [connected insurance groups](../../data/accounting-master/p17-completion-20261014/P17-07/connected-groups/result.md)
+are delivered in 2.83: 248 exact calculation and 83 preservation/build checks
+pass; seven rendered pages are inspected. Separate issued and held groups
+reconcile through finance, service and settlement; timely/late treaty and
+invalid pooling cases expose errors hidden by identical terminal cash.
+P17-07/E07 and actuarial/actual-fact obligations remain open.
+
+P17-06’s [commitment/drawdown case](../../data/accounting-master/p17-completion-20261014/P17-06/commitment-draw/result.md)
+is delivered in 2.82: 88 exact calculation and 82 preservation/build checks
+pass; seven rendered pages are inspected. Original credit history, conditional
+draw probabilities and provision/allowance movements survive funding. P17-06/E07
+and the connected prudential case remain open.
+
+P17-05’s [connected group/FX case](../../data/accounting-master/p17-completion-20261014/P17-05/group-fx-disposal/result.md)
+is delivered in 2.81: 139 exact calculation and 81 preservation/build checks
+pass; seven rendered pages are inspected. Acquisition, foreign goodwill,
+parent/NCI translation reserves and full/retained-interest loss of control
+reconcile through the same cash and equity statements. P17-05/E07 remain open.
+
+P17-04’s [PPE cost-boundary case](../../data/accounting-master/p17-completion-20261014/P17-04/ppe-cost-boundary/result.md)
+is delivered in 2.80: 73 exact calculation and 80 preservation/build checks
+pass; six rendered pages are inspected. The dated inventory-source dependency
+is resolved for calendar 2024; preparation cost, sample sales and idle-period
+depreciation stay separate. P17-04/E07 and whole-company assembly remain open.
+
+[P17-04's impairment allocation repair](../../data/accounting-master/p17-completion-20261014/P17-04/impairment-floors/result.md)
+is delivered in 2.79. Capped proportional allocation, depreciation-adjusted
+reversal and unchanged goodwill have exact cases, with explicit residual and
+missing-input behavior. All 70 calculation and 79 preservation/build checks
+pass; six pages are inspected. This advances the scoped MC obligations below
+without closing P17-04/E07. Current authority, actual measurement, zero-weight
+interpretation and whole-company assembly remain open. The subsequent initial-cost/pre-use-proceeds unit is delivered above.
+
+[P17-04's PPE operation repair](../../data/accounting-master/p17-completion-20261014/P17-04/ppe-operations/result.md)
+is delivered in 2.78. Replacement, disposal and revaluation now have complete
+pretax journal/state/statement cases and balanced wrong-treatment contrasts.
+All 214 calculation and 78 preservation/build checks pass; seven pages are
+inspected. This advances MC02/04/07/11/13–16/19/20/28/30/32–35 within historical
+source scope. Actual valuation/tax facts and further operations remain open.
+The bounded impairment continuation is delivered above; E07 and MC15 remain open.
+
+[P17-10's state-only allocation exchange](../../data/accounting-master/p17-completion-20261014/P17-10/state-only/result.md)
+is delivered in 2.77. Complete synthetic positive/replay/conflict/adverse
+exchanges preserve credit usage with no monetary lines. All 899 documentary
+exchange and 78 preservation/build checks pass; ten rendered pages are
+inspected. This advances scoped MC02/04/11/13/15/24–27/32–35 without closing
+P17-10/E14 or claiming runtime compatibility. The bounded PPE continuation is delivered above.
+
+[P17-04's customer-obligation repair](../../data/accounting-master/p17-completion-20261014/P17-04/customer-obligations/result.md)
+is delivered in 2.76. Service-warranty allocation, prospective/cumulative
+contract modifications and principal/agent behavior now have exact cases,
+state and pretax statement consequences. All 177 calculation and 80
+preservation/build checks pass; seven rendered pages are inspected. This
+advances the same scoped MC obligations without closing E07 or MC15.
+Assurance measurement authority, mixed cases, actual facts and full company
+assembly retain named residuals. The state-only exchange is delivered above.
+
+[P17-04's advance/return repair](../../data/accounting-master/p17-completion-20261014/P17-04/result.md)
+is delivered in 2.75. Its operation matrix credits existing inventory,
+lease/tax and extension examples and identifies specific remaining methods.
+The new cases preserve advance-credit identity and separate refund/recovery
+states through revisions and settlement. All 92 exact calculation and 75
+manuscript checks pass. This advances scoped MC02/04/07/13–16/19/20/28/30/32–35;
+E07 and full MC15 remain open. The state-only billing exchange is now delivered above as a bounded
+P17-10 supplement; wider interface acceptance remains open. The subsequent service,
+modification and agency methods are delivered above; actual fact and authority
+gaps remain.
+
+[P17-02](../../data/accounting-master/p17-completion-20261014/P17-02/result.md)
+delivers the connected real-package/chronology dossier and the actual Apple
+FY2025 retrospective segment disclosures for 2024/2023. All 70 frozen
+reference rows, seven package obligations, 23 notes, 32 selected assertions
+and seven additional frontiers have current query/residual links. This advances
+MC01–08/10/11/14–16/28/30/32–35 within scope. E01/G5/MC28 remain open:
+conditional row equality does not establish a feasible whole-company history;
+private obligations, tax/cohort/grant facts and historical-byte availability
+remain unresolved. All prior displays/labels/citations survive; nine rendered
+pages are inspected. Full P18-05 and independent/human acceptance remain open.
+
+[P17-01](../../data/accounting-master/accounting-sql-three-valued-logic-20261013/result.md)
+is complete. Version 2.73 adds the checked relational-query competitor and a
+source-bound counterexample to incomplete three-valued inference; the existing
+financial query contract remains unchanged. This advances bounded support for
+MC08–12/23/26/29/30/32–35. Build, source preservation and the affected-page
+inspection passed; whole-candidate P18-05 review remains open.
+
+[P17-03](../../data/accounting-master/p17-completion-20261014/P17-03/result.md)
+completes the internal acceptance comparison for the delivered JPMorgan
+source-reference conflict (MC04/27/28/33). MC27/G17 do not require inventing a
+monetary misstatement. Shared-interface/case integration and independent/human
+acceptance remain; the full G5/MC28 real-case obligation is broader.
+
+The latest full assessment still concerns Version 2.72. These scoped additions
+change no original acceptance wording or frozen status. All five E workstreams
+remain open. The immediate work is the P17-11/P18-03/P19-01 convergence audit,
+followed by other corporate/sector operations and ready literature/interface units.
+
+## Current completion plans — 14 October 2026
+
+The [remaining-phase plan](accounting-remaining-phases-20261014.md) now gives
+the current gaps, dependencies and completion criteria. Plans already existed;
+the refresh replaces their historical execution baselines and adds a connected
+completion route. It changed no requirement wording, acceptance status,
+manuscript content or readiness judgment; the scoped execution above followed.
+
+| Phase | Detailed plan | Remaining obligation |
+|---|---|---|
+| P17 | [Eleven method/source units](accounting-p17-completion-20261014.md) | Complete required real cases, operative authority, corporate/sector methods, cross-cutting contracts, literature and proposed interfaces |
+| P18 | [Six manuscript units](accounting-p18-completion-20261014.md) | Integrate justified findings, reconcile the argument and contracts, preserve technical content, build and inspect the whole final candidate |
+| P19 | [Five assessment units](accounting-p19-completion-20261014.md) | Assess all original obligations and interactions, specify implementation staging, bind independent technical review and record the final readiness decision |
+
+The [coverage map](../../data/accounting-master/remaining-phases-audit-20261014/coverage-map.md)
+allocates all 35 requirements and 18 gaps with their original obligations and
+recorded statuses preserved. P15 maintains coverage; P16 maintains architecture
+through P17-08/10/11 and P18-03. All five E workstreams remain open. P19 assesses
+proposal readiness; runtime conformance, empirical validation and human/domain
+acceptance retain separate evidence. Missing design cannot be renamed later
+implementation to obtain readiness.
+
+P17-01's SQL technical closeout, P17-02's connected dossier and P17-03's internal
+conflict comparison are delivered within scope. The state-only exchange is also delivered. Next: corporate/group impairment and tax-origin repairs under docs/plans/accounting-impairment-tax-repairs-20261015.md; remaining R03 methods/exchanges and R07/R08 stay open. Runtime admission and empirical execution remain held.
+Reuse newer Apple/JPMorgan results before following an old
+source frontier; do not repeat the completed Exhibit 21/22.2 reading or search
+for an invented monetary conflict.
+
+The [audit record](../../data/accounting-master/remaining-phases-audit-20261014/review.md)
+preserves previous controls and verification. Historical scheduling statements
+below remain evidence of earlier work; the new completion plans govern direct
+continuation. The active candidate is Version 2.76 and **not_ready**.
 
 ## Current whole-program assessment — Version 2.72
 
@@ -11,8 +339,9 @@ is complete: all35 requirements/18 gaps and original acceptance statuses are
 preserved. All390 integrity/preservation checks pass. Changed2.70–2.72
 sources are mapped to the current candidate; unchanged judgments are carried
 by exact bytes. A stale corporate-operations disposition was corrected.
-This is an author evidence-delta review; readiness remains not_ready.
-Execute the [SQL/null-semantics inquiry](accounting-sql-three-valued-logic-20261013.md).
+This is an author evidence-delta review; readiness remains not_ready. The SQL
+inquiry has since closed with a scoped integration, without a new full
+assessment.
 
 All35 requirements/18 gaps and five E workstreams remain. The latest
 53-row matrix is the post-certainty Version2.72 assessment. Earlier full

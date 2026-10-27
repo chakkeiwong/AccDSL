@@ -30,6 +30,20 @@ implementation or accounting gaps. Preserve the four original blocked sources.
 If the route succeeds, read the full source before changing the manuscript;
 otherwise retain the blocker and continue other ready internal work.
 
+Audit outcome: this bounded source inquiry passes. The comparator is the
+Version 2.72 certainty section and its exact PDF, not an abstract SQL slogan.
+The primary criterion is identity plus a reconstructible reading of the
+definitions, proof obligations, query classes and counterexamples. An identity
+mismatch or missing technical text vetoes source admission; a mismatch between
+relational nulls and financial histories vetoes theorem transfer, not further
+work. A successful download, low data complexity or an empty SQL result is not
+a completeness criterion. The early diagnostic is the paper's own difference
+counterexample and its explicit set/bag and open/closed-world limits. If the
+paper exposes a material distinction absent from the proposal, integrate only
+that scoped correction in a new protected candidate, then check source,
+mathematics, citation preservation, build and rendered pages. No runtime SQL
+result or default-policy change will be claimed.
+
 Output data/accounting-master/accounting-sql-three-valued-logic-20261013/.
 Refresh the four controls only after a material result and preserve100
 unrelated staged entries. Human acceptance remains separate.

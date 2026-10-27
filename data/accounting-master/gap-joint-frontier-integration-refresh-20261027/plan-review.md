@@ -1,0 +1,1 @@
+Exact source preservation, checked local mathematics and bounded rendered author review support provisional 5.41. Missing saved-result controls were repaired before integration. Exact renaming is the next bounded question; refinement requires its own relation. Financing evidence and all original rows are preserved.

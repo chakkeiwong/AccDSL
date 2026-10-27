@@ -1,0 +1,197 @@
+\chapter{Core grammar, records and execution details}
+\label{app:contracts}
+
+\section{Preserved Core 0 teaching grammar}
+
+The grammar governing the preserved Core 0 teaching examples is reproduced
+from \code{spec/core-0.lark}. It does not enlarge the first matched text
+frontend beyond the portable profile described in the body. Names are
+case-sensitive ASCII identifiers; strings are UTF-8 with JSON escaping. All
+literal words in the grammar are reserved. The companion contract specifies
+valid dates, exact rational literals, argument arity, type/context checks and
+package resolution. A syntax parse is not semantic validation.
+
+\lstinputlisting[basicstyle=\scriptsize\ttfamily]{spec/core-0.lark}
+
+\section{Required core record definitions}
+
+The historical closed machine-readable definitions remain in the original
+design directory at \path{spec/core-ir.schema.json}. They define contexts, source spans,
+observations, narratives, coverage units, mappings, partitions, entity/control
+records, books, accounts, symbols, choices, expressions, constraints, assumptions,
+alternatives, contracts, events, rules, packages, measurements, states,
+journals, scenarios, information views, review decisions, evidence views,
+model scopes, historical families, probability models, report mappings,
+result cells, branches, runs and diagnostics. For those historical records the schema fixes field spelling and structural
+shape, and its companion contract fixes reference resolution and operations.
+New portable records instead obey the exact versioned contracts introduced in
+Chapters~\ref{ch:language}, \ref{ch:execution} and \ref{ch:implementation}.
+No historical field list grants new posting authority.
+
+\begin{minipage}{\linewidth}
+For example, these selected records reproduce the schema's field names.
+Each field is required; a nullable link is represented by explicit null.
+
+\begin{lstlisting}
+EvidenceView {
+  id, cutoff, system_as_of, mode,
+  documents[], observations[], decisions[],
+  conflict_sets[][], transforms[]
+}
+Context {
+  id, entity, perimeter, concept, basis, measurement,
+  time, unit, currency, taxonomy_version, dimensions[]
+}
+Symbol {
+  id, type, context, domain, uncertainty_kind,
+  scope, dependencies[], admission, provenance[]
+}
+Journal {
+  id, event, book, date, accrual_period,
+  postings[], rule, measurements[], assumptions[],
+  precondition_hash, explanation
+}
+ResultCell {
+  id, context, history_condition, scenario, path, kind,
+  value, expression, lower, upper,
+  lower_attained, upper_attained, sample_ref,
+  certificate, reason, dependencies[]
+}
+\end{lstlisting}
+\end{minipage}
+
+A value is a reduced rational, or a typed symbolic/domain reference. A
+posting is nonnegative with its side carrying the sign, in the book's
+functional currency. Original units and the valuation reference survive
+conversion. Monetary contexts require currency; a period flow requires a
+calendar and exclusive end boundary. Historical zero postings may preserve traceability but establish no economic
+event. New portable proposals omit zero lines and retain their explanation in
+the event and findings instead. The amount may have
+finer precision before the declared posting-rounding operation.
+
+Schema validation rejects unknown fields but cannot prove that a treatment
+is permitted, a reference points to the correct kind of record, or two periods
+are comparable. Those semantic checks precede solver or runtime dispatch.
+The structural fixture and complete demonstration source/package are supplied
+separately so that a future implementation can check both layers explicitly.
+\path{fixtures/core-ir-demo.json} supplies an authored expected lowering;
+the reference checker evaluates its selected debt expressions. A general
+source-to-IR compiler and complete external-registry validation remain to be
+implemented. Domain records retain disclosed display text and rounding rules
+alongside their exact bounds.
+
+\section{Typing and partial-information rules}
+
+For expressions $x$ and $y$ in the same currency $C$, the money addition rule is
+\[
+ \frac{x:\operatorname{Money}\langle C\rangle\quad
+       y:\operatorname{Money}\langle C\rangle}
+      {x+y:\operatorname{Money}\langle C\rangle}.
+\]
+Context compatibility is a separate premise for observations. There is no
+analogous implicit rule for different currencies. Explicit conversion uses
+a dated measurement and records its rate and purpose. A rate-times-principal
+calculation is typed through a declared accrual convention; the example's
+annual simple rate and year fraction produce money in the principal's currency.
+
+Known expressions evaluate normally. Shared symbols evaluate to symbolic
+expressions subject to a joint constraint store. Missing source values cannot
+enter arithmetic until the model supplies a symbol or a conditional assumption.
+Boolean guards over symbols produce formulas, not the value false. This avoids
+the common error in which ``unknown whether impaired'' silently means
+``not impaired.'' Division requires a proven nonzero denominator or a
+partitioned domain that excludes zero; otherwise the expression remains
+unsupported for concrete execution.
+
+Logical queries first require a nonempty feasible family. An empty family
+returns \code{Infeasible}; it must not produce vacuous answers to substantive
+questions. For a nonempty family, constraint evaluation has three results.
+\code{entailed} means every state in
+the declared feasible family satisfies the proposition. \code{refuted} means
+none does. \code{undetermined} means both remain feasible or the solver has
+not decided; the response distinguishes those causes. Probabilistic truth is
+a separate query requiring a measure. A language-level Boolean value must
+never be inferred from an arbitrary probability threshold.
+
+For a decided answer, let $F(h)$ be the exact constraint representation of the
+whole family requested by the query, and let $P(h)$ be its proposition.
+Establish feasibility first. Then \code{entailed} requires that
+$F(h)\land\neg P(h)$ has no solution, while \code{refuted} requires that
+$F(h)\land P(h)$ has no solution. Feasible witnesses on both sides establish
+the mixed case. A timeout, unsupported operation, or unfinished search
+establishes neither universal conclusion. A proof for a selected cell applies
+to that cell; it applies to the parent family only with coverage of the
+remaining cells or a proof over the full family. The result records the
+scope, query kind and evidence for that status.
+Section~\ref{sec:query-certainty} distinguishes this Boolean test from a
+certain-tuples view and a family of answer schedules.
+
+
+\section{Operational rule selection}
+
+Let $V(e,h)$ be the applicable rules for event $e$ in concrete history $h$,
+after package/date selection and guard evaluation. Let $r\prec r'$ mean that
+$r'$ validly overrides $r$ through the declared acyclic graph. Define
+\[
+ \operatorname{Max}(V)=\{r\in V:\nexists r'\in V\text{ with }r\prec r'\}.
+\]
+For one required recognition operation, a singleton selects that rule; the
+empty set yields \code{UnsupportedTreatment}; a larger set yields
+\code{RuleConflict}. Multiple distinct operations, such as measurement and
+recognition, are evaluated through separate declared interfaces. A rule that
+intentionally produces no postings must belong to a supported non-recognition
+event operation, whose economic state effect is still recorded.
+
+Given a selected rule, the evaluator computes all local bindings and
+preconditions, emits proposed postings, verifies
+Equation~\eqref{eq:posting}, validates account/context restrictions and commits
+the event transaction. Failure returns the original state plus a diagnostic.
+This defines the atomicity requirement independently of the storage technology.
+
+\begin{minipage}{\linewidth}
+\section{Example run request and response}
+
+The following request executes two named conditions under one scenario. It
+does not request an aggregate probability distribution.
+
+\begin{lstlisting}
+{
+  "model": "BorrowingExample@1",
+  "evidence_view": "synthetic-2025-exact",
+  "starting_state": "after-2025-close",
+  "horizon": {"start": "2026-01-01", "end_exclusive": "2027-01-01"},
+  "conditions": ["allFixed", "allFloating"],
+  "scenarios": ["rateShock"],
+  "mode": "conditional",
+  "weight_model": null,
+  "reports": ["balance_sheet", "income", "cash_flow", "equity", "journals"],
+  "package_lock": "demonstration-packages-v1"
+}
+\end{lstlisting}
+\end{minipage}
+
+The response contains two separately labelled results with interest expense
+5 and 7, cash 90 and 88, debt 100 in both, and equity $-10$ and $-12$.
+A request for the parent symbolic family returns the formula
+$7-2\alpha$ and, under exact linear bounds, $[5,7]$ before monetary
+quantisation. The API rejects an unconditional mean request without a weight
+model. A user can instead request an arbitrary clearly labelled representative
+case, which does not stand in for the feasible family.
+
+\section{Requirement traceability}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule Requirement & Primary implementation area & Conformance cases\\\midrule
+R1 & Evidence registry and extraction adapters & T03, T09\\
+R2 & Context/version model and cutoff queries & T03, T04\\
+R3 & Types, mappings and package selection & T02, T12, T13\\
+R4 & Symbols, choices and constraint graph & T05--T10, T14\\
+R5 & Posting, closing and consolidation & T01, T11--T13\\
+R6 & Contract and behavioural interfaces & T05, T11, T15, T16\\
+R7 & Conditional output and probability types & T06, T07, T18\\
+R8 & Explanation graph and report dependencies & T09, T11--T13\\
+R9 & Capabilities and versioned modules & T02, T14--T16\\
+R10 & Run records, scheduler and replay & T03, T17, T18\\\bottomrule
+\end{tabular}
+\end{center}

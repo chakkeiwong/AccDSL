@@ -1,0 +1,423 @@
+PHYSICAL PAGE 1
+AccDSL
+Company Histories,
+Accounting Interpretations,
+and Scenario Simulation
+Product and method proposal
+Version 2.1 (proposal candidate)
+7 October 2026
+This document specifies a system that translates company disclosures into traceable evidence,
+represents several compatible economic and accounting histories, and simulates their future
+journals and financial statements under explicit economic scenarios.
+The proposed data contracts, methods and acceptance cases specify the intended implementation.
+Current source and domain limitations remain explicit; this candidate is not a completed product
+or a claim of full proposal readiness. Proposed libraries can be replaced while preserving those
+contracts. Sector rule packages require their own accounting review before they can be described
+as compliant with a reporting standard.
+Research materials, source qualifications and review records accompany this document in
+docs/design/research and docs/design/review.
+
+
+PHYSICAL PAGE 4
+CONTENTS
+iii
+8
+Reconstruction and execution procedures
+44
+8.1
+Ingest, reconcile and construct histories . . . . . . . . . . . . . . . . . . . . .
+44
+8.2
+Condition a run without rewriting history . . . . . . . . . . . . . . . . . . . .
+45
+8.3
+Schedule and commit events . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+45
+8.4
+From an economic event to permission to post
+. . . . . . . . . . . . . . . . .
+46
+8.5
+A lost acknowledgement must not create a second sale . . . . . . . . . . . . .
+47
+8.6
+Funding, tax and other simultaneous relations
+. . . . . . . . . . . . . . . . .
+48
+8.7
+Worked example: identical history, different future journals . . . . . . . . . .
+48
+8.8
+Worked example: a bond has several relevant amounts . . . . . . . . . . . . .
+49
+8.9
+Reporting and explanations . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+49
+8.10
+The corporate reference package as operations
+. . . . . . . . . . . . . . . . .
+50
+8.11
+Scenario meaning and information access
+. . . . . . . . . . . . . . . . . . . .
+51
+9
+Accounting methods for an operating company
+52
+9.1
+A common core with distinct accounting books . . . . . . . . . . . . . . . . .
+52
+9.2
+Non-financial companies . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+53
+9.3
+A matched inventory case across reporting profiles . . . . . . . . . . . . . . .
+53
+9.4
+Operating events . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+54
+9.5
+Lease and tax integration . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+55
+9.6
+Returning to the company forecast . . . . . . . . . . . . . . . . . . . . . . . .
+56
+9.7
+Employee benefits
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+57
+9.8
+Impairment and provisions
+. . . . . . . . . . . . . . . . . . . . . . . . . . . .
+58
+9.9
+Share-based compensation . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+58
+9.10
+Fair value and capitalization boundaries . . . . . . . . . . . . . . . . . . . . .
+59
+9.11
+Rule selection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+60
+9.12
+IFRS and incorporating jurisdictions . . . . . . . . . . . . . . . . . . . . . . .
+60
+9.13
+US GAAP proposed methods and authority limitation . . . . . . . . . . . . .
+61
+9.14
+ASBE lease adoption and deferred tax . . . . . . . . . . . . . . . . . . . . . .
+61
+9.15
+Matched-case outcomes and decision . . . . . . . . . . . . . . . . . . . . . . .
+63
+10 Financing, ownership and the group boundary
+65
+10.1
+Debt and hybrid financing . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+65
+10.2
+Equity and ownership . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+66
+10.3
+A compound bond exposes classification dependencies . . . . . . . . . . . . .
+66
+10.4
+Schedules and initial classification
+. . . . . . . . . . . . . . . . . . . . . . . .
+67
+10.5
+Modification, extinguishment and default . . . . . . . . . . . . . . . . . . . .
+67
+10.6
+Equity and compound instruments . . . . . . . . . . . . . . . . . . . . . . . .
+68
+10.7
+Control and an elimination book . . . . . . . . . . . . . . . . . . . . . . . . .
+69
+
+
+PHYSICAL PAGE 67
+CHAPTER 9.
+ACCOUNTING METHODS FOR AN OPERATING COMPANY
+60
+9.11
+Rule selection
+The proposed selection procedure distinguishes operative authority from historical source
+support. The retained sources include official AASB compilations, the original EU incorporating
+regulation and official ASBE lease and income-tax texts (Australian Accounting Standards
+Board, 2022e,c, 2023c,b; European Commission, 2023; Ministry of Finance of the People’s
+Republic of China, 2019, 2018, 2006b, 2022). Historical US lease additions are separately
+identified in the retained amendment source (Financial Accounting Standards Board, 2016).
+AuthorityRequirement contains issuer/framework, jurisdiction, entity class, annual-period/ap-
+plication interval, paragraph and local source Ref, incorporating instrument, amendment chain,
+transition, elections and unresolved dependencies. RuleSelection binds those requirements to
+the accounting event and evidence view. The algorithm evaluates chronological applicability
+first, then scope and facts, then available elections/transition, then measurement/presentation.
+If two supported rules can apply, retain the explicit alternative and required election; if one
+is contradicted by facts, mark ineligible. Missing current authority gives unresolved, never
+eligibility through a familiar rule name.
+An unchanged historical report remains an assertion under its own basis and vintage. A
+harmonized comparison creates an adjustment book and reconciliation, with changed recog-
+nition/measurement explained. Label mapping alone cannot convert US GAAP to IFRS or
+ASBE. The four clocks and source version remain part of each rule dependency; later knowledge
+cannot leak into an original as-of view. Transition entries reconcile opening assets, liabilities,
+tax and equity, rather than changing old source bytes or plugging an unexplained amount.
+9.12
+IFRS and incorporating jurisdictions
+The retained official AASB texts provide explicit IAS/IFRS incorporation for their stated
+entity/version scope. AASB 9/15 compilation dates are 31 December 2022 with the source
+covers’ application window; AASB 16 compilation 8 is 31 December 2023, AASB 112 compilation
+7 is 29 September 2023. Their filenames are not date evidence. AASB 102’s older retained edition
+is selected historical support for inventory, not current 2024 applicability certification. The
+retained EU 2023/1803 original provides official EU-adopted IFRS 3/10/IAS 19/21/36/37/IFRS
+2/13 passages inspected in this method investigation; its historical adoption scope and later
+amendments remain separate. The retained amendment investigation supplies additional source
+evidence, not a blanket acceptance of all rules in these standards.
+Initial real-method admission is therefore claim-specific: the selected revenue, lease/tax, financ-
+ing, credit, group/FX and insurance cases must resolve each named applicability prerequisite.
+For synthetic demonstrations, declare the chosen dated provisions and assumptions and use the
+synthetic book mode. No assertion of whole-IFRS compliance follows from those entries.
+The base lease in the saved dossiers (two annual 121 payments, 10% rate, no qualifying
+exemptions or extra costs) has liability 210 initially, 110 after year one, 0 after year two. IFRS-
+equivalent cost-model ROU is 210/105/0; expenses 126 then 116. Income tax needs its own
+legal deductions and gross temporary differences, as the connected corporate case demonstrates.
+Revenue timing, inventory cost formula, financial instrument classification, control and contract
+boundaries are required rule predicates, not accounting options chosen after seeing which
+outcome fits best.
+
+
+PHYSICAL PAGE 68
+CHAPTER 9.
+ACCOUNTING METHODS FOR AN OPERATING COMPANY
+61
+9.13
+US GAAP proposed methods and authority limitation
+The saved official FASB ASU 2016-02 Section A and later 2020-05/2021-09 amendments contain
+inspected historical ASC 842 additions. Their covers explicitly say an ASU is not authoritative.
+Current Codification access returned 403 again in this source investigation; the proposed
+methods cannot be marked current-authority-admitted. ASU amendments, historical FAS 109,
+issuer accounting policy and a model’s memory are all insufficient substitutes for the operative
+ASC text and full applicable amendment chain.
+The same lease facts include ten-year remaining equipment life, fair value 1000, alternative
+use to lessor, no ownership transfer, no purchase option, two-year term and PV 210. Under
+the inspected historical 842-10-25-2/25-3 provisions, the stated facts support the proposed
+operating classification. Historical 842-20-25-6 and 35-3 yield single lease expense 121 per year,
+liability 210/110/0 and ROU 210/ 110/0. First year debit lease expense 121/credit liability
+21/credit ROU 100; payment debits liability 121/credits cash 121. Next expense 121 decomposes
+into liability interest 11 and ROU reduction 110. The finance comparison uses the separate
+depreciation 105 plus interest 21/11 path. Changing classification facts is not a free election.
+The 75%/90% heuristics in the historical guidance cannot become universal requirements. This
+complete numerical contrast is useful despite the remaining current-authority limitation.
+Proposed ASC 740 temporary-difference treatment retains tax base, reversal dates, enacted
+rates, valuation allowance and source-specific allocation/presentation. The saved historical FAS
+109 and ASU 2019-12 provide inspected enactment support, not a completed current ASC 740
+implementation. Under the matched PPE case, book 800/tax 600 at assumed 25% yields DTL
+50 and current tax 75 on taxable 300. A future 30% rate that is merely substantively enacted
+but not legally enacted cannot be imported from the AASB 112 rule into this proposed US
+treatment; the declared 2025 closing temporary difference is 300, giving DTL 75 at the enacted
+25% rate versus DTL 90 at 30%. This deferred-tax comparison is separate from current tax 75
+on taxable profit 300. Actual legal enactment remains a separate jurisdictional fact.
+The proposed CECL method for in-scope amortised-cost assets estimates lifetime expected cash
+shortfalls from origination using past/current/forecast evidence, with a documented reversion
+method beyond a reasonable/supportable forecast horizon and applicable instrument exceptions.
+It retains allowance roll-forwards, write-offs, recoveries, purchased-credit-deteriorated handling
+and off-balance commitments separately. It must not copy IFRS 9’s 12-month/SICR staging
+to the same record. A candidate contrast: lifetime discounted loss 6 with 2 attributable to
+default events in the next year gives IFRS general Stage 1 candidate 2 versus CECL lifetime
+candidate 6, conditional on scope and method support. No current ASC 326 text was retrieved,
+and the attempted official amendment path returned 403; this contrast remains an explicitly
+unadmitted proposed reading, not a source-verified US requirement or posting example. Full
+current ASC 326, insurance 944, consolidation 810, FX 830 and relevant later amendments are
+specific internal source tasks before corresponding real admission.
+9.14
+ASBE lease adoption and deferred tax
+For an ASBE lease, selecting the lease standard and selecting the related income-tax treatment
+require different application dates. Article 68 of the revised ASBE 21 states a general date of 1
+January 2019, but the Ministry of Finance’s 2018 issuance notice specifies the enterprise groups.
+Paragraph I requires application from that date for enterprises listed both domestically and
+overseas, and for overseas-listed enterprises preparing financial statements under IFRS or ASBE.
+Other enterprises applying ASBE must apply the revision from 1 January 2021 (Ministry of
+Finance of the People’s Republic of China, 2018, issuance notice, para. I).
+
+
+PHYSICAL PAGE 69
+CHAPTER 9.
+ACCOUNTING METHODS FOR AN OPERATING COMPANY
+62
+Paragraph II permits earlier application for enterprises whose parent or subsidiary is listed
+overseas and prepares its overseas financial statements under IFRS or ASBE. Their early date
+cannot precede simultaneous application of the specified 2017 financial-instruments and revenue
+standards. Paragraph III discontinues the 2006 lease standard and its application guidance
+when the enterprise applies the revision. Thus a 2020 reporting date alone does not establish
+use of the revised lease standard for an enterprise in the second group: its qualifying early
+adoption would need evidence. The retained official Chinese texts include the 2018 notice and
+attachment and the Ministry’s later ASBE 21 page, published on 28 October 2019 (Ministry
+of Finance of the People’s Republic of China, 2018, 2019). They replace the earlier secondary
+reproduction as support for the inspected wording.
+Articles 4–8 require control of identified use, economic benefits and direction; article 6 includes
+both conditions for substantive substitution and the express presumption when difficult to
+determine. Articles 14–18 specify commencement, ROU cost and PV, using implicit rate
+or incremental borrowing rate if the former cannot be determined. Articles 20–23 separate
+cost-model depreciation and periodic interest; articles 25–29 distinguish reassessment/index
+changes/modifications and their discount-rate rules. Articles 30–33 define the exemptions; a
+two-year term is not short-term. Articles 60–67 specify transition choices and disclosures; the
+chosen transition cannot be inferred from a present closing liability (Ministry of Finance of the
+People’s Republic of China, 2018, attached standard, arts. 4–8, 14–33, 60–67).
+For the declared base lease, these inspected recognition/measurement provisions support
+proposed ROU 210/105/0 and liability 210/110/0 with expense 126/116, under the same
+stated facts, depreciation assumption and fixed rule version. A same-asset modification is tested
+against 28–29, rather than labeled a separate lease without increased scope and commensurate
+consideration. A 2019 first-adopter using article 61(2) records cumulative opening changes
+without adjusting comparatives, while 61(1) is retrospective; comparison datasets must retain
+that distinction and the entity’s actual election.
+The tax question is why equal opening lease balances can still require separate deferred-tax assets
+and liabilities. The Ministry’s original ASBE 18 defines tax bases and temporary differences in
+articles 4–9 and contains initial-recognition exceptions in articles 11 and 13. Article 13 also
+limits a deferred-tax asset to the probable taxable profit available to use the deduction. Articles
+16–23 govern measurement, recovery or settlement assumptions, subsequent review, allocation
+and noncurrent classification (Ministry of Finance of the People’s Republic of China, 2006b).
+The original text must be read with later interpretations.
+Interpretation 16 removes the initial-recognition exemption for a single transaction that is
+not a business combination, initially affects neither accounting profit nor taxable income or
+loss, and creates equal taxable and deductible temporary differences. Section I(a) expressly
+includes qualifying initial lease liabilities and right-of-use assets; the corresponding deferred-tax
+liabilities and assets are recognized separately under ASBE 18. Equal carrying amounts alone
+do not establish equal temporary differences, and the asset’s recoverability condition still applies.
+Section IV makes this treatment effective from 1 January 2023; Section I(b) permits early
+application from the year of issuance, 2022, with disclosure (Ministry of Finance of the People’s
+Republic of China, 2022, secs. I(a)–(b), IV). This tax date is distinct from the enterprise’s lease-
+standard adoption date. The operative text now supports the treatment previously illustrated
+by the retained official 2023 tax application case.
+For the synthetic two-year lease, retain the assumed payments of 121, 10% discount rate and
+straight-line depreciation. All amounts use the same illustrative monetary unit. Assume that tax
+deductions are allocated to the liability, both tax bases are zero, the applicable tax rate is 25%,
+and sufficient taxable profit satisfies the deferred-tax asset recognition condition. Also assume
+that the transaction meets Section I(a)’s conditions and falls within its application period. At
+
+
+PHYSICAL PAGE 70
+CHAPTER 9.
+ACCOUNTING METHODS FOR AN OPERATING COMPANY
+63
+commencement the ROU asset and liability are each 210. The taxable ROU difference gives
+a deferred-tax liability (DTL) of 52.5; the deductible liability difference gives a deferred-tax
+asset (DTA) of 52.5. The entry debits DTA and credits DTL by those amounts. At the first
+annual close, liability 110 and ROU 105 give DTA 27.5 and DTL 26.25. Reducing the DTA
+by 25 creates deferred-tax expense; reducing the DTL by 26.25 creates a benefit, leaving net
+benefit 1.25. Both balances reverse by expiry. Applying the old exemption to omit both opening
+deferred balances is wrong for these qualifying facts and dates: it conceals the required gross
+balances and the later tax effect.
+Transition also needs more than an opening journal entry. Section I(b) requires adjustments for
+qualifying transactions between the earliest comparative opening and application. For qualifying
+existing balances at that opening, cumulative effects adjust opening retained earnings and the
+relevant financial-statement items. Consider a separate transition example with cash 500, ROU
+105, lease liability 110 and equity 495, with no deferred tax yet recognized. Under the same
+assumed tax bases, rate and recoverability, recognition debits DTA 27.5, credits DTL 26.25 and
+credits opening retained earnings 1.25. The resulting balance sheet is
+500 + 105 + 27.5
+|
+{z
+}
+assets 632.5
+= 110 + 26.25
+|
+{z
+}
+liabilities 136.25
++ 495 + 1.25
+|
+{z
+}
+equity 496.25
+.
+The equity adjustment records the cumulative effect at the comparative opening.
+If the
+remaining lease year falls within the comparative year, the DTA of 27.5 and DTL of 26.25
+reverse during that year, giving comparative deferred-tax expense 1.25. The opening adjustment
+alone therefore does not complete the transition. Neither ASBE 21’s article 61(2) lease-adoption
+election nor Interpretation 16 Section III’s no-comparative-adjustment rule for its separate
+share-payment topic may be substituted for Section I(b)’s tax transition.
+These are gross recognition and measurement amounts. Separate recognition and noncurrent
+classification do not determine whether an actual balance sheet may offset DTA and DTL. That
+decision needs the applicable presentation provisions and entity/tax-authority facts. Actual tax
+law, tax bases and rates, recoverable profit, the enterprise’s adoption and elections, and later
+amendments remain to be established before applying the example to an issuer. Full ASBE 22
+credit, consolidated statements, group combinations and insurance revisions also retain specific
+source dependencies; similar amounts do not establish full IFRS equivalence.
+9.15
+Matched-case outcomes and decision
+Input changed or withheld
+Required consequence
+Framework changes with same lease facts
+Preserve different expense/ROU paths and
+source strength, not just rename accounts
+Method source present but target entity’s
+adoption unknown
+Unresolved applicability, no real posting
+authorization
+ROU/liability initially equal
+Still evaluate gross tax differences and later
+divergent balances
+Historical rule supports method but a later
+reporting year is requested
+Recheck operative amendments/transition;
+no automatic extension
+Issuer policy discloses LIFO, regulator text
+unavailable
+Retain issuer assertion; do not upgrade it
+into universal US authority
+Foreign basis label replaced by local label
+Reject as a standards conversion without
+recognition/measurement bridge
+
+
+PHYSICAL PAGE 124
+BIBLIOGRAPHY
+117
+Thomas Mack. Distribution-free Calculation of the Standard Error of Chain Ladder Reserve
+Estimates. ASTIN Bulletin, 23(2):213–225, 1993. URL
+https://www.casact.org/sites/default/files/database/astin_vol23no2_213.pdf. Published
+1993 article, pp. 213–225, CAS-hosted copy; equations (1)–(3), Theorems 1–3 and
+aggregate-error corollary inspected. No full predictive distribution follows from the moment
+assumptions.
+Denis Merigoux, Nicolas Chataing, and Jonathan Protzenko. Catala: a programming language
+for the law. Proceedings of the ACM on Programming Languages, 5(ICFP), 2021. URL
+https://arxiv.org/pdf/2103.03198.
+Marjan Mernik, Jan Heering, and Anthony M. Sloane. When and how to develop
+domain-specific languages. ACM Computing Surveys; archived CWI SEN-E0309 (2003), 2005.
+URL https://ir.cwi.nl/pub/4109/04109D.pdf. Local full text is CWI report SEN-E0309,
+December 2003; publication 2005. Claims anchored to the archived working paper.
+Ministry of Finance of the People’s Republic of China. Accounting Standard for Business
+Enterprises No. 1: Inventories. Chinese text reproduced by Wikisource, 2006a. Articles 1–22
+inspected, particularly 14–19. Unofficial reproduction; official origin and applicable-version
+verification pending; access 2 October 2026.
+Ministry of Finance of the People’s Republic of China. Accounting Standard for Business
+Enterprises No. 18: Income Taxes, 2006b. URL
+https://kjs.mof.gov.cn/zt/kjzzss/kuaijizhunzeshishi/200806/t20080618_46230.htm. Official
+page published 9 March 2006; original articles 1–25 inspected. Read with subsequent
+interpretations; not a consolidated current amendment text. Original Chinese retained;
+English title translated.
+Ministry of Finance of the People’s Republic of China. Notice on Issuing the Revised
+Accounting Standard for Business Enterprises No. 21: Leases, 2018. URL
+https://kjs.mof.gov.cn/zhengcefabu/201812/t20181213_3092629.htm. Cai Kuai [2018] No. 35,
+signed 7 December 2018; webpage published 14 December 2018. Notice paragraphs I–III and
+attached standard articles 1–8, 14–18, 20–23, 25–33, 60–68 inspected. Original Chinese notice
+and attachment retained; English title translated.
+Ministry of Finance of the People’s Republic of China. Accounting Standard for Business
+Enterprises No. 21: Leases, 2019. URL
+https://kjs.mof.gov.cn/zt/kjzzss/kuaijizhunzeshishi/201910/t20191028_3411190.htm.
+Official page dated 28 October 2019; selected articles inspected. Read with the 2018 issuance
+notice. Later amendments and actual entity adoption remain to be established.
+Ministry of Finance of the People’s Republic of China. Interpretation No. 16 of the Accounting
+Standards for Business Enterprises, 2022. URL
+https://kjs.mof.gov.cn/gongzuotongzhi/202212/P020221213437987613379.pdf. Operative
+five-page attachment to Cai Kuai [2022] No. 31. Issuance notice signed 30 November 2022
+and published on its webpage 13 December 2022. Sections I(a)–(b) and IV govern the
+single-transaction tax treatment and its application; all five pages inspected. Original
+Chinese retained; English title translated.
+Robert A. Nehmer and Derek Robinson. An algebraic model for the representation of
+accounting systems. Annals of Operations Research, 71:179–198, 1997. URL
+https://doi.org/10.1023/a:1018915430594.
+Judea Pearl. Causal inference in statistics: An overview. Statistics Surveys, 3:96–146, 2009.
+URL https://ftp.cs.ucla.edu/pub/stat_ser/r350.pdf.

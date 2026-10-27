@@ -1,0 +1,166 @@
+{
+  "schema_version": "accdsl.proposal.measure_attachment.fixtures.v1",
+  "status": "specified_partial",
+  "product_implemented": false,
+  "synthetic": true,
+  "boundary": "All records, masses, domains, purposes and expected dispositions are authored synthetic examples. They establish no company probability, accounting validity, forecast calibration or runtime capability.",
+  "law_convention": {
+    "finite_mass_type": "exact rational string",
+    "outcome_identity": "elementary outcome id plus immutable version",
+    "default_independence": "none",
+    "default_normalization": "reject non-unit finite laws; never renormalize"
+  },
+  "support_records": {
+    "family@1": {"kind": "history_family", "id": "F@1", "view": "V@1", "coordinates": ["region", "rate"], "support": ["a@1", "b@1", "c@1"]},
+    "family@2": {"kind": "history_family", "id": "F@2", "view": "V@1", "coordinates": ["region", "rate"], "support": ["a@1", "b@1", "c@1", "d@1"]},
+    "model@finite-1": {"kind": "measure_model", "id": "M@1", "version": 1, "measure_kind": "finite_joint", "purpose": "scenario"},
+    "model@pricing-1": {"kind": "measure_model", "id": "M@P", "version": 1, "measure_kind": "finite_joint", "purpose": "pricing"},
+    "model@continuous-1": {"kind": "measure_model", "id": "M@C", "version": 1, "measure_kind": "continuous_joint", "purpose": "scenario"},
+    "event@A": {"kind": "event", "id": "A@1", "selector": ["a@1", "b@1"], "family": "F@1", "view": "V@1"},
+    "event@B": {"kind": "event", "id": "B@1", "selector": ["b@1", "c@1"], "family": "F@1", "view": "V@1"},
+    "event@partition": {"kind": "event_partition", "id": "P@1", "cells": ["a@1", "b@1"], "coverage": "missing c@1"},
+    "event@projection": {"kind": "projection", "id": "rate_projection@1", "from": ["a@1", "b@1"], "to": ["rate=1"]}
+  },
+  "groups": [
+    {
+      "id": "MA01_unweighted_preservation",
+      "question": "Can an explicit future domain remain admissible without a probability law?",
+      "cases": [
+        {
+          "id": "MA01a",
+          "input": {
+            "family_id": "F@1", "family_version": 1, "view_id": "V@1", "view_version": 1,
+            "model_id": null, "model_version": null, "measure_kind": null, "purpose": "scenario",
+            "coordinates": ["rate_change"], "sample_space": {"kind": "continuous_domain", "domain": ["-1/10", "1/10"]},
+            "mass_or_density": null, "dependence": "unspecified", "operation": "attach_measure",
+            "provenance": "authored_future_domain@1", "information_cutoff": "2026-03-01T00:00:00Z"
+          },
+          "expected": {
+            "disposition": "RETAINED_ONLY", "reason_codes": ["NO_MEASURE_PROVIDED"],
+            "preserved_records": ["authored_future_domain@1"], "probability": null,
+            "unresolved_obligations": ["Provide a declared joint measure before probability operations"],
+            "next_permissible_operation": "attach_measure", "family_effect": "unchanged"
+          }
+        },
+        {
+          "id": "MA01b",
+          "input": {
+            "family_id": "F@1", "family_version": 1, "view_id": "V@1", "view_version": 1,
+            "model_id": null, "model_version": null, "measure_kind": "finite_joint", "purpose": "scenario",
+            "coordinates": ["scenario"], "sample_space": {"kind": "finite", "outcomes": ["s1@1", "s2@1", "s3@1"]},
+            "mass_or_density": null, "dependence": "unspecified", "operation": "infer_from_branch_count",
+            "provenance": "branch_count@1", "information_cutoff": "2026-03-01T00:00:00Z"
+          },
+          "expected": {
+            "disposition": "REQUEST_INVALID", "reason_codes": ["COUNT_IS_NOT_A_MEASURE"],
+            "preserved_records": ["branch_count@1"], "probability": null,
+            "unresolved_obligations": ["Supply explicit masses or density with provenance"],
+            "next_permissible_operation": "revise_request", "family_effect": "unchanged"
+          }
+        }
+      ]
+    },
+    {
+      "id": "MA02_finite_joint_validity",
+      "question": "Do finite laws enforce identity, non-negativity and exact unit mass?",
+      "law": {"outcomes": ["a@1", "b@1", "c@1"], "masses": {"a@1": "1/2", "b@1": "1/3", "c@1": "1/6"}},
+      "cases": [
+        {
+          "id": "MA02a",
+          "input": {"family_id": "F@1", "family_version": 1, "view_id": "V@1", "view_version": 1, "model_id": "M@1", "model_version": 1, "measure_kind": "finite_joint", "purpose": "scenario", "sample_space": ["a@1", "b@1", "c@1"], "masses": {"a@1": "1/2", "b@1": "1/3", "c@1": "1/6"}, "dependencies": ["family@1", "model@finite-1"]},
+          "expected": {"disposition": "ATTACHED_ASSUMPTION", "reason_codes": [], "probability_total": "1", "preserved_records": ["family@1", "model@finite-1"], "unresolved_obligations": [], "next_permissible_operation": "evaluate_event", "family_effect": "measure_attached"}
+        },
+        {
+          "id": "MA02b",
+          "input": {"family_id": "F@1", "family_version": 1, "view_id": "V@1", "view_version": 1, "model_id": "M@1", "model_version": 1, "measure_kind": "finite_joint", "purpose": "scenario", "sample_space": ["a@1", "b@1", "c@1"], "masses": {"a@1": "1/2", "b@1": "-1/3", "c@1": "5/6"}, "dependencies": ["family@1", "model@finite-1"]},
+          "expected": {"disposition": "REQUEST_INVALID", "reason_codes": ["NEGATIVE_MASS"], "preserved_records": ["family@1", "model@finite-1"], "unresolved_obligations": ["Replace negative mass and revalidate total"], "next_permissible_operation": "revise_request", "family_effect": "unchanged"}
+        },
+        {
+          "id": "MA02c",
+          "input": {"family_id": "F@1", "family_version": 1, "view_id": "V@1", "view_version": 1, "model_id": "M@1", "model_version": 1, "measure_kind": "finite_joint", "purpose": "scenario", "sample_space": ["a@1", "b@1", "c@1"], "masses": {"a@1": "1/2", "b@1": "1/3", "c@1": "1/3"}, "dependencies": ["family@1", "model@finite-1"]},
+          "expected": {"disposition": "REQUEST_INVALID", "reason_codes": ["NON_UNIT_MASS"], "probability_total": "7/6", "preserved_records": ["family@1", "model@finite-1"], "unresolved_obligations": ["Do not renormalize; correct or explain the missing support"], "next_permissible_operation": "revise_request", "family_effect": "unchanged"}
+        },
+        {
+          "id": "MA02d",
+          "input": {"family_id": "F@1", "family_version": 1, "view_id": "V@1", "view_version": 1, "model_id": "M@1", "model_version": 1, "measure_kind": "finite_joint", "purpose": "scenario", "sample_space": ["a@1", "a@1", "b@1", "c@1"], "masses": {"a@1": "1/2", "b@1": "1/3", "c@1": "1/6"}, "dependencies": ["family@1", "model@finite-1"]},
+          "expected": {"disposition": "REQUEST_INVALID", "reason_codes": ["DUPLICATE_ELEMENTARY_ID"], "preserved_records": ["family@1", "model@finite-1"], "unresolved_obligations": ["Give each elementary outcome one immutable identity"], "next_permissible_operation": "revise_request", "family_effect": "unchanged"}
+        }
+      ]
+    },
+    {
+      "id": "MA03_overlapping_events",
+      "question": "Are overlapping named events evaluated once against one joint law?",
+      "law": {"outcomes": ["a@1", "b@1", "c@1"], "masses": {"a@1": "1/2", "b@1": "1/3", "c@1": "1/6"}},
+      "cases": [
+        {
+          "id": "MA03a",
+          "input": {"measure": "M@1", "family": "F@1/V@1", "event_a": ["a@1", "b@1"], "event_b": ["b@1", "c@1"]},
+          "expected": {"disposition": "EVALUATED", "event_a_probability": "5/6", "event_b_probability": "1/2", "intersection_probability": "1/3", "union_probability": "1", "reason_codes": [], "next_permissible_operation": "condition_or_update"}
+        },
+        {
+          "id": "MA03b",
+          "input": {"measure": "M@1", "family": "F@1/V@1", "partition_id": "P@1", "cells": [["a@1"], ["b@1"]], "coverage": "missing c@1", "disjoint": true},
+          "expected": {"disposition": "REQUEST_INVALID", "reason_codes": ["PARTITION_COVERAGE_UNPROVEN"], "preserved_records": ["event_partition@1"], "unresolved_obligations": ["Supply coverage of the declared support before treating cells as exhaustive"], "next_permissible_operation": "revise_event", "family_effect": "unchanged"}
+        },
+        {
+          "id": "MA03c",
+          "input": {"measure": "M@1", "family": "F@1/V@1", "event_id": "A@1", "selector": ["a@1", "b@1"], "same_description_as": "A@1"},
+          "expected": {"disposition": "EVALUATED", "reason_codes": ["IDEMPOTENT_EVENT_REFERENCE"], "event_probability": "5/6", "next_permissible_operation": "condition_or_update"}
+        }
+      ]
+    },
+    {
+      "id": "MA04_dependence_and_projection",
+      "question": "Do marginal equality and display projections preserve joint dependence and elementary identity?",
+      "cases": [
+        {
+          "id": "MA04a",
+          "input": {"family": "F@1/V@1", "coordinates": ["x", "y"], "marginal_x": {"0": "1/2", "1": "1/2"}, "marginal_y": {"0": "1/2", "1": "1/2"}, "joint": null},
+          "expected": {"disposition": "RETAINED_ONLY", "reason_codes": ["JOINT_DEPENDENCE_UNSPECIFIED"], "probability": null, "unresolved_obligations": ["Provide a joint law or preserve all compatible couplings"], "next_permissible_operation": "attach_measure"}
+        },
+        {
+          "id": "MA04b",
+          "input": {"measure": "M@1", "family": "F@1/V@1", "outcomes": [{"id": "a@1", "region": "A", "rate": "1", "mass": "1/2"}, {"id": "b@1", "region": "B", "rate": "1", "mass": "1/2"}], "projection": "rate"},
+          "expected": {"disposition": "EVALUATED", "reason_codes": ["PROJECTION_COLLISION_RETAINED"], "projected_event_probability": "1", "elementary_outcomes_preserved": ["a@1", "b@1"], "next_permissible_operation": "condition_or_update"}
+        }
+      ]
+    },
+    {
+      "id": "MA05_identity_version_and_purpose",
+      "question": "Do family/version and measure-purpose mismatches block silent reuse?",
+      "cases": [
+        {
+          "id": "MA05a",
+          "input": {"attached_family": "F@1/V@1", "requested_family": "F@2/V@1", "model": "M@1", "support_change": ["d@1"]},
+          "expected": {"disposition": "REQUEST_INVALID", "reason_codes": ["FAMILY_VERSION_MISMATCH", "SUPPORT_CHANGED"], "next_permissible_operation": "align_or_update_measure", "family_effect": "no_reuse"}
+        },
+        {
+          "id": "MA05b",
+          "input": {"attached_model": "M@1", "attached_purpose": "scenario", "requested_purpose": "pricing"},
+          "expected": {"disposition": "REQUEST_INVALID", "reason_codes": ["MEASURE_PURPOSE_MISMATCH"], "next_permissible_operation": "attach_new_purpose_specific_measure", "family_effect": "unchanged"}
+        },
+        {
+          "id": "MA05c",
+          "input": {"attached_family": "F@1/V@1", "requested_family": "F@1/V@1", "attached_model": "M@1", "model_version": 2, "alignment": null},
+          "expected": {"disposition": "RETAINED_ONLY", "reason_codes": ["MODEL_VERSION_STALE"], "next_permissible_operation": "review_model_migration", "family_effect": "old_view_preserved"}
+        }
+      ]
+    },
+    {
+      "id": "MA06_continuous_and_mixed_support",
+      "question": "Does unsupported continuous evaluation remain explicit rather than fabricated?",
+      "cases": [
+        {
+          "id": "MA06a",
+          "input": {"family": "F@1/V@1", "model": "M@C", "measure_kind": "continuous_joint", "domain": {"rate": ["-1/10", "1/10"]}, "density": "k*(1-rate^2)", "event": "rate >= 0", "normalization_proof": null},
+          "expected": {"disposition": "UNSUPPORTED", "reason_codes": ["CONTINUOUS_EVALUATOR_UNAVAILABLE", "NORMALIZATION_UNPROVEN"], "probability": null, "preserved_expression": "k*(1-rate^2)", "unresolved_obligations": ["Supply normalization and a validated evaluator"], "next_permissible_operation": "provide_evaluator_or_retain_symbolic"}
+        },
+        {
+          "id": "MA06b",
+          "input": {"family": "F@1/V@1", "model": "M@C", "measure_kind": "mixed_joint", "domain": {"atom": ["a@1"], "continuous": ["0", "1"]}, "event": "atom or x>1/2", "density": "unspecified"},
+          "expected": {"disposition": "UNSUPPORTED", "reason_codes": ["MIXED_MEASURE_REPRESENTATION_UNSUPPORTED"], "probability": null, "unresolved_obligations": ["Declare atom masses, continuous measure and evaluator separately"], "next_permissible_operation": "specify_mixed_model"}
+        }
+      ]
+    }
+  ]
+}

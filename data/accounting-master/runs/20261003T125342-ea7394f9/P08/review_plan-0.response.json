@@ -1,0 +1,44 @@
+{
+  "assumptions": [
+    "The fixed synthetic 2024–2025 reporting context, existing IFRS preparation and no early adoption remain unchanged.",
+    "This slice covers scope/eligibility dispositions only; EU admission and criterion 3 remain incomplete."
+  ],
+  "checks": [
+    "Verified all seven source hashes recorded in the v6 validation report against current files.",
+    "Executed the existing preparation validator successfully: 26 claims, 366 relationships, admission_allowed=false.",
+    "Independently ran seven CurrentEUDispositionTests: all passed.",
+    "Inspected the recorded 42-test preflight, primary scope provisions, builder publication sequence and checker hash validation.",
+    "The bounded baseline, comparison assumptions, admission veto and PARTIAL stop condition are appropriate. Provenance checks and test counts are correctly excluded as accounting-validity evidence."
+  ],
+  "evidence": [
+    "docs/design/research/p08-v6/validation-report.json",
+    "docs/design/research/p08-v6/source-disposition.json",
+    "docs/design/research/p08-v3/scope.txt",
+    "docs/design/research/p08-v3-preparation/eu-2023-1803-original.txt",
+    "docs/design/research/p08-v6/portuguese-correction-inspection.md",
+    "data/accounting-master/runs/20261003T125342-ea7394f9/P08/preflight/checks.checker.json",
+    "docs/design/fixtures/p08-result-spec-v1.json",
+    "scripts/build_accounting_p08.py",
+    "scripts/check_accounting_p08.py",
+    "tests/test_accounting_p08.py"
+  ],
+  "issues": [
+    "Correct the regulation/provision mapping before execution. The plan assigns adoption and entry-into-force work to Regulation 1606/2002 Articles 1 and 5, but the retained eu.adoption and eu.entry_into_force anchors are Regulation 2023/1803 Articles 1 and 5. Regulation 1606/2002 Article 1 states its aim, Article 5 concerns Member State options, Article 4 establishes reporting scope, and Article 11 governs its entry into force. This ambiguity directly affects the substantive authority decisions.",
+    "Correct the verification order. The plan requires a passing standalone checker after modifying tests but before rebuilding the canonical result. tests/test_accounting_p08.py is a pinned canonical input, so that sequence produces a stale-hash failure. Run focused disposition tests first, rebuild the canonical result with current input hashes, then run the complete suite and standalone checker against the final files."
+  ],
+  "next_actions": [
+    "Revise the source mapping explicitly: 2023/1803 Articles 1 and 5 for adoption and entry into force; 1606/2002 Article 4 for conditional reporting scope. Treat any additional 1606/2002 provisions as separate decisions.",
+    "Use the verified current baseline without repeating preparation or acquisition. Implement only the separate scope/eligibility disposition and its focused validator/tests.",
+    "After focused tests pass, rebuild the canonical result, verify unchanged AASB cases and comparison economics, then run the full suite and standalone checker.",
+    "Return PARTIAL for independent review with admission_allowed=false, criterion 3 incomplete and the remaining applicability groups explicitly queued."
+  ],
+  "residuals": [
+    "Classification/issuance, measurement/settlement/notes and amendment/transition dispositions remain subsequent work before EU lifecycle admission.",
+    "US GAAP, ASBE, wider corporate methods and broader MC06/MC15/MC17/MC19/MC29/MC30 and G4/G7/G8 obligations remain open.",
+    "The full 42-test suite was verified through matching recorded evidence; only the seven preparation tests were independently rerun.",
+    "This review changed no files and establishes no accounting validity, forecast validity or human acceptance."
+  ],
+  "steps": [],
+  "summary": "REVISE: the bounded scope is appropriate, but the plan must correct its regulation anchors and rebuild-before-final-check sequence.",
+  "verdict": "REVISE"
+}

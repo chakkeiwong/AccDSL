@@ -1,0 +1,110 @@
+\chapter[Scenarios and feasible decisions]{Scenarios, interventions, and feasible decisions}
+\label{sim:scenarios}
+
+A scenario is a specified change to a model, not merely a new column of forecast numbers. It must say what changes, what remains structurally linked, what actors observe and how they may respond. A rate increase imposed on a contract schedule differs from conditioning an empirical model on periods when rates were high. A revenue decline with unchanged prices differs from one caused by price reductions. These distinctions determine the cash flows and the meaning of the result.
+
+\section{Describe the experiment before calculating it}
+A scenario request should identify the forecast origin, horizon, evidence view, shock variables, shock timing, transition rules, management policy and requested outputs. It should also specify whether the shock is a deterministic path, a random process or an ambiguity set. A phrase such as ``rates up 200 basis points'' leaves reset dates, currency curves, spread behavior and duration unresolved.
+
+For a deterministic scenario $s$, let $u_t(s)$ be the imposed external path. The company evolves as
+\begin{equation}
+ X_{t+1}=T_t(X_t,\theta,a_t,u_{t+1}(s)),\qquad a_t=\pi_t(I_t).
+ \label{sim:scenario-transition}
+\end{equation}
+The transition includes contractual events and operational behavior. The policy uses information available at its decision time. A statement projection is then a reporting map of the resulting events and states. Directly shocking a reported total can be a useful reduced-form approximation, but it requires an explanation of how the corresponding events and balances are reconstructed.
+
+A scenario can also specify a set $\mathcal S$ of paths. The outcome family becomes
+\begin{equation}
+ \mathcal Y=\{F(h,s,\pi):h\in\mathcal H, s\in\mathcal S, \pi\in\Pi\}.
+\end{equation}
+This expression is not automatically a Cartesian product of arbitrary histories, shocks and policies. Feasibility may couple them. A lender's offer can depend on the company's contract state; a commodity shock can affect both sales and collateral; a policy may be admissible only for certain information states. These dependencies must remain in the defining relation.
+
+\section{Conditioning and intervention}
+Suppose sales $S$ and market rates $R$ both respond to an economic factor $U$. Observing high rates can reveal information about $U$ and therefore about sales. Imposing a rate change while holding the structural equation for sales fixed asks a different question. The distinction is formalized in causal models by separating conditioning from intervention.
+
+In a simple illustration, let $R=U$ and $S=100-10U$, where $U$ is either zero or one. Observing $R=1$ implies $U=1$ and sales 90. An intervention setting $R=1$ replaces the rate equation. It does not, by itself, change $U$ or the sales equation. If $U=0$ in the starting world, sales remain 100 under that intervention.
+
+This is a local derivation illustrating the distinction in \citet[Sections 3.2--3.4]{pearl2009}. It is not an empirical claim that rates have no effect on sales. A richer structural model may include a direct rate effect, feedback and expectations. The point is that the intervention must name which mechanisms change. An observed correlation cannot decide that intervention on its own.
+
+For financial stress work, a reduced-form scenario may intentionally impose several joint paths without claiming a causal intervention. That is a valid conditional exercise if described accurately. It should not be presented as the causal effect of one variable when the exercise changes several variables simultaneously.
+
+\section{One shock can enter several contracts}
+A market-rate shock may affect floating debt, deposit income, derivative settlements, pension valuation and refinancing prices. Applying it independently to each reported line can miss offsets or count them twice. The shock should enter the relevant primitive variables, and the affected contracts should generate their consequences.
+
+Suppose floating debt of 100 and a receive-floating/pay-fixed swap of notional 60 share the same reference rate and reset date. Ignoring basis, timing and credit effects, a two-point increase raises debt interest by 2 and swap receipts by 1.2, leaving a net increase in cash interest cost of 0.8. Applying the shock to net finance cost and again to the swap would double count the hedge.
+
+The simplification is material. A different reset date, reference index, currency, collateral agreement or counterparty default changes the result. The correct representation preserves separate contracts and links them through the common rate process. An accounting hedge designation is another relationship; it does not itself create the economic offset.
+
+\section{Timing changes exposure}
+For principal $N$ and rate increment $\Delta r$ applying over year fraction $\delta$, the simple incremental payment is $N\Delta r\delta$. A full-year shock on 100 at two points gives 2. A half-year exposure gives 1. If the debt resets only after maturity, the current contract's payment may not change at all.
+
+The year fraction must use the contract's convention and relevant dates. Replacing actual reset schedules with annual averages can preserve annual interest in a calm period while changing a short-horizon liquidity stress. A payment on the last day of a quarter and one on the first day of the next quarter have different reporting and liquidity consequences even if their annual totals agree.
+
+A simulation should state whether events at a boundary occur before or after a decision. Refinancing proceeds received after an old debt payment cannot fund that payment unless a bridge or intraday facility is included. Netting same-day totals can conceal this ordering problem.
+
+\section{Behavioral closure}
+Accounting identities do not determine production, hiring, investment, dividends or borrowing. A simulation needs rules for these choices. They may be supplied policies, estimated relationships, optimization problems or bounded alternatives. Each has a different evidentiary status.
+
+A fixed payout ratio is easy to calculate but can produce dividends when cash is unavailable or legal restrictions bind. A cash-target policy can call for borrowing beyond committed facilities. An optimal investment policy can require knowledge of demand the manager does not possess. The policy must be evaluated together with feasibility and information, not appended after the financial statements have been balanced.
+
+Let $A_t(X_t,I_t)$ be the feasible action set. A policy is admissible only if
+\begin{equation}
+ \pi_t(I_t)\in A_t(X_t,I_t)
+\end{equation}
+for the worlds it claims to govern. If the actor cannot observe $X_t$ fully, feasibility may itself be uncertain from that actor's perspective. The model then needs a rule for attempted actions, acceptance by counterparties and consequences of rejection. Assuming successful execution whenever management requests funding is a substantive optimism assumption.
+
+\section{Attempts, commitments and settlements}
+An equity issue may be proposed, approved, subscribed, priced and settled at different dates. A loan may be committed but subject to conditions before drawing. A sale of assets may require a buyer and transfer completion. Treating intention as cash receipt collapses these stages.
+
+The event model should distinguish an action request from acceptance, a binding commitment from a contingent one, and settlement from recognition. A financing policy can request 20 while the lender supplies 12. The shortfall remains an economic state requiring a further response. It must not disappear because the request was entered into a forecast cell.
+
+These distinctions also prevent duplicate events. If a commitment is recognized in a schedule and the eventual settlement is recognized again as new borrowing without linking them, principal or cash can be counted twice. Stable contract and event identities support reconciliation from request through settlement.
+
+\section{Feedback and simultaneous determination}
+A company's borrowing cost can depend on leverage, while leverage depends on borrowing proceeds and operating decisions. This creates a fixed-point or equilibrium problem. Sequentially evaluating one formula and then the other once is generally not a solution to the simultaneous system.
+
+For illustration, suppose required proceeds are $P=20$ and face value satisfies $F=P(1+y)$, while the yield rule is $y=0.05+0.001F$. Substitution gives
+\begin{align}
+ F&=20(1.05+0.001F),\\
+ 0.98F&=21,\qquad F=21/0.98.
+\end{align}
+Using the initial guess $F=20$ in the yield rule and stopping gives a different face value. The discrepancy is small here because the feedback coefficient is small. Near a financing threshold it may change feasibility.
+
+This rule is a teaching assumption, not a market-pricing model. Its purpose is to distinguish simultaneous equations from an event sequence. A proper model must also consider whether a solution exists, whether it is unique, whether the implied offer is feasible, and which equilibrium is selected when several exist. Numerical convergence to one point does not answer all those questions.
+
+\section{Joint shocks and dependence}
+A recession scenario can combine lower sales, slower collections, weaker collateral values and tighter funding. Sampling these shocks independently may understate their joint effect. Conversely, forcing every adverse marginal outcome to occur together can describe an intentionally severe stress that is not a probabilistic percentile.
+
+If a joint probability model is used, its dependence structure needs evidence or an explicit sensitivity range. Correlations alone may not determine tail dependence. If a set of scenarios is used, the feasible combinations should be declared. A collection of marginal intervals does not establish that every combination is economically possible.
+
+Historical and future uncertainty can also be dependent. A company with short-term debt may follow a different liquidity policy from one with long-term debt. Treating debt maturity and cash management as independent can generate histories inconsistent with the assumed behavior. The model should either retain the dependence or state that the policies are deliberately varied independently for a conditional stress comparison.
+
+\section{Counterfactual histories}
+A counterfactual asks what would have happened under a different action or shock while preserving specified features of an actual or hypothesized world. It requires a rule linking the factual and counterfactual worlds. Independently drawing a new company for each scenario does not preserve that link.
+
+If two policies are compared using the same initial history and exogenous innovations, differences can be attributed to the policies within the model. If histories or shocks are redrawn independently, the comparison includes sampling variation. Common random numbers can reduce variance, but only when the coupling preserves the correct marginal model for each policy.
+
+For unidentified histories, a useful result is the range of policy differences $F(h,s,\pi_1)-F(h,s,\pi_0)$ over the same $h$. Subtracting an independently minimized baseline from a maximized alternative can combine different companies and overstate the achievable difference. The paired relation should be preserved.
+
+\section{A threshold example}
+Suppose cash after interest is $90-2\alpha$ and a covenant requires cash at least 89.4. Solving the inequality gives
+\begin{equation}
+ 90-2\alpha\geq89.4\quad\Longleftrightarrow\quad\alpha\leq0.3.
+\end{equation}
+After evidence narrows $\alpha$ to $[0.2,0.4]$, both compliance and breach remain possible. The equality point belongs to compliance under the inclusive covenant in this example. A strict covenant would require a different boundary.
+
+The model can retain two guarded regions without enumerating individual values. The breach region then triggers whatever cure, waiver or acceleration rules the contract specifies. It does not automatically trigger liquidation. An unresolved guard is a reason to preserve conditional outcomes or refine the family, not to choose the midpoint and declare compliance.
+
+\section{Scenario comparison as a decision aid}
+A useful comparison reports which conclusions hold across histories, which depend on a particular contract assumption and which depend on a policy. For instance, a rate increase may raise interest for every floating exposure but reduce the value of a fixed-rate liability under a separate valuation basis. These are different quantities and can move in different directions.
+
+The result should separate cash liquidity, book income, book equity, market value and contractual compliance. A positive accounting profit does not guarantee payment capacity; a market-value loss does not necessarily cause an immediate cash outflow. Combining them into an unnamed risk score makes the mechanism difficult to audit.
+
+A proposed dashboard can show a conditional envelope with witness histories at important boundaries and a list of assumptions that change the conclusion. The envelope should retain joint outcomes and timing. A worst cash value at one date and a worst debt value at another may come from different paths; presenting them as one path would mislead.
+
+\section{Scenario failures and repairs}
+A scenario can fail because its shock is underspecified, because the model omits an exposure, because behavior uses future information, because financing is infeasible, because the numerical calculation fails, or because the economic assumptions are outside their domain. These failures require different remedies. More Monte Carlo paths cannot repair an omitted contract or an information violation. A more detailed journal cannot repair an unidentified behavioral response.
+
+AccDSL should therefore return a typed result: completed conditional simulation, unresolved history region, unsupported mechanism, infeasible action, economic distress event, or numerical failure. A run may contain several statuses across different regions. Dropping failed regions and renormalizing successful ones changes the target distribution and can systematically remove the worst outcomes.
+
+The next chapters make the financing mechanisms explicit. Debt and equity are especially consequential because they can appear to solve every cash shortage if issuance is represented only as a balancing entry. Their economic terms, counterparties, timing and rights must determine whether the entry may occur.

@@ -1,0 +1,156 @@
+\section{Equal balances after unequal payment histories}
+\label{sim:settlement-remedies}
+
+A borrower can recover from a cash shortage before the reporting date. Its
+closing statements then need not reveal that it failed to pay on time. To
+isolate the timing, consider a synthetic company with cash 60, inventory 100,
+debt carrying amount 80 and book equity 80. The contractual promise is 100,
+payable on 30 June 2027. Assume a zero coupon, no fees or taxes, and one
+remaining measurement interval that accretes the discount of 20 at maturity.
+This deliberately simple interval makes the cash and contract comparisons
+exact; a general effective-interest schedule needs its own measurement rules.
+
+The company issues 40 new shares for one unit of cash each. In the first
+history, the subscription settles on 29 June. Cash rises from 60 to 100,
+the discount accretes on 30 June, and the borrower pays the complete promise
+that day. In the second history, the shares settle on 2 July. The borrower
+can pay only 60 at maturity. On 1 July an explicit observation records the
+unpaid 40; the new cash arrives on 2 July and pays the remaining claim on
+3 July. No overdraft, emergency loan or retroactive receipt funds the earlier
+payment.
+
+The following comparison follows the money and claim in the second history.
+The liability column is positive for presentation, although journal credits
+use the implementation's signed convention.
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+After the dated event & Cash & Claim unpaid & Historical miss\\
+\midrule
+30 June: accretion &60&100&0\\
+30 June: partial payment &0&40&0\\
+1 July: missed-payment observation &0&40&40\\
+2 July: share proceeds &40&40&40\\
+3 July: final payment &0&0&40\\
+\bottomrule
+\end{tabular}
+\end{center}
+The zero in the first two historical-miss cells records that the observation
+has not yet been made. It is not a finding that a payment was timely. The
+observation changes contract memory without changing cash or posting another
+expense. The final payment clears the current claim; it leaves the history
+of the earlier shortfall intact.
+
+Both histories end with the same financial statements under the supplied
+treatment. Inventory of 100 is the only remaining asset, the debt is zero,
+and equity is opening equity plus the subscription less the discount expense:
+\begin{equation}
+ A=100,\qquad L=0,\qquad E=80+40-20=100.
+\end{equation}
+Profit for the illustrated movements is $-20$. Net financing cash flow is
+$40-100=-60$ in either history. The late path divides the repayment into
+$60+40$, which changes its timing but not its total. Even agreement across
+the closing balance sheet, income and cash-flow statements does not answer
+whether the maturity was paid on time. A simulation query about missed
+payments must retain the distinguishing history.
+
+The difference also explains why balancing the journal is insufficient. Share
+proceeds can debit cash and credit capital correctly while a faulty method
+fails to increase the recorded shares. A missed-payment observation can omit
+its history update without unbalancing any account. In the checked reference,
+both omissions pass generic accounting execution and fail the independent
+complete-state comparison. Explicit financing conditions subsequently reject
+these proposed transitions before accepting their successors.
+
+Those conditions have two roles. Snapshot conditions constrain current
+quantities: claims and arrears are nonnegative, arrears cannot exceed the
+remaining claim, and under this matured zero-coupon convention the carrying
+liability equals that claim. Transition conditions constrain how an event
+changes them. Payment of $p$ gives remaining claim $q'=q-p$, reduces cash by
+$p$, and leaves the historical missed amount unchanged. A share subscription
+must increase both the monetary capital account and the separate share
+quantity under the supplied issue terms. An internally plausible rewrite of
+historical miss from 40 to 50 can satisfy snapshot inequalities but violates
+the transition condition. This is why both kinds of condition are needed.
+
+Opening history creates another distinction. A supplied fiscal opening must
+satisfy the declared period-start, temporary-balance and flow restrictions;
+an intermediate state containing this year's payments is not such an opening.
+Importing a consistent snapshot does not establish that it includes every
+earlier missed payment. The selected opening method therefore compares it
+with a separately supplied history premise and preserves unknown completeness.
+Actual source evidence is still needed to establish that premise.
+
+\section{A missed payment and the available remedies}
+The amount unpaid does not by itself identify the creditor's remedy. Apple's
+2024 annual report provides a concrete historical description of why the
+distinction matters. Exhibit 4.1 expressly calls its description incomplete
+and qualifies it by the 2013 and 2018 indentures; its issuer references concern
+Apple Inc., rather than automatically every subsidiary
+\citep[Exhibit 4.1, printed p.~3]{apple2024}. We use the summary to identify
+conditions a simulation must represent. It does not establish an actual
+issuer default, complete operative terms, or the applicability of those terms
+to the synthetic company.
+
+The described interest-payment event requires default continuing for 30 days
+after the installment becomes due. Principal and premium use a different
+condition: nonpayment when due and payable, including maturity, redemption
+or declaration. Importing the interest grace period into principal repayment
+would therefore apply the wrong described condition. The other-covenant route
+has its own exclusions, a continuing breach and 90 days after qualifying
+written notice. Holder notice uses at least 25\% of outstanding principal
+under the 2013 indenture and at least 33\% under the 2018 indenture; the
+trustee has a separately described notice route
+\citep[Exhibit 4.1, printed p.~9]{apple2024}.
+
+The thresholds concern the relevant outstanding series, not a fraction of
+consolidated debt or a count of creditors. Series mapping, denominator,
+delivery to the required recipients and validity of notice are substantive
+inputs. No notice and no evidence about notice lead to different answers.
+Likewise, day-level data at exactly the 30- or 90-day boundary may leave
+event order unresolved. The conditional reference retains that uncertainty;
+it does not assert that the complete contract has no answer at the boundary.
+
+The summary next distinguishes declaration from automatic acceleration.
+Certain continuing nonbankruptcy events permit a declaration by the specified
+trustee or holder route. Certain bankruptcy events make the obligations due
+without that declaration. A negative equity balance establishes neither the
+specified bankruptcy event nor the required category. Moreover, an event for
+one series does not necessarily constitute an event for another. Neither
+automatic contagion nor universal independence follows
+\citep[Exhibit 4.1, printed pp.~9--10]{apple2024}.
+
+Cure and rescission must also remain separate. The described rescission of a
+declaration requires holder action and specified deposits and cure or waiver
+conditions, with an exception concerning amounts due solely because of
+acceleration. Payment can remove current arrears without by itself proving
+that an earlier acceleration has been rescinded. In the selected synthetic
+continuation, payment changes the economic claim, reassessment changes the
+current clause finding, and a separate supported rescission assessment changes
+the recorded acceleration state. The historical miss remains 40 throughout.
+
+Consent cannot be supplied by a numerical convenience either. The summary
+requires each affected holder's consent for specified protected changes,
+including changes to stated maturity and reductions of principal or interest.
+Its general majority-waiver provision excludes payment defaults and certain
+individually protected provisions. A waiver concerns the specified past
+default; it does not license a future one
+\citep[Exhibit 4.1, printed pp.~11--12]{apple2024}. A current contractual default
+may cease under a valid waiver while the economic record still shows that
+payment arrived late. Keeping those two statements is consistent.
+
+The surrounding qualifications matter economically. Individual payment
+enforcement differs from collective proceedings; legal discharge differs
+from covenant defeasance. The description warns that assets sufficient to
+fund scheduled maturity may be insufficient after acceleration
+\citep[Exhibit 4.1, printed pp.~10--13]{apple2024}. A simulator must therefore
+retain the relevant rights, legal owner, timing and usable funding, even
+when a consolidated closing statement appears fully funded.
+
+The typed conditional implementation translates the retained examples and
+records selected findings through the common monetary and memory engine.
+An unresolved finding produces no successor state. Recording a known finding
+changes no cash, carrying amount, shares or historical missed amount. This
+establishes a limited representation and execution result. Multiple concurrent
+clauses, the full instruments, actual notices and amendments, and the economic
+consequences of acceleration still require their own admitted methods.

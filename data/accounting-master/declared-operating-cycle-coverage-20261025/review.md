@@ -1,0 +1,1 @@
+Preserve all53 obligations,6 interactions and46 operations by exact predecessor references. Six-method evidence is scoped;no whole row closes. Hash/record mismatches veto this continuity check. Wider native admission,clocks,valuation and notes remain open.

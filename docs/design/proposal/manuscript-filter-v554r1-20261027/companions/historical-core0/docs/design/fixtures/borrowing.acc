@@ -1,0 +1,22 @@
+module BorrowingExample version "1";
+use DemoDebt version "1";
+source note7 = external("synthetic-note-7");
+entity Acme functional USD;
+book Local entity Acme basis DemoDebt version "1";
+account Cash : Asset book Local;
+account Debt : Liability book Local;
+account InterestExpense : Expense book Local;
+account Retained : Equity book Local;
+opening after2025 for Local from external("after-2025-close");
+observation debt : Money<USD> instant @2025-12-31 = 100 USD from note7;
+symbol alpha : Real in [0, 1] because "Fixed-rate proportion not disclosed";
+contract loans : DebtMix book Local {
+  principal = value(debt);
+  fixed_fraction = alpha;
+  fixed_rate = 0.05 per year;
+  initial_floating_rate = 0.05 per year;
+}
+alternative allFixed { assume alpha == 1; }
+alternative allFloating { assume alpha == 0; }
+scenario rateShock { set market_rate = constant(0.07 per year); }
+report statements for Local { mapping = external("DemoDebt.statements.v1"); }

@@ -1,0 +1,299 @@
+\chapter{What the literature contributes}
+\label{ch:literature}
+
+The research problem crosses accounting, databases, programming languages,
+econometrics and document understanding. Each field resolves part of it. The
+review below distinguishes results that can be adopted directly, engineering
+ideas that need adaptation, and evidence that does not establish the intended
+product capability. Source versions and technical anchors are recorded in the
+accompanying research ledgers. The search includes work outside the original
+collection, with public-index searches and backward and forward citation
+searches through 2 October 2026. It is a scoped design survey, rather than a
+claim to enumerate every paper in these fields.
+
+\section{Accounting structure and company dynamics}
+
+\citet{nehmer1997}, especially Sections 2--5, supplies a useful algebraic
+starting point: balances occupy a structured state space, transactions change
+that state, and aggregation relates detailed accounts to reports. This supports
+a distinction between conservation constraints and permitted transactions.
+An entry can conserve the accounting total and still be an inadmissible
+transaction. AccDSL adopts that distinction in its posting validator. Its
+particular event vocabulary, evidence model and inverse-history semantics are
+new design decisions, not results established by the algebraic paper.
+
+\citet{doshi2024} develops an accounting DSL with time, transaction logs and
+correction mechanisms. The relevant material is in Chapters 4 and 7--9 of the
+2024 thesis; the original collection's filename misleadingly suggests 2026.
+It demonstrates why corrections and dates belong in the language rather than
+in informal comments. The thesis does not establish recovery of an entire
+company history from public reports or inference over economically distinct
+histories. \citet{babcinetchi2022}, pp.~342--345, offers a much smaller accounting
+language and grammar proposal. It is useful as a syntax precedent, but it
+provides insufficient semantics or evaluation to govern AccDSL by itself.
+
+\citet{shahnazarian2004} connects accounting dynamics with behavioural and
+econometric equations. Sections 2.3--2.8 describe the accounting relationships;
+the optimisation and econometric discussion in Chapter 3 and the data and
+evaluation material in Chapters 4 and 8 show how the model is used with
+standardised Swedish corporate data. This is an important precedent for
+simulating companies under changed conditions. Its standardised tax-data
+starting point differs from heterogeneous public-report extraction, and its
+working-capital funds formulation should not be imported as a general modern
+cash-flow statement implementation. The transferable idea is the explicit
+separation of accounting evolution and behavioural assumptions.
+
+\citet{pierson2020}, Sections 3--4 and the reporting structures, makes that
+separation operational in system dynamics. Receivables, payables and wages
+accumulate differences between accrual and payment flows; reporting-period
+accumulators turn instantaneous flows into statements. AccDSL can use these
+structures as examples of coherent movement schedules. The model's payment
+delays, inventory approximations and simplified equity treatment remain
+modelling choices. They are not universal defaults for companies or evidence
+that an aggregate state is sufficient for all shocks.
+
+Bank models demonstrate why journal generation needs economic state.
+\citet{halaj2016}, Section 3, combines funding shocks, fire sales, loans,
+securities and risk constraints. The homogeneous portfolios and specified
+funding process make the model tractable, but limit instrument-level
+interpretation. \citet{behn2019}, Section 2, makes managers' choices over asset
+growth, debt, risk and payouts depend on capital and liquidity constraints.
+These models motivate interfaces for management policy and regulatory
+calculations. Their parameterisations must be calibrated and evaluated for
+the target application; passing their accounting identities would not validate
+an AccDSL forecast.
+
+Two important neighbouring traditions remain explicit coverage qualifications.
+McCarthy's 1982 REA model is a foundational candidate for the relation between
+resources, events and agents; Caiani and co-authors' stock-flow-consistent
+agent-based benchmark is a candidate for simulation across interacting sectors.
+Verified primary PDFs could not be obtained in this retrieval campaign after
+institutional and publisher attempts. Their records are retained in the omission
+register, and no technical result from either is used to justify the design.
+AccDSL's event and counterparty records are specified and justified in Chapters~\ref{ch:language} and~\ref{ch:execution}. A later multi-company equilibrium engine would require expansion of
+the stock-flow-consistent literature before implementation.
+
+\section{Incomplete information and provenance}
+
+Financial disclosures are incomplete databases in a substantive sense.
+Multiple underlying records can yield the same published observations.
+\citet{libkin2014}, Sections 2--6, explains the semantics of incomplete
+databases, labelled nulls, conditional tables and certain answers. Repeated
+occurrences of the same unknown must share a value. Conditional tables can
+represent dependence between alternatives that independent missing cells
+cannot express. This is directly relevant to a debt note and a cash-flow table
+that refer to the same unknown repayment.
+
+AccDSL adopts shared symbolic unknowns and conditions. It extends the database
+idea with accounting constraints, continuous amounts, temporal transitions and
+economic event models. A ``certain'' answer means a statement that holds for
+every history in a nonempty declared feasible family. This is Boolean
+certainty; a table of individually certain rows can lose existential
+information and must not imply that omitted rows are absent. The payable
+example in Section~\ref{sec:query-certainty} develops this distinction.
+The family itself may omit
+unknown mechanisms; certainty is therefore always relative to a model scope.
+Imieliński and Lipski's original 1984 paper is a foundational backward lead
+whose publisher copy was inaccessible in this campaign. The inspected Libkin
+paper supplies the technical discussion actually used here.
+
+\citet{green2007}, Definitions 3.1--3.2 and Section 4, treats provenance as
+annotations that compose through relational operations. Combining sources
+and alternative derivations can therefore have formal semantics, rather than
+being a list of unrelated citations. This is useful for report aggregation and
+explanation queries. Positive relational operations covered by provenance
+semirings do not by themselves specify every operation AccDSL needs: negation,
+nonlinear valuation, optimisation and probabilistic conditioning require their
+own derivation records. Accordingly, the implementation starts with a typed
+dependency graph and may use semiring annotations for supported relational
+subqueries. A dependency edge is not a posterior probability.
+
+\citet{snodgrass1986} distinguishes historical validity from the time facts
+are stored. The archived paper is \emph{Temporal Databases}, by Snodgrass and
+Ahn, not the later Jensen--Snodgrass paper initially returned by a search.
+Its snapshot, rollback, historical and temporal examples support the need to
+recover both old business facts and old database beliefs. AccDSL adds public
+availability time because a database insertion date cannot establish whether
+a historical investor could have seen a filing.
+
+\section{Inverse problems, identification and probability}
+
+\citet{stuart2010}, Section 2.2, starts from an observation equation
+$y=G(u)$ and distinguishes inversion, regularisation and Bayesian inference.
+The discussion makes explicit that a regularising norm or prior is an
+additional assumption. AccDSL has a similar observation problem, although
+its unknowns include discrete accounting interpretations and event structures
+as well as continuous parameters. The infinite-dimensional well-posedness
+theorems in that paper are not automatically applicable to this mixed,
+potentially discontinuous model.
+
+The relevant issue is often identification rather than computation alone.
+\citet{giacomini2021}, Sections 2.1--2.6 and Theorem 1 of the archived 2020
+working version, shows how a class of priors can preserve uncertainty within
+an identified set. A likelihood that is flat over the unresolved part does
+not learn the conditional prior over that part. Posterior lower and upper
+probabilities summarise a class of posterior beliefs. The paper's regularity
+conditions and application to structural vector autoregressions do not prove
+that an arbitrary accounting program admits the same algorithms or guarantees.
+The design borrows the distinction between learnable quantities and
+assumption-dependent distributions; the simple accounting bounds in
+Chapter~\ref{ch:math} are derived directly.
+
+\citet{hoeting1999}, equations (1)--(3), gives Bayesian model averaging as a
+weighted sum of model-conditional distributions, with weights determined by
+model priors and marginal likelihoods. Sections 3 and 5 discuss computation
+and prior specification. This supports an optional weighted mode, provided
+AccDSL specifies the likelihood, priors and candidate model space. It does
+not justify giving equal mass to every syntactically different journal
+reconstruction. Two encodings of the same economic history must not gain extra
+weight by duplication. Model averaging also remains conditional on the
+considered model family, rather than repairing missing mechanisms.
+
+Scenario semantics need similar care. \citet{pearl2009}, Section 3.2.1 and
+equations (5)--(6), distinguishes an intervention that replaces a structural
+equation from ordinary conditioning. AccDSL will distinguish a supplied
+exogenous path, an observational conditional forecast and an intervention.
+A rise in rates imposed by a stress test is not automatically distributed as
+the collection of historical periods in which rates happened to be high.
+Identifying a causal effect requires assumptions beyond reproducing accounts.
+
+\section{Languages for rules and contracts}
+
+\citet{vandeursen2000} surveys DSL benefits, risks and implementation options.
+\citet{mernik2005}, Sections 1.1 and 2.2--2.5 of the archived CWI report,
+treats application libraries as serious competitors and distinguishes deciding,
+analysing, designing and implementing a DSL. Its implementation decision tree
+explicitly includes embedding in a host language. The literature therefore
+supports a conditional design decision: a DSL is attractive when domain
+constraints and repeated notation justify it, but an ordinary typed library
+may be cheaper and equally expressive. AccDSL will implement one shared
+representation accessible from both a Python API and a textual language, so
+syntax does not become a prerequisite for testing the accounting model.
+
+\citet{merigoux2021}, Sections 3--4 and Figures 8--9, provides Catala's scopes,
+exceptions, default calculus and translation into a conventional functional
+target. Its explicit empty and conflict outcomes are valuable precedents for
+accounting rules with exceptions. They are different from probabilistic
+uncertainty. AccDSL will preserve this distinction: conflicting applicable
+rules produce a diagnostic, while an evidence-supported alternative reading
+produces a conditional model branch. The paper's compiler correctness results
+do not establish correctness of our accounting rules or of an automatic
+translation from disclosures.
+
+The inspected LegalMath code offers reusable ideas in its shared typed
+interpretation, partial observations, source references and validity/knowledge
+times. Its ordinary frontend execution selects a reading. AccDSL needs an
+additional execution mode that retains a family of readings, continuous
+unknowns and economic state. A bounded candidate generator is useful for
+search, but its candidate limit does not prove completeness.
+
+\citet{jones2000}, Sections 3--5, builds complex financial contracts from
+combinators and separates their compositional meaning from a chosen valuation
+model. The ACTUS technical specification similarly separates contract states,
+scheduled events, state transitions and payoffs, with risk factors supplied
+through an interface \citep{actus}. These are strong reasons to represent
+contractual obligations independently of accounting classifications. Neither
+contract cash flows nor a derivative price determine the recognition,
+measurement and presentation rules of a complete IFRS or US GAAP book.
+
+\section{Extraction and financial reasoning}
+
+The document literature supports a staged ingestion process. PubTables-1M
+\citep{smock2022}, in its canonicalisation procedure and evaluation section,
+distinguishes table detection, structure recognition and functional analysis.
+Its GriTS evaluation compares reconstructed table structure. TableBank
+\citep{li2020}, Sections 3--4, uses document structure to obtain weak supervision
+for table detection and recognition. GTE and FinTabNet \citep{zheng2021},
+Sections 3--5, provide a financial-document setting and company-level dataset
+splits. These sources help select extraction components and evaluation units.
+Their table scores do not establish that a debt note has been interpreted
+correctly across years or that every off-balance-sheet exposure has been found.
+
+The Docling report \citep{nassar2024}, Section 3, describes PDF parsing, page
+layout analysis and table structure recognition within a document-conversion
+pipeline. The locally archived version lists Christoph Auer first; this
+version difference is recorded in the catalogue. Docling is an ingestion
+candidate whose output must retain source locations and undergo accounting
+validation. Its code and model licences must be considered separately when
+packaging a deployment.
+
+\enlargethispage{\baselineskip}
+TableFormer makes the division between structure and text concrete.
+\citet{nassar2022tableformer}, Sections 4--5, describe a model that receives a
+cropped table image and predicts its HTML structure together with a bounding
+box for each cell. The cell's words and numbers come from separately supplied
+PDF text; they are not generated by the structure decoder. Matching the
+predicted cells to that text is itself consequential. The supplementary
+algorithm can remove duplicate columns, attach previously unmatched text to a
+cell, or create a new cell \citep[Section 2]{nassar2022tableformersupp}. A
+plausible grid therefore still needs its text assignments and structural
+corrections checked against the source.
+
+The paper's evaluation preserves this distinction. Table 4 reports TEDS,
+a similarity measure based on tree edit distance, for structure \emph{with
+content} on PubTabNet PDF documents containing cropped tables: 95.4 for simple
+tables, 90.1 for complex tables and 93.6 overall. The content comes from PDF
+cells; Table 2 separately reports structure-only results
+\citep[Tables 2 and 4, p.~4620]{nassar2022tableformer}. These are results for
+that input population and text supply. They do not establish extraction
+accuracy for complete financial filings, or whether a cell has been assigned
+the correct entity, period, unit or accounting meaning. Those questions require
+the source-linked accounting checks developed here.
+
+
+FinQA \citep{chen2021}, Sections 3--6, provides questions with executable
+reasoning programs and supporting evidence. TAT-QA \citep{zhu2021}, Sections
+2--4, combines table cells and text spans with aggregation operations, and
+explicitly treats numerical signs in evaluation. DocFinQA \citep{reddy2024}
+extends financial questions to long documents and evaluates retrieval/context
+choices. FinBen \citep{xie2024} broadens the collection of financial tasks and
+model evaluations. These benchmarks can test retrieval and local numerical
+reasoning. Their question-answer format does not require a complete
+multi-period company representation, joint alternative histories or
+scenario-dependent journal generation.
+
+A directly relevant recent competitor is the auditable RAG architecture of
+\citet{cosentino2026}. Sections 3.1--3.2 describe persistent extraction,
+enrichment, retrieval and provenance records; Section 4.6 checks citation
+resolvability and failure recovery. Section 5 limits the interpretation of
+those results to the evaluated document-intelligence tasks. AccDSL should
+reuse the idea of persistent evidence and recoverable processing, while adding
+executable accounting and economic semantics. No performance comparison with
+that architecture has been run here.
+
+\section{Solvers and probabilistic execution}
+
+\citet{damoura2008}, Sections 2--3, describes Z3's interfaces and theory-solving
+architecture. It supports choosing an SMT solver for logical choices and
+arithmetic constraints, but does not make arbitrary nonlinear simulation
+tractable. The first solver fragment is deliberately bounded: finite choices,
+exact linear arithmetic and selected calendar relations. Unsupported formulas
+remain in the representation with a solver diagnostic.
+
+\citet{vandeMeent2018} develops probabilistic programs through sampling,
+observations and inference; the inspected material includes the first-order
+language and weighted sampling discussion. Stan \citep{carpenter2017}, its
+model language and sampler-output discussion, and Pyro \citep{bingham2019},
+Sections 2--3, show different ways to separate a probabilistic model from
+inference machinery. They are candidates for optional inference over an
+already-defined economic model. Exact accounting identities and discrete rule
+selection should not be turned into nearly satisfied likelihood penalties
+merely to fit an inference library. Nor should successful sampler execution
+be described as evidence that all interpretations were explored.
+
+\clearpage
+\section{The remaining design problem}
+
+The combined literature provides algebra for journals, semantics for missing
+information, temporal storage, provenance, contract languages, rule languages,
+inference methods and extraction tools. The unresolved integration problem is
+to retain their distinctions while connecting them: a disclosure constrains
+economic histories; a history supplies contract and behavioural state; a
+scenario drives events; accounting rules produce journals; reporting rules
+render statements; and every step remains explainable.
+
+The design is therefore an integration proposal with several local
+mathematical constructions. Its originality and empirical advantage have not
+been established by this survey. Its practical merit will depend on the
+acceptance cases, accounting review and comparative implementation work in
+Chapter~\ref{ch:validation}.

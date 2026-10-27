@@ -1,0 +1,948 @@
+{
+  "profile": "AuthoredMethodCall/1",
+  "expected_state_sha256": "817bb8ddabed1654dffe670099440c2dc1ca8d5fe09d271b4c149dcfcf681c11",
+  "expected_registry_sha256": "eee3526b3585af45801dfabc6158dca3f1893905df16310c9bb33ad5017ac7ef",
+  "registry": {
+    "profile": "AuthoredMethodRegistry/1",
+    "context": {
+      "entity": "beta",
+      "book": "legal-beta",
+      "currency": "USD",
+      "case_id": "constructed-beta",
+      "mode": "synthetic"
+    },
+    "entries": {
+      "authored": {
+        "method_sha256": "ddd19fafa03bd2bf6a112953d7b74c450b5ad0e563c68ae295f09a8c78bb6ebf",
+        "method": {
+          "profile": "CompanyBookMethod/1",
+          "id": "synthetic.liability.payment",
+          "version": "1",
+          "context": {
+            "entity": "beta",
+            "book": "legal-beta",
+            "currency": "USD",
+            "case_id": "constructed-beta",
+            "mode": "synthetic"
+          },
+          "account_map": {
+            "cash": "101",
+            "liability": "230"
+          },
+          "preconditions": {
+            "manifest": {
+              "profile": "MethodRequirements/3",
+              "method_id": "synthetic.liability.payment",
+              "version": "1",
+              "inputs": {
+                "cash": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:cash"
+                },
+                "liability": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:liability"
+                },
+                "outstanding": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:outstanding"
+                },
+                "amount": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:amount"
+                },
+                "approved": {
+                  "type": {
+                    "kind": "boolean",
+                    "context": {}
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:approved"
+                }
+              },
+              "requirements": [
+                {
+                  "id": "positive",
+                  "guard": {
+                    "op": "const",
+                    "type": {
+                      "kind": "boolean",
+                      "context": {}
+                    },
+                    "value": true
+                  },
+                  "guard_requires": [],
+                  "predicate": {
+                    "op": "lt",
+                    "left": {
+                      "op": "const",
+                      "type": {
+                        "kind": "rational",
+                        "context": {
+                          "entity": "beta",
+                          "book": "legal-beta",
+                          "case_id": "constructed-beta",
+                          "mode": "synthetic"
+                        },
+                        "dimensions": {
+                          "currency:USD": 1
+                        },
+                        "scale": "1/1"
+                      },
+                      "value": "0/1"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "id": "amount"
+                    }
+                  },
+                  "requires": [
+                    "amount"
+                  ],
+                  "admission_refs": [],
+                  "on_false": "invalid",
+                  "on_unknown": "unresolved"
+                },
+                {
+                  "id": "cash",
+                  "guard": {
+                    "op": "const",
+                    "type": {
+                      "kind": "boolean",
+                      "context": {}
+                    },
+                    "value": true
+                  },
+                  "guard_requires": [],
+                  "predicate": {
+                    "op": "le",
+                    "left": {
+                      "op": "ref",
+                      "id": "amount"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "id": "cash"
+                    }
+                  },
+                  "requires": [
+                    "cash",
+                    "amount"
+                  ],
+                  "admission_refs": [],
+                  "on_false": "invalid",
+                  "on_unknown": "unresolved"
+                },
+                {
+                  "id": "outstanding",
+                  "guard": {
+                    "op": "const",
+                    "type": {
+                      "kind": "boolean",
+                      "context": {}
+                    },
+                    "value": true
+                  },
+                  "guard_requires": [],
+                  "predicate": {
+                    "op": "le",
+                    "left": {
+                      "op": "ref",
+                      "id": "amount"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "id": "outstanding"
+                    }
+                  },
+                  "requires": [
+                    "outstanding",
+                    "amount"
+                  ],
+                  "admission_refs": [],
+                  "on_false": "invalid",
+                  "on_unknown": "unresolved"
+                },
+                {
+                  "id": "control",
+                  "guard": {
+                    "op": "const",
+                    "type": {
+                      "kind": "boolean",
+                      "context": {}
+                    },
+                    "value": true
+                  },
+                  "guard_requires": [],
+                  "predicate": {
+                    "op": "eq",
+                    "left": {
+                      "op": "add",
+                      "left": {
+                        "op": "ref",
+                        "id": "liability"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "id": "outstanding"
+                      }
+                    },
+                    "right": {
+                      "op": "const",
+                      "type": {
+                        "kind": "rational",
+                        "context": {
+                          "entity": "beta",
+                          "book": "legal-beta",
+                          "case_id": "constructed-beta",
+                          "mode": "synthetic"
+                        },
+                        "dimensions": {
+                          "currency:USD": 1
+                        },
+                        "scale": "1/1"
+                      },
+                      "value": "0/1"
+                    }
+                  },
+                  "requires": [
+                    "liability",
+                    "outstanding"
+                  ],
+                  "admission_refs": [],
+                  "on_false": "invalid",
+                  "on_unknown": "unresolved"
+                },
+                {
+                  "id": "applicable",
+                  "guard": {
+                    "op": "const",
+                    "type": {
+                      "kind": "boolean",
+                      "context": {}
+                    },
+                    "value": true
+                  },
+                  "guard_requires": [],
+                  "predicate": {
+                    "op": "ref",
+                    "id": "approved"
+                  },
+                  "requires": [
+                    "approved"
+                  ],
+                  "admission_refs": [],
+                  "on_false": "unsupported",
+                  "on_unknown": "unresolved"
+                }
+              ],
+              "required_known": [],
+              "capabilities": [],
+              "residual_prerequisites": [
+                "Synthetic applicability only; actual source and accounting admission remain separate."
+              ]
+            },
+            "bindings": {
+              "cash": {
+                "kind": "account",
+                "role": "cash"
+              },
+              "liability": {
+                "kind": "account",
+                "role": "liability"
+              },
+              "outstanding": {
+                "kind": "memory",
+                "pointer": "/contracts/obligation/outstanding"
+              },
+              "amount": {
+                "kind": "event",
+                "name": "amount"
+              },
+              "approved": {
+                "kind": "event",
+                "name": "approved"
+              }
+            }
+          },
+          "postconditions": {
+            "manifest": {
+              "profile": "MethodRequirements/3",
+              "method_id": "synthetic.liability.payment",
+              "version": "1",
+              "inputs": {
+                "liability": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:liability"
+                },
+                "outstanding": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:outstanding"
+                }
+              },
+              "requirements": [
+                {
+                  "id": "control",
+                  "guard": {
+                    "op": "const",
+                    "type": {
+                      "kind": "boolean",
+                      "context": {}
+                    },
+                    "value": true
+                  },
+                  "guard_requires": [],
+                  "predicate": {
+                    "op": "eq",
+                    "left": {
+                      "op": "add",
+                      "left": {
+                        "op": "ref",
+                        "id": "liability"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "id": "outstanding"
+                      }
+                    },
+                    "right": {
+                      "op": "const",
+                      "type": {
+                        "kind": "rational",
+                        "context": {
+                          "entity": "beta",
+                          "book": "legal-beta",
+                          "case_id": "constructed-beta",
+                          "mode": "synthetic"
+                        },
+                        "dimensions": {
+                          "currency:USD": 1
+                        },
+                        "scale": "1/1"
+                      },
+                      "value": "0/1"
+                    }
+                  },
+                  "requires": [
+                    "liability",
+                    "outstanding"
+                  ],
+                  "admission_refs": [],
+                  "on_false": "invalid",
+                  "on_unknown": "unresolved"
+                }
+              ],
+              "required_known": [],
+              "capabilities": [],
+              "residual_prerequisites": [
+                "Synthetic applicability only; actual source and accounting admission remain separate."
+              ]
+            },
+            "bindings": {
+              "liability": {
+                "kind": "account",
+                "role": "liability"
+              },
+              "outstanding": {
+                "kind": "memory",
+                "pointer": "/contracts/obligation/outstanding"
+              }
+            }
+          },
+          "monetary": {
+            "definition": {
+              "profile": "MethodMonetaryEffects/1",
+              "method_id": "synthetic.liability.payment",
+              "version": "1",
+              "inputs": {
+                "amount": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "reported_measurement",
+                  "source_ref": "constructed:amount"
+                },
+                "outstanding": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:outstanding"
+                },
+                "paid": {
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "role": "state",
+                  "source_ref": "constructed:paid"
+                }
+              },
+              "calculations": [
+                {
+                  "id": "outstanding_after",
+                  "expression": {
+                    "op": "sub",
+                    "left": {
+                      "op": "ref",
+                      "id": "outstanding"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "id": "amount"
+                    }
+                  },
+                  "requires": [
+                    "outstanding",
+                    "amount"
+                  ],
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                {
+                  "id": "paid_after",
+                  "expression": {
+                    "op": "add",
+                    "left": {
+                      "op": "ref",
+                      "id": "paid"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "id": "amount"
+                    }
+                  },
+                  "requires": [
+                    "paid",
+                    "amount"
+                  ],
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "beta",
+                      "book": "legal-beta",
+                      "case_id": "constructed-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                }
+              ],
+              "accounts": {
+                "cash": {
+                  "kind": "rational",
+                  "context": {
+                    "entity": "beta",
+                    "book": "legal-beta",
+                    "case_id": "constructed-beta",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "scale": "1/1"
+                },
+                "liability": {
+                  "kind": "rational",
+                  "context": {
+                    "entity": "beta",
+                    "book": "legal-beta",
+                    "case_id": "constructed-beta",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "scale": "1/1"
+                }
+              },
+              "cash_account": "cash",
+              "postings": [
+                {
+                  "id": "cash",
+                  "account": "cash",
+                  "expression": {
+                    "op": "sub",
+                    "left": {
+                      "op": "const",
+                      "type": {
+                        "kind": "rational",
+                        "context": {
+                          "entity": "beta",
+                          "book": "legal-beta",
+                          "case_id": "constructed-beta",
+                          "mode": "synthetic"
+                        },
+                        "dimensions": {
+                          "currency:USD": 1
+                        },
+                        "scale": "1/1"
+                      },
+                      "value": "0/1"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "id": "amount"
+                    }
+                  },
+                  "requires": [
+                    "amount"
+                  ]
+                },
+                {
+                  "id": "liability",
+                  "account": "liability",
+                  "expression": {
+                    "op": "ref",
+                    "id": "amount"
+                  },
+                  "requires": [
+                    "amount"
+                  ]
+                }
+              ],
+              "flows": [
+                {
+                  "id": "payment",
+                  "activity": "financing",
+                  "origin": "principal_payment",
+                  "expression": {
+                    "op": "sub",
+                    "left": {
+                      "op": "const",
+                      "type": {
+                        "kind": "rational",
+                        "context": {
+                          "entity": "beta",
+                          "book": "legal-beta",
+                          "case_id": "constructed-beta",
+                          "mode": "synthetic"
+                        },
+                        "dimensions": {
+                          "currency:USD": 1
+                        },
+                        "scale": "1/1"
+                      },
+                      "value": "0/1"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "id": "amount"
+                    }
+                  },
+                  "requires": [
+                    "amount"
+                  ]
+                }
+              ]
+            },
+            "bindings": {
+              "amount": {
+                "kind": "event",
+                "name": "amount"
+              },
+              "outstanding": {
+                "kind": "memory",
+                "pointer": "/contracts/obligation/outstanding"
+              },
+              "paid": {
+                "kind": "memory",
+                "pointer": "/contracts/obligation/paid"
+              }
+            }
+          },
+          "memory": {
+            "definition": {
+              "profile": "MethodMemoryEffects/1",
+              "state_schema": "2523faedd301c6e0d0aff6a45f8e152d964c6748bb27b5a57a785abafd3f7c51",
+              "input_schema": "80a85b16ad828eb97e047d24506d1b4c2b9296c9ee26769c98aa3b7cf92742fc",
+              "operations": [
+                {
+                  "id": "write.outstanding",
+                  "op": "replace",
+                  "path": [
+                    "contracts",
+                    "obligation",
+                    "outstanding"
+                  ],
+                  "value": {
+                    "kind": "read",
+                    "source": "inputs",
+                    "pointer": "/remaining"
+                  }
+                },
+                {
+                  "id": "write.paid",
+                  "op": "replace",
+                  "path": [
+                    "contracts",
+                    "obligation",
+                    "paid"
+                  ],
+                  "value": {
+                    "kind": "read",
+                    "source": "inputs",
+                    "pointer": "/paid"
+                  }
+                },
+                {
+                  "id": "write.last_date",
+                  "op": "replace",
+                  "path": [
+                    "contracts",
+                    "obligation",
+                    "last_date"
+                  ],
+                  "value": {
+                    "kind": "read",
+                    "source": "inputs",
+                    "pointer": "/date"
+                  }
+                },
+                {
+                  "id": "write.last_event",
+                  "op": "replace",
+                  "path": [
+                    "contracts",
+                    "obligation",
+                    "last_event"
+                  ],
+                  "value": {
+                    "kind": "read",
+                    "source": "inputs",
+                    "pointer": "/event_id"
+                  }
+                }
+              ]
+            },
+            "input_bindings": {
+              "remaining": {
+                "kind": "calculation",
+                "name": "outstanding_after"
+              },
+              "paid": {
+                "kind": "calculation",
+                "name": "paid_after"
+              },
+              "date": {
+                "kind": "event",
+                "name": "date"
+              },
+              "event_id": {
+                "kind": "event",
+                "name": "id"
+              }
+            }
+          },
+          "residual_prerequisites": [
+            "Constructed payment contract; no inference of source authority or accounting compliance."
+          ]
+        },
+        "schemas": {
+          "2523faedd301c6e0d0aff6a45f8e152d964c6748bb27b5a57a785abafd3f7c51": {
+            "type": "object",
+            "properties": {
+              "contracts": {
+                "type": "object",
+                "properties": {
+                  "obligation": {
+                    "type": "object",
+                    "properties": {
+                      "outstanding": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096,
+                        "x-exact-kind": "rational"
+                      },
+                      "paid": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096,
+                        "x-exact-kind": "rational"
+                      },
+                      "last_date": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096,
+                        "x-exact-kind": "date"
+                      },
+                      "last_event": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096,
+                        "x-exact-kind": "text"
+                      }
+                    },
+                    "required": [
+                      "outstanding",
+                      "paid",
+                      "last_date",
+                      "last_event"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "obligation"
+                ],
+                "additionalProperties": false
+              },
+              "untouched": {
+                "type": "object",
+                "properties": {
+                  "tag": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "x-exact-kind": "text"
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "x-exact-kind": "rational"
+                  }
+                },
+                "required": [
+                  "tag",
+                  "quantity"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "contracts",
+              "untouched"
+            ],
+            "additionalProperties": false
+          },
+          "80a85b16ad828eb97e047d24506d1b4c2b9296c9ee26769c98aa3b7cf92742fc": {
+            "type": "object",
+            "properties": {
+              "remaining": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "x-exact-kind": "rational"
+              },
+              "paid": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "x-exact-kind": "rational"
+              },
+              "date": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "x-exact-kind": "date"
+              },
+              "event_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "x-exact-kind": "text"
+              }
+            },
+            "required": [
+              "remaining",
+              "paid",
+              "date",
+              "event_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "account_classes": {
+          "cash": "asset",
+          "liability": "liability"
+        },
+        "event_inputs": {
+          "amount": {
+            "kind": "rational",
+            "context": {
+              "entity": "beta",
+              "book": "legal-beta",
+              "case_id": "constructed-beta",
+              "mode": "synthetic"
+            },
+            "dimensions": {
+              "currency:USD": 1
+            },
+            "scale": "1/1"
+          },
+          "approved": {
+            "kind": "boolean",
+            "context": {}
+          }
+        },
+        "metadata_bindings": {},
+        "clock": {
+          "kind": "direct_event_date"
+        },
+        "transition_profile": "CompanyBookTransition/1",
+        "source": "company_method \"CompanyMethodAuthoring/1\" \"CompanyBookTransition/1\" \"CompanyBookMethod/1\" \"synthetic.liability.payment\" \"1\";\ncontext {\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"currency\":\"USD\",\"entity\":\"beta\",\"mode\":\"synthetic\"};\naccount_map \"cash\" \"101\";\naccount_map \"liability\" \"230\";\nbegin_preconditions;\nrequirements_exchange \"MethodRequirementExchange/2\" \"MethodRequirements/3\" \"synthetic.liability.payment\" \"1\";\ninput \"amount\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} state \"constructed:amount\";\ninput \"approved\" {\"context\":{},\"kind\":\"boolean\"} state \"constructed:approved\";\ninput \"cash\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} state \"constructed:cash\";\ninput \"liability\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} state \"constructed:liability\";\ninput \"outstanding\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} state \"constructed:outstanding\";\nguarded \"positive\" invalid unresolved [] [\"amount\"] [] (const {\"context\":{},\"kind\":\"boolean\"} true) (lt (const {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} \"0/1\") (ref \"amount\"));\nguarded \"cash\" invalid unresolved [] [\"cash\",\"amount\"] [] (const {\"context\":{},\"kind\":\"boolean\"} true) (le (ref \"amount\") (ref \"cash\"));\nguarded \"outstanding\" invalid unresolved [] [\"outstanding\",\"amount\"] [] (const {\"context\":{},\"kind\":\"boolean\"} true) (le (ref \"amount\") (ref \"outstanding\"));\nguarded \"control\" invalid unresolved [] [\"liability\",\"outstanding\"] [] (const {\"context\":{},\"kind\":\"boolean\"} true) (eq (add (ref \"liability\") (ref \"outstanding\")) (const {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} \"0/1\"));\nguarded \"applicable\" unsupported unresolved [] [\"approved\"] [] (const {\"context\":{},\"kind\":\"boolean\"} true) (ref \"approved\");\nrequired_known [];\nresidual \"Synthetic applicability only; actual source and accounting admission remain separate.\";\nselect \"a2438dfb4b983110bcd399dde677fe157aeb0a98cf43141e463546f003c49cba\";\nend_requirements_exchange;\nend_preconditions;\ninput_binding \"preconditions\" \"amount\" {\"kind\":\"event\",\"name\":\"amount\"};\ninput_binding \"preconditions\" \"approved\" {\"kind\":\"event\",\"name\":\"approved\"};\ninput_binding \"preconditions\" \"cash\" {\"kind\":\"account\",\"role\":\"cash\"};\ninput_binding \"preconditions\" \"liability\" {\"kind\":\"account\",\"role\":\"liability\"};\ninput_binding \"preconditions\" \"outstanding\" {\"kind\":\"memory\",\"pointer\":\"/contracts/obligation/outstanding\"};\nbegin_monetary \"MethodMonetaryEffects/1\" \"synthetic.liability.payment\" \"1\";\nmoney_input \"amount\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} reported_measurement \"constructed:amount\";\nmoney_input \"outstanding\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} state \"constructed:outstanding\";\nmoney_input \"paid\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} state \"constructed:paid\";\ncalculation \"outstanding_after\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} [\"outstanding\",\"amount\"] (sub (ref \"outstanding\") (ref \"amount\"));\ncalculation \"paid_after\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} [\"paid\",\"amount\"] (add (ref \"paid\") (ref \"amount\"));\nmoney_account \"cash\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"};\nmoney_account \"liability\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"};\ncash_account \"cash\";\nposting \"cash\" \"cash\" [\"amount\"] (sub (const {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} \"0/1\") (ref \"amount\"));\nposting \"liability\" \"liability\" [\"amount\"] (ref \"amount\");\nflow \"payment\" \"financing\" \"principal_payment\" [\"amount\"] (sub (const {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} \"0/1\") (ref \"amount\"));\nend_monetary;\ninput_binding \"monetary\" \"amount\" {\"kind\":\"event\",\"name\":\"amount\"};\ninput_binding \"monetary\" \"outstanding\" {\"kind\":\"memory\",\"pointer\":\"/contracts/obligation/outstanding\"};\ninput_binding \"monetary\" \"paid\" {\"kind\":\"memory\",\"pointer\":\"/contracts/obligation/paid\"};\nbegin_memory \"MethodMemoryEffects/1\" \"2523faedd301c6e0d0aff6a45f8e152d964c6748bb27b5a57a785abafd3f7c51\" \"80a85b16ad828eb97e047d24506d1b4c2b9296c9ee26769c98aa3b7cf92742fc\";\nmemory_input \"date\" {\"kind\":\"event\",\"name\":\"date\"};\nmemory_input \"event_id\" {\"kind\":\"event\",\"name\":\"id\"};\nmemory_input \"paid\" {\"kind\":\"calculation\",\"name\":\"paid_after\"};\nmemory_input \"remaining\" {\"kind\":\"calculation\",\"name\":\"outstanding_after\"};\nwrite \"write.outstanding\" \"replace\" [\"contracts\",\"obligation\",\"outstanding\"] {\"kind\":\"read\",\"pointer\":\"/remaining\",\"source\":\"inputs\"};\nwrite \"write.paid\" \"replace\" [\"contracts\",\"obligation\",\"paid\"] {\"kind\":\"read\",\"pointer\":\"/paid\",\"source\":\"inputs\"};\nwrite \"write.last_date\" \"replace\" [\"contracts\",\"obligation\",\"last_date\"] {\"kind\":\"read\",\"pointer\":\"/date\",\"source\":\"inputs\"};\nwrite \"write.last_event\" \"replace\" [\"contracts\",\"obligation\",\"last_event\"] {\"kind\":\"read\",\"pointer\":\"/event_id\",\"source\":\"inputs\"};\nend_memory;\nbegin_postconditions;\nrequirements_exchange \"MethodRequirementExchange/2\" \"MethodRequirements/3\" \"synthetic.liability.payment\" \"1\";\ninput \"liability\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} state \"constructed:liability\";\ninput \"outstanding\" {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} state \"constructed:outstanding\";\nguarded \"control\" invalid unresolved [] [\"liability\",\"outstanding\"] [] (const {\"context\":{},\"kind\":\"boolean\"} true) (eq (add (ref \"liability\") (ref \"outstanding\")) (const {\"context\":{\"book\":\"legal-beta\",\"case_id\":\"constructed-beta\",\"entity\":\"beta\",\"mode\":\"synthetic\"},\"dimensions\":{\"currency:USD\":1},\"kind\":\"rational\",\"scale\":\"1/1\"} \"0/1\"));\nrequired_known [];\nresidual \"Synthetic applicability only; actual source and accounting admission remain separate.\";\nselect \"5767714edd9150860a238ce2969b0fcb7de47fb9c661a97102df6125ad8b19af\";\nend_requirements_exchange;\nend_postconditions;\ninput_binding \"postconditions\" \"liability\" {\"kind\":\"account\",\"role\":\"liability\"};\ninput_binding \"postconditions\" \"outstanding\" {\"kind\":\"memory\",\"pointer\":\"/contracts/obligation/outstanding\"};\nresidual \"Constructed payment contract; no inference of source authority or accounting compliance.\";\nend_method;\n",
+        "source_sha256": "d879148202be375532989bfd0cab74d9a405e4992fed0164bc85e435f3ca37b0"
+      }
+    }
+  },
+  "method_key": "authored",
+  "event": {
+    "id": "payment.1",
+    "date": "2027-01-02",
+    "inputs": {
+      "amount": {
+        "type": {
+          "kind": "rational",
+          "context": {
+            "entity": "beta",
+            "book": "legal-beta",
+            "case_id": "constructed-beta",
+            "mode": "synthetic"
+          },
+          "dimensions": {
+            "currency:USD": 1
+          },
+          "scale": "1/1"
+        },
+        "value": {
+          "status": "known",
+          "value": "7/2"
+        },
+        "provenance": "Authored payment for exact arithmetic comparison"
+      },
+      "approved": {
+        "type": {
+          "kind": "boolean",
+          "context": {}
+        },
+        "value": {
+          "status": "known",
+          "value": true
+        },
+        "provenance": "Hypothetical applicability finding, not posting authorization"
+      }
+    }
+  }
+}

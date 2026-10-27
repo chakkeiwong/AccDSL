@@ -1,0 +1,27 @@
+from pathlib import Path
+import json,hashlib,subprocess
+OUT=Path(__file__).resolve().parent;ROOT=OUT.parents[2]
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+assert not (OUT/'run-manifest.json').exists()
+c=json.loads((OUT/'manuscript-checks.json').read_text());assert c['passed']
+(OUT/'render-review.json').write_text(json.dumps({'pdf_sha256':c['pdf_sha256'],'physical_pages':[1,121,122,123,124],'review':'Scoped author visual review; no layout defect; human understanding pending'},indent=2)+'\n')
+paths=['docs/plans/accounting-master-current.md','docs/plans/accounting-master-checkpoint.md','docs/plans/accounting-continuation-requirements-20261007.md','docs/plans/accounting-p17-completion-20261014.md','docs/plans/accounting-p18-completion-20261014.md','data/accounting-master/next-plan.md']
+before=OUT/'controls-before-impairment-tax';before.mkdir();records=[]
+section='''## Corporate event methods — 15 October 2026
+
+R03-F is integrated in Version 3.03, 307 pages: major-inspection replacement, homogeneous lease scope decrease and usage payments, benefits curtailment/settlement/ceiling ordering and multi-employer classification. Five conditional cases pass 33 exact arithmetic/conservation checks; five final rendered pages were inspected. Result: data/accounting-master/corporate-event-repairs-20261015/result.md. Actual valuations and heterogeneous rights remain conditional; remaining methods and extended profile closure keep R03 and readiness open.
+
+Next: corporate/group impairment and tax-origin method repairs under docs/plans/accounting-impairment-tax-repairs-20261015.md, then remaining bank/insurance/financing/group and complete extended exchanges before R07/R08. Runtime and empirical campaigns remain held.
+
+'''
+for rel in paths:
+ p=ROOT/rel;s=p.read_text();(before/p.name).write_bytes(p.read_bytes());h=sha(p)
+ s=s.replace('Version **3.02**, 304 pages','Version **3.03**, 307 pages').replace('docs/design/proposal/manuscript-selected-reuse-20261015/accounting-product-proposal.pdf','docs/design/proposal/manuscript-corporate-events-20261015/accounting-product-proposal.pdf').replace('44e8f20419cb8e4089cf3416ed9ea54a693dcb24a0d58b8b4e57efc1065fd559',c['pdf_sha256'])
+ s=s.replace('Next: repair the named R03 methods under docs/plans/accounting-corporate-event-repairs-20261015.md, then reconcile remaining finance/bank/insurance/group and exchange obligations before R07/R08. R04/R05 and the finite R06 source-selection increment are delivered; exact runtime dependency admission remains open and execution held.','Next: corporate/group impairment and tax-origin repairs under docs/plans/accounting-impairment-tax-repairs-20261015.md; remaining R03 methods/exchanges and R07/R08 stay open. Runtime admission and empirical execution remain held.')
+ s=s.replace('Next: the named R03 corporate event repairs under docs/plans/accounting-corporate-event-repairs-20261015.md; remaining finance/bank/insurance/group and extended exchanges follow. R07 whole-candidate and R08 all53 assessment retain each unresolved required method and acceptance dependency.','Next: corporate/group impairment and tax-origin repairs, then remaining R03 methods and extended exchanges before R07/R08.')
+ i=s.index('\n## ');s=s[:i+1]+section+s[i+1:];p.write_text(s);records.append({'path':rel,'before_sha256':h,'after_sha256':sha(p)})
+residual=ROOT/'data/accounting-master/finite-method-decisions-20261015/residual-followup.md'
+with residual.open('a') as f:f.write('\n## Progress 15 October 2026 through Version 3.03\n\nR04 reconciliation, R05 future protocols and finite R06 source selection are delivered within their stated limits. R03-F specifies inspection replacement, homogeneous lease scope reduction/usage and benefits exceptional-event/multi-employer methods; see corporate-event-repairs-20261015/result.md. The earlier rows remain historical. Next are corporate/group impairment and tax-origin methods, then remaining sector/financing/group operations and extended exchanges. Actual valuations and runtime admission remain separate.\n')
+idx=subprocess.check_output(['git','diff','--cached','--raw','--no-abbrev'],cwd=ROOT);assert idx==(ROOT/'data/accounting-master/remaining-phases-audit-20261014/unrelated-index-before.txt').read_bytes()
+record={'date':'2026-10-15','git_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'plan':'docs/plans/accounting-corporate-event-repairs-20261015.md','result':str((OUT/'result.md').relative_to(ROOT)),'pdf_sha256':c['pdf_sha256'],'page_count':307,'commands':['check_cases.py','prepare_manuscript.py','format_math.py','accounting_document_tools.py build','accounting_document_tools.py render','verify_manuscript.py','closeout.py'],'environment':'Python stdlib rational arithmetic, pandoc, existing LuaLaTeX','cpu_gpu_status':'CPU only, no GPU detection','data_version':'Retained EU2023/1803; five explicit synthetic event examples','random_seeds':'N/A: deterministic arithmetic','wall_seconds':{'build':json.loads((OUT/'build-run.json').read_text())['wall_seconds'],'author_total':'Not captured; no performance claim'},'checks':{'arithmetic':33,'manuscript':c['count']},'artifacts':[str(p.relative_to(ROOT)) for p in sorted(OUT.glob('*.json'))],'controls':records,'index_preserved':True,'readiness':'not_ready'}
+(OUT/'run-manifest.json').write_text(json.dumps(record,indent=2)+'\n');print(json.dumps({'version':'3.03','controls':6,'checks':record['checks'],'next':'Impairment/tax and remaining R03','index_preserved':True}))

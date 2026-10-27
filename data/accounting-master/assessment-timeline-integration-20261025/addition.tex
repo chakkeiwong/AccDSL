@@ -1,0 +1,45 @@
+\paragraph{An assessment closes the interval it measures.}
+A tax assessment differs from a payment because it measures activity over an
+interval and constrains which events may follow. The optional
+\texttt{MixedEventTimeline/2} retains the same native annual book and decision
+rules while adding an explicit clock for current assessment. The interval
+has an inclusive start, an exclusive end and a final included activity date.
+That final date must be the day before the exclusive end, and it must equal
+the date supplied in the timeline. No extra \code{event.date} is introduced.
+The assessment reads the book at its actual turn, after earlier successful
+actions; static validation does not calculate tax against the initial book.
+
+Consider the same opening cash of USD~452, inventory of USD~80 and carried tax
+payable of USD~10.25, now with an explicitly enabled one-unit sale on
+2~January 2027. The sale earns USD~15 against cost of USD~10. Under the
+constructed assumption of zero tax adjustments and a one-quarter tax rate,
+a subsequent assessment through that day measures profit of USD~5 and current
+tax of USD~1.25. Cash is USD~467, inventory is USD~70 and total tax payable is
+USD~11.50. Assessment creates no cash flow and preserves the carried vintages.
+These numbers illustrate the supplied tax model; they are not an assessment
+of a named company's liability.
+
+Reversing the explicit same-day priorities gives a different admissibility
+result. Assessment first records zero current profit and closes the interval
+through 2~January. The later sale is refused because it would add activity
+inside an already assessed interval. The runner preserves the successful
+assessment, cash of USD~452 and the exact rejected sale. It neither silently
+moves the sale ahead of assessment nor rolls back the valid prefix.
+
+A half-unit sale on the next day, after the successful sale-first sequence,
+adds proceeds of USD~7.50 and cost of USD~5. Cumulative profit becomes USD~7.50
+and cumulative tax USD~1.875. Replacing the earlier assessment therefore
+records only USD~0.625 of additional expense and updates the same current
+vintage. Cash becomes USD~474.50 and inventory USD~65. This replacement rule
+prevents the earlier USD~1.25 charge from being counted again.
+
+Twelve focused tests and 49 regression tests preserve eight complete exchanges
+in \path{data/accounting-master/assessment-timeline-20261025/}. The comparison
+checks the full materialized decision, native transition, journals and report,
+alongside independent arithmetic. Unknown rates retain their unresolved
+status after a successful sale; malformed clocks, stale initial state and
+ambiguous priorities refuse. The existing bounds of 32 native entries and
+64 total actions are tested with actual boundary cases. Deferred measurement
+still requires its own state-binding rule, and carry still requires a fiscal
+boundary rule. Completing this declared timeline therefore establishes neither
+complete fiscal activity nor broader accounting admission.

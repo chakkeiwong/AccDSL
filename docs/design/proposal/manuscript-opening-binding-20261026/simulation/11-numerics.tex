@@ -1,0 +1,131 @@
+\chapter[Solving the economic equations]{Solving the economic equations that the model actually states}
+\label{sim:numerics}
+
+A correct financial representation can still be evaluated by the wrong numerical method. Conversely, a numerical method can converge accurately to equations that describe the wrong financing problem. The first obligation is to state the target equations, their timing and their feasible domain. Only then does it make sense to choose a solver or train a neural approximation. The risky-debt convention discussed earlier illustrates why a small residual is insufficient: an inconsistent cash convention can be solved very accurately.
+
+\section{Separate identities, conditions and approximations}
+Accounting identities reconcile stocks and flows. Contract equations determine obligations from terms. Behavioral conditions describe choices. Equilibrium conditions connect counterparties and prices. Numerical approximations evaluate these relations with finite resources. They should not be treated as interchangeable equations in an undifferentiated loss.
+
+An accounting identity can often be enforced exactly by construction. A lender pricing equation may involve an expectation and an endogenous default rule. A management optimum may require inequalities and boundary conditions. A reporting standard may require a categorical treatment selected by facts. Each type needs a suitable validation method.
+
+A residual vector can combine them for computation, but the result should still report each component in meaningful units. A small average residual can hide one economically decisive violation, especially when large accounting amounts dominate the scale. A pricing residual of one currency unit and a share-count residual of one share are not directly comparable without a declared normalization.
+
+\section{The Bellman problem}
+For a finite-horizon shareholder problem, let $x$ be state, $a$ a feasible action, $d_t(x,a)$ the current net distribution to the modeled owners, and $\beta$ a discount factor under the chosen valuation formulation. A Bellman equation is
+\begin{equation}
+ V_t(x)=\sup_{a\in A_t(x)}\left\{d_t(x,a)+\beta\mathbb E[V_{t+1}(X_{t+1})\mid x,a]\right\}.
+ \label{sim:bellman}
+\end{equation}
+The expectation uses the declared transition law and information. If an action depends on private information or a belief state, the state must be defined accordingly. The terminal value $V_T$ is an assumption with economic consequences, not merely a numerical boundary condition.
+
+A liquidation-at-book-value terminal rule can make asset accumulation artificially attractive. A zero terminal value can induce premature payouts or abandonment. A continuation approximation can be useful, but its accuracy and domain should be checked. Changing terminal treatment while comparing solvers changes the target.
+
+In a stylized limited-liability problem, continuation value may be compared with default or exit value. The choice and its consequences must be specified. A maximum operator alone does not provide a legal restructuring model or creditor recovery schedule.
+
+\section{Pricing and value must agree on policy}
+Suppose debt price $P(x,F)$ depends on repayment under future policy $\pi$. The policy depends on funding proceeds and therefore on $P$. A joint solution must satisfy both the policy-value problem and lender pricing for that same policy.
+
+One can write residuals $R_V(V,\pi,P)=0$ and $R_P(V,\pi,P)=0$, supplemented by feasibility and optimality conditions. Solving $R_V$ with a fixed old price and $R_P$ with a different policy leaves a mismatch. Alternating iteration can be a candidate algorithm, but convergence and target consistency need checking.
+
+The retained \citet{duarte2026} working paper uses a lagged value network in part of its pricing training and a subsequent local grid refinement. These are specific numerical choices in its model. They do not supply a general convergence or global-optimality guarantee for AccDSL. Transferring them requires a target-specific protocol and matched timing, recovery, taxes and state definitions.
+
+\section{A residual can target the wrong expectation}
+Let $r(x,\varepsilon;\theta)$ be a random equation contribution with parameterized functions $\theta$. Suppose the desired residual is the conditional expectation $m(x;\theta)=\mathbb E[r\mid x]$. Squared expected residual is $m(x;\theta)^2$. Squaring a single random contribution and averaging gives
+\begin{equation}
+ \mathbb E[r^2\mid x]=m(x;\theta)^2+\operatorname{Var}(r\mid x).
+ \label{sim:double-sampling}
+\end{equation}
+The second objective adds a variance term. If that variance depends on $\theta$, minimizing the two objectives can select different functions. This is a mathematical target mismatch, not merely noisy estimation of the same loss.
+
+With conditionally independent draws $\varepsilon_1,\varepsilon_2$ under the same $x$,
+\begin{equation}
+ \mathbb E[r(x,\varepsilon_1;\theta)r(x,\varepsilon_2;\theta)\mid x]=m(x;\theta)^2.
+\end{equation}
+Independence is conditional on the common state. Reusing the same draw restores the unwanted variance term. \citet[Definitions 2.5--2.9 and Algorithm 1]{maliar2021} discusses objective formulations for dynamic economic equations, including this distinction. The local derivation explains why the sampling convention must match the intended residual.
+
+\section{A small objective counterexample}
+Let $r(\theta,\varepsilon)=\theta-1+\theta\varepsilon$, with $\mathbb E[\varepsilon]=0$ and variance one. Then $m(\theta)=\theta-1$, so the desired squared residual is $(\theta-1)^2$, minimized at one. The single-draw squared objective is
+\begin{equation}
+ (\theta-1)^2+\theta^2=2\theta^2-2\theta+1,
+\end{equation}
+minimized at one half. At that point the expected equation residual is negative one half. The optimizer has correctly minimized the wrong objective.
+
+This exact example is a useful unit test for residual construction. It also shows why training loss alone cannot certify economic equations. Validation should directly evaluate the target conditional residual using independent quadrature or sufficiently controlled sampling.
+
+\section{Inequalities and complementary slackness}
+A borrowing or cash constraint can bind. Interior first-order conditions do not apply unchanged at a boundary. Consider minimizing a differentiable cost $f(a)$ subject to $a\geq0$. With multiplier $\lambda\geq0$, the Karush--Kuhn--Tucker conditions under appropriate regularity include
+\begin{equation}
+ f'(a)-\lambda=0,\qquad a\geq0,\qquad \lambda\geq0,\qquad a\lambda=0.
+\end{equation}
+If $a>0$, the multiplier is zero and the interior derivative vanishes. If $a=0$, the derivative need not vanish. A residual enforcing only $f'(a)=0$ can demand an infeasible negative action.
+
+For $f(a)=(a+1)^2$, the constrained minimum is $a=0$, with derivative 2 and multiplier 2. An interior solver seeks $a=-1$, which violates the constraint. Clipping its output to zero may recover the action in this example, but does not establish a general constrained solution or correct derivatives through the clipping operation.
+
+Complementarity formulations, active-set methods and direct constrained optimization are possible approaches. Their conditions are necessary or sufficient only under their stated assumptions. Nonconvex financing problems may have local optima and discrete choices; a small KKT residual does not prove global optimality.
+
+\section{Discrete choices and nondifferentiability}
+Default, conversion, refinancing and investment shutdown can be discrete. Their value functions may have kinks or discontinuities. Differentiating a smooth surrogate through these decisions can optimize a smoothed problem rather than the original one.
+
+A smooth approximation may be useful as a warm start. Its smoothing parameter changes the target and should be varied, with final policies evaluated under the original event rules. A soft default indicator that pays a fractional blend of full repayment and recovery does not describe an actual realized default event unless explicitly interpreted as an expectation under a probabilistic model.
+
+Near a threshold, classification error can dominate value error. A network can fit values closely while moving the default boundary enough to affect debt pricing. Validation should include state pairs on both sides of the boundary and pricing consequences under the resulting policy.
+
+\section{Partial and total derivatives}
+A financing choice can affect a price directly and through future policy. If $P(a)=P(a,\pi(a))$, the total derivative includes both paths:
+\begin{equation}
+ \frac{dP}{da}=\frac{\partial P}{\partial a}+\frac{\partial P}{\partial\pi}\frac{d\pi}{da}.
+\end{equation}
+Holding a learned policy fixed computes a partial derivative. It may be the intended derivative in an alternating algorithm, but it is not automatically the total derivative of the equilibrium price.
+
+Automatic differentiation differentiates the implemented computation. It does not decide which economic dependencies should be present. Stop-gradient operations, target networks and detached iterations can deliberately omit paths. Their use should be justified relative to the algorithm and validated against the final target.
+
+An implicit derivative can be derived when a smooth equilibrium equation has a nonsingular Jacobian, but default boundaries and multiple equilibria can violate those conditions. Numerical finite differences can diagnose implementation mistakes away from such boundaries; they do not resolve the economic choice among equilibria.
+
+\section{Scaling and units}
+Residuals measured in millions of currency, fractions, shares and utility can differ by orders of magnitude. A loss that sums their squares without scaling effectively assigns arbitrary importance based on units. Changing currency units from dollars to millions can change the trained solution if the formulation is not invariant.
+
+Normalization should be documented and checked. One can scale a cash residual by a meaningful transaction or balance scale, a share residual by outstanding units, and a probability residual by its natural range. Zero or near-zero denominators need explicit treatment. An adaptive scale can itself alter the objective over training.
+
+A unit-rescaling test is useful: transform all monetary inputs consistently and confirm that the implied economic policy and normalized diagnostics transform appropriately. Failure reveals a numerical or modeling dependence on representation rather than economics.
+
+\section{Training distribution and the queried domain}
+A learned solver is trained on selected states. If training emphasizes typical solvent states, it may be unreliable near liquidity crises, maturity walls or default. Uniform sampling in raw coordinates is not automatically balanced in economic importance. A high-dimensional box may contain mostly infeasible states.
+
+The training protocol should identify feasible-state generation, boundary coverage, tails, heldout regions and distribution shift. Data from simulated policies can omit states reached by a different policy or scenario. Updating the policy can therefore change the relevant state distribution.
+
+No architecture, learning rate or loss weighting should become a default merely because it worked on another model. Transfer can provide a baseline or warm start. A substantially different target needs its own capacity, optimization, budget and validation protocol. This manuscript proposes no promoted neural default without that evidence.
+
+\section{Classical reference methods}
+Small discretized problems can be solved by direct enumeration, grid search, backward induction or carefully controlled quadrature. These methods can be slow, but they provide transparent references for testing learned or accelerated methods. The reference should be strong enough to answer the same target question.
+
+A weak coarse grid can make a surrogate appear superior merely because the comparator is underresolved. A fair comparison includes convergence or refinement evidence for the reference and matched terminal conditions, constraints and state domains. Comparing different models is not a solver benchmark.
+
+Exact rational examples are especially useful for cash identities and simple pricing. They are not substitutes for numerical validation of high-dimensional expectations, but they can expose sign, timing and unit errors before expensive training. The positive-recovery debt example belongs in this first layer.
+
+\section{Multiple solutions and selection}
+A nonlinear system can have no solution, one solution or several. A solver initialized differently may converge to different roots. Reporting the first root as the economic equilibrium requires a selection argument or an explicit conditional interpretation.
+
+A financing market can have feedback in which perceived distress raises spreads and higher spreads increase distress. A stylized fixed point may admit low- and high-spread solutions. Stability under a chosen iteration is a numerical property, not necessarily an economic equilibrium-selection criterion.
+
+The method should search or bound multiplicity where material, report dependence on initialization and preserve unresolved alternatives. If only one local root is found, describe it as such. A failed solver does not establish that no financing equilibrium exists.
+
+\section{Downstream validation}
+A learned value function is useful only if its errors are acceptable for the decisions and reports it drives. Validation should evaluate feasible actions, debt price consistency, default classification, cash paths, ownership changes and accounting outputs under heldout scenarios. Low prediction error alone is insufficient.
+
+A pricing error can alter proceeds, which changes investment, which changes default and feeds back into price. A one-step residual screen may miss that loop. Multi-period policy evaluation under an independent method is needed for a claim about the coupled computation.
+
+Stochastic comparisons require uncertainty evidence. One seed or a few short runs can nominate a candidate but cannot establish superiority from descriptive averages alone. Hard failures, descriptive differences and statistically supported rankings should remain separate. This is particularly important when rare defaults dominate economic conclusions.
+
+\section{A proposed solver interface}
+The solver receives a typed economic problem: state domain, timing, objectives, constraints, transition and observation laws, price equations and requested accuracy. It returns functions or policies together with target residuals, feasibility diagnostics, unresolved regions and reproducibility information.
+
+A solver should not mutate the economic model to obtain convergence without recording the change. Smoothing, truncation, penalty relaxation and altered terminal values define modified problems. Their relation to the original target must be evaluated. A successful run on a modified problem is not an implicit solution of the original.
+
+AccDSL can support several solvers behind the same problem definition. The interface should preserve method-specific limitations rather than force every solver to claim identical guarantees. A certified finite result, a local numerical solution and a learned approximation can all be useful when labeled accurately.
+
+\section{The smallest justified numerical program}
+Begin with a one-period debt model whose face, proceeds and recovery are distinct. Verify cash-leg pricing and limited-liability conventions exactly. Add a finite-state dynamic model with explicit feasible policies and compare enumeration with backward induction. Then add borrowing limits, equity issuance and default transitions one at a time.
+
+Only after these targets are stable should a learned solver be compared on the same equations. The comparison needs a predeclared primary criterion, veto diagnostics, budget ladder and heldout downstream checks. Training settings remain hypotheses until supported on this target.
+
+This staged approach does not postpone the difficult economic questions. It exposes them early in forms that can be checked. The purpose of deep learning is to accelerate a well-defined computation, not to make an ambiguous financing model appear resolved through a low loss value.

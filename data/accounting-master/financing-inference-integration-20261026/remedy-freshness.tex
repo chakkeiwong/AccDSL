@@ -1,0 +1,74 @@
+\section{A finding can become stale within one day}
+\label{sim:remedy-freshness}
+
+Consider the late-funded borrower in Section~\ref{sim:settlement-remedies}.
+An observation records an unpaid principal clause as satisfied on 2 July.
+The company then pays the remaining 40 on that same date. A later command
+asks whether a continuing event permits a new acceleration. Matching the
+observation's date to the command's date would accept the old unpaid finding,
+even though the intervening payment changed its premise. Calendar equality
+does not establish that the financial state is unchanged.
+
+This is a concrete failure in the earlier selected adapter. Its original
+trace, with payment on the following day, passed. Moving payment to the same
+day exposed the defect: the stale satisfied finding remained usable. The
+successor retains the old observation as history but requires reassessment
+before using it as a current condition. A fresh paid assessment then supports
+the corresponding absence of a new trigger. It does not retroactively revoke
+an acceleration already recorded under earlier valid facts.
+
+To express the dependency, let $B$ be the complete typed book and let $P(B)$
+retain its economic contents: balances, cash-flow history, nonremedy memory,
+context, account and type definitions, reporting period and schema. The
+projection omits the remedy-status record, the list of seen event identifiers
+and the current observation date. The date is checked separately. The first
+omission is essential: recording a finding changes remedy status and must
+not, by that act alone, invalidate the finding it records. Event identifiers
+alone do not establish an economic change. Other dependencies are retained
+conservatively, even when a particular clause might use fewer of them.
+
+An observation stores its clause kind $k_o$, date $d_o$, evidence revision
+$v_o$, and the projected economic state $P(B_o)$, represented by a digest in
+the implementation. A proposed use at book $B$ and date $d$, under revision
+$v$, requires
+\begin{equation}
+ d=d_o,\qquad P(B)=P(B_o),\qquad v=v_o,
+ \label{sim:remedy-observation-dependency}
+\end{equation}
+together with a compatible clause kind and the separately supplied continuing
+event finding. The same-day payment violates the middle equality. A status
+recording with no economic effect does not. A later evidence correction can
+violate the last equality while leaving every balance unchanged.
+
+The evidence revision identifies a supplied immutable view; it is not a
+certificate that the view contains all relevant facts. A caller that omits a
+new notice or supplies a false old view cannot be corrected by comparing
+digests. Source acquisition, availability and revision selection remain
+separate requirements. Similarly, checking a conservative whole-economic
+projection can demand reassessment after an unrelated change. Minimal
+clause-specific dependency analysis would be a further optimization needing
+its own correctness argument.
+
+Clause kind prevents a different misuse. A satisfied principal-payment clause
+cannot supply the missing premise for automatic bankruptcy acceleration.
+The selected implementation rejects that mismatch; a separately supplied
+qualifying bankruptcy observation can support its own automatic route.
+Its truth remains conditional on the applicable terms and supplied event
+finding. The system preserves unresolved applicability rather than turning
+an unsupported factual inference into a remedy.
+
+This repair illustrates a broader simulation requirement. Assertions about
+current state need the dependencies under which they were observed, not only
+an observation timestamp. Reusing a cached covenant finding after a cash
+transfer, or a borrowing-capacity calculation after a collateral release,
+has the same risk. Keeping the previous assertion permits historical replay;
+withholding its current use prevents a past result from deciding a different
+present problem. Neither operation requires enumerating a separate tree node
+for every stored copy. Shared data can retain the dependence explicitly.
+
+The checked continuation preserves complete states and the prior missed amount
+through payment, reassessment and rescission. Unknown or stale findings return
+without an accepted successor. The reference covers one selected synthetic
+series and supplied evidence views. Automated source revision, several
+simultaneous clauses and general rights-changing financial effects remain
+additional work, rather than consequences of this freshness check.

@@ -1,0 +1,78 @@
+3.2.9 date
+[Definition:]
+The ·value space· of date
+consists of top-open intervals of exactly one day in length on the timelines of
+dateTime, beginning on the beginning moment of each day (in
+each timezone), i.e. '00:00:00', up to but not including '24:00:00' (which is
+identical with '00:00:00' of the next day).  For nontimezoned values, the top-open
+intervals disjointly cover the nontimezoned timeline, one per day.  For timezoned
+values, the intervals begin at every minute and therefore overlap.
+A "date object" is an object with year, month, and day properties just like those
+of dateTime objects, plus an optional timezone-valued
+timezone property. (As with values of dateTime timezones are a
+special case of durations.)
+Just as a dateTime object corresponds to a point on one of the
+timelines, a date object corresponds to an interval on one
+of the two timelines as just described.
+Timezoned date values track the starting moment of their day, as
+determined by their timezone; said timezone is generally recoverable for
+canonical representations.
+[Definition:]
+The recoverable timezone is that duration which
+is the result of subtracting the first moment (or any moment) of the timezoned
+date from the first moment (or the corresponding moment) UTC on the
+same date.  ·recoverable timezone·s are
+always durations between '+12:00' and '-11:59'.  This "timezone normalization"
+(which follows automatically from the definition of the date
+·value space·) is explained more in
+Lexical representation (§3.2.9.1).
+For example: the first moment of 2002-10-10+13:00 is 2002-10-10T00:00:00+13,
+which is 2002-10-09T11:00:00Z, which is also the first moment of 2002-10-09-11:00.
+Therefore 2002-10-10+13:00 is 2002-10-09-11:00; they are the same interval.
+Note:
+For most timezones, either the first moment or last moment of the day (a
+dateTime value, always UTC) will have a date portion
+different from that of the date itself!
+However, noon of that date (the midpoint of the interval) in that
+(normalized) timezone will always have the same date portion as the
+date itself, even when that noon point in time is normalized to
+UTC.  For example, 2002-10-10-05:00 begins during 2002-10-09Z and 2002-10-10+05:00
+ends during 2002-10-11Z, but noon of both 2002-10-10-05:00 and 2002-10-10+05:00
+falls in the interval which is 2002-10-10Z.
+Note: See the conformance note in  (§3.2.6) which
+applies to the year part of this datatype as well.
+3.2.9.1 Lexical representation
+For the following discussion, let the "date portion" of a dateTime
+or date object be an object similar to a dateTime or
+date object, with similar year, month, and day properties, but no
+others, having the same value for these properties as the original
+dateTime or date object.
+The ·lexical space· of date consists of finite-length
+sequences of characters of the form:
+'-'? yyyy '-' mm '-' dd zzzzzz?
+where the date and optional timezone are represented exactly the
+same way as they are for dateTime.  The first moment of the
+interval is that represented by:
+'-' yyyy '-' mm '-' dd 'T00:00:00' zzzzzz?
+and the least upper bound of the interval is the timeline point represented
+(noncanonically) by:
+'-' yyyy '-' mm '-' dd 'T24:00:00' zzzzzz?.
+Note:
+The ·recoverable timezone· of a date will always be
+a duration between '+12:00' and '11:59'.  Timezone lexical representations, as
+explained for dateTime, can range from '+14:00' to '-14:00'.
+The result is that literals of dates with very large or very
+negative timezones will map to a "normalized" date value with a
+·recoverable timezone· different from that represented in the original
+representation, and a matching difference of +/- 1 day in the date itself.
+3.2.9.2 Canonical representation
+Given a member of the date ·value space·, the
+date portion of the canonical representation (the entire representation
+for nontimezoned values, and all but the timezone representation for timezoned values)
+is always the date portion of the dateTime canonical
+representation of the interval midpoint (the dateTime representation,
+truncated on the right to eliminate 'T' and all following characters).
+For timezoned values, append the canonical representation of the ·recoverable timezone·.
+3.2.10 gYearMonth
+[Definition:]
+gYearMonth represents a

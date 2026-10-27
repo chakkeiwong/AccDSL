@@ -1,0 +1,113 @@
+\chapter[A fully solved risky-debt model]{A fully solved risky-debt model before any neural approximation}
+\label{sim:finite-finance}
+
+A small structural model can make the financing equations completely transparent. This chapter solves one with two future asset states. It is deliberately restrictive: one period, one creditor, no tax, no fees initially, no bankruptcy costs, no interim distributions and risk-neutral pricing with zero risk-free rate. These assumptions isolate the relationship among promised repayment, proceeds, default, recovery and equity value. They are not a general corporate-finance specification.
+
+\section{Assets and claims}
+At the final date, assets available to creditors and shareholders are 60 in the low state and 140 in the high state, each with probability one half. A debt contract promises face $F\geq0$. The creditor receives the smaller of face and available assets. Shareholders receive the positive residual.
+\begin{align}
+ D(A,F)&=\min(F,A),\\
+ E(A,F)&=\max(A-F,0).
+\end{align}
+For every state, $D(A,F)+E(A,F)=A$. This conservation relation is exact under the stipulated priority and absence of costs. Default occurs when assets are insufficient for the promise, with equality treated as full payment.
+
+Debt proceeds at issuance are the expected creditor payoff because the pricing rate is zero and risk neutrality is assumed. Economic equity value is the expected shareholder payoff. Therefore
+\begin{equation}
+ P(F)=\tfrac12\min(F,60)+\tfrac12\min(F,140),\qquad V_E(F)=100-P(F).
+\end{equation}
+The expected asset value 100 is allocated between the claims. Face does not equal proceeds once default becomes possible.
+
+\section{Solve the price schedule by regions}
+For $0\leq F\leq60$, debt is paid in both states, so $P(F)=F$. For $60<F\leq140$, the creditor receives 60 in the low state and $F$ in the high state, so $P(F)=30+F/2$. For $F>140$, the creditor receives all assets in both states, so proceeds remain 100.
+\begin{equation}
+ P(F)=\begin{cases}
+ F,&0\leq F\leq60,\\
+ 30+F/2,&60<F\leq140,\\
+ 100,&F>140.
+ \end{cases}
+ \label{sim:finite-price}
+\end{equation}
+The function is continuous but its slope changes. Promising another unit raises proceeds by one in the safe region, by one half in the intermediate region and by zero beyond the highest asset payoff. An unlimited face amount does not create unlimited funding.
+
+Equity value is $100-F$ in the first region, $70-F/2$ in the second and zero in the third. These are economic values under the model. They are not a balance-sheet measurement rule. The model has not specified accounting carrying amounts.
+
+\section{A funding need of 80}
+Suppose an admitted transaction requires gross proceeds of 80. This need lies above the safe-debt capacity 60. Solve $30+F/2=80$, giving face 100. In the low state the lender receives 60 and shareholders zero. In the high state the lender receives 100 and shareholders 40.
+
+Expected lender payoff is 80, matching proceeds. Expected shareholder payoff is 20. The promised yield is $100/80-1=25$ per cent, although the risk-free rate is zero. That promised yield compensates for the modeled default loss; it is not the realized return in both states.
+
+The low-state recovery is 60, or 60 per cent of face. If the model instead specifies recovery as a fixed fraction of face independent of available assets, it is a different recovery model and may violate conservation at some face values. Recovery assumptions cannot be swapped silently.
+
+\section{A funding need of 110}
+No face value raises 110 in this model because expected distributable assets are only 100 and the creditor cannot receive more than assets. A root finder searching for $P(F)=110$ should report no solution under the model, or a validated infeasibility conclusion if its method establishes it.
+
+A numerical optimizer that pushes face to a large upper bound has not solved the funding problem. Reporting that bound as issued debt would invent proceeds. The flat price region is a useful test of solver behavior when increasing the promise no longer raises cash.
+
+The company could still have an alternative outside this model: new equity, collateral from another entity, a guarantee or a changed investment plan. The no-solution conclusion is conditional on the admitted financing channel and asset process. It is not proof that the real company has no option.
+
+\section{Fees and net cash}
+Add a fixed issuance fee of 5 paid at inception. To net 80, gross proceeds must be 85. Solving $30+F/2=85$ gives face 110. Net cash is 80, expected creditor payoff 85, and expected equity payoff 15 under the unchanged asset distribution.
+
+If the fee instead equals five per cent of gross proceeds, required gross proceeds are $80/0.95=1600/19$. Face is $2(1600/19-30)=2060/19$, about 108.4211. The two cost structures give different promises.
+
+If the fee is itself paid out of final assets rather than at inception, the asset payoff to claims changes and pricing must be recomputed. Merely subtracting the fee from current proceeds while also reducing final assets would charge it twice. The event dates determine which equation it enters.
+
+\section{Recovery costs}
+Suppose default destroys 10 of assets before creditor recovery. For $60<F\leq140$, low-state recovery becomes 50 and high-state payment remains $F$, so $P(F)=25+F/2$. Raising 80 now requires face 110.
+
+At face 110, expected shareholder payoff is 15 and expected creditor payoff 80. Their sum is 95, below expected assets 100 by expected default cost 5. The conservation relation now includes the cost recipient or destroyed value: creditor payoff plus shareholder payoff plus default cost equals assets in each state.
+
+A test that insists creditor plus shareholder value always equals 100 would be wrong after adding bankruptcy costs. Invariants must follow the model's resource accounting. Conversely, a model with no costs that loses value unexplained has a defect.
+
+\section{Endogenous investment changes the price}
+Suppose management can choose between project S with assets 100 in both states and project R with assets zero or 180 equally likely. Expected assets are 100 for S and 90 for R. Let face be 80. Under S, creditor payoff is 80 and equity payoff 20. Under R, creditor expected payoff is 40 and equity expected payoff 50.
+
+Shareholders prefer R if they choose after debt proceeds are fixed and maximize their residual value. Total expected asset value is lower under R. A lender anticipating R prices face 80 at 40, not 80. Pricing as though S will be chosen while allowing shareholders to choose R is inconsistent.
+
+A covenant restricting project choice, a different security structure or a commitment can change the feasible policy. The model must say whether project choice is committed before issuance, observed by lenders or chosen afterward. Timing determines the financing equilibrium.
+
+\section{A committed project comparison}
+If management commits credibly to S before issuance, face 80 raises 80. If it commits to R, face 80 raises 40. To raise 80 under R, face must satisfy $F/2=80$ while $F\leq180$, giving face 160. Equity expected payoff is then 10.
+
+The comparison is now between different promises financing the same proceeds under different committed projects. S leaves equity value 20; R leaves 10. Under the stated objective and no other benefits, S is preferred ex ante. This differs from the post-issuance asset-substitution choice at fixed face.
+
+The example demonstrates why a structural model must distinguish issuance decisions from later policy. A single optimization over all variables can accidentally grant commitment that the actor does not possess. A sequential model must encode which choices are binding when the lender prices the debt.
+
+\section{A simple equity alternative}
+Suppose the company can instead sell a fraction $u$ of the final asset claim for fair value under the original 60/140 distribution, with no fees. The price is $100u$. Raising 80 requires selling 80 per cent, leaving existing owners expected value 20.
+
+This matches the expected residual value after issuing face 100 debt in the frictionless original example, but the state payoffs differ. With equity financing, old owners receive 12 in the low state and 28 in the high state. With debt financing, they receive zero and 40. Equal expected value does not imply equal risk or incentives.
+
+Adding taxes, costs, control rights or different investor preferences can change the comparison. Those mechanisms must be specified rather than inferred from the equality in this simplified benchmark. The benchmark is valuable because it identifies exactly which additions drive a difference.
+
+\section{Unknown asset distribution}
+Suppose reports do not identify the low-state asset payoff and it may be 40 or 60, while the high payoff remains 140 and probabilities remain one half by assumption. For a promised face 100, proceeds are 70 or 80. A funding plan requiring 80 succeeds only in the second history.
+
+If lenders know the asset type privately, they offer different prices across histories. If lenders share the analyst's uncertainty and use a prior, pricing requires that prior and the information structure. Averaging proceeds without stating who knows the type can misrepresent both the offer and management's choice.
+
+An unweighted robust funding calculation asks whether a face can raise the required cash under every admitted pricing history. At face 120, proceeds are 80 in the low-asset history and 90 in the other. But the higher promise changes shareholders' payoffs. A robustly feasible financing plan need not maximize expected owner value under a selected prior.
+
+\section{Learning before issuance}
+A verified asset report arriving before issuance can identify the low-state payoff and narrow the price schedule. The same report arriving afterward cannot retroactively change settled proceeds, although it may affect secondary-market value or future refinancing.
+
+The simulator should retain issuance-time information for the original price and current information for later valuation. Repricing the original cash receipt after new information would rewrite history. A market-value update is a separate measurement, not a new issuance event.
+
+This distinction is particularly important in backtests of debt pricing. Using later realized recovery information to set the earlier issue price creates look-ahead. The model can use that information to evaluate the forecast, but not as an original input.
+
+\input{simulation/lit-26-finite-finance-8}
+
+\section{Reference-solver requirements}
+The finite model has a closed-form piecewise price schedule, so a numerical method can be checked at safe, risky, boundary and flat-price regions. Required points include face zero, 60, 100, 140 and above 140. Funding roots should be checked for needs below 60, between 60 and 100, exactly 100 and above 100.
+
+A neural approximation can fit the schedule, but average error is not the only criterion. It should preserve monotonicity, upper funding capacity and boundary classification within stated error. A small positive price slope beyond 140 can falsely imply that an arbitrarily large face eventually raises 110. Downstream feasibility is the decisive check for that use.
+
+A smooth approximation around the kinks can be useful for training, but final results should be evaluated against the original payoff. The source literature on learned economic solvers provides candidate algorithms; this exact model provides a local target-specific test. No training result is claimed here.
+
+\section{How the example answers the financing concern}
+Debt issuance is not a choice of a balance-sheet number. It is a contract whose cash price depends on future payoff and policy. Equity issuance is not merely negative dividends; it allocates future claims and potentially control. The finite model makes those relations explicit before numerical approximation.
+
+For AccDSL, an external offer can be accepted as a conditional input, while an endogenous financing module can solve a stated pricing-policy problem. Both routes must keep face, proceeds, recovery, owner claims and information dates separate. This provides a defensible starting point for extending the supplied lecture rather than importing its conflicting convention into a larger simulator.
+
+\input{simulation/conversion-scope}
+
+\input{simulation/control-group-scope}

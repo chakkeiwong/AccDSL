@@ -1,0 +1,204 @@
+\section{A coherent book needs complete collections and ordered identities}
+\label{sec:collection-state-requirements}
+
+The return equations can be arithmetically correct while the proposed sequence
+is impossible. A sale may precede the creation of its recovered inventory lot;
+the same lot may be sold twice; or a balanced book may contain negative cash.
+Each failure concerns information that a scalar equality does not express. The
+finite collection and state references extend the preceding requirements to
+those relationships, retaining a distinction between checking a supplied state
+and applying an accounting transition.
+
+In the retained example, settlement closes the return component and creates a
+recovered lot. A later sale consumes that lot. The lot's carrying amount also
+contributes to inventory in the shared legal book. Three different checks follow:
+the relevant records must be present and identifiable, their sequence must make
+the lot available when it is sold, and their amounts must reconcile with the
+book. Passing any one of these checks cannot establish the other two.
+
+\subsection{Which members are actually known}
+
+\code{MethodCollections/1} declares typed collections and selected constraints
+over their fields. Its first operations are uniqueness, exact-one reference
+resolution, nondecreasing order, and a guarded requirement evaluated for each
+row. Global inputs and row inputs have explicit mappings to the preserved
+guarded evaluator. Type, context and role must agree; a field name does not
+by itself establish economic equivalence.
+
+A supplied collection is either complete with its rows, or partial with its
+observed rows and a reason for incomplete coverage. Missing collections are
+partial with no observed rows. Partial rows retain their relative supplied
+order, while additional members may be absent between them. An unknown field
+has a separate tagged reason. Thus an empty complete list says that there are
+no members in the declared scope; an empty partial list says that none has yet
+been supplied. These are different assertions, and neither proves that the
+scope describes an actual company's complete record.
+
+Known duplicates contradict uniqueness even when another key is unknown. When
+no duplicate is observed, an unknown key or incomplete membership prevents a
+uniqueness conclusion. A reference must resolve to exactly one matching target
+of the same type and context. Two known matches already contradict that
+requirement. No match is a contradiction only when the target collection is
+complete and its keys are known. One known match remains unresolved if another
+unknown or unobserved target could create a second match. Target-wide uniqueness
+is a separate condition when needed.
+
+Ordering checks preserve the caller's sequence. If two known dates are reversed,
+an unknown date between them cannot repair the reversal. If the known subsequence
+is ordered but another date or member is unknown, the full order remains
+unresolved. Equal dates retain their original order rather than being sorted
+by a hidden tie-breaker. Period predicates separately check the retained
+half-open interval: an event on the start date is included, while an event on
+the exclusive end date is outside the period.
+
+Per-row checks retain all original guarded findings and indexed input mappings.
+A known invalid row remains visible despite another unknown row or incomplete
+membership. An inactive condition still undergoes type and structure checks,
+and its separately required facts remain required. A complete empty collection
+vacuously satisfies a universal row condition; a partial empty collection leaves
+it unresolved. These rules prevent missing records from being mistaken for a
+successful review of every record.
+
+\subsection{A sale needs an earlier live lot}
+
+Snapshot membership cannot show that a lot existed before a sale. The retained
+comparison makes this concrete by giving settlement and sale the same date and
+placing the sale first. Date ordering then passes, but the native method rejects
+the sale because the lot does not yet exist. A second sale and a second complete
+settlement expose similar limitations. These failures motivate an explicitly
+ordered identity check rather than a stronger interpretation of the snapshot.
+
+\code{MethodIdentityLifecycle/1} declares named identity pools, their initial
+live and retired members, and a closed action mapping. Each action contains an
+ordered list of \code{create}, \code{require} or \code{consume} operations.
+Create requires an identity absent from both live and retired memory. Require
+checks that an identity is live without changing it. Consume moves a live
+identity into retired memory. Retaining retired identities prevents an already
+used identifier from being silently created again.
+
+For the conditional return example, settlement consumes the live return-component
+identity and creates a recovered-lot identity. Sale consumes that lot. Consuming
+the component makes a second complete settlement fail; consuming the lot makes
+a second whole-lot sale fail. The supplied order also makes a sale before creation
+fail, including when both events have the same date. The initial empty retired
+pools in this example are explicit assumptions of its synthetic opening. They
+are not evidence about an actual company's lifetime event history.
+
+Each event's operations run against a private copy of the identity pools. Only
+when every operation succeeds does the diagnostic trace adopt that event's
+result. If a later operation fails or needs an unknown key, no partial identity
+change from that event survives. Earlier successful steps remain visible with
+their indices and after-states. This is local identity atomicity: no money is
+posted, no journal is authorized and no durable transaction is committed.
+
+Unknown initial identities or incomplete initial pools stop the trace before its
+first event. An incomplete event sequence also stops before any observed event,
+because an omitted predecessor might create or consume a needed resource. With
+a complete sequence, an unknown action or operation key stops at that event.
+Later state is not inferred. All observed rows still undergo structural checks,
+and independent snapshot findings remain available. An otherwise complete
+identity trace can therefore coexist with an unresolved snapshot condition;
+the combined result does not report success.
+
+The four retained failures---sale before creation on an equal date, a missing
+sale lot, repeated whole-lot sale and repeated complete settlement---are all
+rejected by this explicit identity sequence. The result establishes only those
+declared resource relationships. Prices, cash availability, tax consequences
+and accounting entries still require their own conditions.
+
+\subsection{Signed totals and the limits of balance}
+
+The shared legal book uses signed account balances. In the retained convention,
+assets normally carry positive coefficients and liabilities and equity negative
+coefficients. For the declared complete account registry $\mathcal A$, the
+selected balance condition is
+\[
+  \sum_{a\in\mathcal A} b_a=0.
+\]
+The registry matters as much as the sum. Omitting an account or adding an
+unclassified zero-balance account is a structural mismatch even if the displayed
+coefficients still add to zero. The retained declaration therefore checks unique
+account keys and reference membership in both directions against the pinned
+native account list. Account-classification coverage is checked separately
+against the implementation's classification lists.
+
+Let $\mathcal L$ be the declared complete recovered-lot collection, $c_\ell$ its
+carrying amount for lot $\ell$, and $I_{\mathrm{other}}$ the separately represented
+inventory. Selected allocation conditions include
+\begin{align}
+ b_{\mathrm{inventory}} &= I_{\mathrm{other}}+
+                          \sum_{\ell\in\mathcal L}c_\ell, \\
+ b_{\mathrm{refund\ liability}} &= -L_{\mathrm{refund}}, \\
+ b_{\mathrm{recovery\ asset}} &= A_{\mathrm{recovery}}.
+\end{align}
+The minus sign in the refund equation follows the signed-book convention; it
+is not an absolute-value normalization. The retained lot tax method separately
+requires each lot's tax basis to equal its carrying amount. Other tax methods
+need different, explicitly selected conditions.
+
+\code{MethodCollectionTotals/1} binds an assessment input either to a declared
+global value or to the sum of one declared rational collection field. It retains
+the original type, role and contributor indices. Complete, known inputs give an
+exact reduced rational sum; an empty complete collection gives zero. A missing
+or unknown field, or partial collection membership, leaves the total unknown.
+The observed subtotal remains available as a diagnostic but is never substituted
+for that unknown total. Even cancellation of all observed amounts cannot remove
+an unknown contribution.
+
+Contexts, dimensions and scales must match exactly. There is no inferred currency
+conversion, group-to-legal allocation, rounding or balancing entry. Snapshot
+findings and the guarded scalar assessment remain visible together, so a correct
+sum cannot override a duplicate account or incomplete reference registry.
+Completeness remains a supplied declaration whose source support must be checked
+before using the result as a claim about a company.
+
+Two counterexamples show the remaining limitation. One adverse fixture has a
+negative cash balance and an offsetting capital change, keeping the book balanced
+solely to isolate the funding check. Another marks a lot disposed while leaving
+its stock amounts unchanged. Both satisfy the selected totals. Neither is an
+admissible state under the retained method. The capital offset belongs only to
+the diagnostic fixture; the engine does not manufacture financing to repair a
+cash shortfall.
+
+\subsection{Distinguish funding failure from an invalid state}
+
+The additional state predicates check nonnegative cash and other inventory,
+settled return rights, lot identities and amount domains, disposition memory,
+lifetime event identities and tax-adjustment references. A disposed lot must
+have zero units, carrying amount and tax basis; a live lot must have positive
+units. Its stored identifier must match its collection key and its component
+must match the owner. Lifetime event IDs must be unique, and each uniquely named
+tax adjustment must refer to an event already in that history.
+
+These conditions reuse guarded scalar predicates, collection constraints and
+exact totals. Known settlement and disposition facts are separately required;
+unknown is never interpreted as false. A narrow
+\code{MethodStateAssessment/1} layer preserves the economic category of an active,
+known-false cash condition. It reports \code{funding\_failure} while retaining the
+original predicate result. It cannot relabel malformed values, inactive
+conditions, unknowns or unrelated failures as funding outcomes.
+
+The complete findings summary orders invalid state, funding failure, unsupported
+method scope and unresolved information, retaining every finding. This differs
+from the native invariant's first-failure control flow. If cash is negative and
+a later lifetime event ID is duplicated, the native function first reports the
+cash shortfall; the common assessment reports invalid state and also retains
+the funding failure. Another explicit difference concerns disposition memory:
+the native function rejects an unknown disposition because it requires a
+concrete Boolean, whereas the tagged-input extension reports unresolved. Neither
+difference is hidden inside a claim of full native equivalence.
+
+The saved comparisons repair both counterexamples: balanced negative cash is a
+funding failure and disposed stock is invalid. Selected adverse cases also cover
+identity mismatches, negative or empty live lots, outstanding settled rights and
+invalid tax references. The branch disposition record distinguishes these
+checked predicates from fixed implementation constants and the still-separate
+validation of complete outer and nested record shape.
+
+The resulting chain gives increasingly informative prerequisite assessments:
+typed facts, applicable equations, complete collections, ordered identity memory,
+signed reconciliations and state-domain findings. Each stage leaves source and
+accounting admission, full method eligibility and execution false. The next section connects these prerequisites to a selected return transition:
+complete raw-state structure, exact monetary effects, atomic memory updates and
+full proposal recomputation. Reporting and annual carry retain their own method
+conditions, and source correspondence remains distinct from authority.

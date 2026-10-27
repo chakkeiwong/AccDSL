@@ -1,0 +1,36 @@
+{
+  "assumptions": [
+    "Durable resume may occur after a host reboot; the supplied interfaces do not restrict saved process identities to the current boot.",
+    "Workers remain in their initial process group, and the supervisor is single-threaded, as specified."
+  ],
+  "checks": [
+    "Reviewed the supplied launch, signal deferral, cleanup, recovery and lock code without tools or external inspection.",
+    "Checked recovery identity comparisons against ordinary stale-state scenarios.",
+    "Treated the reported 141 passing tests and supplied test names as supporting evidence only; test bodies were not supplied."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "Persisted process identity is not bound to a host boot. process_identity records only pid, state, pgid and start_ticks; Master.recover_process and _stop_recovered_group establish ownership using pid, pgid and start_ticks. Linux start_ticks measures time since boot, so after a reboot an unrelated process-group leader can match a stale saved tuple. Recovery would then obtain valid pidfds for that unrelated group and STOP/KILL it. Pidfds stabilize the selected process but do not establish that it belongs to the previous invocation. Repair: durably record the Linux boot ID with the worker identity and compare it before inspecting or signalling saved PIDs. A different boot proves the prior local processes cannot remain alive; archive that record without signalling current processes. Records lacking a boot identity must fail closed or follow an explicitly reviewed migration."
+  ],
+  "next_actions": [
+    "Add boot identity to durable process registration and recovery ownership checks.",
+    "Add regression coverage for a stale record from another boot whose PID, PGID and start ticks match a current process, verifying that no signal is sent; also cover records without boot identity.",
+    "Rerun lifecycle verification and obtain a fresh review of the repaired code."
+  ],
+  "residuals": [
+    "The on_spawn implementation, recovery call ordering under the writer lock, and atomic persistence implementation are supplied only as interface descriptions. Their implementations were not independently checked.",
+    "Initial-group containment and the exclusion of uncatchable termination between fork and durable registration remain accepted scope limitations.",
+    "Source-panel checks and internal phase acceptance do not establish accounting correctness, scientific validity or human acceptance."
+  ],
+  "steps": [
+    "Traced ordinary launch and handled-interruption cleanup.",
+    "Traced recovery ownership checks, membership freezing and stable-handle signalling.",
+    "Identified a stale-state ownership defect across host boots."
+  ],
+  "summary": "Recovery can signal an unrelated process after reboot because durable process identities omit boot identity. Revise the recovery identity contract before acceptance.",
+  "verdict": "REVISE"
+}

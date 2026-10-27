@@ -1,0 +1,35 @@
+{
+  "assumptions": [
+    "The supplied lifecycle interface holds: trusted workers remain in their initial process group; deliberate detachment and uncatchable termination before durable registration are excluded.",
+    "Definitions of bounded_process, catch_termination and defer_shutdown are not supplied. Their stated cleanup guarantees are assumed; whether catch_termination defers signals throughout every atomic_json call is not established.",
+    "CLI configuration queries are read-only local inspections, as stated."
+  ],
+  "checks": [
+    "Reviewed worker admission, absolute deadlines, role-specific verdict validation, review retries, write inventories and atomic publication by static inspection only.",
+    "The supplied report records 197 passing tests. Test bodies were not supplied, and no tests were run.",
+    "Source checks and internal phase acceptance remain distinct from accounting correctness, scientific validity and human acceptance."
+  ],
+  "evidence": [
+    "scripts/accounting_master_support.py: atomic_json leaves its PID-suffixed temporary file behind when writing, flushing or fsync fails before os.replace; atomic_bytes has explicit temporary-file cleanup.",
+    "scripts/run_accounting_master.py: Master.worker inventories files before _worker_result and excludes exact generated destinations, but not atomic_json temporary files.",
+    "scripts/run_accounting_master.py: Master._worker_result publishes recovery, packet, schema and response records within that inventory window."
+  ],
+  "issues": [
+    "P2 — Supervisor publication failures can become false worker-integrity violations. atomic_json has no finally cleanup for its temporary file. An ordinary write/fsync error, or a handled interruption raised before os.replace, can leave a file such as a packet destination plus '.<pid>.tmp'. Master.worker then sees that supervisor-created file as a new, unapproved write. For read-only roles it necessarily raises ContinuationVeto; for editable phases a temporary file in the run directory is outside the declared write scope. This misclassifies a recoverable publication/interruption failure as worker misconduct and prevents the normal review retry or resumable interruption path. Repair atomic_json with exception-safe cleanup of its own temporary file, preserving the original destination and original exception. If partially serialized content must be retained as evidence, preserve it explicitly through a supervisor-owned recovery mechanism rather than leaving an unclassified inventory entry. Do not broadly exempt arbitrary temporary files."
+  ],
+  "next_actions": [
+    "Add focused fault-injection coverage for failure before replacement and handled interruption during atomic publication inside a worker inventory window.",
+    "Verify that existing destination bytes survive, supervisor temporary files do not cause a false scope violation, and genuine out-of-scope worker edits still veto continuation.",
+    "Rerun the relevant controller checks and obtain a fresh bounded review after repair."
+  ],
+  "residuals": [
+    "Process-group cleanup, lock ownership, scheduler transitions and reusable command approval are stated interfaces here; their implementations cannot be independently verified from this worker-boundary packet.",
+    "The accepted panel contains 192 reports. Neither that count nor the reported controller test count closes the remaining accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Followed the packet-only restriction without tools, file reads, commands or mission-history inspection.",
+    "Traced supervisor-generated writes through the worker inventory and failure paths."
+  ],
+  "summary": "The worker boundary has an atomic-publication cleanup defect: supervisor temporary files can trigger false integrity vetoes after ordinary failure or interruption.",
+  "verdict": "REVISE"
+}

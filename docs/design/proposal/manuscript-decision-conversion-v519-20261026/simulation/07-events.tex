@@ -1,0 +1,118 @@
+\chapter[Events and financial statements]{From economic events to coherent statements}
+\label{sim:events}
+
+A scenario produces a sequence of events. Financial statements summarize selected consequences of those events under a reporting basis. Keeping this direction explicit makes it possible to ask whether an output follows from a plausible company history. Starting with independently forecast statement lines and inserting a balancing amount reverses the logic: it can make the accounts add up while leaving the economic transaction unexplained.
+
+\section{An event carries more than an amount}
+An event identifies actors, instrument or resource, effective time, settlement time, currency, quantity, conditions and provenance. A sale can transfer goods today, be recognized under a specified rule today, and be collected next month. A loan draw can be approved today and settle tomorrow. A derivative can change value without an immediate cash transfer.
+
+The event layer should therefore represent economic occurrence separately from recognition, measurement and payment. The accounting layer maps admitted events and estimates to postings. The reporting layer aggregates postings into statements. The mapping may create noncash movements, and some economically relevant commitments may be disclosed without a current journal amount.
+
+\citet[Sections 3.3--3.5]{pierson2020} explicitly separates accrual, payment and reporting accumulation in a system-dynamics setting. Its simple debt-delay mechanism is acknowledged as limited. The lesson for AccDSL is the separation of clocks, not the adoption of that simplified debt mechanism as a general contract engine.
+
+\section{A credit sale and collection}
+Consider a synthetic sale of goods for 30, with inventory cost 18, recognized at delivery and collected later. Ignore tax, returns and credit impairment for this illustration. At delivery, the postings are a debit to receivables and credit to revenue of 30, and a debit to cost of sales and credit to inventory of 18. Cash has not increased.
+
+At collection, cash increases by 30 and receivables decrease by 30. Revenue is not recognized again. The two events explain why profit and operating cash can differ during the interval. A scenario that delays collection changes receivables and liquidity even if recognized revenue is unchanged.
+
+If the sale is instead prepaid, receipt creates a different sequence under the selected recognition rule. The same annual revenue and cash collection can conceal different within-year funding needs. An annual-only model can be adequate for some questions, but it cannot claim to resolve a monthly liquidity trough that its time aggregation removes.
+
+\section{Balanced entries are necessary, not sufficient}
+Double-entry balance verifies a conservation relation in the accounting representation. It does not establish that the event occurred, that the account mapping is correct or that the measurement basis is appropriate. Debiting cash and crediting revenue balances even when the money was borrowed.
+
+Let $j_e$ be the vector of signed account movements for event $e$, under a declared debit-credit convention. A balancing check can be written $\mathbf 1^{\mathsf T}j_e=0$. This is one invariant. Additional invariants depend on the event: a loan settlement should reconcile cash to proceeds and fees; a physical inventory sale should not consume more units than available unless backorders or short sales are explicitly allowed; a share issue should reconcile units and ownership.
+
+The event's economic and accounting checks should remain separate. A balanced but economically impossible issue must fail transaction admission. An economically valid event with an unresolved accounting treatment can remain in the economic state while its statement consequences are conditional or unsupported. Forcing one layer to masquerade as the other hides useful information.
+
+\section{Quantity and valuation}
+Inventory value can change because quantities change, unit costs change, measurement rules change or currency changes. A model using only a monetary stock can confuse these mechanisms. Production capacity and physical shortages depend on quantities, while reported carrying values depend on measurement.
+
+Suppose ten units cost 5 each. Inventory carrying value is 50 under the illustrative cost basis. A replacement-price increase to 8 does not automatically increase that carrying value to 80. If five units are sold and replaced, cash purchases, cost allocation and ending stock depend on the chosen inventory-flow assumptions. A future demand shock can expose differences among vintages with the same initial total value.
+
+The economic state should retain the granularity needed for production and sale decisions: units, location, quality, expiry and ownership where relevant. Accounting state can aggregate or measure those units under its basis. An aggregate sufficient for valuation may be insufficient for a supply interruption.
+
+\section{Asset vintages and depreciation}
+Two firms can report the same property carrying amount and depreciation while holding assets of different ages. The remaining useful lives, maintenance needs and replacement dates can differ. A capital-expenditure scenario therefore requires more than a depreciation ratio.
+
+For a simple straight-line asset with cost $K$, residual value $v$ and life $L$, annual depreciation is $(K-v)/L$ under the assumed full-year convention. Several combinations of $K$, $v$ and $L$ can yield the same charge. The historical charge does not identify replacement timing.
+
+An asset-vintage representation retains acquisition date, cost, accumulated depreciation, remaining life, capacity and relevant impairment or disposal events. If only aggregates are observed, the reconstruction should preserve a family of vintage allocations. A query about next year's depreciation may admit a compact aggregate; a query about replacement cash over five years may require finer structure.
+
+\section{Working capital is a set of contracts}
+Receivables and payables are often forecast using days sales outstanding and days payable outstanding. These ratios summarize historical relationships but do not identify individual due dates or counterparties. A ratio-based projection can be a useful approximation when its scope is stated. It cannot automatically describe payment priority or concentration under stress.
+
+A customer delay can raise receivables while the firm still owes suppliers on fixed dates. If the model shifts payables proportionally with sales without checking contracts, it may manufacture supplier financing. Conversely, a model that fixes all payment dates may omit renegotiation that management could pursue. Both are policy choices.
+
+The proposed design permits ratio methods as explicitly reduced models alongside contract schedules. Their outputs should carry the aggregation assumptions, horizon and validation domain. A breach-sensitive liquidity query can require refinement to invoices or cohorts whose due dates cross the critical boundary.
+
+\section{Currency conversion and cash availability}
+A foreign-currency account has both native units and a reporting-currency value. Exchange movements can change reported amounts without changing native cash. A debt payment in foreign currency requires the appropriate currency at settlement, not merely sufficient consolidated reporting-currency cash.
+
+Suppose the company holds 100 domestic units and owes 10 foreign units. At exchange rate 8 domestic per foreign, repayment costs 80; at 12 it costs 120. A consolidated cash total of 100 does not establish payment capacity after the depreciation. A hedge, foreign cash balance or exchange facility may alter the result, but each must be represented.
+
+Translation for group reporting differs from converting cash for settlement. The accounting basis determines exchange differences in profit, other comprehensive income or other components. The economic layer tracks actual currencies and conversions. A rate applied for presentation cannot automatically be used as an executable market price for a large transaction.
+
+\section{Group boundaries and internal funding}
+A consolidated group can report cash in one entity and debt in another. Consolidation removes some internal balances but does not necessarily make all cash freely transferable. Legal, tax, contractual, regulatory or operational constraints may restrict movement. A group-level cash plug can conceal an entity-level default.
+
+Represent cash accounts and obligations by legal entity, then model permitted transfers as events with dates, costs and approvals. Intercompany loans create claims in both entities. Dividends, capital contributions and service payments have different legal and accounting consequences. They cannot be substituted solely because each moves cash.
+
+For consolidated reporting, internal claims may be eliminated under the applicable perimeter and basis. The underlying entity records remain necessary for liquidity and counterparty analysis. Eliminating the records themselves would prevent the simulator from identifying which entity can pay which obligation.
+
+\section{A two-entity liquidity example}
+Parent P has cash 5 and external debt due 20. Subsidiary S has cash 30 and no current external debt. Consolidated cash is 35, apparently enough for the maturity. Suppose only 10 can legally and operationally transfer from S before the due date under the declared facts. P can then assemble 15 and has a shortfall of 5.
+
+If a permitted intercompany loan of 15 becomes available in time, P can pay. If a dividend of 15 is declared but settles after maturity, it cannot fund that payment without a bridge. If the subsidiary cash is restricted, even the first 10 may be unavailable. The scenario result depends on transfer rights and timing, not just the consolidated total.
+
+A correct consolidated statement after payment can coexist with an incorrect event sequence if the model silently borrowed the cash before it was available. Tests must therefore examine entity cash at event boundaries, not only the final group balance sheet.
+
+\section{Taxes and losses}
+Tax expense, cash tax and deferred tax are different quantities. A profit forecast cannot generally multiply pretax income by one rate and use the result simultaneously for expense and immediate payment. Loss carryforwards, payment lags, jurisdiction, interest limitations and temporary differences can separate them.
+
+A simple teaching model may assume immediate tax payment at rate $\tau$ on positive taxable income, giving cash tax $\tau\max(T,0)$. That is a declared simplification. If losses can offset future income, the state must retain the remaining loss balance and expiry or utilization conditions. Forgetting that state can overstate future tax; treating all losses as immediately refundable can overstate current cash.
+
+Accounting recognition of deferred tax assets requires its own admitted rules and evidence. Their carrying amount is not spendable cash. A stress scenario that turns a deferred tax asset into a funding source without an actual refund or financing transaction is economically wrong.
+
+\section{Estimates, errors and changes of policy}
+An estimate revision changes the model's measurement of an uncertain quantity. An error correction revises a prior assertion or application. An accounting-policy change can alter recognition or measurement according to the applicable rules. Their timing and comparative effects differ.
+
+The scenario engine should distinguish an economic shock that changes expected credit losses from a correction showing that the old receivables data were wrong. Both can change reported equity, but only one necessarily describes new economic information at the forecast date. The evidence and accounting version relations should make the distinction explicit.
+
+A correction should not silently rewrite every frozen forecast. A current restated view and an as-published historical view can coexist. Their differences are analytically useful: they separate errors in data available at the time from errors in the forecasting model.
+
+\section{Consolidation and scenario-dependent perimeter}
+An acquisition, disposal or change of control can alter the reporting perimeter. The group total before and after the event may not be comparable without a bridge. A simulation that treats acquired revenue as organic growth can distort future behavior and validation.
+
+Perimeter state should identify included entities and the relevant control assessment over time. Acquisition events introduce assets, liabilities and consideration under the selected accounting treatment. Disposal events remove or reclassify them and may create gains, losses or continuing interests. These are not ordinary sales receipts applied to an unchanged company.
+
+Unknown deal terms can produce alternative histories. Earn-outs, guarantees and retained interests may affect future cash after apparent disposal. A compact representation that keeps only closing consolidated balances can lose these rights. The source-to-contract-to-event chain should survive even when the initial reporting effect is aggregated.
+
+\section{Atomic posting and partial failure}
+A multi-leg event should either apply all admitted accounting movements consistently or remain unapplied with a recorded failure. Posting cash but failing to create debt because a later validation step failed corrupts the state. Similar risks arise when conversion removes debt but does not issue shares.
+
+Atomicity is an engineering property that supports accounting consistency. It does not certify the event's economic validity. Preconditions should be checked before mutation where possible, and the event should retain an immutable input snapshot. Replay should reproduce the same movements under the same rule version.
+
+A failed accounting mapping should not erase a successfully observed economic event from the evidence store. Instead, the system can retain the event and mark its accounting consequences unresolved. This separation permits later repair without inventing or deleting transactions.
+
+\input{simulation/remedy-freshness}
+
+\section{Reporting frequency and event frequency}
+A company may report quarterly while obligations settle daily. A quarterly engine that nets all flows can miss a temporary liquidity failure. A daily engine can still report quarterly by aggregation. The appropriate event resolution depends on the question and the contracts.
+
+Adaptive resolution is possible. A long period with no state-dependent decisions can be aggregated analytically. A period containing maturity, reset, dividend and covenant dates may require explicit boundaries. The aggregation must preserve ordering and any intermediate constraint that matters.
+
+For example, cash 10, a receipt of 20 and payment of 25 produce closing cash 5 regardless of order. If payment comes first and no overdraft is permitted, the path is infeasible despite the positive closing balance. A minimum-cash query requires the event sequence. A closing-balance query alone would not detect the problem.
+
+\section{Stock-flow consistency across counterparties}
+When several entities are modeled, a payment by one is a receipt by another, subject to fees, taxes and timing. Keeping counterpart links helps detect money creation or disappearance. In an external-counterparty boundary, the system can record the flow leaving the modeled domain rather than pretending the counterparty does not exist.
+
+The stock-flow consistent approach in \citet{caiani2016} gives a useful example of explicit sectors and transaction sequence. Its named cash-flow measures must be interpreted in its own definitions: a quantity called operating cash flow in that model subtracts principal repayments and should not automatically be mapped to an accounting statement category. Reusing labels without inspecting definitions is a semantic error.
+
+AccDSL should therefore give each reported or derived quantity a definition and units. A label match is a candidate mapping, not proof of equivalence. This is especially important when connecting economic simulators, accounting standards and regulatory templates.
+
+\section{A coherent event-to-report method}
+The proposed method first admits an economic event under its contractual and behavioral premises. It updates quantities, rights and obligations. It then invokes the accounting rule for the declared basis and context, validates the posting bundle, and updates report accumulators. Source and scenario provenance accompany each stage.
+
+At reporting boundaries, the system reconciles opening balances, movements and closing balances, checks units and perimeter, and preserves unresolved amounts or conditional interpretations. It does not force an unsupported movement into a generic other line merely to close the statement. A residual can be displayed as a diagnostic requiring explanation.
+
+This sequence supports both concrete witnesses and symbolic families. If every member of a region has the same event rule, amounts can remain symbolic. If a guard changes the rule, the region must split or retain a piecewise expression. Accounting coherence then applies within every admissible branch, not just to an average statement that no individual history produces.

@@ -1,0 +1,53 @@
+CHAPTER 13.
+IMPLEMENTATION CONTRACTS
+325
+13.4
+Versioned requests and independent results
+The workflow names above become portable operations only when their arguments, input
+versions and effects are fixed. Each request names an exact operation, profile and signature; an
+immutable view; typed arguments; execution settings; and the expected head for a mutation.
+The body is closed:
+OperationRequest {
+operation, request_id, workspace_key,
+profile_ref, signature_ref, view_ref, arguments,
+execution: {mode, budget, environment_ref},
+expected_head: null | {owner_key, state_ref, generation}
+}
+All fields are present. The mode distinguishes a specification example from a runtime request.
+Budget states operation-count and elapsed-time limits, or a reason either is inapplicable. The
+expected head appears only in this envelope. For accounting its owner is the entity/book/branch;
+for review it is the review namespace; for probability selection it is the family/evidence/time
+owner. Resolving a mutable “current” alias happens before constructing the request, and a
+mutation compares the resolved revision again.
+The fingerprint covers the complete request, including its request identifier, expected generation
+and execution settings. In accounting the lookup namespace is still the business-event tuple in
+Section 8.5, not request ID. Changing the request ID for a committed event changes the finger-
+print and conflicts. Source and review mutations use their own operation/workspace/request
+namespace. A transport correlation identifier and an economic event are not interchangeable
+identities.
+The result preserves the submission even when decoding fails. Once exact-byte retention
+succeeds, it has the following fields:
+OperationResult {
+submission_ref, request_ref, operation, input_view_ref,
+disposition, statuses, payload, diagnostics, coverage,
+unresolved, continuation_ref, commit_observation,
+receipt_ref, evidence_mode
+}
+The validated request reference remains null until all required input checks, including bindings
+and authorization, pass. Rejected input has null payload. If submission retention itself fails, the
+caller receives a transport failure with its original correlation, not a fabricated stored submission
+or a known commit outcome. A read can inspect an earlier committed receipt while its own
+commit observation says no new commit occurred.
+Completed, partial, rejected, unsupported, cancelled, internal failure, unknown commit and
+replay are operation dispositions. They do not replace the separate structural, mathematical,
+computational, empirical, accounting, forecast, product and human statuses. Computing a zero
+normalizer can complete while conditioning on that event is undefined. A valid symbolic family
+can have only partly explored regions. A supported insolvency scenario can be fully evaluated
+while its company defaults. These distinctions prevent an infrastructure error from erasing an
+economically important path.
+For example, let an admitted law assign mass 3/5 to a path with cash 120 and 2/5 to an
+unavailable cash calculation. The output retains both regions and their masses. If separate
+evidence bounds the unavailable cash by [80, 110], the unconditional mean is bounded by
+3
+5(120) + 2
+5[80, 110] = [104, 116].

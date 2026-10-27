@@ -1,0 +1,53 @@
+CHAPTER 13.
+IMPLEMENTATION CONTRACTS
+333
+The text supplied to table recognition also needs an identity.
+The retained docling-ibm-
+models 4.0.2 consumer uses OTSL cell and span tokens, converts them to HTML, and merges
+text from separately supplied PDF cells (Docling IBM Models contributors, 2026). This is a later
+representation than the original paper’s HTML sequence. The Docling report explicitly describes
+a subsequent token-language refinement (Auer et al., 2024, Section 3); neither that statement
+nor a model-card score identifies the later files with the paper’s experimental checkpoints.
+The proposed adapter therefore retains the source page and crop, the supplied text cells and
+their locations, the predicted table cells, and the assignments and structural changes made
+during matching. If a correction combines columns or adds a cell for unmatched text, a reviewer
+must be able to recover the earlier structure and the text that prompted the change. Text
+obtained from an OCR engine also retains that engine’s identity and outcome. A resulting
+table remains a proposal until its cell content, context and accounting interpretation have been
+checked; a well-formed HTML table alone cannot settle those questions.
+Token syntax and cell geometry require separate checks too. In the inspected author version
+of OTSL, Lysak et al. (2023, Sections 4.1–4.3) use five tokens: C starts a cell, L joins the cell
+to its left, U joins the cell above, X joins both, and NL ends a row. Neighbor restrictions and
+equal row lengths allow invalid tokens to be detected during generation. The authors explicitly
+distinguish a syntactically valid sequence from a correct prediction.
+Even those local rules need a further condition to ensure rectangular merged cells. Consider two
+rows, C L NL followed by U C NL. The L has C to its left, the U has C above, and the first-row,
+first-column and equal-length rules are satisfied; no X occurs. Yet the first cell joins the top-left,
+top-right and bottom-left positions, leaving the bottom-right position to the second C. It is
+L-shaped. Representing it with both a two-row and a two-column HTML span would also
+occupy the second cell’s position. This finite example shows why the six printed rules alone do
+not establish a nonoverlapping partition into rectangular cells. The proposed adapter checks
+that each merged cell occupies a complete rectangle, that cells do not overlap, and that every
+declared grid position belongs to a cell. Passing those checks still leaves correspondence with
+the source table to be established.
+The later decoder needs its own verification. In the retained 4.0.2 source, a correction described
+as applying to the first row uses a row counter that is initialized to zero and never updated.
+It therefore also rewrites an affected token on later rows (Docling IBM Models contributors,
+2026). This is a specific source-code defect relative to that stated scope; its frequency and effect
+on actual model predictions have not been measured. Neither the paper’s syntax argument nor
+these partial corrections establish that a deployed converter enforces all the proposed checks.
+The retained Apple annual filing makes the dependency problem concrete. Its issuer archive
+includes the instance, the issuer’s schema and its calculation, definition, label and presentation
+linkbases. Those files also refer to US GAAP and SEC Reporting Taxonomy definitions, SEC
+schemas and XBRL definitions held elsewhere. The issuer archive alone therefore cannot
+supply every definition needed to interpret its tagged facts. For this particular archive, a static
+inspection now resolves the recorded imports, link references and typed-domain references to
+retained files, checks target namespaces and fragment identifiers, and checks that instance facts
+have declared concepts, contexts and units. This establishes a source dependency map. XML
+Schema and XBRL validation, the issuer’s interpretation of each concept, and the completeness
+of the wider disclosure package remain separate questions.
+An offline parser needs more than a map of intended filenames. At the inspected Arelle source
+version, the cache lookup can return a local pathname when the file is absent; subsequent
+loading records an IOerror. The proposed adapter must check each mapped file and its hash
+before loading, retain the missing dependency and affected records, and return an unresolved-
+dependency result. It must not infer successful retrieval from a nonempty pathname or silently

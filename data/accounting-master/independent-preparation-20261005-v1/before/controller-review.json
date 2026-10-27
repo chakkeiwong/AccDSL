@@ -1,0 +1,302 @@
+{
+  "verdict": "REVISE",
+  "issues": [
+    "process-lifecycle: bounded_process launches before checking whether its absolute cutoff has already passed or stopped() already returns true. It calculates cutoff, writes the prompt, opens files and executes Popen; only the subsequent wait loop evaluates those conditions. Consequently, a deadline or stop request arriving during preparation can still start an editable worker, which can change files before termination. Returning timeout or stop_requested afterward does not undo those effects. This conflicts with the reviewed requirement that insufficient budget and observed stop requests prevent worker launch. Repair: recheck the absolute cutoff and stop callback immediately before Popen, after preparation, and return an explicit not-launched outcome without invoking on_spawn when either condition applies. Ensure callers preserve that outcome without treating it as an executed retry. Keep the existing post-launch checks for events arriving after the launch decision.",
+    "permissions-install: The public CLI permits execution budgets beyond the reviewed ordinary-run authorization. main sets the non-campaign maximum to 86400, so both run --max-seconds 86400 and install-and-run --max-seconds 86400 pass argument validation and reach master.run with a 24-hour budget. The installed prefix also permits these arguments. This conflicts with the reviewed two-hour invocation ceiling. Enforce a 7200-second maximum for ordinary run/install-and-run execution and retain the separate campaign total limit. Also enforce the per-invocation ceiling within campaign dispatch or Master.run, so internal callers cannot extend it. If Master.run already clamps the budget, supply that interface evidence; the CLI should still reject unsupported values explicitly.",
+    "worker-boundary: P2 — Supervisor publication failures can become false worker-integrity violations. atomic_json has no finally cleanup for its temporary file. An ordinary write/fsync error, or a handled interruption raised before os.replace, can leave a file such as a packet destination plus '.<pid>.tmp'. Master.worker then sees that supervisor-created file as a new, unapproved write. For read-only roles it necessarily raises ContinuationVeto; for editable phases a temporary file in the run directory is outside the declared write scope. This misclassifies a recoverable publication/interruption failure as worker misconduct and prevents the normal review retry or resumable interruption path. Repair atomic_json with exception-safe cleanup of its own temporary file, preserving the original destination and original exception. If partially serialized content must be retained as evidence, preserve it explicitly through a supervisor-owned recovery mechanism rather than leaving an unclassified inventory entry. Do not broadly exempt arbitrary temporary files.",
+    "scheduler: R1 — Campaign invocation accounting is not recoverable across ordinary interruption. In Master.campaign, the pre-run write records next_invocation_seconds but no pending invocation identity or progress baseline. self.run durably records its run separately; only after it returns does campaign append the invocation and update consecutive_no_progress. A handled interruption after the run finishes but before that campaign update leaves a completed run absent from campaign accounting. Resume neither reconciles that run nor restores its no-progress contribution. For example, interrupting after a second non-progressing run but before its campaign update allows a third invocation despite the two-invocation stop rule. Repair by persisting a pending invocation identity and baseline before execution, binding the run to that identity, and reconciling unfinished campaign accounting on resume exactly once. Preserve the run's terminal outcome when deciding whether another invocation is permitted.",
+    "scheduler: R2 — Campaign progress uses a baseline captured outside the runner lock and before reloading state. Master.campaign reads before_accepted and previous_runs from self.state; Master.run acquires runner.lock and reloads state afterward. An ordinary serialized run can therefore finish between campaign invocations, or after this Master instance loaded its state, without violating the runner lock. Its accepted phases are then counted as new acceptance by the campaign invocation even if that invocation made no progress. This can incorrectly reset consecutive_no_progress. Campaign also reads next-plan.json after releasing runner.lock, so the continuation decision can refer to another invocation's plan. Repair by capturing the baseline after reload under runner.lock and returning or persisting the resulting run-specific progress and next-plan decision before releasing that lock. Campaign should consume that immutable result. Alternatively, enforce and document mutual exclusion between campaign orchestration and all ordinary state-mutating entrypoints.",
+    "phase-plan-repair: P2 — Bounded partial review incorrectly requires every final deliverable to exist. In execute_phase, a non-scoped PARTIAL result with a positive test count enters bounded_partial_work review even when checks report missing deliverables. However, save_pending_review unconditionally adds every phase deliverable and phase['test_file'] to names, then calls evidence_hashes, which raises on any missing file. Consequently, legitimate incomplete work never reaches its bounded result reviewer or durable pending-review checkpoint; the outer exception handler instead sends it through another editable repair cycle with only the missing-evidence error. save_continuation already recognizes missing files, so these two persistence paths impose inconsistent requirements. Repair save_pending_review to distinguish bounded-partial checkpoints from full-acceptance checkpoints: require the actual work/check/approved-plan records, hash existing declared evidence, and explicitly record absent final deliverables. Validate that recorded presence/absence on resume, invalidating and rechecking when it changes. Keep the complete-file requirement for full acceptance.",
+    "evidence: P1 — Preservation can silently omit unreadable directories. In scripts/accounting_master_support.py, editable_files uses os.walk without onerror, so directory enumeration failures are silently ignored. preserve_editable can therefore return a successful but incomplete backup inventory; changes_since and contributed_changes can subsequently misclassify omitted files. worker_inventory explicitly raises traversal errors, but that does not make the separate preservation traversal fail closed. Repair: give editable_files a raising onerror callback and propagate inventory failures as continuation vetoes before editable work. Add a targeted traversal-error regression verifying that incomplete preservation cannot authorize work.",
+    "evidence: P2 — Earlier proposal blockers can disappear from final readiness without a recorded resolution. In scripts/check_accounting_proposal.py, P15–P17 accept decisions with blocks_proposal=true. P19 recursively checks those stages using their original non-final rules, then applies decisions(final=True) only to its own open_decisions. An empty P19 list therefore passes even when an upstream decision remains explicitly blocking. Repair: reconcile upstream blocking decision IDs against explicit final dispositions, requiring a supported resolution or superseding decision for each blocker. Add a regression where an upstream blocker is omitted from P19 and verify that readiness fails; also cover an explicit resolution.",
+    "evidence: P2 — Render evidence is not bound to the PDF that produced it. P18 independently hashes rendered_pages and checks only that the worker-authored rendered_pdf_sha256 equals the current PDF reference. After a rebuild, updating the PDF/build records and that scalar while retaining old page images and render-review references passes these checks. The supplied test covers a mismatched scalar and an empty page list, but not stale pages accompanying a newly pinned PDF. Repair: require a render record binding the renderer's input PDF hash to its output page hashes, and bind the render review to that record. Add a regression that rebuilds and repins the PDF while retaining the prior render record/pages; it must fail until rendering and review evidence are refreshed."
+  ],
+  "scope_reviews": [
+    {
+      "scope": "process-lifecycle",
+      "assumptions": [
+        "Workers are trusted to remain in their initial process group; deliberate detachment and uncatchable termination before durable registration are excluded.",
+        "The caller must hold the single-writer lock through launch, cleanup and recovery, and on_spawn must durably record ownership before returning. Those call sites and the registration implementation are not supplied.",
+        "Callers must supply finite positive time allowances and valid absolute deadlines; bounded_process does not validate these inputs."
+      ],
+      "checks": [
+        "Reviewed the supplied launch, signal masking, cleanup, recovery, locking and clock code without tools.",
+        "Checked ordinary interruption handling, leader identity preservation, PID-reuse defenses, recovery vetoes and absolute-deadline enforcement.",
+        "The packet reports 197 passing tests. Test bodies were not supplied, so names and counts do not establish coverage of individual interleavings or accounting correctness."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_worker_clock.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md",
+        "docs/plans/accounting-worker-timing-repair-20261004.md"
+      ],
+      "issues": [
+        "bounded_process launches before checking whether its absolute cutoff has already passed or stopped() already returns true. It calculates cutoff, writes the prompt, opens files and executes Popen; only the subsequent wait loop evaluates those conditions. Consequently, a deadline or stop request arriving during preparation can still start an editable worker, which can change files before termination. Returning timeout or stop_requested afterward does not undo those effects. This conflicts with the reviewed requirement that insufficient budget and observed stop requests prevent worker launch. Repair: recheck the absolute cutoff and stop callback immediately before Popen, after preparation, and return an explicit not-launched outcome without invoking on_spawn when either condition applies. Ensure callers preserve that outcome without treating it as an executed retry. Keep the existing post-launch checks for events arriving after the launch decision."
+      ],
+      "next_actions": [
+        "Add the final prelaunch deadline and stop checks and define how callers handle a not-launched result.",
+        "Add focused regression coverage for a deadline expiring during preparation and a stop becoming observable during preparation; verify that Popen and on_spawn are not called and no editable attempt is consumed.",
+        "Rerun the controller verification and obtain a fresh review of the changed code and caller handling."
+      ],
+      "residuals": [
+        "Atomic publication, durable registration, lock ownership at recovery call sites and terminal-state persistence are stated interfaces rather than fully inspectable implementations in this packet.",
+        "The output limit is enforced by polling and can be exceeded between observations; it is not a strict storage quota.",
+        "Ambiguous recovery ownership deliberately vetoes continuation instead of signalling potentially unrelated processes.",
+        "The accepted 192-report source panel and scoped internal acceptance do not close accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Completed a bounded static review of the supplied process-lifecycle packet.",
+        "Identified one launch-boundary defect requiring repair."
+      ],
+      "summary": "The launcher can start an editable worker after its deadline or an observable stop request because both checks occur only after Popen.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "permissions-install",
+      "assumptions": [
+        "The reviewed plan's two-hour ordinary invocation limit remains binding; the separately authorized campaign may span 48 hours.",
+        "Controllers and workers are trusted under the supplied process-containment assumptions.",
+        "Master.run's implementation is not supplied; any independent downstream enforcement of the two-hour limit is an unverified interface assumption."
+      ],
+      "checks": [
+        "Inspected only the supplied packet; used no tools.",
+        "Checked rule-prefix semantics, publication conflict handling, interrupted installation recovery, internal helper validation, and public CLI permission boundaries.",
+        "Treated the reported 197 passing tests as supporting control-plane evidence; test bodies were not supplied."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py: main accepts max_seconds up to 86400 for non-campaign actions and forwards args.max_seconds unchanged to master.run.",
+        "docs/plans/accounting-master-program.md: the supplied reviewed plan repeatedly retains a two-hour invocation limit while separately authorizing a 48-hour campaign.",
+        "scripts/run_accounting_master.py: rule_text permits the fixed entrypoint prefix, including subsequent CLI arguments."
+      ],
+      "issues": [
+        "The public CLI permits execution budgets beyond the reviewed ordinary-run authorization. main sets the non-campaign maximum to 86400, so both run --max-seconds 86400 and install-and-run --max-seconds 86400 pass argument validation and reach master.run with a 24-hour budget. The installed prefix also permits these arguments. This conflicts with the reviewed two-hour invocation ceiling. Enforce a 7200-second maximum for ordinary run/install-and-run execution and retain the separate campaign total limit. Also enforce the per-invocation ceiling within campaign dispatch or Master.run, so internal callers cannot extend it. If Master.run already clamps the budget, supply that interface evidence; the CLI should still reject unsupported values explicitly."
+      ],
+      "next_actions": [
+        "Correct action-specific budget validation and verify that ordinary execution rejects 7201 seconds before installation or worker execution.",
+        "Verify that a 48-hour campaign remains allowed while each constituent run stays within the two-hour ceiling and remaining campaign deadline.",
+        "Rerun the relevant controller checks and obtain a fresh review of the changed controller."
+      ],
+      "residuals": [
+        "Installation recovery preserves a conflicting published rule and binds pending installation to the prepared candidate and controller hashes.",
+        "The effective-policy check covers the enumerated local rules; runtime-managed policy may still deny execution, as the supplied plan acknowledges.",
+        "Actual policy-check output omits campaign, although install_rule iterates over all PUBLIC_ACTIONS and the supplied prefix semantics cover campaign.",
+        "This bounded review does not establish accounting correctness, completeness of the 192-report panel, or human acceptance. Scoped internal acceptance leaves those gaps open."
+      ],
+      "steps": [
+        "Compared the exposed command permissions and recovery paths with the supplied reviewed execution limits.",
+        "Identified the ordinary invocation budget mismatch without extending the stated threat model."
+      ],
+      "summary": "REVISE: the reusable command prefix exposes ordinary run budgets up to 24 hours despite the reviewed two-hour invocation ceiling.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "worker-boundary",
+      "assumptions": [
+        "The supplied lifecycle interface holds: trusted workers remain in their initial process group; deliberate detachment and uncatchable termination before durable registration are excluded.",
+        "Definitions of bounded_process, catch_termination and defer_shutdown are not supplied. Their stated cleanup guarantees are assumed; whether catch_termination defers signals throughout every atomic_json call is not established.",
+        "CLI configuration queries are read-only local inspections, as stated."
+      ],
+      "checks": [
+        "Reviewed worker admission, absolute deadlines, role-specific verdict validation, review retries, write inventories and atomic publication by static inspection only.",
+        "The supplied report records 197 passing tests. Test bodies were not supplied, and no tests were run.",
+        "Source checks and internal phase acceptance remain distinct from accounting correctness, scientific validity and human acceptance."
+      ],
+      "evidence": [
+        "scripts/accounting_master_support.py: atomic_json leaves its PID-suffixed temporary file behind when writing, flushing or fsync fails before os.replace; atomic_bytes has explicit temporary-file cleanup.",
+        "scripts/run_accounting_master.py: Master.worker inventories files before _worker_result and excludes exact generated destinations, but not atomic_json temporary files.",
+        "scripts/run_accounting_master.py: Master._worker_result publishes recovery, packet, schema and response records within that inventory window."
+      ],
+      "issues": [
+        "P2 — Supervisor publication failures can become false worker-integrity violations. atomic_json has no finally cleanup for its temporary file. An ordinary write/fsync error, or a handled interruption raised before os.replace, can leave a file such as a packet destination plus '.<pid>.tmp'. Master.worker then sees that supervisor-created file as a new, unapproved write. For read-only roles it necessarily raises ContinuationVeto; for editable phases a temporary file in the run directory is outside the declared write scope. This misclassifies a recoverable publication/interruption failure as worker misconduct and prevents the normal review retry or resumable interruption path. Repair atomic_json with exception-safe cleanup of its own temporary file, preserving the original destination and original exception. If partially serialized content must be retained as evidence, preserve it explicitly through a supervisor-owned recovery mechanism rather than leaving an unclassified inventory entry. Do not broadly exempt arbitrary temporary files."
+      ],
+      "next_actions": [
+        "Add focused fault-injection coverage for failure before replacement and handled interruption during atomic publication inside a worker inventory window.",
+        "Verify that existing destination bytes survive, supervisor temporary files do not cause a false scope violation, and genuine out-of-scope worker edits still veto continuation.",
+        "Rerun the relevant controller checks and obtain a fresh bounded review after repair."
+      ],
+      "residuals": [
+        "Process-group cleanup, lock ownership, scheduler transitions and reusable command approval are stated interfaces here; their implementations cannot be independently verified from this worker-boundary packet.",
+        "The accepted panel contains 192 reports. Neither that count nor the reported controller test count closes the remaining accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Followed the packet-only restriction without tools, file reads, commands or mission-history inspection.",
+        "Traced supervisor-generated writes through the worker inventory and failure paths."
+      ],
+      "summary": "The worker boundary has an atomic-publication cleanup defect: supervisor temporary files can trigger false integrity vetoes after ordinary failure or interruption.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "state-refresh",
+      "assumptions": [
+        "Public entrypoints acquire the exclusive writer lock and call reload_state after acquiring it, before refresh or save. Those call sites are not supplied; refresh itself neither acquires the lock nor reloads persisted state.",
+        "The supplied helper contracts hold: verify_hashes checks current file contents and missing evidence, local_path enforces repository containment, and atomic writers publish complete files durably.",
+        "proposal_gate independently validates current readiness evidence as described in the interface; its implementation is outside this packet."
+      ],
+      "checks": [
+        "Accepted phases require nonempty evidence hashes, an unchanged phase contract and matching prerequisite evidence bindings.",
+        "The ordered dependency pass propagates stale prerequisite status to accepted descendants before eligibility is computed.",
+        "Workflow migration is enforced on initialization, reload and refresh; held and product implementation phases are excluded from eligibility.",
+        "Unchanged external blocks and deferred fingerprints suppress automatic retries; declared input and dependency changes affect fingerprints.",
+        "Canonical state is saved before derived plans; refreshed plans bind the saved state digest and generation.",
+        "State validation requires mission_complete=false and all G1–G18 to remain open."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_catalog.json",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "The packet reports 197 passing tests and supplies test names, but not test bodies or execution output. This supports the reported control-plane verification only; it does not independently establish the assertions exercised.",
+        "Atomic publication is per file, not across the state and all derived views. An ordinary interruption can leave mixed generations until refresh rebuilds them. Consumers must validate freshness against canonical state rather than trust a cached readiness boolean or next-plan file.",
+        "Process containment, actual repair execution, approval installation and result-review enforcement are described interfaces, not implementations inspected in this assigned state-refresh scope.",
+        "The accepted panel of 192 reports and internal phase acceptance do not establish accounting correctness, scientific completeness or human acceptance."
+      ],
+      "steps": [
+        "Reviewed only the supplied state-refresh code, contracts and verification metadata; used no tools.",
+        "Traced accepted-evidence invalidation, dependent invalidation, retry eligibility, checkpoint loss handling and derived-plan publication."
+      ],
+      "summary": "AGREE for the bounded state-refresh packet under the explicit interface assumptions. No concrete defect is established by the supplied implementation; this is not approval of omitted controller subsystems or accounting completeness.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "scheduler",
+      "assumptions": [
+        "Review is limited to the supplied packet; no tools or external files were used.",
+        "Trusted workers remain within their initial process group. Deliberate detachment and uncatchable termination during registration are excluded.",
+        "The omitted exclusive_lock, reload_state and refresh implementations must enforce their stated interfaces. The packet does not establish a campaign-wide exclusion rule for ordinary run invocations."
+      ],
+      "checks": [
+        "Traced campaign admission, invocation accounting, interruption recovery, progress detection and terminal decisions.",
+        "Inspected phase repair, reviewed-plan renewal, bounded retries and acceptance conditions.",
+        "Treated the reported 197 passing tests and supplied test names as supporting evidence, without assuming unprovided test assertions."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md",
+        "docs/plans/accounting-master-campaign-20261005.md"
+      ],
+      "issues": [
+        "R1 — Campaign invocation accounting is not recoverable across ordinary interruption. In Master.campaign, the pre-run write records next_invocation_seconds but no pending invocation identity or progress baseline. self.run durably records its run separately; only after it returns does campaign append the invocation and update consecutive_no_progress. A handled interruption after the run finishes but before that campaign update leaves a completed run absent from campaign accounting. Resume neither reconciles that run nor restores its no-progress contribution. For example, interrupting after a second non-progressing run but before its campaign update allows a third invocation despite the two-invocation stop rule. Repair by persisting a pending invocation identity and baseline before execution, binding the run to that identity, and reconciling unfinished campaign accounting on resume exactly once. Preserve the run's terminal outcome when deciding whether another invocation is permitted.",
+        "R2 — Campaign progress uses a baseline captured outside the runner lock and before reloading state. Master.campaign reads before_accepted and previous_runs from self.state; Master.run acquires runner.lock and reloads state afterward. An ordinary serialized run can therefore finish between campaign invocations, or after this Master instance loaded its state, without violating the runner lock. Its accepted phases are then counted as new acceptance by the campaign invocation even if that invocation made no progress. This can incorrectly reset consecutive_no_progress. Campaign also reads next-plan.json after releasing runner.lock, so the continuation decision can refer to another invocation's plan. Repair by capturing the baseline after reload under runner.lock and returning or persisting the resulting run-specific progress and next-plan decision before releasing that lock. Campaign should consume that immutable result. Alternatively, enforce and document mutual exclusion between campaign orchestration and all ordinary state-mutating entrypoints."
+      ],
+      "next_actions": [
+        "Add durable pending-invocation reconciliation and make campaign accounting idempotent.",
+        "Bind progress baselines and continuation decisions to the same locked invocation.",
+        "Add focused regression coverage for interruption between run completion and campaign accounting, and for an intervening ordinary run. Rerun controller verification and independent review."
+      ],
+      "residuals": [
+        "campaign_progress counts observed file deltas, including changes subsequently reverted. This remains a coarse liveness signal, not substantive progress or acceptance.",
+        "Process cleanup, approval installation and several validation helpers are supplied as interfaces rather than complete implementations; their internals were not independently verified.",
+        "The visible readiness gate keeps implementation disabled and human acceptance pending. The 192-report source panel and scoped phase acceptance do not close accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Compared the supplied scheduler paths with the reviewed interruption, resumption and no-progress contracts.",
+        "Identified two campaign bookkeeping defects without extending the stated containment threat model."
+      ],
+      "summary": "REVISE: phase acceptance remains explicitly scoped, but campaign bookkeeping can lose completed invocations on interruption and misattribute progress from another serialized run.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "phase-plan-repair",
+      "assumptions": [
+        "A legitimate PARTIAL result may create some phase deliverables while others remain absent; partial acceptance is not full phase acceptance.",
+        "The supplied process, locking, authorization and protection interfaces are assumed to hold. Their implementations were not included in this review scope.",
+        "Workers are trusted and remain in the initial process group, as specified."
+      ],
+      "checks": [
+        "Traced planning, plan rejection, editable repair, verification, result review and bounded continuation paths.",
+        "Checked pending-review creation and resumption against incomplete deliverables and evidence preservation.",
+        "Inspected acceptance guards: positive integer test counts, explicit registered-checker criteria and independent AGREE remain necessary.",
+        "Treated the reported 197 passing tests and supplied test names as supporting evidence only; no commands were run or test bodies inspected."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "P2 — Bounded partial review incorrectly requires every final deliverable to exist. In execute_phase, a non-scoped PARTIAL result with a positive test count enters bounded_partial_work review even when checks report missing deliverables. However, save_pending_review unconditionally adds every phase deliverable and phase['test_file'] to names, then calls evidence_hashes, which raises on any missing file. Consequently, legitimate incomplete work never reaches its bounded result reviewer or durable pending-review checkpoint; the outer exception handler instead sends it through another editable repair cycle with only the missing-evidence error. save_continuation already recognizes missing files, so these two persistence paths impose inconsistent requirements. Repair save_pending_review to distinguish bounded-partial checkpoints from full-acceptance checkpoints: require the actual work/check/approved-plan records, hash existing declared evidence, and explicitly record absent final deliverables. Validate that recorded presence/absence on resume, invalidating and rechecking when it changes. Keep the complete-file requirement for full acceptance."
+      ],
+      "next_actions": [
+        "Add a regression in tests/test_accounting_master.py where a non-scoped phase returns PARTIAL, checks execute a positive number of tests, and a final deliverable remains missing. Verify that bounded review executes without an additional editable attempt caused solely by the missing deliverable.",
+        "Cover review unavailability and subsequent read-only resume for that incomplete checkpoint, plus invalidation when a previously absent deliverable appears.",
+        "Rerun the relevant controller checks and obtain a fresh review of the repair."
+      ],
+      "residuals": [
+        "The exact catalog contracts and test bodies were not supplied; whether a current phase already encounters this defect is not established.",
+        "The packet does not define the required input-hash coverage for every checker. verification_input_errors accepts an absent or empty mapping, so freshness depends on checker contracts identifying all material inputs.",
+        "Process containment, exclusive ownership and reusable narrow command approval were assessed only through the stated interfaces, not independently verified.",
+        "The accepted 192-report source panel and scoped internal phase acceptance do not close accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Performed the requested packet-only static review without tools, file access or project-history retrieval."
+      ],
+      "summary": "Bounded partial review can be prevented by missing final deliverables, causing unnecessary editable repair instead of resumable read-only review.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "evidence",
+      "assumptions": [
+        "This review uses only the supplied packet; no tools, files or commands were accessed.",
+        "Workers are trusted. Findings concern accidental omissions, stale evidence and ordinary filesystem failures.",
+        "The packet does not establish an additional mechanism that reconciles proposal blockers across stages or binds rendered-page hashes to the PDF used by the renderer."
+      ],
+      "checks": [
+        "Inspected preservation, change attribution, hash verification, deterministic validation, proposal readiness and supplied proposal tests.",
+        "The reported 197 passing tests support control-plane verification; they do not establish accounting correctness or human acceptance.",
+        "Confirmed that proposal_gate retains implementation_enabled=false and human_acceptance=pending."
+      ],
+      "evidence": [
+        "scripts/accounting_master_support.py",
+        "scripts/check_accounting_proposal.py",
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_proposal.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "P1 — Preservation can silently omit unreadable directories. In scripts/accounting_master_support.py, editable_files uses os.walk without onerror, so directory enumeration failures are silently ignored. preserve_editable can therefore return a successful but incomplete backup inventory; changes_since and contributed_changes can subsequently misclassify omitted files. worker_inventory explicitly raises traversal errors, but that does not make the separate preservation traversal fail closed. Repair: give editable_files a raising onerror callback and propagate inventory failures as continuation vetoes before editable work. Add a targeted traversal-error regression verifying that incomplete preservation cannot authorize work.",
+        "P2 — Earlier proposal blockers can disappear from final readiness without a recorded resolution. In scripts/check_accounting_proposal.py, P15–P17 accept decisions with blocks_proposal=true. P19 recursively checks those stages using their original non-final rules, then applies decisions(final=True) only to its own open_decisions. An empty P19 list therefore passes even when an upstream decision remains explicitly blocking. Repair: reconcile upstream blocking decision IDs against explicit final dispositions, requiring a supported resolution or superseding decision for each blocker. Add a regression where an upstream blocker is omitted from P19 and verify that readiness fails; also cover an explicit resolution.",
+        "P2 — Render evidence is not bound to the PDF that produced it. P18 independently hashes rendered_pages and checks only that the worker-authored rendered_pdf_sha256 equals the current PDF reference. After a rebuild, updating the PDF/build records and that scalar while retaining old page images and render-review references passes these checks. The supplied test covers a mismatched scalar and an empty page list, but not stale pages accompanying a newly pinned PDF. Repair: require a render record binding the renderer's input PDF hash to its output page hashes, and bind the render review to that record. Add a regression that rebuilds and repins the PDF while retaining the prior render record/pages; it must fail until rendering and review evidence are refreshed."
+      ],
+      "next_actions": [
+        "Make editable inventory traversal fail closed.",
+        "Require explicit reconciliation of upstream proposal blockers.",
+        "Bind render outputs and their review to the exact rendered PDF.",
+        "Run the targeted regressions and controller suites, then obtain a fresh review of the changed controls."
+      ],
+      "residuals": [
+        "The implementations of process containment, locking, acceptance finalization and approval-rule installation are not supplied here; their stated interfaces and test names cannot independently establish their correctness.",
+        "The accepted 192-report source panel and scoped internal phase acceptance leave accounting, scientific and human-acceptance gaps open.",
+        "Structural evidence checks cannot establish substantive design quality; independent result review remains necessary after these repairs."
+      ],
+      "steps": [
+        "Compared the supplied evidence functions and proposal checker against preservation, freshness and honest-readiness requirements.",
+        "Separated concrete code findings from unsupplied interface implementations and semantic-review limitations."
+      ],
+      "summary": "REVISE: preservation can silently omit files, final readiness can omit upstream blockers, and render evidence can remain stale after a PDF rebuild.",
+      "verdict": "REVISE"
+    }
+  ],
+  "controller_hashes": {
+    "scripts/run_accounting_master.py": "1745ad1917a7462b185ea3fb7950b98dbdcbc9291dc0dbc9bf90014150787e76",
+    "scripts/accounting_master_support.py": "8c449c0309534c58eb110a5fd77873258ef1646255526cc8af22e8d5170e71bd",
+    "scripts/accounting_master_catalog.json": "2ec65623fe2b048c01f37599c3193f99a42b29767112cfe13da136964b793e1c",
+    "scripts/accounting_master_response.schema.json": "4b492e3495e6a64bf8e74d0798362b3c52073aef182c06dd9a06a658184f1269",
+    "tests/test_accounting_master.py": "0703ef2f68f0479a5c6945e127d789c807967c73d0a626ee0d11c2d6190077f1",
+    "docs/plans/accounting-master-program.md": "39246b887a28bbf51395443c75fc0de5f021f1177fcd2aa04d04ce428607acd5",
+    "scripts/check_accounting_proposal.py": "ec6db459fcb7b89830ff00872a15128b177c06c61e62097aecf0051b9dd937ba",
+    "tests/test_accounting_proposal.py": "07b41c28c10740767de5d01f9fb4c6082589074ec842069106aa73a7c7224fcd",
+    "docs/plans/accounting-p15-execution-repair-20261004.md": "d389d0e38822cea3a822545c3af8fb7b7db0b87e4a7a2be0b176e07633f3ca69",
+    "scripts/accounting_worker_clock.py": "6d23817fcc160afd9245172d0cf8e65425f097694afa2300fe1fc54d9253ac61",
+    "docs/plans/accounting-worker-timing-repair-20261004.md": "68458dd071fa7d77656df5a09d2170a0b2ca4ac849bb54b3cb6804de184d9763",
+    "docs/plans/accounting-master-campaign-20261005.md": "5a74aba76821e8a660f4c394916a06ca3183f41a5d453d93c462561da7d741b2"
+  },
+  "reviewed_at": "2026-10-05T01:04:04.178003+00:00"
+}

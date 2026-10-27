@@ -1,0 +1,4 @@
+Final-verification attempt 01 stopped in the Markdown-link parser because the escaped expression returned capture tuples. No control or manuscript changes occurred. Attempt 02 uses a literal bracket/parenthesis pattern; all other checks and comparison targets are unchanged. This is a verification-script defect, not a candidate-source finding.
+
+
+Attempt 02 exposed eleven valid multiline citations checked incorrectly against a single line, plus the not-yet-written run manifest. Each span was inspected: its exact recorded literal starts on the recorded line and continues on the next line. Attempt 03 checks the exact number of lines in that literal, without a fuzzy match or changed source target. The run manifest now exists. The failed result is preserved as final-verification-attempt-02.json.

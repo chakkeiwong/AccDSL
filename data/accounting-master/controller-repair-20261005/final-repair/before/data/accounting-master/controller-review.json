@@ -1,0 +1,290 @@
+{
+  "verdict": "REVISE",
+  "issues": [
+    "process-lifecycle: High — bounded_process can leave an unregistered running child after an ordinary identity-read failure. Immediately after Popen succeeds, it calls process_identity before on_spawn. If that lookup raises, finally calls terminate_group, whose _terminate_group immediately repeats the same lookup. A persistent OSError or PermissionError reading the child's /proc entry or boot identity therefore prevents both registration and termination. If the lookup instead repeatedly returns None, cleanup can also fail to find members and reach proc.wait(timeout=5) while the child remains alive. The parent then unwinds without a durable identity available to recover_process. This is an accidental failure after a successful fork, not the excluded uncatchable-kill window. Repair by establishing an exception-safe cleanup path for a newly created, unreaped direct child that does not depend on the metadata read that failed. Under the stated no-other-reaper assumption, retain the child as the ownership anchor, terminate its known initial group with bounded escalation, and reap only after cleanup. Persist unresolved cleanup state if termination cannot be established; never silently resume from an absent active-process record.",
+    "worker-boundary: Runtime publication and its expected-hash update are interruptible separately. In runtime_json, atomic_json can replace the destination before runtime_expected is updated; in event, the append can complete before its expected hash is updated. An ordinary handled SIGTERM/KeyboardInterrupt in either interval leaves legitimate supervisor bytes different from the recorded expectation. The subsequent process cleanup or worker finally calls check_runtime and converts the interruption into a ContinuationVeto alleging an outside write; cleanup status publication can also fail for the same reason. Repair: defer handled shutdown across each complete check/write/expected-hash-update/check transaction, including event append, flush and fsync. Keep actual publication failures fail-closed. Add focused interruption tests at the publication-to-hash-update boundary for both methods, verifying cleanup and resumable interruption without a false integrity accusation.",
+    "worker-boundary: Master.worker fails open for editable roles with an unknown phase ID. Both the phase_block check and the final declared-write-scope check execute only when phase['id'] is in self.phases. Consequently, worker('implement', unknown_phase, ...) or worker('repair', unknown_phase, ...) passes role validation, receives workspace-write access, and can change any inventoried file outside the globally protected controls without a phase-scope veto. This contradicts the stated worker-launch boundary and can arise from an ordinary erroneous caller; no hostile actor is needed. Repair: reject editable roles unless the phase ID is registered and passes phase_block, before writing budgets or launching queries. Explicitly allow only the required non-phase read-only roles. Add tests showing an unknown editable phase is rejected before launch and cannot bypass write-scope enforcement.",
+    "scheduler: REVISE: Master.run() invokes recover_process() and reload_state() before entering its try/except/finally block. recover_process() assumes active-process.json is a mapping with nested identity keys (for example previous['pgid'], previous['pid'], previous['start_ticks']); malformed, truncated, or schema-incomplete JSON can therefore raise KeyError, AttributeError, or TypeError outside the controller's handled exception boundary. The CLI entrypoint does not catch those exception types, so the invocation can terminate without a terminal manifest, run_stopped event, or durable next-plan stop record. Repair by validating the loaded record and identity fields before dereference, converting schema failures to ContinuationVeto, and moving startup recovery/state loading under the same durable-stop handling used for later controller failures (while preserving the invalid bytes for supervisor inspection).",
+    "scheduler: REVISE: Master.campaign() calls campaign_remaining(campaign) before validating that the loaded campaign record is a mapping with the required schema and numeric fields, and before its try/finally status publication. A malformed campaign.json can raise AttributeError/KeyError/TypeError or ContinuationVeto before campaign status is atomically changed to a supervisor-recovery state; the command may exit without recording why automatic continuation stopped. Repair by validating the record shape and deadline/boot fields first, catching all schema/type failures at the campaign boundary, atomically updating campaign.json to continuation_veto or needs_supervisor_repair with the reason, and retaining the original malformed record for inspection.",
+    "evidence: R1 — scripts/run_accounting_master.py, Master.ensure_controller_tests: required-suite execution is checked only through the combined unittest summary. If discovery finds zero tests in test_accounting_proposal_current.py, the master suite can still supply a positive aggregate count and produce passed=true. Likewise, every proposal test can be skipped while executed master tests make skipped < tests. This permits startup to report current controller verification without executing either required suite independently. Repair: retain discovery and execution counts per required suite, require each suite to execute at least one non-skipped test successfully, and save structured per-suite outcomes rather than deriving admission solely from one aggregate log regex. Add regressions for an empty required suite and an entirely skipped required suite alongside a passing companion suite.",
+    "evidence: R2 — scripts/check_accounting_proposal.py, P18 render validation: rendered_pages is required to be nonempty and uniquely named, but its completeness relative to the PDF is never checked. A successful render command restricted accidentally to page 1 of a multipage manuscript can supply matching page hashes, render records and review records and pass every shown render check. P19 recursively accepts that structural result. The supplied tests verify freshness and hash binding, but do not establish page coverage. Repair: bind the PDF page count and page-number mapping to the render record, validate that the required inspection set is complete, and bind the review to that set. If selected-page inspection is intentionally permitted, declare that bounded scope explicitly and prevent it from satisfying a whole-manuscript inspection requirement. Add a multipage regression where one omitted page keeps P18 incomplete."
+  ],
+  "scope_reviews": [
+    {
+      "scope": "process-lifecycle",
+      "assumptions": [
+        "The supervisor is single-threaded on Linux; trusted workers remain in their initial process group.",
+        "Launches use normal child-reaping semantics: no SIGCHLD auto-reaping or other component reaps the child before terminate_group.",
+        "The supplied registration callback durably records ownership before returning. Its implementation and failure-state persistence are not included."
+      ],
+      "checks": [
+        "Reviewed launch, deferred interruption, group cleanup, recovered-process signalling and lock lifetime from the supplied code only.",
+        "The packet reports 218 passing tests. Test bodies were not supplied; names and counts do not establish coverage of persistent identity-read failures or accounting correctness."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "High — bounded_process can leave an unregistered running child after an ordinary identity-read failure. Immediately after Popen succeeds, it calls process_identity before on_spawn. If that lookup raises, finally calls terminate_group, whose _terminate_group immediately repeats the same lookup. A persistent OSError or PermissionError reading the child's /proc entry or boot identity therefore prevents both registration and termination. If the lookup instead repeatedly returns None, cleanup can also fail to find members and reach proc.wait(timeout=5) while the child remains alive. The parent then unwinds without a durable identity available to recover_process. This is an accidental failure after a successful fork, not the excluded uncatchable-kill window. Repair by establishing an exception-safe cleanup path for a newly created, unreaped direct child that does not depend on the metadata read that failed. Under the stated no-other-reaper assumption, retain the child as the ownership anchor, terminate its known initial group with bounded escalation, and reap only after cleanup. Persist unresolved cleanup state if termination cannot be established; never silently resume from an absent active-process record."
+      ],
+      "next_actions": [
+        "Implement the launch-failure cleanup path and explicitly enforce or document its child-reaping assumptions.",
+        "Add a regression in tests/test_accounting_master.py where Popen succeeds and identity lookup fails persistently through cleanup; verify that the child cannot remain running without an unresolved durable record. Include handled interruption during that failure path.",
+        "Rerun lifecycle verification and obtain a fresh review of the repaired code."
+      ],
+      "residuals": [
+        "Recovered ownership ambiguity correctly blocks continuation rather than signalling a potentially unrelated process.",
+        "Process enumeration assumes visibility of every relevant group member. live_group_members skips PermissionError; document the required /proc visibility and same-credential operating conditions.",
+        "Atomic persistence, scheduling, narrow command approval and frozen-evidence enforcement are supplied as interfaces rather than implementations in this lifecycle packet; they were not independently verified.",
+        "The 192-report source panel and scoped internal acceptance do not close accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Performed the requested bounded packet-only static review without tools, commands or project-history reads."
+      ],
+      "summary": "The launch exception path can lose containment when process identity reads fail persistently before durable registration.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "permissions-install",
+      "assumptions": [
+        "Master.run and Master.campaign enforce the stated fresh controller-review requirement before execution; their implementations are not supplied.",
+        "The supervisor retains its acquired writer lock while internal children validate their inherited descriptor, as specified by the supplied interface.",
+        "Existing authorization records were validly issued under the stated upfront approval. This packet does not supply their validation or migration implementation.",
+        "Workers and controller are trusted, and containment has the exclusions stated in the packet."
+      ],
+      "checks": [
+        "Checked that the generated rule matches only the fixed interpreter-and-script prefix; inline match examples are correctly treated as tests rather than an action allowlist.",
+        "Traced installation interruption across prepared receipt, atomic rule publication, authorization creation and completion receipt.",
+        "Checked pending-installation bindings to candidate bytes, target path, controller hashes and original or prepared authorization.",
+        "Checked conflicting-rule preservation and atomic publication without overwriting an existing target.",
+        "Checked internal-helper admission for parent identity, one-use capability, phase, output location, inherited lock and existing results.",
+        "Checked that CLI output retains mission_complete=false and does not equate internal phase acceptance with whole-mission completion."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "No tools were used. The supplied 218-test pass and test names are reported supporting evidence; test bodies and execution results were not independently inspected.",
+        "The provided actual policy-check results omit campaign. The supplied installer code nevertheless checks every PUBLIC_ACTIONS member, including campaign.",
+        "Effective-policy checks cover the enumerated local rule files. They do not establish that runtime-managed policy will permit execution; the reviewed permission scope explicitly preserves that limitation.",
+        "The action-independent entrypoint prefix also matches private helper invocations. Their authorization depends on validate_internal, which is consistent with the stated design.",
+        "This verdict is limited to permissions and installation. It does not establish accounting correctness, acceptance of the 192-report source panel beyond its stated scope, or closure of scientific and human-acceptance gaps."
+      ],
+      "steps": [
+        "Reviewed only the supplied code, interface statements, permission contract and verification metadata.",
+        "Examined ordinary interruption, stale installation state, conflicting policy files and direct internal invocation without adding excluded threat models."
+      ],
+      "summary": "AGREE for the bounded permissions-install scope. No concrete blocking defect was identified in the supplied installation recovery, narrow prefix rule or internal-helper authorization logic.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "worker-boundary",
+      "assumptions": [
+        "This review uses only the supplied packet; no tools, files or commands were accessed.",
+        "Workers and controller are trusted, and containment covers only the initial process group and ordinary handled interruption.",
+        "Missing interface assumption: runtime_json and event are not shown to run exclusively inside an enclosing defer_shutdown context. The findings below concern their supplied implementations and visible call sites."
+      ],
+      "checks": [
+        "Traced worker admission, role validation, configuration inspection, response validation and final integrity checks.",
+        "Examined runtime-record publication against ordinary handled interruption.",
+        "Compared editable-worker phase validation with the stated requirement that worker launch enforce proposal eligibility and declared write scope.",
+        "Treated the reported 218 passing tests as supporting control-plane evidence only; test bodies were not supplied."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py: Master.runtime_json, Master.event, Master.process, Master.worker and Master.check_runtime.",
+        "scripts/accounting_master_support.py: atomic_json durably publishes bytes before returning.",
+        "docs/plans/accounting-master-program.md: ordinary interruption/resume, exact supervisor-write tracking and phase-specific write-scope requirements.",
+        "tests/test_accounting_master.py: supplied test names cover runtime mutation and interruption, but do not establish coverage of interruption between runtime publication and expected-hash update."
+      ],
+      "issues": [
+        "Runtime publication and its expected-hash update are interruptible separately. In runtime_json, atomic_json can replace the destination before runtime_expected is updated; in event, the append can complete before its expected hash is updated. An ordinary handled SIGTERM/KeyboardInterrupt in either interval leaves legitimate supervisor bytes different from the recorded expectation. The subsequent process cleanup or worker finally calls check_runtime and converts the interruption into a ContinuationVeto alleging an outside write; cleanup status publication can also fail for the same reason. Repair: defer handled shutdown across each complete check/write/expected-hash-update/check transaction, including event append, flush and fsync. Keep actual publication failures fail-closed. Add focused interruption tests at the publication-to-hash-update boundary for both methods, verifying cleanup and resumable interruption without a false integrity accusation.",
+        "Master.worker fails open for editable roles with an unknown phase ID. Both the phase_block check and the final declared-write-scope check execute only when phase['id'] is in self.phases. Consequently, worker('implement', unknown_phase, ...) or worker('repair', unknown_phase, ...) passes role validation, receives workspace-write access, and can change any inventoried file outside the globally protected controls without a phase-scope veto. This contradicts the stated worker-launch boundary and can arise from an ordinary erroneous caller; no hostile actor is needed. Repair: reject editable roles unless the phase ID is registered and passes phase_block, before writing budgets or launching queries. Explicitly allow only the required non-phase read-only roles. Add tests showing an unknown editable phase is rejected before launch and cannot bypass write-scope enforcement."
+      ],
+      "next_actions": [
+        "Make runtime publication and expected-hash bookkeeping one shutdown-deferred transaction.",
+        "Require registered, eligible phases for every editable worker invocation.",
+        "Run focused regressions and the existing controller suite, then obtain a fresh bounded review of the repaired boundary."
+      ],
+      "residuals": [
+        "Process-group cleanup internals, signal-context implementations, scheduler callers and approval-rule implementation were not included; their broader guarantees remain interface assumptions in this packet review.",
+        "The supplied source protections and acceptance interfaces preserve the distinction between 192 accepted reports, scoped internal acceptance and unresolved accounting, scientific and human-acceptance gaps.",
+        "The packet does not establish accounting correctness, substantive manuscript adequacy or human acceptance."
+      ],
+      "steps": [
+        "Reviewed the supplied worker-boundary code against its stated interfaces.",
+        "Identified two repairable boundary defects without extending the threat model."
+      ],
+      "summary": "REVISE: ordinary interruption can falsely trigger runtime-integrity vetoes, and unknown phase IDs bypass editable-worker phase and write-scope enforcement.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "state-refresh",
+      "assumptions": [
+        "All mutating entrypoints acquire the exclusive runner lock and reload persisted state before calling refresh; lock acquisition and dispatch are outside the supplied code.",
+        "The supplied protection, atomic-write, acceptance and proposal-gate interfaces hold. Their omitted implementations were not independently verified.",
+        "Workers and the controller are trusted, with the stated process-group and interruption limits."
+      ],
+      "checks": [
+        "Reviewed accepted-phase invalidation for changed evidence, changed phase contracts and changed prerequisite evidence.",
+        "Checked that the ordered dependency pass propagates stale prerequisite status before eligibility is computed.",
+        "Checked proposal-only scheduling, unchanged external-block suppression and declared-input retry fingerprints.",
+        "Checked observed checkpoint-loss rejection and canonical-state publication before derived plans.",
+        "Checked that persisted state rejects mission completion and any closure of G1–G18.",
+        "Compared supplied verification hashes with controller hashes; they match. No tests or commands were run."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py: supplied validate_state, reload_state, save and refresh implementations.",
+        "scripts/run_accounting_master.py: supplied validate_catalog, phase_block, input_fingerprint and review_dependencies implementations.",
+        "scripts/accounting_master_catalog.json: supplied proposal contracts and workflow policies.",
+        "docs/plans/accounting-master-program.md: supplied execution contract and acceptance limits.",
+        "tests/test_accounting_master.py: supplied test names and reported verification result; test bodies were not supplied."
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "The packet reports 218 passing tests. This supports the control-plane review but does not establish accounting correctness, scientific validity or human acceptance of the 192-report source panel.",
+        "Fresh plan review, actual repair execution, process cleanup, narrow command approval and frozen-evidence enforcement depend on interfaces outside this state-refresh excerpt; this verdict does not independently certify their implementations.",
+        "Derived views are published separately. Interruption can leave mixed generations until resume rebuilds them; consumers must validate generation/state bindings or refresh under the lock before using them. Consumer implementations were not supplied.",
+        "Input fingerprints intentionally cover declared retry inputs and recorded dependency evidence. Undeclared or unobservable external changes require the documented explicit retry."
+      ],
+      "steps": [
+        "Performed a packet-only static review of state validation, refresh, scheduling and their stated interfaces.",
+        "Checked ordinary interruption and stale-state behavior without extending the threat model."
+      ],
+      "summary": "AGREE for the bounded state-refresh scope. No concrete blocking defect is established by the supplied code and interfaces. Accepted evidence is revalidated, dependency invalidation propagates before scheduling, and scoped acceptance cannot close the mission or original gaps.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "scheduler",
+      "assumptions": [
+        "The supplied excerpts are complete for the controller entry and campaign/resume paths relevant to stale-state handling.",
+        "Malformed or incomplete persisted control records are within the stated stale-state review scope."
+      ],
+      "checks": [
+        "Reviewed exception boundaries around recover_process(), reload_state(), campaign_remaining(), and campaign() initialization.",
+        "Checked whether stale-state failures produce a durable stop record before the controller exits."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-controller-repair-20261005.md"
+      ],
+      "issues": [
+        "REVISE: Master.run() invokes recover_process() and reload_state() before entering its try/except/finally block. recover_process() assumes active-process.json is a mapping with nested identity keys (for example previous['pgid'], previous['pid'], previous['start_ticks']); malformed, truncated, or schema-incomplete JSON can therefore raise KeyError, AttributeError, or TypeError outside the controller's handled exception boundary. The CLI entrypoint does not catch those exception types, so the invocation can terminate without a terminal manifest, run_stopped event, or durable next-plan stop record. Repair by validating the loaded record and identity fields before dereference, converting schema failures to ContinuationVeto, and moving startup recovery/state loading under the same durable-stop handling used for later controller failures (while preserving the invalid bytes for supervisor inspection).",
+        "REVISE: Master.campaign() calls campaign_remaining(campaign) before validating that the loaded campaign record is a mapping with the required schema and numeric fields, and before its try/finally status publication. A malformed campaign.json can raise AttributeError/KeyError/TypeError or ContinuationVeto before campaign status is atomically changed to a supervisor-recovery state; the command may exit without recording why automatic continuation stopped. Repair by validating the record shape and deadline/boot fields first, catching all schema/type failures at the campaign boundary, atomically updating campaign.json to continuation_veto or needs_supervisor_repair with the reason, and retaining the original malformed record for inspection."
+      ],
+      "next_actions": [
+        "Add focused regressions for malformed active-process.json and malformed campaign.json, including verification that durable stop/recovery metadata is written and original evidence is retained.",
+        "Re-review startup exception handling after the validation and durable-status changes."
+      ],
+      "residuals": [
+        "The packet does not expose the implementations of reload_state(), process_identity(), or the persisted-state schema, so field-level validation requirements beyond the dereferences shown cannot be assessed.",
+        "No finding is made about hostile actors, deliberate detachment, or an uncatchable kill between fork and registration; those are outside the stated containment guarantee."
+      ],
+      "steps": [
+        "Harden startup recovery and campaign-state validation before allowing another resumable invocation.",
+        "Run the targeted stale-state and interruption tests, then confirm terminal manifests and next-plan records remain honest."
+      ],
+      "summary": "The scheduler has two startup paths where malformed persisted state can escape the controller's handled failure boundary and leave no durable recovery decision. This weakens honest stale-state handling and requires repair.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "phase-plan-repair",
+      "assumptions": [
+        "The stated interfaces for locking, process cleanup, protection, role-specific verdict validation and scheduling hold; their complete implementations are outside this packet.",
+        "The catalog restricts reviewed-scope continuation to the intended P15 policy.",
+        "Workers remain trusted and do not detach, as specified."
+      ],
+      "checks": [
+        "Traced initial planning, rejected-plan correction, editable repair, verification and result-review transitions.",
+        "Checked that failed criteria, zero tests, PARTIAL responses and unavailable reviews cannot directly produce phase acceptance.",
+        "Traced pending-review invalidation against phase contracts, dependencies, present evidence, absent evidence and deletion obligations.",
+        "Checked budget deferral, bounded retries, scoped continuation and preservation of actionable repair findings."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "The packet reports 218 passing tests and supplies test names, but not test bodies or execution output; their assertions were not independently checked.",
+        "Complete catalog validation, scheduler persistence, process containment and reusable command approval implementations are not supplied. This verdict covers the provided phase-plan-repair code under the stated interfaces.",
+        "Acceptance of scoped internal work and checks of the 192-report source panel do not establish accounting correctness, scientific validity, mission completion or human acceptance."
+      ],
+      "steps": [
+        "Performed a packet-only static review without tools, commands, file access or project-history review."
+      ],
+      "summary": "No concrete blocking defect found in the supplied phase-plan-repair scope. Repairs invoke editable work and repeat verification and review; ordinary repairs receive fresh reviewed plans, and checked partial continuation cannot itself accept a phase.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "evidence",
+      "assumptions": [
+        "This review uses only the supplied packet; no tools, files or project history were consulted.",
+        "Workers and controller are trusted. Deliberate detachment, hostile same-user activity and uncatchable termination during registration are outside scope.",
+        "The omitted process wrapper must enforce deadlines, cleanup and protection checks as stated in the interfaces. Test names alone do not independently establish those implementations."
+      ],
+      "checks": [
+        "Inspected protection, evidence hashing, controller-test admission, change attribution and proposal-readiness code.",
+        "Inspected deterministic built-in validation, preservation, recovery and the proposal checker with its supplied current tests.",
+        "The supplied verification reports 218 passing tests with matching supplied controller hashes; this is reported control-plane evidence, not independently executed verification or accounting correctness.",
+        "Confirmed that proposal readiness retains human_acceptance=pending and implementation_enabled=false, and that source operations explicitly preserve mission limitations."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "scripts/check_accounting_proposal.py",
+        "tests/test_accounting_proposal_current.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "R1 — scripts/run_accounting_master.py, Master.ensure_controller_tests: required-suite execution is checked only through the combined unittest summary. If discovery finds zero tests in test_accounting_proposal_current.py, the master suite can still supply a positive aggregate count and produce passed=true. Likewise, every proposal test can be skipped while executed master tests make skipped < tests. This permits startup to report current controller verification without executing either required suite independently. Repair: retain discovery and execution counts per required suite, require each suite to execute at least one non-skipped test successfully, and save structured per-suite outcomes rather than deriving admission solely from one aggregate log regex. Add regressions for an empty required suite and an entirely skipped required suite alongside a passing companion suite.",
+        "R2 — scripts/check_accounting_proposal.py, P18 render validation: rendered_pages is required to be nonempty and uniquely named, but its completeness relative to the PDF is never checked. A successful render command restricted accidentally to page 1 of a multipage manuscript can supply matching page hashes, render records and review records and pass every shown render check. P19 recursively accepts that structural result. The supplied tests verify freshness and hash binding, but do not establish page coverage. Repair: bind the PDF page count and page-number mapping to the render record, validate that the required inspection set is complete, and bind the review to that set. If selected-page inspection is intentionally permitted, declare that bounded scope explicitly and prevent it from satisfying a whole-manuscript inspection requirement. Add a multipage regression where one omitted page keeps P18 incomplete."
+      ],
+      "next_actions": [
+        "Require successful non-skipped execution separately for both startup suites.",
+        "Define and enforce the P18 page-coverage contract, then add the focused regressions described above.",
+        "Rerun the current suites and obtain a fresh controller review after repair."
+      ],
+      "residuals": [
+        "The exact intended P18 inspection coverage is a missing interface assumption: the packet specifies manuscript inspection but supplies no all-pages or selected-pages policy.",
+        "Lifecycle enforcement, locking, approval-rule publication and repair scheduling are principally supplied as interface statements and test names; their implementations are not fully present in this evidence packet.",
+        "The source-register count is checked against the coverage manifest rather than independently against 192. This relies on frozen coverage provenance preserving the accepted panel definition.",
+        "Passing structural checks and internal reviews cannot close the remaining accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Performed a static, packet-only review of the assigned evidence scope.",
+        "Separated concrete acceptance gaps from omitted-interface assumptions and nonblocking limitations."
+      ],
+      "summary": "REVISE: startup verification can pass without executing a required suite, and P18 can accept incomplete rendered-page coverage.",
+      "verdict": "REVISE"
+    }
+  ],
+  "controller_hashes": {
+    "scripts/run_accounting_master.py": "42053ee1a403d78d83ca933d639d4134b7fb719f077ada082455ca2775393dfc",
+    "scripts/accounting_master_support.py": "04f77663b36eca5b3c9abbc0714fff7666c81308d795af96ee0a3d755d5a0330",
+    "scripts/accounting_master_catalog.json": "2ec65623fe2b048c01f37599c3193f99a42b29767112cfe13da136964b793e1c",
+    "scripts/accounting_master_response.schema.json": "4b492e3495e6a64bf8e74d0798362b3c52073aef182c06dd9a06a658184f1269",
+    "tests/test_accounting_master.py": "07c43810452a6c5a4bbbfc44e746e16913bc5d6ffcff08a057888f9f528205fc",
+    "docs/plans/accounting-master-program.md": "42bc32d94001e84b5cefdc4004cbc6f08077cdc0d01dc2ee89fcb4be272101e9",
+    "scripts/check_accounting_proposal.py": "4087aa778b940977639eeb52f8249546b57221b20d4537b03703f419139a320a",
+    "tests/test_accounting_proposal.py": "07b41c28c10740767de5d01f9fb4c6082589074ec842069106aa73a7c7224fcd",
+    "docs/plans/accounting-p15-execution-repair-20261004.md": "d389d0e38822cea3a822545c3af8fb7b7db0b87e4a7a2be0b176e07633f3ca69",
+    "scripts/accounting_worker_clock.py": "6d23817fcc160afd9245172d0cf8e65425f097694afa2300fe1fc54d9253ac61",
+    "docs/plans/accounting-worker-timing-repair-20261004.md": "68458dd071fa7d77656df5a09d2170a0b2ca4ac849bb54b3cb6804de184d9763",
+    "docs/plans/accounting-master-campaign-20261005.md": "5a74aba76821e8a660f4c394916a06ca3183f41a5d453d93c462561da7d741b2",
+    "tests/test_accounting_proposal_current.py": "3ed4678eb7b626e4d6d7f8ccfc4670950d610c3b6302c9a0a359ffdb62288c46",
+    "docs/plans/accounting-proposal-evidence-supplement-20261005.md": "472e57909ccf489d3e9ff88b112762187015e0771094d1ed1e87b9fe8e7b90ad",
+    "docs/plans/accounting-master-controller-repair-20261005.md": "dabfe0e5f7f12a3a3f40d9c26e6ce25b9f56d484aaf6dde5f14b68f4cd19cb7e"
+  },
+  "reviewed_at": "2026-10-05T09:09:00.223709+00:00"
+}

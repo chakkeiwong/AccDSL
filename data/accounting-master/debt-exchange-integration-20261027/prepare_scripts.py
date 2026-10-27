@@ -1,0 +1,21 @@
+from pathlib import Path
+H=Path(__file__).resolve().parent;assert not (H/'integrate.py').exists()
+s=(H.parent/'prior-equity-integration-20261027/integrate.py').read_text()
+def rep(a,b):
+    global s
+    assert a in s,a;s=s.replace(a,b)
+rep("S=R/'docs/design/proposal/manuscript-upstream-carry-v535-20261027'","S=R/'docs/design/proposal/manuscript-prior-equity-v536-20261027'")
+rep("T=R/'docs/design/proposal/manuscript-prior-equity-v536-20261027'","T=R/'docs/design/proposal/manuscript-debt-exchange-v537-20261027'")
+rep('bff99bcae8c29268fd29497c4b5cbb2de5d1bd528bd4b4c20fbb3ac783e69fb8','221a556f22a7fcb845487a096770d8abac73775b712dc598547bfa9d83fd3920')
+rep('9c3ecdc06aa94a5772688e0ad57dfe1d86bfb70f356c579885ae30b55ef4f56d','50dc57a63853c78d5b5580057958b1b1cc423e93805c580a156038a5822a7db0')
+rep('Version 5.36','__NEW__');rep('Version 5.35','Version 5.36');rep('__NEW__','Version 5.37')
+rep("startswith('5.35;')","startswith('5.36;')")
+rep('prior-equity.tex','debt-exchange.tex');rep('input{simulation/prior-equity}','input{simulation/debt-exchange}')
+rep('aasb128prior2025','aasbint19exchange2020')
+rep("['acquisition-prior-interest-20261027','acquisition-prior-interest-scope-20261027','acquisition-prior-worksheet-20261027']", "['acquisition-debt-relationship-20261027','debtor-conversion-worksheet-20261027','creditor-conversion-worksheet-20261027']")
+rep('accounting-prior-equity-integration-20261027.md','accounting-debt-exchange-integration-20261027.md')
+rep('An investment already held before control','One debt exchange, two sets of accounts')
+rep('That distinction determines the next extension of the financing example.','to preserve that separation through the control-changing exchange.')
+rep('An investor may already own shares when it obtains control of a business.','Suppose a company extinguishes debt of 100 by issuing its own shares, valued')
+rep("['significant influence','joint control','noncash','remeasurement','FVOCI','NCI','120']", "['creditor','debtor','impairment','noncash','allowance','transaction price','120']")
+(H/'integrate.py').write_text(s);print('Created new integration writer.')

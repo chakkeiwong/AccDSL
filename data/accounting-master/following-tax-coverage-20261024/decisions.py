@@ -1,0 +1,13 @@
+EVIDENCE={'tax':'following-period-tax-20261024','manuscript':'following-tax-integration-20261024'}
+UPDATES={}
+def add(ids,advance,residual,next_action):
+    for key in ids.split():UPDATES[key]={'evidence':['tax','manuscript'],'advance':advance,'residual':residual,'next_action':next_action,'full_requirement_closed':False,'acceptance':'not_promoted'}
+add('MC05','First current assessment binds the actual carried opening and explicit exclusive interval.','Later assessment, deferred renewal and repeated carry remain incomplete.','Preserve assessed timing in the explicit vintage continuation caller.')
+add('MC11 MC13 I05','Two tax vintages preserve carried settlements and distinguish new assessment from prior liability.','General multiyear state interface and later replacement remain absent.','Keep each vintage and aggregate payable reconciled after continuation.')
+add('MC16 G4 P17-04.10','New expense C and total payable P0-S+C reconcile under an explicit hypothetical tax model.','Actual law, new-period deferred recognition and general tax allocation remain unadmitted.','Require explicit allocation of each later payment; never infer FIFO.')
+add('MC24 G2','First new-period assessment consumes the full assessed carry and returns a complete two-vintage ledger.','General authoring and repeated annual execution remain incomplete.','Specify explicit allocated-payment and ordinary-event continuation.')
+add('MC26','390 checks across 31 cases,13 focused and19 regression methods validate first assessment and carried-payment identity.','Synthetic checks do not establish whole-company or accounting admission.','Independently check vintage conservation, shared cash and successful prefixes.')
+add('MC28','Paid,part-paid and unpaid opening tax each yield new expense5 and profit-15; aggregate liabilities differ correctly.','Selected hypothetical company book is not a complete historical company.','Continue actual state without double expense or duplicated carried settlements.')
+add('MC32','Version3.87 preserves174 sources,285 prior displays and739 citations;pages1,8,99,440–443 inspected.','Dense navigation and whole-document/domain/human acceptance remain open.','Preserve the predecessor while integrating subsequent checked methods.')
+add('MC33 MC34 MC35','The post-carry expense identity is repaired; full residuals and all prior coverage remain.','No whole phase closes;S6 held,S7 deferred.','Continue tax-state and source-completeness repairs internally.')
+add('P17-04.11','The actual carried book supports its first following-period current assessment with separate liability vintages.','Later continuation,reassessment,deferred recognition and repeated carry remain open.','Bind explicit vintage settlements before later annual chaining.')

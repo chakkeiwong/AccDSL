@@ -1,0 +1,45 @@
+"""Create one guarded advancement from the current live predecessor."""
+from pathlib import Path
+H=Path(__file__).resolve().parent
+assert not (H/'advance.py').exists()
+s=(H.parent/'upstream-carry-integration-20261027/advance.py').read_text()
+def rep(a,b):
+    global s
+    assert a in s,a
+    s=s.replace(a,b)
+# Tokens with version/path context only: never replace bare numeric substrings.
+rep('5.35','__NEW_VERSION__');rep('5.34','5.35');rep('__NEW_VERSION__','5.36')
+rep('gap-upstream-carry-integration-refresh-20261027','gap-prior-equity-integration-refresh-20261027')
+rep('gap-upstream-carry-refresh-20261027','gap-prior-worksheet-refresh-20261027')
+rep('accounting-prior-interest-acquisition-20261027.md','accounting-debt-conversion-relationship-20261027.md')
+rep('accounting-upstream-carry-integration-20261027.md','accounting-prior-equity-integration-20261027.md')
+rep('upstream-carry-integration-20261027/result.md','prior-equity-integration-20261027/result.md')
+rep("v['checks']==701","v['checks']==693")
+rep('701 checks preserve 263 predecessor sources and 157 evidence files','693 checks preserve 264 predecessor sources and 146 evidence files')
+rep('701 document checks preserve 263','693 document checks preserve 264')
+rep('predecessor sources and 157 evidence files','predecessor sources and 146 evidence files')
+rep("'5.35;801 pages;not_ready'","'5.35;802 pages;not_ready'")
+rep("'5.36;802 pages;not_ready'","'5.36;804 pages;not_ready'")
+rep('**5.36**, 802 main pages','**5.36**, 804 main pages')
+rep('**237 total / 216 body pages**','**239 total / 218 body pages**')
+rep('cross_interface_challenges=77,successor_deltas=79','cross_interface_challenges=80,successor_deltas=83')
+rep('Version 5.35, 801 pages','Version 5.35, 802 pages')
+rep('Version 5.36, 802 pages','Version 5.36, 804 pages')
+rep("('**236 pages**','**237 pages**')","('**237 pages**','**239 pages**')")
+rep("('**215 body pages**','**216 body pages**')","('**216 body pages**','**218 body pages**')")
+rep('intragroup-upstream-integration-20261027/result.md','upstream-carry-integration-20261027/result.md')
+rep('upstream retained profit,NCI and later margin/tax release','prior-equity presentation,relationship scope and complete worksheet')
+rep('Upstream retained profit,NCI and later margin/tax release','Prior-equity presentation,relationship scope and complete worksheet')
+rep('upstream opening and NCI carry','prior-equity accounting and relationship scope')
+rep('Upstream opening and NCI carry','Prior-equity accounting and relationship scope')
+rep('Protected upstream opening/NCI carry manuscript integration','Protected prior-equity manuscript integration')
+rep('source-qualified prior-interest acquisition','source-qualified debt-conversion relationship analysis')
+rep('Next is prior-interest acquisition','Next is debt-conversion relationship analysis')
+rep('inspect prior-equity and separate-transaction authority,then specify and compare prior interests/debt conversion,loss/ownership and general methods','inspect debtor/creditor and original-terms scope,then specify debt conversion and pre-existing relationship separation before numerical worksheets')
+rep('Inspect and specify prior-interest acquisition and conversion boundaries','Inspect and specify debt-conversion and pre-existing relationship boundaries')
+rep('Extend prior-interest, control and measurement methods','Extend source-qualified transaction separation,control and measurement methods')
+rep('Prior-equity classification,remeasurement,OCI,tax and separate-transaction treatment are explicit dependencies of the next financial unit.','Debt conversion,debtor/creditor perspective,original terms and separate-transaction treatment are explicit dependencies of the next financial unit.')
+rep('# Downstream inventory program refresh','# Prior-equity integration program refresh')
+assert '20262027' not in s
+(H/'advance.py').write_text(s)
+print('Created new guarded advance.py; no live controls changed.')

@@ -1,0 +1,163 @@
+\section{Keep lease rights distinct within one company book}
+\label{sec:lease-shared-book}
+
+Preserving a proposal makes its calculations available for inspection. To
+reproduce them, the company model must also preserve the rights that generated
+the entries. A total lease liability and a total right-of-use asset do not tell
+us how much of either balance disappears when one right ends. Nor does a
+balanced calculation for one lease establish that the company can pay it after
+another lease has used the same cash.
+
+Consider the retained synthetic example with two rights in one lease. Right A
+has a right-of-use asset of 90 and a liability of 100; right B has an asset of
+30 and a liability of 50. Amounts are exact USD quantities in this example.
+The supplied findings support tracing the amounts to their individual rights.
+Terminating B therefore removes its asset of 30 and liability of 50, giving a
+gain of 20. Allocating the total asset of 120 in proportion to B's share of the
+total liability would instead remove
+\[
+  120\frac{50}{100+50}=40,
+  \qquad 50-40=10.
+\]
+That gain of 10 is wrong for the stated traced-right inputs. The two rights
+have different asset-to-liability ratios. Their totals conceal that difference,
+so the simulator retains each right's amounts through termination and
+remeasurement.
+
+This example uses the inspected \path{CorporateResiduals/1} methods and their
+historical synthetic source scope. The owner remains
+\path{Synthetic-heterogeneous-rights}, with the Legal book, base branch, USD
+currency and \path{historical_EU_IFRS_conditional} basis. The permitted execution
+window begins on 1 January 2024 and ends immediately before 1 January 2026.
+Complete opening balances, lease membership and method findings are supplied
+premises. They are not inferred from an actual issuer's reports or evidence of
+current accounting compliance.
+
+\subsection{Follow the rights through the complete lifecycle}
+
+Both opening rights have a supplied annual rate of 10 percent. On 1 January
+2024, the example terminates B and replaces A's payment schedule with one
+payment of 121 at the annual period end. The original method discounts that
+payment for one year. For A, the liability rises from 100 to 110, and the
+remeasurement adds the same 10 to its asset:
+\[
+  L_A^{(1)}=\frac{121}{1.1}=110,
+  \qquad R_A^{(1)}=90+(110-100)=100.
+\]
+Here $L_A$ is A's positive liability amount and $R_A$ its right-of-use asset;
+the superscript identifies the completed step. B is now zero. Combining B's
+termination with A's remeasurement reduces the total asset by 20 and the
+positive liability by 40. With debit-positive signed accounts, the journal is
+therefore $\Delta\mathrm{rou}=-20$,
+$\Delta\mathrm{lease\_liability}=+40$ and
+$\Delta\mathrm{other\_gains}=-20$. The entries sum to zero; the credit to
+gains records the 20 profit.
+
+A second supplied modification occurs on the same date. It removes a further
+10 of A's asset and 11 of its liability, producing a gain of 1. The remaining
+amounts before remeasurement are asset 90 and liability 99. Replacing the
+remaining annual payment with 99 gives:
+\[
+  L_A^{(2)}=\frac{99}{1.1}=90,
+  \qquad R_A^{(2)}=(100-10)+(90-(110-11))=81.
+\]
+The remeasurement reduces the remaining liability by 9 and makes the same
+reduction to the asset. Across this second step, the total asset falls by 19,
+the positive liability falls by 20, and the additional gain is 1. Tracing the
+removed amounts and then remeasuring the remainder explains all three changes.
+
+On 1 January 2025, the supplied findings confirm one elapsed year with no
+intervening accrual or modification. The payment of 99 comprises interest of
+$90\times0.1=9$ and principal of $99-9=90$. Cash falls by 99, finance expense
+increases by 9, and the signed liability increases by 90 to zero. The retained
+cash-flow policy assigns 9 to operating outflow and 90 to financing outflow.
+Finally, a supplied systematic depreciation amount of 81 removes the remaining
+asset and records expense of 81. This depreciation amount is an input supported
+by the example's finding; the wrapper does not infer a useful life.
+
+With opening cash 200, closing cash is $200-99=101$. Both lease balances are
+zero, and cumulative pretax profit from these four events is
+\[
+  \Pi=20+1-9-81=-69.
+\]
+The gains, interest and depreciation explain the profit independently of the
+cash payment. This is a complete lifecycle for the supplied finite example;
+it does not supply an annual tax close or a complete financial report.
+
+\subsection{Apply each lease to the same cash balance}
+
+Now instantiate a second synthetic lease with the same supplied right-level
+amounts and its own identity and premise. A company opening containing both
+leases must reconcile to assets of 240 and positive liabilities of 300. Cash
+and equity belong to that one company opening. Adding an isolated lease
+calculator's opening cash or equity would capitalize the company again each
+time a method runs.
+
+For example, opening company cash of 400 followed by one payment of 99 gives
+301. Adding the component fixture's opening cash of 200 would give 501, an
+incorrect result. The shared-book proposal instead applies only the original
+journal deltas. It updates the selected lease's rights, preserves the other
+lease's memory, and leaves unrelated company accounts unchanged. Right A in
+the first lease and right A in the second lease are distinct: their identities
+are the pairs of lease identifier and local right identifier.
+
+Funding must be checked in event order. Under the explicitly supplied
+\path{no_overdraft} policy, company cash of 300 funds both payments of 99 and
+leaves 102. Cash of 150 funds the first payment and leaves 51. The second
+payment then fails: its liability remains 90, while the first lease's liability
+remains settled. The successful earlier events survive; the failed event adds
+no journal, cash movement or after-state. This is a funding failure under the
+company premise. The original component calculator's ability to calculate a
+balanced entry ending in negative cash does not provide that funding policy.
+
+\subsection{Bind proposals to complete state and original methods}
+
+The \path{SharedLeaseBook/1} record contains context, original source-scope
+hash, execution period, current date, the full original account registry, all
+lease components, collection-completeness and instantiation premises, funding
+policy, prior event identities, gross cash movements and the conditional-state
+flag. Every right retains its asset, liability, rate and last measurement date.
+Canonical rational strings preserve exact amounts. Before and after each event,
+the signed balances sum to zero, the ROU account equals all named rights'
+assets, and the negative lease-liability account equals all their liabilities.
+Unknown membership cannot establish those equalities merely because a supplied
+subset balances.
+
+\path{LeaseBookEvent/1} binds a new event identity, lease identity, date, source
+scope and one of the original \path{lease.reduce}, \path{lease.pay} or
+\path{lease.depreciate} methods. Parameters must satisfy that method's closed
+schema and required findings. Dates are nondecreasing within the execution
+window; a selected right's measurement date cannot lie after the event.
+Payment retains the original exact annual-anniversary requirement. A missing
+required date does not create a dated prefix, and no leap-day convention is
+silently supplied.
+
+The permitted account changes are explicit. Reduction affects ROU, lease
+liability and other gains. Payment affects cash, finance expense and lease
+liability. Depreciation affects ROU and depreciation expense. The wrapper checks
+these effects, reconciles the complete rights collection and enforces the
+company's cash policy. Unknown supported inputs remain unresolved; malformed
+records, false findings and unsupported schedules retain their distinct original
+refusal categories. No invented loan or balancing entry repairs a refusal.
+
+A \path{LeaseBookProposal/1} binds the complete before-state, event and original
+method hashes to the hypothetical after-state, journal and gross cash effects.
+Applying it recomputes the original method and compares the entire proposal.
+A forged cash increase offset by equity can preserve balance while failing
+this comparison. Context, source, period, unrelated accounts and nonselected
+leases must remain unchanged. The result remains hypothetical:
+\path{committed}, \path{source_admission}, \path{accounting_admission} and
+\path{method_eligible} are false. Application here does not publish a database
+transaction; an evidence-archive receipt preserves bytes without replacing
+financial recomputation.
+
+The original-scope audit and shared-book reference, including complete input
+and output examples, are retained under \path{data/accounting-master/}:
+\begin{quote}\small
+\path{lease-module-composition-audit-20261024-r2}\\
+\path{lease-shared-book-20261024}
+\end{quote}
+The checked composition preserves heterogeneous rights and one cash balance
+for these methods. General lease valuation, FX, tax and report integration,
+arbitrary module imports, and reconstruction of actual contract rights remain
+separate design dependencies.

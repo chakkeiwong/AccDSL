@@ -1,0 +1,39 @@
+{
+  "assumptions": [
+    "The supplied interfaces are authoritative for omitted helpers; test names describe intended coverage but do not establish their assertions.",
+    "approve_phase_plan may return None after a blocked or failed plan review, as its callers explicitly permit.",
+    "Workers are trusted and remain in their initial process group. Deliberate detachment and uncatchable termination during registration are outside this review."
+  ],
+  "checks": [
+    "Inspected phase selection, repair-loop exits, interruption handling, dependency bindings and proposal readiness in the supplied code.",
+    "Checked that proposal readiness keeps implementation disabled and human acceptance pending.",
+    "Treated the reported 141 passing tests as supplied control-plane evidence only; no tools or tests were run."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "scripts/accounting_master_catalog.json",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "Unresolved prohibited deletions can escape the continuation veto through an early repair exit. In execute_phase, outstanding_deletions raises MasterError, which is caught and followed by approve_phase_plan. If that call returns None, execute_phase returns before reaching its final outstanding_deletions check. Master.run can then schedule an independent eligible phase while preserved project files remain deleted. The protection interface covers frozen evidence and controls, not every editable file tracked by outstanding_deletions. Repair: enforce the outstanding-deletion invariant whenever a phase yields back to the scheduler, including failed/blocked replanning and other early returns. Preserve the deletion obligations and stop further phase execution until restoration; allow the current bounded repair path to attempt restoration first."
+  ],
+  "next_actions": [
+    "Add a scheduler-boundary check that raises ContinuationVeto when the attempted phase retains outstanding_deletions, regardless of how execute_phase returned.",
+    "Add a regression covering a worker deletion followed by a replanning refusal or external block, with an independent phase eligible. Verify that the independent phase never launches and that deletion obligations survive resume.",
+    "Rerun the controller checks and obtain a fresh read-only review after the repair."
+  ],
+  "residuals": [
+    "The full-result BLOCKED branch and worker BLOCKED branch do not copy next_actions into the phase record, unlike the partial-review BLOCKED branch. Structured responses remain available through recovery, but the next-plan next_actions projection can omit the current unblock instructions. Persisting those actions would improve resumability.",
+    "Implementations of refresh, approve_phase_plan, process, locking and approval installation were not supplied. Their stated interface guarantees were assumed; this packet cannot independently establish narrow command approval, complete invalidation behavior or process cleanup.",
+    "The protection helpers recompute hashes for historical snapshots and retained PDFs from current bytes. The packet does not show whether previous protection expectations are durably retained and verified across invocations; that persistence assumption remains unverified.",
+    "The 192-report source panel, structural checks and internal phase acceptance do not establish accounting correctness, scientific validity or human acceptance."
+  ],
+  "steps": [
+    "Performed a bounded static review of the supplied scheduler code and interfaces.",
+    "Traced deletion failure through repair planning, early return and subsequent scheduler selection."
+  ],
+  "summary": "REVISE: a failed repair-plan review can bypass the unresolved-deletion continuation veto and allow another phase to run against damaged preserved inputs.",
+  "verdict": "REVISE"
+}

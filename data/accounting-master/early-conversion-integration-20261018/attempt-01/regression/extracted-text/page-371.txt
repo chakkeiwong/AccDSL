@@ -1,0 +1,46 @@
+APPENDIX A. PORTABLE OPERATION REFERENCE
+362
+AccountingEventBasis/v1 {
+identity: {entity_id, book_id, branch_key, business_event_id},
+event_ref, opening_ref, context_ref, branch_ref, time_ref,
+chart_ref, authority_refs, method_ref, evidence_refs,
+admission_refs, assumptions_ref, view_ref
+}
+PostingAuthorization/v1 {
+basis_ref, posting_profile_ref, method_ref, authority_refs,
+status, findings, posting_permitted, evidence_level, view_ref
+}
+AccountingCommitArguments/v1 {
+basis_ref, authorization_ref, journal_ref, delta_ref
+}
+Identity fields are nonempty ASCII names. Each singular reference is nonnull. Authority
+references identify applicable support or a specifically typed synthetic authority for an explicitly
+synthetic example. Authorization status is eligible, unresolved, ineligible or outside scope;
+posting permission is a Boolean and can be true only for eligible status under a supporting
+profile. A branch’s immutable book mode is synthetic or real, and a profile names its supported
+modes. Synthetic evidence cannot authorize a real-book posting. Journal and delta both identify
+the same basis and authorization. Their domain payloads obey the package’s pinned journal
+and state schemas. No earlier record refers forward to the final receipt.
+A.27
+Method and extension definitions
+A versioned financial method supplies the following nonempty definitions:
+MethodDefinition {
+method_id, version, event_kind,
+state_schema, event_schema, journal_schema, delta_schema,
+output_schema, required_contexts, authority_requirements,
+preconditions, algorithm, account_roles, report_mappings,
+numerical_capability, examples, unsupported_cases
+}
+ExtensionPackage {
+package_key, version, record_schemas, operation_signatures,
+supported_contexts, state_requirements, authority_refs,
+method_refs, capability_requirements, migration_refs,
+example_refs
+}
+Each precondition has an identity, typed predicate, required input/admission references and
+separate false/unknown consequences. Domain state and event fields are specified with the
+financial methods in the body. Schema names and package members resolve through immutable
+locks. An empty authority list makes no accounting-authority claim. Registering a schema does
+not establish the method’s entity, instrument, reporting-period or probabilistic applicability. The
+full machine-oriented contracts and finite exchanges accompany the proposal in the architecture
+and methods directories; their exact versions are pinned by the manuscript’s dependency index.

@@ -1,0 +1,1 @@
+Skeptical audit: complete downstream worksheets do not establish complete legal-event journals or external resale. Explicit tax assumptions remain conditional. Continue the planned discriminating realisation comparison; no global continuation veto. Preserve independent observation-map work.

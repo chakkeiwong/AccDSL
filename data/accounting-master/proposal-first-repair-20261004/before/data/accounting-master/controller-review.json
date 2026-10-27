@@ -1,0 +1,78 @@
+{
+  "verdict": "AGREE",
+  "issues": [],
+  "review_kind": "supervisor_finding_adjudication",
+  "reviewed_at": "2026-10-03T12:52:52.200658+00:00",
+  "controller_hashes": {
+    "scripts/run_accounting_master.py": "08007b37df9ad7a9ec4c1f99b6f583b542ea226912b4aeadc674027a4552d00c",
+    "scripts/accounting_master_support.py": "fe8a74227c68e47e06d9eff361de3e90c536375478c470e8b46e733fd2d3cef3",
+    "scripts/accounting_master_catalog.json": "ea1b584494721103e28f93621271ff7b7ce39568c74e85cb7fd80a3d9bb1a036",
+    "scripts/accounting_master_response.schema.json": "4b492e3495e6a64bf8e74d0798362b3c52073aef182c06dd9a06a658184f1269",
+    "tests/test_accounting_master.py": "4cfa9c58eda3a31e7da682ab8427ebbd19ac115ca5f43530708ac94ef57c9226",
+    "docs/plans/accounting-master-program.md": "2bdfb23dba3935155e904492f78258ae66bda31cc2ba10d4cb57db8b36a76e77"
+  },
+  "finding_dispositions": [
+    {
+      "id": "worker-boundary-1",
+      "status": "repaired_verified",
+      "finding": "Verification reserve can be consumed by worker startup. In Master._worker_result, editable-worker seconds is calculated as deadline - time.monotonic() - reserve before recovery preparation and two sequential subprocess.run configuration queries, each permitting 30 seconds. That stale duration is later passed to self.process, which calls self.remaining(seconds) without subtracting the reserve again. For example, with 100 seconds remaining, a 40-second reserve, and a nominal worker limit of at least 60 seconds, the worker receives a 60-second allowance. If preparation and queries consume 30 seconds, the worker can still run for 60 seconds, leaving only 10 seconds for supervisor verification. The fixed query timeouts can themselves exhaust a short remaining run budget. Repair by using an absolute editable-work cutoff of self.deadline - reserve, bounding each query by the remaining preparation/work allowance, and recalculating the worker allowance immediately before launch. Refuse launch once that cutoff is reached and refresh the reported budget to reflect actual availability. Add focused regression coverage for delayed configuration queries and an exhausted cutoff.",
+      "reason": "Implemented repair and focused fault-injection verification; see the corresponding row in docs/plans/accounting-p08-controller-repair-review-20261003.md. Final suite: 113 passing tests."
+    },
+    {
+      "id": "state-refresh-1",
+      "status": "repaired_verified",
+      "finding": "Persisted acceptance is not bound to the accepted phase contract. Master.__init__ snapshots the current controller/catalog hashes, while validate_state checks only that phase IDs match. Master.refresh reuses accepted_internal whenever recorded file hashes survive and current dependencies are accepted. Changing criteria, checker arguments, deliverables or dependencies while retaining IDs can therefore reuse acceptance earned under a different contract. The catalog hash in input_fingerprint affects blocked/deferred eligibility, not accepted phases; publishing the current catalog hash in next-plan does not repair this. Persist a canonical phase-contract digest and the prerequisite evidence identity at acceptance, compare both during refresh, and mark mismatches or missing legacy bindings stale. Add a regression where a contract changes without changing phase IDs or output bytes and verify that acceptance is invalidated.",
+      "reason": "Implemented repair and focused fault-injection verification; see the corresponding row in docs/plans/accounting-p08-controller-repair-review-20261003.md. Final suite: 113 passing tests."
+    },
+    {
+      "id": "scheduler-1",
+      "status": "repaired_verified",
+      "finding": "Terminal integrity failure is not reflected in the run outcome. In Master.run's finally block, the manifest is finalized before self.refresh(). If refresh raises ContinuationVeto, ValueError or OSError, the fallback writes next-plan.json with status='continuation_veto', but leaves outcome and the finalized manifest unchanged. run_finished and the return value can therefore report 'catalog_slices_accepted_mission_open' or another ordinary outcome while the executable plan records an integrity veto. Repair: resolve final refresh and its failure classification before publishing the terminal manifest/event; on fallback set outcome='continuation_veto', preserve the reason, and return that same outcome. Verify agreement among the manifest, next plan, event and returned outcome when final refresh fails.",
+      "reason": "Implemented repair and focused fault-injection verification; see the corresponding row in docs/plans/accounting-p08-controller-repair-review-20261003.md. Final suite: 113 passing tests."
+    },
+    {
+      "id": "scheduler-2",
+      "status": "repaired_verified",
+      "finding": "Run initialization leaves an ordinary-interruption gap in durable bookkeeping. After the run manifest is written and the run is appended to self.state['runs'], the initial self.refresh() executes outside the try/finally. A handled SIGTERM/KeyboardInterrupt or refresh error there bypasses run_stopped, finished_at, outcome and final state publication entirely. Depending on where refresh stops, the state may reference an unfinished manifest or the manifest may never become linked from saved state. This is ordinary initialization failure, not the excluded fork-registration kill window. Repair: establish terminal bookkeeping before the first fallible operation after creating the run record, and enclose initial refresh in the same guarded lifecycle as execution. Preserve an explicit interrupted/veto outcome without publishing an executable plan when initialization fails.",
+      "reason": "Implemented repair and focused fault-injection verification; see the corresponding row in docs/plans/accounting-p08-controller-repair-review-20261003.md. Final suite: 113 passing tests."
+    },
+    {
+      "id": "phase-plan-repair-1",
+      "status": "repaired_verified",
+      "finding": "High — Ordinary repairs execute under the original plan without fresh plan review. In Master.execute_phase, failed checks, result-review REVISE and caught execution errors populate packet['repair_findings'], then fall through to the next loop iteration. That iteration calls worker('repair', ...) with the original approved plan and hash. Only the partial-work branch calls approve_phase_plan again. Consequently, repair instructions can change the authorized work without a plan incorporating those findings being reviewed. Repair: route every transition to editable repair through a refreshed packet and a fresh approve_phase_plan call, persist that approval, and stop if approval is unavailable or blocked. Add regression coverage for failed checks, result-review REVISE and execution errors, asserting that reviewed replanning precedes the repair worker.",
+      "reason": "Implemented repair and focused fault-injection verification; see the corresponding row in docs/plans/accounting-p08-controller-repair-review-20261003.md. Final suite: 113 passing tests."
+    },
+    {
+      "id": "phase-plan-repair-2",
+      "status": "repaired_verified",
+      "finding": "High — A BLOCKED verdict from partial result review is ignored as a control decision. In the partial-work branch of Master.execute_phase, partial_review is stored in repair_findings, but its verdict is never inspected. With progress, execution can replan and launch another editable worker; without progress, it records needs_plan_repair instead of the external block. This differs from both plan review and full result review, which explicitly preserve BLOCKED. Repair: after evidence-integrity verification, handle partial_review['verdict'] == 'BLOCKED' by preserving its issues, residuals and next actions, marking blocked_external and returning through the normal external-block persistence path. Add coverage for a passing partial check followed by review BLOCKED, ensuring no subsequent editable worker starts.",
+      "reason": "Implemented repair and focused fault-injection verification; see the corresponding row in docs/plans/accounting-p08-controller-repair-review-20261003.md. Final suite: 113 passing tests."
+    },
+    {
+      "id": "evidence-1",
+      "status": "repaired_verified",
+      "finding": "Preservation and deletion detection silently omit editable files. In scripts/accounting_master_support.py, editable_files inventories only selected directories and suffixes; for example, source files ending in .yaml or .sql under src are omitted, as are root-level configuration files. preserve_editable, changes_since and contributed_changes all inherit this omission. An ordinary worker edit or deletion of such a file therefore has no preserved original and no reported delta or deletion obligation. The supplied workspace-write interface does not enforce this inventory boundary. Repair by inventorying every file within the authorised editable scope, with explicit exclusions for generated/supervisor/frozen material, or enforce an equally narrow write scope and detect writes outside it. Verify preservation and deletion reporting for a previously omitted source/configuration file.",
+      "reason": "Implemented repair and focused fault-injection verification; see the corresponding row in docs/plans/accounting-p08-controller-repair-review-20261003.md. Final suite: 113 passing tests."
+    },
+    {
+      "id": "evidence-2",
+      "status": "repaired_verified",
+      "finding": "Recovery can abort on the malformed response it is supposed to recover from. In scripts/accounting_master_support.py, phase_recovery selects recent structured records and calls load_json(path) without exception handling. A malformed implement/repair response can remain after an ordinary worker failure; on resume it is selected as work_response and raises ValueError. Valid JSON with the wrong top-level shape also fails at value.get. The continuation-record branch already handles invalid records, but recent_records does not. Repair by retaining the record path, recording a bounded invalid-record diagnostic, and continuing recovery with an explicit recheck/replan obligation; do not treat that record as acceptance evidence. Cover truncated JSON and structurally invalid JSON left by a failed attempt.",
+      "reason": "Implemented repair and focused fault-injection verification; see the corresponding row in docs/plans/accounting-p08-controller-repair-review-20261003.md. Final suite: 113 passing tests."
+    },
+    {
+      "id": "partial-replan-internal-helper-state",
+      "status": "repaired_verified",
+      "origin": "runtime supervising agent",
+      "reason": "Persist active execution state before every attempt; real helper integration and stop-deferral tests pass. See supplemental review note and controller-tests-r4.log."
+    }
+  ],
+  "review_evidence_hashes": {
+    "docs/plans/accounting-p08-controller-repair-review-20261003.md": "071261553e893c99351bb7a4589d9578e3331c864e41388d30c279b825205ed1",
+    "docs/plans/accounting-p08-execution-repair-20261003.md": "79e878fb6d90a1585fef2e33b8aeca4052128b981fde5516c232cba56e9e68d4",
+    "data/accounting-master/p08-execution-repair-20261003/independent-review-r1.json": "4d11dcfbe02a92df2829d586398519a22206e1015e85bb276a6ceb234d9cfd94",
+    "data/accounting-master/p08-execution-repair-20261003/controller-tests-r4.log": "e6d1421fdcb653460015707f27a3afa419585797c66fc2141a64b011505b4560",
+    "data/accounting-master/p08-execution-repair-20261003/acceptance-binding-migration.json": "2fa5330228600a2f7ff47efaf6344c104d47e85dba8e30b29512ef1b36dffb3f"
+  },
+  "scope": "Eight independent findings and one runtime supervisor finding repaired; 115 controller tests including actual internal helper integration passed."
+}

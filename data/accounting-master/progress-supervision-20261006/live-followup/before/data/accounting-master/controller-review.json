@@ -1,0 +1,284 @@
+{
+  "verdict": "AGREE",
+  "issues": [],
+  "review_kind": "supervisor_finding_adjudication",
+  "reviewed_at": "2026-10-05T18:25:16.787143+00:00",
+  "controller_hashes": {
+    "scripts/run_accounting_master.py": "9269d40975eff86d07883136cff1060426909f2b83b59d13e2e8330ec093cc36",
+    "scripts/accounting_master_support.py": "2e3ca2fe3840ed8515297e1f9318302aa207ba3992a9effb8efc4f69bf350da0",
+    "scripts/accounting_master_catalog.json": "2ec65623fe2b048c01f37599c3193f99a42b29767112cfe13da136964b793e1c",
+    "scripts/accounting_master_response.schema.json": "4b492e3495e6a64bf8e74d0798362b3c52073aef182c06dd9a06a658184f1269",
+    "tests/test_accounting_master.py": "b575006fca17d197f894cd75a9ba0ffaa9d88aca47f71507f58f9f485d902f97",
+    "docs/plans/accounting-master-program.md": "105de2629e0ccca17b398b2367d2a16a28b06e12fd75ce05a0fe4249e91128e9",
+    "scripts/check_accounting_proposal.py": "06d61c9bb7f630f33ccef4cc272efbc5cbdd13d4e1557c69c755d7f2f10bae63",
+    "tests/test_accounting_proposal.py": "07b41c28c10740767de5d01f9fb4c6082589074ec842069106aa73a7c7224fcd",
+    "docs/plans/accounting-p15-execution-repair-20261004.md": "d389d0e38822cea3a822545c3af8fb7b7db0b87e4a7a2be0b176e07633f3ca69",
+    "scripts/accounting_worker_clock.py": "53461d8cf63211f212e86b0034360811141f891abaa9458d00f0194f16aa625d",
+    "scripts/accounting_worker_supervision.py": "ce94506ed8a3b09e7c5d8bcfdcfca9e130366e874bb6a49bb2026a4439493be3",
+    "docs/plans/accounting-progress-supervision-20261006.md": "9c5fa8fa6a796fd68602775c2a683702f876efbaed54f3dc548d1b05d2319b3c",
+    "docs/plans/accounting-worker-timing-repair-20261004.md": "68458dd071fa7d77656df5a09d2170a0b2ca4ac849bb54b3cb6804de184d9763",
+    "docs/plans/accounting-master-campaign-20261005.md": "5a74aba76821e8a660f4c394916a06ca3183f41a5d453d93c462561da7d741b2",
+    "tests/test_accounting_proposal_current.py": "f5119a66a0569e57a2168eafd65d51788a1272ea0b5fd77df6cb28116815b20a",
+    "docs/plans/accounting-proposal-evidence-supplement-20261005.md": "2ad9ca9d7f29cf601bb81cbfa253e82e53a4d5696031c2819e65fc3824b5f673",
+    "docs/plans/accounting-master-controller-repair-20261005.md": "98d8588fb14e136993eae0570483169e81d4c2a99191dbcfb91a154e170ecf9c"
+  },
+  "finding_dispositions": [
+    {
+      "id": "R1-1",
+      "finding": "process-lifecycle: bounded_process launches before checking whether its absolute cutoff has already passed or stopped() already returns true. It calculates cutoff, writes the prompt, opens files and executes Popen; only the subsequent wait loop evaluates those conditions. Consequently, a deadline or stop request arriving during preparation can still start an editable worker, which can change files before termination. Returning timeout or stop_requested afterward does not undo those effects. This conflicts with the reviewed requirement that insufficient budget and observed stop requests prevent worker launch. Repair: recheck the absolute cutoff and stop callback immediately before Popen, after preparation, and return an explicit not-launched outcome without invoking on_spawn when either condition applies. Ensure callers preserve that outcome without treating it as an executed retry. Keep the existing post-launch checks for events arriving after the launch decision.",
+      "status": "repaired_verified",
+      "reason": "Final pre-Popen stop/deadline check returns not-launched, with retry refund; late-cutoff/refund regressions pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R1-2",
+      "finding": "permissions-install: The public CLI permits execution budgets beyond the reviewed ordinary-run authorization. main sets the non-campaign maximum to 86400, so both run --max-seconds 86400 and install-and-run --max-seconds 86400 pass argument validation and reach master.run with a 24-hour budget. The installed prefix also permits these arguments. This conflicts with the reviewed two-hour invocation ceiling. Enforce a 7200-second maximum for ordinary run/install-and-run execution and retain the separate campaign total limit. Also enforce the per-invocation ceiling within campaign dispatch or Master.run, so internal callers cannot extend it. If Master.run already clamps the budget, supply that interface evidence; the CLI should still reject unsupported values explicitly.",
+      "status": "repaired_verified",
+      "reason": "MAX_RUN_SECONDS=7200 at CLI/run/campaign; invocation ceiling regressions pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R1-3",
+      "finding": "worker-boundary: P2 — Supervisor publication failures can become false worker-integrity violations. atomic_json has no finally cleanup for its temporary file. An ordinary write/fsync error, or a handled interruption raised before os.replace, can leave a file such as a packet destination plus '.<pid>.tmp'. Master.worker then sees that supervisor-created file as a new, unapproved write. For read-only roles it necessarily raises ContinuationVeto; for editable phases a temporary file in the run directory is outside the declared write scope. This misclassifies a recoverable publication/interruption failure as worker misconduct and prevents the normal review retry or resumable interruption path. Repair atomic_json with exception-safe cleanup of its own temporary file, preserving the original destination and original exception. If partially serialized content must be retained as evidence, preserve it explicitly through a supervisor-owned recovery mechanism rather than leaving an unclassified inventory entry. Do not broadly exempt arbitrary temporary files.",
+      "status": "repaired_verified",
+      "reason": "Unique temporary publication and exception-safe cleanup; serialization/fsync/replace fault tests pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R1-4",
+      "finding": "scheduler: R1 — Campaign invocation accounting is not recoverable across ordinary interruption. In Master.campaign, the pre-run write records next_invocation_seconds but no pending invocation identity or progress baseline. self.run durably records its run separately; only after it returns does campaign append the invocation and update consecutive_no_progress. A handled interruption after the run finishes but before that campaign update leaves a completed run absent from campaign accounting. Resume neither reconciles that run nor restores its no-progress contribution. For example, interrupting after a second non-progressing run but before its campaign update allows a third invocation despite the two-invocation stop rule. Repair by persisting a pending invocation identity and baseline before execution, binding the run to that identity, and reconciling unfinished campaign accounting on resume exactly once. Preserve the run's terminal outcome when deciding whether another invocation is permitted.",
+      "status": "repaired_verified",
+      "reason": "Pending invocation identity and terminal manifest reconcile exactly once; interrupted second-no-progress update test passes.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R1-5",
+      "finding": "scheduler: R2 — Campaign progress uses a baseline captured outside the runner lock and before reloading state. Master.campaign reads before_accepted and previous_runs from self.state; Master.run acquires runner.lock and reloads state afterward. An ordinary serialized run can therefore finish between campaign invocations, or after this Master instance loaded its state, without violating the runner lock. Its accepted phases are then counted as new acceptance by the campaign invocation even if that invocation made no progress. This can incorrectly reset consecutive_no_progress. Campaign also reads next-plan.json after releasing runner.lock, so the continuation decision can refer to another invocation's plan. Repair by capturing the baseline after reload under runner.lock and returning or persisting the resulting run-specific progress and next-plan decision before releasing that lock. Campaign should consume that immutable result. Alternatively, enforce and document mutual exclusion between campaign orchestration and all ordinary state-mutating entrypoints.",
+      "status": "repaired_verified",
+      "reason": "Baseline captured after locked reload and immutable run-specific result; interleaved-state/plan regression passes.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R1-6",
+      "finding": "phase-plan-repair: P2 — Bounded partial review incorrectly requires every final deliverable to exist. In execute_phase, a non-scoped PARTIAL result with a positive test count enters bounded_partial_work review even when checks report missing deliverables. However, save_pending_review unconditionally adds every phase deliverable and phase['test_file'] to names, then calls evidence_hashes, which raises on any missing file. Consequently, legitimate incomplete work never reaches its bounded result reviewer or durable pending-review checkpoint; the outer exception handler instead sends it through another editable repair cycle with only the missing-evidence error. save_continuation already recognizes missing files, so these two persistence paths impose inconsistent requirements. Repair save_pending_review to distinguish bounded-partial checkpoints from full-acceptance checkpoints: require the actual work/check/approved-plan records, hash existing declared evidence, and explicitly record absent final deliverables. Validate that recorded presence/absence on resume, invalidating and rechecking when it changes. Keep the complete-file requirement for full acceptance.",
+      "status": "repaired_verified",
+      "reason": "Bounded partial checkpoint records missing final files and invalidates presence changes; partial checkpoint regression passes.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R1-7",
+      "finding": "evidence: P1 — Preservation can silently omit unreadable directories. In scripts/accounting_master_support.py, editable_files uses os.walk without onerror, so directory enumeration failures are silently ignored. preserve_editable can therefore return a successful but incomplete backup inventory; changes_since and contributed_changes can subsequently misclassify omitted files. worker_inventory explicitly raises traversal errors, but that does not make the separate preservation traversal fail closed. Repair: give editable_files a raising onerror callback and propagate inventory failures as continuation vetoes before editable work. Add a targeted traversal-error regression verifying that incomplete preservation cannot authorize work.",
+      "status": "repaired_verified",
+      "reason": "Raising preservation traversal and continuation veto before edits; traversal fault test passes.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R1-8",
+      "finding": "evidence: P2 — Earlier proposal blockers can disappear from final readiness without a recorded resolution. In scripts/check_accounting_proposal.py, P15–P17 accept decisions with blocks_proposal=true. P19 recursively checks those stages using their original non-final rules, then applies decisions(final=True) only to its own open_decisions. An empty P19 list therefore passes even when an upstream decision remains explicitly blocking. Repair: reconcile upstream blocking decision IDs against explicit final dispositions, requiring a supported resolution or superseding decision for each blocker. Add a regression where an upstream blocker is omitted from P19 and verify that readiness fails; also cover an explicit resolution.",
+      "status": "repaired_verified",
+      "reason": "Every upstream blocking decision requires supported final disposition; omitted and superseded blocker regressions pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R1-9",
+      "finding": "evidence: P2 — Render evidence is not bound to the PDF that produced it. P18 independently hashes rendered_pages and checks only that the worker-authored rendered_pdf_sha256 equals the current PDF reference. After a rebuild, updating the PDF/build records and that scalar while retaining old page images and render-review references passes these checks. The supplied test covers a mismatched scalar and an empty page list, but not stale pages accompanying a newly pinned PDF. Repair: require a render record binding the renderer's input PDF hash to its output page hashes, and bind the render review to that record. Add a regression that rebuilds and repins the PDF while retaining the prior render record/pages; it must fail until rendering and review evidence are refreshed.",
+      "status": "repaired_verified",
+      "reason": "Render and review records bind PDF/page hashes; rebuilt-PDF and stale-review regressions pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R2-1",
+      "finding": "worker-boundary: Worker evidence can be modified without detection. Master.worker excludes the current .packet.json, .recovery.json, .schema.json and .prompt.txt from both inventories. These files are created before the actual worker launch, but Master.process guards only protected files and selected supervisor controls. Consequently, even a read-only review that accidentally rewrites or deletes its supplied packet or recovery record can return AGREE without an integrity veto. This contradicts the stated read-only byte-preservation requirement and can destroy the evidence of what the worker actually received. Repair: after preparing these inputs and immediately before launch, pin their hashes and verify them on every exit path. Keep exclusions only for files that genuinely remain supervisor-managed mutable outputs; bind those outputs separately where necessary.",
+      "status": "repaired_verified",
+      "reason": "Prepared inputs bound by hashes through successful/error exits; mutation/truncation/deletion tests pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/followup/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R2-2",
+      "finding": "worker-boundary: Configuration-query subprocesses bypass ordinary-interruption cleanup. _worker_result.config_query uses subprocess.run directly rather than the registered bounded process lifecycle. subprocess.run's timeout handles its direct child, but it does not provide the supplied controller's process-group registration and cleanup on KeyboardInterrupt. In particular, Python's Popen context manager only briefly waits after KeyboardInterrupt and can leave the query running; the enclosing worker integrity check inventories files, not this child. If handled termination raises another exception, context-manager waiting can instead exceed the declared query timeout. Read-only configuration inspection does not eliminate this lifecycle defect. Repair: run queries through an equivalent bounded, registered lifecycle with captured output and guaranteed cleanup on handled interruption, preserving the absolute worker cutoff. The precise signal path depends on the omitted catch_termination implementation.",
+      "status": "repaired_verified",
+      "reason": "Configuration queries use registered bounded lifecycle and separate stderr; SIGINT/SIGTERM cleanup and reserve tests pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/followup/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R2-3",
+      "finding": "scheduler: P2 — Stale terminal readiness can become current campaign readiness. In Master.reconcile_campaign_invocation, runner.lock protects validation of the completed manifest, but current state and proposal evidence are never revalidated. After a campaign run reports proposal_reviewed_implementation_held, a serialized ordinary invocation can invalidate proposal acceptance before reconciliation. Reconciliation still consumes the historical result and sets status='proposal_ready'; campaign then exits and returns that status. This bypasses the current-evidence check implemented for the separate cached-proposal_ready startup path. Preserve the completed invocation and its progress exactly once, but before publishing campaign readiness, reload state and validate current protection and proposal_gate under runner.lock. If current evidence fails, retain the historical success while recording needs_supervisor_repair with the current failure reason. Add a regression that interposes an ordinary invocation invalidating proposal evidence between terminal run publication and reconciliation.",
+      "status": "repaired_verified",
+      "reason": "Historical success rechecks current protection/readiness while locked; serialized invalidation regression passes.",
+      "source_review": "data/accounting-master/controller-repair-20261005/followup/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R2-4",
+      "finding": "phase-plan-repair: `Master.worker` unconditionally excludes `data/accounting-master/events.jsonl`, `data/accounting-master/active-process.json`, and `data/accounting-master/stop-request.json` from `worker_inventory` for every role. Consequently a read-only review worker can modify, truncate, or create these files without `touched` detecting the change, and an editable worker can alter controller runtime state without the integrity veto. This contradicts the stated requirement that read-only reviewers leave project bytes unchanged and weakens evidence/state protection. Repair by separating supervisor-owned runtime mutations from worker output: snapshot/hash these files before launch, permit only explicitly identified supervisor updates, and reject any worker-originated change (or move all runtime updates behind a controller-only mechanism). Add regression coverage for modification, truncation, and deletion by both read-only and editable workers.",
+      "status": "repaired_verified",
+      "reason": "Event/process mutations checked against exact supervisor writes; both-role runtime mutation tests pass. Valid new stop input always prevents acceptance.",
+      "source_review": "data/accounting-master/controller-repair-20261005/followup/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R2-5",
+      "finding": "phase-plan-repair: `Master.check_phase` returns immediately through the `check_override` branch after only stale-input checking and writing `checks.json`; it skips deliverable existence checks, `validate_artifact_contract`, checker-capture freshness/hash validation, historical-input resolution, and the final protection check. A positive override can therefore make `acceptance_ready` true and allow result review/acceptance while required artifacts or checker evidence are absent or invalid. Repair by routing override results through the same post-processing and contract checks as normal checks, or reject overrides outside an explicitly test-only mode before scheduling/acceptance.",
+      "status": "repaired_verified",
+      "reason": "Overrides require explicit isolated test-only mode; live-root/check/run rejection tests pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/followup/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R2-6",
+      "finding": "evidence: P1 — verify_builtin validates the supplied result dictionary without establishing that it equals the saved primary deliverable. In scripts/accounting_master_support.py, the deliverables loop checks only is_file(); P01 then validates records from result, never loading source-work-register.json. P00 similarly uses result for the baseline summary without loading baseline.json. Consequently, a correct returned result alongside a stale, truncated or different saved primary deliverable can receive checks.json passed=true and a deterministic PASS review. Merely hashing that deliverable later preserves the wrong bytes rather than validating them. Repair: load the required primary JSON deliverable, require exact agreement with the returned result, and perform independent validation on that loaded value. Bind the checked primary bytes into the verification evidence and verify that binding before acceptance. Add regressions that retain a valid result argument while replacing the saved primary deliverable with malformed JSON and with a different valid object; both must prevent PASS.",
+      "status": "repaired_verified",
+      "reason": "Built-in validation loads and binds primary JSON, matching returned data; malformed/different primary tests pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/followup/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R3-1",
+      "finding": "process-lifecycle: High — bounded_process can leave an unregistered running child after an ordinary identity-read failure. Immediately after Popen succeeds, it calls process_identity before on_spawn. If that lookup raises, finally calls terminate_group, whose _terminate_group immediately repeats the same lookup. A persistent OSError or PermissionError reading the child's /proc entry or boot identity therefore prevents both registration and termination. If the lookup instead repeatedly returns None, cleanup can also fail to find members and reach proc.wait(timeout=5) while the child remains alive. The parent then unwinds without a durable identity available to recover_process. This is an accidental failure after a successful fork, not the excluded uncatchable-kill window. Repair by establishing an exception-safe cleanup path for a newly created, unreaped direct child that does not depend on the metadata read that failed. Under the stated no-other-reaper assumption, retain the child as the ownership anchor, terminate its known initial group with bounded escalation, and reap only after cleanup. Persist unresolved cleanup state if termination cannot be established; never silently resume from an absent active-process record.",
+      "status": "repaired_verified",
+      "reason": "Direct unreaped-child fallback and durable unresolved cleanup; persistent metadata and cleanup-status regressions pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/final-repair/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R3-2",
+      "finding": "worker-boundary: Runtime publication and its expected-hash update are interruptible separately. In runtime_json, atomic_json can replace the destination before runtime_expected is updated; in event, the append can complete before its expected hash is updated. An ordinary handled SIGTERM/KeyboardInterrupt in either interval leaves legitimate supervisor bytes different from the recorded expectation. The subsequent process cleanup or worker finally calls check_runtime and converts the interruption into a ContinuationVeto alleging an outside write; cleanup status publication can also fail for the same reason. Repair: defer handled shutdown across each complete check/write/expected-hash-update/check transaction, including event append, flush and fsync. Keep actual publication failures fail-closed. Add focused interruption tests at the publication-to-hash-update boundary for both methods, verifying cleanup and resumable interruption without a false integrity accusation.",
+      "status": "repaired_verified",
+      "reason": "Runtime publication defers handled signals until expected hash is committed; event/JSON fsync-boundary tests pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/final-repair/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R3-3",
+      "finding": "worker-boundary: Master.worker fails open for editable roles with an unknown phase ID. Both the phase_block check and the final declared-write-scope check execute only when phase['id'] is in self.phases. Consequently, worker('implement', unknown_phase, ...) or worker('repair', unknown_phase, ...) passes role validation, receives workspace-write access, and can change any inventoried file outside the globally protected controls without a phase-scope veto. This contradicts the stated worker-launch boundary and can arise from an ordinary erroneous caller; no hostile actor is needed. Repair: reject editable roles unless the phase ID is registered and passes phase_block, before writing budgets or launching queries. Explicitly allow only the required non-phase read-only roles. Add tests showing an unknown editable phase is rejected before launch and cannot bypass write-scope enforcement.",
+      "status": "repaired_verified",
+      "reason": "Unknown editable/non-phase calls rejected before budgets and launch; unknown-phase regression passes.",
+      "source_review": "data/accounting-master/controller-repair-20261005/final-repair/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R3-4",
+      "finding": "scheduler: REVISE: Master.run() invokes recover_process() and reload_state() before entering its try/except/finally block. recover_process() assumes active-process.json is a mapping with nested identity keys (for example previous['pgid'], previous['pid'], previous['start_ticks']); malformed, truncated, or schema-incomplete JSON can therefore raise KeyError, AttributeError, or TypeError outside the controller's handled exception boundary. The CLI entrypoint does not catch those exception types, so the invocation can terminate without a terminal manifest, run_stopped event, or durable next-plan stop record. Repair by validating the loaded record and identity fields before dereference, converting schema failures to ContinuationVeto, and moving startup recovery/state loading under the same durable-stop handling used for later controller failures (while preserving the invalid bytes for supervisor inspection).",
+      "status": "repaired_verified",
+      "reason": "Malformed recovery record validated and preserved with startup-stop and terminal manifest; malformed startup regressions pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/final-repair/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R3-5",
+      "finding": "scheduler: REVISE: Master.campaign() calls campaign_remaining(campaign) before validating that the loaded campaign record is a mapping with the required schema and numeric fields, and before its try/finally status publication. A malformed campaign.json can raise AttributeError/KeyError/TypeError or ContinuationVeto before campaign status is atomically changed to a supervisor-recovery state; the command may exit without recording why automatic continuation stopped. Repair by validating the record shape and deadline/boot fields first, catching all schema/type failures at the campaign boundary, atomically updating campaign.json to continuation_veto or needs_supervisor_repair with the reason, and retaining the original malformed record for inspection.",
+      "status": "repaired_verified",
+      "reason": "Malformed campaign preserved with recovery status and no new allowance; malformed campaign regressions pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/final-repair/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R3-6",
+      "finding": "evidence: R1 — scripts/run_accounting_master.py, Master.ensure_controller_tests: required-suite execution is checked only through the combined unittest summary. If discovery finds zero tests in test_accounting_proposal_current.py, the master suite can still supply a positive aggregate count and produce passed=true. Likewise, every proposal test can be skipped while executed master tests make skipped < tests. This permits startup to report current controller verification without executing either required suite independently. Repair: retain discovery and execution counts per required suite, require each suite to execute at least one non-skipped test successfully, and save structured per-suite outcomes rather than deriving admission solely from one aggregate log regex. Add regressions for an empty required suite and an entirely skipped required suite alongside a passing companion suite.",
+      "status": "repaired_verified",
+      "reason": "Per-suite discovery/run/skip/results required; empty and fully skipped companion regressions pass.",
+      "source_review": "data/accounting-master/controller-repair-20261005/final-repair/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "R3-7",
+      "finding": "evidence: R2 — scripts/check_accounting_proposal.py, P18 render validation: rendered_pages is required to be nonempty and uniquely named, but its completeness relative to the PDF is never checked. A successful render command restricted accidentally to page 1 of a multipage manuscript can supply matching page hashes, render records and review records and pass every shown render check. P19 recursively accepts that structural result. The supplied tests verify freshness and hash binding, but do not establish page coverage. Repair: bind the PDF page count and page-number mapping to the render record, validate that the required inspection set is complete, and bind the review to that set. If selected-page inspection is intentionally permitted, declare that bounded scope explicitly and prevent it from satisfying a whole-manuscript inspection requirement. Add a multipage regression where one omitted page keeps P18 incomplete.",
+      "status": "repaired_verified",
+      "reason": "Actual PDF page count and complete render/review numbering; omitted-page regression passes.",
+      "source_review": "data/accounting-master/controller-repair-20261005/final-repair/before/data/accounting-master/controller-review.json"
+    },
+    {
+      "id": "review-focus-handoff",
+      "finding": "Resume reconstructed the packet without saved supervisor review guidance.",
+      "status": "repaired_verified",
+      "reason": "Validated focus reaches the resumed independent review only and is removed before the next plan; updated bounded-review regression and all 205 controller tests pass.",
+      "source_review": "docs/plans/accounting-p16-review-focus-20261005.md"
+    },
+    {
+      "id": "PS1",
+      "finding": "Fixed timeout lost completed subsection responses",
+      "status": "repaired_verified",
+      "reason": "Bound unchanged PARTIAL checkpoint recovery reaches fresh verification and independent bounded review; process failure retained.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS2",
+      "finding": "Activity or repeated content could reset progress",
+      "status": "repaired_verified",
+      "reason": "Timely completed command reports verify evidence, role, novelty and located read-only conclusions; log/progress-note/replay tests pass.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS3",
+      "finding": "Silent workers need a bounded intervention",
+      "status": "repaired_verified",
+      "reason": "Five-minute checkpoint request plus three-minute acknowledgement/progress grace; real child cleaned after no acknowledgement.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS4",
+      "finding": "Productive finishing needs limited extra time",
+      "status": "repaired_verified",
+      "reason": "Two-minute grants require recent new evidence and acknowledged controls, capped at five minutes and original absolute limits; real child survives ordinary window.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS5",
+      "finding": "Late acknowledgement or delayed launch could reset a deadline",
+      "status": "repaired_verified",
+      "reason": "Late report and prelaunch soft-window regressions pass; configuration and verification reserves stay bounded.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS6",
+      "finding": "Checkpoint reuse could miss new, changed or deleted files",
+      "status": "repaired_verified",
+      "reason": "Complete scoped inventory and evidence are compared at report, recovery and after checks; mismatch and wrong-plan tests pass.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS7",
+      "finding": "Progress channel could weaken worker write restrictions",
+      "status": "repaired_verified",
+      "reason": "Helper writes no files; exact supervisor runtime writes bind control/supervision/checkpoint records; mutation fault tests pass.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS8",
+      "finding": "Large snapshots could exceed tool output limits",
+      "status": "repaired_verified",
+      "reason": "Helper emits one inventory digest; supervisor recomputes and stores complete scoped hashes.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS9",
+      "finding": "Provider and operator stops could become false success",
+      "status": "repaired_verified",
+      "reason": "Operator stop wins; provider nonzero exit stays a process failure; checkpoint cannot accept full phase.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    },
+    {
+      "id": "PS10",
+      "finding": "New code and recovered responses need review/recovery navigation",
+      "status": "repaired_verified",
+      "reason": "CONTROLS and fallback code packets include supervision and checkpoint methods; structured recovery finds recovered-work responses.",
+      "source_review": "data/accounting-master/progress-supervision-20261006/review.md"
+    }
+  ],
+  "review_evidence_hashes": {
+    "data/accounting-master/controller-repair-20261005/final-repair/adjudication.json": "9fe30047cfb0dd4bf8b9122572c014d47f37e645bbcef528132611f931474817",
+    "data/accounting-master/controller-repair-20261005/final-repair/result.md": "6a887823618bec2891d76497ecff065f15f0c79636c422b207c51a4084023182",
+    "data/accounting-master/controller-repair-20261005/final-repair/preservation.json": "2531731d78b6bb9a89a93382622b69b922a9f3e46087f831e30a447d73fd7909",
+    "data/accounting-master/controller-repair-20261005/final-repair/controller-tests-final.log": "85e18ed869595491a1d96ebf7cde7b13e185f0ef9b691640bc43fcf0cdba4675",
+    "data/accounting-master/controller-repair-20261005/final-repair/proposal-tests.log": "49453cbdec2ba19b79cf5d4fe0bd11792cef8ab86f3881f7b61199b5892c4019",
+    "data/accounting-master/controller-repair-20261005/before/data/accounting-master/controller-review.json": "ef7c33792213d3c598a04b55751d3150ee7d7377328b1cf7728730e7b731d435",
+    "data/accounting-master/controller-repair-20261005/followup/before/data/accounting-master/controller-review.json": "c8b28a7fe806a865d501a05100de2509fbe20b34c80fbd9b777fad8db2ab1da8",
+    "data/accounting-master/controller-repair-20261005/final-repair/before/data/accounting-master/controller-review.json": "646e96588e04bcdde0b57dfbcb0c516ccfb106dca76680e7bc614df973fad040",
+    "docs/plans/accounting-p16-review-focus-20261005.md": "1458031f61603b4ab58748cfc081d30065f3042773085cd215fddf611f099b98",
+    "data/accounting-master/p16-review-focus-20261005/controller-tests.log": "7efc0fac5f8b5ddcc2d171e4884fab7dfd839b17b1812489f62822a2af264f39",
+    "data/accounting-master/progress-supervision-20261006/review.md": "7c6b96060e1da2c6fe1e5fae33bdacd7a6423409fcb2996e3d8f96f51902cd78",
+    "data/accounting-master/progress-supervision-20261006/baseline.json": "9cb614d522f96b1ea48e5b823aaba180cf224f0b6b6e210849466bf1ed22d5f1",
+    "data/accounting-master/progress-supervision-20261006/preservation.json": "15736aba0fa229eb80264fe6ead7314c0774af011289d90f0c00edfa02100dca",
+    "data/accounting-master/progress-supervision-20261006/result.json": "c099bb69d70481014f7dae65022a7403a99d5882b27cb133445fbd6c3070d5a9",
+    "data/accounting-master/progress-supervision-20261006/run-manifest.json": "766d8f37864b73b427530a4ebc7d9f027971045e804a0644e91afe235191c9d7",
+    "data/accounting-master/progress-supervision-20261006/allowlist-check.json": "b80434f85ba20b710b509451d49ac383701af341ad876ac754bc37926603bb8f",
+    "data/accounting-master/progress-supervision-20261006/controller-tests-reviewed.log": "c235879b8cbb63851ecffecf15abd819e0f6f528a781ec9bfba2645a1442f289",
+    "data/accounting-master/progress-supervision-20261006/proposal-tests.log": "f58a914126eb011068ea54761a9539508cd50e6a0b4ff21cd403209e3d22bd2b"
+  },
+  "previous_review": "data/accounting-master/progress-supervision-20261006/before/data/accounting-master/controller-review.json",
+  "independent_new_review": false,
+  "residuals": [
+    "Cooperative signalling cannot preempt an in-flight provider request.",
+    "Milestones are scheduling evidence; semantic acceptance remains independent."
+  ]
+}

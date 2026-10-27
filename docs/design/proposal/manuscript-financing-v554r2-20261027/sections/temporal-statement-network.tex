@@ -1,0 +1,300 @@
+\section{Balances and movements retain their different times}
+\label{sec:temporal-statement-network}
+
+A cash-flow statement connects a balance at the start of a period, movements
+during that period and a balance at its end. The three quantities have a common
+monetary unit but different time meanings. Requiring their complete measurement
+types to be identical would reject a valid stock-flow relation; deleting their
+dates would lose the reason that the relation is valid. The language therefore
+checks the roles of the quantities before solving their numerical equation.
+
+The retained annual example reports cash-flow-statement opening cash of 30,737
+at 30 September 2023, a change of \(-794\) during the following fiscal year,
+and closing cash of 29,943 at 28 September 2024. The corresponding interim
+statement reports an opening amount of 29,943, change of 356 and closing amount
+of 30,299 at 28 December 2024. These are source-bound cash-flow captions.
+They do not identify the available cash of a particular legal entity or bank
+account. Treating their opening and closing captions as one population is an
+explicit proposed interpretation in the conditional calculation.
+
+\subsection{A relation can connect different measurement types}
+
+Each temporal measurement declares a value type, a time and a named quantity.
+The value type retains issuer, reporting perimeter, reporting basis, monetary
+dimension and scale. The time is either a dated snapshot or a half-open period.
+The named quantity distinguishes, for example, the cash population reported by
+a cash-flow statement from legal-book cash available to meet a payment. The
+source mapping preserves the complete original context, including its period
+wording and measurement-kind description, alongside this explicit type.
+
+For date-only records, write the flow period as \([s,e)\), with its last
+included date immediately before \(e\). The opening snapshot is dated the day
+before \(s\), and the closing snapshot the day before \(e\). This is the
+convention used by the retained source records, not an intraday accounting rule.
+For a declared population \(q\), a stock-flow relation has the form
+\begin{equation}
+\label{eq:temporal-network-bridge}
+ B_q(e-1\text{ day})
+ =B_q(s-1\text{ day})+\sum_{j=1}^{m}a_j F_j([s,e)).
+\end{equation}
+The opening and closing measurements must name the same quantity \(q\).
+Every movement must cover the declared period, and all operands must have
+compatible monetary value types. The coefficients \(a_j\) retain the source
+sign convention. A separately proposed identity specifies why those particular
+movements account for the change in the named population.
+
+For the annual cash-flow example, \(s\) is 1 October 2023 and \(e\) is
+29 September 2024. For the interim example, they are 29 September and
+29 December 2024. Substituting the displayed amounts gives
+\begin{equation}
+\label{eq:temporal-network-cash-examples}
+ 30{,}737+(-794)=29{,}943,
+ \qquad
+ 29{,}943+356=30{,}299.
+\end{equation}
+The negative annual movement reduces the closing balance; the positive interim
+movement increases it. These equalities are checked displayed arithmetic.
+Whether the same identities hold for the underlying unrounded measurements
+requires the explicit identity, population and rounding hypotheses.
+
+The annual closing and interim opening have the same displayed value and date,
+but they remain distinct source observations. Their reporting bases differ:
+one belongs to the annual issuer report and the other to the condensed interim
+statements. The reference neither merges their identities nor imposes equality
+between their unrounded amounts merely because the displays agree.
+
+The \path{TemporalMeasurementConstraints/1} reference accepts two relation
+forms. A same-time relation requires matching value types and time declarations
+for all operands. A stock-flow relation requires the opening, movement and
+closing roles just described. Once those checks pass, it lowers the numerical
+part of equation~\eqref{eq:temporal-network-bridge} to an opening coefficient
+of \(+1\), the supplied movement coefficients and a closing coefficient of
+\(-1\). One observation identity still means one unknown throughout the system.
+The original temporal definition and the generated scalar constraints are both
+retained, so the calculation can be traced back through that lowering.
+
+This does not weaken the earlier same-context profile. It remains an error to
+add differently timed quantities through an ordinary same-time relation.
+Changing the opening date by one day, swapping opening and closing roles,
+using a movement over another period, or changing the endpoint population is
+rejected even when the numerical amounts happen to balance. Missing hypotheses
+leave a well-formed question unresolved; they do not conceal malformed types.
+
+\subsection{Construct the requested network before asking whether it fits}
+
+The larger retained description has 143 relation records. The adapter first
+classifies them by their existing meaning and context, before examining solver
+outcomes. Forty snapshot sums, 30 period sums, eight same-period comparisons,
+16 same-date endpoint comparisons and ten stock-flow bridges supply 104
+candidate equations. Their monetary units and invariant contexts match within
+each relation, and their dates fit the applicable temporal form.
+
+Three candidates depend on source concepts omitted from the interim table.
+The capital and whole-equity bridges omit the annual concept of equity issued;
+the financing-cash relation omits debt issuance. The fact that a row is absent
+does not establish a zero movement. Without a separate interpretation for those
+omissions, the adapter leaves these three relations outside its supported
+selection and preserves the original omission records. It therefore supports
+101 conditional equations in this version.
+
+The other 39 source relations also retain their distinct roles: six derived
+subtotals, 24 explanatory differences, two endpoint differences, two cash
+population comparisons and five cross-period or cross-basis comparisons.
+A derived subtotal lacks an independently observed target; an explanatory
+difference is not automatically an identity. The population and cross-basis
+comparisons require their own interpretations. Classifying these records keeps
+their evidence available without silently asserting equations that their
+source roles do not justify.
+
+Every selected relation requires named proposed hypotheses for its underlying
+identity and population interpretation. Rounding remains separately optional.
+The adapter recomputes the complete retained statement description and derives
+its coefficients and dates from that description. It accepts neither substitute
+source coefficients nor an arbitrary solver result. Original observation digests
+provide sharing across equations; equal captions, dates or displayed values do
+not merge different observations.
+
+\subsection{The PDF-only request remains unresolved on a reported dash}
+
+Selecting all 101 supported relations uses 236 distinct observations. One of
+them, the annual debt-issuance amount in the financing-cash relation, is a
+reported dash. Its source interpretation remains nonnumeric. Even with all
+proposed identity, population and rounding assumptions supplied, the requested
+system is therefore unresolved. The result identifies that observation and
+relation. It supplies no witness and does not replace the dash with zero.
+
+There is a useful, different question: are the explicitly selected relations
+whose operands have numeric displayed amounts jointly compatible? That selection
+omits the annual financing-cash relation in advance, leaving 100 equations and
+229 distinct observations. Under the proposed assumptions, this narrower system
+has an exact rational witness. Independent checks substitute the witness into
+every original source equation and separately check the signed rounding bounds.
+The result records the excluded relation and states that the supported network
+was not selected in full.
+
+The distinction is substantive. A witness for 100 equations does not resolve
+the missing measurement in the 101-equation request. Nor are equations removed
+because the solver dislikes them: the narrower request follows the pre-existing
+nonnumeric source disposition. If a fully specified selected system is
+infeasible, that result concerns its declared assumptions and equations; it is
+not permission to drop inconvenient relations until a witness appears.
+
+Both requests preserve all 256 observations and all 143 original dispositions.
+Seven observations used only by the omitted annual financing-cash relation
+fall outside the narrower numerical system, but remain in the preserved source
+description. Dashes, omitted concepts, derived subtotals and explanatory
+differences are therefore still available for subsequent interpretation.
+The result distinguishes selected relations, supported but unselected relations,
+and relations outside this version's capabilities.
+
+\enlargethispage{\baselineskip}
+\subsection{A second source representation supplies a reported value}
+\label{sec:debt-selected-reading}
+
+The unresolved dash concerns the selected PDF reading, not every available
+representation of the filing. A later inspection of the retained annual XBRL
+instance finds a numerical fact for the same caption. Occurrence
+\code{f-325}, under \code{ProceedsFromIssuanceOfLongTermDebt}, reports zero
+USD for 1 October 2023 through 28 September 2024. It identifies Apple's CIK,
+has no additional segment or scenario dimensions, and declares decimal
+accuracy \code{-6}. The filing-specific label is \emph{Proceeds from issuance of
+term debt, net}, matching the annual cash-flow statement. Its presentation
+relationship places it in financing activities, and the calculation
+relationship gives it a positive contribution to the financing total
+\citep[retained instance, occurrence f-325, context c-1; associated label,
+presentation and calculation relationships]{apple2024xbrlinstance}.
+
+This is a separate source-linked reading. The PDF still contains a dash;
+its original observation and the earlier unresolved calculation remain intact.
+The selected interpretation retains both representations and their exact
+identities. A dash elsewhere, an absent interim row, a nil fact and a
+reported numerical zero do not become interchangeable. The XBRL value's
+declared accuracy also matters: a reported zero at million-dollar accuracy
+does not establish an exact underlying economic zero
+\citep[Component Fact, value and decimals properties]{xbrloim}.
+
+The neighboring years and repayment row provide useful checks on the match.
+The same issuance concept reports USD~5,228 million and USD~5,465 million in
+the two comparative years, agreeing with the visible columns. The FY2024
+repayment fact reports USD~9,958 million as a payment; its negative
+calculation weight agrees with the parenthesized cash-flow amount. All
+thirty retained occurrences of the eight financing concepts, including
+duplicates, stay distinct. The seven signed FY2024 components then sum to
+\(-5{,}441-15{,}234-94{,}949+0-9{,}958+3{,}960-361=-121{,}983\)
+million dollars, matching the displayed financing total
+\citep[p.~33]{apple2024}. The earlier no-contribution convention is therefore
+no longer the only available basis for this displayed calculation: the
+selected numerical reading has its own inspected source support.
+
+The term-debt comparison remains a different question. Closing current and
+noncurrent carrying amounts sum to USD~96,662 million, compared with
+USD~105,103 million at the opening date. Subtracting the selected reported
+issuance and the signed repayment gives
+\(96{,}662-105{,}103-0-(-9{,}958)=1{,}517\) million dollars.
+This is an unattributed difference between carrying-value movement and the
+selected cash flows. It supplies no allocation to foreign exchange, hedges,
+fees or another account and creates no balancing journal.
+
+The selected interpretation can also be carried into the whole conditional
+measurement system. It changes one unknown interval while preserving all
+236 selected observations and all 101 equations. The complete parent still
+retains the PDF dash, all 256 source observations and all 143 relation
+dispositions. The rounding rule remains the earlier, explicitly proposed
+nearest-million rule with half ties away from zero. Under that assumption,
+the latent issuance amount for a reported zero lies in the open interval
+\((-1/2,1/2)\) million dollars. This interval comes from the chosen rounding
+rule; the source accuracy alone is not used to impose its endpoints or an
+additional nonnegativity condition.
+
+The full conjunction admits an exact rational witness. A separate checker
+substitutes every value into each original equation and interval. A second
+complete witness fixes the issuance measurement at USD~0.25 million and
+still satisfies the same original constraints. This is a useful discriminator:
+the numerical reading resolves the selected source uncertainty without
+pretending that the latent amount is known exactly. No financing equation is
+dropped to obtain either witness.
+
+Missing interpretation or rounding premises remain unresolved. A changed
+issuer, period, source identity, original dash, equation set or rounding rule
+is refused; an exhausted computation budget remains unknown. The interface
+retains the original PDF-only result separately. These checks establish a
+conditional measurement composition, not an actual sequence of company events.
+Legal books, instrument populations, source availability and the remaining
+identity and population assumptions still require their own evidence.
+
+The exact source selection and signed comparisons are retained under
+\path{data/accounting-master/debt-dash-source-20261027/}; the full network,
+independent witness checks and refusal cases are under
+\path{data/accounting-master/debt-reading-network-20261027/}.
+
+\subsection{The selected reading can constrain a supplied history}
+\label{sec:selected-reading-history}
+
+The numerical reading can now enter the two previously supplied historical
+candidates while retaining the complete statement network. The annual and
+interim candidates keep their separate source contexts. Each has nineteen
+declared accounts, two hypothetical capital transactions and thirty explicit
+links from reported quantities to historical amounts. The new composition
+preserves those histories and links, partitions every selected observation
+and equation by its original context, and attaches the selected issuance
+interval without replacing the PDF-only parent.
+
+Both candidates satisfy their declared constraints. An independent rational
+calculation reconstructs the account movements and snapshots, checks the
+source-to-history links, and substitutes the resulting measurements into all
+236 selected intervals and 101 equations. Reintroducing the earlier hypothesis
+that the opening cash populations are identical still makes that historical
+candidate incompatible. A numerical debt-issuance reading cannot repair a
+wrong cash-population mapping.
+
+These candidates remain sparsely connected to the filing. Of the 236 selected
+measurements, 176 have no supplied history mapping. Their equations remain
+in the calculation, but they do not thereby identify an account or transaction.
+Four further obligations preserve the unknown actual history and wider source
+coverage in the two contexts. All 180 unresolved obligations remain attached
+to the result. Nor have the annual and interim candidates been joined into one
+company history. Their separate feasibility therefore supplies no executable
+legal-book opening or probability over possible histories.
+
+\code{SelectedReadingHistoryAttachment/1} implements this explicit composition.
+It accepts the exact original source parent, selected reading, rounding premise,
+context-specific histories and declared computation budget. Missing premises
+remain unresolved; altered parents, equations or contexts are refused; an
+exhausted search remains unknown. The earlier interface still recomputes its
+own PDF-only source and retains its original results. Complete requests,
+independent checks and adverse cases are retained under
+\path{data/accounting-master/selected-reading-history-20261027/}.
+The companion \path{spec/source-opening-compatibility-v1.md} specifies the
+supported joins through conditional opening, financial transition, reporting
+and period carry, including the inputs that each join still requires.
+
+\subsection{What the temporal network contributes to reconstruction}
+
+The selected network connects balance-sheet, income, comprehensive-income,
+cash-flow and equity measurements using shared identities and explicit times.
+It extends the earlier isolated balance equations without inventing a sequence
+of company transactions. The recorded checks include altered dates, periods,
+source coefficients, quantity interpretations, hypotheses and completeness
+claims. They also compare the exact terms and intervals with the preceding
+balance and cash-bridge references. A zero computational budget returns unknown,
+and a valid alternative rational witness is allowed on replay.
+
+The implementation and complete retained examples are under
+\path{data/accounting-master/}:
+\begin{quote}\small
+\path{temporal-measurement-contexts-20261024}\\
+\path{statement-network-contexts-20261024}
+\end{quote}
+They establish checked conditional measurement behavior. Their interpretation
+still depends on proposed identities and populations; feasibility does not
+promote those premises to issuer facts or accounting authority.
+
+Section~\ref{sec:conditional-history-families} develops a finite conditional
+connection to authored states and event sequences. Actual historical
+reconstruction still requires the corresponding source and method admission. Several histories can produce the same balances
+and movements while leaving different contracts, tax attributes, inventory
+cohorts or liquidity constraints at the end. Those differences matter for the
+simulator's next event. A history-family representation must preserve them,
+state its search scope and retain uncomputed or missing cases. Until that
+connection is justified, the retained company has no executable legal-book
+opening and its actual history remains unknown.

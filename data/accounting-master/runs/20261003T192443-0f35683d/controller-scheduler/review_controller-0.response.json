@@ -1,0 +1,39 @@
+{
+  "assumptions": [
+    "The supplied worker, process-cleanup, locking, integrity-check and fresh-plan interfaces are honored by their omitted implementations.",
+    "refresh and save implementations are not supplied. Whether they independently suppress executable plans after every scheduler failure is not established.",
+    "Workers are trusted and remain in their initial process group; deliberate detachment and uncatchable termination during registration are outside this review."
+  ],
+  "checks": [
+    "Reviewed the supplied scheduler, proposal gate, phase execution and support code without tools.",
+    "Checked exception boundaries, blocked-result propagation, acceptance bindings and proposal-only scheduling.",
+    "Treated the reported 153 passing tests and supplied test names as supporting evidence, without inferring unprovided assertions or accounting correctness."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "scripts/accounting_master_catalog.json",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "Blocked responses lose their actionable findings. In execute_phase, both the work['verdict'] == 'BLOCKED' branch and the ordinary response['verdict'] == 'BLOCKED' branch update status, issues and residuals but omit next_actions. The partial-review BLOCKED branch correctly saves next_actions. Consequently an external block can leave the phase's previous next_actions intact, or retain none, while subsequent refreshes construct the next plan from that record. Repair both branches to persist the current response's next_actions, replacing stale values even when the new list is empty. Verify that the refreshed plan and a resumed invocation expose the actual unblock instructions.",
+    "Run finalization is not protected against an ordinary handled interruption. Master.run catches KeyboardInterrupt in its main try, but its finally block performs refresh/save, plan publication, manifest publication and event writing outside that handler. The nested finalization handler catches only ContinuationVeto, ValueError and OSError. A SIGTERM translated to KeyboardInterrupt during final refresh or terminal publication therefore escapes to the module entrypoint, potentially leaving the manifest without finished_at/outcome and leaving the previous executable next plan published. A second interruption while finalizing an already interrupted run has the same problem. Repair this with a bounded, signal-deferred finalization section that durably records interruption and either publishes a verified current plan or a non-executable recovery record before restoring signal handling. Preserve the existing worker-cleanup guarantees. Verify interruption during final refresh and terminal publication, including interruption after a prior stop."
+  ],
+  "next_actions": [
+    "Persist next_actions consistently in every BLOCKED response branch and add focused regression coverage for stale instructions.",
+    "Make terminal state publication resilient to handled termination and add focused interruption coverage.",
+    "Rerun the controller checks and obtain a fresh review of the repaired code."
+  ],
+  "residuals": [
+    "The implementations of refresh, controller_review, process, approval installation and several acceptance helpers are omitted; their stated interfaces were assumed, not independently verified.",
+    "The shown gate preserves human_acceptance as pending and implementation_enabled as false. Historical phases are held, and product implementation is explicitly blocked.",
+    "The accepted 192-report panel, structural checks and internal phase acceptance do not establish accounting correctness, scientific validity, mission completion or human acceptance."
+  ],
+  "steps": [
+    "Compared the supplied execution paths with the reviewed resumability, interruption and fresh-plan requirements.",
+    "Identified two concrete state-propagation and finalization defects; no files were read or changed."
+  ],
+  "summary": "REVISE: blocked responses can leave stale next actions, and handled termination during finalization can prevent durable terminal publication.",
+  "verdict": "REVISE"
+}

@@ -1,0 +1,126 @@
+\section{A certain liability need not identify its creditor}
+\label{sec:query-certainty}
+
+Suppose the admitted records establish exactly one payable of 100 currency
+units, but leave its creditor unresolved between A and B. For this constructed
+example the declared family has two histories: in $h_A$ the company owes A
+100 and owes B nothing; in $h_B$ it owes B 100 and owes A nothing. These are
+complete alternatives within the example, not two sampled points from a wider
+family. The question \emph{does a payable exist?} has the answer yes in both
+histories. The question \emph{is A owed 100?} does not.
+
+Now ask for the rows of the payable schedule. If $Q(h)$ returns those rows,
+then $Q(h_A)=\{(A,100)\}$ and $Q(h_B)=\{(B,100)\}$. Their intersection is
+empty: no creditor--amount row occurs in both. Reading that empty table as
+the company's complete schedule would wrongly assert that it owes nothing.
+Reading the union as its complete schedule would instead assert that it owes
+200. Evaluating the total within each history gives 100 in both. The
+uncertainty concerns the creditor, not the existence or total of the payable.
+
+This distinction is central to Libkin's critique of intersection-based
+answers. His example retains a tuple with an unknown second component;
+discarding it loses knowledge that a tuple with the stated first component
+exists. An intersection read under a closed-world interpretation can also
+add an unsupported absence claim \citep[Section~3 and the opening of
+Section~6]{libkin2014}. A table of individually certain rows is therefore a
+restricted view of knowledge, not generally a replacement for the possible
+answer schedules.
+
+For a nonempty feasible history family $H=\Hist_M(D_k)$ and a total,
+deterministic query $Q$ on its histories, retain the family of answers
+\[
+ \mathcal{A}_Q(H)=\{Q(h):h\in H\}.
+\]
+Each answer remains linked to the histories that produce it. Equality of
+payable schedules alone does not license merging histories for another query.
+For a row-valued query, a separately requested certain-tuples view is
+\[
+ T_Q(H)=\bigcap_{h\in H}Q(h).
+\]
+Membership in $T_Q(H)$ asserts that a row appears in every answer. Omission
+asserts only that the row is not established in every answer; it does not
+assert absence from every answer. A total computed after taking this
+intersection answers a different question from totals computed within
+histories. In the payable example, $T_Q(H)$ is empty while
+$\{\operatorname{total}(Q(h)):h\in H\}=\{100\}$.
+
+For a proposition $P$ about a concrete answer, Boolean certainty has the
+separate meaning
+\[
+ \operatorname{Certain}_H(P\circ Q)
+ \quad\Longleftrightarrow\quad
+ \forall h\in H,\ P(Q(h)).
+\]
+Taking $P$ to mean that the schedule contains at least one payable proves
+existence without identifying A or B as the creditor. Allowing a third history
+with no payable would change that answer. The two-history result consequently
+depends on the admitted evidence and scope that require the liability to
+exist, not merely on the two rows chosen for display.
+
+Libkin distinguishes a logical description of knowledge shared by all
+answers from an object representing their greatest lower bound in an
+information ordering. These representations need not exist in the chosen
+language; ordinary tuple intersection is not their general definition
+\citep[Section~5.3, equations~(6)--(8)]{libkin2014}. AccDSL's answer family and
+Boolean propositions above are local definitions. They do not assert that
+every family has a finite relational representation. A symbolic answer must
+carry its conditions and preserve the stated family, or declare the
+restriction or approximation it makes.
+
+Input completeness and output meaning must also be explicit. A model that
+fixes the available event templates and contract slots imposes a scope
+restriction; it does not establish that a public filing lists every economic
+event. Nor does that restriction entitle a display to interpret every omitted
+row as false.
+
+Libkin's primary proof compares information by reverse inclusion of possible
+completions: an object is more informative when fewer complete objects remain
+compatible with it. For a query to be evaluated directly on an incomplete
+object, the chosen output interpretation must preserve that order as input
+information increases. The query must also respect the relevant renamings,
+and its output domain must have a representation system whose formulas
+describe each object's complete interpretations
+\citep[Sections~6.1--6.2, equations~(9)--(10)]{libkin2014}. In Theorem~2, the proof
+first shows that evaluating the query preserves exactly the statements true
+in all completed answers; it then uses those statements to establish the
+greatest-lower-bound answer as an object
+\citep[Definitions~4--7 and Theorem~2, pp.~11--18]{libkin2016certain}.
+Monotonicity alone is insufficient, and SQL null comparisons need not meet
+the genericity condition \citep[Section~7.1, pp.~18--19]{libkin2016certain}.
+
+The relational examples make the difference between input and output
+assumptions concrete. Positive existential queries have the stated result
+with open-world inputs and answers. A guarded positive fragment also has it
+with \emph{closed-world inputs and open-world answers}; the latter is an
+interpretation of omitted result rows, not a claim that the input filing
+lists every economic event
+\citep[Proposition~9 and Corollary~3, p.~20]{libkin2016certain}.
+These results do not authorize evaluating arbitrary financial negation,
+aggregates or nonlinear constraints by treating unknown amounts as ordinary
+constants. AccDSL has not established the theorem's abstract domain,
+information order and representation-system conditions for every financial
+output. The constructed payable example above instead follows directly
+from its two declared histories.
+
+A related relational method illustrates what a sound but incomplete answer
+means in practice. For marked-null tables under closed-world set semantics,
+Libkin's modified three-valued evaluator returns a certainly positive answer
+when it yields 1 and a certainly negative answer when it yields 0; its value
+$1/2$ carries no guarantee \citep[Theorems~4.1 and~5.3, pp.~8--12]{libkin2016sql}.
+Let $T=\{(1,\bot)\}$ and ask whether there is a $y$ for which $T(1,y)$ and
+either $y=1$ or $y\ne 1$. Every completed table answers yes, yet the modified
+evaluation leaves the answer at $1/2$: its null comparison and its negation
+are both unknown. The paper gives this case as a missed certain answer for
+ordinary SQL; the modified evaluator's outcome follows from its atomic rules.
+An inconclusive evaluation therefore does not show that two possible histories
+give opposite answers. AccDSL requires witnesses on both sides to establish
+that stronger claim; a timeout or unsupported operation remains undecided.
+The relational guarantee itself does not transfer to financial totals,
+nonlinear valuations, temporal histories or scenario conditioning.
+
+The query contract records whether it returns a proposition, individually
+certain rows, or a family of answers, together with the family scope and
+completeness and the interpretation of omitted rows. Unsupported evaluation
+and unfinished search keep their existing failure or unresolved status. In
+particular, a sampled answer family cannot be relabelled as the full family
+merely because its displayed rows agree.

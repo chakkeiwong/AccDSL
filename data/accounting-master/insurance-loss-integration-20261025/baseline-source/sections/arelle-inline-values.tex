@@ -1,0 +1,54 @@
+\subsection{An inline value is already a transformed reading}
+
+Return to the source spelling \code{1,234}. At the inspected Arelle version,
+an inline fact's \code{value} property first obtains assembled text and applies
+the selected transformation. In the ordinary non-nil numeric path, it then
+converts that result to a decimal number, applies the declared scale and
+applies the sign. Both \code{textValue} and \code{stringValue} delegate to this
+transformed value. Reading any of those three properties and applying scale
+again would therefore change the reported amount
+\citep{arelleinlinevalues2026}.
+
+For a concrete constructed case, select \code{numdotdecimal} from the
+transformation registry dated 31~July~2011, scale $-3$ and a minus sign. The
+inspected function accepts \code{1,234} and removes the grouping comma, giving
+1234. Scaling gives 1.234; applying the sign gives $-1.234$. If a consumer
+treats that returned value as the original literal and reapplies both scale
+and sign, it obtains $+0.001234$. The difference is a consumer error relative
+to the selected source path. The format's namespace and function name matter:
+the dispatcher selects a registry by namespace and can also invoke a custom
+transformation. The example establishes no equivalence among those choices
+\citep{arelleinlinevalues2026}.
+
+Nor does \code{rawValue} recover the original source spelling in every case.
+The inspected property assembles inner text, omits inline excluded content,
+can follow nonnumeric continuation links, and collapses XML whitespace when a
+format is present. An original spelling containing surrounding spaces and a
+line break can consequently yield the same \code{1,234} reading. Escaped
+content follows an additional markup-generation path with URI handling; one
+inspected branch can modify an object element's \code{codebase} attribute in
+the parsed tree. Original retained bytes and occurrence locators are therefore
+needed even when assembled text or a later tree serialization is available
+\citep{arelleinlinevalues2026}.
+
+Consider an unescaped nonnumeric fact containing text A, an excluded child
+containing X, and text B after that child, with a continuation containing C.
+Under the stated traversal conditions, its assembled text is ABC. The excluded
+X remains part of the source document, while B survives as the child's tail
+text. The helper follows continuation links already attached by the loader;
+it does not resolve the source's continuation identifier itself. If the link
+is absent, a nonempty AB can still be returned. The loader separately records
+missing-target, wrong-target and cycle diagnostics. Nonempty text alone cannot
+establish that the disclosure was completely assembled
+\citep{arelleinlinevalues2026}.
+
+The proposed adapter thus preserves the original bytes and nodes, the ordered
+text fragments and exclusions, the continuation identifiers and outcomes, and
+the assembled and transformed readings. It records transform identity, scale,
+sign and validation state so that each step can be reconstructed. Computing a
+value is distinct from validating it: the inspected property initializes an
+unvalidated state on first evaluation, and failures can set an invalid value
+and raise an exception. Nil facts take a separate branch and remain distinct
+from numeric zero. These source-derived requirements and constructed examples
+do not replace schema checks, an executed adapter or review of an actual
+issuer's facts \citep{arelleinlinevalues2026}.

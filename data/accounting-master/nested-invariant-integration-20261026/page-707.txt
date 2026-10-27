@@ -1,0 +1,50 @@
+APPENDIX A. PORTABLE OPERATION REFERENCE
+685
+Expose the supplied rows without choosing a history.
+NestedMapProjection/1 binds a
+declared parent map and nested child map to typed scalar rows. Bindings may read the parent
+key, child key, a parent field or a child field. The accompanying lineage retains both raw keys
+and escaped source paths. Each parent also has a group record with its child-map path, first
+row and row count. An empty child map still produces a group; an empty parent map produces
+no groups. This distinction lets a rule require terms for every supplied claim even when one
+claim has no terms.
+Projection preserves supplied insertion order and makes no chronological selection. Declarations
+are checked against the memory definition even when there are no rows. An explicit population
+declaration identifies the exact book and both map paths; partial or unknown coverage remains
+unresolved. Complete supplied internal maps are sufficient for these checks, but do not establish
+that an issuer’s disclosures reveal all contracts or past events.
+Select within one parent and one declared boundary.
+GroupedRowQuery/1 provides count,
+typed match and greatest-row queries. The query names the parent key, escaped parent path
+and child-map path; all must agree. Count includes all rows in that group. Match compares
+one declared field with one value of exactly the same type. Greatest orders dates or exact
+rational values, optionally below an explicitly inclusive or exclusive upper bound. Units, scale
+and context must agree before a rational comparison.
+The February assessment selects the greatest effective date no later than 28 February, which
+is 2 January. A predecessor query instead uses a strict upper bound: the predecessor of the
+term effective on 10 April is the term effective on 10 March. A query without an upper bound
+identifies the latest term. None of these operations sorts or replaces the stored source order.
+Candidate and winner indices retain that order, and a unique result includes the whole selected
+row and its source lineage.
+Equal greatest dates produce an ambiguous result. Duplicate matches do the same; insertion
+order is never a tie breaker. A group absent from a complete supplied population is invalid. A
+present group with no qualifying row returns explicit none when the declaration permits it, or
+invalid when the row is required. An explicit unknown input remains unresolved; omitting a
+required input is a malformed declaration. Every evaluation recomputes its projection from
+the bound book, schemas, types and coverage. A caller cannot substitute previously computed
+rows after changing the source.
+Use absence without treating uncertainty as absence.
+QueryGuardedInvariant/1 binds
+query results into the preserved guarded requirement evaluator. Count becomes an exact
+dimensionless rational. A unique row supplies has_row=true and known selected fields. Allowed
+none supplies has_row=false, while its selected fields remain unknown.
+An ambiguous or
+unresolved query supplies unknown values, including an unknown presence indicator. Thus a tie
+cannot masquerade as an empty group. The declaration explicitly chooses whether ambiguity is
+invalid or unresolved.
+A false guard makes a predicate inactive; it does not prove that predicate. The separate
+required_known declaration can require a selected field even when its predicate is inactive.
+Invalid queries fail structurally before the predicates run, and unresolved queries keep the overall
+result unresolved even under a false guard. Allowed absence is different: it can legitimately
+activate an empty-group rule while leaving a selected-row rule inactive. The result retains the
+original guard findings and distinguishes no_active_requirements from satisfied requirements.

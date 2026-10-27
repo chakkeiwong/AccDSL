@@ -1,0 +1,33 @@
+{
+  "assumptions": [
+    "A persisted state may be resumed after the catalog file changes between invocations.",
+    "The controller hash map in Master.__init__ is initialized from the current files, so it is not by itself a historical binding to the catalog used to create the state."
+  ],
+  "checks": [
+    "Reviewed only the supplied packet and the shown state-refresh/catalog code paths.",
+    "Checked whether persisted state binds all phase contracts before eligibility is recomputed."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_catalog.json",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "REVISE: Persisted state does not bind the complete phase catalog. Master.__init__ stores only workflow_sha256, and verify_workflow() compares only catalog['workflow']. A change to a pending phase's deps, criteria, deliverables, checker, retry_inputs, or other phase contract can therefore pass validate_state(), pass verify_workflow(), and be scheduled by refresh() under a newly reviewed-looking contract. The accepted-phase path partially detects contract changes via accepted_phase_hash, but pending and non-accepted phases have no equivalent protection. This violates stale-state handling and can execute a phase from a catalog different from the one that produced the checkpoint. Repair by persisting a canonical full-catalog hash (or per-phase contract hashes) in state at creation and checking it before refresh/eligibility; reject with an explicit migration ContinuationVeto on mismatch. If intentional migrations are needed, require a reviewed migration record that preserves prior evidence and rebinds every affected phase. Add a regression covering a persisted pending phase whose criteria/dependencies/checker changes and asserting scheduling is vetoed until migration."
+  ],
+  "next_actions": [
+    "Add full-catalog or per-phase contract binding to persisted state and enforce it during load/refresh.",
+    "Add the pending-phase catalog-mutation regression and record the migration requirement in the plan/checkpoint."
+  ],
+  "residuals": [
+    "The packet does not expose the full implementation of protection-hash initialization or migration helpers, so their interaction with this missing catalog binding was not independently checked."
+  ],
+  "steps": [
+    "Identify the unbound catalog surface.",
+    "Trace its effect through state load, refresh, and eligibility selection.",
+    "Specify the smallest evidence-preserving repair and regression."
+  ],
+  "summary": "REVISE: refresh protects accepted contracts but allows persisted pending work to resume under changed phase contracts because state binds only workflow policy, not the complete catalog.",
+  "verdict": "REVISE"
+}

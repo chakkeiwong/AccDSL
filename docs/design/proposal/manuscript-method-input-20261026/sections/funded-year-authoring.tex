@@ -1,0 +1,76 @@
+\section{Claims, funding and matched annual authoring}
+\label{sec:funded-year-authoring}
+
+The early supplier payment also needs an identified obligation. Northstar's
+opening payables of 30 and new purchase of 170 make a payable control balance
+of 200. In the authored allocation, the payment of 160 reduces the new purchase
+claim to 10 while the opening claims remain 30. Opening receivables of 35 and
+sales of 300 are settled by collections of 10 and 270 respectively, leaving
+25 and 30. These allocations agree with the retained annual totals; they are
+explicit scenario inputs, not invoice facts recovered from a filing.
+
+A claim records its origin, recognised amount, adjustments where supported,
+settlements and outstanding amount. Recognition and settlement have separate
+events. Collecting an existing receivable does not recognise revenue again;
+settling a supplier does not recognise the purchase again. After each affected
+event, identified claims must sum to the receivable or payable control account.
+An excessive settlement rejects before changing either the claim or journal.
+The full-year example explicitly supports partial claim settlement; the earlier
+full-payment decision subprofile retains its narrower meaning.
+
+\paragraph{Choosing and settling a draw.}
+The proposed \code{SettlementDecisionDraft/1} separates cash, the identified
+claim, facility knowledge and the chosen action. A facility's usable capacity
+depends on its limit, prior drawings and reservations, with eligibility and
+the draw window kept explicit. A decision names a facility, amount and expected
+settlement instant, or explicitly chooses cash alone. It observes only its
+permitted information. Unknown eligibility leaves a necessary draw unresolved;
+it does not supply a zero limit or establish default. Available cash may still
+support a cash-only decision.
+
+Authorisation produces a proposal. Cash and debt change when a draw settles;
+the payable and cash change when the supplier is paid. These are separate
+events with separate atomic accounting transitions. A payment that fails after
+successful borrowing leaves the borrowing outstanding. The documentary checker
+can calculate a conditional successor assuming stipulated successful events,
+but that state is explicitly uncommitted. Durable storage and concurrent
+reservation semantics still require their own implementation evidence.
+
+\paragraph{Authoring the complete conditional year.}
+\code{FundedYearInputsDraft/1} imports an immutable annual projection and names
+its source hash, company, book, currency and floating-rate share. It then
+specifies the four claim allocations, facility capacity, new principal,
+annual rate, day-count convention, fees, tax method, assumptions and a dated
+event sequence. The example names zero fees and an eligible facility; it does
+not infer either from annual accounts. A nonzero fee is unsupported until a
+fee method is supplied. An unknown collection instant remains an unresolved
+input with a named obligation.
+
+The restricted text form and typed JSON have identical fields and lower to
+the same closed body. Each text line declares a profile, reference, context,
+claim, facility, loan term, tax method, assumption or event. Amounts use reduced
+rationals; dates use UTC instants. The documentary lexical rule uses quoted
+tokens with an explicit semicolon terminator. The grammar and both complete
+inputs are retained in
+\path{data/accounting-master/funded-authoring-20261023/}. This grammar is a
+bounded proposed extension, not a change to the existing product compiler.
+
+The pure reference executor consumes that body and the imported projection.
+It generates the added draw, interest and principal events, checks claim
+movements, derives tax from the accrued income accounts and closes those
+accounts. It does not obtain the result by copying expected closing balances.
+The 18 conditional comparisons combine the two retained stress rates, three
+floating shares and explicit facility rates of zero, five and seven percent.
+Every journal, cash prefix, closing account and statement agrees with the
+separate exact annual calculation. The loan's interest and tax effects are
+included; at zero interest the original closing accounts return exactly.
+
+These comparisons establish the stated reference meaning under authored
+assumptions. They do not establish access to credit, customer payment behaviour,
+general economic-policy generation or complete company-language coverage.
+The annual operating and accounting model is still imported by reference.
+Broader facility terms, long-dated accruals, fees, refinancing and sector rules
+retain their separate specification obligations. The reference execution is
+conditional and uncommitted; production execution remains a later deliverable.
+
+\input{sections/company-input-authoring}

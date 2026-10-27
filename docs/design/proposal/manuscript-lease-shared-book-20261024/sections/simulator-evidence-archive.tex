@@ -1,0 +1,127 @@
+\section{Retain the evidence needed to reproduce an answer}
+\label{sec:simulator-evidence-archive}
+
+An answer about a conditional family is useful only while its meaning can be
+recovered. The reported inventory range alone does not identify the opening
+book, permitted recoverable values, event order or unresolved source obligations.
+Retaining the complete definition and result allows a later reader to inspect
+those conditions and a compatible implementation to repeat the calculation.
+Storage must also distinguish a complete saved answer from an interrupted write.
+
+AccDSL's earlier P07 reference already provides physical SQLite storage,
+immutable records, evidence views, event replay, retry handling and one schema
+migration for its original company engine. Its run construction and replay
+instantiate that older engine directly. A newer native state can be saved as a
+generic record without thereby becoming a state that the older engine can
+execute. The \path{SimulatorEvidenceArchive/1} reference uses the existing
+immutable nodes and transactions to retain evidence under a narrower, explicit
+meaning: the original bytes have been archived and their relationships checked.
+
+\subsection{Preserve exact records and their relationships}
+
+A complete range result contains both financial values and diagnostic metadata,
+including elapsed time. P07's original numeric contract refuses JSON floating
+numbers; its identity conventions also normalize Unicode text and treat certain
+named lists as sets. Those conventions serve its original interface but cannot
+promise exact retention of every newer JSON record. For example, two spellings
+of an accented name can have different UTF-8 bytes despite the same normalized
+text, and two differently ordered constraint lists can receive the same generic
+identity.
+
+The archive retains the original JSON text as bytes inside a small closed
+envelope. Hex encoding preserves those bytes without applying text normalization
+or numeric conversion to their contents. A byte count and SHA256 digest detect
+changes relative to the stored record. The declared profile label is also kept
+as exact UTF-8 bytes. Whitespace, number spelling, list order, finite timing
+metadata and unresolved fields therefore survive retrieval. Different original
+bytes remain different records, even when an analyst considers their numerical
+content equivalent.
+
+The closed \path{SimulatorEvidenceBundle/1} contains its \path{profile} and an
+ordered \path{records} list. Every record has a local \path{name}, a descriptive
+\path{role}, a declared \path{profile}, the original \path{json} text and
+\path{dependencies} naming earlier records in that bundle. Roles distinguish a
+definition, state, proposal, result or note; none confers authority to execute.
+Names must be distinct, and forward, missing, repeated or cyclic dependencies
+are refused. Declared dependency order is preserved even though the underlying
+physical dependency edges are unordered.
+
+JSON must contain an object, have no duplicate keys, use valid UTF-8 scalar
+values and contain no nonfinite numbers. When the payload states a profile, it
+must equal its declared profile. An unfamiliar profile can still be retained
+as unverified evidence. Callers supply explicit maximum record count, individual
+byte size and total byte size. These limits control this reference's accepted
+input; they are not recommendations about model size or performance. Validation
+does not discard an inconvenient field or round an unsupported amount to make
+the record fit.
+
+For the retained range example, one bundle contains the complete opening state,
+the query definition depending on that opening, and the complete answer depending
+on both. Another preserves the candidate family's unresolved actual-source
+obligation. The receipt identifies every record in order. A compatible later
+query implementation can read the original request and repeat its semantic
+checks; the archive itself supplies no new financial interpretation.
+
+\subsection{Publish a complete bundle and recover it}
+
+Inserting several records independently can leave an incomplete group if the
+process stops between insertions. The archive therefore inserts the record
+nodes and their common receipt in one transaction. The receipt depends on every
+record, and each record depends on its named predecessors and the archive's
+version marker. An exact retry produces the same receipt. Changed bytes produce
+a new identity, rather than replacing an earlier record under the same name.
+
+Before commit, the archive rereads the complete receipt and its records. This
+step matters because an existing content identity alone cannot prove that stored
+bytes remain intact. Retrieval checks closed envelopes, identities, byte counts,
+hashes, dependency edges, ordering and the original JSON conditions. A corrupted
+existing record therefore cannot pass an exact retry merely because its former
+identifier is still present.
+
+A new archive is prepared and marked in a temporary file in the destination
+directory. After that file is closed, a non-overwriting hard link publishes it.
+An existing unrelated database is inspected read-only and refused before the
+older storage implementation can alter it. An unknown schema version or
+incompatible archive marker is also refused; this reference introduces no
+automatic migration. A hard process exit can leave an unreferenced staging file,
+which the archive does not sweep away automatically.
+
+The retained interruption checks observe no destination before initial
+publication and a complete marked archive afterwards. For a bundle transaction,
+exit before commit leaves no new receipt; exit after commit leaves the complete
+bundle available on reopen. These are local process-recovery results. Power
+loss, concurrent writers, distributed storage and filesystems without the chosen
+publication operation require separate evidence. The unchanged P07 migration
+checks continue to concern its own schema and engine.
+
+\subsection{Check bytes separately from financial meaning}
+
+Consider a proposed settlement whose closing cash is increased by one dollar
+and whose signed original-equity balance is reduced by one dollar. The modified
+book still balances. Generic storage can retain it and pass its byte-integrity
+checks, but replaying the original settlement does not produce that state. The
+original native proposal checker rejects it. This example separates three
+questions: whether the bytes were preserved, whether the stated transition
+produces them, and whether the underlying company facts and accounting treatment
+have been admitted.
+
+The archive answers the first question. Its result has \path{archived=true};
+retrieval reports \path{byte_integrity_verified=true} after its checks. It keeps
+\path{semantic_verified}, \path{source_admission}, \path{accounting_admission},
+\path{method_eligible}, \path{simulation_executed} and \path{native_committed}
+false. These are the archive's own conclusions, regardless of stronger assertions
+inside a retained payload. A stored digest is an integrity comparison, not proof
+of authentic evidence or a correct financial method.
+
+The reuse investigation and reference cases are retained under
+\path{data/accounting-master/}:
+\begin{quote}\small
+\path{simulator-storage-reuse-audit-20261024}\\
+\path{simulator-evidence-archive-20261024}
+\end{quote}
+The reference preserves complete evidence across its tested restart conditions.
+Persisting an executable native event cursor, migrating arbitrary histories,
+joining sector methods and admitting real-company state remain separate design
+and conformance work.
+
+\input{sections/lease-shared-book}

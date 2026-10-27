@@ -1,0 +1,1 @@
+Exact source preservation, checked financial derivation and bounded rendered review support provisional 5.45. Refused instructions must retain unpaid coupons and accepted financial prefixes. Financing evidence and all original rows are preserved.

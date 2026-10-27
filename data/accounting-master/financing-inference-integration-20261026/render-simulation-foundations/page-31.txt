@@ -1,0 +1,88 @@
+CHAPTER 3.
+LEARNING AND PERSISTENT UNCERTAINTY
+17
+this marginal relation; it does not make an arbitrary finite particle population equal to the
+posterior.
+Now change representation from N to M and draw fresh randomness u′ from mM(· | θ). The
+augmented proposal law is eπN,v(θ, u)mM(u′ | θ). With backward law mN(u | θ), the desired
+augmented target is eπM,v(θ, u′)mN(u | θ). Their ratio is
+w(θ, u, u′) = eπM,v(θ, u′)mN(u | θ)
+eπN,v(θ, u)mM(u′ | θ)
+(3.11)
+= ZM,v(θ, u′)
+ZN,v(θ, u) .
+(3.12)
+The prior, normalizer and auxiliary proposal laws cancel because the type and evidence revision
+are unchanged. This recovers the exchange correction in Section 3.6.1 of the inspected source.
+The ratio requires the relevant support conditions. The following example uses strictly positive
+estimates, so it does not hide a zero-denominator problem inside that cancellation.
+Take two types with prior probability 1/2 each and true likelihood one. For type zero the old
+estimate is 1/2 or 3/2 with equal probabilities; the new estimate is 1/4 or 7/4, again equally
+likely. Type one’s estimate is always one. Each estimator is unbiased. Order the new joint
+states as (0, 1/4), (0, 7/4), (1, 1). The likelihood-weighted target in equation (3.10) and the
+distribution produced by unweighted replacement are respectively
+π =
+ 1
+16, 7
+16, 1
+2
+
+,
+q =
+1
+4, 1
+4, 1
+2
+
+.
+(3.13)
+Both assign probability 1/2 to type one. Immediate marginal agreement therefore passes a test
+that the joint target fails.
+To see the consequence, make one valid particle marginal Metropolis–Hastings move. Propose
+the other type, draw its new estimate, and accept with min(1, Zproposed/Zcurrent). From (0, 1/4)
+the proposal is accepted certainly. From (0, 7/4) it is accepted with probability 4/7. From type
+one, the low-estimate proposal has total accepted probability (1/2)(1/4) = 1/8, and the high
+proposal has probability 1/2. The transition matrix, with the same state order, is thus
+K =
+
+
+0
+0
+1
+0
+3/7
+4/7
+1/8
+1/2
+3/8
+
+.
+(3.14)
+The correct joint law satisfies πK = π and detailed balance. Starting instead from q, the
+probability of type one after the move is
+(qK)3 = 1
+4 + 1
+4
+4
+7 + 1
+2
+3
+8 = 65
+112 = 1
+2 +
+9
+112.
+(3.15)
+The transition is valid for its stated target; the wrongly initialized joint distribution is the
+problem. This is an exact one-step counterexample, not a claim that a valid PMMH kernel has
+the wrong stationary distribution. Applying the exchange weight restores the desired joint law
+in the finite enumeration.
+The inspected author-linked implementation includes the exchange correction (Chopin and
+contributors, 2026, SMC2.exchange_step, pinned source).
+Its new filter is run through the
+preceding observation before the next incremental weight is added; processing that next
+observation in both places would count it twice. Rejected Metropolis proposals retain their
+existing filter state, and repeated resampled selections receive distinct mutable filter copies.
+These are scoped source-code correspondences, not a run of the full modern package or a
+performance comparison. The modern waste-free extension requires its own dependence and
+finite-run analysis.

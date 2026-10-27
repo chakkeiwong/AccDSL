@@ -1,0 +1,54 @@
+CHAPTER 7.
+THE ACCOUNTING LANGUAGE
+93
+Type
+Meaning and checks
+SourceRef, RuleRef,
+ModelRef
+Versioned evidence or implementation references;
+unresolved references prevent concrete execution.
+Measurement<T>
+Value plus valuation date, basis, method, assumptions
+and numerical status. Recognition remains a rule
+decision.
+The portable profile spells the rate type Rate<convention> and makes both calendar and ac-
+crual convention explicit in YearFraction<calendar, convention>. InstantValue<T> and Flow<T,
+[start,end)> distinguish dated stocks from interval flows; their context carries the calendar. An
+approximate numerical component of a historical Measurement<T> uses Approximation with its
+method, error description and environment references. An exact measurement remains exact;
+valuation context and recognition authority are separate in either case.
+Core expressions use exact integers and rationals, Boolean logic, enumerations, dates, records,
+lists, comparisons and registered pure functions.
+A decimal literal is parsed exactly, not
+first converted through binary floating point.
+Numerical plugins can return approximate
+measurements, but must declare their error or numerical status and the rounding used when
+posting money.
+Missingness is a tagged type with distinct values: notDisclosed, notApplicable, unreadable,
+withheld, and unresolvedMeaning. Zero is an ordinary known number. A missing datum can be
+replaced by a declared Symbol or assumption in a model branch; the source observation stays
+missing. An unknown is not necessarily random, and an estimate is not necessarily missing.
+On portable import, notDisclosed, unreadable, withheld and unresolvedMeaning become Unknown
+with the corresponding reason and obligation references. notApplicable becomes the explicit
+NotApplicable variant, never an unknown or zero.
+Addition of monetary observations also requires compatible entity, perimeter, time, dimensions
+and basis. These checks operate on contextual expressions in addition to the currency type. An
+analyst can deliberately aggregate dimensions or transform a basis using an explicit function.
+For example, sumOver(segment, ...) records the dimension being removed and requires the
+segment partition to be declared; it does not assume every disclosed segment total is additive.
+7.3
+A portable record has an exact meaning
+A constructor and a textual frontend can describe the same financial model only if they
+exchange values whose identity is independent of a Python object or an incidental JSON writer.
+The proposed portable record therefore has six fields: kind, schema, key, revision, body and
+dependencies. Kind and schema identify a registered version; key is its stable, schema-scoped
+logical name; revision is a nonnegative integer. The body obeys that schema’s required, optional
+and nullable fields. Unknown fields reject.
+A typed reference has exactly kind, schema and digest. The digest covers the complete target
+record. Every body reference is also listed in dependencies; additional dependencies need a
+schema-declared role. The submitted closure is finite and acyclic. A receipt can refer to its
+request and old state, but the old state cannot refer forward to that receipt. Stable business
+names can relate counterparties without creating a cycle of content references.
+Financial quantities use a reduced rational with signed numerator text n and positive denomina-
+tor text d, with gcd(|n|, d) = 1 and zero represented by 0/1. The decimal token 2.50 therefore
+denotes 5/2 exactly. Revisions, ordinals and integer counts remain integers; a Boolean is never

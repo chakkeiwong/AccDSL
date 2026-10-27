@@ -1,0 +1,39 @@
+{
+  "assumptions": [
+    "Workers are trusted to remain in their initial process group; deliberate detachment and uncatchable termination before durable registration are excluded.",
+    "The caller must hold the single-writer lock through launch, cleanup and recovery, and on_spawn must durably record ownership before returning. Those call sites and the registration implementation are not supplied.",
+    "Callers must supply finite positive time allowances and valid absolute deadlines; bounded_process does not validate these inputs."
+  ],
+  "checks": [
+    "Reviewed the supplied launch, signal masking, cleanup, recovery, locking and clock code without tools.",
+    "Checked ordinary interruption handling, leader identity preservation, PID-reuse defenses, recovery vetoes and absolute-deadline enforcement.",
+    "The packet reports 197 passing tests. Test bodies were not supplied, so names and counts do not establish coverage of individual interleavings or accounting correctness."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_worker_clock.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md",
+    "docs/plans/accounting-worker-timing-repair-20261004.md"
+  ],
+  "issues": [
+    "bounded_process launches before checking whether its absolute cutoff has already passed or stopped() already returns true. It calculates cutoff, writes the prompt, opens files and executes Popen; only the subsequent wait loop evaluates those conditions. Consequently, a deadline or stop request arriving during preparation can still start an editable worker, which can change files before termination. Returning timeout or stop_requested afterward does not undo those effects. This conflicts with the reviewed requirement that insufficient budget and observed stop requests prevent worker launch. Repair: recheck the absolute cutoff and stop callback immediately before Popen, after preparation, and return an explicit not-launched outcome without invoking on_spawn when either condition applies. Ensure callers preserve that outcome without treating it as an executed retry. Keep the existing post-launch checks for events arriving after the launch decision."
+  ],
+  "next_actions": [
+    "Add the final prelaunch deadline and stop checks and define how callers handle a not-launched result.",
+    "Add focused regression coverage for a deadline expiring during preparation and a stop becoming observable during preparation; verify that Popen and on_spawn are not called and no editable attempt is consumed.",
+    "Rerun the controller verification and obtain a fresh review of the changed code and caller handling."
+  ],
+  "residuals": [
+    "Atomic publication, durable registration, lock ownership at recovery call sites and terminal-state persistence are stated interfaces rather than fully inspectable implementations in this packet.",
+    "The output limit is enforced by polling and can be exceeded between observations; it is not a strict storage quota.",
+    "Ambiguous recovery ownership deliberately vetoes continuation instead of signalling potentially unrelated processes.",
+    "The accepted 192-report source panel and scoped internal acceptance do not close accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Completed a bounded static review of the supplied process-lifecycle packet.",
+    "Identified one launch-boundary defect requiring repair."
+  ],
+  "summary": "The launcher can start an editable worker after its deadline or an observable stop request because both checks occur only after Popen.",
+  "verdict": "REVISE"
+}

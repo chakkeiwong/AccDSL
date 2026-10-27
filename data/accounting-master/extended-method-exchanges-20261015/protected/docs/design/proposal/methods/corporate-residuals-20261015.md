@@ -1,0 +1,250 @@
+# Changed obligations, unfinished production and uncertain tax
+
+15 October2026. R03-E; MC02/05–07/11/13–22/24–30/32–35. This supplements
+the original corporate methods. It specifies finite methods and their state,
+input, posting, reporting and failure obligations; it is not a running package.
+Evidence is under data/accounting-master/finite-method-decisions-20261015/corporate.
+
+## Shared admission and state
+
+Every operation retains entity/book, currency/unit, effective date, evidence-view
+date, source edition and applicability, event identity, prior state, measurement
+version, and authorization. Exact duplicate events return the saved result;
+conflicting reuse, stale state, or double consumption rejects without posting.
+New historical evidence creates a new view; it does not silently edit a frozen
+statement. A proposed measurement has no monetary effect before authorization.
+Missing required facts yield unresolved; inadmissible scope yields unsupported;
+violated facts yield rejected. All statuses preserve the obligation and reasons.
+
+The original CorporateJointHistory/1 is closed. These additional record fields
+do not become accepted merely by appearing in this method. Any future extended
+profile must bind them to the common immutable record and atomic owner contracts
+and supply its own closed schema/complete exchanges before runtime admission.
+
+Source-specific profiles remain distinct: restoration/production/uncertain-tax
+examples use the retained historical EU2023/1803 text; assurance and mixed
+contracts use inspected historical AASB compilations for synthetic2024/2025
+Australian for-profit reporters. No EU-to-AU, US or ASBE substitution occurs.
+Rational amounts are exact illustrative units. Unknown company tax is uncomputed,
+not zero; most statement figures below are explicitly pretax contributions.
+
+## Restoration estimates change the asset and the obligation differently
+
+RestorationState retains the related component and liability, cost/revaluation
+policy, gross cost/accumulated depreciation, remaining life/residual, current
+cash-flow estimate and rate, prior estimate identity, same-asset revaluation
+surplus/prior profit deficit, hypothetical cost-model carrying amount, impairment
+evidence and whole-class valuation review. IFRIC1.2 requires the original liability
+to have been included in the asset's cost. A standalone litigation obligation is
+not admitted to this asset-adjustment method.
+
+Separate passage of time from a new estimate. Under the cost model, a liability
+increase adds to PPE; a decrease reduces PPE only to zero, with excess in profit.
+An increase prompts assessment of impairment indications and an IAS36 test when
+required. Depreciate the adjusted carrying amount less admitted residual over
+the remaining useful life. Discount unwind is finance expense, never capitalised
+under IFRIC1.8. Once useful life is exhausted, later estimate changes go to profit
+under7 regardless of asset model. Actual settlement reduces the obligation and
+cash; a difference from the last carrying amount requires a dated remeasurement.
+
+With cash100, PPE80 and provision20, opening equity is160. An admitted new
+provision50 adds30 to PPE. Recoverable amount90 requires impairment20: PPE90,
+cash100, liability50 and equity140. Four years remaining and zero residual gives
+annual depreciation22.5. The subsequent depreciation-only illustration assumes
+a separately supplied zero discount rate and no further liability change;
+PPE67.5 and equity117.5 follow. In another branch, PPE30/provision80 and a
+new provision30 require Dr provision50 / Cr PPE30 / Cr profit20. Negative PPE20
+would be wrong. Cash100 then equals liability30 plus equity70.
+
+Under the revaluation model, a liability increase first consumes a same-asset
+surplus through OCI, then affects profit; a decrease reverses a same-asset profit
+deficit and otherwise increases OCI. A decrease exceeding the hypothetical
+cost-model carrying amount has an immediate profit component. Determine any
+necessary class revaluation first so that these splits use the correct history.
+With PPE150/provision50/surplus20, an increase35 gives OCI loss20 and profit
+loss15; PPE stays150 only because a supplied class valuation review supports it.
+Cash100 then gives equity165 and liability85. Surplus on another asset cannot
+be borrowed. In a separate decrease case, PPE25, hypothetical cost40, earlier
+profit deficit15 and provision80→30 yield excess10 plus deficit reversal15 in
+profit and25 in OCI. Cash100+PPE25=provision30+equity95. Using25 as the cost
+floor would compute the wrong split. The prior deficit explains why25 and40
+differ; no fresh impairment is inferred from that difference.
+
+A full cash history opens cash100/PPE120/provision20/equity200. Two-year
+straight-line life and zero residual give depreciation60 in year1. At10%,
+unwind2 raises the provision22; new supported estimate33 adds11 to PPE.
+Close PPE71/provision33/equity138, with pretax loss62 and no cash change.
+Year2 depreciation71 and unwind3.3 give loss74.3; actual settlement36.3 leaves
+cash/equity63.7 and zero PPE/provision. Across both years depreciation131 plus
+finance5.3 equals cumulative loss136.3. The total cash bridge is exact; IAS7
+classification of restoration settlement needs a separate fact-specific policy.
+The method therefore returns a cash-classification obligation rather than
+inventing a complete categorized cash-flow statement. A fully exhausted PPE0
+with provision20→25 gives expense5 even if a historic revaluation reserve exists.
+
+## Assurance is a measured obligation alongside the product sale
+
+AssuranceState stores covered sales/population, legal or constructive promise,
+coverage/task findings, claim history, remaining-outcome law, timing/discount,
+reimbursement contract and virtual-certainty evidence. AASB15.B28–B33 determines
+whether assurance, service or an inseparable combined service is present.
+AASB137.14/24 admission precedes measurement. For a large population39 uses
+weighted outcomes; individual claim probability does not replace the population
+outflow judgment. Correlation matters for distributions even when marginal means
+are sufficient to add expected cost. A single lawsuit uses40's different analysis.
+
+Consider100 products with admitted per-product costs0,10,40 and probabilities
+3/4,1/5,1/20. Expected cost is100×(0+2+2)=400. The entire population has a
+present assurance duty, probable outflow and reliable estimate; discount is
+immaterial over the short horizon. Opening cash1000 and inventory600 are funded
+by equity1600. Cash sales2000 and inventory expense600 accompany warranty
+expense/provision400. An independently enforceable quarter-cost reimbursement
+is virtually certain on settlement, so recognise a separate asset100/benefit100.
+Do not net it against the provision. Paragraph54 permits net expense presentation.
+
+Pay claims100 and receive reimbursement25. A new remaining-claims estimate250
+replaces the old300, releasing50; reduce the remaining reimbursement75 to62.5,
+expense12.5. Year1 cash2925+reimbursement62.5=provision250+pretax equity2737.5.
+Profit1137.5 follows from2000−600−400+100+50−12.5. Direct operating cash1925
+also equals profit1137.5+inventory release600+provision increase250−receivable
+increase62.5. Year2 settlement250 and receipt62.5 leave cash/equity2737.5 with
+no further profit under the realised amounts. Without virtual certainty, no
+reimbursement asset is recognised; retain the separate uncertainty. Missing
+claim evidence does not permit zero provision or the printed400 by default.
+
+## A mixed amendment needs two revenue calculations
+
+ModificationState retains the original allocation/performance, enforceable
+change, remaining distinctness findings, amended allocations, faithful measures
+of progress and new receipts. AASB15.21(c) requires consistent application of
+21(a)/(b) to the affected promises; it does not supply a universal price split.
+The following exact case deliberately removes discount-allocation ambiguity.
+
+A contract includes construction100 and four distinct inspection visits5 each,
+at their evidenced standalone prices. Inspections concern another operating
+line and can occur before the new construction finishes. The original expected
+construction cost80; actual eligible cost40 and faithful cost-to-cost progress
+give50% and revenue50. One visit adds revenue5 and cash expense2. The120 price
+was prepaid. The approved amendment adds integrated construction40 and two
+visits10; supported standalone allocations therefore become140 and30. New
+total construction cost100 makes cumulative progress40%, so target construction
+revenue56 yields catch-up6. The first visit's5 remains; five remaining distinct
+visits share25 prospectively. The new50 receipt itself earns no revenue.
+
+With opening cash/equity100, two additional visits by year-end yield revenue71,
+expense46, profit25, cash224 and contract liability99. The indirect operating
+bridge25+99=124 matches170 received−46 paid. Complete construction for cash60
+and three visits for6 next year: revenue84+15=99, profit33 and cash/equity158.
+Lifetime profit58=price170−construction100−visit costs12. Keeping old progress
+would recognise70 for construction; applying40% to the entire170 would wrongly
+recognise distinct future visits. Missing allocation/progress or enforceability
+blocks the numeric transition. The one-year-or-less financing expedient under63
+is explicitly elected for this example, not assumed for long prepaid contracts.
+
+## Unfinished production carries component-specific completion
+
+ProductionState adds started/completed/scrapped quantities, material insertion
+point, conversion stages, opening WIP by component, observed progress, actual
+eligible costs, normal capacity, fixed/variable overhead classification, NRV,
+and the costing-policy version. Equivalent units are a derived policy justified
+by this homogeneous process; IAS2 prescribes rational cost allocation and the
+normal-capacity constraint, not this exact spreadsheet convention.
+
+Start100 units with no opening WIP or abnormal waste. Finish80;20 are half
+converted, with all material already inserted. Material1000 is spread over100
+material units; variable conversion450 over90 equivalent conversion units.
+Fixed cash overhead600 has admitted normal capacity120 equivalent units, so its
+rate is5, assigned450 and expensed idle150. Material rate10 plus variable5
+plus fixed5 gives completed unit cost20. Completed cost1600 and WIP300 exhaust
+assigned cost1900: WIP has material200 and conversion100. Sell50 finished units
+at30: revenue1500, cost1000 and idle expense150 give profit350; finished600
+plus WIP300 remain. Opening cash/equity3000 leaves cash2450 and equity3350.
+
+In the next production month, the remaining10 equivalent conversion units
+require variable50 and fixed50; independently supplied normal capacity10 admits
+both. Add100 to WIP300 and transfer completed400. The remaining50 finished units
+then sell1500 at total cost1000. Cumulative cash/equity3850 and profit850 follow;
+no WIP remains. A different opening WIP, spoilage policy or completion pattern
+needs its own allocation. Reusing100 as conversion units overstates completion;
+capitalising all600 fixed cost conceals150 idle expense. NRV is separately
+assessed for both unfinished and completed stock, including costs to complete.
+
+## Joint products and delayed supplier payment
+
+JointProductionState retains inseparable joint costs, split-off quantities,
+separate subsequent costs, allocation-basis evidence, selling values/dates and
+NRV. For joint cost300, A60 at split-off price4 and B40 at9 give values240/360.
+The selected rational and consistent relative-sales method assigns120/180,
+or unit costs2/4.5. Selling30A and10B gives revenue210, cost105 and profit105.
+Opening cash500 leaves cash410, unsold A60/B135 and equity605. Weighting by mass
+instead changes the admitted policy; equal weights are not a missing-value fix.
+
+Separately, production300 with an independently established immaterial byproduct
+of NRV20 allocates main inventory280 and byproduct20. Sale of that byproduct for20
+removes its20 carrying amount; it earns no margin here. Opening cash500 ends
+cash220+main280=equity500. Retaining main300 as well as byproduct20 invents cost;
+deducting20 without recording the unsold byproduct loses an asset.
+
+SupplierFinanceState names the original creditor, normal-credit purchase price,
+actual terms, financing assessment, initial liability, effective rate, payment
+schedule and actual payments. Normal cash price100 and a fixed payment121 in
+two years imply10% effective interest under the supplied terms. Record inventory
+and payable100; interest10 then11 raises the liability121. Ordinary inventory
+is not a qualifying asset in this case. Sell for cash150 in year1: opening
+cash/equity100 becomes cash250, payable110 and equity140. Year2 interest11 and
+payment121 leave cash/equity129; lifetime profit29. Under the explicit historical
+IAS7 election, both original supplier payment and interest are operating cash.
+Year1 indirect40+payable increase110=150; year2−11−110=−121. A substituted
+finance provider or altered arrangement requires reclassification analysis.
+
+## Uncertain tax has its own measurement decision
+
+The prior tax dossier already specifies tax bases, gross DTA/DTL, recoverability,
+rate changes and lease interaction; the error/estimate bridge retains equity
+origins. Uncertain tax treatment was genuinely deferred. Under the historical
+EU IFRIC23.6–14 method, UncertainTaxState adds treatment grouping, filing position,
+authority/examination scope, full-information acceptance finding, candidate
+outcomes, predictive-measure choice, consistent current/deferred bases, reassessment
+event and disclosure obligations. Assume examination with full knowledge; do not
+multiply exposure by an estimated chance of avoiding examination.
+
+Synthetic law ultimately deducts equipment100, with the timing uncertain. Book
+depreciation20 leaves PPE80; cash operating revenue100 makes pretax profit80.
+Opening cash/equity500, purchase100 and cash revenue100 leave cash500. The enacted
+rate25% is supplied, all tax amounts remain payable, and all origins are profit.
+If full deduction100 is probably accepted, current tax0 and DTL20 follow.
+If outcomes100/20 are binary with full acceptance probability1/5, and most-likely
+amount better predicts resolution, use deduction20: current20 and DTL0. In a
+third branch, deductions100/40/20 at1/5,3/10,1/2 and a supported expected-value
+choice give42. Taxable profit58 and tax base58 give current14.5 and DTL5.5.
+All branches have total tax20, profit60 and equity560; they differ in the timing
+liability. These equal totals arise from this particular full-deduction law.
+
+If new evidence immediately resolves the expected-value branch at deduction40,
+increase current tax14.5→15 and reduce DTL5.5→5. The two0.5 expense/benefit
+entries net to zero. Pay15: cash485+PPE80=DTL5+equity560. A later resolution
+must also include intervening depreciation and other facts; silence alone is not
+new evidence of acceptance. Real law, probability and predictive suitability
+remain required. The printed hypothetical rate or distribution cannot fill them.
+
+## Combined closing and unresolved authority
+
+Combine only the five explicitly compatible EU year1 contributions: WIP, joint
+products, byproduct, supplier financing and lifetime restoration. Give each
+independent lots/contracts/assets but one reporting entity, currency and period;
+sum their openings, without intercompany elimination or transferring AU cases.
+Opening cash4200, PPE120, provision20 and equity4300 become cash3430,
+inventory1375, PPE71, liabilities143 and pretax equity4733. Pretax profit433
+reconciles equity4300→4733; total assets4876 equal liabilities143+equity4733.
+Operating cash movement−770 is350+105+0+40−62 profits, plus depreciation60,
+less inventory increase1375, plus supplier increase110, plus noncash unwind2.
+The11 restoration estimate adds both PPE and provision and is excluded from
+cash. This is a pretax operating slice; new tax effects are unresolved, so a
+complete after-tax report cannot be issued from it. The separate uncertain-tax
+example is not silently grafted onto this different law/fact pattern.
+
+The residual disposition file records each original operation and the exact
+remaining actual-fact, authority or method dependency. Assurance source admission
+is repaired for the historical AU interval. US ASC and ASBE are not admitted by
+renaming these rules. Missing broader methods, company facts, tax origins,
+current source versions, profile exchanges and human review remain visible.

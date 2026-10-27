@@ -1,0 +1,41 @@
+{
+  "assumptions": [
+    "This review uses only the supplied packet; no tools, files or commands were accessed.",
+    "Workers are trusted. Findings concern accidental omissions, stale evidence and ordinary filesystem failures.",
+    "The packet does not establish an additional mechanism that reconciles proposal blockers across stages or binds rendered-page hashes to the PDF used by the renderer."
+  ],
+  "checks": [
+    "Inspected preservation, change attribution, hash verification, deterministic validation, proposal readiness and supplied proposal tests.",
+    "The reported 197 passing tests support control-plane verification; they do not establish accounting correctness or human acceptance.",
+    "Confirmed that proposal_gate retains implementation_enabled=false and human_acceptance=pending."
+  ],
+  "evidence": [
+    "scripts/accounting_master_support.py",
+    "scripts/check_accounting_proposal.py",
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_proposal.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "P1 — Preservation can silently omit unreadable directories. In scripts/accounting_master_support.py, editable_files uses os.walk without onerror, so directory enumeration failures are silently ignored. preserve_editable can therefore return a successful but incomplete backup inventory; changes_since and contributed_changes can subsequently misclassify omitted files. worker_inventory explicitly raises traversal errors, but that does not make the separate preservation traversal fail closed. Repair: give editable_files a raising onerror callback and propagate inventory failures as continuation vetoes before editable work. Add a targeted traversal-error regression verifying that incomplete preservation cannot authorize work.",
+    "P2 — Earlier proposal blockers can disappear from final readiness without a recorded resolution. In scripts/check_accounting_proposal.py, P15–P17 accept decisions with blocks_proposal=true. P19 recursively checks those stages using their original non-final rules, then applies decisions(final=True) only to its own open_decisions. An empty P19 list therefore passes even when an upstream decision remains explicitly blocking. Repair: reconcile upstream blocking decision IDs against explicit final dispositions, requiring a supported resolution or superseding decision for each blocker. Add a regression where an upstream blocker is omitted from P19 and verify that readiness fails; also cover an explicit resolution.",
+    "P2 — Render evidence is not bound to the PDF that produced it. P18 independently hashes rendered_pages and checks only that the worker-authored rendered_pdf_sha256 equals the current PDF reference. After a rebuild, updating the PDF/build records and that scalar while retaining old page images and render-review references passes these checks. The supplied test covers a mismatched scalar and an empty page list, but not stale pages accompanying a newly pinned PDF. Repair: require a render record binding the renderer's input PDF hash to its output page hashes, and bind the render review to that record. Add a regression that rebuilds and repins the PDF while retaining the prior render record/pages; it must fail until rendering and review evidence are refreshed."
+  ],
+  "next_actions": [
+    "Make editable inventory traversal fail closed.",
+    "Require explicit reconciliation of upstream proposal blockers.",
+    "Bind render outputs and their review to the exact rendered PDF.",
+    "Run the targeted regressions and controller suites, then obtain a fresh review of the changed controls."
+  ],
+  "residuals": [
+    "The implementations of process containment, locking, acceptance finalization and approval-rule installation are not supplied here; their stated interfaces and test names cannot independently establish their correctness.",
+    "The accepted 192-report source panel and scoped internal phase acceptance leave accounting, scientific and human-acceptance gaps open.",
+    "Structural evidence checks cannot establish substantive design quality; independent result review remains necessary after these repairs."
+  ],
+  "steps": [
+    "Compared the supplied evidence functions and proposal checker against preservation, freshness and honest-readiness requirements.",
+    "Separated concrete code findings from unsupplied interface implementations and semantic-review limitations."
+  ],
+  "summary": "REVISE: preservation can silently omit files, final readiness can omit upstream blockers, and render evidence can remain stale after a PDF rebuild.",
+  "verdict": "REVISE"
+}

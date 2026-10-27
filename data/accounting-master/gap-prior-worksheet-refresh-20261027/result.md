@@ -1,0 +1,1 @@
+One complete prior-equity worksheet delta and one debt-conversion interface challenge added. All original rows and18 open packages preserved; version5.35 and four stable links unchanged. Concurrent observation-frontier work is retained.

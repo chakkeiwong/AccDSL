@@ -1,0 +1,166 @@
+\section{Publication effects and dependencies between profiles}
+\label{sec:profile-effects-composition}
+
+An insurer can publish a valuation assessment without changing its accounts.
+A consolidation method can append a worksheet adjustment without posting to a
+subsidiary's legal book. A reporting request can publish a new report while
+leaving every financial balance unchanged. An implementation must distinguish
+these actions before it decides whether a later method has the state it needs.
+The retained component profiles make those distinctions differently, so a
+common interface cannot infer them from a field name alone.
+
+\subsection{What a successful invocation changes}
+
+\code{PublicationEffects/1} describes an invocation under one exact profile and
+schema lock. It retains the request, submission, result and original receipt,
+and compares the complete declared worlds before and after that invocation.
+Its four substantive effects are publication of immutable records and their
+decision index; changes to component heads; changes to legal-account heads;
+and appended journals with their native scope. The complete changed values and
+unchanged ownership domains remain available in the description.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}L{0.29\textwidth}X@{}}
+\toprule
+Native profile & Meaning of \code{additional\_commit} \\
+\midrule
+InsuranceComponents/1 & A new component result or report was published. \\
+GroupComponents/1 & A new component result or report was published; the field
+is absent when a rejected result has a null payload. \\
+BankAssessment/1 & A new query result was published. \\
+InsuranceAssessment/1 & A financial commitment occurred; it remains false
+for the retained successful query publications. \\
+\bottomrule
+\end{tabularx}
+\caption{The same Boolean name does not denote the same effect across profiles.}
+\label{tab:native-publication-effects}
+\end{table}
+
+For example, a successful bank assessment and a successful insurance assessment
+both publish a query result and receipt, yet their native Booleans differ.
+Neither changes an accounting head or appends an accounting journal. A group
+component's adjustment journal belongs to the consolidation worksheet. Its
+legal heads remain unchanged even when its successor component state refers to
+later immutable legal-book snapshots. Reading a later snapshot and changing the
+book are separate operations.
+
+The description checks the newly added decision against its exact request,
+result and receipt. Previously published records and decisions cannot disappear
+or be overwritten. New records must equal the publication's dependency closure;
+an appended journal must equal the bound native result's journal. The closed
+world shape prevents an unfamiliar ownership field from being silently omitted.
+These checks establish the stated documentary effects. Recognition,
+measurement, applicable authority and actual source eligibility still require
+their own evidence.
+
+Native submission encoding also matters. InsuranceComponents hashes the request
+body, whereas the other three profiles hash the complete immutable request
+record. Group and bank submissions bind a decoder and wire blob rather than
+containing a request-reference field. The comparison preserves these bindings
+instead of rewriting all four submissions into an invented common encoding.
+
+\subsection{Identity, replay and missing acknowledgement}
+
+Request identity is a pair within an exact profile namespace: a client or
+workspace identifier and a request identifier. The retained InsuranceComponents/1
+index incorrectly joins its two allowed strings with a slash. The distinct pairs
+\code{("a/b","c")} and \code{("a","b/c")} both become \code{a/b/c}.
+Both pairs satisfy the native field schema, so that index is not faithful to its
+declared identity. The defect can falsely conflict distinct requests; it does
+not establish that a retained financial amount is wrong or that a duplicate
+posting occurred.
+
+A separate metadata successor encodes the ordered pair as a canonical JSON
+array and binds the index to the exact profile. Decoding recovers both strings,
+so equality of the encoded arrays implies equality of the pair. Explicit
+conversion retains the old request, result and receipt references and refuses
+conflicting, missing or ambiguous decision history. It cannot reconstruct a
+decision already erased by an old collision without independent retained
+evidence. A missing lookup result therefore grants no permission to post.
+
+A replay describes the effects of the present invocation. It returns the
+original receipt and preserves the original diagnostics, coverage and result,
+while creating no additional publication or financial change. Treating the
+earlier receipt's journal as a new journal would double count the transaction.
+A refusal likewise changes no world and supplies no success receipt.
+
+When acknowledgement is lost, the client cannot tell whether publication
+occurred. The description reports unknown publication knowledge and leaves the
+effects unknown. A conformance fixture may separately contain a committed world
+and an uncommitted world; neither hidden world becomes client knowledge. An exact
+retry publishes once in the uncommitted case and replays the original receipt
+in the committed case. The retained cases check both possibilities without
+claiming that a physical store was exercised.
+
+\subsection{Declaring a dependency without inventing a state adapter}
+
+\code{RetainedProfileComposition/1} provides a finite text and typed description
+of dependencies between imported native exchanges. Each stage names a packet
+by its exact content hash and selects an exchange identifier. The resulting
+description preserves its profile, request, result, receipt, information view,
+native signature when present and complete publication effects. It contains no
+financial formula or arbitrary execution callback.
+
+A sequence dependency requires the same exact profile and equality of the
+complete predecessor-after and successor-before worlds. A state dependency also
+names explicit paths to the produced and consumed native state references.
+Those references must agree, and the receiving request must actually declare
+the consumed head. Thus matching a closing cash amount cannot conceal a changed
+owner, information view, journal history or decision index. A receipt dependency
+requires the original receipt to occur in the receiving request's immutable
+dependency closure; that reference alone conveys no accounting authority.
+
+The text form declares a composition name, ordered stages and dependencies.
+Its stage values are an identifier, packet hash and exchange identifier; its
+dependency values are source stage, destination stage, relation and two explicit
+head paths when the relation is a state handoff. All values are data. The typed
+form carries the same closed fields, and source-line locations are retained
+separately from semantic identity. The checked text and typed routes produce
+identical native findings. Existing annual-program authoring and declared-method
+requirements keep their own evaluation rules; this layer does not replace them.
+
+Consider passing an insurance component's closing accounts to an insurance
+assessment. The former is an \code{OwnerState} containing a ten-account balance
+map and component history in a scenario-specific context. The latter expects
+an \code{AccountingHead} with a balance digest in a different entity, authority
+and information context. Both examples use USD, but that agreement supplies
+neither an ownership mapping nor a complete accounting-state conversion. The
+direct handoff is unsupported. An adapter would need explicit entity and book
+matching, balance and history mapping, temporal and source admission, applicable
+authority, and checked native request/result bindings.
+
+Unknown acknowledgement makes dependent stages unresolved, including later
+stages whose immediately adjacent worlds otherwise match. A partial query can
+publish evidence without supplying a completed financial successor. A refused
+stage cannot supply a dependent input. The comparison preserves all these
+findings even when another defect determines the overall status. Duplicate
+publication decisions, missing imports, cycles, undeclared intervening changes
+and incompatible head references are refused. Stages with no declared edge are
+merely independent in the description; they are not certified for concurrent
+execution.
+
+\subsection{Checked examples and remaining scope}
+
+The effect comparison covers the retained 1,892 exchanges from the four profiles
+in Table~\ref{tab:native-publication-effects}, including 412 possible crash worlds
+and their retries. Semantic counterexamples change native flags, receipts,
+protected heads, journals, prior decisions and acknowledgement knowledge; changed
+records are rehashed so that integrity checking alone cannot hide a missing
+binding check. These are deterministic documentary comparisons, not observations
+of a deployed transaction service.
+
+The composition examples include 66 retained native commit-to-report sequences
+and matched text/typed incompatible, partial, unknown and refused cases. No
+receiving request in the selected packets consumes a receipt, so the receipt
+relation has a specified rule and negative checks but no checked positive
+handoff. General method-input authoring, cross-profile adaptation, whole-company
+source admission and independent implementation acceptance remain unfinished.
+
+The exact contracts, source locks, examples and verification manifests are
+retained under \code{data/accounting-master/} in the directories
+\code{component-identity-repair-20261026},
+\code{profile-publication-effects-20261026} and
+\code{profile-composition-boundary-20261026}.
+Their separate evidence lets an implementation adopt a checked distinction
+without mistaking a finite reference case for the completed simulator.

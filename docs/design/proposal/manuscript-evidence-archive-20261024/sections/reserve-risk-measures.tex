@@ -1,0 +1,311 @@
+\section{A payment distribution still leaves compensation to choose}
+\label{sec:reserve-risk-measures}
+
+A justified distribution answers how much the insurer might pay. It does not
+determine how much compensation the insurer requires for bearing that
+uncertainty. Two insurers can agree on every possible payment and its
+probability while choosing different compensation. The distinction also
+matters within one insurer: a payment quantile, an average of expensive
+outcomes and a charge for future capital answer different questions.
+England, Verrall and W\"uthrich compare these choices in their retained
+accepted manuscript, keeping the risk measure and its tolerance level
+separate from the underlying reserve distribution
+\citep[Sections 5--6]{england2019lifetime}.
+
+Consider an authored finite example in which the discounted remaining payment
+is 0, 4 or 10, with probabilities $1/2$, $1/4$ and $1/4$. All amounts use one
+currency and are present values at today's valuation date. These
+probabilities define the example, rather than being estimated from the small
+claims triangle. The mean payment is $0/2+4/4+10/4=7/2$. A method that returns
+a total risk measure of $31/4$ would therefore assign an additional amount
+of $31/4-7/2=17/4$. The choice of the total measure still needs explanation.
+For this finite specification, write $X$ for the discounted payment and
+$m=\E[X]$ for its mean. If $\mathcal R(X)$ is the selected total risk measure,
+the candidate compensation is the relative amount
+\[
+ A_{\mathcal R}=\mathcal R(X)-m.
+\]
+The subtraction separates expected payment from the additional allowance.
+It does not select $\mathcal R$, establish the probabilities, or admit this
+amount as an insurer's accounting risk adjustment. The entity's method and
+non-financial-risk perimeter must support that further use.
+
+\subsection{A tail average must retain the probability at its boundary}
+
+Suppose the insurer examines the upper forty percent of the example's payment
+distribution. The largest payment, 10, occupies only one quarter of all
+outcomes. Completing the upper forty percent requires another $3/20$ of
+probability from the payment of 4. Discarding every outcome equal to the
+cutoff would average only the payments of 10; keeping all such outcomes would
+average half the distribution. Both would answer a different question.
+
+To specify the cutoff precisely, let $F(x)=\Prob(X\leq x)$ be the cumulative
+distribution function. We use its left quantile at level $\alpha$,
+\[
+ Q_\alpha=\inf\{x:F(x)\geq\alpha\},\qquad 0<\alpha\leq1.
+\]
+At $\alpha=3/5$, the cumulative probability is $1/2$ at zero and $3/4$ at
+four, so $Q_{3/5}=4$. This quantile is one possible total risk measure.
+Its level is an explicit preference or measurement input, not a number
+deduced from the three payments.
+
+An expected-shortfall measure instead averages the quantiles in the upper
+$1-\alpha$ of the distribution. For distinct ordered payments $x_j$ with
+positive probabilities $p_j$ summing to one, put $q=Q_\alpha$.
+For $0<\alpha<1$, the finite formula is
+\[
+ \operatorname{ES}_\alpha(X)
+ =\frac{1}{1-\alpha}\int_\alpha^1 Q_u\,du
+ =\frac{\displaystyle\sum_{x_j>q}p_jx_j
+             +q\bigl(F(q)-\alpha\bigr)}{1-\alpha}.
+\]
+The first term keeps every payment strictly above the cutoff. The second
+keeps exactly the probability needed from the cutoff itself. In the example,
+the numerator is $10/4+4(3/4-3/5)=31/10$; dividing by $2/5$ gives $31/4$.
+By comparison, $\E[X\mid X>4]=10$ and $\E[X\mid X\geq4]=7$.
+Neither equals the specified expected shortfall. At $\alpha=0$, define the
+measure directly as the full mean, $\operatorname{ES}_0(X)=m$; the upper-tail
+average then includes the whole distribution. This quantile-integral
+convention makes explicit the treatment of probability atoms that the
+source's equal-upper-tail-weight description leaves implicit
+\citep[Section 6]{england2019lifetime}.
+
+The same atoms affect an equivalent confidence level. The amount 4 is the
+left quantile for every $\alpha\in(1/2,3/4]$; it has no unique equivalent
+level. The amount $31/4$ is never a left quantile of this three-point law,
+because the only quantile values are 0, 4 and 10. Its cumulative coverage is
+nevertheless well defined: $F(31/4)=3/4$. That coverage is not an exact
+quantile match, since $Q_{3/4}=4$. A finite evaluator must therefore report
+the probabilities $F(v-)=\Prob(X<v)$ and $F(v)=\Prob(X\leq v)$ at the
+requested amount $v$, together with whether an exact quantile-equivalent
+level or interval exists. Interpolation would be a separately declared
+convention. This mathematical distinction does not decide the appropriate
+regulatory disclosure convention for an actual insurer.
+
+\subsection{Changing the weights changes the risk measure}
+
+A different approach gives additional weight to expensive outcomes throughout
+the distribution. For a nonnegative payment $X$, its survival probability
+$S(u)=\Prob(X>u)$ records how often the payment exceeds each amount $u$.
+The ordinary mean is the area under this survival function. The
+proportional-hazards transform replaces each survival probability by its
+$1/\rho$ power, with a chosen parameter $\rho\geq1$:
+\[
+ H_\rho(X)=\int_0^\infty S(u)^{1/\rho}\,du.
+\]
+At $\rho=1$ this is the ordinary mean. Increasing $\rho$ raises survival
+probabilities between zero and one, increasing the weight attached to large
+payments. The source introduces this integral for nonnegative losses
+\citep[Appendix 2]{england2019lifetime}. Applying it to signed net cash flows
+requires a separately specified extension; silently clipping recoveries or
+shifting the distribution would change the stated calculation.
+
+The finite weights follow from that same survival function. Order the
+payments increasingly, define $S_j=1-\sum_{k\leq j}p_k$, and set $S_0=1$.
+The transformed probability assigned to $x_j$ is the fall in transformed
+survival probability across that payment:
+\[
+ w_j=S_{j-1}^{1/\rho}-S_j^{1/\rho},\qquad
+ H_\rho(X)=\sum_jw_jx_j.
+\]
+The weights are nonnegative because survival decreases. Their sum telescopes
+from $S_0^{1/\rho}=1$ to zero. At $\rho=1$, each $w_j=p_j$ and the ordinary
+mean is recovered. Repeated payment values may be combined by adding their
+probabilities; splitting one such mass into identical observations does not
+alter the result.
+
+For an exact illustration of the transform, keep payments 0, 4 and 10 but
+change their probabilities explicitly to $5/9$, $1/3$ and $1/9$. The mean is
+now $22/9$. At $\rho=2$, the transformed survival probabilities are
+$1,2/3,1/3,0$, so all three transformed weights equal $1/3$ and
+$H_2=14/3$. Computing the area directly gives the same answer:
+$4(2/3)+6(1/3)=14/3$. The example checks the transformation under its stated
+law; neither that law nor the parameter 2 is an insurer default.
+
+The retained accepted manuscript prints the survival subtraction in the
+opposite order for observations after the first. On its page 34, that formula
+is wrong relative to the integral it defines. With two equally likely
+payments 0 and 4 and $\rho=1$, the printed weights are $1/2$ and $-1/2$.
+They sum to zero and give an unnormalised weighted sum of $-2$, whereas the
+integral is the mean, 2. The formula above uses the locally derived correction.
+The final journal edition has not been checked for this equation, and the
+printed error does not establish which formula produced the authors'
+numerical tables or was implemented in their software
+\citep[Appendix 2, p.\ 34]{england2019lifetime}.
+
+\subsection{Tomorrow's information changes tomorrow's risk}
+
+A cost-of-capital calculation needs a sequence of future capital amounts.
+It is tempting to obtain each amount by taking today's simulated payments,
+removing the payments made before that future date, and measuring the spread
+of what remains. But the insurer will then know more than it knows today.
+Some of today's uncertainty will have become information, even when no cash
+has yet been paid.
+
+Consider an authored two-period example with one payment at final settlement.
+The ultimate payment $U$ is 0, 2, 8 or 14, each with probability $1/4$.
+After the first period the insurer learns whether the payment belongs to
+the lower pair or the upper pair. Within either pair the two possibilities
+remain equally likely. Figure~\ref{fig:reserve-information} separates the
+information arrival from final payment.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth,
+ every node/.style={align=center,font=\small},
+ box/.style={draw=ink,rounded corners,inner sep=5pt}]
+ \node[box] (now) at (0,0) {Today\\mean 6};
+ \node[box] (low) at (4,1) {First-period news\\lower pair: mean 1};
+ \node[box] (high) at (4,-1) {First-period news\\upper pair: mean 11};
+ \node (loend) at (8,1) {Final payment\\0 or 2};
+ \node (hiend) at (8,-1) {Final payment\\8 or 14};
+ \draw[->] (now)--node[above,sloped] {$1/2$}(low);
+ \draw[->] (now)--node[below,sloped] {$1/2$}(high);
+ \draw[->] (low)--(loend);
+ \draw[->] (high)--(hiend);
+\end{tikzpicture}
+\caption{Information changes the remaining uncertainty before cash is paid.
+ Within each revealed pair, the two final payments are equally likely.}
+\label{fig:reserve-information}
+\end{figure}
+
+Today's mean is 6 and variance is 30. After the news, the lower pair has mean
+1 and standard deviation 1; the upper pair has mean 11 and standard deviation
+3. The expected future standard deviation is therefore $(1+3)/2=2$.
+Taking the square root after averaging the future variances instead gives
+$\sqrt{(1+9)/2}=\sqrt5$. Keeping today's information throughout gives
+$\sqrt{30}$. These are three distinct quantities, not three estimates of
+one interchangeable target.
+
+To generalise the distinction, let $\mathcal F_t$ denote all information
+available at time $t$, increasing through time, and let $A_t$ be cumulative
+payments already made and known then. Remaining payments are $L_t=U-A_t$.
+Assume finite second moments and a final date $T$ by which $U$ is known.
+At a future time $t$, write
+$V_t=\operatorname{Var}(L_t\mid\mathcal F_t)$ for the conditional payment
+variance. Its square root is the uncertainty remaining after that date's
+news. Viewed today, concavity of square root and conditional total variance
+give
+\[
+ \E[\sqrt{V_t}\mid\mathcal F_0]
+ \leq\sqrt{\E[V_t\mid\mathcal F_0]}
+ \leq\sqrt{\operatorname{Var}(L_t\mid\mathcal F_0)}.
+\]
+The first inequality compares an average of standard deviations with their
+root mean square. For the second, total variance separates uncertainty
+remaining after the news from uncertainty about what the news will reveal:
+\[
+ \operatorname{Var}(L_t\mid\mathcal F_0)
+ =\E[V_t\mid\mathcal F_0]
+  +\operatorname{Var}\bigl(\E[L_t\mid\mathcal F_t]\mid\mathcal F_0\bigr).
+\]
+The last term is nonnegative. In the example it is the variance of conditional
+means 1 and 11, namely 25, so $30=5+25$. These relations reconstruct the
+source's Lemma A3.1 in the present notation
+\citep[Appendix 3]{england2019lifetime}. They concern expected future standard
+deviation. On the upper branch, the actual future standard deviation is
+$3>\sqrt5$, so the middle quantity is not an upper bound in every future
+state. The argument also establishes no corresponding quantile ordering.
+
+\subsection{When future reserve revisions have additive variances}
+
+The previous claims development result subtracts both cash paid and the
+revised closing reserve. A useful ideal case assumes the reserve at every
+date is the true conditional expected remaining payment. Define
+$M_t=\E[U\mid\mathcal F_t]$ and $R_t=M_t-A_t$. Substituting these expressions
+into the result for period $t$ gives
+\[
+ \begin{aligned}
+ D_t
+ &=R_{t-1}-(A_t-A_{t-1})-R_t\\
+ &=(M_{t-1}-A_{t-1})-(A_t-A_{t-1})-(M_t-A_t)\\
+ &=M_{t-1}-M_t.
+ \end{aligned}
+\]
+Here $D_t$ uses the source's profit sign: an increase in estimated ultimate
+payments is a loss and makes $D_t$ negative. A capital calculation on losses
+must declare the opposite sign. The source's Table 7, for example, uses the
+negative of a lower-tail CDR quantile
+\citep[equations 5--9 and Section 4]{england2019lifetime}.
+
+Summing future results from $t+1$ to final settlement makes the intermediate
+conditional means cancel, leaving $M_t-U$. Its conditional mean at time $t$
+is zero. Since $A_t$ is known then,
+$\operatorname{Var}(L_t\mid\mathcal F_t)=\operatorname{Var}(U\mid\mathcal F_t)$.
+Applying total variance once more therefore yields
+\[
+ \E[V_t\mid\mathcal F_0]
+ =\operatorname{Var}\!\left(\sum_{k=t+1}^{T}D_k
+                   \,\middle|\,\mathcal F_0\right).
+\]
+Under the conditional-mean assumption, these future revisions have zero
+conditional covariance. To see why, take $k<l$: $D_k$ is already known at
+$l-1$, while $\E[D_l\mid\mathcal F_{l-1}]=0$ by iterated expectation.
+Thus $\E[D_kD_l\mid\mathcal F_0]=0$, and each increment also has conditional
+mean zero. The variance above becomes
+\[
+ \E[V_t\mid\mathcal F_0]
+ =\sum_{k=t+1}^{T}\operatorname{Var}(D_k\mid\mathcal F_0).
+\]
+This is a local derivation under true conditional means. The source's
+Corollary A3.2 states a fixed-origin relation and then connects its variances
+to estimated MSEPs in a Bayesian chain-ladder representation
+\citep[Appendix 3]{england2019lifetime}. That estimator claim is additional
+to the identity derived here. Using total ultimate payment $U$ retains any
+dependence across origins; summing separate origin variances would require
+their covariance terms as well.
+
+In the four-outcome example, the first result is 5 or $-5$. The second is
+1 or $-1$ on the lower branch and 3 or $-3$ on the upper branch. The two
+variances are 25 and 5, and their covariance is zero. Nevertheless, they
+are dependent: the first result reveals the absolute size of the second.
+Zero covariance does not establish independence. Nor does an arbitrary
+refitted reserve rule necessarily equal the true conditional mean. With
+such a rule, preserve the joint sequence of results and its covariance;
+do not automatically replace its variance by a sum of MSEPs. The source
+itself warns that general re-reserving need not produce zero-mean or
+independent future results \citep[Section 7]{england2019lifetime}.
+
+\subsection{Capital timing and entity choices remain separate inputs}
+
+Once a capital basis has been justified, a cost-of-capital calculation still
+needs the charge rate and its payment timing. Suppose $K_t$ is capital held
+at the start of year $t$, $c_t$ is the annual charge per unit of capital, and
+$d(0,t+1)$ discounts a charge paid at year end to time zero. For this stated
+timing convention, the margin is
+\[
+ \operatorname{RM}_0=\sum_{t=0}^{T-1}d(0,t+1)c_tK_t.
+\]
+The equation adds discounted capital costs. It does not supply the capital
+amounts or select their risk measure. A projected best-estimate runoff,
+a standard-deviation profile and a quantile profile can have the same
+opening capital and different future charges. Near equality in one source
+example does not make them equivalent. If capital or discount factors are
+random, the intended conditional expectation and their joint dependence
+must be specified; discounting expected capital generally differs from
+expecting discounted capital. Capital-charge timing also need not equal
+claim-payment timing.
+
+The paper's chosen capital charges, discount rates and tolerance levels
+belong to its historical discussion and illustrative calculations
+\citep[Sections 5--7]{england2019lifetime}. They are not AccDSL defaults.
+An actual insurance risk adjustment additionally requires the applicable
+accounting basis, the entity's compensation for non-financial risk, the
+relevant fulfilment cash flows and appropriate treatment of reinsurance
+and group allocation. The paper's payment-triangle example does not supply
+all those quantities, and its discussion leaves allocation and diversification
+beyond scope.
+
+For implementation, the finite evaluation request must therefore identify
+the law and its provenance, information date, horizon, contract perimeter,
+currency and unit, payment or loss sign, discount convention, chosen
+functional and explicit parameter. It returns the mean, total risk measure,
+relative amount, boundary convention and cumulative coverage, together with
+any exact quantile-equivalence interval and unresolved condition. A negative
+relative quantile amount is retained and flagged if the declared compensation
+profile requires nonnegativity; silently flooring it would change the method.
+Unknown probabilities, mixed currencies, incomplete draws, missing preferences
+and signed inputs outside the nonnegative PH method block their dependent
+calculation. They cannot be repaired by borrowing a percentage from a paper.
+The next software boundary must preserve precisely the joint outcomes on
+which these calculations depend.

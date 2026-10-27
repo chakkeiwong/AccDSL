@@ -1,0 +1,330 @@
+\chapter{Implementation contracts}
+\label{ch:implementation}
+
+\section{Reference implementation and component boundaries}
+
+The proposed reference implementation uses Python for orchestration and a deterministic
+reference evaluator, exact decimal/rational arithmetic for booked amounts,
+SQLite for transactional metadata and versioned records, and columnar files
+for large scenario outputs. DuckDB is an optional analytical reader. These
+are convenience choices justified by inspectability and modest initial scale;
+they do not establish production performance. The IR and conformance tests
+allow a later compiled executor without changing accounting meaning.
+Committed journals, economic deltas, receipts and branch heads belong to the
+one transactional store, including for simulation branches. Columnar files
+hold derived analytical exports, never independently writable committed books.
+
+\begin{lstlisting}
+accdsl/
+  evidence/       documents, spans, filing contexts, extraction versions
+  model/          typed IR, entities, books, symbols, contracts
+  language/       grammar, parser, resolver, type checker, lowering
+  constraints/    propagation, solver adapters, bounds and conflict cores
+  accounting/     rule selection, posting validation, closing, consolidation
+  economics/      contract and behavioural plugin interfaces
+  execution/      scheduler, branch state, stochastic streams, run records
+  reporting/      statements, notes, movement schedules, explanations
+  storage/        versioned records, migrations, result readers
+  interfaces/     Python API, CLI, structured import/export
+  packages/       reviewed demonstration and accounting modules
+\end{lstlisting}
+
+The first service boundary is local and synchronous. A job abstraction can be
+added for extraction and simulation without requiring distributed execution.
+The model compiler returns an immutable execution plan; the executor receives
+that plan and run inputs. Neither should retrieve live market data implicitly.
+Input datasets and rule packages are selected and versioned before execution.
+
+\section{Persistent records}
+
+The table identifies logical storage relations and their obligations; exact
+versioned record schemas determine their payloads. Candidate calculations and
+diagnostics remain separate from the committed accounting relations.
+
+\begin{longtable}{L{40mm}L{96mm}}
+\toprule Relation & Key information and constraints\\\midrule\endhead
+\code{document} & Hash, original path/URI, filing ID, entity, publication and
+availability times, media type, revision links. Original bytes are retained.\\
+\code{source\_span} & Document hash, page/element locator, bounding box,
+text/table representation, extraction run ID.\\
+\code{observation} & Context ID, value or missingness tag, precision domain,
+source-span IDs, semantic-reading ID, review status.\\
+\code{context} & Entity/perimeter, concept, basis, currency/unit, instant or
+interval, dimensions and taxonomy version. Contexts are immutable.\\
+\code{assertion\_version} & Logical assertion ID, payload hash, economic
+validity, ingestion time, public availability, superseded version and reason.\\
+\code{model\_node} & IR node ID, type, serialised payload, dependency IDs,
+package/model version; no executable arbitrary text.\\
+\code{constraint} & Expression, scope, source/assumption references, supported
+solver fragment, applicable alternative condition.\\
+\code{alternative} & Parent model, added conditions, rationale, evidence,
+coverage declaration and rejection history.\\
+\code{economic\_event} & Stable entity/book/branch/business-event key;
+versioned event, contract/cohort, dates, quantities and dependencies.\\
+\code{branch} & Branch key and immutable definition reference, including
+entity, book and required synthetic or real book mode.\\
+\code{branch\_head} & Branch owner, current state reference and generation;
+updated only by the expected-head transaction.\\
+\code{posting\_authorization} & Exact basis, posting profile, method,
+authority, findings, permission and historical view. A permission record
+alone does not establish a committed event.\\
+\code{journal\_batch} & Committed balanced postings with event key, book/basis,
+date, method and measurement references. Candidate journals are separate;
+membership here requires the complete accounting transaction.\\
+\code{economic\_delta} & Committed contractual and physical state change,
+bound to the same basis and authorization as its journal.\\
+\code{committed\_receipt} & Unique stable event key, full request fingerprint,
+original request, opening/closing state, journal and delta references.
+Published atomically with those records and the advanced head.\\
+\code{review\_view} & Immutable parent view, decisions and dependency
+selection revisions; preserves historical interpretation.\\
+\code{dependency} & Typed source and derived-record edges, including
+candidate-set membership needed for transitive invalidation.\\
+\code{search\_checkpoint} & Semantic manifest, partition, explored/unresolved
+regions, frontier, used budget and result references, committed together.\\
+\code{run} & Evidence and model hashes, cutoff, scenarios, branch selection,
+weight model, solver/numerical settings, seeds and environment.\\
+\code{report\_cell} & Run, branch/scenario, context, amount or result family,
+dependency references and completeness status.\\\bottomrule
+\end{longtable}
+
+Persistent identifiers are opaque; display labels can change without changing
+identity. References use foreign keys or validated content-addressed links.
+The full logical key of a reported fact includes its dimensions, not merely
+company, label and year. Duplicate assertions are stored as distinct source
+claims until a documented duplicate-resolution operation relates them.
+
+Version records are append-only. A derived transaction-time interval can be
+closed by the next version event without deleting the original payload.
+Validity intervals can overlap when assertions conflict. Such overlap is
+diagnosed and resolved by the evidence view, not prohibited by a database
+constraint that would erase one assertion. Scenario states use structural
+sharing of immutable historical nodes and branch-local changes.
+
+Large simulation output is indexed by run, explanation, parameter draw,
+scenario, innovation path, entity, book, date and account. Reducing this to
+means across all dimensions would destroy the product's central feature.
+Online summaries may compress draws within a declared distribution, while
+retaining conditional summaries and representative replay identifiers. A
+retention policy that removes individual traces must state which explanations
+can still be reconstructed.
+
+\begin{minipage}{\linewidth}
+\section{Public API and result types}
+
+The following unversioned names describe the user workflow. They are conceptual
+shorthand, not the portable operation registry. The exact versioned requests
+are specified below; Python, command-line and any service binding must exchange
+the same typed values:
+\begin{lstlisting}
+ingest(manifest, extractor_config) -> EvidenceVersion
+compile(source_or_ir, evidence_view, package_lock) -> ModelPlan | Diagnostics
+reconcile(plan, cutoff, solver_config) -> HistoryFamily | Diagnostics
+condition(family, assumptions) -> ConditionalFamily | Infeasible
+simulate(family, scenario_set, run_config) -> RunResult
+render(run_id, report_request) -> ReportBundle
+explain(node_id, evidence_view_or_run_id) -> ExplanationGraph
+compare(run_a, run_b, alignment_spec) -> Comparison
+\end{lstlisting}
+\end{minipage}
+
+\code{HistoryFamily} contains a model-scope declaration, shared variables,
+constraints, finite choices, feasibility status and solver-completeness status.
+It may contain witness histories without claiming that those witnesses
+enumerate the family. \code{RunResult} is a tagged union of concrete outputs,
+conditional samples, certified bounds, explored ranges and unresolved outputs.
+Probability-bearing results reference a probability-model record. Results
+without that reference cannot be presented as probabilities.
+
+Comparison requires an alignment specification: entity/perimeter, dates,
+reporting basis, scenarios and shared innovations where applicable. Comparing
+IFRS and US GAAP books holds economic events fixed and changes accounting
+rules. Comparing management responses holds the specified scenario and
+initial information fixed and changes the behavioural model. These are
+different questions and must not be combined into an unexplained difference.
+
+\input{sections/operations-storage}
+\input{sections/profile-interfaces}
+
+\section{Plugin interfaces}
+
+Every plugin declares a version, supported types, input information dates,
+determinism, numerical measure and capabilities. A contract plugin implements
+\code{schedule}, \code{observe}, \code{transition} and \code{payoff}; it may
+return future conditional events. A behaviour plugin implements
+\code{decide} and declares which state and scenario information it uses.
+A measurement plugin implements \code{measure} and returns an amount or
+vector with a basis and numerical status. A reporting plugin maps classified
+journals and balances to output contexts.
+
+The plugin response must include all inputs that materially affect results.
+An external calculator's global evaluation date, market-curve cache, calendar
+version or random seed cannot remain invisible. For example, QuantLib's
+floating coupon interface makes fixing-date conventions and pricing objects
+relevant inputs; the adapter records them rather than relying on process-global
+state. ACTUS risk-factor observations receive explicit dates and identifiers.
+
+The constraint interface accepts a typed formula and a requested operation:
+feasibility, witness, enumeration of declared finite choices, or bound. It
+returns \code{sat}, \code{unsat} or \code{unknown}, plus evidence appropriate
+to the operation. Timeouts and unsupported theories return \code{unknown}.
+The history layer exposes that solver outcome as \code{SolverIncomplete},
+retains the affected region and marks its coverage unresolved. These are
+layer-specific descriptions of incomplete computation, not infeasibility.
+A witness proves existence within the formula, not completeness of a recovered
+historical family.
+
+\section{Human review and model-assisted extraction}
+
+The review interface should put the source passage beside the proposed
+observation, context and reconciliation impact. An analyst can accept a
+mapping, add an alternative, reject an extraction, define a symbolic unknown
+or request more evidence. These actions create structured changes with
+reasons. The useful unit of review is a coherent disclosure and its links,
+not an isolated number detached from its note.
+
+A language model can identify candidate tables, draft concept mappings,
+propose contract terms and suggest alternative readings. Its output must
+reference source spans and a schema. Deterministic checks reject fabricated
+source references, invalid units, inconsistent periods and unbalanced
+postings. A model-generated interpretation that passes those checks remains
+a proposal until its evidentiary status is established. Token probabilities
+and self-reported confidence are never automatically used as weights over
+economic histories.
+
+For routine local research use, a lightweight interface and immutable source
+versions are sufficient. Multi-user approval hierarchies, cryptographic
+attestations and deployment security systems are outside this initial design.
+They can be added for a concrete operational requirement without changing the
+scientific representation.
+
+\section{Failure recovery and reproducibility}
+
+Extraction jobs and simulation jobs write explicit progress records and atomic
+results. Restarting a failed document conversion reuses its document hash and
+creates either the same idempotent extraction result or a new version under
+changed settings. Restarting a simulation resumes only from a committed state
+whose model and input hashes match the run. Numerical failures retain the
+inputs needed for a focused diagnostic.
+
+A run manifest records code revision when available, package lock, source
+hashes, cutoff rule, model hash, scenario data, priors or weights, seed/stream
+scheme, solver settings, decimal and rounding conventions, calendars,
+environment and result locations. Absence of a usable Git revision is recorded
+as unavailable with content hashes, rather than inventing a commit.
+
+\section{Review decisions have consequences for later results}
+
+A proposed reading starts in \code{Proposed}. Acceptance records a reviewer,
+date, reason, verified locator and context, together with the reconciliation
+result. Acceptance means that the stated layer has been reviewed: accepting
+an extraction of a company's sentence does not accept its accounting
+treatment. Competing defensible readings enter \code{AcceptedAlternative}
+under a choice group. Rejection preserves the source and reason.
+A correction creates a new reading; replacing an accepted reading requires
+an explicit \code{Supersede} action. A prior reading therefore remains
+reproducible without entering the latest model.
+
+Suppose OCR reads Northstar's original 120 as 720. The source span supports
+120; correcting extraction creates a new reading linked to the erroneous
+one. The later revenue correction from 120 to 110 is different: it changes
+the company's reported assertion. The original extraction remains faithful
+to its document. Finally, a reviewer may accept that two notes conflict
+without accepting either as a unique model constraint. The view then contains
+a conflict set requiring alternatives or further evidence.
+
+A changed reading or mapping invalidates descendant constraints, families,
+measurements, reports and cached runs for a new view. Unaffected dependencies
+can be reused. Old frozen runs retain their original decisions and evidence
+IDs; they are marked stale for current use, not overwritten. A journal derived
+under the old view is never silently attached to a new source. The local
+workflow needs no multi-user approval hierarchy to enforce these rules.
+
+\section{Identity must survive harmless reordering}
+
+The portable serialisation in Section~\ref{sec:portable-record} preserves
+decoded Unicode code points without global NFC normalisation. It uses sorted
+ASCII keys and exact rational financial quantities, while integer metadata
+remains integer. Only schema-declared sets are sorted. Source identity hashes
+original bytes. The old Core 0 encoding survives only for its historical
+fixtures through an explicit legacy import; it does not define new portable
+digests. Neither encoding proves arbitrary economic equivalence.
+
+SHA-256 with a domain/version prefix identifies three different closures.
+Evidence identity includes source bytes, locations, extraction and review
+versions. Model identity includes typed IR, assumptions, rules, calculator
+locks and resolution, while excluding formatting and source byte offsets.
+Run identity adds the evidence view, horizon, scenarios, outputs, calendars,
+numerical policy, random-stream scheme and environment. A corrected
+source can change evidence and run identity without changing the numerical
+model; a new rate assumption changes the model as well.
+
+Each economic business event has a stable identity within its entity, book
+and branch. Its lookup key is the four-tuple in Section~\ref{sec:replay};
+event version, payload, expected head and request settings belong to the full
+fingerprint. Exact replay returns the original receipt before a new-event
+freshness check. Changed inputs under that key conflict. A new run label or
+version cannot make the event post again. Independent events
+may reorder only when read/write sets are disjoint or a package proves
+commutation, including funding constraints. Alphabetical ordering cannot
+settle an economic timing ambiguity.
+
+Stochastic keys contain seed, coupling group, entity, contract/cohort,
+economic date, shock kind and draw index. Branch enumeration order is absent.
+Shared coupling groups may use the same uniform draw with different marginal
+transforms. The reference fixture maps the first 64 bits of a SHA-256 key
+digest, interpreted as unsigned big-endian integer $v$, to
+$(v+1/2)/2^{64}$. This fixes example replay; it does not validate a production
+Monte Carlo generator. Research runs select an assessed counter-based
+generator and record transforms and numerical environment. Inner measurement
+draws have different shock domains from outer realised defaults.
+
+Schema migration preserves old and new payloads and a field/meaning mapping.
+A representation-only migration must demonstrate equivalent supported
+semantics; a changed recognition rule creates a new model. Restart resumes
+only a committed state whose locks and identities match. SQLite owns source,
+review, accounting and run metadata transactions; content-addressed files hold immutable
+bytes and JSON, while DuckDB reads versioned analytical exports. Each mutable
+transition has one owner.
+
+\section{Adapters exchange typed records}
+
+The portable interfaces described in this chapter govern new exchanges.
+The original \code{spec/core-contract.md} and
+\path{spec/core-ir.schema.json} retain the historical Core 0 examples.
+A named decoder and comparison link those examples to the portable records;
+their older fields do not silently extend a new closed signature.
+The source package includes those two historical files beside
+\path{spec/core-0.lark}. Their fixture and executable dependencies retain
+repository-relative paths; \path{spec/REFERENCE-ROOTS.md} gives the exact
+resolution and the independently relocated Core~0 component. The selected
+term-program component has its own versioned source and dependency manifest.
+Neither component supplies a migration between these distinct profiles or
+completes the remaining language interfaces. Every method returns a success record or a
+diagnostic with code, source IDs, entity/period, dependency path and retry
+status. The principal sequence is \code{ingest}, \code{review},
+\code{compile}, \code{reconstruct}, \code{simulate}, \code{report}, with
+\code{bound}, \code{explain} and \code{replay} over frozen identities.
+
+Arelle supplies candidate facts with QName, entity, context, period,
+dimensions, unit, accuracy, nil status and locator. Duplicates survive for
+review. Its archived \code{ModelInstanceObject} interface exposes these
+properties; validation success does not establish economic truth. Docling
+supplies page/table proposals, locations and conversion status. Missing
+headers and failed pages remain unresolved. Z3 receives named rational-linear
+assertions and finite choices; witnesses are checked against exact inputs and
+unknown results retain their reasons. The reference checks exercise Z3;
+the other selected adapters remain interface designs grounded in inspected
+official source snapshots.
+
+ACTUS receives contract terms, calendars and dated risk factors and returns
+schedules, transitions and payoffs. AccDSL applies accounting separately.
+QuantLib receives an explicit evaluation date, instrument, curves, fixings,
+calendar/day-count and measure; it returns dated measurements with numerical
+status. No process-global valuation date may leak between branches.
+Beancount exports concrete journals for later differential checks; it does
+not own symbolic families. Import failures retain request ID and source hash
+so retries are idempotent. Licence/version evidence remains in the software
+ledger; integration acceptance requires pinned releases or source digests.
+
+\input{sections/adapter-methods}

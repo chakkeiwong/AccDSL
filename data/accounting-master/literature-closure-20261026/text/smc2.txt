@@ -1,0 +1,3110 @@
+PHYSICAL PAGE 1
+SMC2: an efﬁcient algorithm for sequential analysis of state-
+space models
+N. CHOPIN
+CREST-ENSAE
+P.E. JACOB
+CREST & Universit´e Paris Dauphine
+O. PAPASPILIOPOULOS
+Universitat Pompeu Fabra
+Summary. We consider the generic problem of performing sequential Bayesian inference in a state-
+space model with observation process y, state process x and ﬁxed parameter θ. An idealized approach
+would be to apply the iterated batch importance sampling (IBIS) algorithm of Chopin (2002). This is
+a sequential Monte Carlo algorithm in the θ-dimension, that samples values of θ, reweights iteratively
+these values using the likelihood increments p(yt|y1:t−1, θ), and rejuvenates the θ-particles through
+a resampling step and a MCMC update step. In state-space models these likelihood increments are
+intractable in most cases, but they may be unbiasedly estimated by a particle ﬁlter in the x-dimension,
+for any ﬁxed θ. This motivates the SMC2 algorithm proposed in this article: a sequential Monte Carlo
+algorithm, deﬁned in the θ-dimension, which propagates and resamples many particle ﬁlters in the
+x-dimension. The ﬁlters in the x-dimension are an example of the random weight particle ﬁlter as in
+Fearnhead et al. (2010). On the other hand, the particle Markov chain Monte Carlo (PMCMC) frame-
+work developed in Andrieu et al. (2010) allows us to design appropriate MCMC rejuvenation steps.
+Thus, the θ-particles target the correct posterior distribution at each iteration t, despite the intractabil-
+ity of the likelihood increments. We explore the applicability of our algorithm in both sequential and
+non-sequential applications and consider various degrees of freedom, as for example increasing dy-
+namically the number of x-particles. We contrast our approach to various competing methods, both
+conceptually and empirically through a detailed simulation study, included here and in a supplement,
+and based on particularly challenging examples.
+Keywords: Iterated batch importance sampling; Particle ﬁltering; Particle Markov chain Monte Carlo;
+Sequential Monte Carlo; State-space models
+1.
+Introduction
+1.1.
+Objectives
+We consider a generic state-space model, with parameters θ ∈Θ, prior p(θ), latent Markov process
+(xt), p(x1|θ) = µθ(x1),
+p(xt+1|x1:t, θ) = p(xt+1|xt, θ) = fθ(xt+1|xt),
+t ≥1,
+and observed process
+p(yt|y1:t−1, x1:t−1, θ) = p(yt|xt, θ) = gθ(yt|xt),
+t ≥1.
+For an overview of such models with references to a wide range of applications in Engineering,
+Economics, Natural Sciences, and other ﬁelds, see e.g. Doucet et al. (2001), K¨unsch (2001) or
+Capp´e et al. (2005).
+We are interested in the recursive exploration of the sequence of posterior distributions
+π0(θ) = p(θ),
+πt(θ, x1:t) = p(θ, x1:t|y1:t),
+t ≥1 ,
+(1)
+as well as computing the model evidence p(y1:t) for model composition. Such a sequential analysis
+of state-space models under parameter uncertainty is of interest in many settings; a simple example
+is out-of-sample prediction, and related goodness-of-ﬁt diagnostics based on prediction residuals,
+arXiv:1101.1528v3  [stat.CO]  27 Jan 2012
+
+PHYSICAL PAGE 2
+2
+Chopin et al.
+which are popular for instance in Econometrics; see e.g. Section 4.3 of Kim et al. (1998) or Koop
+and Potter (2007). Furthermore, we shall see that recursive exploration up to time t = T may be
+computationally advantageous even in batch estimation scenarios, where a ﬁxed observation record
+y1:T is available.
+1.2.
+State of the art
+Sequential Monte Carlo (SMC) methods are considered the state of the art for tackling this kind
+of problems. Their appeal lies in the eﬃcient re-use of samples across diﬀerent times t, compared
+for example with MCMC methods which would typically have to be re-run for each time horizon.
+Additionally, convergence properties (with respect to the number of simulations) under mild as-
+sumptions are now well understood; see e.g. Del Moral and Guionnet (1999), Crisan and Doucet
+(2002), Chopin (2004), Oudjane and Rubenthaler (2005), Douc and Moulines (2008). See also
+Del Moral et al. (2006) for a recent overview of SMC methods.
+SMC methods are particularly (and rather unarguably) eﬀective for exploring the simpler se-
+quence of posteriors, πt(xt|θ) = p(xt|y1:t, θ); compared to the general case the static parameters are
+treated as known and interest is focused on xt as opposed to the whole path x0:t. This is typically
+called the ﬁltering problem. The corresponding algorithms are known as particle ﬁlters (PFs); they
+are described in Section 2.1 in some detail. These algorithms evolve, weight and resample a popu-
+lation of Nx number of particles, x1:Nx
+t
+, so that at each time t they are a properly weighted sample
+from πt(xt|θ). Recall that a particle system is called properly weighted if the weights associated
+with each sample are unbiased estimates of the Radon-Nikodym derivative between the target and
+the proposal distribution; see for example Section 1 of Fearnhead et al. (2010a) and references
+therein. A by-product of the PF output is an unbiased estimator of the likelihood increments and
+the marginal likelihood
+p(y1:t|θ) = p(y1|θ)
+tY
+s=2
+p(ys|y1:s−1, θ),
+1 ≤t ≤T.
+(2)
+the variance of which increases linearly over time (C´erou et al., 2011).
+Complementary to this setting is the iterated batch importance sampling (IBIS) algorithm of
+Chopin (2002) for the recursive exploration of the sequence of parameter posterior distributions,
+πt(θ); the algorithm is outlined in Section 2.2. This is also an SMC algorithm which updates a
+population of Nθ particles, θ1:Nθ, so that at each time t they are a properly weighted sample from
+πt(θ). The algorithm includes occasional MCMC steps for rejuvenating the current population of
+θ-particles to prevent the number of distinct θ-particles from decreasing over time. Implementation
+of the algorithm requires the likelihood increments p(yt|y1:t−1, θ) to be computable. This constrains
+the application of IBIS in state-space models since computing the increments involves integrating
+out the latent states. Notable exceptions are linear Gaussian state-space models and models where
+xt takes values in a ﬁnite set. In such cases a Kalman ﬁlter and a Baum ﬁlter respectively can
+be associated to each θ-particle to evaluate eﬃciently the likelihood increments; see e.g. Chopin
+(2007).
+On the other hand, sequential inference for both parameters and latent states for a generic
+state-space model is a much harder problem, which, although very important in applications,
+is still rather unresolved; see for example Doucet et al. (2011), Andrieu et al. (2010), Doucet
+et al. (2009) for recent discussions. The batch estimation problem of exploring πT (θ, x0:T ) is a
+non-trivial MCMC problem on its own right, especially for large T.
+This is due to both high
+dependence between parameters and the latent process, which aﬀects Gibbs sampling strategies
+(Papaspiliopoulos et al., 2007), and the diﬃculty in designing eﬃcient simulation schemes for
+sampling from πT (x0:T |θ). To address these problems Andrieu et al. (2010) developed a general
+theory of particle Markov chain Monte Carlo (PMCMC) algorithms, which are MCMC algorithms
+that use a particle ﬁlter of size Nx as a proposal mechanism. Superﬁcially, it appears that the
+algorithm replaces the intractable (2) by the unbiased estimator provided by the PF within an
+MCMC algorithm that samples from πT (θ). However, Andrieu et al. (2010) show that (a) as Nx
+grows, the PMCMC algorithm behaves more and more like the theoretical MCMC algorithm which
+targets the intractable πT (θ); and (b) for any ﬁxed value of Nx, the PMCMC algorithm admits
+
+PHYSICAL PAGE 3
+SMC2
+3
+πT (θ, x0:T ) as a stationary distribution. The exactness (in terms of not perturbing the stationary
+distribution) follows from demonstrating that the PMCMC is an ordinary MCMC algorithm (with
+speciﬁc proposal distributions) on an expanded model which includes the PF as auxiliary variables;
+when Nx = 1 this augmentation collapses to the more familiar scheme of imputing the latent states.
+1.3.
+Proposed algorithm
+SMC2 is a generic black box tool for performing sequential analysis of state-space models, which
+can be seen as a natural extension of both IBIS and PMCMC. To each of the Nθ θ−particles
+θm, we attach a PF which propagates Nx x−particles; due to the nested ﬁlters we call it the
+SMC2 algorithm. Unlike the implementation of IBIS which carries an exact ﬁlter, in this case
+the PFs only produce unbiased estimates of the marginal likelihood.
+This ensures that the θ-
+particles are properly weighted for πt(θ), in the spirit of the random weight PF of e.g. Fearnhead
+et al. (2010a). The connection with the auxiliary representation underlying PMCMC is pivotal for
+designing the MCMC rejuvenation steps, which are crucial for the success of IBIS. We obtain a
+sequential auxiliary Markov representation, and use it to formally demonstrate that our algorithm
+explores the sequence deﬁned in (1). The case Nx = ∞corresponds to an (unrealisable) IBIS
+algorithm, whereas Nx = 1 to an importance sampling scheme, the variance of which typically
+grows polynomially with t (Chopin, 2004).
+SMC2 is a sequential but not an on-line algorithm. The computational load increases with
+iterations due to the associated cost of the MCMC steps. Nevertheless, these steps typically occur
+at a decreasing rate (see Section 3.8 for details). The only on-line generic algorithm for sequential
+analysis of state-space models we are aware of is the self-organizing particle ﬁlter (SOPF) of
+Kitagawa (1998): this is PF applied to the extended state ˜xt = (xt, θ), which never updates the
+θ-component of particles, and typically diverges quickly over time (e.g. Doucet et al., 2009); see
+also Liu and West (2001) for a modiﬁcation of SOPF which we discuss later. Thus, a genuinely
+on-line analysis, which would provide constant Monte Carlo error at a constant CPU cost, with
+respect to all the components of (x1:t, θ) may well be an unattainable goal. This is unfortunate,
+but hardly surprising, given that the target πt is of increasing dimension. For certain models with
+a speciﬁc structure (e.g the existence of suﬃcient statistics), an on-line algorithm may be obtained
+by extending SOPF so as to include MCMC updates of the θ-component, see Gilks and Berzuini
+(2001), Fearnhead (2002), Storvik (2002), and also the more recent work of Carvalho et al. (2010),
+but numerical evidence seems to indicate these algorithms degenerate as well, albeit possibly at a
+slower rate; see e.g. Doucet et al. (2009). On the other hand, SMC2 is a generic approach which
+does not require such a speciﬁc structure.
+Even in batch estimation scenarios SMC2 may oﬀer several advantages over PMCMC, in the
+same way that SMC approaches may be advantageous over MCMC methods (Neal, 2001; Chopin,
+2002; Capp´e et al., 2004; Del Moral et al., 2006; Jasra et al., 2007). Under certain conditions
+(which relate to the asymptotic normality of the maximizer of (2)) SMC2 has the same complexity
+as PMCMC. Nevertheless, it calibrates automatically its tuning parameters, as for example Nx and
+the proposal distributions for θ. (Note adaptive versions of PMCMC, see e.g. Silva et al. (2009)
+and Peters et al. (2010) exist however.) Then, the ﬁrst iterations of the SMC2 algorithm make it
+possible to quickly discard uninteresting parts of the sampling space, using only a small number
+of observations.
+Finally, the SMC2 algorithm provides an estimate of the evidence (marginal
+likelihood) of the model p(y1:T ) as a direct by-product.
+We demonstrate the potential of the SMC2 on two classes of problems which involve multidi-
+mensional state processes and several parameters: volatility prediction for ﬁnancial assets using
+L´evy driven stochastic volatility models, and likelihood assessment of athletic records using time-
+varying extreme value distributions. A supplement to this article (available on the third author’s
+web-page) contains further numerical investigations with the SMC2 and competing methods on
+more standard examples.
+Finally, it has been pointed to us that Fulop and Li (2011) have developed independently and
+concurrently an algorithm similar to SMC2. Distinctive features of our paper are the generality of
+the proposed approach, so that it may be used more or less automatically on complex examples
+(e.g.
+setting Nx dynamically), and the formal results that establish the validity of the SMC2
+algorithm, and its complexity.
+
+PHYSICAL PAGE 4
+4
+Chopin et al.
+1.4.
+Plan, notations
+The paper is organised as follows. Section 2 recalls the two basic ingredients of SMC2: the PF
+and the IBIS. Section 3 introduces the SMC2 algorithm, provides its formal justiﬁcation, discusses
+its complexity and the latitude in its implementation. Section 4 carries out a detailed simulation
+study which investigates the performance of SMC2 on particularly challenging models. Section 5
+concludes.
+As above, we shall use extensively the concise colon notation for sets of random variables, e.g.
+x1:Nx
+t
+is a set of Nx random variables xn
+t , n = 1, . . . , Nx, x1:Nx
+1:t
+is the union of the sets x1:Nx
+s
+,
+s = 1, . . . , t, and so on. In the same vein, 1 : Nx stands for the set {1, . . . , Nx}. Particle (resp.
+time) indices are always in superscript (resp. subscript). The letter p refers to probability densities
+deﬁned by the model, e.g. p(θ), p(y1:t|θ), while πt refers to the probability density targeted at time
+t by the algorithm, or the corresponding marginal density with respect to its arguments.
+2.
+Preliminaries
+2.1.
+Particle ﬁlters (PFs)
+We describe a particle ﬁlter that approximates recursively the sequence of ﬁltering densities
+πt(xt|θ) = p(xt|y1:t, θ), for a ﬁxed parameter value θ.
+The formalism is chosen with view to
+integrating this algorithm into SMC2. We ﬁrst give a pseudo-code version, and then we detail
+the notations. Any operation involving the superscript n must be understood as performed for
+n ∈1 : Nx, where Nx is the total number of particles.
+Step 1: At iteration t = 1,
+(a) Sample xn
+1 ∼q1,θ(·).
+(b) Compute and normalise weights
+w1,θ(xn
+1) = µθ(xn
+1)gθ(y1|xn
+1)
+q1,θ(xn
+1)
+,
+W n
+1,θ =
+w1,θ(xn
+1)
+PNx
+i=1 w1,θ(xi
+1)
+.
+Step 2: At iteration t = 2 : T,
+(a) Sample the index an
+t−1 ∼M(W 1:Nx
+t−1,θ) of the ancestor of particle n.
+(b) Sample xn
+t ∼qt,θ(·|x
+an
+t−1
+t−1 ).
+(c) Compute and normalise weights
+wt,θ(x
+an
+t−1
+t−1 , xn
+t ) = fθ(xn
+t |x
+an
+t−1
+t−1 )gθ(yt|xn
+t )
+qt,θ(xn
+t |x
+an
+t−1
+t−1 )
+,
+W n
+t,θ =
+wt,θ(x
+an
+t−1
+t−1 , xn
+t )
+PNx
+i=1 wt,θ(x
+ai
+t−1
+t−1 , xi
+t)
+.
+In this algorithm, M(W 1:Nx
+t−1,θ) stands for the multinomial distribution which assigns probability
+W n
+t−1,θ to outcome n ∈1 : Nx, and (qt,θ)t∈1:T stands for a sequence of conditional proposal
+distributions which depend on θ. A standard, albeit sub-optimal, choice is the prior, q1,θ(x1) =
+µθ(x1), qt,θ(xt|xt−1) = fθ(xt|xt−1) for t ≥2, which leads to the simpliﬁcation wt,θ(x
+an
+t−1
+t−1 , xn
+t ) =
+gθ(yt|xn
+t ). We note in passing that Step (a) is equivalent to multinomial resampling (e.g. Gordon
+et al., 1993). Other, more eﬃcient schemes exist (Liu and Chen, 1998; Kitagawa, 1998; Carpenter
+et al., 1999), but are not discussed in the paper for the sake of simplicity.
+At iteration t, the following quantity
+1
+Nx
+Nx
+X
+n=1
+wt,θ(x
+an
+t−1
+t−1 , xn
+t )
+
+PHYSICAL PAGE 5
+SMC2
+5
+is an unbiased estimator of p(yt|y1:t−1, θ). More generally, it is a key feature of PFs that
+ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) =
+ 1
+Nx
+t ( Nx
+X
+n=1
+w1,θ(xn
+1)
+)
+tY
+s=2
+( Nx
+X
+n=1
+ws,θ(x
+an
+s−1
+s−1 , xn
+s )
+)
+(3)
+is also an unbiased estimator of p(y1:t|θ); this is not a straightforward result, see Proposition 7.4.1
+in Del Moral (2004). We denote by ψ1,θ(x1:Nx
+1
+), for t = 1, and ψt,θ(x1:Nx
+1:t
+, a1:Nx
+1:t−1) for t ≥2, the
+joint probability density of all the random variables generated during the course of the algorithm
+up to iteration t. Thus, the expectation of the random variable ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) with respect to
+ψt,θ is exactly p(y1:t|θ).
+2.2.
+Iterated batch importance sampling (IBIS)
+The IBIS approach of Chopin (2002) is an SMC algorithm for exploring a sequence of parameter
+posterior distributions πt(θ) = p(θ|y1:t). All the operations involving the particle index m must be
+understood as operations performed for all m ∈1 : Nθ, where Nθ is the total number of θ-particles.
+Sample θm from p(θ) and set ωm ←1. Then, at time t = 1 : T
+(a) Compute the incremental weights and their weighted average
+ut(θm) = p(yt|y1:t−1, θm),
+Lt =
+1
+PNθ
+m=1 ωm ×
+Nθ
+X
+m=1
+ωmut(θm),
+with the convention p(y1|y1:0, θ) = p(y1|θ) for t = 1.
+(b) Update the importance weights,
+ωm ←ωmut(θm).
+(4)
+(c) If some degeneracy criterion is fulﬁlled, sample ˜θm independently from the mixture distribution
+1
+PNθ
+m=1 ωm
+Nθ
+X
+m=1
+ωmKt (θm, ·) .
+Finally, replace the current weighted particle system, by the set of new, unweighted particles:
+(θm, ωm) ←(˜θm, 1).
+Chopin (2004) shows that
+PNθ
+m=1 ωmϕ(θm)
+PNθ
+m=1 ωm
+is a consistent and asymptotically (as Nθ →∞) normal estimator of the expectations
+E [ϕ(θ)|y1:t] =
+Z
+ϕ(θ)p(θ|y1:t) dθ,
+for all appropriately integrable ϕ. In addition, each Lt, computed in Step (a), is a consistent and
+asymptotically normal estimator of the likelihood p(yt|y1:t−1).
+Step (c) is usually decomposed into a resampling and a mutation step. In the above algorithm
+the former is done with the multinomial distribution, where particles are selected with probability
+proportional to ωm. As mentioned in Section 2.1 other resampling schemes may be used instead.
+The move step is achieved through a Markov kernel Kt which leaves p(θ|y1:t) invariant. In our
+examples Kt will be a Metropolis-Hastings kernel. A signiﬁcant advantage of IBIS is that the
+population of θ-particles can be used to learn features of the target distribution, e.g by computing
+bΣ =
+1
+PNθ
+m=1 ωm
+Nθ
+X
+m=1
+ωm (θm −ˆµ) (θm −ˆµ)T ,
+ˆµ =
+1
+PNθ
+m=1 ωm
+Nθ
+X
+m=1
+ωmθm.
+
+PHYSICAL PAGE 6
+6
+Chopin et al.
+New particles can be proposed according to a Gaussian random walk ˜θm|θm ∼N(θm, cbΣ), where
+c is a tuning constant for achieving optimal scaling of the Metropolis-Hastings algorithm, or in-
+dependently ˜θm ∼N(ˆµ, bΣ) as suggested in Chopin (2002). A standard degeneracy criterion is
+ESS < γNθ, for γ ∈(0, 1), where ESS stands for “eﬀective sample size” and is computed as
+ESS =
+PNθ
+m=1 ωm2
+PNθ
+m=1 (ωm)2 .
+(5)
+Theory and practical guidance on the use of this criterion are provided in Sections 3.7 and 4
+respectively.
+In the context of state-space models IBIS is a theoretical algorithm since the likelihood in-
+crements p(yt|y1:t−1, θ) (used both in Step 2, and implicitly in the MCMC kernel) are typically
+intractable. Nevertheless, coupling IBIS with PFs yields a working algorithm as we show in the
+following section.
+3.
+Sequential parameter and state estimation: the SMC2 algorithm
+SMC2 is a natural amalgamation of IBIS and PF. We ﬁrst provide the algorithm, we then demon-
+strate its validity and we close the section by considering various possibilities in its implementation.
+Again, all the operations involving the index m must be understood as operations performed for
+all m ∈1 : Nθ.
+Sample θm from p(θ) and set ωm ←1. Then, at time t = 1, . . . , T,
+(a) For each particle θm, perform iteration t of the PF described in Section 2.1: If t = 1, sample
+independently x1:Nx,m
+1
+from ψ1,θm, and compute
+ˆp(y1|θm) =
+1
+Nx
+Nx
+X
+n=1
+w1,θ(xn,m
+1
+);
+If t > 1, sample
+
+x1:Nx,m
+t
+, a1:Nx,m
+t−1
+
+from ψt,θm conditional on
+
+x1:Nx,m
+1:t−1 , a1:Nx,m
+1:t−2
+
+, and com-
+pute
+ˆp(yt|y1:t−1, θm) =
+1
+Nx
+Nx
+X
+n=1
+wt,θ(x
+an,m
+t−1 ,m
+t−1
+, xn,m
+t
+).
+(b) Update the importance weights,
+ωm ←ωmˆp(yt|y1:t−1, θm).
+(6)
+(c) If some degeneracy criterion is fulﬁlled, sample
+
+˜θm, ˜x1:Nx,m
+1:t
+, ˜a1:Nx
+1:t−1
+
+independently from the
+mixture distribution
+1
+PNθ
+m=1 ωm
+Nθ
+X
+m=1
+ωmKt
+n
+θm, x1:Nx,m
+1:t
+, a1:Nx,m
+1:t−1
+
+, ·
+o
+where Kt is a PMCMC kernel described in Section 3.2. Finally, replace the current weighted
+particle system by the set of new unweighted particles:
+(θm, x1:Nx,m
+1:t
+, a1:Nx,m
+1:t−1 , ωm) ←(˜θm, ˜x1:Nx,m
+1:t
+, ˜a1:Nx,m
+1:t−1 , 1).
+The degeneracy criterion in Step (c) will typically be the same as for IBIS, i.e., when the ESS drops
+below a threshold, where the ESS is computed as in (5) and the ωm’s are now obtained in (6).
+We study the stability and the computational cost of the algorithm when applying this criterion
+in Section 3.7.
+
+PHYSICAL PAGE 7
+SMC2
+7
+3.1.
+Formal justiﬁcation of SMC2
+A proper formalisation of the successive importance sampling steps performed by the SMC2 algo-
+rithm requires extending the sampling space, in order to include all the random variables generated
+by the algorithm.
+At time t = 1, the algorithm generates variables θm from the prior p(θ), and for each θm, the
+algorithm generates vectors x1:Nx,m
+1
+of particles, from ψ1,θm(x1:Nx
+1
+). Thus, the sampling space is
+Θ×X Nx, and the actual “particles” of the algorithm are Nθ independent and identically distributed
+copies of the random variable (θ, x1:Nx
+1
+), with density:
+p(θ)ψ1,θ(x1:Nx
+1
+) = p(θ)
+Nx
+Y
+n=1
+q1,θ(xn
+1).
+Then, these particles are assigned importance weights corresponding to the incremental weight
+function ˆZ1(θ, x1:Nx
+1
+) = N −1
+x
+PNx
+n=1 w1,θ(xn
+1). This means that, at iteration 1, the target distribu-
+tion of the algorithm should be deﬁned as:
+π1(θ, x1:Nx
+1
+) = p(θ)ψ1,θ(x1:Nx
+1
+) ×
+ˆZ1(θ, x1:Nx
+1
+)
+p(y1)
+,
+where the normalising constant p(y1) is easily deduced from the property that ˆZ1(θ, x1:Nx
+1
+) is an
+unbiased estimator of p(y1|θ). To understand the properties of π1, simple manipulations suﬃce.
+Substituting w1,θ(xn
+1), ψ1,θ(x1:Nx
+1
+) and ˆZ1(θ, x1:Nx
+1
+) with their respective expressions,
+π1(θ, x1:Nx
+1
+)
+=
+p(θ)
+p(y1)
+Nx
+Y
+i=1
+q1,θ(xi
+1)
+(
+1
+Nx
+Nx
+X
+n=1
+µθ(xn
+1)gθ(y1|xn
+1)
+q1,θ(xn
+1)
+)
+=
+1
+Nx
+Nx
+X
+n=1
+p(θ)
+p(y1)µθ(xn
+1)gθ(y1|xn
+1)
+
+
+
+Nx
+Y
+i=1,i̸=n
+q1,θ(xi
+1)
+
+
+
+and noting that, for the triplet (θ, x1, y1) of random variables,
+p(θ)µθ(x1)gθ(y1|x1) = p(θ, x1, y1) = p(y1)p(θ|y1)p(x1|y1, θ)
+one ﬁnally gets that:
+π1(θ, x1:Nx
+1
+)
+=
+p(θ|y1)
+Nx
+Nx
+X
+n=1
+p(xn
+1|y1, θ)
+
+
+
+Nx
+Y
+i=1,i̸=n
+q1,θ(xi
+1)
+
+
+.
+The following two properties of π1 are easily deduced from this expression. First, the marginal
+distribution of θ is p(θ|y1). Thus, at iteration 1 the algorithm is properly weighted for any Nx. Sec-
+ond, conditional on θ, π1 assigns to the vector x1:Nx
+1
+a mixture distribution which with probability
+1/Nx, gives to particle n the ﬁltering distribution p(x1|y1, θ), and to all the remaining particles the
+proposal distribution q1,θ. The notation reﬂects these properties by denoting the target distribution
+of SMC2 by π1, since it admits the distributions deﬁned in (1) as marginals.
+By a simple induction, one sees that the target density πt at iteration t ≥2 should be deﬁned
+as:
+πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) = p(θ)ψt,θ(x1:Nx
+1:t
+, a1:Nx
+1:t−1) ×
+ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+p(y1:t)
+(7)
+where ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) was deﬁned in (3), that is, it should be proportional to the sampling
+density of all random variables generated so far, times the product of the successive incremen-
+tal weights. Again, the normalising constant p(y1:t) in (7) is easily deduced from the fact that
+ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) is an unbiased estimator of p(y1:t|θ). The following Proposition gives an alter-
+native expression for πt.
+
+PHYSICAL PAGE 8
+8
+Chopin et al.
+Proposition 1. The probability density πt may be written as:
+πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) = p(θ|y1:t)×
+(8)
+1
+Nx
+Nx
+X
+n=1
+p(xn
+1:t|θ, y1:t)
+N t−1
+x
+
+
+
+
+
+
+
+Nx
+Y
+i=1
+i̸=hn
+t (1)
+q1,θ(xi
+1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tY
+s=2
+Nx
+Y
+i=1
+i̸=hn
+t (s)
+W
+ai
+s−1
+s−1,θqs,θ(xi
+s|x
+ai
+s−1
+s−1 )
+
+
+
+
+
+
+
+where xn
+1:t and hn
+t are deterministic functions of x1:Nx
+1:t
+and a1:Nx
+1:t−1 deﬁned as follows:
+hn
+t
+=
+(hn
+t (1), . . . , hn
+t (t)) denote the index history of xn
+t , that is, hn
+t (t) = n, and hn
+t (s) = ahn
+t (s+1)
+s
+, recur-
+sively, for s = t −1, . . . , 1, and xn
+1:t = (xn
+1:t(1), . . . , xn
+1:t(t)) denote the state trajectory of particle
+xn
+t , i.e. xn
+1:t(s) = xhn
+t (s)
+s
+, for s = 1, . . . , t.
+A proof is given in Appendix A. We use a bold notation to stress out that the quantities xn
+1:t
+and hn
+t are quite diﬀerent from particle arrays such as e.g. x1:Nx
+1:t
+: xn
+1:t and hn
+t provide the complete
+genealogy of the particle with label n at time t, while x1:Nx
+1:t
+simply concatenates the successive
+particle arrays x1:Nx
+t
+, and contains no such genealogical information.
+It follows immediately from expression (8) that the marginal distribution of πt with respect
+to θ is p(θ|y1:t). Conditional on θ the remaining random variables, x1:Nx
+1:t
+and a1:Nx
+1:t−1, have a mix-
+ture distribution, according to which, with probability 1/Nx the state trajectory xn
+1:t is generated
+according to p(x1:t|θ, y1:t), the ancestor variables corresponding to this trajectory, ahn
+t (s)
+s
+are uni-
+formly distributed within 1 : Nx, and all the other random variables are generated from the particle
+ﬁlter proposal distribution, ψt,θ. Therefore, Proposition 1 establishes a sequence of auxiliary distri-
+butions πt on increasing dimensions, whose marginals include the posterior distributions of interest
+deﬁned in (1). The SMC2 algorithm targets this sequence using SMC techniques.
+3.2.
+The MCMC rejuvenation step
+To formally describe this step performed at some iteration t, we must work, as in the previous
+section, on the extended set of variables (θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1). The algorithm is described below; if the
+proposed move is accepted, the set of variables is replaced by the proposed one, otherwise it is left
+unchanged. The algorithm is based on some proposal kernel T(θ, d˜θ) in the θ−dimension, which
+admits probability density T(θ, ˜θ). (The proposal kernel for θ, T(θ, ·), may be chosen as described
+in Section 2.2.)
+(a) Sample ˜θ from proposal kernel, ˜θ ∼T(θ, d˜θ).
+(b) Run a new PF for ˜θ: sample independently (˜x1:Nx
+1:t
+, ˜a1:Nx
+1:t−1) from ψt,˜θ, and compute ˆZt(˜θ, ˜x1:Nx
+1:t
+, ˜a1:Nx
+1:t−1).
+(c) Accept the move with probability
+1 ∧p(˜θ) ˆZt(˜θ, ˜x1:Nx
+1:t
+, ˜a1:Nx
+1:t−1)T(˜θ, θ)
+p(θ) ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)T(θ, ˜θ)
+.
+It directly follows from (7) that this algorithm deﬁnes a standard Hastings-Metropolis kernel
+with proposal distribution
+qθ(˜θ, ˜x1:Nx
+1:t
+, ˜a1:Nx
+1:t
+) = T(θ, ˜θ)ψt,˜θ(˜x1:Nx
+1:t
+, ˜a1:Nx
+1:t
+)
+and admits as invariant distribution the extended distribution πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1). In the broad
+PMCMC framework, this scheme corresponds to the so-called particle Metropolis-Hastings algo-
+rithm (see Andrieu et al., 2010). It is worth pointing out an interesting digression from the PMCMC
+framework. The Markov mutation kernel has to be invariant with respect to πt, but it does not
+necessarily need to produce an ergodic Markov chain, since consistency of Monte Carlo estimates
+is achieved by averaging across many particles and not within a path of a single particle. Hence,
+we can also attempt lower dimensional updates, e.g using a Hastings-within-Gibbs algorithm. The
+advantage of such moves is that they might lead to higher acceptance rates for the same step size
+in the θ-dimension. However, we do not pursue this point further in this article.
+
+PHYSICAL PAGE 9
+SMC2
+9
+3.3.
+PMCMC’s invariant distribution, state inference
+From (8), one may rewrite πt as the marginal distribution of (θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) with respect to an
+extended distribution that would include a uniformly distributed particle index n⋆∈1 : Nx:
+π⋆
+t (n⋆, θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) = p(θ|y1:t)
+N tx
+×
+p(xn⋆
+1:t|θ, y1:t)
+
+
+
+
+
+
+
+Nx
+Y
+i=1
+i̸=hn⋆
+t
+(1)
+q1,θ(xi
+1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tY
+s=2
+Nx
+Y
+i=1
+i̸=hn⋆
+t
+(s)
+W
+ai
+s−1
+s−1,θqs,θ(xi
+s|x
+ai
+s−1
+s−1 )
+
+
+
+
+
+
+
+.
+(9)
+Andrieu et al. (2010) formalise PMCMC algorithms as MCMC algorithms that leaves π⋆
+t invari-
+ant, whereas in the previous section we justiﬁed our PMCMC update as a MCMC step leaving πt
+invariant. This distinction is a mere technicality in the PMCMC context, but it becomes important
+in the sequential context. SMC2 is best understood as an algorithm targetting the sequence (πt):
+deﬁning importance sampling steps between successive versions of π⋆
+t seems cumbersome, as the
+interpretation of n⋆at time t does not carry over to iteration t + 1. This distinction also relates
+to the concept of Rao-Blackwellised (marginalised) particle ﬁlters (Doucet et al., 2000): since πt is
+a marginal distribution with respect to π⋆
+t , targetting πt rather than π⋆
+t leads to more eﬃcient (in
+terms of Monte Carlo variance) SMC algorithms.
+The interplay between πt and π⋆
+t is exploited below and in the following sections in order to fully
+realize the implementation potential of SMC2. As a ﬁrst example, direct inspection of (9) reveals
+that the conditional distribution of n⋆, given θ, x1:Nx
+1:t
+and a1:Nx
+1:t−1, is M(W 1:Nx
+t,θ
+), the multinomial
+distribution that assigns probability W n
+t,θ to outcome n, n ∈1 : Nx. Therefore, weighted samples
+from p(θ, x1:t|y1:t) may be obtained at iteration t as follows:
+(a) For m = 1, . . . , Nθ, draw index n⋆(m) from M(W 1:Nx
+t,θm ).
+(b) Return the weighted sample
+(ωm, θm, xn⋆(m),m
+1:t
+)m∈1:Nθ
+where xn,m
+1:t
+was deﬁned in Proposition 1.
+This temporarily extended particle system can be used in the standard way to make inferences about
+xt (ﬁltering), yt+1 (prediction) or even x1:t (smoothing), under parameter uncertainty. Smoothing
+requires to store all the state variables x1:Nx,1:Nθ
+1:t
+, which is expensive, but ﬁltering and prediction
+may be performed while storing only the most recent state variables, x1:Nx,1:Nθ
+t
+. We discuss more
+thoroughy the memory cost of SMC2, and explain how smoothing may still be carried out at certain
+times, without storing the complete trajectories, in Section 3.7.
+The phrase temporarily extended in the previous paragraph refers to our discussion on the
+diﬀerence between πt and π⋆
+t . By extending the particles with a n⋆component, one temporarily
+change the target distribution, from πt to π⋆
+t . To propagate to time t + 1, one must revert back
+to πt, by simply marginaling out the particle index n⋆. We note however that, before reverting to
+πt, one has the liberty to apply MCMC updates with respect to π⋆
+t . For instance, one may update
+the θ−component of each particle according to the full conditional distribution of θ with respect
+to to π⋆
+t , that is, p(θ|xn⋆
+1:t, y1:t). Of course, this possibility is interesting mostly for those models
+such that p(θ|xn⋆
+1:t, y1:t) is tractable. And, again, this operation may be performed only if all the
+state variables are available in memory.
+3.4.
+Reusing all the x−particles
+The previous section describes an algorithm for obtaining a particle sample (ωm, θm, xn⋆(m),m
+1:t
+)m∈1:Nθ
+that targets p(θ, x1:t|y1:t). One may use this sample to compute, for any test function h(θ, x1:t),
+an estimator of the expectation of h with respect to the target p(θ, x1:t|y1:t):
+1
+PNθ
+m=1 ωm
+Nθ
+X
+m=1
+ωmh(θm, xn⋆(m),m
+1:t
+).
+
+PHYSICAL PAGE 10
+10
+Chopin et al.
+As in Andrieu et al. (2010, Section 4.6), we may deduce from this expression a Rao-Blackwellised
+estimator, by marginalising out n⋆, and re-using all the x-particles:
+1
+PNθ
+m=1 ωm
+Nθ
+X
+m=1
+ωm
+( Nx
+X
+n=1
+W n
+t,θmh(θm, xn,m
+1:t )
+)
+.
+The variance reduction obtained by this Rao-Blackwellisation scheme should depend on the vari-
+ability of h(θm, xn,m
+1:t ) with respect to n.
+For a ﬁxed m, the components xn,m
+1:t (s) of the tra-
+jectories xn,m
+1:t
+are diverse when s is close to t, and degenerate when s is small.
+Thus, this
+Rao-Blackwellisation scheme should be more eﬃcient when h depends mostly on recent state val-
+ues, e.g. h(θ, x1:t) = h(xt), and less eﬃcient when h depends mostly on early state values, e.g.
+h(θ, x1:t) = h(x1).
+3.5.
+Evidence
+The evidence of the data obtained up to time t may be decomposed using the chain rule:
+p(y1:t) =
+tY
+s=1
+p(ys|y1:s−1).
+The IBIS algorithm delivers the weighted averages Ls, for each s = 1, . . . , t, which are Monte Carlo
+estimates of the corresponding factors in the product; see Section 2.2. Thus, it provides an estimate
+of the evidence by multiplying these terms. This can also be achieved via the SMC2 algorithm in
+a similar manner:
+ˆLt =
+1
+PNθ
+m=1 ωm
+Nθ
+X
+m=1
+ωmˆp(yt|y1:t−1, θm)
+where ˆp(yt|y1:t−1, θm) is given in the deﬁnition of the algorithm. It is therefore possible to estimate
+the evidence of the model, at each iteration t, at practically no extra cost.
+3.6.
+Automatic calibration of Nx
+The plain vanilla SMC2 algorithm assumes that Nx stays constant during the complete run. This
+poses two practical diﬃculties. First, choosing a moderate value of Nx that leads to a good per-
+formance (in terms of small Monte Carlo error) is typically diﬃcult, and may require tedious pilot
+runs. As any tuning parameter, it would be nice to design a strategy that determines automatically
+a reasonable value of Nx. Second, Andrieu et al. (2010) show that, in order to obtain reasonable
+acceptance rates for a particle Metropolis-Hastings step, one should take Nx = O(t), where t is the
+number of data-points currently considered. In the SMC2 context, this means that it may make
+sense to use a small value for Nx for the early iterations, and then to increase it regularly. Finally,
+when the variance of the PF estimates depends on θ, it might be interesting to allow Nx to change
+with θ as well.
+The SMC2 framework provides more scope for such adaptation compared to PMCMC. In this
+section we describe two possibilities, which relate to the two main particle MCMC methods, particle
+marginal Metropolis-Hastings and particle Gibbs. The former generates the auxiliary variables
+independently of the current particle system whereas the latter does it conditionally on the current
+system. For this reason the latter yields a new system without changing the weights, which is a
+nice feature, but it requires storing particle histories, which is memory ineﬃcient; see Section 3.7
+for a more thorough discussion of the memory cost of SMC2.
+The schemes for increasing Nx can be integrated into the main SMC2 algorithm along with
+rules for automatic calibration. We propose the following simple strategy. We start with a small
+value for Nx, we monitor the acceptance rate of the PMCMC step and when this rate falls below
+a given threshold, we trigger the “changing Nx” step; for example we multiply Nx by 2.
+
+PHYSICAL PAGE 11
+SMC2
+11
+3.6.1.
+Exchange importance sampling step
+Our ﬁrst suggestion involves a particle exchange. At iteration t, the algorithm has generated so far
+the random variables θ1:Nθ, x1:Nx,1:Nθ
+1:t
+and a1:Nx,1:Nθ
+1:t−1
+and the target distribution is πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1).
+At this stage, one may extend the sampling space, by generating for each particle θm, new PFs
+of size ˜Nx, by simply sampling independently, for each m, the random variables ˜x1: ˜
+Nx,m
+1:t
+, ˜a1: ˜
+Nx,m
+1:t−1
+from ψt,θm. Thus, the extended target distribution is:
+πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)ψt,θ(˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1).
+(10)
+In order to swap the x−particles and the ˜x−particles, we use the generalised importance sampling
+strategy of Del Moral et al. (2006), which is based on an artiﬁcial backward kernel. Using (7), we
+compute the incremental weights
+πt(θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1)Lt
+
+(θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1), (x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+
+πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)ψt,θ(˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1)
+(11)
+=
+ˆZt(θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1)
+ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+×
+Lt
+
+(θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1), (x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+
+ψt,θ(x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+where Lt is a backward kernel density. One then may drop the “old” particles (x1:Nx
+1:t
+, a1:Nx
+1:t−1) in
+order to obtain a new particle system, based on particles (θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1) targetting πt, but with
+˜Nx, x−particles.
+This importance sampling operation is valid under mild assumptions for the backward kernel
+Lt; namely that the support of the denominator of (11) is included in the support of its numerator.
+One easily deduces from Proposition 1 of Del Moral et al. (2006) and (7) that the optimal kernel
+(in terms of minimising the variance of the weights) is
+Lopt
+t
+
+(θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1), (x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+
+= ψt,θ(x1:Nx
+1:t
+, a1:Nx
+1:t−1) ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+p(y1:t|θ)
+.
+This function is intractable, because of the denominator p(y1:t|θ), but it suggests the following
+simple approximation: Lt should be set to ψt,θ, so as to cancel the second ratio, which leads to the
+very simple incremental weight function:
+uexch
+t
+
+θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1
+
+=
+ˆZt(θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1)
+ˆZt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+.
+By default, one may implement this exchange step for all the particles θ1:Nθ, and multiply
+consequently each particle weight ωm with the ratio above. However, it is possible to apply this
+step to only a subset of particles, either selected randomly or according to some deterministic
+criterion based on θ. (In that case, only the weights of the selected particles should be updated.)
+Similarly, one could update certain particles according to a Hastings-Metropolis step, where the
+exchange operation is proposed, and accepted with probabilty the minimum of 1 and the ratio
+above.
+In both cases, one eﬀectively targets a mixture of πt distributions corresponding to diﬀerent
+values of Nx. This does not pose any formal diﬃcutly, because these distributions admit the same
+marginal distributions with respect to the components of interest (θ, and x1:t if the target distri-
+bution is extended as described in Section 3.3), and because the successive importance sampling
+steps (such as either the exchange step above, or Step (b) in the SMC2 Algorithm) correspond to
+ratios of densities that are known up to a constant that does not depend on Nx.
+Of course, in practice, propagating PF of varying size Nx is a bit more cumbersome to imple-
+ment, but it may show useful in particular applications, where for instance the computational cost
+of sampling a new state xt+1, conditional on xt, varies strongly according to θ.
+
+PHYSICAL PAGE 12
+12
+Chopin et al.
+3.6.2.
+Conditional SMC step
+Whereas the exchange steps associates with the target πt, and the particle Metropolis-Hastings
+algorithm, our second suggestion relates to the target π⋆
+t , and to the particle Gibbs algorithm.
+First, one extends the target distribution, from πt to π⋆
+t , by sampling a particle index n⋆, as
+explained in Section 3.3. Then one may apply a conditional SMC step (Andrieu et al., 2010), to
+generate a new particle ﬁlter of size ˜Nx, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1, but conditional on one trajectory being equal
+to xn
+1:t. This amounts to sampling the conditional distribution deﬁned by the two factors in curly
+brackets in (9), which can also be conveniently rewritten as
+N t
+xπ⋆
+t (n⋆, θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1)
+p(θ, xn
+1:t|y1:t)
+.
+We refrain from calling this operation a Gibbs step, because it changes the target distribution
+(and in particular its dimension), from πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t
+) to πt(θ, x1: ˜
+Nx
+1:t
+, a1: ˜
+Nx
+1:t
+). A better formali-
+sation is again in terms of an importance sampling step involving a backward kernel (Del Moral
+et al., 2006), from the proposal distribution, the current target distribution πt times the conditional
+distribution of the newly generated variables:
+π⋆
+t (n⋆, θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)N t
+xπ⋆
+t (n⋆, θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1)
+p(θ, xn
+1:t|y1:t)
+towards target distribution
+π⋆
+t (n⋆, θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1)Lt
+
+(n⋆, θ, ˜x1: ˜
+Nx
+1:t
+, ˜a1: ˜
+Nx
+1:t−1), ·
+
+where Lt is again an arbitrary backward kernel, whose argument, denoted by a dot, is all the
+variables in (x1:Nx
+1:t
+, a1:Nx
+1:t−1), except the variables corresponding to trajectory xn
+1:t. It is easy to see
+that the optimal backward kernel (applying again Proposition 1 of Del Moral et al. 2006) is such
+that the importance sampling ratio equals one. The main drawback of this approach is that it
+requires to store all the state variables x1:Nx,1:Nθ
+1:t
+; see our dicussion of memory cost in Section 3.7.
+3.7.
+Complexity
+3.7.1.
+Memory cost
+In full generality the SMC2 algorithm is memory-intensive: up to iteration t, O(tNθNx) variables
+have been generated and potentially have to be carried forward to the next iteration. We explain
+now how this cost can be reduced to O(NθNx) with little loss of generality.
+Only the variables x1:Nx,1:Nθ
+t−1
+are necessary to carry out Step (a) of the algorithm, while all other
+state variables x1:Nx,1:Nθ
+1:t−2
+can be discarded. Additionally, when Step (c) is carried out as described
+in Section 3.2, ˆZt is the only additional necessary statistic of the particle histories. Thus, the
+typical implementation of SMC2 for sequential parameter estimation, ﬁltering and prediction has
+an O(NθNx) memory cost. The memory cost of the exchange step is also O(NxNθ); more precisely,
+it is O( ˜NxNθ), where ˜Nx is the new size of the PF’s. A nice property of this exchange step is that
+it temporarily regenerates complete trajectories x1: ˜
+Nx,m
+1:t
+, sequentially for m = 1, . . . , M. Thus,
+besides augmenting Nx dynamically, the exchange step can also be used to to carry out operations
+involving complete trajectories at certain pre-deﬁned times, while maintaining a O(Nθ ˜Nx) overall
+cost. Such operations include inference with respect to πt(θ, x1:t), updating θ with respect to the
+full conditional p(θ|x1:t, y1:t), as explained in Section 3.3, or even the conditional SMC update
+descrided in Section 3.6.2.
+3.7.2.
+Stability and computational cost
+Step (c), which requires re-estimating the likelihood, is the most computationally expensive compo-
+nent of SMC2. When this operation is performed at time t, it incurs an O(tNθNx) computational
+cost. Therefore, to study the computational cost of SMC2 we need to investigate the rate at which
+
+PHYSICAL PAGE 13
+SMC2
+13
+ESS drops below a given threshold. This question directly relates to the stability of the ﬁlter, and
+we will work as in Section 3.1 of Chopin (2004) to answer it. Our approach is based on certain
+simplifying assumptions, regularity conditions and a recent result of C´erou et al. (2011) which all
+lead to Proposition 2; the assumptions are discussed in some detail in Appendix B.
+In general, ESS/Nθ < γ, for ESS given in (5), is a standard degeneracy criterion of sequential
+importance sampling due to the fact that the limit of ESS/Nθ as Nθ →∞is equal to the inverse of
+the second moment of the importance sampling weights (normalized to have mean 1). This limiting
+quantity, which we will generically denote by E, is also often called eﬀective sample size since it
+can be interpreted as an equivalent number of independent samples from the target distribution
+(see Section 2.5.3 of Liu, 2008, for details). The ﬁrst simpliﬁcation in our analysis is to study the
+properties of E, rather than its ﬁnite sample estimator ESS/Nθ, and consider an algorithm which
+resamples whenever E < γ.
+Consider now the speciﬁc context of SMC2.
+Let t be a resampling time at which equally
+weighted, independent particles have been obtained, and t + p, p > 0, a future time such that no
+resampling has happened since t. The marginal distribution of the resampled particles at time t is
+only approximately πt due to the burn-in period of the Markov chains which are used to generate
+them.
+The second simplifying assumption in our analysis is that this marginal distribution is
+precisely πt. Under this assumption, the particles at time t + p are generated according to the
+distribution ¯πt,t+p,
+¯πt,t+p(θ, x1:Nx
+1:t+p, a1:Nx
+1:t+p−1) = πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) ψt+p,θ(x1:Nx
+1:t+p, a1:Nx
+1:t+p−1 | x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+and the expected value of the weights ωt+p obtained from (6) is p(y1:t)/p(y1:t+p). Therefore, the
+normalized weights are given by
+p(y1:t)
+p(y1:t+p)
+p
+Y
+i=1
+ˆp(yt+i|y1:t+i−1, θ)
+∆=
+ˆZt+p|t(θ, x1:Nx
+1:t+p, a1:Nx
+1:t+p−1)
+p(yt+1:t+p|y1:t)
+,
+and the inverse of the second moment of the normalized weights in SMC2 and IBIS is given by
+ENx
+t,t+p =
+(
+E¯πt,t+p
+" ˆZt+p|t(θ, x1:Nx
+1:t+p, a1:Nx
+1:t+p−1)2
+p(yt+1:t+p|y1:t)2
+#)−1
+,
+E∞
+t,t+p =
+
+Ep(θ|y1:t)
+p(θ|y1:t+p)2
+p(θ|y1:t)2
+−1
+.
+The previous development leads to the following Proposition which is proved in Appendix B.
+Proposition 2.
+(a) Under Assumptions (H1a) and (H1b) in Appendix B, there exists a
+constant η > 0 such that for any p, if Nx > ηp,
+ENx
+t,t+p ≥1
+2E∞
+t,t+p.
+(12)
+(b) Under Assumptions (H2a)-(H2d) in Appendix B, for any γ > 0 there exist τ, η > 0 and
+t0 < ∞, such that for t ≥t0,
+ENx
+t,t+p ≥γ, for p = ⌈τt⌉, Nx = ⌈ηt⌉.
+The implication of this Proposition is the following: under the assumptions in Appendix B
+and the assumption that the resampling step produces samples from the target distribution, the
+resample steps should be triggered at times
+
+τ k
+, k ≥1, to ensure that the weight degeneracy
+between two successive resampling step stays bounded in the run of the algorithm; at these times
+Nx should be adjusted to Nx =
+
+ητ k
+; thus, the cost of each successive importance sampling step
+is O(Nθτ k), until the next resampling step; a simple calculation shows that the cumulative compu-
+tational cost of the algorithm up to some iteration t is then O(Nθt2). This is to be contrasted with
+a computational cost O(Nθt) for IBIS under a similar set of assumptions. The assumptions which
+lead to this result are restrictive but they are typical of the state of the art for obtaining results
+about the stability of this type of sequential algorithms; see Appendix B for further discussion.
+
+PHYSICAL PAGE 14
+14
+Chopin et al.
+4.
+Numerical illustrations
+An initial study which illustrates SMC2 in a range of examples of moderate diﬃculty is available
+from the second author’s web-page, see http://sites.google.com/site/pierrejacob/, as supplemen-
+tary material. In that study, SMC2 was shown to typically outperform competing algorithms,
+whether in sequential scenarios (where datapoints are obtained sequentially) or in batch scenarios
+(where the only distribution of interest is p(θ, x1:T |y1:T ) for some ﬁxed time horizon T). For in-
+stance, in the former case, SMC2 was shown to provide smaller Monte Carlo errors than the SOPF
+at a given CPU cost. In the latter case, SMC2 was shown to compare favourably to an adaptive
+version of the marginal PMCMC algorithm proposed by Peters et al. (2010).
+In this paper, our objective instead is to take a hammer to SMC2, that is, to evaluate its
+performance on models that are regarded as particularly challenging, even for batch estimation
+purposes. In addition, we treat SMC2 as much as possible as a black box: the number Nx of
+x-particles is augmented dynamically (using the exchange step, see Section 3.6.1), as explained in
+Section 3.6; the move steps are calibrated using the current particles, as described at the end of
+Section 2.2, and so on. The only model-dependent inputs are (a) a procedure for sampling from the
+Markov transition of the model, fθ(xt+1|xt); (b) a procedure for pointwise evaluation the likelihood
+gθ(yt|xt); and (c) a prior distribution on the parameters. This means that the proposal qt,θ is set
+to the default choice fθ(xt+1|xt). This also means that we are able to treat models such that the
+density fθ(xt+1|xt) cannot be computed, even if it may be sampled from; this is the case in the
+ﬁrst application we consider.
+A generic SMC2 software package written in Python and C by the second author is available
+at http://code.google.com/p/py-smc2/.
+4.1.
+Sequential prediction of asset price volatility
+SMC2 is particularly well suited to tackle several of the challenges that arise in the probabilistic
+modelling of ﬁnancial time series: prediction is of central importance; risk management requires
+accounting for parameter and model uncertainty; non-linear models are necessary to capture the
+features in the data; the length of typical time series is large when modelling medium/low frequency
+data and vast when considering high frequency observations.
+We illustrate some of these possibilities in the context of prediction of daily volatility of asset
+prices.
+There is a vast literature on stochastic volatility (SV) models; we simply refer to the
+excellent exposition in Barndorﬀ-Nielsen and Shephard (2002) for references, perspectives and
+second-order properties. The generic framework for daily volatility is as follows. Let st be the
+value of a given ﬁnancial asset (e.g a stock price or an exchange rate) on the t-th day, and yt =
+105/2 log(st/st−1) be the so-called log-returns (the scaling is done for numerical convenience). The
+SV model speciﬁes a state-space model with observation equation:
+yt = µ + βvt + v1/2
+t
+ϵt , t ≥1
+(13)
+where the ϵt is a sequence of independent errors which are assumed to be standard Gaussian. The
+process vt is known as the actual volatility and it is treated as a stationary stochastic process. This
+implies that log-returns are stationary with mixed Gaussian marginal distribution. The coeﬃcient
+β has both a ﬁnancial interpretation, as a risk premium for excess volatility, and a statistical one,
+since for β ̸= 0 the marginal density of log-returns is skewed.
+We consider the class of L´evy driven SV models which were introduced in Barndorﬀ-Nielsen and
+Shephard (2001) and have been intensively studied in the last decade from both the mathematical
+ﬁnance and the statistical community. This family of models is speciﬁed via a continuous-time
+model for the joint evolution of log-price and spot (instantaneous) volatility, which are driven by
+Brownian motion and L´evy process respectively. The actual volatility is the integral of the spot
+volatility over daily intervals, and the continuous-time model translates into a state-space model
+for yt and vt as we show below.
+Details can be found in Sections 2 (for the continuous-time
+speciﬁcation) and 5 (for the state-space representation) of the original article. Likelihood-based
+inference for this class of models is recognized as a very challenging problem, and it has been
+undertaken among others in Roberts et al. (2004); Griﬃn and Steel (2006) and most recently in
+Andrieu et al. (2010) using PMCMC. On the other hand, Barndorﬀ-Nielsen and Shephard (2002)
+
+PHYSICAL PAGE 15
+SMC2
+15
+develop quasi-likelihood methods using the Kalman ﬁlter based on an approximate state-space
+formulation suggested by the second-order properties of the (yt, vt) process.
+Here we focus on models where the background driving L´evy process is expressed in terms of
+a ﬁnite rate Poisson process and consider multi-factor speciﬁcations of such models which include
+leverage. This choice allows the exact simulation of the actual volatility process, and permits direct
+comparisons to the numerical results in Sections 4 of Roberts et al. (2004), 3.2 of Barndorﬀ-Nielsen
+and Shephard (2002) and 6 of Griﬃn and Steel (2006). Additionally, this case is representative
+of a system which can be very easily simulated forwards whereas computation of its transition
+density is considerably involved (see (14) below). The speciﬁcation for the one-factor model is as
+follows. We parametrize the latent process as in Barndorﬀ-Nielsen and Shephard (2002) in terms
+of (ξ, ω2, λ) where ξ and ω2 are the stationary mean and variance of the spot volatility process,
+and λ the exponential rate of decay of its autocorrelation function. The second-order properties
+of vt can be expressed as functions of these parameters, see Section 2.2 of Barndorﬀ-Nielsen and
+Shephard (2002). The state dynamics for the actual volatility are as follows:
+k ∼Poi
+ λξ2/ω2
+,
+c1:k
+iid
+∼U(t, t + 1) ,
+e1:k
+iid
+∼Exp
+ ξ/ω2
+,
+zt+1 = e−λzt +
+k
+X
+j=1
+e−λ(t+1−cj)ej ,
+vt+1 = 1
+λ
+
+zt −zt+1 +
+k
+X
+j=1
+ej
+
+,
+xt+1 = (vt+1, zt+1)′ .
+(14)
+In this representation, zt is the discretely-sampled spot volatility process, and the Markovian
+representation of the state process involves the pair (vt, zt). The random variables (k, c1:k, e1:k)
+are generated independently for each time period, and 1 : k is understood as the empty set when
+k = 0. These system dynamics imply a Γ(ξ2/ω2, ξ/ω2) as stationary distribution for zt. Therefore,
+we take this to be the initial distribution for z0.
+We applied the algorithm to a synthetic data set of length T = 1, 000 (Figure 1(a)) simulated
+with the values µ = 0, β = 0, ξ = 0.5, ω2 = 0.0625, λ = 0.01 which were used also in the
+simulation study of Barndorﬀ-Nielsen and Shephard (2002).
+We launched 5 independent runs
+using Nθ = 1, 000, a ESS threshold set at 50%, and the independent Hastings-Metropolis scheme
+described in Section 2.2. The number Nx was set initially to 100, and increased whenever the
+acceptance rate went below 20% (Figure 1(b)-(c)). Figure 1(d)-(e) shows estimates of the posterior
+marginal distribution of some parameters. Note the impact the large jump in the volatility has on
+Nx, which is systematically (across runs) increased around time 400, and the posterior distribution
+of the parameters of the volatility process, see Figure 1(f).
+It is interesting to compare the numerical performance of SMC2 to that of the SOPF and Liu
+and West (2001)’s particle ﬁlter (referred to as L&W in the following) for this model and data, and
+for a comparable CPU budget. The SOPF, if run with N = 105 particles, collapses to one single
+particle at about t = 700 and is thus completely unusable in this context. L&W is a version of
+SOPF where the θ-components of the particles are diversiﬁed using a Gaussian move that leaves the
+ﬁrst two empirical moments of the particle sample unchanged. This move unfortunately introduces
+a bias which is hard to quantity. We implemented L&W with N = 2 × 105 (x, θ)-particles and
+we set the smoothing parameter h to 10−1; see the Supplement for results with various values
+of h. This number of particles was to chosen to make the computing time of SMC2 and L&W
+comparable, see Figure 2(a). Unsurprisingly, L&W runs are very consistent in terms of computing
+times, whereas those of SMC2 are more variable, mainly because the number of x-particles does
+not reach the same value across the runs and the number of resample-move steps varies. Each of
+these runs took between 1.5 and 7 hours using a simple Python script and only one processing unit
+of a 2008 desktop computer (equipped with an Intel Core 2 Duo E8400). Note that, given that
+these methods could easily be parallelized, the computational cost can be greatly reduced; a 100×
+speed-up is plausible using appropriate hardware.
+Our results suggest that the bias in L&W is signiﬁcant.
+Figure 2(b) shows the posterior
+distribution of ξ, the mean of volatility, at time t = 500, which is about 100 time steps after the
+large jump in volatility at time t = 407. The results for both algorithms are compared to those from
+a long PMCMC run (implemented as in Peters et al., 2010, and detailed in the Supplement) with
+Nx = 500 and 105 iterations. Figure 2(c) reports on the estimation of the log evidence log p(y1:t)
+
+PHYSICAL PAGE 16
+16
+Chopin et al.
+Time
+Squared observations
+0
+2
+4
+6
+8
+200
+400
+600
+800
+1000
+(a)
+Time
+Acceptance rates
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+G
+G
+GG
+G
+G
+G
+G
+G
+G
+G G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+GG
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+GGG
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+GG
+G
+GG
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+GGG
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+GG
+G G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+GG
+G
+G
+GG
+G
+G G
+G
+G
+G
+G
+GG
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+GG
+G
+G
+G G
+G
+G
+G
+G
+G
+G
+G
+0
+200
+400
+600
+800
+1000
+run
+G
+1
+G
+2
+G
+3
+G
+4
+G
+5
+(b)
+Time
+Nx
+500
+1000
+1500
+2000
+2500
+3000
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+0
+200
+400
+600
+800
+1000
+run
+G
+1
+G
+2
+G
+3
+G
+4
+G
+5
+(c)
+µ
+density
+0
+1
+2
+3
+4
+5
+6
+7
+250
+−0.5
+0.0
+0.5
+1.0
+500
+−0.5
+0.0
+0.5
+1.0
+1000
+−0.5
+0.0
+0.5
+1.0
+Run
+1
+2
+3
+4
+5
+(d)
+β
+density
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+250
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+500
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1000
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+Run
+1
+2
+3
+4
+5
+(e)
+ξ
+density
+0
+1
+2
+3
+4
+5
+250
+1
+2
+3
+4
+5
+6
+500
+1
+2
+3
+4
+5
+6
+1000
+1
+2
+3
+4
+5
+6
+Run
+1
+2
+3
+4
+5
+(f)
+Fig. 1. Single-factor stochastic volatility model, synthetic dataset. (a) Squared observations vs time. (b)-(f)
+Results obtained from 5 repeated runs: (b) acceptance rate; (c) Nx vs time; (d) to (f) overlaid kernel density
+estimators of the posterior distribution of µ, β, ξ at different times t = 250, 500, 1000, the vertical dashed line
+indicates the true value and solid red lines the prior density.
+
+PHYSICAL PAGE 17
+SMC2
+17
+for each algorithm, plotting the estimated log evidence of each run minus the mean of the log
+evidence of the 5 SMC2 runs. We see that the log evidence estimated using L&W is systematically
+biased, positively or negatively depending on the time steps, with a large discontinuity at time
+t = 407, which is due to underestimation of the tails of the predictive distribution.
+Time
+Computing time (s)
+5000
+10000
+15000
+20000
+25000
+L&W
+200
+400
+600
+800
+1000
+SMC2
+200
+400
+600
+800
+1000
+Run
+1
+2
+3
+4
+5
+(a)
+ξ
+density
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+L&W
+2
+4
+6
+8
+SMC2
+2
+4
+6
+8
+PMCMC
+2
+4
+6
+8
+Run
+1
+2
+3
+4
+5
+(b)
+Time
+log evidence minus reference
+−2
+−1
+0
+1
+2
+L&W
+200
+400
+600
+800
+SMC2
+200
+400
+600
+800
+Run
+1
+2
+3
+4
+5
+(c)
+Fig. 2.
+Single-factor stochastic volatility model, synthetic dataset, comparison between methods.
+(a)
+Computing time of 5 independent runs of L&W (left) and SMC2 (right) in seconds, against time. (b) Estimation
+of the posterior marginal distribution of mean volatility, ξ. (c) Estimation of the log evidence, the curves
+represent the estimated evidence of each run minus the mean across 5 runs of the log evidence estimated
+using SMC2.
+We now consider models of diﬀerent complexity for the S&P 500 index. The data set is made
+of 753 observations from January 3rd 2005 to December 31st 2007 and it is shown on Figure 3(a).
+We ﬁrst consider a two-factor model, according to which the actual volatility is a sum of two inde-
+pendent components each of which follows a L´evy driven model. Previous research indicates that a
+two-factor model is suﬃciently ﬂexible, whereas more factors do not add signiﬁcantly when consid-
+ering daily data, see for example Barndorﬀ-Nielsen and Shephard (2002); Griﬃn and Steel (2006)
+for L´evy driven models and Chernov et al. (2003) for diﬀusion-driven SV models. We consider one
+component which describes long-term movements in the volatility, with memory parameter λ1, and
+another which captures short-term variation, with parameter λ2 >> λ1. The second component
+allows more freedom in modelling the tails of the distribution of log-returns. The contribution of
+
+PHYSICAL PAGE 18
+18
+Chopin et al.
+Time
+Squared observations
+5
+10
+15
+20
+100
+200
+300
+400
+500
+600
+700
+(a)
+Time
+Acceptance rates
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+G
+GG
+G
+G
+G
+G
+G
+G
+G G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G
+G G
+G
+G
+G
+GG
+G
+GG
+G
+G
+G
+G
+G
+G
+G
+GG
+G
+G
+G
+G
+G
+G
+G
+G
+G G
+G
+G
+G
+G
+G
+G
+GG
+GGG
+G
+G
+GG
+G
+G
+G
+G
+G
+G
+G G
+G
+G
+G
+G
+G
+G
+G
+G
+0
+100
+200
+300
+400
+500
+600
+700
+run
+G
+1
+G
+2
+G
+3
+(b)
+Time
+Log evidence comparison
+−2
+0
+2
+4
+100
+200
+300
+400
+500
+600
+700
+Model:
+Multifactor without leverage
+Multifactor with leverage
+(c)
+Fig. 3.
+(a): the squares of the S&P 500 data from 03/01/2005 to 21/12/2007. (b): acceptance rates of the
+resample-move step for the full model over two independent runs. (c): log-evidence comparison between
+models (relative to the one-factor model).
+the slowly mixing process to the overall mean and variance of the spot volatility is controlled by the
+parameter w ∈(0, 1). Thus, for this model xt = (v1,t, z1,t, v2,t, z2,t) with vt = v1,t+v2,t, where each
+pair (vi,t, zi,t) evolves according to (14) with parameters (wiξ, wiω2, λi) with w1 = w, w2 = 1 −w.
+The system errors are generated by independent sets of variables (ki, ci,1:k, ei,1:k), and z0,i are
+initialized according to the corresponding gamma distributions. Finally, we extend the observa-
+tion equation to capture a signiﬁcant feature observed in returns on stocks: low returns provoke
+increase in subsequent volatility, see for example Black (1976) for an early reference. In parameter
+driven SV models, one generic strategy to incorporate such feedback is to correlate the noise in the
+observation and state processes, see Harvey and Shephard (1996) in the context of the logarithmic
+SV model, and Section 3 of Barndorﬀ-Nielsen and Shephard (2001) for L´evy driven models. We
+take up their suggestion, and re-write the observation equation as
+yt = µ + βvt + v1/2
+t
+ϵt + ρ1
+k1
+X
+j=1
+e1,j + ρ2
+k2
+X
+j=1
+e2,j −ξ(wρ1λ1 + (1 −w)ρ2λ2)
+(15)
+where ei,j are the system error variables involved in the generation of vt and ρi are the leverage
+parameters which we expect to be negative. Thus, in this speciﬁcation we deal with a model with
+a 5-dimensional state and 9 parameters.
+The mathematical tractability of this family of models and the speciﬁcation in terms of station-
+ary and memory parameters allows to a certain extent subjective Bayesian modelling. Nevertheless,
+since the main emphasis here is to evaluate the performance of SMC2 we choose priors that (as we
+verify a posteriori) are rather ﬂat in the areas of high posterior density. Note that the prior for ξ
+and ω2 has to reﬂect the scaling of the log-returns by a multiplicative factor. We take an Exp(1)
+prior for λ1, an Exp(0.5) for λ2 −λ1, thus imposing the identiﬁability constraint λ2 > λ1. We take
+a U(0, 1) prior for w, an Exp(1/5) for ξ and ω2, and Gaussian priors with large variances for the
+observation equation parameters.
+We launch the three models for the S&P 500 data: single factor, multifactor without and with
+leverage; note that multifactor without leverage means the full model, but with ρ1 = ρ2 = 0 in
+(15). We use Nθ = 2000, and Nx is set initially to 100 and then dynamically increases as already
+described. The acceptance rates stay reasonable as illustrated on Figure 3(b). Figure 3(c) shows
+the log evidence log p(y1:t) for the two factor models minus the log evidence for the single factor
+model. Negative values at time t means that the observations favour the single factor model up
+to time t. Notice how the model evidence changes after the big jump in volatility around time
+t = 550. Estimated posterior densities for all parameters are provided in the Supplement.
+4.2.
+Assessing extreme athletic records
+The second application illustrates the potential of SMC2 in smoothing while accounting for pa-
+rameter uncertainty. In particular, we consider state-space models that have been proposed for
+
+PHYSICAL PAGE 19
+SMC2
+19
+the dynamic evolution of athletic records, see for example Robinson and Tawn (1995), Gaetan and
+Grigoletto (2004), Fearnhead et al. (2010b). We analyse the time series of the best times recorded
+for women’s 3000 metres running events between 1976 and 2010. The motivation is to assess to
+which extent Wang Junxia’s world record in 1993 was unusual: 486.11 seconds while the previous
+record was 502.62 seconds. The data is shown in Figure 4(a) and include two observations per year
+y = y1:2, with y1 < y2: y1 is the best annual time and y2 the second best time on the race where
+y1 was recorded. The data is available from http://www.alltime-athletics.com/ and it is further
+discussed in the aforementioned articles. A further fact that sheds doubt on the record is that the
+second time for 1993 corresponds to an athlete from the same team as the record holder.
+We use the same modelling as Fearnhead et al. (2010b). The observations follow a generalized
+extreme value (GEV) distribution for minima, with cumulative distribution function G deﬁned by:
+G(y|µ, ξ, σ) = 1 −exp
+"
+−
+
+1 −ξ
+y −µ
+σ
+−1/ξ
++
+#
+(16)
+where µ, ξ and σ are respectively the location, shape and scale parameters, and {·}+ = max(0, ·).
+We denote by g the associated probability density function.
+The support of this distribution
+depends on the parameters; e.g. if ξ < 0, g and G are non-zero for y > µ + σ/ξ. The probability
+density function for y = y1:2 is given by:
+g(y1:2|µ, ξ, σ) = {1 −G(y2|µ, ξ, σ)}
+2
+Y
+i=1
+g(yi|µ, ξ, σ)
+1 −G(yi|µ, ξ, σ)
+(17)
+subject to y1 < y2. The location µ is not treated as a parameter but as a smooth second-order
+random walk process:
+xt = (µt, ˙µt)′ ,
+xt+1 | xt, ν ∼N (Fxt, Q) ,
+F =
+1
+1
+0
+1
+
+and Q = ν2
+1/3
+1/2
+1/2
+1
+
+(18)
+To complete the model speciﬁcation we set a diﬀuse initial distribution N(520, 102) on µ0. Thus
+we deal with bivariate observations in time yt = yt,1:2, a state-space model with non-Gaussian
+observation density given in (17), a two-dimensional state process given in (18), and a 3-dimensional
+unknown parameter vector, θ = (ν, ξ, σ). We choose independent exponential prior distributions
+on ν and σ with rate 0.2. The sign of ξ has determining impact on the support of the observation
+density, and the computation of extremal probabilities. For this application, given the form of
+(16) and the fact that the observations are necessarily bounded from below, it makes sense to
+assume that ξ ≤0, hence we take an exponential prior distribution on −ξ with rate 0.5. (We also
+tried a N(0, 32) prior, which had some moderate impact on the estimates presented below, but the
+corresponding results are not reported here.)
+The data we will use in the analysis exclude the two times recorded on 1993. Thus, in an abuse
+of notation y1976:2010 below refers to the pairs of times for all years but 1993, and in the model we
+assume that there was no observation for that year. Formally we want to estimate probabilities
+py
+t = P(yt ≤y|y1976:2010) =
+Z
+Θ
+Z
+X
+G(y|µt, θ)p(µt|y1976:2010, θ)p(θ|y1976:2010) dµtdθ
+where the smoothing distribution p(µt|y1976:2010, θ) and the posterior distribution p(θ|y1976:2010)
+appear explicitly; below we also consider the probabilities conditionally on the parameter values,
+rather than integrating over those. The interest lies in p486.11
+1993 , p502.62
+1993
+and pcond
+t
+:= p486.11
+t
+/p502.62
+t
+,
+which is the probability of observing at year t Wang Junxia’s record given that we observe a better
+time than the previous world record. The rationale for using this conditional probability is to take
+into account the exceptional nature of any new world record.
+The algorithm is launched 10 times with Nθ = 1, 000 and Nx = 250.
+The resample-move
+steps are triggered when the ESS goes below 50%, as in the previous example, and the proposal
+distribution used in the move steps is an independent Gaussian distribution ﬁtted on the particles.
+The computing time of each of the 10 runs varies between 30 and 70 seconds (using the same
+machine as in the previous section), which is why we allowed ourselves to use a fairly large number
+
+PHYSICAL PAGE 20
+20
+Chopin et al.
+of particles compared to the small time horizon. Figure 4(b) represents the estimates ˆpy
+t at each
+year, for y = 486.11 (lower box-plots) and y = 502.62 (upper box-plots), as well as ˆpcond
+t
+=
+ˆp486.11
+t
+/ˆp502.62
+t
+(middle box-plots). The box-plots show the variability across the independent runs
+of the algorithm, and the lines connect the mean values computed across independent runs at each
+year. The mean value of ˆpcond
+1993 over the runs is 9.4 · 10−4 and the standard deviation over the runs
+is 3.3 · 10−4. Note that the estimates ˆpy
+t are computed using the smoothing algorithm described in
+Section 3.3.
+The second row of Figure 4 shows the posterior distributions of the three parameters (ν, ξ, σ)
+using kernel density estimations of the weighted θ-particles. The density estimators obtained for
+each run are overlaid to show the consistency of the results over independent runs. The prior
+density function (full line) is nearly ﬂat over the region of high posterior mass. The third row of
+Figure 4 shows scatter plots of the probabilities G(y|µn⋆(m)
+1993 , θm) against the parameters θm. The
+triangles represent these probabilities for y = 486.11 while the circles represent the probabilities
+for y = 502.62. The cloud of points at the bottom of these plots correspond to parameters θm for
+which the probability G(486.11|µn⋆(m)
+1993 , θm) is exactly 0.
+5.
+Extensions
+In this paper, we developed an “exact approximation” of the IBIS algorithm, that is, an ideal
+SMC algorithm targetting the sequence πt(θ) = p(θ|y1:t), with incremental weight πt(θ)/πt−1(θ) =
+p(yt|y1:t−1, θ). The phrase “exact approximation”, borrowed from Andrieu et al. (2010), refers to
+the fact that our approach targets the exact marginal distributions, for any ﬁxed value Nx.
+5.1.
+Intractable densities
+We have argued that SMC2 can cope with state-space models with intractable transition densities
+provided these can be simulated from. More generally, it can cope with intractable transition of
+observation densities provided they can be unbiasedly estimated. Filtering for dynamic models with
+intractable densities for which unbiased estimators can be computed was discussed in Fearnhead
+et al. (2008). It was shown that replacing these densities by their unbiased estimators is equivalent
+to introducing additional auxiliary variables in the state-space model. SMC2 can directly be applied
+in this context by replacing these terms by the unbiased estimators to obtain sequential state and
+parameter inference for such models.
+5.2.
+SMC2 for tempering
+A natural question is whether we can construct other types of SMC2 algorithms, which would be
+“exact approximations” of diﬀerent SMC strategies. Consider for instance, again for a state-space
+model, the following geometric bridge sequence (in the spirit of e.g. Neal, 2001), which allows for
+a smooth transition from the prior to the posterior:
+πt(θ) ∝p(θ) {p(y1:T |θ)}γt ,
+γt = t/L,
+where L is the total number of iterations. As pointed out by one referee, see also Fulop and Duan
+(2011), it is possible to derive some sort of SMC2 algorithm that targets iteratively the sequence
+πt(θ) ∝p(θ) {ˆp(y1:T |θ)}γt ,
+γt = t/L,
+where ˆp(y1:T |θ) is a particle ﬁltering estimate of the likelihood. Note that {ˆp(y1:T |θ)}γt is not an
+unbiased estimate of {p(y1:T |θ)}γt when γt ∈(0, 1). This makes the interpretation of the algorithm
+more diﬃcult, as it cannot be analysed as a noisy, unbiased, version of an ideal algorithm. In
+particular, Proposition 2 on the complexity of SMC2 cannot be easily extended to the tempering
+case. It is also less ﬂexible in terms of PMCMC steps: for instance, it is not possible to implement
+the conditional SMC step described in Section 3.6.2, or more generally a particle Gibbs step,
+because such steps rely on the mixture representation of the target distribution, where the mixture
+index is some selected trajectory, see (9), and this representation does not hold in the tempering
+
+PHYSICAL PAGE 21
+SMC2
+21
+Year
+Times (seconds)
+480
+490
+500
+510
+520
+530
+1980
+1985
+1990
+1995
+2000
+2005
+2010
+(a)
+Year
+Probability
+10−5
+10−4
+10−3
+10−2
+10−1
+G
+G
+G
+1980
+1985
+1990
+1995
+2000
+2005
+2010
+(b)
+ν
+Density
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+1
+2
+3
+4
+5
+6
+(c)
+ξ
+Density
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+−0.8
+−0.6
+−0.4
+−0.2
+(d)
+σ
+Density
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+3
+4
+5
+6
+(e)
+(f)
+(g)
+(h)
+Fig. 4. Athletics records. (a) Best two times of each year, in women’s 3000 metres events between 1976 and
+2010; (b) box-plots over 10 runs of SMC2 of estimates of the probability of interest (top) p502.62
+t
+, (middle) pcond
+t
+and (bottom) p486.11
+t
+; the y-axis is in log scale and the dotted line indicates the year 1993; (c)-(e) posterior
+distribution of the parameters approximated by SMC2, with results of 10 independent runs overlaid on each
+plot and where the full line represents the prior density function; (f)-(h) probability of observing at year 1993 a
+recorded time less than 486.11 seconds (blue triangles, lower cloud of points) and less than 502.62 seconds
+(red circles, upper cloud of points) against the components of θ, where point sizes and transparencies are
+proportional to the weights of the θ-particles.
+
+PHYSICAL PAGE 22
+22
+Chopin et al.
+case. More importantly, this tempering strategy does not make it possible to perform sequential
+analysis as the SMC2 algorithm discussed in this paper.
+The fact remains that this tempering strategy may prove useful in certain non-sequential sce-
+narios, as suggested by the numerical examples of Fulop and Duan (2011). It may be used also for
+determining MAP (maximum a posteriori) estimators, and in particular the maximum likelihood
+estimator (using a ﬂat prior), by letting γt →+∞.
+Acknowledgements
+N. Chopin is supported by the ANR grant ANR-008-BLAN-0218 “BigMC” of the French Ministry
+of research. P.E. Jacob is supported by a PhD fellowship from the AXA Research Fund. O. Pa-
+paspiliopoulos would like to acknowledge ﬁnancial support by the Spanish government through
+a “Ramon y Cajal” fellowship and grant MTM2009-09063. The authors are thankful to Arnaud
+Doucet (University of Oxford), Peter M¨uller (UT Austin), Gareth W. Peters (UCL) and the referees
+for useful comments.
+References
+Andrieu, C., Doucet, A., and Holenstein, R. (2010). Particle Markov chain Monte Carlo methods.
+J. R. Statist. Soc. B, 72(3):269–342.
+Andrieu, C. and Roberts, G. (2009).
+The pseudo-marginal approach for eﬃcient Monte Carlo
+computations. The Annals of Statistics, 37(2):697–725.
+Barndorﬀ-Nielsen, O. E. and Shephard, N. (2001). Non-Gaussian Ornstein-Uhlenbeck-based models
+and some of their uses in ﬁnancial economics. J. R. Stat. Soc. Ser. B Stat. Methodol., 63(2):167–
+241.
+Barndorﬀ-Nielsen, O. E. and Shephard, N. (2002).
+Econometric analysis of realized volatility
+and its use in estimating stochastic volatility models. J. R. Stat. Soc. Ser. B Stat. Methodol.,
+64(2):253–280.
+Black, F. (1976). Studies of stock price volatility changes. In Proceedings of the 1976 meetings
+of the business and economic statistics section, American Statistical Association, volume 177,
+page 81.
+Capp´e, O., Guillin, A., Marin, J. M., and Robert, C. (2004). Population Monte Carlo. J. Comput.
+Graph. Statist., 23:907–929.
+Capp´e, O., Moulines, E., and Ryd´en, T. (2005). Inference in Hidden Markov Models. Springer-
+Verlag, New York.
+Carpenter, J., Cliﬀord, P., and Fearnhead, P. (1999). Improved particle ﬁlter for nonlinear prob-
+lems. IEE Proc. Radar, Sonar Navigation, 146(1):2–7.
+Carvalho, C., Johannes, M., Lopes, H., and Polson, N. (2010). Particle learning and smoothing.
+Statistical Science, 25(1):88–106.
+C´erou, F., Del Moral, P., and Guyader, A. (2011). A nonasymptotic theorem for unnormalized
+Feynman–Kac particle models. Ann. Inst. Henri Poincarr´e, 47(3):629–649.
+Chernov, M., Ronald Gallant, A., Ghysels, E., and Tauchen, G. (2003). Alternative models for
+stock price dynamics. Journal of Econometrics, 116(1-2):225–257.
+Chopin, N. (2002). A sequential particle ﬁlter for static models. Biometrika, 89:539–552.
+Chopin, N. (2004). Central Limit Theorem for sequential Monte Carlo methods and its application
+to Bayesian inference. Ann. Stat., 32(6):2385–2411.
+
+PHYSICAL PAGE 23
+SMC2
+23
+Chopin, N. (2007). Inference and model choice for sequentially ordered hidden Markov models. J.
+R. Statist. Soc. B, 69(2):269–284.
+Crisan, D. and Doucet, A. (2002). A survey of convergence results on particle ﬁltering methods
+for practitioners. IEEE J. Sig. Proc., 50(3):736–746.
+Del Moral, P. (2004). Feynman-Kac Formulae. Springer.
+Del Moral, P., Doucet, A., and Jasra, A. (2006). Sequential Monte Carlo samplers. Journal of the
+Royal Statistical Society: Series B (Statistical Methodology), 68(3):411–436.
+Del Moral, P. and Guionnet, A. (1999). Central limit theorem for nonlinear ﬁltering and interacting
+particle systems. Ann. Appl. Prob., 9:275–297.
+Douc, R. and Moulines, E. (2008).
+Limit theorems for weighted samples with applications to
+sequential Monte Carlo methods. Ann. Statist., 36(5):2344–2376.
+Doucet, A., de Freitas, N., and Gordon, N. J. (2001). Sequential Monte Carlo Methods in Practice.
+Springer-Verlag, New York.
+Doucet, A., Godsill, S., and Andrieu, C. (2000). On sequential Monte Carlo sampling methods for
+Bayesian ﬁltering. Statist. Comput., 10(3):197–208.
+Doucet, A., Kantas, N., Singh, S., and Maciejowski, J. (2009). An overview of Sequential Monte
+Carlo methods for parameter estimation in general state-space models. In Proceedings IFAC
+System Identiﬁcation (SySid) Meeting.
+Doucet, A., Poyiadjis, G., and Singh, S. (2011). Sequential Monte Carlo computation of the score
+and observed information matrix in state-space models with application to parameter estimation.
+Biometrika, 98:65–80.
+Fearnhead, P. (2002). MCMC, suﬃcient statistics and particle ﬁlters. Statist. Comput., 11:848–862.
+Fearnhead, P., Papaspiliopoulos, O., Roberts, G., and Stuart, A. (2010a). Random weight particle
+ﬁltering of continuous time processes. J. R. Stat. Soc. Ser. B Stat. Methodol., 72:497–513.
+Fearnhead, P., Papaspiliopoulos, O., and Roberts, G. O. (2008).
+Particle ﬁlters for partially
+observed diﬀusions. J. R. Statist. Soc. B, 70:755–777.
+Fearnhead, P., Wyncoll, D., and Tawn, J. (2010b). A sequential smoothing algorithm with linear
+computational cost. Biometrika, 97(2):447.
+Fulop, A. and Duan, J. (2011). Marginalized sequential monte carlo samplers. Technical report,
+SSRN 1837772.
+Fulop, A. and Li, J. (2011). Robust and eﬃcient learning: A marginalized resample-move approach.
+Technical report, SSRN 1724203.
+Gaetan, C. and Grigoletto, M. (2004). Smoothing sample extremes with dynamic models. Extremes,
+7(3):221–236.
+Gilks, W. R. and Berzuini, C. (2001).
+Following a moving target - Monte Carlo inference for
+dynamic Bayesian models. J. R. Statist. Soc. B, 63:127–146.
+Gordon, N. J., Salmond, D. J., and Smith, A. F. M. (1993). Novel approach to nonlinear/non-
+Gaussian Bayesian state estimation. IEE Proc. F, Comm., Radar, Signal Proc., 140(2):107–113.
+Griﬃn, J. and Steel, M. (2006). Inference with non-Gaussian Ornstein-Uhlenbeck processes for
+stochastic volatility. Journal of Econometrics, 134(2):605–644.
+Harvey, A. and Shephard, N. (1996). Estimation of an asymmetric stochastic volatility model for
+asset returns. Journal of Business & Economic Statistics, 14(4):429–434.
+
+PHYSICAL PAGE 24
+24
+Chopin et al.
+Jasra, A., Stephens, D., and Holmes, C. (2007). On population-based simulation for static inference.
+Statistics and Computing, 17(3):263–279.
+Kim, S., Shephard, N., and Chib, S. (1998). Stochastic volatility: likelihood inference and com-
+parison with ARCH models. Rev. Econ. Studies, 65(3):361–393.
+Kitagawa, G. (1998). A self-organizing state-space model. J. Am. Statist. Assoc., 93:1203–1215.
+Koop, G. and Potter, S. M. (2007). Forecasting and estimating multiple change-point models with
+an unknown number of change-points. Review of Economic Studies, 74:763 – 789.
+K¨unsch, H. (2001). State space and hidden Markov models. In Barndorﬀ-Nielsen, O. E., Cox,
+D. R., and Kl¨uppelberg, C., editors, Complex Stochastic Systems, pages 109–173. Chapman and
+Hall.
+Liu, J. and Chen, R. (1998). Sequential Monte Carlo methods for dynamic systems. J. Am. Statist.
+Assoc., 93:1032–1044.
+Liu, J. and West, M. (2001). Combined parameter and state estimation in simulation-based ﬁlter-
+ing. In Doucet, A., de Freitas, N., and Gordon, N. J., editors, Sequential Monte Carlo Methods
+in Practice, pages 197–223. Springer-Verlag.
+Liu, J. S. (2008). Monte Carlo strategies in scientiﬁc computing. Springer Series in Statistics.
+Springer, New York.
+Neal, R. M. (2001). Annealed importance sampling. Statist. Comput., 11:125–139.
+Oudjane, N. and Rubenthaler, S. (2005). Stability and uniform particle approximation of nonlinear
+ﬁlters in case of non ergodic signals. Stochastic Analysis and applications, 23:421–448.
+Papaspiliopoulos, O., Roberts, G. O., and Sk¨old, M. (2007).
+A general framework for the
+parametrization of hierarchical models. Statist. Sci., 22(1):59–73.
+Peters, G., Hosack, G., and Hayes, K. (2010). Ecological non-linear state space model selection via
+adaptive particle markov chain monte carlo. Arxiv preprint arXiv:1005.2238.
+Roberts, G. O., Papaspiliopoulos, O., and Dellaportas, P. (2004).
+Bayesian inference for non-
+Gaussian Ornstein-Uhlenbeck stochastic volatility processes.
+J. R. Stat. Soc. Ser. B Stat.
+Methodol., 66(2):369–393.
+Robinson, M. and Tawn, J. (1995). Statistics for exceptional athletics records. Applied Statistics,
+44(4):499–511.
+Silva, R., Giordani, P., Kohn, R., and Pitt, M. (2009). Particle ﬁltering within adaptive Metropolis
+Hastings sampling. Arxiv preprint arXiv:0911.0230.
+Storvik, G. (2002). Particle ﬁlters for state-space models with the presence of unknown static
+parameters. IEEE Transaction on Signal Processing, 50:281–289.
+Whiteley, N. (2011). Stability properties of some particle ﬁlters. Arxiv preprint arXiv:1109.6779.
+Appendix A: Proof of Proposition (1)
+We remark ﬁrst that ψt,θ may be rewritten as follows:
+ψt,θ(x1:Nx
+1:t
+, a1:Nx
+1:t−1) =
+( Nx
+Y
+n=1
+q1,θ (xn
+1)
+) ( tY
+s=2
+Nx
+Y
+n=1
+W
+an
+s−1
+s−1,θqs,θ
+
+xn
+s |x
+an
+s−1
+s−1
+)
+.
+
+PHYSICAL PAGE 25
+SMC2
+25
+Starting from (7) and (3), one obtains
+πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+=
+p(θ)ψt,θ(x1:Nx
+1:t
+, a1:Nx
+1:t−1)
+N txp(y1:t)
+tY
+s=1
+( Nx
+X
+n=1
+ws,θ(x
+an
+s−1
+s−1 , xn
+s )
+)
+=
+p(θ)
+N txp(y1:t)
+Nx
+X
+n=1
+"
+wt,θ(x
+an
+t−1
+t−1 , xn
+t )
+( Nx
+Y
+i=1
+q1,θ(xi
+1)
+)
+( tY
+s=2
+Nx
+Y
+i=1
+W
+ai
+s−1
+s−1,θqs,θ(xi
+s|x
+ai
+s−1
+s−1 )
+) t−1
+Y
+s=1
+( Nx
+X
+i=1
+ws,θ(x
+ai
+s−1
+s−1 , xi
+s)
+) #
+by distributing the ﬁnal product in the ﬁrst line, and using the convention that w1,θ(xan
+0
+0 , xn
+1) =
+w1,θ(xn
+1).
+To obtain (8), we consider the summand above, for a given value of n, and put aside the random
+variables that correspond to the state trajectory xn
+1:t. We start with xn
+1:t(t) = xn
+t , and note that
+wt,θ(x
+an
+t−1
+t−1 , xn
+t )qt,θ(xn
+t |x
+an
+t−1
+t−1 )
+=
+fθ(xn
+t |x
+an
+t−1
+t−1 )gθ(yt|xn
+t )
+=
+fθ (xn
+1:t(t)|xn
+1:t(t −1)) gθ (yt|xn
+1:t(t)) ,
+and that
+W
+an
+t−1
+t−1,θ
+( Nx
+X
+i=1
+wt−1,θ(x
+ai
+t−2
+t−2 , xi
+t−1)
+)
+= wt−1,θ (xn
+1:t(t −2), xn
+1:t(t −1)) .
+Thus, the summand in the expression of πt above may be rewritten as
+wt−1,θ(xn
+1:t(t −2), xn
+1:t(t −1))fθ (xn
+1:t(t)|xn
+1:t(t −1)) gθ (yt|xn
+1:t(t))
+( Nx
+Y
+i=1
+q1,θ(xi
+1)
+)
+×
+(t−1
+Y
+s=2
+Nx
+Y
+i=1
+W
+ai
+s−1
+s−1,θqs,θ(xi
+s|x
+ai
+s−1
+s−1 )
+)
+
+
+
+
+
+
+
+Nx
+Y
+i=1
+i̸=hn
+t (n)
+W
+ai
+t−1
+t−1,θqt,θ(xi
+t|x
+ai
+t−1
+t−1 )
+
+
+
+
+
+
+
+t−1
+Y
+s=2
+( Nx
+X
+i=1
+ws−1,θ(x
+an
+s−2
+s−2 , xi
+s−1)
+)
+.
+By applying recursively, for s = t −1, . . . , 1 the same type of substitutions, that is,
+ws (xn
+1:t(s −1), xn
+1:t(s)) qs,θ(xhn
+t (s)
+s
+|xhn
+t (s−1)
+s−1
+)
+=
+fθ (xn
+1:t(s)|xn
+1:t(s −1)) gθ (ys|xn
+1:t(s)) ,
+w1 (xn
+1(1)) q1,θ(xhn
+t (1)
+1
+)
+=
+µθ (xn
+1:t(1)) gθ (y1|xn
+1:t(1)) ,
+and, for s ≥2,
+W
+an
+s−1
+s−1,θ
+( Nx
+X
+i=1
+ws−1,θ(x
+ai
+s−2
+s−2 , xi
+s−1)
+)
+= ws−1,θ (xn
+1:t(s −2), xn
+1:t(s −1)) .
+and noting that
+p(θ, xn
+1:t, y1:t)
+=
+p(y1:t)p(θ|y1:t)p(xn
+1:t|y1:t, θ)
+=
+p(θ)
+tY
+s=1
+{fθ (xn
+1:t(s)|xn
+1:t(s −1)) gθ (ys|xn
+1:t(s))} ,
+where p(θ, xn
+1:t, y1:t) stands for the joint probability density deﬁned by the model, for the triplet of
+random variables (θ, x1:t, y1:t), evaluated at x1:t = xn
+1:t, one eventually gets:
+πt(θ, x1:Nx
+1:t
+, a1:Nx
+1:t−1) = p(θ|y1:t)×
+1
+N tx
+Nx
+X
+n=1
+p(xn
+1:t|θ, y1:t)
+
+
+
+
+
+
+
+Nx
+Y
+i=1
+i̸=hn
+t (1)
+q1,θ(xi
+1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tY
+s=2
+Nx
+Y
+i=1
+i̸=hn
+t (s)
+W
+ai
+s−1
+s−1,θqs,θ(xi
+s|x
+ai
+s−1
+s−1 )
+
+
+
+
+
+
+
+.
+
+PHYSICAL PAGE 26
+26
+Chopin et al.
+Appendix B: Proof of Proposition 2 and discussion of assumptions
+Since p(θ|y1:t) is the marginal distribution of ¯πt,t+p, by iterated conditional expectation we get:
+p(yt+1:t+p|y1:t)2
+ENx
+t,t+p
+=
+Ep(θ|y1:t)
+h
+E¯πt,t+p(·|θ)
+n
+ˆZ2
+t+p|t(θ, x1:Nx
+1:t+p, a1:Nx
+1:t+p−1)
+oi
+=
+Ep(θ|y1:t)
+h
+Eπt(·|θ)
+n
+Eψt+p|t(·|x1:Nx
+1:t
+,a1:Nx
+1:t−1θ)
+n
+ˆZ2
+t+p|t(θ, x1:Nx
+1:t+p, a1:Nx
+1:t+p−1)
+ooi
+.
+To study the inner expectation, we make the following ﬁrst set of assumptions:
+(H1a) For all θ ∈Θ, and x, x′, x′′ ∈X,
+fθ(x|x′)
+fθ(x|x′′) ≤β.
+(H1b) For all θ ∈Θ, x, x′ ∈X, y ∈Y,
+gθ(y|x)
+gθ(y|x′) ≤δ.
+Under these assumptions, one obtains the following non-asymptotic bound.
+Proposition 3 (Theorem 1.5 of C´erou et al. (2011)). For Nx ≥βδp,
+Eψt+p|t(·|x1:Nx
+1:t
+,a1:Nx
+1:t−1θ)
+( ˆZ2
+t+p|t(θ, x1:Nx
+1:t+p, a1:Nx
+1:t+p−1)
+p(yt+1:t+p|y1:t, θ)2
+)
+−1 ≤4βδ p
+Nx
+.
+The Proposition above is taken from C´erou et al. (2011), up to some change of notations and a
+minor modiﬁcation: C´erou et al. (2011) establish this result for the likelihood estimate ˆZt, obtained
+by running a particle from time 1 to time t. However, their proof applies straightforwardly to the
+partial likelihood estimate ˆZt+p|t, obtained by running a particle ﬁlter from time t + 1 to time
+t + p, and therefore with initial distribution η0 set to the mixture of Dirac masses at the particle
+locations at time t. We note in passing that Assumptions (H1a) and (H1b) may be loosened up
+slightly, see Whiteley (2011). A direct consequence of Proposition 3, the main deﬁnitions and the
+iterated expectation is Proposition 2(a) for η = 4βδ.
+Proposition 2(b) requires a second set of conditions taken from Chopin (2002). These relate to
+the asymptotic behaviour of the marginal posterior distribution p(θ|y1:t) and they have been used
+to study the weight degeneracy of IBIS. Let lt(θ) = log p(y1:t|θ). The following assumptions hold
+almost surely.
+(H2a) The MLE ˆθt (the mode of function lt(θ)) exists and converges to θ0 as n →+∞.
+(H2b) The observed information matrix deﬁned as
+Σt = −1
+t
+∂lt(ˆθt)
+∂θ∂θ′
+is positive deﬁnite and converges to I(θ0), the Fisher information matrix.
+(H2c) There exists ∆such that, for δ ∈(0, ∆),
+lim sup
+t→+∞
+
+1
+t
+sup
+∥θ−ˆθt∥>δ
+n
+lt(θ) −lt(ˆθt)
+o
+
+< 0.
+(H2d) The function lt/t is six-times continuously diﬀerentiable, and its derivatives of order six are
+bounded relative to t over any compact set Θ′ ⊂Θ.
+
+PHYSICAL PAGE 27
+SMC2
+27
+Under these conditions one may apply Theorem 1 of Chopin (2002) (see also Proof of Theorem
+4 in Chopin, 2004) to conclude that E∞
+t,t+p ≥2γ for a given γ > 0 and t large enough, provided
+p = ⌈τt⌉for some τ > 0 (that depends on γ). Together with Proposition 2(a) and by a small
+modiﬁcation of the Proof of Theorem 4 in Chopin (2004) to ﬁx γ instead of τ, we obtain Proposition
+2(b) provided Nx = ⌈ηt⌉, and η = 4βδ.
+Note that (H2a) and (H2b) essentially amount to establishing that the MLE has a standard
+asymptotic behaviour (such as in the IID case). This type of results for state-space models is
+far from trivial, owning among other things to the intractable nature of the likelihood p(y1:t|θ).
+A good entry in this ﬁeld is Chapter 12 of Capp´e et al. (2005), where it can be seen that the
+ﬁrst set of conditions above, (H1a) and (H2b), are suﬃcient conditions for establishing (H2a) and
+(H2b), see in particular Theorem 12.5.7 page 465. Condition (H2d) is trivial to establish, if one
+assumes bounds similar to those in (H1a) and (H1b) for the derivatives of gθ and fθ. Condition
+(H2c) is harder to establish. We managed to prove that this condition holds for a very simple
+linear Gaussian model; notes are available from the ﬁrst author. Independent work by Judith
+Rousseau and Elisabeth Gassiat is currently carried out on the asymptotic properties of posterior
+distributions of state-space models, where (H2c) is established under general conditions (personal
+communication).
+The implication of Proposition 2 to the stability of SMC2 is based on the additional assump-
+tion that after resampling at time t we obtain exact samples from πt. In practice, this is only
+approximately true since an MCMC scheme is used to sample new particles. This assumption also
+underlies the analysis of IBIS in Chopin (2002), where it was demonstrated empirically (see e.g.
+Fig. 1(a) in that paper) that the MCMC kernel which updates the θ particles has a stable eﬃ-
+ciency over time since it uses the population of θ-particles to design the proposal distribution. We
+also observe empirically that the performance of the PMCMC step does not deteriorate over time
+provided Nx is increased appropriately, see for example Figure 1(b). It is important to establish
+such a result theoretically, i.e., that the total variation distance of the PMCMC kernel from the
+target distribution remains bounded over time provided Nx is increased appropriately. Note that
+a fundamental diﬀerence between IBIS and SMC2 is that respect is that in the latter the MCMC
+step targets distributions in increasing dimensions as time increases. Obtaining such a theoretical
+result is a research project on its own right, since such quantitative results lack, to the best of our
+knowledge, from the existing literature. The closest in spirit is Theorem 6 in Andrieu and Roberts
+(2009) which, however, holds for “large enough” Nx, instead of providing a quantiﬁcation of how
+large Nx needs to be.

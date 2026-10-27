@@ -1,0 +1,14 @@
+"""Exact retained versions; scan text is explicitly not technical OCR."""
+EU = 'docs/design/research/p08-v3-preparation/'
+BOOT = 'data/accounting-master/p17-completion-20261014/P17-09/reserving-bootstrap/'
+CONS = 'data/accounting-master/p17-completion-20261014/P17-09/bootstrap-consistency/'
+MAN = 'docs/design/proposal/manuscript-insurance-branches-20261015/sections/'
+SOURCES = {
+ 'transition': dict(raw=EU+'eu-2023-1803-original.pdf', raw_sha='e4fde71d4db44ef7c6c74055a564c8cb071340442b63185ff1700c86a64579e5', text=EU+'eu-2023-1803-original.txt', text_sha='37f207b1ecdde43e3971cf076f127576d3d7810c791385ba5b1c35f110f17664', methods=[MAN+'insurance-methods.tex'], anchors=['IFRS17.C2-C6.C5A.C5B.C25','IFRS17.C20-C20B']),
+ 'estimation': dict(raw=BOOT+'sources/england2001-addendum.pdf', raw_sha='4350316d04a31942c0050433620d4ae9b31cc521ec00b74084997b53c7e9e64d', text=BOOT+'sources/england2001-addendum.txt', text_sha='9956a7ccf45890e9891e7fa363e0f0e97bbe533a8ca4598df8e8f72e7b475e29', methods=[BOOT+'inspection.md','docs/design/proposal/methods/reserving-bootstrap-20261014.md'], anchors=['England2001.2-3.AppendixA','Local.finite-law-derivation']),
+ 'backward': dict(raw=CONS+'sources/steinmetz2024-published.pdf', raw_sha='5dda55876179bfcabada2326261a24b2f7ee40091f59e0a026b01e3f6e45b4a3', text=CONS+'sources/steinmetz2024-published-layout.txt', text_sha='62d91c8104cf9e23d7cd4995ab58a7b07e67ebee8893e0ab8042393cf5b7f98a', methods=[CONS+'inspection.md',MAN+'bootstrap-consistency.tex'], anchors=['Steinmetz2024.5.1.6.2.AppendixC','Local.Bayes.reserve-center']),
+ 'cdr': dict(raw=BOOT+'sources/england2019-lifetime.pdf', raw_sha='d195f617ffacdb72e6f5f445d54b829cb1f47ad6dc4d0fbe55cc67b06cc70268', text=BOOT+'sources/england2019-lifetime.txt', text_sha='3d673ba43d44c28478268dc3d293a29d6c7ecf1611f58bfec842c3d3b95149e9', methods=['docs/design/proposal/methods/reserving-bootstrap-20261014.md'], anchors=['England2019.3.2.eq7']),
+ 'dependence': dict(raw=EU+'eu-2023-1803-original.pdf', raw_sha='e4fde71d4db44ef7c6c74055a564c8cb071340442b63185ff1700c86a64579e5', text=EU+'eu-2023-1803-original.txt', text_sha='37f207b1ecdde43e3971cf076f127576d3d7810c791385ba5b1c35f110f17664', methods=['docs/design/proposal/methods/insurance-finance-process-20261015.tex'], anchors=['Local.two-claim-stoploss-family']),
+}
+METHOD_SOURCE = {**{k:'transition' for k in ('transition.route@1','transition.recovery@1','transition.opening@1')}, 'triangle.inspect@1':'estimation','estimation.predict@1':'estimation','backward.condition@1':'backward','reserve.error@1':'backward','cdr.one-year@1':'cdr','dependence.stoploss@1':'dependence'}
+METHOD_ANCHOR = dict(zip(METHOD_SOURCE, ('IFRS17.C2-C6.C5A.C5B.C25','IFRS17.C20-C20B','IFRS17.C20-C20B','England2001.2-3.AppendixA','Local.finite-law-derivation','Local.Bayes.reserve-center','Local.Bayes.reserve-center','England2019.3.2.eq7','Local.two-claim-stoploss-family')))

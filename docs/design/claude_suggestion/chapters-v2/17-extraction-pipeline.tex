@@ -1,0 +1,914 @@
+\chapter{Document Extraction and Ingestion Pipeline}
+\label{ch:extraction}
+
+This chapter specifies the complete end-to-end pipeline for converting regulatory
+filings and company disclosures into structured, source-linked observations that
+AccDSL can reason about. It addresses the gap in v1.2 where extraction was
+mentioned but not designed.
+
+\section{Pipeline overview and quality contract}
+
+\subsection{The extraction challenge}
+
+Financial disclosures are published in diverse formats:
+\begin{itemize}
+\item \textbf{XBRL/iXBRL:} Structured but complex (contexts, dimensions, calculation
+  linkbases, extension taxonomies)
+\item \textbf{PDF:} Unstructured (multi-column layouts, tables spanning pages,
+  embedded images, scanned documents)
+\item \textbf{HTML:} Semi-structured (CSS layouts, JavaScript-rendered tables, responsive designs)
+\item \textbf{Word/Excel:} Native office formats (requires conversion)
+\end{itemize}
+
+Extraction must preserve:
+\begin{itemize}
+\item \textbf{Source fidelity:} Original bytes, page/element locators, literal text
+\item \textbf{Structure:} Tables, hierarchies, cross-references, footnotes
+\item \textbf{Semantics:} Concepts, units, periods, dimensions, sign conventions
+\item \textbf{Provenance:} Extraction method, confidence, review decisions
+\end{itemize}
+
+\subsection{Quality contract}
+
+The extraction pipeline must achieve:
+
+\begin{longtable}{L{35mm}L{50mm}L{51mm}}
+\toprule Quality dimension & Target & Measurement\\\midrule\endhead
+\textbf{Document coverage} & 100\% of acquired pages/sections inventoried &
+Count pages with disposition vs. total pages\\
+\textbf{Source linking} & $\geq$99\% of structured observations have valid locator &
+Spot checks + automated validation\\
+\textbf{Table structure} & $\geq$95\% of financial tables correctly parsed
+(row/column headers, cell alignment) & GriTS metric on annotated corpus\\
+\textbf{Numeric accuracy} & $\geq$99.9\% of extracted numbers match source (no
+transcription errors) & Digit-by-digit comparison\\
+\textbf{Context correctness} & $\geq$95\% of observations have correct entity,
+period, unit, currency & Human annotation on heldout set\\
+\textbf{Concept mapping} & $\geq$85\% of line items correctly mapped to standard
+concepts; $\geq$95\% recall for material accounts & Precision/recall vs. expert annotations\\
+\textbf{Cross-reference resolution} & $\geq$90\% of note references resolved to
+correct targets & Link-traversal validation\\
+\textbf{Fabrication rate} & $\leq$0.1\% of extracted facts not in source &
+False-positive audit\\
+\bottomrule
+\end{longtable}
+
+Extraction below these thresholds for a given filing must be flagged for human review.
+
+\section{Stage 1: Document acquisition and inventory}
+
+\subsection{Filing manifest construction}
+
+Input: Company identifier (CIK, LEI, ticker), filing date range, filing types
+(10-K, 10-Q, 20-F, etc.).
+
+\textbf{Process:}
+\begin{enumerate}
+\item Query EDGAR API or equivalent for matching filings
+\item Download complete filing packages (HTML/XML, exhibits, inline XBRL)
+\item Compute SHA-256 hash of each file
+\item Extract metadata (accession number, filing date, period end, document type)
+\item Store original bytes in content-addressed storage
+\item Create filing manifest with document inventory
+\end{enumerate}
+
+\textbf{Manifest schema:}
+
+\begin{lstlisting}
+FilingManifest {
+  filing_id: String,
+  entity: EntityIdentifier,
+  filing_date: Date,
+  period_end: Date,
+  filing_type: Enum[10K, 10Q, 8K, 20F, ...],
+  documents: [
+    {
+      hash: SHA256,
+      filename: String,
+      media_type: String, // application/pdf, text/html, application/xml
+      size_bytes: Integer,
+      storage_uri: URI
+    }
+  ],
+  exhibits: [ExhibitReference],
+  incorporated_references: [IncorporatedReference],
+  acquisition_timestamp: DateTime,
+  acquisition_method: String
+}
+\end{lstlisting}
+
+\subsection{Content structure discovery}
+
+For each document, detect:
+\begin{itemize}
+\item \textbf{PDF:} Page count, TOC (if present), section headings via font size/style heuristics
+\item \textbf{HTML:} DOM structure, `<h1>`--`<h6>` headings, `<table>` elements,
+  XBRL inline facts (`<ix:nonFraction>`, `<ix:nonNumeric>`)
+\item \textbf{XBRL:} Instance document, taxonomy schema, linkbases, calculation relationships
+\end{itemize}
+
+Output: Document structure map with section/note inventory and expected vs. actual content.
+
+\begin{lstlisting}
+DocumentStructure {
+  document_hash: SHA256,
+  content_units: [
+    {
+      unit_id: String,
+      type: Enum[Cover, TOC, Section, Table, Paragraph, Exhibit],
+      locator: PageNumber | ElementPath,
+      parent_unit: String?,
+      heading_text: String?,
+      expected_in_manifest: Boolean,
+      detected: Boolean
+    }
+  ],
+  missing_units: [ExpectedUnit],
+  unexpected_units: [DetectedUnit]
+}
+\end{lstlisting}
+
+\section{Stage 2: Layout analysis and text extraction}
+
+\subsection{PDF parsing with Docling}
+
+Docling (MIT license, inspect model licenses separately) provides:
+\begin{itemize}
+\item Page layout analysis (identify text blocks, tables, figures, headers/footers)
+\item Reading order determination
+\item Table structure recognition (row/column spans, headers)
+\item Text extraction with bounding boxes
+\end{itemize}
+
+\textbf{Integration contract:}
+
+\begin{lstlisting}
+def parse_pdf(pdf_path: Path, config: DoclingConfig) -> DoclingResult:
+    """
+    Returns:
+      - pages: List[PageLayout] with text blocks and tables
+      - extraction_quality: Dict[str, float] with confidence scores
+      - errors: List[ExtractionError] for failed pages/tables
+    """
+    ...
+\end{lstlisting}
+
+\textbf{Configuration:}
+\begin{itemize}
+\item Table detection threshold (default 0.7)
+\item OCR fallback for scanned pages (enable if text extraction empty)
+\item Language hint (English default; affects OCR)
+\item Preserve original page images for review
+\end{itemize}
+
+\textbf{Quality checks:}
+\begin{enumerate}
+\item \textbf{Text extraction completeness:} Compare character count with expected
+  from file size; flag if $<50\%$ extracted (possible encryption or scanning)
+\item \textbf{Table detection:} Validate detected table count vs. expected from
+  financial-statement structure (balance sheet, income statement, cash flow $\geq 3$)
+\item \textbf{Reading order:} Check that page $n$ content precedes page $n+1$
+  content (detect multi-column reordering errors)
+\end{enumerate}
+
+\subsection{HTML parsing and inline XBRL extraction}
+
+HTML filings (especially inline XBRL) embed structured facts in rendered text.
+
+\textbf{Process:}
+\begin{enumerate}
+\item Parse HTML with BeautifulSoup or lxml
+\item Extract inline XBRL facts: `<ix:nonFraction>`, `<ix:nonNumeric>`, `<ix:hidden>`
+\item For each fact, extract:
+  \begin{itemize}
+  \item Context reference (entity, period, dimensions)
+  \item Unit reference (currency, shares)
+  \item Concept QName (namespace + local name)
+  \item Literal value and format
+  \item Decimal/precision attributes
+  \item Parent element path (for source linking)
+  \end{itemize}
+\item Extract tables as structured data (row/column headers from `<th>`, data from `<td>`)
+\item Identify cross-references (`<a href="#note5">`, resolve to target section)
+\end{enumerate}
+
+\textbf{Quality checks:}
+\begin{enumerate}
+\item \textbf{XBRL validation:} Use Arelle to validate instance against taxonomy;
+  report calculation inconsistencies
+\item \textbf{Context completeness:} Every fact must resolve to a valid context
+  with entity, period, dimensions
+\item \textbf{Unit completeness:} Every numeric fact must have a unit (USD, shares, pure)
+\item \textbf{Duplicate facts:} Flag duplicate (context, concept) pairs; may indicate
+  restatements or errors
+\end{enumerate}
+
+\section{Stage 3: Table structure recognition}
+
+Financial tables are the most information-dense part of filings. Correct structure
+is critical for numerical extraction.
+
+\subsection{Table components}
+
+A financial table consists of:
+\begin{itemize}
+\item \textbf{Caption:} Table title (e.g., "Note 5 – Debt")
+\item \textbf{Column headers:} Periods, dimensions, currencies (often multi-level)
+\item \textbf{Row headers:} Line item names (often hierarchical with indentation)
+\item \textbf{Data cells:} Numeric values, sometimes with footnote markers
+\item \textbf{Footnotes:} Cell-specific qualifications
+\end{itemize}
+
+\subsection{Recognition pipeline}
+
+\textbf{Step 1: Detect table boundaries}
+
+Use Docling table detector or Table Transformer (baseline from PubTables-1M).
+Output: Bounding boxes for each table.
+
+\textbf{Step 2: Identify header rows/columns}
+
+Heuristics:
+\begin{itemize}
+\item Top rows with bold or different font: likely column headers
+\item Left column with text while right columns numeric: likely row headers
+\item Cells spanning multiple columns: higher-level headers
+\item Repeated patterns (e.g., "Current Year" / "Prior Year"): period headers
+\end{itemize}
+
+Use GTE (financial table benchmark) trained model if available.
+
+\textbf{Step 3: Parse hierarchical structure}
+
+Row headers often have indentation indicating parent-child relationships:
+
+\begin{verbatim}
+Debt
+  Current portion                    10
+  Long-term debt
+    Senior notes                     50
+    Subordinated debt                20
+  Total debt                         80
+\end{verbatim}
+
+Extract:
+\begin{itemize}
+\item Indentation level (leading spaces or tab count)
+\item Parent-child relationships
+\item Totals and subtotals (often bold or indented differently)
+\end{itemize}
+
+\textbf{Step 4: Canonicalize to structured representation}
+
+Output schema:
+
+\begin{lstlisting}
+TableStructure {
+  table_id: String,
+  caption: String,
+  source_locator: PageNumber | ElementPath,
+  column_headers: [
+    {
+      level: Integer, // 0 = top level
+      span: (col_start, col_end),
+      text: String,
+      dimension: Enum[Period, Segment, Currency, Category]
+    }
+  ],
+  row_headers: [
+    {
+      row_index: Integer,
+      text: String,
+      indentation_level: Integer,
+      parent_row: Integer?,
+      is_total: Boolean
+    }
+  ],
+  cells: [
+    {
+      row: Integer,
+      col: Integer,
+      value: String, // Raw text before parsing
+      numeric_value: Decimal?,
+      unit: String?, // e.g., "millions", "$"
+      footnote_refs: [String]
+    }
+  ]
+}
+\end{lstlisting}
+
+\subsection{Quality validation}
+
+\begin{enumerate}
+\item \textbf{Structural consistency:} Every cell must be in a valid (row, col) position
+\item \textbf{Arithmetic checks:} If table has labeled totals, verify sum of components
+  equals total (within rounding)
+\item \textbf{Column alignment:} Numeric cells should be right-aligned; text left-aligned
+\item \textbf{Duplicate headers:} Flag tables with identical column headers (possible parsing error)
+\item \textbf{Missing cells:} Tables should be dense; many empty cells suggests
+  structure mis-recognition
+\end{enumerate}
+
+Compare against GriTS metric (cell-level structure accuracy) on annotated validation set.
+
+\section{Stage 4: Semantic mapping and concept resolution}
+
+Raw tables and text must be mapped to accounting concepts, periods, and entities.
+
+\subsection{Concept mapping}
+
+\textbf{Challenge:} Company labels vary; standard concepts are fixed.
+
+Examples:
+\begin{itemize}
+\item "Accounts Receivable, Net" $\rightarrow$ \code{us-gaap:AccountsReceivableNetCurrent}
+\item "Trade and other payables" $\rightarrow$ \code{ifrs-full:TradeAndOtherCurrentPayables}
+\item "Property, Plant \& Equipment" $\rightarrow$ \code{us-gaap:PropertyPlantAndEquipmentNet}
+\end{itemize}
+
+\textbf{Approach:}
+
+\begin{enumerate}
+\item \textbf{Exact match:} Check if company label matches a standard-concept label
+\item \textbf{Taxonomy extension:} If XBRL, company may have defined extension
+  concepts with explicit base relationships
+\item \textbf{Embedding similarity:} Use pre-trained financial-domain language
+  model (e.g., FinBERT) to compute semantic similarity between company label and
+  standard concepts; rank candidates
+\item \textbf{Hierarchical constraints:} Use calculation linkbase or table structure
+  to constrain mappings (if "Total Assets" is sum of components, each component must
+  be an asset subconcept)
+\item \textbf{Human review:} Present top-3 candidates with confidence scores; analyst
+  selects or provides alternative
+\end{enumerate}
+
+\textbf{Mapping record:}
+
+\begin{lstlisting}
+ConceptMapping {
+  source_label: String,
+  source_context: Context, // Entity, period, dimensions
+  target_concept: QName,
+  relationship: Enum[Equivalent, Component, Broader, Reclassification, Transformation],
+  confidence: Float in [0,1],
+  mapping_method: Enum[ExactMatch, TaxonomyExtension, Embedding, HumanReview],
+  reviewer: String?,
+  review_date: DateTime?,
+  evidence: [SourceSpan]
+}
+\end{lstlisting>
+
+\subsection{Period and dimension resolution}
+
+\textbf{Period normalization:}
+
+Financial filings use diverse period representations:
+\begin{itemize}
+\item "Year Ended December 31, 2024"
+\item "Three Months Ended June 30, 2024"
+\item "Fiscal Year 2024" (company-specific fiscal year)
+\item "52 weeks ended September 28, 2024"
+\end{itemize}
+
+Normalize to:
+\begin{lstlisting}
+Period {
+  calendar: Calendar, // Gregorian, Fiscal52Week, etc.
+  type: Enum[Instant, Duration],
+  start_date: Date?,
+  end_date: Date, // Instant = observation date; Duration = exclusive end
+}
+\end{lstlisting}
+
+\textbf{Dimension extraction:}
+
+XBRL dimensions (segment, product, geography, etc.) must be preserved:
+
+\begin{lstlisting}
+DimensionValue {
+  axis: QName, // e.g., us-gaap:StatementGeographicalAxis
+  member: QName, // e.g., country:US
+  source_label: String // "United States"
+}
+\end{lstlisting}
+
+\subsection{Unit and currency parsing}
+
+Extract from:
+\begin{itemize}
+\item XBRL unit references (straightforward)
+\item Table headers: "In thousands", "In millions, except per share"
+\item Currency symbols: \$, €, £, ¥
+\item Footnotes: "All amounts in Canadian dollars unless stated"
+\end{itemize}
+
+Output:
+\begin{lstlisting}
+Unit {
+  base_currency: ISO4217, // USD, EUR, GBP, JPY
+  scale: Integer, // 0 = units, 3 = thousands, 6 = millions
+  per_unit: Unit?, // For ratios: $/share, $/barrel
+}
+\end{lstlisting}
+
+\section{Stage 5: Cross-reference traversal and note linking}
+
+Financial statements reference notes; notes reference exhibits and other filings.
+
+\subsection{Link extraction}
+
+Identify references:
+\begin{itemize}
+\item Explicit hyperlinks: `<a href="#note5">` in HTML
+\item Text patterns: "See Note 5", "refer to Note 12"
+\item Exhibit references: "filed as Exhibit 10.1 to Form 8-K"
+\item Prior filings: "incorporated by reference from Annual Report on Form 10-K
+  filed March 15, 2024"
+\end{itemize}
+
+\textbf{Resolution process:}
+
+\begin{enumerate}
+\item Parse link text to extract target (note number, exhibit number, filing accession)
+\item Search document structure for matching target
+\item If target in current document: resolve to locator
+\item If target in exhibit: check exhibit inventory
+\item If target in prior filing: check acquisition status
+\item Record resolution status: Resolved | Duplicate | Unavailable | Ambiguous
+\end{enumerate}
+
+\textbf{Link record:}
+
+\begin{lstlisting}
+CrossReference {
+  source_locator: Locator,
+  link_text: String,
+  target_type: Enum[Note, Exhibit, PriorFiling, ExternalURL],
+  target_identifier: String,
+  target_locator: Locator?,
+  resolution_status: Enum[Resolved, Duplicate, Unavailable, Ambiguous],
+  traversal_depth: Integer // How many hops from root
+}
+\end{lstlisting}
+
+\subsection{Traversal algorithm}
+
+\begin{lstlisting}
+def traverse_references(manifest: FilingManifest, max_depth: int = 3):
+    queue = [(root_statement, 0) for root_statement in manifest.primary_statements]
+    visited = set()
+    unresolved = []
+
+    while queue:
+        locator, depth = queue.pop(0)
+        if locator in visited or depth > max_depth:
+            continue
+        visited.add(locator)
+
+        links = extract_links(locator)
+        for link in links:
+            target = resolve_link(link, manifest)
+            if target.status == Resolved:
+                queue.append((target.locator, depth + 1))
+            else:
+                unresolved.append((link, target.status))
+
+    return {
+        'visited': visited,
+        'unresolved': unresolved,
+        'coverage': len(visited) / expected_content_units(manifest)
+    }
+\end{lstlisting}
+
+\section{Stage 6: Observation creation and validation}
+
+Raw extraction output is converted to immutable observation records.
+
+\subsection{Observation schema}
+
+From Chapter 2 v1.2, expanded:
+
+\begin{lstlisting}
+Observation {
+  observation_id: UUID,
+  // Source provenance
+  document_hash: SHA256,
+  filing_id: String,
+  source_locator: Locator, // Page + bbox or element path
+  literal_text: String, // Original rendering
+  extraction_version: String,
+  extraction_timestamp: DateTime,
+
+  // Reporting context
+  entity: EntityIdentifier,
+  perimeter: ConsolidationScope,
+  concept: QName,
+  concept_mapping: ConceptMapping,
+  taxonomy_version: String,
+  dimensions: [DimensionValue],
+
+  // Amount and precision
+  original_string: String,
+  parsed_value: Decimal?,
+  sign_convention: Enum[Debit, Credit, Absolute],
+  unit: Unit,
+  scale: Integer,
+  rounding_interval: Decimal?,
+  missing_category: Enum[NotDisclosed, NotApplicable, Unreadable, Withheld]?,
+
+  // Temporal context
+  period: Period,
+  economic_validity: (Date, Date)?, // When known
+  publication_date: Date,
+  availability_date: DateTime,
+  ingestion_timestamp: DateTime,
+
+  // Quality and review
+  extraction_confidence: Float in [0,1],
+  validation_errors: [ValidationError],
+  reviewer_decision: Enum[Proposed, Accepted, AcceptedAlternative, Rejected]?,
+  reviewer: String?,
+  review_date: DateTime?,
+  review_reason: String?,
+
+  // Relationships
+  supersedes: [ObservationID],
+  correction_of: ObservationID?,
+  conflicts_with: [ObservationID],
+  components: [ObservationID], // For totals
+  related_narrative: [NarrativeID]
+}
+\end{lstlisting}
+
+\subsection{Validation rules}
+
+Before committing an observation:
+
+\begin{enumerate}
+\item \textbf{Source link valid:} Locator resolves to actual content in document
+\item \textbf{Context complete:} Entity, concept, period all present; dimensions
+  valid for concept's taxonomy
+\item \textbf{Value parseable:} If numeric, string parses to valid decimal; sign
+  convention applied correctly
+\item \textbf{Unit compatible:} Monetary concepts have currency; share counts have
+  "shares" unit; ratios have per-unit
+\item \textbf{Period type match:} Balance-sheet items have instant periods; income
+  items have duration
+\item \textbf{Temporal consistency:} Publication date $\geq$ period end date;
+  ingestion $\geq$ publication
+\item \textbf{No self-contradiction:} If observation supersedes another, contexts
+  must overlap; correction must change value
+\end{enumerate}
+
+Failed validations produce warnings or errors based on severity. Errors block
+observation creation; warnings flag for review.
+
+\subsection{Duplicate resolution}
+
+Filings often contain the same fact multiple times (statement + note, original + restated).
+
+\textbf{Deduplication strategy:}
+
+\begin{enumerate}
+\item Compute canonical key: (entity, concept, period, dimensions, unit)
+\item Group observations by canonical key
+\item Within group:
+  \begin{itemize}
+  \item If values identical (within rounding): Keep all source links but create
+    single observation with multiple locators
+  \item If values differ: Check if one is labeled "As Restated" or "As Corrected"
+    $\rightarrow$ create supersession relationship
+  \item If values differ without explanation: Flag as conflict; retain both with
+    conflict link; require human review
+  \end{itemize}
+\end{enumerate}
+
+\section{Stage 7: Review interface and human-in-the-loop}
+
+Extraction cannot be fully automated; human review is required for:
+\begin{itemize}
+\item Low-confidence extractions
+\item Concept-mapping ambiguity
+\item Conflicting values
+\item Narrative assertions and qualitative disclosures
+\item Novel transaction types
+\end{itemize}
+
+\subsection{Review queue prioritization}
+
+Not all extractions need immediate review. Prioritize by:
+
+\begin{longtable}{L{40mm}L{40mm}L{56mm}}
+\toprule Priority & Criteria & Rationale\\\midrule\endhead
+\textbf{Critical (P0)} & Material account (assets, liabilities, equity, revenue,
+profit); confidence $<0.8$; conflicts detected & Affects financial position materially\\
+\textbf{High (P1)} & Non-material accounts with conflicts; concept mapping
+confidence $<0.7$ & May affect ratios or reconciliations\\
+\textbf{Medium (P2)} & Note details, supplementary disclosures; confidence $<0.6$ &
+Needed for complete model, not immediate\\
+\textbf{Low (P3)} & Boilerplate policies, narrative with no quantitative impact &
+Can be deferred or omitted\\
+\bottomrule
+\end{longtable}
+
+\subsection{Review UI requirements}
+
+The interface must present:
+
+\textbf{Left pane: Source document}
+\begin{itemize}
+\item Original PDF page or HTML rendering
+\item Highlighted bounding box or element
+\item Surrounding context (full table, adjacent paragraphs)
+\end{itemize}
+
+\textbf{Right pane: Proposed interpretation}
+\begin{itemize}
+\item Extracted value, unit, period, dimensions
+\item Proposed concept mapping with confidence and alternatives
+\item Validation warnings/errors
+\item Related observations (duplicates, conflicts, components)
+\end{itemize}
+
+\textbf{Actions:}
+\begin{itemize}
+\item Accept: Mark as Accepted, proceed to next
+\item Edit: Modify value, concept, period, or unit; re-validate
+\item Alternative: Create alternative interpretation (multiple readings coexist)
+\item Reject: Mark as extraction error; record reason
+\item Skip: Defer to later review
+\item Link: Connect to related observations or narrative
+\end{itemize}
+
+\textbf{Workflow:}
+\begin{itemize}
+\item Reviewer assigned queue based on domain expertise
+\item Progress tracked: N accepted / M total in queue
+\item Consensus protocol: Two reviewers for P0/P1; one for P2/P3
+\item Disagreements escalated to senior accountant
+\end{itemize}
+
+\section{Stage 8: Reconciliation and completeness checks}
+
+After observations are created and reviewed, validate against expected financial-statement structure.
+
+\subsection{Statement completeness}
+
+Expected statements for annual filing:
+\begin{itemize}
+\item Balance Sheet (at least 2 periods: current, prior)
+\item Income Statement (at least 2 periods)
+\item Statement of Comprehensive Income (or combined with income)
+\item Cash Flow Statement (at least 2 periods)
+\item Statement of Changes in Equity (at least 2 periods)
+\end{itemize}
+
+Check:
+\begin{enumerate}
+\item All expected statements present with observations
+\item Required line items present (assets, liabilities, equity, revenue, expenses,
+  profit, cash flows)
+\item Periods consistent (if income statement is 2024 and 2023, balance sheet
+  should be Dec 31 2024 and Dec 31 2023)
+\end{enumerate}
+
+\subsection{Arithmetic reconciliation}
+
+\textbf{Balance sheet identity:}
+\[
+\text{Total Assets} = \text{Total Liabilities} + \text{Total Equity}
+\]
+
+Check both current and prior periods. Tolerate rounding differences (typically $\pm$1
+in display units).
+
+\textbf{Income reconciliation:}
+\[
+\text{Net Income} = \text{Revenue} - \text{Expenses} - \text{Taxes}
+\]
+
+\textbf{Cash flow reconciliation:}
+\[
+\text{Cash}_{\text{end}} = \text{Cash}_{\text{start}} + \text{Operating CF} +
+\text{Investing CF} + \text{Financing CF} + \text{FX Effect}
+\]
+
+\textbf{Equity rollforward:}
+\[
+\text{Equity}_{\text{end}} = \text{Equity}_{\text{start}} + \text{Profit} +
+\text{OCI} - \text{Dividends} + \text{Issuance} - \text{Repurchase}
+\]
+
+For each identity, report:
+\begin{itemize}
+\item Matched: Both sides equal (or within rounding tolerance)
+\item Unmatched: Difference exceeds tolerance; require investigation
+\item Incomplete: Missing observations for one or more terms
+\end{itemize}
+
+\subsection{Cross-note validation}
+
+Notes must reconcile with statement amounts:
+\begin{itemize}
+\item Debt note detail should sum to debt on balance sheet
+\item Segment revenue should sum to total revenue
+\item Tax expense components should sum to total tax expense
+\end{itemize}
+
+Create validation rules for common reconciliations; flag exceptions for review.
+
+\section{Performance targets and benchmarks}
+
+\subsection{Throughput}
+
+Target processing speed:
+\begin{itemize}
+\item \textbf{XBRL filing:} $<$5 minutes for full pipeline (fast-path; structured)
+\item \textbf{PDF annual report (100-200 pages):} $<$30 minutes for extraction +
+  validation (human review separate)
+\item \textbf{Human review:} ~5-10 observations per minute for experienced reviewer
+  (varies by complexity)
+\end{itemize}
+
+For corpus of 100 companies $\times$ 3 filings each = 300 filings:
+\begin{itemize}
+\item Automated extraction: ~50 hours compute time (parallelizable)
+\item Human review (assume 20\% of observations need review, 500 obs/filing):
+  $300 \times 500 \times 0.2 \div 5 \text{ obs/min} = 6{,}000$ minutes $\approx$ 100 hours
+\end{itemize}
+
+\subsection{Evaluation on benchmark datasets}
+
+\textbf{PubTables-1M:} Table structure recognition
+\begin{itemize}
+\item Metric: GriTS (cell-level structure accuracy)
+\item Baseline: Table Transformer (~0.85 GriTS on PubTables test set)
+\item Target: $\geq$0.90 on financial-table subset
+\end{itemize}
+
+\textbf{FinTabNet (GTE):} Financial table understanding
+\begin{itemize}
+\item Metric: Row/column header F1, cell extraction accuracy
+\item Baseline: GTE model (~0.75 F1)
+\item Target: $\geq$0.85 F1 on standard table types
+\end{itemize}
+
+\textbf{TAT-QA:} Tabular reasoning with questions
+\begin{itemize}
+\item Metric: Exact match (EM) and F1 on numerical answers
+\item Baseline: SOTA models ~40-50\% EM
+\item Use case: Validate extracted observations can answer known questions about filing
+\end{itemize}
+
+\textbf{AccDSL custom corpus:} Annotated real filings
+\begin{itemize}
+\item 3 companies $\times$ 3 filings = 9 filings fully annotated
+\item Metrics: Observation precision/recall, concept-mapping accuracy, reconciliation success rate
+\item Target: $\geq$95\% recall on material accounts, $\geq$85\% precision on concepts
+\end{itemize}
+
+\section{Error budget and continuous improvement}
+
+\subsection{Error taxonomy}
+
+Classify extraction errors:
+
+\begin{longtable}{L{30mm}L{50mm}L{56mm}}
+\toprule Error type & Description & Mitigation\\\midrule\endhead
+\textbf{Transcription} & Wrong digit extracted (7 vs. 1, OCR error) &
+Confidence scoring, manual verification of low-confidence\\
+\textbf{Structure} & Table rows/columns misaligned & Improved layout model, heuristic validation\\
+\textbf{Context} & Wrong period, entity, or dimension assigned & NER + co-reference
+resolution, human review\\
+\textbf{Concept} & Wrong concept mapping & Better semantic embeddings, calculation-linkbase
+constraints\\
+\textbf{Fabrication} & Fact not in source (hallucination) & Source-link validation,
+audit random sample\\
+\textbf{Omission} & Fact in source but not extracted & Recall measurement, heuristic
+expected-item checks\\\bottomrule
+\end{longtable}
+
+\subsection{Monitoring and feedback loop}
+
+\begin{enumerate}
+\item \textbf{Per-filing quality report:} After extraction, generate report with:
+  \begin{itemize}
+  \item Document coverage percentage
+  \item Observation count by confidence tier
+  \item Validation errors and warnings
+  \item Reconciliation status
+  \item Unresolved cross-references
+  \end{itemize}
+
+\item \textbf{Human reviewer feedback:} Track:
+  \begin{itemize}
+  \item Accept rate (should be $>$80\% for P1/P2 observations)
+  \item Common rejection reasons
+  \item Time per observation (identify bottlenecks)
+  \end{itemize}
+
+\item \textbf{Downstream validation:} When observations feed into AccDSL historical
+  reconstruction:
+  \begin{itemize}
+  \item Infeasibility $\rightarrow$ extraction error (wrong value or context)
+  \item Missing data $\rightarrow$ omission error
+  \item Reconciliation failure $\rightarrow$ concept-mapping or arithmetic error
+  \end{itemize}
+
+\item \textbf{Retraining triggers:} Retrain extraction models when:
+  \begin{itemize}
+  \item Accept rate drops below 70\% on new filing batch
+  \item New company/industry patterns emerge (e.g., first insurance filing)
+  \item Standards change (new IFRS/GAAP requirements)
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Model improvement protocol}
+
+\begin{enumerate}
+\item Collect failed cases (rejected by human or downstream validation)
+\item Annotate correct extraction for failed cases
+\item Add to training set or few-shot examples
+\item Retrain/fine-tune extraction models
+\item Validate on held-out set
+\item Deploy new model version with A/B test (route 10\% of filings to new model,
+  compare accept rates)
+\item If new model improves, promote to production
+\end{enumerate}
+
+\section{Implementation roadmap}
+
+\subsection{Milestone breakdown}
+
+\begin{longtable}{L{20mm}L{45mm}L{71mm}}
+\toprule Milestone & Deliverable & Dependencies\\\midrule\endhead
+\textbf{M1} & Document acquisition from EDGAR; manifest construction; SHA-256 hashing &
+HTTP client, SEC EDGAR API\\
+\textbf{M2} & PDF parsing with Docling; text extraction; table detection &
+Docling installation, model downloads\\
+\textbf{M3} & HTML + inline XBRL parsing with Arelle; fact extraction &
+Arelle installation, taxonomy downloads\\
+\textbf{M4} & Table structure recognition; row/column header detection &
+PubTables model, heuristic rules\\
+\textbf{M5} & Concept mapping with FinBERT embeddings; similarity search &
+FinBERT model, taxonomy concept embeddings\\
+\textbf{M6} & Observation schema implementation; validation rules; database storage &
+SQLite, schema migrations\\
+\textbf{M7} & Review UI (web-based); source + interpretation display; workflow &
+React/Vue frontend, REST API\\
+\textbf{M8} & Reconciliation engine; arithmetic checks; completeness validation &
+Observation query API\\
+\textbf{M9} & End-to-end test on Apple 10-K fixture; quality report &
+All prior milestones\\
+\textbf{M10} & Benchmark evaluation on PubTables, FinTabNet, TAT-QA &
+Test harness, annotated datasets\\\bottomrule
+\end{longtable}
+
+\subsection{Estimated effort}
+
+\begin{itemize}
+\item \textbf{Software engineering:} 2 FTE $\times$ 6 months = 12 person-months
+  (pipeline infrastructure, integration, UI)
+\item \textbf{ML engineering:} 1 FTE $\times$ 4 months = 4 person-months (model
+  selection, fine-tuning, evaluation)
+\item \textbf{Domain expertise (accounting):} 0.5 FTE $\times$ 6 months = 3 person-months
+  (concept-mapping rules, validation logic, review protocol)
+\item \textbf{QA + annotation:} 2 FTE $\times$ 3 months = 6 person-months (corpus
+  annotation, testing, human review)
+\end{itemize}
+
+Total: ~25 person-months for production-ready extraction pipeline.
+
+\section{Integration with AccDSL core}
+
+Extraction pipeline outputs feed directly into AccDSL evidence registry (Chapter 2 v1.2).
+
+\textbf{Interface contract:}
+
+\begin{lstlisting}
+def ingest_filing(
+    filing_manifest: FilingManifest,
+    extraction_config: ExtractionConfig
+) -> EvidenceVersion:
+    """
+    Returns:
+      - evidence_version_id: Unique ID for this extraction
+      - observations: List[Observation] with source links
+      - validation_report: Quality metrics and errors
+      - review_queue: Observations requiring human review
+    """
+    ...
+\end{lstlisting}
+
+AccDSL compiler (Chapter 6 v1.2) queries evidence registry for observations matching
+requested entity, period, concepts. Extraction pipeline ensures these observations
+are source-linked, validated, and human-reviewed before entering the accounting model.
+
+\textbf{Separation of concerns:}
+\begin{itemize}
+\item Extraction pipeline: Source $\rightarrow$ Observations (preserve fidelity)
+\item AccDSL core: Observations $\rightarrow$ Histories + Forecasts (accounting + economics)
+\end{itemize}
+
+This separation allows extraction improvements (better table parsing, smarter concept
+mapping) without changing AccDSL semantics, and vice versa.

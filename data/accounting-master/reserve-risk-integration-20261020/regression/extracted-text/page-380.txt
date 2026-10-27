@@ -1,0 +1,49 @@
+Appendix B
+Core grammar, records and
+execution details
+B.1
+Preserved Core 0 teaching grammar
+The grammar governing the preserved Core 0 teaching examples is reproduced from spec/core-
+0.lark. It does not enlarge the first matched text frontend beyond the portable profile described
+in the body. Names are case-sensitive ASCII identifiers; strings are UTF-8 with JSON escaping.
+All literal words in the grammar are reserved. The companion contract specifies valid dates,
+exact rational literals, argument arity, type/context checks and package resolution. A syntax
+parse is not semantic validation.
+// Normative Core 0 syntax, Lark EBNF. UTF-8 input; ASCII identifiers.
+// Longest token wins; keywords cannot be declaration identifiers.
+start: "module" NAME "version" STRING ";" declaration*
+?declaration: use | source | entity | book | account | observation | symbol
+| choice | binding | constraint | alternative | contract | event
+| rule | scenario | report | opening
+use: "use" NAME "version" STRING ";"
+source: "source" NAME "=" expr ";"
+entity: "entity" NAME "functional" NAME ";"
+book: "book" NAME "entity" NAME "basis" NAME "version" STRING ";"
+account: "account" NAME ":" NAME "book" NAME ";"
+observation: "observation" NAME ":" type time_spec "=" expr "from" NAME ";"
+time_spec: "instant" DATE | "period" DATE "to" DATE
+symbol: "symbol" NAME ":" type "in" domain "because" STRING ";"
+domain: "[" expr "," expr "]" | "{" expr ("," expr)* "}"
+choice: "choice" NAME "in" "{" NAME ("," NAME)* "}" "because" STRING ";"
+binding: "let" NAME [":" type] "=" expr ";"
+constraint: "constraint" NAME ":" expr ";"
+alternative: "alternative" NAME "{" assumption* "}"
+assumption: "assume" expr ";"
+contract: "contract" NAME ":" NAME "book" NAME "{" field* "}"
+field: NAME "=" expr ";"
+event: "event" NAME "(" [parameters] ")" "book" NAME ";"
+parameters: NAME ":" type ("," NAME ":" type)*
+rule: "rule" NAME "for" NAME "as" NAME ["overrides" NAME ("," NAME)*] "when" expr "{" rule_statement* "}"
+?rule_statement: binding | require | post
+require: "require" expr ";"
+post: "post" "{" posting+ "}"
+posting: SIDE NAME expr ";"
+scenario: "scenario" NAME "{" setting* "}"
+setting: "set" NAME "=" expr ";"
+report: "report" NAME "for" NAME "{" field* "}"
+opening: "opening" NAME "for" NAME "from" expr ";"
+type: NAME ["<" type ("," type)* ">"]
+?expr: disjunction
+?disjunction: conjunction (OR conjunction)*
+?conjunction: comparison (AND comparison)*
+371

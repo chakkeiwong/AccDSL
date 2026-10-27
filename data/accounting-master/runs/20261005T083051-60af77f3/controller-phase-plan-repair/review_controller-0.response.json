@@ -1,0 +1,33 @@
+{
+  "assumptions": [
+    "The supplied `check_override` and worker execution paths are reachable through ordinary controller operation or test configuration; if `check_override` is provably test-only, issue 2 is limited to test-harness safety.",
+    "Read-only reviewers are required to leave every project byte unchanged, including controller runtime records."
+  ],
+  "checks": [
+    "Reviewed the supplied controller/support excerpts and stated interfaces only.",
+    "Compared worker integrity exceptions and check-phase branches against the packet's acceptance and preservation criteria."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-controller-repair-20260505.md"
+  ],
+  "issues": [
+    "`Master.worker` unconditionally excludes `data/accounting-master/events.jsonl`, `data/accounting-master/active-process.json`, and `data/accounting-master/stop-request.json` from `worker_inventory` for every role. Consequently a read-only review worker can modify, truncate, or create these files without `touched` detecting the change, and an editable worker can alter controller runtime state without the integrity veto. This contradicts the stated requirement that read-only reviewers leave project bytes unchanged and weakens evidence/state protection. Repair by separating supervisor-owned runtime mutations from worker output: snapshot/hash these files before launch, permit only explicitly identified supervisor updates, and reject any worker-originated change (or move all runtime updates behind a controller-only mechanism). Add regression coverage for modification, truncation, and deletion by both read-only and editable workers.",
+    "`Master.check_phase` returns immediately through the `check_override` branch after only stale-input checking and writing `checks.json`; it skips deliverable existence checks, `validate_artifact_contract`, checker-capture freshness/hash validation, historical-input resolution, and the final protection check. A positive override can therefore make `acceptance_ready` true and allow result review/acceptance while required artifacts or checker evidence are absent or invalid. Repair by routing override results through the same post-processing and contract checks as normal checks, or reject overrides outside an explicitly test-only mode before scheduling/acceptance."
+  ],
+  "next_actions": [
+    "Patch the worker inventory/integrity boundary and apply the complete check validation pipeline to overrides, then add focused regressions for both defects."
+  ],
+  "residuals": [
+    "This packet does not establish accounting correctness, scientific validity, human acceptance, or closure of the 192-report mission gaps; test counts remain control-plane evidence only.",
+    "The packet does not specify whether `check_override` is production-inaccessible. That reachability assumption should be made explicit in code and enforced if the override is intended only for tests."
+  ],
+  "steps": [
+    "Revise the two identified interfaces before accepting the controller repair.",
+    "Re-run the existing controller acceptance suite and inspect the new integrity and override-validation evidence."
+  ],
+  "summary": "Two control-plane bypasses remain: worker integrity ignores mutable runtime records, and the check override bypasses required artifact/checker validation.",
+  "verdict": "REVISE"
+}

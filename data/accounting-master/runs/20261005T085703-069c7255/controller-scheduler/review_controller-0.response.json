@@ -1,0 +1,33 @@
+{
+  "assumptions": [
+    "The supplied excerpts are complete for the controller entry and campaign/resume paths relevant to stale-state handling.",
+    "Malformed or incomplete persisted control records are within the stated stale-state review scope."
+  ],
+  "checks": [
+    "Reviewed exception boundaries around recover_process(), reload_state(), campaign_remaining(), and campaign() initialization.",
+    "Checked whether stale-state failures produce a durable stop record before the controller exits."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-controller-repair-20261005.md"
+  ],
+  "issues": [
+    "REVISE: Master.run() invokes recover_process() and reload_state() before entering its try/except/finally block. recover_process() assumes active-process.json is a mapping with nested identity keys (for example previous['pgid'], previous['pid'], previous['start_ticks']); malformed, truncated, or schema-incomplete JSON can therefore raise KeyError, AttributeError, or TypeError outside the controller's handled exception boundary. The CLI entrypoint does not catch those exception types, so the invocation can terminate without a terminal manifest, run_stopped event, or durable next-plan stop record. Repair by validating the loaded record and identity fields before dereference, converting schema failures to ContinuationVeto, and moving startup recovery/state loading under the same durable-stop handling used for later controller failures (while preserving the invalid bytes for supervisor inspection).",
+    "REVISE: Master.campaign() calls campaign_remaining(campaign) before validating that the loaded campaign record is a mapping with the required schema and numeric fields, and before its try/finally status publication. A malformed campaign.json can raise AttributeError/KeyError/TypeError or ContinuationVeto before campaign status is atomically changed to a supervisor-recovery state; the command may exit without recording why automatic continuation stopped. Repair by validating the record shape and deadline/boot fields first, catching all schema/type failures at the campaign boundary, atomically updating campaign.json to continuation_veto or needs_supervisor_repair with the reason, and retaining the original malformed record for inspection."
+  ],
+  "next_actions": [
+    "Add focused regressions for malformed active-process.json and malformed campaign.json, including verification that durable stop/recovery metadata is written and original evidence is retained.",
+    "Re-review startup exception handling after the validation and durable-status changes."
+  ],
+  "residuals": [
+    "The packet does not expose the implementations of reload_state(), process_identity(), or the persisted-state schema, so field-level validation requirements beyond the dereferences shown cannot be assessed.",
+    "No finding is made about hostile actors, deliberate detachment, or an uncatchable kill between fork and registration; those are outside the stated containment guarantee."
+  ],
+  "steps": [
+    "Harden startup recovery and campaign-state validation before allowing another resumable invocation.",
+    "Run the targeted stale-state and interruption tests, then confirm terminal manifests and next-plan records remain honest."
+  ],
+  "summary": "The scheduler has two startup paths where malformed persisted state can escape the controller's handled failure boundary and leave no durable recovery decision. This weakens honest stale-state handling and requires repair.",
+  "verdict": "REVISE"
+}

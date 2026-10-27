@@ -1,0 +1,52 @@
+CHAPTER 7.
+THE ACCOUNTING LANGUAGE
+92
+7.5
+A small model with a continuous interpretation family
+The following source uses a synthetic observation whose full context is stored in the evidence
+registry. The example imports the demonstration debt package, which uses one-year simple
+accrual, no fees and immediate rate resets. It is not an IFRS rule package.
+All dependencies are instantiated in fixtures/demo-debt-package.json: the source reading,
+balanced opening state, currency precision, contract state and dates, reset and interest operations,
+closing and report mappings, request and expected outputs. fixtures/borrowing.acc is the
+complete source, including the retained earnings account and an opening declaration. The
+shorter listings below explain its declarations in stages. They do not replace that full source.
+module BorrowingExample version "1";
+use DemoDebt version "1";
+source note7 = external("synthetic-note-7");
+entity Acme functional USD;
+book Local entity Acme basis DemoDebt version "1";
+account Cash : Asset book Local;
+account Debt : Liability book Local;
+account InterestExpense : Expense book Local;
+observation debt : Money<USD> instant @2025-12-31
+= 100 USD from note7;
+symbol alpha : Real in [0, 1]
+because "The fixed-rate proportion is not disclosed";
+The remaining declarations use this same unknown fraction in both loan components. A change
+to the fraction therefore changes the whole debt mix consistently.
+let fixedPrincipal = alpha * value(debt);
+let floatingPrincipal = (1 - alpha) * value(debt);
+constraint split:
+fixedPrincipal + floatingPrincipal == value(debt);
+contract loans : DebtMix book Local {
+principal = value(debt);
+fixed_fraction = alpha;
+fixed_rate = 0.05 per year;
+initial_floating_rate = 0.05 per year;
+}
+alternative allFixed { assume alpha == 1; }
+alternative allFloating { assume alpha == 0; }
+scenario rateShock {
+set market_rate = constant(0.07 per year);
+}
+The parent model retains every α ∈[0, 1]. The two named alternatives are useful conditional
+views of that family, not a declaration that the endpoints exhaust it. Requesting the parent
+family’s exact bounds produces [5, 7] for the next year’s expense under rateShock. Requesting a
+conditional run of allFixed supplies α = 1. Requesting a weighted mixture requires a separate
+weight model; the two labels do not create equal weights.
+An observation declaration is a reference to evidence plus a proposed typed reading. The
+compiler checks that the registry context agrees with the declared period and type. If the
+evidence is rounded, value(debt) denotes a shared constrained value rather than a silently exact
+100. This synthetic registry explicitly declares an exact value, which keeps the illustration
+deterministic.

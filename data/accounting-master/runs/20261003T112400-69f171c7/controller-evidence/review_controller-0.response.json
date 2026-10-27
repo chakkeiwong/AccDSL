@@ -1,0 +1,36 @@
+{
+  "assumptions": [
+    "The stated process, lock, protection and fresh-plan interfaces are accepted as contracts; their omitted implementations were not independently reviewed.",
+    "No supplied interface restricts editable worker output to the directories and extensions enumerated by editable_files.",
+    "The accepted source panel contains 192 reports. Test counts establish supporting controller evidence only."
+  ],
+  "checks": [
+    "Reviewed only the supplied code and evidence; used no tools or external project history.",
+    "Checked preservation coverage, recovery from malformed records, builtin validation and test-result handling against the stated interfaces.",
+    "The supplied verification reports 104 passing tests with hashes matching the supplied controller hashes. Test names alone do not establish their assertions or coverage."
+  ],
+  "evidence": [
+    "scripts/accounting_master_support.py",
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "Preservation and deletion detection silently omit editable files. In scripts/accounting_master_support.py, editable_files inventories only selected directories and suffixes; for example, source files ending in .yaml or .sql under src are omitted, as are root-level configuration files. preserve_editable, changes_since and contributed_changes all inherit this omission. An ordinary worker edit or deletion of such a file therefore has no preserved original and no reported delta or deletion obligation. The supplied workspace-write interface does not enforce this inventory boundary. Repair by inventorying every file within the authorised editable scope, with explicit exclusions for generated/supervisor/frozen material, or enforce an equally narrow write scope and detect writes outside it. Verify preservation and deletion reporting for a previously omitted source/configuration file.",
+    "Recovery can abort on the malformed response it is supposed to recover from. In scripts/accounting_master_support.py, phase_recovery selects recent structured records and calls load_json(path) without exception handling. A malformed implement/repair response can remain after an ordinary worker failure; on resume it is selected as work_response and raises ValueError. Valid JSON with the wrong top-level shape also fails at value.get. The continuation-record branch already handles invalid records, but recent_records does not. Repair by retaining the record path, recording a bounded invalid-record diagnostic, and continuing recovery with an explicit recheck/replan obligation; do not treat that record as acceptance evidence. Cover truncated JSON and structurally invalid JSON left by a failed attempt."
+  ],
+  "next_actions": [
+    "Repair inventory coverage and malformed-record recovery, then rerun focused regression checks and the controller suite.",
+    "Obtain a fresh read-only review of the repaired code and current verification evidence before controller execution resumes."
+  ],
+  "residuals": [
+    "verify_builtin checks deliverable existence but validates the supplied result dictionary rather than explicitly comparing it with the saved baseline/register JSON. The missing caller assumption is that result is loaded from, or checked against, the exact persisted deliverable subsequently hashed for acceptance.",
+    "Source counts are compared with current coverage metadata rather than independently requiring 192. This is sufficient only if the frozen input contract independently binds that metadata to the accepted 192-report panel; that binding is not demonstrated in this packet.",
+    "baseline permits a successful regression suite with some skipped tests, whereas verify_builtin requires a bare OK line and rejects unittest's OK (skipped=N). Align the policies to avoid rejecting an otherwise permitted run.",
+    "The broader controller lifecycle and approval implementation are outside the supplied executable excerpts. No conclusion here certifies accounting correctness, scientific validity, mission completion or human acceptance."
+  ],
+  "steps": [
+    "Completed a bounded static review of the supplied evidence-handling functions and stated interfaces."
+  ],
+  "summary": "Two repairable defects remain: incomplete preservation coverage and recovery that can fail repeatedly on malformed worker records.",
+  "verdict": "REVISE"
+}

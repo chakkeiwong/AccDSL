@@ -1,0 +1,39 @@
+APPENDIX B. CORE GRAMMAR, RECORDS AND EXECUTION DETAILS
+369
+Known expressions evaluate normally. Shared symbols evaluate to symbolic expressions subject
+to a joint constraint store. Missing source values cannot enter arithmetic until the model
+supplies a symbol or a conditional assumption. Boolean guards over symbols produce formulas,
+not the value false. This avoids the common error in which “unknown whether impaired” silently
+means “not impaired.” Division requires a proven nonzero denominator or a partitioned domain
+that excludes zero; otherwise the expression remains unsupported for concrete execution.
+Logical queries first require a nonempty feasible family. An empty family returns Infeasible; it
+must not produce vacuous answers to substantive questions. For a nonempty family, constraint
+evaluation has three results. entailed means every state in the declared feasible family satisfies
+the proposition. refuted means none does. undetermined means both remain feasible or the
+solver has not decided; the response distinguishes those causes. Probabilistic truth is a separate
+query requiring a measure. A language-level Boolean value must never be inferred from an
+arbitrary probability threshold.
+For a decided answer, let F(h) be the exact constraint representation of the whole family
+requested by the query, and let P(h) be its proposition. Establish feasibility first. Then entailed
+requires that F(h) ∧¬P(h) has no solution, while refuted requires that F(h) ∧P(h) has no
+solution. Feasible witnesses on both sides establish the mixed case. A timeout, unsupported
+operation, or unfinished search establishes neither universal conclusion. A proof for a selected
+cell applies to that cell; it applies to the parent family only with coverage of the remaining cells
+or a proof over the full family. The result records the scope, query kind and evidence for that
+status. Section 6.2 distinguishes this Boolean test from a certain-tuples view and a family of
+answer schedules.
+B.4
+Operational rule selection
+Let V (e, h) be the applicable rules for event e in concrete history h, after package/date selection
+and guard evaluation. Let r ≺r′ mean that r′ validly overrides r through the declared acyclic
+graph. Define
+Max(V ) = {r ∈V : ∄r′ ∈V with r ≺r′}.
+For one required recognition operation, a singleton selects that rule; the empty set yields
+UnsupportedTreatment; a larger set yields RuleConflict. Multiple distinct operations, such as
+measurement and recognition, are evaluated through separate declared interfaces. A rule that
+intentionally produces no postings must belong to a supported non-recognition event operation,
+whose economic state effect is still recorded.
+Given a selected rule, the evaluator computes all local bindings and preconditions, emits
+proposed postings, verifies Equation (6.2), validates account/context restrictions and commits
+the event transaction. Failure returns the original state plus a diagnostic. This defines the
+atomicity requirement independently of the storage technology.

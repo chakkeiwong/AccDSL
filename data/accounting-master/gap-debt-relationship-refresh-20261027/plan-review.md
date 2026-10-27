@@ -1,0 +1,1 @@
+Skeptical audit: routing does not establish measured accounting. Full debtor comparison must bind original-terms exclusions,valuation hierarchy,zero-tax premises and no cash. Creditor/acquisition and partial-modification methods remain open. No global continuation veto; preserve independent prospective-policy work.

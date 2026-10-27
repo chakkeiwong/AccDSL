@@ -1,0 +1,1 @@
+Skeptical audit: downstream two-year carry does not establish upstream attribution or actual continuing schedules/control. Explicit tax assumptions remain conditional. Integrate checked carry,then compare upstream with an independent acquisition/post-control boundary; no global continuation veto. Preserve independent observation-map work.

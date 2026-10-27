@@ -1,0 +1,1 @@
+One conditional partition delta and one unsupported-measurement interface challenge added. All original rows and18 open packages preserved; version5.37 and four stable links unchanged. Concurrent observation-frontier work is retained.

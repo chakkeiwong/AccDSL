@@ -1,0 +1,3 @@
+# First-build local review
+
+Physical pages385–387 were actually viewed in order. The initial-library count is now scoped correctly and the layout is legible. A new local ambiguity remains: inserting the later-search sentence before “This includes previously omitted discovery files” changes that pronoun's apparent referent. Those files belong to the initial population. Move the later-search statement after the initial-population and generation-script explanation, and name that initial scope explicitly. This is a wording repair, not new research or a change to the count. No other page-reading credit is claimed for this attempt.

@@ -1,0 +1,178 @@
+"""Deterministic exact-time checks with independent arithmetic and native cases."""
+from copy import deepcopy
+from itertools import product
+from hashlib import sha256
+from datetime import datetime,timezone
+from pathlib import Path
+import importlib.util,json,subprocess,sys,time
+from projection import *
+import method_requirement_text_v2 as text
+
+ATT=ROOT/'data/accounting-master/extended-method-exchanges-20261015/bank-assessment/attempt-03'
+sys.path.insert(0,str(ATT/'inputs'))
+spec=importlib.util.spec_from_file_location('exact_time_native_audit',ATT/'inputs/verify_exchanges.py')
+native=importlib.util.module_from_spec(spec);spec.loader.exec_module(native);native.ROOT=ROOT
+
+def dump(path,value):path.write_text(json.dumps(value,indent=2)+chr(10))
+def sha(path):return sha256(path.read_bytes()).hexdigest()
+
+def packet(records, selections, context=None):
+    context={'bank':'Synthetic-US-Bank','book':'Legal','perimeter':'Solo'} if context is None else context
+    definition={'profile':'MethodRequirements/1','method_id':'timestamp.selection-only','version':'1',
+                'inputs':{},'requirements':[],'capabilities':[],
+                'residual_prerequisites':['Binding declarations only; timestamp conversion is separate.']}
+    schemas,refs,bindings,blobs={},{},[],{}
+    for name,record in records.items():
+        raw=core.canonical(record);key=sha256(raw).hexdigest();blobs[key]=raw
+        schema={'profile':binder.SCHEMA,'requirements_profile':'MethodRequirements/1',
+                'schema_id':'selected-time.'+name,'fields':{}}
+        for input_id,origin,pointer,encoding,role in selections:
+            if origin!=name:continue
+            typ={'kind':'text','context':context.copy()}
+            definition['inputs'][input_id]={'type':typ,'role':role,'source_ref':'sha256:'+key+'#'+pointer}
+            schema['fields'][pointer]={'type':typ,'role':role,'encoding':encoding,'missing':'unresolved'}
+            bindings.append({'input':input_id,'record':name,'pointer':pointer})
+            definition['requirements'].append({'id':'selected.'+input_id,'predicate':{'op':'eq','left':{'op':'ref','id':input_id},'right':{'op':'ref','id':input_id}},
+                 'requires':[input_id],'admission_refs':[],'on_false':'invalid','on_unknown':'unresolved'})
+        sk=core.digest(schema);schemas[sk]=schema;refs[name]={'raw_sha256':key,'schema_digest':sk}
+    dk=core.digest(definition)
+    return {'plan':{'profile':binder.PROFILE,'manifest_digest':dk,'records':refs,'bindings':bindings},
+            'manifests':{dk:definition},'schemas':schemas,'blobs':blobs,'available_capabilities':[]}
+
+def pair_packet(a,b):
+    return packet({'supplied':{'a':a,'b':b}},[(x,'supplied','/'+x,'tagged_binding','caller_finding') for x in ['a','b']])
+
+def compare(projected):
+    assert projected['status']=='projected'
+    record=projected['record'];raw=core.canonical(record);key=sha256(raw).hexdigest()
+    definition={'profile':'MethodRequirements/2','method_id':'timestamp.available-by','version':'1',
+                'inputs':{},'requirements':[{'id':'available-by','predicate':{'op':'le','left':{'op':'ref','id':'a'},'right':{'op':'ref','id':'b'}},
+                'requires':['a','b'],'admission_refs':[],'on_false':'invalid','on_unknown':'unresolved'}],
+                'capabilities':[],'residual_prerequisites':['Evidence membership and timestamp truth remain unassessed.']}
+    schema={'profile':binder.SCHEMA,'requirements_profile':'MethodRequirements/2','schema_id':'exact-projected-times','fields':{}}
+    bindings=[]
+    for name in ['a','b']:
+        row=record['values'][name];pointer='/values/'+name+'/value'
+        definition['inputs'][name]={'type':row['type'],'role':row['role'],'source_ref':'sha256:'+key+'#'+pointer}
+        schema['fields'][pointer]={'type':row['type'],'role':row['role'],'encoding':'tagged_binding','missing':'unresolved'}
+        bindings.append({'input':name,'record':'projection','pointer':pointer})
+    dk,sk=core.digest(definition),core.digest(schema)
+    args={'plan':{'profile':binder.PROFILE,'manifest_digest':dk,'records':{'projection':{'raw_sha256':key,'schema_digest':sk}},'bindings':bindings},
+          'manifests':{dk:definition},'schemas':{sk:schema},'blobs':{key:raw},'available_capabilities':[]}
+    result=binder.assess_bound(**args);assert result['status']=='bound'
+    exchange={'profile':text.EXCHANGE,'definition':definition,'selected_digest':dk,'values':result['values'],'available_capabilities':[]}
+    rendered=text.render(exchange);assert text.lower(rendered)==exchange
+    assert text.assess_exchange(text.lower(rendered))==result['assessment']
+    for obj in [projected,result,result['assessment']]:
+        assert all(obj[k] is False for k in BOUNDARY)
+    return result,rendered,args
+
+def known(x):return {'status':'known','value':x}
+
+def manual_days(y,m,d):
+    previous=y-1
+    days=365*previous+previous//4-previous//100+previous//400
+    leap=y%4==0 and (y%100!=0 or y%400==0)
+    months=[31,29 if leap else 28,31,30,31,30,31,31,30,31,30,31]
+    return days+sum(months[:m-1])+d-1
+
+def main():
+    start=time.monotonic();lock_path=HERE/'source-lock.json'
+    files=[ROOT/'scripts/method_requirements_v1.py',ROOT/'scripts/method_requirements_v2.py',ROOT/'scripts/method_requirements_v3.py',
+           ROOT/'scripts/method_requirement_versions.py',ROOT/'scripts/method_requirement_text_v1.py',ROOT/'scripts/method_requirement_text_v2.py',
+           ROOT/'scripts/method_input_binding_v1.py',ROOT/'scripts/method_input_binding_v2.py',ATT/'portable-exchanges.json',
+           ATT/'record-schemas.json',ATT/'inputs/verify_exchanges.py',ATT/'inputs/financial_checks.py',ATT/'inputs/source_policy.py',
+           ROOT/'data/accounting-master/native-timing-binding-audit-20261026/checks.json',
+           ROOT/'data/accounting-master/company-portable-authoring-20261023/portable.py',ROOT/'data/accounting-master/company-path-admission-20261023/admission.py']
+    if not lock_path.exists():dump(lock_path,{str(p.relative_to(ROOT)):sha(p) for p in files})
+    lock=json.loads(lock_path.read_text())
+    for name,h in lock.items():assert sha(ROOT/name)==h,name
+    exact=[]
+    for y,m,d,fraction in product([1,4,100,400,1600,1900,1970,2000,2026,9999],[1,3,12],[1,28],['','0000001','123456789012345678']):
+        spelling=f'{y:04}-{m:02}-{d:02}T12:34:56'+('.'+fraction if fraction else '')+'Z'
+        expected=Fraction(manual_days(y,m,d)*86400+12*3600+34*60+56)
+        if fraction:expected+=Fraction(int(fraction),10**len(fraction))
+        assert instant(spelling)==expected,spelling
+        exact.append({'timestamp':spelling,'rational':rational(expected)})
+    pairs=[('submicrosecond-later','2026-04-01T00:00:00.0000002Z','2026-04-01T00:00:00.0000001Z',False),
+      ('equivalent-offset','2026-04-01T01:00:00+01:00','2026-04-01T00:00:00Z',True),
+      ('previous-day-offset','2026-04-01T00:00:00+02:00','2026-03-31T22:00:00Z',True),
+      ('negative-offset','2026-03-31T23:00:00-01:00','2026-04-01T00:00:00Z',True),
+      ('fraction-spelling','2026-04-01T00:00:00.10Z','2026-04-01T00:00:00.1+00:00',True),
+      ('same-day-later','2026-04-01T00:00:01Z','2026-04-01T00:00:00Z',False)]
+    comparison_rows=[];examples={}
+    for name,a,b,expected in pairs:
+        p=packet0=pair_packet(known(a),known(b));projection=project(p);result,rendered,args=compare(projection)
+        assert result['assessment']['status']==('requirements_satisfied' if expected else 'invalid')
+        if name=='equivalent-offset':
+            vals=projection['record']['values'];assert vals['a']['value']==vals['b']['value']
+            assert vals['a']['original_value']!=vals['b']['original_value']
+        comparison_rows.append({'case':name,'left':a,'right':b,'status':result['assessment']['status']})
+        examples[name]=(projection,result,rendered)
+    a=native.Auditor(ATT);reg=a.reg
+    unique={}
+    for ex in a.packet['exchanges']:
+        rq=a.body(ex['request_ref'])
+        if rq['operation']!='bank.regulatory.assess@1':continue
+        br=rq['arguments']['value']['basis_ref'];basis=a.body(br);vr=basis['view_ref']
+        for digest in a.closure([br]):
+            evidence=reg[digest]
+            if evidence['kind']!='Evidence':continue
+            for field,cutoff in [('available_at','decision_at'),('ingested_at','system_asof')]:
+                key=(digest,vr['digest'],field,cutoff)
+                unique[key]=(evidence,reg[vr['digest']])
+    native_rows=[]
+    for (digest,vd,field,cutoff),(evidence,view) in unique.items():
+        selections=[('a','evidence','/body/'+field,'scalar','caller_finding'),('b','view','/body/'+cutoff,'scalar','caller_finding')]
+        projected=project(packet({'evidence':evidence,'view':view},selections))
+        result,_,_=compare(projected)
+        expected=native.instant(evidence['body'][field])<=native.instant(view['body'][cutoff])
+        assert result['assessment']['status']==('requirements_satisfied' if expected else 'invalid')
+        native_rows.append({'evidence_digest':digest,'view_digest':vd,'field':field,'cutoff':cutoff,'result':result['assessment']['status']})
+    invalids=['2026-02-30T00:00:00Z','2026-04-01T24:00:00Z','2026-04-01T00:60:00Z',
+              '2026-04-01T00:00:61Z','2026-04-01T00:00:00+24:00','2026-04-01T00:00:00+00:60']
+    unsupported=['2026-04-01','2026-04-01T00:00:00','2026-04-01T00:00:60Z',
+                 '2026-04-01T00:00:00-00:00','2026-04-01T00:00:00.1234567890123456789Z',
+                 '0001-01-01T00:00:00+00:01','9999-12-31T23:59:59-00:01',
+                 '2026-04-01T00:00:00Europe/London','2026-04-01T00:00:00z']
+    rejections=[]
+    for expected,values in [('invalid',invalids),('unsupported',unsupported)]:
+        for value in values:
+            result=project(pair_packet(known(value),known('2026-04-01T00:00:00Z')))
+            assert result['status']==expected,(value,result)
+            assert 'record' not in result
+            rejections.append({'value':value,'status':expected,'reason':result['reason']})
+    unknown=project(pair_packet({'status':'unknown','reason':'not_observed'},known('2026-04-01T00:00:00Z')))
+    result,_,_=compare(unknown);assert result['assessment']['status']=='unresolved'
+    assert unknown['record']['values']['a']['value']=={'status':'unknown','reason':'not_observed'}
+    corrupt=pair_packet(known('2026-04-01T00:00:00Z'),known('2026-04-01T00:00:00Z'))
+    corrupt['blobs'][next(iter(corrupt['blobs']))]=b'{}';assert project(corrupt)['status']=='invalid'
+    missing=pair_packet(known('2026-04-01T00:00:00Z'),known('2026-04-01T00:00:00Z'))
+    missing['blobs'].clear();assert project(missing)['status']=='unsupported'
+    # Source context containing financial unit keys is retained, not reinterpreted as time units.
+    context_packet=packet({'supplied':{'a':known('2026-04-01T00:00:00Z'),'b':known('2026-04-01T00:00:00Z')}},
+       [(x,'supplied','/'+x,'tagged_binding','caller_finding') for x in ['a','b']],{'currency':'USD','scale':'million','book':'Legal'})
+    assert compare(project(context_packet))[0]['assessment']['status']=='requirements_satisfied'
+    out=HERE/'examples';out.mkdir(exist_ok=True)
+    for name,(projection,result,rendered) in examples.items():
+        dump(out/(name+'.projection.json'),projection);dump(out/(name+'.assessment.json'),result)
+        (out/(name+'.acc')).write_text(rendered)
+    dump(HERE/'exact-cases.json',exact);dump(HERE/'comparisons.json',comparison_rows)
+    dump(HERE/'native-comparisons.json',native_rows);dump(HERE/'rejections.json',rejections)
+    for name,h in lock.items():assert sha(ROOT/name)==h,name
+    checks={'passed':True,'independent_exact_points':len(exact),'offset_precision_pairs':len(pairs),
+       'native_timing_bindings':len(native_rows),'encoding_refusals':len(rejections),'unknown_preserved':True,
+       'corrupt_bytes_refused':True,'unavailable_bytes_unsupported':True,'full_context_preserved':True,
+       'protected_files':len(lock),'source_accounting_execution_admission':False}
+    dump(HERE/'checks.json',checks)
+    dump(HERE/'run-manifest.json',{'git_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        'command':'CUDA_VISIBLE_DEVICES=-1 python3 data/accounting-master/exact-information-time-20261026/verify.py',
+        'environment':sys.version,'cpu_gpu':'CPU; GPU intentionally hidden','random_seeds':'N/A deterministic',
+        'wall_seconds':time.monotonic()-start,'data_version':sha(ATT/'portable-exchanges.json'),
+        'plan_file':'docs/plans/accounting-exact-information-time-20261026.md','result_file':str((HERE/'result.md').relative_to(ROOT)),
+        'artifact_paths':['checks.json','exact-cases.json','comparisons.json','native-comparisons.json','rejections.json','examples/'],
+        'implementation_sha256':sha(HERE/'projection.py'),'verifier_sha256':sha(Path(__file__)),
+        'timestamp_utc':datetime.now(timezone.utc).isoformat()})
+    print(json.dumps(checks))
+
+if __name__=='__main__':main()

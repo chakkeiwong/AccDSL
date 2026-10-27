@@ -1,0 +1,37 @@
+{
+  "assumptions": [
+    "Controllers and workers are trusted; accidental edits and ordinary handled interruption remain in scope.",
+    "The supplied protection interface covers frozen evidence and controller files; no additional enforcement over excluded configuration directories or prior run records was supplied.",
+    "Process-group cleanup and lock ownership are treated as stated interfaces because their implementations are absent from this packet."
+  ],
+  "checks": [
+    "Inspected worker launch, role validation, integrity checks, review retries, and file-inventory exclusions.",
+    "Treated the reported 141 passing tests and supplied test names as supporting evidence only; no commands or independent tests were run.",
+    "Checked that scoped acceptance remains separate from accounting correctness, scientific validity, and human acceptance."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "High — The write-scope check has an inventory blind spot. Master.worker derives touched paths exclusively from changes_since(), whose editable_files() excludes .codex, .agents, other configuration directories, and all data/accounting-master subdirectories except deliverables. The explicit control snapshot covers only four files, while protected_hashes() does not inventory prior master run records. An implementation worker can therefore accidentally create or modify excluded project configuration, or overwrite an earlier response/check record, without appearing in touched or violating the supplied protected hashes. This contradicts the declared document-only write scope and preservation of prior evidence. Repair by separating the preservation inventory from the forbidden-write inventory: snapshot and verify excluded persistent configuration and prior evidence, permit only explicitly identified supervisor-generated changes, and reject newly created forbidden files. Do not rely on the workspace-write sandbox to enforce phase-specific paths. Add regression coverage for an out-of-scope configuration write and mutation of an earlier run record.",
+    "High — Integrity-check failures can be downgraded into review unavailability. In Master.worker's finally block, only merge_hashes() errors are converted to ContinuationVeto. changes_since() calls editable_files(), which raises ValueError for a newly introduced symlink and can raise OSError for unreadable files. These exceptions bypass the integrity-failure record and reach phase_review(), which catches ValueError/OSError as review_unavailable, launches a retry, and eventually records ReviewPending. For example, replacing an ordinary editable document with a symlink during a review produces an integrity-verification exception instead of the required continuation veto. Repair by wrapping the entire post-worker integrity assessment, converting inventory/hash/scope-inspection failures into ContinuationVeto, and preserving the original worker exception plus verification error where recording remains possible. A verification failure must prohibit retry and further scheduling. Add regression coverage for a review that introduces a symlink and for an inventory read failure."
+  ],
+  "next_actions": [
+    "Close the excluded-path write and evidence-preservation blind spots without treating ordinary generated caches as immutable evidence.",
+    "Make every failed post-worker integrity assessment a continuation veto.",
+    "Run focused regression checks and repeat the bounded worker-boundary review after repair."
+  ],
+  "residuals": [
+    "The packet does not supply bounded_process, shutdown handling, lock acquisition, or scheduler implementations; their full lifecycle and resume behavior cannot be independently established here.",
+    "phase_recovery unconditionally accesses phase['test_file'], including for checker-backed phases. The missing catalog assumption is that every such phase retains a valid test_file field; otherwise recovery fails before worker launch.",
+    "The reported test count and accepted 192-report source panel establish neither whole-company accounting correctness nor scientific or human acceptance."
+  ],
+  "steps": [
+    "Completed the requested packet-only static review without tools or project-history access."
+  ],
+  "summary": "Two worker-boundary defects require repair: excluded paths escape write-scope checks, and integrity-inspection errors can become retryable review failures.",
+  "verdict": "REVISE"
+}

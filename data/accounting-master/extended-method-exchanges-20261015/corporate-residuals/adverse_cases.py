@@ -1,0 +1,46 @@
+"""Authored refusal expectations, including genuine missing design authority."""
+from copy import deepcopy
+from authored_cases import tax_inputs,p,incur
+METHOD_REFUSALS={
+ 'rcost.settle':({'actual_units':11},'return_quantity_or_cost_invalid','rejected'),
+ 'cgu.reverse':({'changed_estimates':False},'reversal_estimate_change_required','rejected'),
+ 'individual.reverse':({'cost_model':False},'revaluation_route_unspecified','unsupported'),
+ 'lease.reduce':({'allocation_basis':'unknown'},'lease_allocation_basis_missing','partial'),
+ 'lease.pay':({'one_year_elapsed':False},'lease_payment_interval_unresolved','partial'),
+ 'lease.depreciate':({'systematic_allocation_supported':None},'lease_depreciation_basis_missing','partial'),
+ 'cost.incur':({'other_standard':'IAS2'},'cost_other_standard_required','unsupported'),
+ 'cost.amortize':({'delivered_units':99},'cost_service_units_invalid','rejected'),
+ 'cost.impair':({'other_impairments_done':False},'other_asset_impairment_incomplete','rejected'),
+ 'cost.reverse':({'changed_circumstances':False},'cost_reversal_change_required','rejected'),
+ 'distinct.modify':({'priced_at_ssp':True},'separate_contract_route_required','unsupported'),
+ 'distinct.perform':({'units':99},'performance_units_invalid','rejected'),
+ 'integrated.modify':({'progress_supported':None},'contract_progress_finding_missing','partial'),
+ 'integrated.perform':({'new_progress':0},'performance_progress_decreased','rejected'),
+ 'acqdta.recognize':({'rate_enacted':None},'tax_rate_authority_missing','partial'),
+ 'taxlots.remeasure':({'lots':[{**x,'rate':None} if x['lot_id']=='p' else x for x in tax_inputs]},'tax_rate_missing','partial'),
+ 'taxlots.present':({'request_offset':True,'enforceable_current_setoff_right':None},'tax_setoff_right_missing','partial'),
+}
+# label, case, method, parameter patch, component patch, event date, code, disposition
+BOUNDARIES=[
+ ('zero-weight-cgu','cgu-zero-no-reversal','cgu.reverse',{'recoverable':60},None,None,'zero_weight_allocation_unspecified','partial'),
+ ('open-return-window','return-expected','rcost.settle',{'all_rights_closed':False},None,None,'return_rights_still_open','partial'),
+ ('missing-handling','return-expected','rcost.settle',{'unit_handling':None},None,None,'actual_handling_missing','partial'),
+ ('missing-handling-classification','return-expected','rcost.settle',{'handling_is_selling_cost':None},None,None,'handling_classification_unresolved','partial'),
+ ('missing-nrv','return-expected','rcost.settle',{'inventory_nrv':None},None,None,'returned_inventory_nrv_missing','partial'),
+ ('incorrect-refund','return-expected','rcost.settle',{'refund_cash':41},None,None,'settlement_cash_mismatch','rejected'),
+ ('missing-lease-attribution','heterogeneous-rights','lease.reduce',{'rights':[{**x,'removed_rou':None} if x['right_id']=='B' else x for x in p['rights']]},None,None,'surrendered_rou_missing','partial'),
+ ('physical-fraction-not-evidence','heterogeneous-rights','lease.reduce',{'standalone_allocation_supported':None},None,None,'standalone_allocation_missing','partial'),
+ ('nonannual-lease','heterogeneous-rights','lease.reduce',{'annual_end_payments':False},None,None,'nonannual_lease_schedule_unspecified','unsupported'),
+ ('wrong-payment-date','heterogeneous-rights','lease.pay',{},None,'2025-01-02','lease_payment_interval_mismatch','rejected'),
+ ('missing-cost-recovery','fulfilment-cost-life','cost.incur',{'recoverable':None},None,None,'cost_recoverability_missing','partial'),
+ ('unknown-benefit-pattern','fulfilment-cost-life','cost.amortize',{'equal_unit_pattern_supported':None},None,None,'cost_amortization_pattern_missing','partial'),
+ ('missing-prior-impairment','fulfilment-cost-life','cost.impair',{'other_impairments_done':None},None,None,'other_asset_impairment_incomplete','partial'),
+ ('expired-measurement-period','acquired-tax-measurement','acqdta.recognize',{},None,'2025-06-30','measurement_period_closed','rejected'),
+ ('missing-acquisition-facts','acquired-tax-measurement','acqdta.recognize',{'new_acquisition_date_information':None},None,None,'acquisition_date_information_missing','partial'),
+ ('missing-outside-origin','closed-measurement-equity-origin','acqdta.recognize',{'underlying_origin':None},None,None,'tax_origin_missing','partial'),
+ ('missing-acquirer-origin','acquirer-own-benefit','acqdta.recognize',{'underlying_origin':None},None,None,'tax_origin_missing','partial'),
+ ('no-dta-recovery','acquired-tax-measurement','acqdta.recognize',{'recoverable':None},None,None,'dta_recovery_finding_missing','partial'),
+ ('cross-authority-offset','different-authority-tax-gross','taxlots.present',{'request_offset':True,'enforceable_current_setoff_right':True},None,None,'tax_offset_scope_mismatch','rejected'),
+ ('dta-recognition-unsupported','mixed-tax-origin-rate','taxlots.remeasure',{'lots':[{**x,'recognition_supported':False} if x['lot_id']=='p' else x for x in tax_inputs]},None,None,'dta_recovery_finding_missing','rejected'),
+ ('missing-legal-rate','mixed-tax-origin-rate','taxlots.remeasure',{'lots':[{**x,'rate_enacted':None} if x['lot_id']=='e' else x for x in tax_inputs]},None,None,'tax_rate_authority_missing','partial'),
+]

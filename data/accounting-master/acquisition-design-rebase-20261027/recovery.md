@@ -1,0 +1,3 @@
+# Rebase onto concurrent5.28
+
+27 October2026. The acquisition-only5.28 candidate based on5.27 passed756 structural checks and bounded render review but was never advanced. Concurrent family-policy work now governs5.28. Preserve its255 source baseline plus added common-policy chapter and independent observation-map plan. The unchanged acquisition section is rebased into5.29 with new source/evidence/build verification. The prior successful preparation/build/check writers do not rerun. The title-page locator is repaired before this new candidate by using unique body prose. No financial claim or source interpretation changes.

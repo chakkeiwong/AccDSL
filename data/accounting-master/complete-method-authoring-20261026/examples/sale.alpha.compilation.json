@@ -1,0 +1,2464 @@
+{
+  "executed": false,
+  "committed": false,
+  "source_admission": false,
+  "accounting_admission": false,
+  "method_eligible": false,
+  "profile": "CompanyMethodAuthoring/1",
+  "status": "compiled_method",
+  "transition_profile": "CompanyBookTransition/2",
+  "method": {
+    "profile": "CompanyBookMethod/1",
+    "id": "synthetic.operating.deliver",
+    "version": "1",
+    "account_map": {
+      "cash": "cash",
+      "cost_of_sales": "cost_of_sales",
+      "inventory": "inventory",
+      "receivables": "receivables",
+      "revenue": "revenue"
+    },
+    "preconditions": {
+      "bindings": {
+        "approved": {
+          "kind": "event",
+          "name": "approved"
+        },
+        "consideration": {
+          "kind": "event",
+          "name": "consideration"
+        },
+        "inventory": {
+          "kind": "account",
+          "role": "inventory"
+        },
+        "receivables": {
+          "kind": "account",
+          "role": "receivables"
+        },
+        "unit_cost": {
+          "kind": "memory",
+          "pointer": "/stock/unit_cost"
+        },
+        "units": {
+          "kind": "event",
+          "name": "units"
+        }
+      },
+      "manifest": {
+        "profile": "MethodRequirements/3",
+        "method_id": "synthetic.operating.deliver",
+        "version": "1",
+        "inputs": {
+          "approved": {
+            "type": {
+              "context": {},
+              "kind": "boolean"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:approved"
+          },
+          "consideration": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:consideration"
+          },
+          "inventory": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:inventory"
+          },
+          "receivables": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:receivables"
+          },
+          "unit_cost": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1,
+                "goods:unit": -1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:unit_cost"
+          },
+          "units": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "goods:unit": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:units"
+          }
+        },
+        "requirements": [
+          {
+            "id": "applicable",
+            "on_false": "unsupported",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "approved"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "ref",
+              "id": "approved"
+            }
+          },
+          {
+            "id": "units_nonnegative",
+            "on_false": "invalid",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "units"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "goods:unit": 1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "ref",
+                "id": "units"
+              }
+            }
+          },
+          {
+            "id": "positive_unit_cost",
+            "on_false": "invalid",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "unit_cost"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "lt",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1,
+                    "goods:unit": -1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "ref",
+                "id": "unit_cost"
+              }
+            }
+          },
+          {
+            "id": "consideration_nonnegative",
+            "on_false": "invalid",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "consideration"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "ref",
+                "id": "consideration"
+              }
+            }
+          },
+          {
+            "id": "receivables_sign",
+            "on_false": "invalid",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "receivables"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "ref",
+                "id": "receivables"
+              }
+            }
+          },
+          {
+            "id": "inventory_sign",
+            "on_false": "invalid",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "inventory"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "ref",
+                "id": "inventory"
+              }
+            }
+          },
+          {
+            "id": "inventory_available",
+            "on_false": "invalid",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "units",
+              "unit_cost",
+              "inventory"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "mul",
+                "left": {
+                  "op": "ref",
+                  "id": "units"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "unit_cost"
+                }
+              },
+              "right": {
+                "op": "ref",
+                "id": "inventory"
+              }
+            }
+          }
+        ],
+        "capabilities": [],
+        "residual_prerequisites": [
+          "Synthetic fixed-unit-cost operating method; no source or accounting admission."
+        ],
+        "required_known": []
+      }
+    },
+    "postconditions": {
+      "bindings": {
+        "inventory": {
+          "kind": "account",
+          "role": "inventory"
+        },
+        "receivables": {
+          "kind": "account",
+          "role": "receivables"
+        }
+      },
+      "manifest": {
+        "profile": "MethodRequirements/3",
+        "method_id": "synthetic.operating.deliver",
+        "version": "1",
+        "inputs": {
+          "inventory": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:inventory"
+          },
+          "receivables": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:receivables"
+          }
+        },
+        "requirements": [
+          {
+            "id": "receivables_sign",
+            "on_false": "invalid",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "receivables"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "ref",
+                "id": "receivables"
+              }
+            }
+          },
+          {
+            "id": "inventory_sign",
+            "on_false": "invalid",
+            "on_unknown": "unresolved",
+            "guard_requires": [],
+            "requires": [
+              "inventory"
+            ],
+            "admission_refs": [],
+            "guard": {
+              "op": "const",
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "value": true
+            },
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "ref",
+                "id": "inventory"
+              }
+            }
+          }
+        ],
+        "capabilities": [],
+        "residual_prerequisites": [
+          "Synthetic fixed-unit-cost operating method; no source or accounting admission."
+        ],
+        "required_known": []
+      }
+    },
+    "monetary": {
+      "bindings": {
+        "consideration": {
+          "kind": "event",
+          "name": "consideration"
+        },
+        "unit_cost": {
+          "kind": "memory",
+          "pointer": "/stock/unit_cost"
+        },
+        "units": {
+          "kind": "event",
+          "name": "units"
+        }
+      },
+      "definition": {
+        "profile": "MethodMonetaryEffects/1",
+        "method_id": "synthetic.operating.deliver",
+        "version": "1",
+        "inputs": {
+          "consideration": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:consideration"
+          },
+          "unit_cost": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1,
+                "goods:unit": -1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:unit_cost"
+          },
+          "units": {
+            "type": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "goods:unit": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "role": "state",
+            "source_ref": "declared-operating-premise:units"
+          }
+        },
+        "accounts": {
+          "cash": {
+            "context": {
+              "book": "legal-alpha",
+              "case_id": "synthetic-cycle-alpha",
+              "entity": "Operating-alpha",
+              "mode": "synthetic"
+            },
+            "dimensions": {
+              "currency:USD": 1
+            },
+            "kind": "rational",
+            "scale": "1/1"
+          },
+          "cost_of_sales": {
+            "context": {
+              "book": "legal-alpha",
+              "case_id": "synthetic-cycle-alpha",
+              "entity": "Operating-alpha",
+              "mode": "synthetic"
+            },
+            "dimensions": {
+              "currency:USD": 1
+            },
+            "kind": "rational",
+            "scale": "1/1"
+          },
+          "inventory": {
+            "context": {
+              "book": "legal-alpha",
+              "case_id": "synthetic-cycle-alpha",
+              "entity": "Operating-alpha",
+              "mode": "synthetic"
+            },
+            "dimensions": {
+              "currency:USD": 1
+            },
+            "kind": "rational",
+            "scale": "1/1"
+          },
+          "receivables": {
+            "context": {
+              "book": "legal-alpha",
+              "case_id": "synthetic-cycle-alpha",
+              "entity": "Operating-alpha",
+              "mode": "synthetic"
+            },
+            "dimensions": {
+              "currency:USD": 1
+            },
+            "kind": "rational",
+            "scale": "1/1"
+          },
+          "revenue": {
+            "context": {
+              "book": "legal-alpha",
+              "case_id": "synthetic-cycle-alpha",
+              "entity": "Operating-alpha",
+              "mode": "synthetic"
+            },
+            "dimensions": {
+              "currency:USD": 1
+            },
+            "kind": "rational",
+            "scale": "1/1"
+          }
+        },
+        "calculations": [],
+        "postings": [
+          {
+            "id": "receivables",
+            "account": "receivables",
+            "requires": [
+              "consideration"
+            ],
+            "expression": {
+              "op": "ref",
+              "id": "consideration"
+            }
+          },
+          {
+            "id": "revenue",
+            "account": "revenue",
+            "requires": [
+              "consideration"
+            ],
+            "expression": {
+              "op": "sub",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "ref",
+                "id": "consideration"
+              }
+            }
+          },
+          {
+            "id": "cost_of_sales",
+            "account": "cost_of_sales",
+            "requires": [
+              "units",
+              "unit_cost"
+            ],
+            "expression": {
+              "op": "mul",
+              "left": {
+                "op": "ref",
+                "id": "units"
+              },
+              "right": {
+                "op": "ref",
+                "id": "unit_cost"
+              }
+            }
+          },
+          {
+            "id": "inventory",
+            "account": "inventory",
+            "requires": [
+              "units",
+              "unit_cost"
+            ],
+            "expression": {
+              "op": "sub",
+              "left": {
+                "op": "const",
+                "type": {
+                  "context": {
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "entity": "Operating-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1
+                  },
+                  "kind": "rational",
+                  "scale": "1/1"
+                },
+                "value": "0/1"
+              },
+              "right": {
+                "op": "mul",
+                "left": {
+                  "op": "ref",
+                  "id": "units"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "unit_cost"
+                }
+              }
+            }
+          }
+        ],
+        "flows": [],
+        "cash_account": "cash"
+      }
+    },
+    "memory": {
+      "definition": {
+        "profile": "MethodMemoryEffects/1",
+        "state_schema": "e9f9d9e1aca4c90e13c08e873aaa193faf7c207731a84f9abaf4ebcc51baf34b",
+        "input_schema": "e9c2f6ee24d853e31f2c4381aa5e6f710e1bcfebdc836780f15a7847717fcca2",
+        "operations": [
+          {
+            "id": "create_claim",
+            "op": "insert",
+            "path": [
+              "claims",
+              "invoice/a~1"
+            ],
+            "value": {
+              "fields": {
+                "due": {
+                  "kind": "literal",
+                  "value": "2027-01-31"
+                },
+                "remaining": {
+                  "kind": "read",
+                  "pointer": "/amount",
+                  "source": "inputs"
+                },
+                "sale_event": {
+                  "kind": "read",
+                  "pointer": "/event_id",
+                  "source": "inputs"
+                }
+              },
+              "kind": "object"
+            }
+          }
+        ]
+      },
+      "input_bindings": {
+        "amount": {
+          "kind": "monetary_input",
+          "name": "consideration"
+        },
+        "event_id": {
+          "kind": "event",
+          "name": "id"
+        }
+      }
+    },
+    "residual_prerequisites": [
+      "Synthetic declared fixed unit cost; maturity, tax, valuation and complete notes are not supplied."
+    ],
+    "context": {
+      "book": "legal-alpha",
+      "case_id": "synthetic-cycle-alpha",
+      "currency": "USD",
+      "entity": "Operating-alpha",
+      "mode": "synthetic"
+    }
+  },
+  "method_sha256": "38478bb5af39c0e6718715d818e115c8d29c78ba5f203552528a7738a975c010",
+  "request": {
+    "profile": "CompanyBookTransition/2",
+    "expected_state_sha256": "fa03fdf9de587c1dd6041a89a1b04689d03dcda3eccefe6959124277b2426614",
+    "expected_method_sha256": "38478bb5af39c0e6718715d818e115c8d29c78ba5f203552528a7738a975c010",
+    "method": {
+      "profile": "CompanyBookMethod/1",
+      "id": "synthetic.operating.deliver",
+      "version": "1",
+      "account_map": {
+        "cash": "cash",
+        "cost_of_sales": "cost_of_sales",
+        "inventory": "inventory",
+        "receivables": "receivables",
+        "revenue": "revenue"
+      },
+      "preconditions": {
+        "bindings": {
+          "approved": {
+            "kind": "event",
+            "name": "approved"
+          },
+          "consideration": {
+            "kind": "event",
+            "name": "consideration"
+          },
+          "inventory": {
+            "kind": "account",
+            "role": "inventory"
+          },
+          "receivables": {
+            "kind": "account",
+            "role": "receivables"
+          },
+          "unit_cost": {
+            "kind": "memory",
+            "pointer": "/stock/unit_cost"
+          },
+          "units": {
+            "kind": "event",
+            "name": "units"
+          }
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "synthetic.operating.deliver",
+          "version": "1",
+          "inputs": {
+            "approved": {
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:approved"
+            },
+            "consideration": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:consideration"
+            },
+            "inventory": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:inventory"
+            },
+            "receivables": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:receivables"
+            },
+            "unit_cost": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1,
+                  "goods:unit": -1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:unit_cost"
+            },
+            "units": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "goods:unit": 1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:units"
+            }
+          },
+          "requirements": [
+            {
+              "id": "applicable",
+              "on_false": "unsupported",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "approved"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "ref",
+                "id": "approved"
+              }
+            },
+            {
+              "id": "units_nonnegative",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "units"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "goods:unit": 1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "units"
+                }
+              }
+            },
+            {
+              "id": "positive_unit_cost",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "unit_cost"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "lt",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1,
+                      "goods:unit": -1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "unit_cost"
+                }
+              }
+            },
+            {
+              "id": "consideration_nonnegative",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "consideration"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "consideration"
+                }
+              }
+            },
+            {
+              "id": "receivables_sign",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "receivables"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "receivables"
+                }
+              }
+            },
+            {
+              "id": "inventory_sign",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "inventory"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "inventory"
+                }
+              }
+            },
+            {
+              "id": "inventory_available",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "units",
+                "unit_cost",
+                "inventory"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "mul",
+                  "left": {
+                    "op": "ref",
+                    "id": "units"
+                  },
+                  "right": {
+                    "op": "ref",
+                    "id": "unit_cost"
+                  }
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "inventory"
+                }
+              }
+            }
+          ],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Synthetic fixed-unit-cost operating method; no source or accounting admission."
+          ],
+          "required_known": []
+        }
+      },
+      "postconditions": {
+        "bindings": {
+          "inventory": {
+            "kind": "account",
+            "role": "inventory"
+          },
+          "receivables": {
+            "kind": "account",
+            "role": "receivables"
+          }
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "synthetic.operating.deliver",
+          "version": "1",
+          "inputs": {
+            "inventory": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:inventory"
+            },
+            "receivables": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:receivables"
+            }
+          },
+          "requirements": [
+            {
+              "id": "receivables_sign",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "receivables"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "receivables"
+                }
+              }
+            },
+            {
+              "id": "inventory_sign",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "inventory"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "inventory"
+                }
+              }
+            }
+          ],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Synthetic fixed-unit-cost operating method; no source or accounting admission."
+          ],
+          "required_known": []
+        }
+      },
+      "monetary": {
+        "bindings": {
+          "consideration": {
+            "kind": "event",
+            "name": "consideration"
+          },
+          "unit_cost": {
+            "kind": "memory",
+            "pointer": "/stock/unit_cost"
+          },
+          "units": {
+            "kind": "event",
+            "name": "units"
+          }
+        },
+        "definition": {
+          "profile": "MethodMonetaryEffects/1",
+          "method_id": "synthetic.operating.deliver",
+          "version": "1",
+          "inputs": {
+            "consideration": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:consideration"
+            },
+            "unit_cost": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1,
+                  "goods:unit": -1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:unit_cost"
+            },
+            "units": {
+              "type": {
+                "context": {
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "entity": "Operating-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "goods:unit": 1
+                },
+                "kind": "rational",
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "declared-operating-premise:units"
+            }
+          },
+          "accounts": {
+            "cash": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "cost_of_sales": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "inventory": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "receivables": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            },
+            "revenue": {
+              "context": {
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "entity": "Operating-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "kind": "rational",
+              "scale": "1/1"
+            }
+          },
+          "calculations": [],
+          "postings": [
+            {
+              "id": "receivables",
+              "account": "receivables",
+              "requires": [
+                "consideration"
+              ],
+              "expression": {
+                "op": "ref",
+                "id": "consideration"
+              }
+            },
+            {
+              "id": "revenue",
+              "account": "revenue",
+              "requires": [
+                "consideration"
+              ],
+              "expression": {
+                "op": "sub",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "consideration"
+                }
+              }
+            },
+            {
+              "id": "cost_of_sales",
+              "account": "cost_of_sales",
+              "requires": [
+                "units",
+                "unit_cost"
+              ],
+              "expression": {
+                "op": "mul",
+                "left": {
+                  "op": "ref",
+                  "id": "units"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "unit_cost"
+                }
+              }
+            },
+            {
+              "id": "inventory",
+              "account": "inventory",
+              "requires": [
+                "units",
+                "unit_cost"
+              ],
+              "expression": {
+                "op": "sub",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "context": {
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "entity": "Operating-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "kind": "rational",
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "mul",
+                  "left": {
+                    "op": "ref",
+                    "id": "units"
+                  },
+                  "right": {
+                    "op": "ref",
+                    "id": "unit_cost"
+                  }
+                }
+              }
+            }
+          ],
+          "flows": [],
+          "cash_account": "cash"
+        }
+      },
+      "memory": {
+        "definition": {
+          "profile": "MethodMemoryEffects/1",
+          "state_schema": "e9f9d9e1aca4c90e13c08e873aaa193faf7c207731a84f9abaf4ebcc51baf34b",
+          "input_schema": "e9c2f6ee24d853e31f2c4381aa5e6f710e1bcfebdc836780f15a7847717fcca2",
+          "operations": [
+            {
+              "id": "create_claim",
+              "op": "insert",
+              "path": [
+                "claims",
+                "invoice/a~1"
+              ],
+              "value": {
+                "fields": {
+                  "due": {
+                    "kind": "literal",
+                    "value": "2027-01-31"
+                  },
+                  "remaining": {
+                    "kind": "read",
+                    "pointer": "/amount",
+                    "source": "inputs"
+                  },
+                  "sale_event": {
+                    "kind": "read",
+                    "pointer": "/event_id",
+                    "source": "inputs"
+                  }
+                },
+                "kind": "object"
+              }
+            }
+          ]
+        },
+        "input_bindings": {
+          "amount": {
+            "kind": "monetary_input",
+            "name": "consideration"
+          },
+          "event_id": {
+            "kind": "event",
+            "name": "id"
+          }
+        }
+      },
+      "residual_prerequisites": [
+        "Synthetic declared fixed unit cost; maturity, tax, valuation and complete notes are not supplied."
+      ],
+      "context": {
+        "book": "legal-alpha",
+        "case_id": "synthetic-cycle-alpha",
+        "currency": "USD",
+        "entity": "Operating-alpha",
+        "mode": "synthetic"
+      }
+    },
+    "event": {
+      "id": "sale.1",
+      "date": "2027-01-02",
+      "inputs": {
+        "units": {
+          "type": {
+            "kind": "rational",
+            "context": {
+              "entity": "Operating-alpha",
+              "book": "legal-alpha",
+              "case_id": "synthetic-cycle-alpha",
+              "mode": "synthetic"
+            },
+            "dimensions": {
+              "goods:unit": 1
+            },
+            "scale": "1/1"
+          },
+          "value": {
+            "status": "known",
+            "value": "2/1"
+          },
+          "provenance": "Authored synthetic operating premise"
+        },
+        "consideration": {
+          "type": {
+            "kind": "rational",
+            "context": {
+              "entity": "Operating-alpha",
+              "book": "legal-alpha",
+              "case_id": "synthetic-cycle-alpha",
+              "mode": "synthetic"
+            },
+            "dimensions": {
+              "currency:USD": 1
+            },
+            "scale": "1/1"
+          },
+          "value": {
+            "status": "known",
+            "value": "30/1"
+          },
+          "provenance": "Authored synthetic operating premise"
+        },
+        "approved": {
+          "type": {
+            "kind": "boolean",
+            "context": {}
+          },
+          "value": {
+            "status": "known",
+            "value": true
+          },
+          "provenance": "Authored synthetic operating premise"
+        }
+      }
+    },
+    "schemas": {
+      "fdeecd106d6fd168f74a4cbbe71f724d364348a4c3f2d163668f57be0d9d28f1": {
+        "type": "object",
+        "properties": {
+          "stock": {
+            "type": "object",
+            "properties": {
+              "unit_cost": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "x-exact-kind": "rational"
+              }
+            },
+            "required": [
+              "unit_cost"
+            ],
+            "additionalProperties": false
+          },
+          "complement": {
+            "type": "object",
+            "properties": {
+              "tag": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "x-exact-kind": "text"
+              }
+            },
+            "required": [
+              "tag"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "stock",
+          "complement"
+        ],
+        "additionalProperties": false
+      },
+      "d746974fa9afd5e951f76f9af38954b0ad7f436f2120dc974da65e5ee39f856f": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "e9c2f6ee24d853e31f2c4381aa5e6f710e1bcfebdc836780f15a7847717fcca2": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "x-exact-kind": "rational"
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "x-exact-kind": "text"
+          }
+        },
+        "required": [
+          "amount",
+          "event_id"
+        ],
+        "additionalProperties": false
+      },
+      "e9f9d9e1aca4c90e13c08e873aaa193faf7c207731a84f9abaf4ebcc51baf34b": {
+        "type": "object",
+        "properties": {
+          "stock": {
+            "type": "object",
+            "properties": {
+              "unit_cost": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "x-exact-kind": "rational"
+              }
+            },
+            "required": [
+              "unit_cost"
+            ],
+            "additionalProperties": false
+          },
+          "complement": {
+            "type": "object",
+            "properties": {
+              "tag": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "x-exact-kind": "text"
+              }
+            },
+            "required": [
+              "tag"
+            ],
+            "additionalProperties": false
+          },
+          "claims": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "due": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "x-exact-kind": "date"
+                },
+                "remaining": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "x-exact-kind": "rational"
+                },
+                "sale_event": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "x-exact-kind": "text"
+                }
+              },
+              "required": [
+                "due",
+                "remaining",
+                "sale_event"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "stock",
+          "complement",
+          "claims"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "memory_definition": {
+      "profile": "CompanyMemoryTypes/1",
+      "root": {
+        "node": "record",
+        "fields": {
+          "stock": {
+            "node": "record",
+            "fields": {
+              "unit_cost": {
+                "node": "scalar",
+                "type": {
+                  "kind": "rational",
+                  "context": {
+                    "entity": "Operating-alpha",
+                    "book": "legal-alpha",
+                    "case_id": "synthetic-cycle-alpha",
+                    "mode": "synthetic"
+                  },
+                  "dimensions": {
+                    "currency:USD": 1,
+                    "goods:unit": -1
+                  },
+                  "scale": "1/1"
+                }
+              }
+            }
+          },
+          "complement": {
+            "node": "record",
+            "fields": {
+              "tag": {
+                "node": "scalar",
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                }
+              }
+            }
+          },
+          "claims": {
+            "node": "map",
+            "max_items": 3,
+            "values": {
+              "node": "record",
+              "fields": {
+                "due": {
+                  "node": "scalar",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "remaining": {
+                  "node": "scalar",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-alpha",
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "sale_event": {
+                  "node": "scalar",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "request_sha256": "b7165b4fbcc9b81a0c6952b307df4c7256005f96466bcf4e42c4695fa9a5a2d1",
+  "source_sha256": "163cf0f0d810668687b2717786794f7f9bf8898daac7331d9eb0ce72b284dd1c",
+  "source_spans": [
+    {
+      "line": 1,
+      "byte_start": 0,
+      "byte_end": 124,
+      "slice_sha256": "5236800ae00e0e08416b2247216c2ca69cb61e2fd6ac4b59c72f9115c37652fa"
+    },
+    {
+      "line": 2,
+      "byte_start": 125,
+      "byte_end": 253,
+      "slice_sha256": "b81f5bf8499c46ea694adb887326bfa6c86df7278a232bedf316cea4a9598e02"
+    },
+    {
+      "line": 3,
+      "byte_start": 254,
+      "byte_end": 280,
+      "slice_sha256": "6d00f8868e8b9ac75be1789dbbbd1ee3e7855f1c36f017d0105aa296ceb02f8a"
+    },
+    {
+      "line": 4,
+      "byte_start": 281,
+      "byte_end": 325,
+      "slice_sha256": "05f7922ba20fcbb0ae3e22737808084f4bbfb2ca48ea2e8cdd945fe267d2fcd0"
+    },
+    {
+      "line": 5,
+      "byte_start": 326,
+      "byte_end": 362,
+      "slice_sha256": "aa0360a687ba3b17bdf8a86a9d4b4e00022d1b55b32c023ae26a7cb62f8c3be7"
+    },
+    {
+      "line": 6,
+      "byte_start": 363,
+      "byte_end": 403,
+      "slice_sha256": "accf44bbe77dd42e3399779b70131cc8d641ab1da9603473e4cf018665e1b509"
+    },
+    {
+      "line": 7,
+      "byte_start": 404,
+      "byte_end": 436,
+      "slice_sha256": "572bd70734a131bdd5b09b89235de8540c8aaba2442d0d0f6174141aeb264970"
+    },
+    {
+      "line": 8,
+      "byte_start": 437,
+      "byte_end": 457,
+      "slice_sha256": "724aa06fc9d19e9bc721d028279d030fe2c98ba212cd53730792078168947ab1"
+    },
+    {
+      "line": 9,
+      "byte_start": 458,
+      "byte_end": 567,
+      "slice_sha256": "b4bcdf3f76bf2961152a7be97c2a8c62e641ee28016a31a6bc87488a41fcb78b"
+    },
+    {
+      "line": 10,
+      "byte_start": 568,
+      "byte_end": 661,
+      "slice_sha256": "fb088c19d73aaed3d74f24bb1c3bc57917769b98930bf5a77d6538baa0cc648c"
+    },
+    {
+      "line": 11,
+      "byte_start": 662,
+      "byte_end": 912,
+      "slice_sha256": "0e2e3d9595dd6b436dc89029b3167230ae51412fd2086de510e511c949ed9cc4"
+    },
+    {
+      "line": 12,
+      "byte_start": 913,
+      "byte_end": 1155,
+      "slice_sha256": "d90e716814b0f6d1a64527f1189be8613a7b502affb17ebf50e41b16681b1c79"
+    },
+    {
+      "line": 13,
+      "byte_start": 1156,
+      "byte_end": 1402,
+      "slice_sha256": "e8d4c869be5a0a3e4fae26e4e6a5456356197235fc56e4dd0572f51af84d50ce"
+    },
+    {
+      "line": 14,
+      "byte_start": 1403,
+      "byte_end": 1661,
+      "slice_sha256": "40d7a83e7da49d95e2da1b1e3bd27515329125c31acb966d8f6d1cce18bddc4d"
+    },
+    {
+      "line": 15,
+      "byte_start": 1662,
+      "byte_end": 1894,
+      "slice_sha256": "25d893112f97dfa3897a18dfe368e5c9ee538454e3c0292e55e27c1c197e3f8c"
+    },
+    {
+      "line": 16,
+      "byte_start": 1895,
+      "byte_end": 2020,
+      "slice_sha256": "7f9882a435aa1b8ffe34fdc6d150270aba5bc7dece55a51387b984a951a7ca46"
+    },
+    {
+      "line": 17,
+      "byte_start": 2021,
+      "byte_end": 2339,
+      "slice_sha256": "fc8a398f0e4959f204e5f7e08a80e88bf4a3b860a9fcd9518b70518c2d69f51b"
+    },
+    {
+      "line": 18,
+      "byte_start": 2340,
+      "byte_end": 2685,
+      "slice_sha256": "515367ddd3a516e2476e90d3431a8a6532e2c64d6cf6fafc7a44050e4333367e"
+    },
+    {
+      "line": 19,
+      "byte_start": 2686,
+      "byte_end": 3030,
+      "slice_sha256": "391ad984e271903c6cf68ac2fa699554000a2faf23acdd9a631c7f4e66292efb"
+    },
+    {
+      "line": 20,
+      "byte_start": 3031,
+      "byte_end": 3362,
+      "slice_sha256": "d7e4a7209ab36007d9c46a375387ac549ad9a3576066af35290f96abf80d77dd"
+    },
+    {
+      "line": 21,
+      "byte_start": 3363,
+      "byte_end": 3688,
+      "slice_sha256": "7f0ec12ecaba21c6d1875024a1cd688c1825742bf897548c8e9da5b04d7d2755"
+    },
+    {
+      "line": 22,
+      "byte_start": 3689,
+      "byte_end": 3884,
+      "slice_sha256": "ab745ff9008b358a4aec31b2cfc2b6e0c863d75de16fe5a2895b3fd9b0746df6"
+    },
+    {
+      "line": 23,
+      "byte_start": 3885,
+      "byte_end": 3903,
+      "slice_sha256": "12e02128f9a58ca4d907983f91387a18d463243ce5480f0e0cc044a93d47dd82"
+    },
+    {
+      "line": 24,
+      "byte_start": 3904,
+      "byte_end": 3994,
+      "slice_sha256": "b363777c923234cc59563435f5e62babbe9f092569f4d271d5808e95f8e2553a"
+    },
+    {
+      "line": 25,
+      "byte_start": 3995,
+      "byte_end": 4069,
+      "slice_sha256": "bfedc1dc5fcf3ce2178a39d185775cc8918ff0c7d46f2aad7daed7445f66efa0"
+    },
+    {
+      "line": 26,
+      "byte_start": 4070,
+      "byte_end": 4096,
+      "slice_sha256": "1353dbe9bc6a55fda21135e2eb881139fa05fd5e219438a8238f925ee7f49ad8"
+    },
+    {
+      "line": 27,
+      "byte_start": 4097,
+      "byte_end": 4115,
+      "slice_sha256": "faf520cff304db62b1104826ed00520563a4b54011333b82285562e469a27f0d"
+    },
+    {
+      "line": 28,
+      "byte_start": 4116,
+      "byte_end": 4192,
+      "slice_sha256": "887619788f8a926da9f6aef4344954d172cac3894c8cbd773b1d6427d75e2534"
+    },
+    {
+      "line": 29,
+      "byte_start": 4193,
+      "byte_end": 4279,
+      "slice_sha256": "643694e07b2fc5561423cd16447a508f26c98fa03112055141d3c431a4f47775"
+    },
+    {
+      "line": 30,
+      "byte_start": 4280,
+      "byte_end": 4360,
+      "slice_sha256": "74737057d0560bcfe528bc08f40666a03b8d95460d878dc9bb25c63d464b050c"
+    },
+    {
+      "line": 31,
+      "byte_start": 4361,
+      "byte_end": 4445,
+      "slice_sha256": "3ac5d16f1bd1a6190b59e22cc5511c98fcf739f614624e6f170c19fd9753a040"
+    },
+    {
+      "line": 32,
+      "byte_start": 4446,
+      "byte_end": 4535,
+      "slice_sha256": "0b8c562cba21c9e72c9c6e46a6b7e0c1e98038e97fd6ec36251711991df9e2ed"
+    },
+    {
+      "line": 33,
+      "byte_start": 4536,
+      "byte_end": 4606,
+      "slice_sha256": "87448d1384563857962312e38c3106ce9c5c16d882c0f1cea06b7c31943a257f"
+    },
+    {
+      "line": 34,
+      "byte_start": 4607,
+      "byte_end": 4682,
+      "slice_sha256": "6c952b8a27a49899a33e7286144267c56c7d15664580214b11cdad33658809f3"
+    },
+    {
+      "line": 35,
+      "byte_start": 4683,
+      "byte_end": 4939,
+      "slice_sha256": "4ebb4e330499f6bb1e93b2091584a96ce98b34b30597b9af5123e6d4b92a2df1"
+    },
+    {
+      "line": 36,
+      "byte_start": 4940,
+      "byte_end": 5204,
+      "slice_sha256": "4ed99bfd4e1df5cf3cdfd6bd7d2b3e3d790642fd131990ae8678d5b5367f722f"
+    },
+    {
+      "line": 37,
+      "byte_start": 5205,
+      "byte_end": 5443,
+      "slice_sha256": "d2711ebb5b3d4f0dbc92b6a6feb3e45535f5a49d497ed8f7acff19221cc860ae"
+    },
+    {
+      "line": 38,
+      "byte_start": 5444,
+      "byte_end": 5644,
+      "slice_sha256": "0ea071077c21323ab11217956357cdf0442d3ed366ea1d71c4a7133632cbd157"
+    },
+    {
+      "line": 39,
+      "byte_start": 5645,
+      "byte_end": 5854,
+      "slice_sha256": "1883312d9283673fbe12e20ca5bbdba99e8b571fb70910cf2edee75da3b1bbdf"
+    },
+    {
+      "line": 40,
+      "byte_start": 5855,
+      "byte_end": 6060,
+      "slice_sha256": "34d9897fef70c5799ee49920cb8e7acc03cdbb57489ee083c530d96eb11c918b"
+    },
+    {
+      "line": 41,
+      "byte_start": 6061,
+      "byte_end": 6268,
+      "slice_sha256": "7ae67ff6973e230c76cd50dbeebf8c3d4e71491a2143c40842e06c9f407e8491"
+    },
+    {
+      "line": 42,
+      "byte_start": 6269,
+      "byte_end": 6472,
+      "slice_sha256": "722fbed138c0b12794ef341846b51b30beda3e2824fde58b1196320945cdd786"
+    },
+    {
+      "line": 43,
+      "byte_start": 6473,
+      "byte_end": 6493,
+      "slice_sha256": "bdf83976bf98b1fbce45b33da4cefc814e6515a15bac010c2c5de59ffa93bf31"
+    },
+    {
+      "line": 44,
+      "byte_start": 6494,
+      "byte_end": 6570,
+      "slice_sha256": "fee9853e8f4a20cdb02b5704f8052ef5184b3baa71c9c86ca8676db53aff7a47"
+    },
+    {
+      "line": 45,
+      "byte_start": 6571,
+      "byte_end": 6838,
+      "slice_sha256": "4f585aeda35e0050df1ef9716fcc994ff365d1efc8111a16fa8fd5ed332e8182"
+    },
+    {
+      "line": 46,
+      "byte_start": 6839,
+      "byte_end": 6939,
+      "slice_sha256": "cfc7a2874ae37a0988091031a1a2969833451a8037c5c618c234dcc164c0630a"
+    },
+    {
+      "line": 47,
+      "byte_start": 6940,
+      "byte_end": 7231,
+      "slice_sha256": "c3cc6517df540ae07cfe9696ebcb6c3715226f26cdd14a68bf6cfcbcae55e70f"
+    },
+    {
+      "line": 48,
+      "byte_start": 7232,
+      "byte_end": 7245,
+      "slice_sha256": "c5df4a31a5308403d2378ddd8d4bfb1876b2abfdc469cc40832e5d5f360c5c11"
+    },
+    {
+      "line": 49,
+      "byte_start": 7246,
+      "byte_end": 7327,
+      "slice_sha256": "0763140fc8d561a2051c9a30478d033c902ea4ec5eb997f1b30a099a3cd83aa6"
+    },
+    {
+      "line": 50,
+      "byte_start": 7328,
+      "byte_end": 7412,
+      "slice_sha256": "4aa120cf4ab76f55a69df525efbef9e5eaf5a0aeda2f63a12fef40f67f1ee656"
+    },
+    {
+      "line": 51,
+      "byte_start": 7413,
+      "byte_end": 7478,
+      "slice_sha256": "eda3de59b8f59ee1c63e0764472a54926d7b918a69830e32f51e958a36ddc663"
+    },
+    {
+      "line": 52,
+      "byte_start": 7479,
+      "byte_end": 7650,
+      "slice_sha256": "02b7cc497ef9b33ed33f723ecfed199270de71717b10a21a9668356ef9060042"
+    },
+    {
+      "line": 53,
+      "byte_start": 7651,
+      "byte_end": 7722,
+      "slice_sha256": "9c0442c5fc337c588dd1bb7a0af9a545255da4a96f464b58f63801fc49249ad1"
+    },
+    {
+      "line": 54,
+      "byte_start": 7723,
+      "byte_end": 7776,
+      "slice_sha256": "449899e56747571cbb7cafdcc9da06646b3ff8d99210117501c2108be34b0d20"
+    },
+    {
+      "line": 55,
+      "byte_start": 7777,
+      "byte_end": 8042,
+      "slice_sha256": "f73b0ce67653824873919b42c6745f166c8de660abce8a0b5849a7c3a0097da7"
+    },
+    {
+      "line": 56,
+      "byte_start": 8043,
+      "byte_end": 8054,
+      "slice_sha256": "851e0ab79e810d66579abd9d27f794869e1fac1f3c56385e258f3579508924d4"
+    },
+    {
+      "line": 57,
+      "byte_start": 8055,
+      "byte_end": 8076,
+      "slice_sha256": "3d6429d360019754a785d8d37609e615584ac486645ae85f7719ba8461936296"
+    },
+    {
+      "line": 58,
+      "byte_start": 8077,
+      "byte_end": 8186,
+      "slice_sha256": "b4bcdf3f76bf2961152a7be97c2a8c62e641ee28016a31a6bc87488a41fcb78b"
+    },
+    {
+      "line": 59,
+      "byte_start": 8187,
+      "byte_end": 8429,
+      "slice_sha256": "d90e716814b0f6d1a64527f1189be8613a7b502affb17ebf50e41b16681b1c79"
+    },
+    {
+      "line": 60,
+      "byte_start": 8430,
+      "byte_end": 8676,
+      "slice_sha256": "e8d4c869be5a0a3e4fae26e4e6a5456356197235fc56e4dd0572f51af84d50ce"
+    },
+    {
+      "line": 61,
+      "byte_start": 8677,
+      "byte_end": 9008,
+      "slice_sha256": "d7e4a7209ab36007d9c46a375387ac549ad9a3576066af35290f96abf80d77dd"
+    },
+    {
+      "line": 62,
+      "byte_start": 9009,
+      "byte_end": 9334,
+      "slice_sha256": "7f0ec12ecaba21c6d1875024a1cd688c1825742bf897548c8e9da5b04d7d2755"
+    },
+    {
+      "line": 63,
+      "byte_start": 9335,
+      "byte_end": 9353,
+      "slice_sha256": "12e02128f9a58ca4d907983f91387a18d463243ce5480f0e0cc044a93d47dd82"
+    },
+    {
+      "line": 64,
+      "byte_start": 9354,
+      "byte_end": 9444,
+      "slice_sha256": "b363777c923234cc59563435f5e62babbe9f092569f4d271d5808e95f8e2553a"
+    },
+    {
+      "line": 65,
+      "byte_start": 9445,
+      "byte_end": 9519,
+      "slice_sha256": "095e27f518de5e10d7bb1e435c93463ec171074497b984d395ebb144612c7d96"
+    },
+    {
+      "line": 66,
+      "byte_start": 9520,
+      "byte_end": 9546,
+      "slice_sha256": "1353dbe9bc6a55fda21135e2eb881139fa05fd5e219438a8238f925ee7f49ad8"
+    },
+    {
+      "line": 67,
+      "byte_start": 9547,
+      "byte_end": 9566,
+      "slice_sha256": "70a0bd5b80ecb55665d949f5fe4fddbca27e97c18a076cf0e7244d0d8f3f8e75"
+    },
+    {
+      "line": 68,
+      "byte_start": 9567,
+      "byte_end": 9648,
+      "slice_sha256": "ca7771b60a16f43a394b02be9c6018d4f0f1042faee376a874bd4117a6b23800"
+    },
+    {
+      "line": 69,
+      "byte_start": 9649,
+      "byte_end": 9734,
+      "slice_sha256": "02356477fa325984898aaa419e529d442ba9a12e68134a52f4a1d7e5c9eabbc3"
+    },
+    {
+      "line": 70,
+      "byte_start": 9735,
+      "byte_end": 9844,
+      "slice_sha256": "f9578073637ce3cebe157f891142da76411eb78f058a270e36cf440424a093c8"
+    },
+    {
+      "line": 71,
+      "byte_start": 9845,
+      "byte_end": 9856,
+      "slice_sha256": "9abd7508a19396f2d295a83ec4c746991971d41d435dd7d56de743270d1cdb7f"
+    }
+  ]
+}

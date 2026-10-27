@@ -1,0 +1,21 @@
+\section{Particle filtering under known model assumptions}
+A particle filter approximates sequential distributions in a specified state-space model. Let $x_t$ be the latent state at date $t$ and $y_t$ the observation then available. The transition density is $f(x_t\mid x_{t-1})$, the observation likelihood is $g(y_t\mid x_t)$, and a proposal $q$ generates the next particle. First consider a sequential importance-sampling step that extends particle $i$ without resampling it. Its updated weight satisfies
+\begin{equation}
+ w_t^{(i)}\propto w_{t-1}^{(i)}\frac{g(y_t\mid x_t^{(i)})f(x_t^{(i)}\mid x_{t-1}^{(i)})}{q(x_t^{(i)}\mid x_{t-1}^{(i)},y_t)}.
+\end{equation}
+The fraction is the incremental weight; multiplying it by the previous weight gives the new weight. It follows by dividing the joint posterior update by the proposal update, as in \citet[Section 3.3, equations (29)--(30)]{doucet2012tutorial}. The proposal must cover the relevant target support. A proposal that never visits a feasible high-risk region cannot recover it by weighting.
+
+Resampling changes this calculation because selecting a parent already uses its weight. Let $W_{t-1}^{(j)}$ be the normalized weights before selection. Suppose child $i$ selects ancestor $A_t^{(i)}=j$ with probability $r_{t-1}^{(j)}$, then draws its next state from $q(\,\cdot\mid x_{t-1}^{(j)},y_t)$. Relative to this finite weighted approximation, the joint target mass for ancestor $j$ and new state $x$ is proportional to $W_{t-1}^{(j)} f(x\mid x_{t-1}^{(j)})g(y_t\mid x)$; the proposal mass is $r_{t-1}^{(j)}q(x\mid x_{t-1}^{(j)},y_t)$. Their ratio therefore gives
+\begin{equation}
+ \widetilde w_t^{(i)}\propto
+ \frac{W_{t-1}^{(A_t^{(i)})}}{r_{t-1}^{(A_t^{(i)})}}
+ \frac{g(y_t\mid x_t^{(i)})f(x_t^{(i)}\mid x_{t-1}^{(A_t^{(i)})})}
+ {q(x_t^{(i)}\mid x_{t-1}^{(A_t^{(i)})},y_t)}.
+\end{equation}
+Both ancestor and state proposals must have positive mass wherever this target has positive mass. For ordinary multinomial resampling, $r_{t-1}^{(j)}=W_{t-1}^{(j)}$, so the first ratio cancels. Equivalently, the resampled children start with equal weights $1/N$ before propagation; the old parent's weight is not multiplied again. The always-resampled and adaptive algorithms in \citet[Sections 3.4--3.5]{doucet2012tutorial} make that reset explicit. If resampling is skipped, the previous unequal weights are retained. These conventions concern numerical particles, not changes to the company's contract.
+
+For example, suppose two persistent contract types have current weights $3/4$ and $1/4$, and a new disclosure has likelihoods $1/3$ and $1$. Bayes' rule gives unnormalized masses $1/4$ and $1/4$, hence equal posterior probabilities. A four-child resampling allocation with three copies of the first type and one of the second gives aggregate incremental weights $3(1/3)=1$ and $1$, also equal. Multiplying by the old parent weights again would instead give $3/4$ and $1/4$. This exact allocation exposes the double counting; a random finite resampling draw need not reproduce the posterior exactly.
+
+\citet[Sections 2--3]{doucet2012tutorial} explains sequential importance sampling, resampling and degeneracy. Its filtering setup conditions on a specified model. Static unknown parameters are not automatically handled well by adding them to the state and repeatedly resampling. That extension can suffer severe impoverishment.
+
+For AccDSL, particle filtering is appropriate only after prior, transition and observation laws are admitted. It can be an optional numerical view of a history family. The family and source constraints remain available to detect support loss and distinguish probabilistic approximation from exact admissibility.

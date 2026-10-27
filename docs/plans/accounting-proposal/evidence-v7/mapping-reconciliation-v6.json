@@ -1,0 +1,396 @@
+{
+  "schema_version": "accdsl.proposal.p15.mapping_reconciliation.v6",
+  "phase": "P15",
+  "review_scope": "bounded_partial_work",
+  "requirements": [
+    "MC07"
+  ],
+  "gaps": [
+    "G12"
+  ],
+  "status": "completed_bounded_reconciliation",
+  "product_implemented": false,
+  "human_acceptance": "pending",
+  "claims": [
+    {
+      "id": "mapping_relationships",
+      "specified": "The manuscript distinguishes equivalent, component, broader, presentation-reclassification and measurement-transformation relationships; source concepts remain identifiable and company extensions need not equal a standard concept. Many-to-many mappings carry dates, dimensions and evidence. The later mapping section identifies entity/basis/period/dimensions, reviewer and transformation fields; the existing Core IR Mapping schema declares all five relations, a string applicability reference, optional transform/partition references and source/review references. These are existing record shapes, not an absent registry schema.",
+      "implemented": "MappingRule admits equivalent, component and reclassification only, requires nonempty concept IDs and provenance, and rejects conversion. compatible_context selects one active direct edge when concept is the only context difference; optional source_context/target_context restrict entity strings, not full contextual predicates.",
+      "retained_tests": [
+        "test_equivalent_context_mapping_and_spelling_preserved",
+        "test_expired_cycle_and_measurement_conversion_rejected"
+      ],
+      "tested_boundary": "The retained sales-to-revenue case preserves both concept spellings, scale and precision. It asserts a compatibility witness, not source-backed equality of observed amounts or cross-company comparability. Provenance is fixture:review, not accounting authority.",
+      "unsupported": "Broader relations, numerical measurement transformations, full dimensional applicability predicates and a versioned company-concept registry are not established by these operations.",
+      "remaining_obligation": "Specify registry identity/version, relationship direction and cardinality, complete applicability predicates, evidence/reviewer dependencies, and how unsupported or ambiguous mappings remain unresolved. Supply real-source cases for differently named equal quantities and similarly named unlike measurements.",
+      "design_consequence": "Keep vocabulary alignment distinct from measurement conversion and accounting eligibility; a nonempty provenance string cannot authorize equivalence.",
+      "evidence": [
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 56-81"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 147-188"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 221-256"
+        },
+        {
+          "path": "tests/test_accounting_p06.py",
+          "sha256": "5bb66d65c3c7854a647d484baf4acb359f35c9d7fd06209a76a4bdb4a31dc1c9",
+          "locator": "lines 38-71"
+        },
+        {
+          "path": "data/accounting-master/deliverables/P06/conformance.json",
+          "sha256": "d6c81ba5296e856d6380c5abc561e6da0658b7e25079d44d37792ffbf0347a70",
+          "locator": "JSON Pointer /tests/test_accounting_p06"
+        },
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 222-233"
+        },
+        {
+          "path": "docs/design/spec/core-ir.schema.json",
+          "sha256": "fd45e425b4f47b0350a508fb5997874ca26af384fe174ef7544e746ee075461c",
+          "locator": "JSON Pointer /$defs/Mapping"
+        }
+      ]
+    },
+    {
+      "id": "composition_ambiguity",
+      "specified": "The manuscript explicitly says component followed by equivalence remains component and that two measurement transforms compose only when intermediate bases and information dates agree. It also permits many-to-many mappings. These are substantive specified rules; the general admissible composition algebra and executable resolution are still incomplete.",
+      "implemented": "_check_mapping_graph rejects directed cycles across all supplied rules without filtering by applicability dates. compatible_context does not traverse a chain; it selects active direct source-target edges and raises AMBIGUOUS_MAPPING for more than one before checking entity restrictions. Identical contexts return identity after graph validation.",
+      "retained_tests": [
+        "test_expired_cycle_and_measurement_conversion_rejected"
+      ],
+      "tested_boundary": "A two-edge cycle and one expired direct rule are rejected in the retained test. General chain composition, overlapping active alternatives, and non-overlapping dated reverse edges are not independently tested by the cited methods.",
+      "unsupported": "Acyclicity does not implement transitivity, relation-specific composition, precedence or conflict resolution. Equivalent is represented as a directed rule and cannot be assumed to support symmetric registry edges.",
+      "remaining_obligation": "Decide whether supported execution permits direct edges only or composable chains. Specify composition by relation kind, evidence/dependency propagation, date/context intersection, ambiguity handling, cycle policy and invalidation, with positive and negative worked cases.",
+      "design_consequence": "Preserve competing mappings as unresolved alternatives until the proposal defines a justified selection or composition rule; do not inherit acyclicity or direct-only selection as immutable product defaults.",
+      "evidence": [
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 63-73"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 203-250"
+        },
+        {
+          "path": "tests/test_accounting_p06.py",
+          "sha256": "5bb66d65c3c7854a647d484baf4acb359f35c9d7fd06209a76a4bdb4a31dc1c9",
+          "locator": "lines 63-71"
+        },
+        {
+          "path": "data/accounting-master/deliverables/P06/conformance.json",
+          "sha256": "d6c81ba5296e856d6380c5abc561e6da0658b7e25079d44d37792ffbf0347a70",
+          "locator": "JSON Pointer /tests/test_accounting_p06"
+        },
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 224-233"
+        }
+      ]
+    },
+    {
+      "id": "context_gross_net",
+      "specified": "The manuscript distinguishes principal, carrying amount, contractual flows and fair value, and warns that gross/net revenue and segment measures differ. Contextual addition requires compatible entity, perimeter, time, dimensions and basis. Core 0 context equality explicitly includes instant/period/calendar; this is wider than P06 Context. The manuscript also uses Apple vendor non-trade receivables as an unlike-meaning counterexample.",
+      "implemented": "_context_mismatch compares entity, perimeter/version, basis, measurement, unit, currency, calendar, dimensions, gross_net, parent/group and display metadata before concept. Equivalent mappings cannot waive these mismatches. Context has no reporting-period start/end or observation amount; compatible_context is not a full dated-quantity comparison.",
+      "retained_tests": [
+        "test_context_rejects_parent_basis_measurement_currency_calendar_gross_net",
+        "test_expired_cycle_and_measurement_conversion_rejected"
+      ],
+      "tested_boundary": "The retained same-concept synthetic pairs reject historical-cost/fair-value, gross/net, perimeter/version, basis, currency and calendar mismatches; scale conversion also fails. This is guarded rejection, not a method for reconciling or converting those measures. Separately, the retained Apple 2024 primary report, Note 4 printed p.38, confirms that component sales to vendors are excluded from products net sales and gains reduce products cost of sales. This supports that company-specific distinction, not a general cross-company mapping method.",
+      "unsupported": "Positive cross-basis, gross/net or perimeter transformations and actual reporting-period comparability are not established by the mapping API. Entity mismatch rejection also does not establish comparability between two real issuers.",
+      "remaining_obligation": "Turn the existing Apple source distinction and synthetic measurement/gross-net rejection examples into complete mapping records and expected outcomes. Define contextual comparability separately from numeric conversion; bind quantities to reporting periods/evidence views and preserve original/derived measures. Add a justified gross/net bridge or explicit refusal and a perimeter-change/reclassification case.",
+      "design_consequence": "Reject unsubstantiated aggregation and report the exact missing conversion or comparability evidence. Calendar equality and a query date alone cannot establish that quantities refer to the same period.",
+      "evidence": [
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 56-81"
+        },
+        {
+          "path": "docs/design/chapters/06-language.tex",
+          "sha256": "238aa4b5030a988de53d443fcf38fb78a6a39a4971b8e3951f29922369e6aea8",
+          "locator": "lines 79-85"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 135-144"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 191-256"
+        },
+        {
+          "path": "tests/test_accounting_p06.py",
+          "sha256": "5bb66d65c3c7854a647d484baf4acb359f35c9d7fd06209a76a4bdb4a31dc1c9",
+          "locator": "lines 49-71"
+        },
+        {
+          "path": "data/accounting-master/deliverables/P06/conformance.json",
+          "sha256": "d6c81ba5296e856d6380c5abc561e6da0658b7e25079d44d37792ffbf0347a70",
+          "locator": "JSON Pointer /tests/test_accounting_p06"
+        },
+        {
+          "path": "docs/design/spec/core-contract.md",
+          "sha256": "29b8195acfc2098312322731611baf9865a5c587b024e79d15a29ee346235c92",
+          "locator": "lines 116-121"
+        },
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 245-252"
+        },
+        {
+          "path": "docs/design/cases/apple/annual-2024.txt",
+          "sha256": "caaf182340d3846ff54cf967a2d3da7dce82505170665943ea7227e6bed8336e",
+          "locator": "lines 1992-2002",
+          "quote": "The Company does not reflect\nthe sale of these components in products net sales."
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 85-115"
+        }
+      ]
+    },
+    {
+      "id": "finite_partitions_residuals",
+      "specified": "The manuscript requires a disjoint and exhaustive population for sumOver, retains unallocated residuals instead of setting them to zero, and leaves unobserved geography-by-product cells unidentified. The Core IR Partition schema already records population, axis, members, context, disjoint/exhaustive proof references and an optional residual member.",
+      "implemented": "check_partition enumerates caller-supplied finite IDs, rejects duplicates, outside members, overlap and omission, and accepts an explicit known residual exactly equal to the missing set. Unknown residuals are rejected. map_components requires one exact rational value per population ID and an exhaustive named partition; it has no residual argument, so a residual can enter that operation only as an explicitly valued ordinary member. Both component and reclassification take this same arithmetic path.",
+      "retained_tests": [
+        "test_partition_independent_enumeration_and_unknown_residual",
+        "test_partition_population_and_axis_prevent_double_counting",
+        "test_finite_component_mapping_and_cross_axis_double_count"
+      ],
+      "tested_boundary": "The retained tests verify finite completeness, overlap/omission/unknown-residual rejection, a known residual membership witness and the 3+5=8 component total. They do not establish the source completeness of the declared population, a measured value for a residual merely marked known, or an independently tested reclassification treatment.",
+      "unsupported": "Enumeration proves disjointness and exhaustiveness only relative to supplied IDs. String proof references and known=True do not prove real disclosures are complete or accounting amounts comparable. Unknown-residual feasible-set/interval propagation and non-enumerated populations are not provided by these APIs.",
+      "remaining_obligation": "Specify what source evidence establishes the population, measurement context and membership; define residual identity, known amount versus known membership versus missing amount, and how unresolved residuals constrain totals. Connect Core IR proof references to checkable witnesses and define supported reclassification cases and dimension-removal semantics.",
+      "design_consequence": "A valid finite partition is a reusable conformance example, not proof of disclosure coverage. Preserve partial totals and unresolved residual constraints without inventing zero or certifying an exact total.",
+      "evidence": [
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 235-243"
+        },
+        {
+          "path": "docs/design/spec/core-ir.schema.json",
+          "sha256": "fd45e425b4f47b0350a508fb5997874ca26af384fe174ef7544e746ee075461c",
+          "locator": "JSON Pointer /$defs/Partition"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 264-319"
+        },
+        {
+          "path": "tests/test_accounting_p06.py",
+          "sha256": "5bb66d65c3c7854a647d484baf4acb359f35c9d7fd06209a76a4bdb4a31dc1c9",
+          "locator": "lines 73-85"
+        },
+        {
+          "path": "tests/test_accounting_p06.py",
+          "sha256": "5bb66d65c3c7854a647d484baf4acb359f35c9d7fd06209a76a4bdb4a31dc1c9",
+          "locator": "lines 269-283"
+        },
+        {
+          "path": "data/accounting-master/deliverables/P06/conformance.json",
+          "sha256": "d6c81ba5296e856d6380c5abc561e6da0658b7e25079d44d37792ffbf0347a70",
+          "locator": "JSON Pointer /tests/test_accounting_p06"
+        }
+      ]
+    },
+    {
+      "id": "alternative_classifications",
+      "specified": "The manuscript already gives two classifications of the same 260: 180+80 and 200+60; adding all four to obtain 520 is forbidden. Population identity is shared and axes differ; cross-tabulation cells need additional constraints.",
+      "implemented": "combine_partitions rechecks each partition and rejects any shared population member ID. It permits only disjoint populations and returns their union; it does not compare accounting contexts or sum amounts. map_components labels the output with an axis but requires otherwise matching Context records, rather than implementing general dimension removal.",
+      "retained_tests": [
+        "test_finite_component_mapping_and_cross_axis_double_count"
+      ],
+      "tested_boundary": "The retained product partition has atoms a=3 and b=5 and total 8. A geography partition north={a,b} over the same IDs cannot be combined with it. This directly exercises the anti-double-counting rule. It is not a real product/geography filing or an independently valued pair of alternative totals.",
+      "unsupported": "Distinct IDs for the same economic item can evade a membership-only overlap check. Shared real populations, group eliminations, measured marginal consistency and reconstruction of joint geography-by-product cells are not established.",
+      "remaining_obligation": "Provide a source-backed product/geography example with canonical population identity, compatible periods/bases/perimeters, independently reconciled equal totals, explicit refusal to sum axes and preserved unknown joint cells. Specify when genuinely disjoint populations may be added and how source aliases and context changes affect that decision.",
+      "design_consequence": "Define economic population identity and a separate contextual amount check; a disjoint-ID union cannot by itself authorize financial addition. Do not convert two marginal classifications into a joint table without evidence.",
+      "evidence": [
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 235-243"
+        },
+        {
+          "path": "docs/design/chapters/06-language.tex",
+          "sha256": "238aa4b5030a988de53d443fcf38fb78a6a39a4971b8e3951f29922369e6aea8",
+          "locator": "lines 79-85"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 303-330"
+        },
+        {
+          "path": "tests/test_accounting_p06.py",
+          "sha256": "5bb66d65c3c7854a647d484baf4acb359f35c9d7fd06209a76a4bdb4a31dc1c9",
+          "locator": "lines 269-283"
+        },
+        {
+          "path": "data/accounting-master/deliverables/P06/conformance.json",
+          "sha256": "d6c81ba5296e856d6380c5abc561e6da0658b7e25079d44d37792ffbf0347a70",
+          "locator": "JSON Pointer /tests/test_accounting_p06"
+        }
+      ]
+    },
+    {
+      "id": "company_extensions_over_time",
+      "specified": "Company extensions retain distinct meaning, may express dated presentation changes and cannot override recognition rules. Mapping records specify applicable entity, basis, period and dimensions.",
+      "implemented": "MappingRule.active uses start-inclusive/end-exclusive date windows, and a dated rule without an as-of date is ineligible. Perimeter and perimeter_version differences are rejected before concept mapping. P06Engine.add_mapping stores rules and checks cycles; it supplies no versioned extension lifecycle or source-to-period migration policy.",
+      "retained_tests": [
+        "test_expired_cycle_and_measurement_conversion_rejected",
+        "test_context_rejects_parent_basis_measurement_currency_calendar_gross_net"
+      ],
+      "tested_boundary": "An expired rule is rejected; changed perimeter versions fail compatibility. The cited retained tests do not cover a positive switch between dated company extensions, window-boundary transitions, a change within a reporting period or a restated comparative under a revised perimeter.",
+      "unsupported": "A query-date eligibility test does not show that a rule applies throughout a reported duration. Rejecting a perimeter change is not a consolidation or reclassification method. Inactive rules still enter cycle validation; the date-window design cannot automatically admit every historically non-overlapping mapping sequence.",
+      "remaining_obligation": "Define extension versions, economic validity versus evidence availability, period-spanning applicability, supersession/alternatives and downstream invalidation. Supply a two-period company-extension example and a perimeter-change case retaining original and restated views, with explicit unsupported outcomes where comparability cannot be established.",
+      "design_consequence": "Keep dated comparability unresolved unless the mapping, population and reporting period all support it. The proposal must choose and justify lifecycle rules independently of P06 storage or graph convenience.",
+      "evidence": [
+        {
+          "path": "docs/design/chapters/02-history.tex",
+          "sha256": "3eb97e82073aa5f19513f5a1e262f2638501556f4a007922b54557130a15ced3",
+          "locator": "lines 224-252"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 147-188"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 203-256"
+        },
+        {
+          "path": "scripts/context_chronology_v1.py",
+          "sha256": "64878e62fa8784f666017252208229cc86111a000219b6fa24da52239f6d1d62",
+          "locator": "lines 867-881"
+        },
+        {
+          "path": "tests/test_accounting_p06.py",
+          "sha256": "5bb66d65c3c7854a647d484baf4acb359f35c9d7fd06209a76a4bdb4a31dc1c9",
+          "locator": "lines 49-71"
+        },
+        {
+          "path": "data/accounting-master/deliverables/P06/conformance.json",
+          "sha256": "d6c81ba5296e856d6380c5abc561e6da0658b7e25079d44d37792ffbf0347a70",
+          "locator": "JSON Pointer /tests/test_accounting_p06"
+        }
+      ]
+    }
+  ],
+  "supersedes": "Only the current MC07/G12 assessments; older versioned assessment and reconciliation files remain historical evidence.",
+  "review_status": "pending independent bounded_partial_work review",
+  "evidence_boundary": {
+    "specified_design": "Manuscript and Core IR declarations",
+    "exploratory_code": "P06 runtime; implementation not extended",
+    "tested_invariants": "Retained finite synthetic cases with matching hashes",
+    "accounting_validity": "Not established by P06; Apple claim limited to inspected Note 4",
+    "empirical_forecast_validity": "Not evaluated",
+    "human_acceptance": "pending"
+  },
+  "g12_obligation_resolution": [
+    {
+      "obligation": "Registry records and application rules",
+      "claim_ids": [
+        "mapping_relationships",
+        "composition_ambiguity"
+      ]
+    },
+    {
+      "obligation": "Different labels for the same quantity",
+      "claim_ids": [
+        "mapping_relationships"
+      ]
+    },
+    {
+      "obligation": "Similar labels with different meanings or measurements",
+      "claim_ids": [
+        "context_gross_net"
+      ]
+    },
+    {
+      "obligation": "Disjointness, exhaustiveness and residuals",
+      "claim_ids": [
+        "finite_partitions_residuals"
+      ]
+    },
+    {
+      "obligation": "Two classifications of one population",
+      "claim_ids": [
+        "alternative_classifications"
+      ]
+    },
+    {
+      "obligation": "Dated company extensions and perimeter/context changes",
+      "claim_ids": [
+        "company_extensions_over_time"
+      ]
+    },
+    {
+      "obligation": "Comparability without a universal chart of accounts",
+      "claim_ids": [
+        "mapping_relationships",
+        "context_gross_net"
+      ]
+    }
+  ],
+  "test_provenance": {
+    "conformance": {
+      "path": "data/accounting-master/deliverables/P06/conformance.json",
+      "sha256": "d6c81ba5296e856d6380c5abc561e6da0658b7e25079d44d37792ffbf0347a70",
+      "locator": "JSON Pointer /hashes"
+    },
+    "supervisor": {
+      "path": "data/accounting-master/runs/20261002T233421-cea9e631/P06/execution-2/checks.json",
+      "sha256": "c738e742f6a43a87e328ce01ffe414c009db3bac58a6b21652c5ac749c940232",
+      "locator": "JSON Pointer /test_sha256"
+    },
+    "review": {
+      "path": "data/accounting-master/runs/20261002T233421-cea9e631/P06/execution-2/review_result-2.response.json",
+      "sha256": "f91b64226bb167c0fbf94f4e78801e309ddfdc5d074f59f948b0e9cb957afded",
+      "locator": "JSON Pointer /residuals"
+    },
+    "source_hashes_verified": 5,
+    "retained_p06_methods": 27,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "tests_rerun": false
+  },
+  "row_assessments": {
+    "MC07": {
+      "id": "MC07",
+      "status": "partial",
+      "assessment": "The manuscript and Core IR already specify five mapping relationships, contextual applicability, two composition rules, partition references and an anti-double-counting example. P06 implements restricted direct dated equivalence and finite component/reclassification operations, context-mismatch rejection and enumerated partition checks. Retained tests with matching implementation/test hashes demonstrate sales/revenue label preservation, measurement/gross-net/perimeter rejection, a component total of 8 and refusal to combine product/geography partitions sharing atoms. Apple Note 4 supports the vendor non-trade distinction. These are specified design and bounded exploratory evidence; a complete source-backed cross-company mapping method is not established.",
+      "remaining_work": "Complete versioned company-concept registry and applicability/composition rules; connect source/review/proof references to checkable evidence. Add source-backed differently named equal quantities and complete the existing unlike-meaning case; define periods, gross/net and perimeter comparability separately from conversion. Specify unknown-residual constraints and dimension removal. Supply dated extension/perimeter-change and independently reconciled product/geography cases with shared population identity, retained unresolved joint cells and explicit non-additivity.",
+      "design_consequence": "Preserve source concepts and accounting contexts. Separate direct alignment, supported composition, measurement conversion and authority; finite IDs or nonempty provenance cannot establish accounting comparability. Keep P06 restrictions as exploratory choices until justified in the governing proposal."
+    },
+    "G12": {
+      "id": "G12",
+      "status": "partial",
+      "assessment": "G12 is partly addressed: Mapping/Partition record shapes exist; the manuscript specifies contextual relations, two composition constraints, residual preservation and two classifications of 260 that cannot be summed to 520. P06 enumerates disjoint/exhaustive finite populations, accepts a known residual membership witness, rejects unknown residuals and shared-population addition, and checks exact component arithmetic. The older claim that partitions and residual handling are wholly unspecified and unexecuted is wrong relative to this evidence. General registry resolution, company extensions over time, source-proven comparability and measurement transformations remain incomplete.",
+      "remaining_work": "Define registry identity/version and executable applicability, relation-specific composition, ambiguity/cycle handling and invalidation. Distinguish finite membership completeness from completeness of a real disclosure population, and known residual membership from known residual amounts. Provide complete source-backed same-quantity/different-label and different-measurement/similar-label records; extend the Apple distinction into an application case. Specify cross-context/gross-net refusal or justified transformations, dated extension/perimeter-change cases, and product/geography totals over a canonical shared population with unresolved joint cells preserved.",
+      "design_consequence": "Comparability must be demonstrated or left unresolved without imposing a universal chart of accounts. A direct mapping, known=True residual flag or disjoint-ID union is insufficient to authorize financial addition or conversion. P06 rejection behavior informs failure semantics but does not supply the missing accounting method."
+    }
+  }
+}

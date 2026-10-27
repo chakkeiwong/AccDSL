@@ -1,0 +1,55 @@
+APPENDIX A. PORTABLE OPERATION REFERENCE
+368
+A.28
+Ordered multi-series EPS report records
+OrderedEPS/1 specifies the report taught in Sections 10.2.4–10.2.5. Its closed Draft 2020-12
+JSON schemas are retained as ordered-eps/record-schemas.json in the continuation evidence
+directory. Every field below is required; unknown fields reject. Braces denote objects, brackets
+arrays, and alternatives distinct shapes. No migration from FinancingComponents/2 is inferred.
+Request {
+wire: "OrderedEPS/1", operation: "report",
+context, context_ref, inventory, scope, basic, series
+}
+context {
+entity, book, head, view, population,
+period: {start, end_exclusive}, ordinary_class, share_basis,
+currency, currency_scale, rule_version
+}
+support {path, sha256, anchor}
+inventory {status: complete | incomplete, ids: [id], support}
+scope {
+nonparticipating_rights, independent_additive_effects,
+fixed_effects, support
+}
+basic (ready) {
+status: ready, context_ref, support, continuing_numerator,
+total_numerator, denominator,
+attribution_complete, chronology_complete
+}
+basic (unresolved) {
+status: unresolved, context_ref, support, reason
+}
+Names and reasons are nonempty strings, findings are Booleans, dates are valid ISO calendar
+dates, and intervals include their start but exclude their end. A reporting period has positive
+length. Digests are 64 lower-case hexadecimal characters. The context reference is SHA256 of
+UTF-8 JSON with keys sorted, compact separators, ASCII escaping and no trailing newline.
+Every basic or series record must carry that reference. A support reference identifies exact local
+bytes and a nonempty anchor. Source resolution checks the bytes; a caller must separately
+interpret the anchor and the finding.
+Quantities are reduced rational strings: 0, a signed nonzero integer, or a reduced numera-
+tor/positive-denominator fraction. Leading zeros, plus signs, negative zero, decimals, exponents
+and a redundant denominator of one reject. The basic denominator is positive. The context
+binds units and scale before arithmetic; the report performs no currency or share-basis con-
+version. Both completeness findings in a ready basic record must be true to return basic EPS.
+The inventory and series IDs must agree bijectively, with no duplicates. A complete empty
+inventory is permitted with support.
+series (candidate) {
+id, resolution: candidate, context_ref, support,
+continuing_increment, total_increment, share_increment,
+earnings_complete, time_weighting_complete,
+potential_windows: [{start, end_exclusive}],
+actual_windows: [{start, end_exclusive}],
+end_kind: period_end | lapsed | converted, actual_in_basic
+}
+series (no effect) {
+id, resolution: no_effect, context_ref, support,

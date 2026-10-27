@@ -1,0 +1,1 @@
+The first final checker mistakenly compared the final images to themselves: the archived build-01 manifest retains the original render paths. The image bytes were correctly preserved under build-01/render. Resolve those paths explicitly, verify the archived hashes, then compare pixels. This is a checker-path defect, not a new manuscript or reading defect.

@@ -1,0 +1,169 @@
+\section{What must be known before a method can run}
+\label{sec:method-requirement-language}
+
+A company model can name a tax method while still lacking the information that
+method needs. It may know the tax rate but not the relevant tax bases, or have a
+reported consolidated balance without an allocation to the legal book being
+simulated. Naming the implementation does not resolve either problem. The
+method definition therefore needs to say which quantities and findings it
+requires, how they are related, and what prevents the method from proceeding.
+
+The preceding portable contract already calls for typed preconditions. The
+\code{MethodRequirements/1} reference gives a small part of that contract a
+common executable meaning. A requirement has an identity, a typed predicate,
+the exact input identities on which it depends, references to required admission
+findings, and different consequences for a false or unresolved predicate.
+The same interpreter can assess declarations for several methods. It does not
+replace their accounting algorithms, source checks or state transitions.
+
+Consider the conditional annual-company example. Its floating-rate share is a
+fraction of the declared debt principal, so the selected method requires a
+value between zero and one. It also restricts the coupon interval to one year
+and the opening facility draw and loan fee to zero. A negative fraction or a
+share exceeding one contradicts the declared input domain. A nonzero fee instead
+requires a method that handles fees. Those are different findings: the first
+is invalid for the stated fraction; the second is outside the selected method's
+scope. Neither can be repaired by silently changing the supplied number.
+
+\subsection{A known contradiction survives an unrelated unknown}
+
+Let $f$ denote the declared floating-rate share and $r$ the tax-rate input in
+this finite annual profile. Its selected conditions include $0\leq f\leq1$
+and $0\leq r\leq1$. These bounds belong to the declared profile; this example
+does not assert a universal model of tax measurement. Suppose the caller gives
+$f=2$ and leaves $r$ unknown. The supplied share already contradicts its meaning
+as a fraction. Uncertainty about tax does not remove that contradiction.
+
+The common assessment evaluates every declared requirement and retains each
+finding. Its summary gives a known invalid input precedence over unsupported
+scope, and unsupported scope precedence over unresolved requirements. Successful
+selected requirements remain visible as well. This ordering summarizes the
+results; it does not discard the reasons for an interrupted assessment.
+
+The existing \code{CompanyOperationsDraft} validator follows a different order
+in this mixed case: it returns on a globally unknown input before reaching the
+fraction-domain test. It therefore reports unresolved for the same inputs.
+The new reference reports invalid while retaining the unresolved tax condition.
+The original validator is preserved, and this difference is recorded explicitly.
+The checked agreement concerns selected single-condition comparisons, rather
+than equivalence of every possible mixed input to the old validator.
+
+Each input is separately marked known or unknown with a reason. An absent
+binding is unresolved; it is never zero or false. A declaration that refers to
+an undeclared input is structurally invalid. The literal text \emph{unknown} can
+still be a known text value because the binding status is separate from its
+value. Caller findings also have their own role. A true finding records what
+the caller supplied; the evaluator does not establish that an accounting
+judgment is correct merely by reading a Boolean.
+
+The Boolean operators use the following finite tables. Here $U$ means an
+unresolved supplied input or predicate, not a probability and not a set of
+financial histories.
+\begin{center}
+\begin{tabular}{cc|cc}
+$A$ & $B$ & $\operatorname{all}(A,B)$ & $\operatorname{any}(A,B)$ \\
+\hline
+true & true & true & true \\
+true & false & false & true \\
+true & $U$ & $U$ & true \\
+false & true & false & true \\
+false & false & false & false \\
+false & $U$ & false & $U$ \\
+$U$ & true & $U$ & true \\
+$U$ & false & false & $U$ \\
+$U$ & $U$ & $U$ & $U$
+\end{tabular}
+\end{center}
+Negation exchanges true and false and leaves $U$ unresolved. Every operand's
+dependency is retained even when another operand determines the result. Thus a
+false conjunction may still report the input missing from its other branch.
+Repeated references identify the same input; they introduce no independent
+draws or weights.
+
+Arithmetic and comparisons with an unknown operand remain unknown in this
+fragment. In particular, an unresolved $x$ leaves both $x=x$ and $x-x$ unresolved
+here. This conservative rule is deliberately different from symbolic deduction
+over an explicitly inhabited domain or the coefficient cancellation used in the
+source-relation calculation. Those procedures have additional premises. The
+requirement interpreter evaluates supplied inputs and does not decide entailment
+over admissible company histories.
+
+\subsection{The same requirement in text and typed form}
+
+Types carry explicit context maps. A rational amount can identify its currency,
+scale, entity, book, measurement date and accounting basis. Numeric operations
+and comparisons require exactly matching types and contexts. A reported
+consolidated balance of 100 and a legal-book balance of 100 are consequently not
+interchangeable merely because their numerals agree. An explicit allocation or
+conversion belongs to a separately specified method. Exact rational arithmetic
+also describes the calculation, not the precision or truth of a reported amount.
+
+The first expression fragment contains references, typed constants, equality,
+ordered comparison, addition, subtraction and the Boolean operators. It has no
+arbitrary calls, imports, multiplication, quantifiers or collection traversal.
+These restrictions make the selected semantics inspectable while leaving the
+broader method definition open to later compatible extensions.
+
+\noindent\begin{minipage}{\linewidth}
+Text uses named, semicolon-terminated declarations and prefix expressions. For
+example, a requirement that a declared share does not exceed one can be written
+as follows. The context and input roles remain explicit.
+\begin{lstlisting}
+input "share" rational assumption
+  {"unit":"ratio"} "case:declared-share";
+require "share.upper" invalid unresolved ["share"] []
+  (le (ref "share")
+      (const rational {"unit":"ratio"} "1/1"));
+bind "share" known "1/2";
+\end{lstlisting}
+\end{minipage}
+
+The display wraps declarations for reading; the reference text grammar places
+each complete declaration on one line. A complete document also contains the
+method identity and version, capability and residual-prerequisite declarations,
+an exact selected manifest digest and an end marker. The lower bound and other
+conditions must be declared separately; the upper-bound example supplies none
+implicitly. Rational values use reduced numerator/denominator strings. Boolean
+values are true or false, not integers or quoted words.
+
+The frontend lowers these declarations to the same records used by the typed
+library and calls the same evaluator. Strict exchange decoding rejects duplicate
+JSON keys, including nested context keys. The text parser rejects duplicate
+declarations, unknown operators, malformed types, missing terminators and
+trailing content. Quoted delimiters and Unicode remain part of the exact supplied
+text values, without normalization. These checks establish a bounded authoring
+correspondence; they do not establish that users prefer this syntax.
+
+\subsection{Content identity leaves authority with the caller}
+
+The caller selects a manifest by its canonical SHA256 digest. Changing a
+predicate, context, source role or residual prerequisite changes that identity.
+A stale selection is rejected, and an unavailable definition or required
+capability is reported separately. The manifest loads no code. Transporting an
+availability list does not establish that an implementation is installed, and
+a content hash does not authenticate the sender. Registry ownership and
+capability availability remain responsibilities of the trusted caller.
+
+A successful result is called \code{requirements\_satisfied} within the scope
+\code{selected\_requirements\_only}. It retains the unassessed prerequisites
+and explicitly leaves method eligibility, execution, source admission and
+accounting admission false. For the checked company bridges, those remaining
+conditions include source binding, account and state controls, event order,
+unselected allocation equations and the actual method transition. A nonempty
+source reference or an empty admission-reference list cannot settle them.
+
+The common interpreter has 35 checked selected-condition comparisons with the
+unchanged company-operation and return-module functions, complemented by
+independent truth tables, exact arithmetic and adversarial type/context cases.
+The separate frontend has exact typed/text and result comparisons across five
+examples, including constructed legal-book, reported-measurement and
+insurance-cohort contexts. The latter demonstrate language behavior, not new
+insurance or source-admission methods. The mixed unknown/contradiction case
+above remains a documented difference.
+
+These references make prerequisites reusable and inspectable across the tested
+profiles. General method applicability, account-state conversion, source-to-latent
+reconstruction and independent acceptance still require their own evidence.
+The following section extends this reference to exact record binding,
+dimensional arithmetic and guarded applicability. Complete method boundaries
+still require more than a partial predicate list before execution can proceed.

@@ -1,0 +1,151 @@
+\subsection{Keep each assessment attached to its historical terms}
+\label{sec:nested-term-invariants}
+
+A claim can remain outstanding while its due date changes. Checking its
+current balance and current due date is therefore insufficient to explain an
+earlier overdue assessment. In the retained synthetic example, a claim issued
+on 2 January 2027 is initially due on 31 January. An imported assessment dated
+28 February records 20 remaining and 20 overdue. Prospective extensions become
+effective on 10 March and 10 April, moving the due date first to 30 April and
+then to 31 May. Applying the current 31 May due date to the February assessment
+would incorrectly turn its overdue amount into zero. The historical assessment
+must remain attached to the initial term.
+
+The term history is stored inside the claim. Each term has its own local
+identifier, effective date, due date, predecessor and event identity. Each
+assessment has a date, referenced term, remaining amount, overdue amount,
+origin and event identity. Local identifiers alone do not identify these
+records: another claim may use the same identifier. Nor does insertion order
+establish chronology. A declaration must name the parent claim and select a
+term using its effective date before comparing the financial amounts.
+
+\paragraph{Expose the supplied rows without choosing a history.}
+\code{NestedMapProjection/1} binds a declared parent map and nested child map
+to typed scalar rows. Bindings may read the parent key, child key, a parent
+field or a child field. The accompanying lineage retains both raw keys and
+escaped source paths. Each parent also has a group record with its child-map
+path, first row and row count. An empty child map still produces a group;
+an empty parent map produces no groups. This distinction lets a rule require
+terms for every supplied claim even when one claim has no terms.
+
+Projection preserves supplied insertion order and makes no chronological
+selection. Declarations are checked against the memory definition even when
+there are no rows. An explicit population declaration identifies the exact
+book and both map paths; partial or unknown coverage remains unresolved.
+Complete supplied internal maps are sufficient for these checks, but do not
+establish that an issuer's disclosures reveal all contracts or past events.
+
+\paragraph{Select within one parent and one declared boundary.}
+\code{GroupedRowQuery/1} provides count, typed match and greatest-row queries.
+The query names the parent key, escaped parent path and child-map path; all
+must agree. Count includes all rows in that group. Match compares one declared
+field with one value of exactly the same type. Greatest orders dates or exact
+rational values, optionally below an explicitly inclusive or exclusive upper
+bound. Units, scale and context must agree before a rational comparison.
+
+The February assessment selects the greatest effective date no later than
+28 February, which is 2 January. A predecessor query instead uses a strict
+upper bound: the predecessor of the term effective on 10 April is the term
+effective on 10 March. A query without an upper bound identifies the latest
+term. None of these operations sorts or replaces the stored source order.
+Candidate and winner indices retain that order, and a unique result includes
+the whole selected row and its source lineage.
+
+Equal greatest dates produce an ambiguous result. Duplicate matches do the
+same; insertion order is never a tie breaker. A group absent from a complete
+supplied population is invalid. A present group with no qualifying row returns
+explicit \code{none} when the declaration permits it, or invalid when the row
+is required. An explicit unknown input remains unresolved; omitting a required
+input is a malformed declaration. Every evaluation recomputes its projection
+from the bound book, schemas, types and coverage. A caller cannot substitute
+previously computed rows after changing the source.
+
+\paragraph{Use absence without treating uncertainty as absence.}
+\code{QueryGuardedInvariant/1} binds query results into the preserved guarded
+requirement evaluator. Count becomes an exact dimensionless rational. A unique
+row supplies \code{has\_row=true} and known selected fields. Allowed
+\code{none} supplies \code{has\_row=false}, while its selected fields remain
+unknown. An ambiguous or unresolved query supplies unknown values, including
+an unknown presence indicator. Thus a tie cannot masquerade as an empty group.
+The declaration explicitly chooses whether ambiguity is invalid or unresolved.
+
+A false guard makes a predicate inactive; it does not prove that predicate.
+The separate \code{required\_known} declaration can require a selected field
+even when its predicate is inactive. Invalid queries fail structurally before
+the predicates run, and unresolved queries keep the overall result unresolved
+even under a false guard. Allowed absence is different: it can legitimately
+activate an empty-group rule while leaving a selected-row rule inactive. The
+result retains the original guard findings and distinguishes
+\code{no\_active\_requirements} from satisfied requirements.
+
+\paragraph{Declare the rule once for every supplied claim and assessment.}
+Finite queries with handwritten claim identities would miss newly supplied
+records. \code{NestedQueryInvariantTemplate/1} instead iterates over all groups
+or all child rows of a declared complete projection. Typed captures read the
+current parent or child identity, scalar fields and explicit book dates or
+memory values. Every query's full group identity is bound to that parent.
+Scalar substitutions can fill only a typed match value, typed bound or the
+value of a typed constant already present in a guarded predicate. They cannot
+replace operators, types, bindings or failure consequences. Duplicate or
+unsafe substitutions refuse before iteration, including on empty populations.
+
+Each instance retains its captured values, source paths, resulting declaration
+and complete query and predicate results. The reviewed selection identifies
+the template as a whole. The instance selection is explicitly derived by the
+checked substitution procedure; it is not described as an independent review
+of every resulting instance. The initial checked profile permits at most
+64 instances and refuses overflow without a partially successful result.
+This bound is an implementation choice for the finite probe, not a restriction
+on the financial concepts that the product must eventually represent.
+
+The term-row declaration uses a unique match at each effective date to reject
+ties. It selects the greatest strictly earlier term and checks the stored
+predecessor against that identity; when no predecessor exists, the explicit
+initial sentinel must be \code{none}. It also checks issue, effective, due and
+book dates. The assessment-row declaration checks uniqueness of its date,
+selects the greatest applicable term, preserves historical overdue, requires
+nonnegative assessed remaining amounts and distinguishes imported snapshots
+from recorded events. Parent-group declarations check current terms, latest
+assessments, assessed flags, summary amounts and empty-assessment sentinels.
+
+Event membership uses \code{ProjectedStateCollections/1} to connect nested
+rows to the existing collection-reference evaluator. It binds complete term
+rows and the book's
+seen-event sequence. An explicitly typed equality filter selects assessments
+whose origin is \code{recorded\_event}; their event identities must be seen.
+Imported snapshots have a separately declared unknown-event condition. A
+filtered collection is complete only relative to its complete supplied source
+and explicit predicate. The filter does not turn a partial source into a
+complete collection, and its types are checked even when it selects no rows.
+
+\paragraph{Join the six semantic checks.}
+\code{TermStateSemanticBundle/1} joins six reviewed components: common claim
+conditions and the receivables total, the collection-clock bound, term history,
+historical assessments, parent summaries and event membership. The clock reads
+the actual exclusive fiscal endpoint rather than assuming a calendar year.
+The common claim declaration retains nonnegative remaining amounts, sale-event
+membership, issue dates and the exact receivables sum. Historical assessment
+rules own overdue; the earlier scalar rule based on current due is not applied
+to these amended-term histories.
+
+All 22 retained states satisfy this semantic bundle. Fifty-one complete
+comparisons preserve every subassessment, and 27 targeted semantic corruptions
+are rejected by both the independently run native validator and the declared
+checks. The candidate evaluations disable native financial callbacks. A
+separate discriminator changes the native migration premise: native validation
+rejects that premise while the book's declared semantic relations still hold.
+This difference identifies a separate structural condition rather than an
+alternative form of opening admission. The semantic bundle by itself grants
+no execution or accounting admission. Section~\ref{sec:selected-term-execution}
+supplies the selected structural contract, direct nested source and bounded
+event/carry composition while retaining actual-source and accounting limits.
+
+Complete declarations, original-state comparisons, structural controls and
+the native-oracle outcomes are retained under
+\begingroup\raggedright
+\path{data/accounting-master/grouped-row-query-20261026/},
+\path{data/accounting-master/query-guard-composition-20261026/},
+\path{data/accounting-master/nested-query-template-20261026/},
+\path{data/accounting-master/nested-obligation-completion-20261026/}
+and \path{data/accounting-master/term-semantic-composition-20261026/}.
+\par\endgroup

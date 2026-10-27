@@ -1,0 +1,160 @@
+\chapter[Approximate simulation]{Approximate inference and simulation without false certainty}
+\label{sim:approximation}
+
+Exact symbolic calculation will not solve every useful company model within available resources. Approximation is therefore necessary. Its legitimacy depends on naming the quantity being approximated and preserving the distinction between numerical evidence and economic possibility. A finite sample can estimate an expectation under a declared distribution. It cannot, by itself, characterize every history compatible with disclosures. A fitted surrogate can interpolate a function well while giving the wrong answer at a default boundary.
+
+\section{Choose the target first}
+Different questions require different methods. An expected cash balance, a worst-case cash balance, a breach probability, a feasible breach witness and a policy value are different targets. A method appropriate for one can be misleading for another. Sample averaging targets an expectation; minimizing over samples supplies a witness-based bound on a minimum, not an exact worst case.
+
+Let $Y=F(H,S,\pi)$ under a declared joint measure for history $H$ and scenario $S$. Monte Carlo draws $Y_1,\ldots,Y_n$ give the sample mean
+\begin{equation}
+ \widehat m_n=\frac1n\sum_{i=1}^nY_i.
+\end{equation}
+Under independent identical sampling and finite variance, its variance is $\operatorname{Var}(Y)/n$. Those conditions are part of the claim. Correlated paths, importance weights or adaptive sampling require a different variance treatment. The formula does not apply merely because the output file has $n$ rows.
+
+Without a probability model, a finite collection of histories can still be useful for explanation and testing. It should be called a set of witnesses or selected cases. Equal frequencies in that collection do not establish probabilities in the underlying company family.
+
+\section{Sampling a persistent parameter}
+If a contract type is fixed but unknown, sample it once for a simulated world and retain it through time. Draw future innovations according to their conditional process. This produces the intended joint law of parameter and trajectory. Redrawing the type each period approximates a different model.
+
+The distinction remains important after filtering. Resampling particles may duplicate a parameter value as a computational operation; it does not mean the company changed contract. Particle identity and world identity must not be confused. A lineage record can preserve which parameter and past events each particle represents.
+
+If the uncertainty is set-valued rather than probabilistic, selecting parameter values for numerical exploration should retain the original feasible region. Sampled values can reveal failure cases or guide refinement. They should not replace the family with a smaller set and thereby turn unexplored histories into impossible ones.
+
+\section{Particle filtering under known model assumptions}
+A particle filter approximates sequential distributions in a specified state-space model. With transition density $f(x_t\mid x_{t-1})$ and observation likelihood $g(y_t\mid x_t)$, an importance proposal $q$ generates particles and weights. A generic incremental weight is proportional to
+\begin{equation}
+ w_t^{(i)}\propto w_{t-1}^{(i)}\frac{g(y_t\mid x_t^{(i)})f(x_t^{(i)}\mid x_{t-1}^{(i)})}{q(x_t^{(i)}\mid x_{t-1}^{(i)},y_t)}.
+\end{equation}
+The proposal must cover the relevant target support. A proposal that never visits a feasible high-risk region cannot recover it by weighting.
+
+\citet[Sections 2--3]{doucet2012tutorial} explains sequential importance sampling, resampling and degeneracy. Its filtering setup conditions on a specified model. Static unknown parameters are not automatically handled well by adding them to the state and repeatedly resampling. That extension can suffer severe impoverishment.
+
+For AccDSL, particle filtering is appropriate only after prior, transition and observation laws are admitted. It can be an optional numerical view of a history family. The family and source constraints remain available to detect support loss and distinguish probabilistic approximation from exact admissibility.
+
+\section{Weight degeneracy and genealogical collapse}
+If nearly all weight concentrates on one particle, a nominal population of ten thousand does not provide ten thousand effective alternatives. A common weight diagnostic is
+\begin{equation}
+ N_{\rm eff}=\frac{1}{\sum_i(\bar w_i)^2},
+\end{equation}
+where normalized weights sum to one. It summarizes weight concentration, not every form of approximation error. Uniform weights after resampling can coexist with many duplicate ancestors.
+
+Genealogical collapse matters for historical reconstruction and smoothing. Particles can share the same early history even while their current states differ. If an old unknown contract type is lost, later data cannot revive it without a rejuvenation method or retained symbolic support. A high current effective sample size does not establish historical diversity.
+
+Diagnostics should therefore include unique persistent parameter values or clusters, ancestor diversity, support checks against constraints and sensitivity to proposal design. These are explanatory or veto diagnostics under a stated protocol. No single scalar certifies that the posterior or scenario tail is accurate.
+
+\section{Rejuvenation and conditional calculation}
+Move steps can restore diversity if they preserve the intended target distribution. Their acceptance probabilities, conditional variables and constraints must be correct. Arbitrarily perturbing a loan rate or maturity can create a history inconsistent with evidence. Projection back into a feasible set can also alter the target distribution unless its effect is accounted for.
+
+Analytic integration of conditionally tractable components can reduce sampling variance. \citet[Section 4.6]{doucet2012tutorial} discusses Rao--Blackwellization. In a company model, some accounting accumulations may be deterministic conditional on contract type and shock path, so they need not be sampled separately.
+
+This benefit depends on a valid conditional decomposition. Integrating a variable out while forgetting the dependence it induces on remaining quantities gives the wrong target. The same projection discipline used for symbolic families applies probabilistically: marginalization preserves dependence, whereas independent replacement usually does not.
+
+\section{Rare events and empty samples}
+If a breach has probability $p$ and paths are independent, the probability of observing no breach in $n$ draws is $(1-p)^n$. For $p=0.001$ and $n=100$, this is about 0.905. Zero observed breaches are therefore unsurprising and do not establish safety.
+
+For an ideal Bernoulli experiment with zero events, a one-sided 95 per cent upper bound solves $(1-p)^n=0.05$, giving $p=1-0.05^{1/n}$. This is a statistical bound under the sampling assumptions, not a statement about model misspecification. If the simulator omits a default mechanism, more draws cannot detect it.
+
+Tail estimates need enough events and a suitable uncertainty analysis. Extreme quantiles and maxima have high sampling variability. A lower observed maximum in one run is descriptive evidence, not a defensible ranking of methods. The target, sampling design and uncertainty calculation should be specified before interpreting a comparison.
+
+\section{Importance sampling}
+Importance sampling deliberately visits rare regions more often. If target density is $p(x)$ and proposal is $q(x)$, an expectation can be estimated using weights $p(x)/q(x)$ where the proposal covers target support. Oversampling distress is useful only if weights and support are handled correctly.
+
+For event indicator $B(x)$, the ordinary importance estimator is $n^{-1}\sum_i B(X_i)p(X_i)/q(X_i)$ with $X_i\sim q$. Self-normalized weights define a different finite-sample estimator. The method should record which is used and how uncertainty is assessed.
+
+A proposal chosen after observing a preliminary sample can be effective, but adaptive procedures require care in interpretation. Selecting only paths that breach and averaging them estimates a conditional severity, not the unconditional breach probability. A report should separate frequency from loss given breach.
+
+\section{Stress testing without probabilities}
+A deterministic stress can be useful even when its likelihood is unknown. It asks what happens under the specified path. Reverse stress can search for conditions that produce a shortfall. Neither exercise needs invented probabilities.
+
+For example, solve for the smallest rate increase causing cash below a threshold under each compatible debt history. The answer is a family of thresholds. A minimum across histories identifies a vulnerable compatible case; a maximum identifies how much stress is needed to affect every admitted history, subject to monotonicity and feasibility.
+
+The search should include joint constraints on shocks. Allowing sales, exchange rates and funding spreads to vary independently over arbitrary ranges can produce an economically incoherent reverse stress. A broad stress set may be intentionally conservative, but its interpretation is then a designed adversarial exercise rather than an estimated likelihood.
+
+\section{Scenario reduction}
+A large finite scenario set can be reduced by selecting representative paths or aggregating similar ones. Similarity in Euclidean shock distance does not automatically imply similarity in financial consequences. Two rate paths close in norm can lie on opposite sides of a covenant or option boundary.
+
+The proposed AccDSL method should define reduction error in terms of requested outputs, feasible policies and information timing. If a reduction is intended to preserve an optimization value, it needs evidence for that target. Preserving a few unconditional moments is insufficient for a path-dependent refinancing decision.
+
+Probability-metric reduction provides a precise method when a measure and suitable regularity are available. Its usefulness depends on the financial quantity and decision being approximated. The following derivations distinguish fixed-policy expectations, threshold probabilities and policy optimization.
+
+\section{What probability-metric reduction preserves}
+A finite probability model permits a more precise reduction than deleting paths and renormalizing. Let scenarios $s_i$ have admitted probabilities $p_i$, with $\sum_i p_i=1$. Choose a smaller retained index set $K$ and map each original scenario to a retained representative $s_{k(i)}$. The reduced probability of representative $j$ is
+\begin{equation}
+ q_j=\sum_{i:k(i)=j}p_i,\qquad j\in K.
+\end{equation}
+All probability mass remains accounted for, although the distribution has changed. The method approximates a specified measure; it supplies no probabilities for an unweighted family of unknown company histories.
+
+\citet[Section 3, Theorem 3.1 and its proof]{dupacova2000preprint} derives optimal redistribution for a fixed retained subset under the paper's probability-metric assumptions: deleted mass moves to a nearest retained scenario under the admitted cost. The choice of which scenarios to retain remains a separate combinatorial problem. Algorithms 3.6 and 3.7 are backward-reduction and forward-selection heuristics. Their sequential choices do not generally establish a globally optimal subset.
+
+A short local derivation shows what a distance can buy for a financial query. Suppose a fixed-policy cash outcome $f(s)$ satisfies $|f(s)-f(u)|\leq Ld(s,u)$ for all admitted pairs, where $d$ is a stated scenario distance and $L$ is a justified constant. Then
+\begin{align}
+ |\mathbb E_P f-\mathbb E_Q f|
+ &=\left|\sum_i p_i[f(s_i)-f(s_{k(i)})]\right|\nonumber\\
+ &\leq L\sum_i p_i d(s_i,s_{k(i)}).
+\end{align}
+The first equality substitutes the redistributed masses; the inequality applies the triangle inequality and the assumed regularity. Thus the weighted movement of scenarios bounds this expected-output error. A distance small in interest rates is useful only when the required output responds regularly in that distance.
+
+For example, let the original states be 0, 1 and 2 with probabilities $1/4,1/2,1/4$. Keep 0 and 2, and resolve the middle state's distance tie by assigning it to 0. Reduced masses are $3/4,1/4$. Under absolute distance, weighted movement is $1/2$. For $f(s)=s$, the original mean is 1 and the reduced mean is $1/2$, exactly attaining the bound with $L=1$. Mass conservation alone does not preserve the mean.
+
+A default indicator is discontinuous. Put equal mass at $1-\eta$ and $1+\eta$, where $\eta>0$, and retain only the first state. Weighted movement is $\eta$, tending to zero, but the probability of $s>1$ changes from one half to zero. Therefore a small distance does not by itself give a useful default-probability guarantee. One needs additional control of probability near the boundary, a distance tailored to the event, or explicit preservation of the relevant region.
+
+\input{simulation/lit-09-approximation-10}
+
+\section{Reduction before choosing a policy}
+An approximation adequate for one fixed policy may fail after optimization selects a different one. Suppose, more strongly, that every policy in the same feasible, nonanticipative class satisfies
+\begin{equation}
+ |V_P(\pi)-V_Q(\pi)|\leq\delta.
+\end{equation}
+If maximizers $\pi_P$ and $\pi_Q$ exist, adding and subtracting their reduced-model values gives
+\begin{align}
+ V_P(\pi_P)-V_P(\pi_Q)
+ &= [V_P(\pi_P)-V_Q(\pi_P)]\nonumber\\
+ &\quad+[V_Q(\pi_P)-V_Q(\pi_Q)]
+       +[V_Q(\pi_Q)-V_P(\pi_Q)]\nonumber\\
+ &\leq2\delta.
+\end{align}
+The middle term is nonpositive because $\pi_Q$ optimizes the reduced problem. This elementary bound needs uniform control over the policy class, identical feasibility and consistent information. A bound established only at the final selected policy cannot justify the argument.
+
+The source's Section 2 gives stability results for convex stochastic programs under explicit solution-set, integrability and regularity assumptions. Remark 2.2 adds dependence conditions for its multistage setting. Those conditions do not automatically cover discrete default, share conversion, nonconvex financing or private information in a company model. Nor does a close distribution over complete paths establish that intermediate observations and admissible decisions are preserved.
+
+An AccDSL reduction should therefore state the admitted measure, retained scenarios, redistribution rule, distance and query guarantee. It should separately check liquidity and default boundaries and the actor's observation structure. The original joint history family remains available for refinement. Reducing a numerical probability approximation must not erase a structurally possible contract or turn an unobserved future path into information available today.
+
+\section{Surrogates and boundary errors}
+A surrogate can approximate expensive valuations or transitions. Its input domain, training distribution, output definition and constraints must be explicit. A small average prediction error can coexist with large errors in rare distressed states. If those states determine issuance feasibility, the surrogate may be a poor component despite good average accuracy.
+
+Suppose true funding capacity is $c(x)$ and issuance is allowed only when $c(x)\geq K$. An approximation error bound $|\hat c-c|\leq\epsilon$ permits safe classification only outside $[K-\epsilon,K+\epsilon]$. Inside that band, refine or return uncertainty. A point prediction alone gives no such protection.
+
+A surrogate should also respect units and economic constraints. Negative principal, duplicated shares or cash creation may be detectable regardless of predictive error. Enforcing constraints can improve mechanical validity, but does not prove that the underlying economic mapping is correct. Both checks remain necessary.
+
+\input{simulation/lit-09-approximation-4}
+
+\section{Error propagation through time}
+Small one-step errors can accumulate or amplify through nonlinear feedback. For an illustrative recursion with Lipschitz transition constant $L$, one-step approximation error at most $\epsilon$ and initial error $e_0$, a bound satisfies
+\begin{equation}
+ e_{t+1}\leq Le_t+\epsilon.
+\end{equation}
+Iterating gives $e_T\leq L^Te_0+\epsilon\sum_{j=0}^{T-1}L^j$. When $L<1$, the sum is bounded by $1/(1-L)$; when $L>1$, it can grow rapidly. This is a local mathematical bound under its assumptions, not a claim that a company model is globally Lipschitz.
+
+Default and option transitions can be discontinuous. Near them, a small state error can select a different regime and invalidate a smooth bound. Validation should therefore include boundary perturbations and multi-period rollouts, not only one-step residuals on typical states.
+
+\section{Combining exact and sampled components}
+A hybrid method can keep discrete contract alternatives exact, solve linear accounting relations symbolically and sample future demand conditional on each alternative. It can also bound unresolved histories while estimating conditional means for selected regions. This is often more informative than forcing every uncertainty into one Monte Carlo distribution.
+
+The result must retain which component is exact, bounded or estimated. An exact accounting identity inside a sampled simulation does not make a sample quantile exact. A certified bound on one contract region does not cover omitted regions. Mixed results should be combined using rules appropriate to their evidence type.
+
+A useful report can state that breach is impossible in one region, possible with a verified witness in another, and probabilistically estimated in a third under an admitted measure. These are compatible forms of information. Reducing them to one unlabeled scalar would lose their meaning.
+
+\section{Stopping rules}
+A numerical budget should specify what makes an approximation adequate for the decision. A tolerance on expected cash may be appropriate for planning; a confidence interval for breach probability may be needed for a probabilistic statement; a certified lower bound may be needed for a robust safety claim.
+
+Stopping because the sample mean appears stable can miss a rare region. Repeatedly checking a confidence interval without accounting for the stopping design can alter its coverage. A deterministic residual tolerance does not establish statistical accuracy. The stopping criterion should match the target and method.
+
+If the required evidence cannot be obtained within budget, the answer remains provisional or unresolved. This is not a reason to discard the model's useful conditional results. It is a reason to state what is known, what remains uncertain and which computation would discriminate the remaining cases.
+
+\section{Proposed approximation records}
+Each approximation should record its target, retained family, measure if any, sampling or discretization rule, random seeds, support assumptions, error estimates, failed regions and method version. A run manifest supports reproduction; the reader-facing result should explain the consequences rather than expose every internal field.
+
+Tests should include a small exact reference, a rare-event fixture, a persistent-parameter fixture, a boundary-sensitive fixture and an intentionally unsupported region. Comparison should use the same model and query. A fast method solving a simplified target is not a faster solution to the original target unless the difference is quantified.
+
+The objective is controlled approximation, not universal exactness. The system can remain useful while refusing an unjustified probability or exact bound. Retaining the original family ensures that future evidence and better methods can revisit uncertainty that today's computation could not resolve.

@@ -1,0 +1,11 @@
+EVIDENCE={'annual':'annual-inventory-composition-20261025','manuscript':'annual-inventory-integration-20261025'}
+UPDATES={}
+def add(ids,advance,residual,next_action):
+    for key in ids.split():UPDATES[key]={'evidence':['annual','manuscript'],'advance':advance,'residual':residual,'next_action':next_action,'full_requirement_closed':False,'acceptance':'not_promoted'}
+add('MC11 MC13 MC15 MC23','Optional partial sales preserve the complete 26-account annual book and residual units across periods.','Matched source authoring, named families and broader methods remain open.','Add an explicit optional authoring profile with exact lowering.')
+add('MC16 MC18 G4 P17-04.10','Carried tax liabilities and assessments remain exact; new sales stale old measurement and require reassessment.','Actual policy admission and wider tax, FX, group and sector methods remain incomplete.','Preserve tax timing and unknown declarations through authored programs.')
+add('MC24 G2','Complete recomputation rejects altered annual results without account projection or runtime monkeypatching.','General persistence, resource scaling and other profiles remain incomplete.','Reuse frozen validation through explicit local operation dispatch.')
+add('MC26','389 checks over 19 cases, 14 focused and 26 regression methods pass; the stale-measurement diagnostic was repaired with its original failure preserved.','Deterministic synthetic evidence does not establish arbitrary-size or real-company validity.','Check pure compilation, exact lowering and all financial result fields.')
+add('MC28','Annual sale produces cash 467, inventory 70, profit 5 and operating cash 15, retaining payable 41/4; residual stock survives carry.','Whole-company and broader-method coverage remain open.','Execute text and typed controls through the identical annual evaluator.')
+add('MC32','Version 3.97 preserves 174 sources and 288 displays; 496 pages; local rendering checked.','Whole-document and independent/domain/human review remain pending.','Integrate only checked interface evidence after its replay passes.')
+add('MC33 MC34 MC35','Internal full-state implementation, tax timing checks and coverage review are complete without expert engagement.','S1-S5 partial, S6 held, S7 deferred; source and broad mission gaps remain open.','Continue authoring then family composition; defer forecasting.')

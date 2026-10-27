@@ -1,0 +1,1 @@
+One dated credit continuity delta and one manuscript integration delta added without duplicate credit. Original obligations, interactions, operations and all 18 package statuses are preserved. No whole requirement closes.

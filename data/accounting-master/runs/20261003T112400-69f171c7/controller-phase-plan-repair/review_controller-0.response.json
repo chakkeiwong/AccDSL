@@ -1,0 +1,38 @@
+{
+  "assumptions": [
+    "This review uses only the supplied packet; no tools, files or project history were consulted.",
+    "Workers are trusted and obey the stated execution modes. Deliberate detachment and uncatchable termination during registration remain outside scope.",
+    "The packet supplies test names and a reported passing result, but not test bodies. Those names do not establish coverage of the findings below."
+  ],
+  "checks": [
+    "Traced initial planning, ordinary failed verification, partial-work replanning and checked-work resume.",
+    "Checked how partial result-review verdicts affect subsequent execution.",
+    "Compared editable-file preservation with the stated source/manuscript preservation interface.",
+    "Confirmed that explicit incomplete criteria veto acceptance and that builtin results retain bounded acceptance qualifications."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "High — Ordinary repairs execute under the original plan without fresh plan review. In Master.execute_phase, failed checks, result-review REVISE and caught execution errors populate packet['repair_findings'], then fall through to the next loop iteration. That iteration calls worker('repair', ...) with the original approved plan and hash. Only the partial-work branch calls approve_phase_plan again. Consequently, repair instructions can change the authorized work without a plan incorporating those findings being reviewed. Repair: route every transition to editable repair through a refreshed packet and a fresh approve_phase_plan call, persist that approval, and stop if approval is unavailable or blocked. Add regression coverage for failed checks, result-review REVISE and execution errors, asserting that reviewed replanning precedes the repair worker.",
+    "High — A BLOCKED verdict from partial result review is ignored as a control decision. In the partial-work branch of Master.execute_phase, partial_review is stored in repair_findings, but its verdict is never inspected. With progress, execution can replan and launch another editable worker; without progress, it records needs_plan_repair instead of the external block. This differs from both plan review and full result review, which explicitly preserve BLOCKED. Repair: after evidence-integrity verification, handle partial_review['verdict'] == 'BLOCKED' by preserving its issues, residuals and next actions, marking blocked_external and returning through the normal external-block persistence path. Add coverage for a passing partial check followed by review BLOCKED, ensuring no subsequent editable worker starts."
+  ],
+  "next_actions": [
+    "Require a fresh reviewed plan before every editable repair driven by new verification or review findings.",
+    "Honor BLOCKED consistently for partial result reviews and retain the checked continuation.",
+    "Clarify the editable-file coverage contract and add focused regression cases for the identified transitions."
+  ],
+  "residuals": [
+    "Preservation coverage needs an explicit interface assumption. editable_files inventories selected directories and suffixes only; bibliography files, stylesheet files, YAML configuration, root-level source files and symlinks are excluded. If workers may edit such files, their prior bytes and deletions are not covered by this mechanism. Either constrain authorized editable paths to the inventory or expand preservation to the actual edit scope.",
+    "Process cleanup, lock enforcement, capability validation, approval-rule installation and outer state persistence are represented chiefly by interfaces and test names in this packet. Their implementations cannot be independently approved from these excerpts.",
+    "The reported 104 passing tests support control-plane verification only. They do not establish accounting correctness, scientific validity or human acceptance for the 192-report panel."
+  ],
+  "steps": [
+    "Performed a bounded static review of the supplied phase-plan-repair code and interfaces.",
+    "Separated concrete control-flow defects from missing interface assumptions and unreviewed implementation areas."
+  ],
+  "summary": "Two control-flow defects require repair: ordinary failures bypass fresh reviewed replanning, and partial result-review BLOCKED verdicts do not stop editable work.",
+  "verdict": "REVISE"
+}

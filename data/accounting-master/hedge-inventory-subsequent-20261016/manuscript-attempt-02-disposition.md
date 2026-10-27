@@ -1,0 +1,1 @@
+The second build passed365 automated checks. Full-resolution visual inspection found the new closing citation abutting the preceding full stop. Move the citation inside the sentence with normal spacing; retain these pre-repair records and rebuild. No mathematical or source-content change.

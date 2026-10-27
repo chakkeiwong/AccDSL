@@ -1,0 +1,1 @@
+Rendered review of main page125 and simulation page116 found three citations touching the preceding word. Inserted ordinary spaces only. Equations, claims, citations, predecessor sources and the original successful build/review records are preserved. This is a typography repair, not new scientific evidence.

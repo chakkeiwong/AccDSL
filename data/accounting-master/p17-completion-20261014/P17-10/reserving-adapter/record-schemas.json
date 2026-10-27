@@ -1,0 +1,1865 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "bodies": {
+    "SchemaLock": {
+      "type": "object",
+      "properties": {
+        "schema_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "semantic_contract_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_blob",
+        "semantic_contract_blob"
+      ],
+      "additionalProperties": false
+    },
+    "Profile": {
+      "type": "object",
+      "properties": {
+        "profile_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_lock_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "SchemaLock"
+            },
+            "schema": {
+              "const": "accdsl.reserving.schemalock.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "mode": {
+          "const": "documentary_only"
+        }
+      },
+      "required": [
+        "profile_id",
+        "schema_lock_ref",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "Signature": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "reserving.evaluate@1"
+        },
+        "schema_lock_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "SchemaLock"
+            },
+            "schema": {
+              "const": "accdsl.reserving.schemalock.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "output_schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "operation",
+        "schema_lock_ref",
+        "arguments",
+        "output_schema"
+      ],
+      "additionalProperties": false
+    },
+    "View": {
+      "type": "object",
+      "properties": {
+        "view_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "const": "authored_synthetic"
+        },
+        "historical_availability_claim": {
+          "const": false
+        }
+      },
+      "required": [
+        "view_id",
+        "scope",
+        "historical_availability_claim"
+      ],
+      "additionalProperties": false
+    },
+    "Environment": {
+      "type": "object",
+      "properties": {
+        "numerics": {
+          "const": "exact_rational_fixture"
+        },
+        "runtime_executed": {
+          "const": false
+        },
+        "gpu": {
+          "const": "not_used"
+        }
+      },
+      "required": [
+        "numerics",
+        "runtime_executed",
+        "gpu"
+      ],
+      "additionalProperties": false
+    },
+    "Triangle": {
+      "type": "object",
+      "properties": {
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.reserving.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "portfolio": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scale": {
+          "type": "integer"
+        },
+        "valuation_date": {
+          "type": "string",
+          "minLength": 1
+        },
+        "origins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "developments": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "origin": {
+                "type": "string",
+                "minLength": 1
+              },
+              "development": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "payment_period": {
+                "type": "string",
+                "minLength": 1
+              },
+              "role": {
+                "enum": [
+                  "observed",
+                  "future"
+                ]
+              },
+              "observed_cumulative": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "origin",
+              "development",
+              "payment_period",
+              "role",
+              "observed_cumulative"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "view_ref",
+        "entity",
+        "portfolio",
+        "currency",
+        "base_unit",
+        "scale",
+        "valuation_date",
+        "origins",
+        "developments",
+        "cells"
+      ],
+      "additionalProperties": false
+    },
+    "Law": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "enum": [
+            "negative_binomial_mu_size",
+            "poisson_lambda",
+            "gamma_shape_scale",
+            "scaled_poisson"
+          ]
+        },
+        "dispersion": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scale": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "family",
+        "dispersion",
+        "currency",
+        "base_unit",
+        "scale"
+      ],
+      "additionalProperties": false
+    },
+    "Method": {
+      "type": "object",
+      "properties": {
+        "source_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "description_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implementation": {
+          "enum": [
+            "native_snapshot",
+            "instrumented_fixture"
+          ]
+        },
+        "native_selector": {
+          "enum": [
+            "od.pois",
+            "gamma"
+          ]
+        },
+        "law_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Law"
+            },
+            "schema": {
+              "const": "accdsl.reserving.law.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "target": {
+          "const": "lifetime_process_payments"
+        },
+        "conditioning": {
+          "const": "declared_triangle_method"
+        },
+        "rng_policy": {
+          "const": "authored_values_no_rng_execution"
+        },
+        "runtime_dependencies": {
+          "const": "unresolved_no_runtime"
+        },
+        "terms": {
+          "const": "GPL>=2_source_only_distribution_unresolved"
+        }
+      },
+      "required": [
+        "source_blob",
+        "description_blob",
+        "snapshot",
+        "implementation",
+        "native_selector",
+        "law_ref",
+        "target",
+        "conditioning",
+        "rng_policy",
+        "runtime_dependencies",
+        "terms"
+      ],
+      "additionalProperties": false
+    },
+    "DrawPlan": {
+      "type": "object",
+      "properties": {
+        "draw_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "semantics": {
+          "const": "computational_replicates_not_economic_mass"
+        }
+      },
+      "required": [
+        "draw_ids",
+        "semantics"
+      ],
+      "additionalProperties": false
+    },
+    "Producer": {
+      "type": "object",
+      "properties": {
+        "raw_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "method_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Method"
+            },
+            "schema": {
+              "const": "accdsl.reserving.method.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence": {
+          "enum": [
+            "native_post_coercion",
+            "authored_pre_coercion"
+          ]
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scale": {
+          "type": "integer"
+        },
+        "termination": {
+          "enum": [
+            "finished",
+            "confirmed_cancelled",
+            "unknown"
+          ]
+        },
+        "draws": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "draw_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fit_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "cells": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "origin": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "development": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "fit_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "fitted_mean": {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "status": {
+                      "enum": [
+                        "ok",
+                        "failed",
+                        "pending",
+                        "unavailable"
+                      ]
+                    },
+                    "payment": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "n": {
+                              "type": "string",
+                              "pattern": "^(0|-?[1-9][0-9]*)$"
+                            },
+                            "d": {
+                              "type": "string",
+                              "pattern": "^[1-9][0-9]*$"
+                            }
+                          },
+                          "required": [
+                            "n",
+                            "d"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "origin",
+                    "development",
+                    "fit_id",
+                    "fitted_mean",
+                    "status",
+                    "payment",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "draw_id",
+              "fit_id",
+              "cells"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "values_are_fitted": {
+          "const": false
+        }
+      },
+      "required": [
+        "raw_blob",
+        "method_ref",
+        "evidence",
+        "currency",
+        "base_unit",
+        "scale",
+        "termination",
+        "draws",
+        "values_are_fitted"
+      ],
+      "additionalProperties": false
+    },
+    "OperationRequest": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "reserving.evaluate@1"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspace_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Profile"
+            },
+            "schema": {
+              "const": "accdsl.reserving.profile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "signature_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Signature"
+            },
+            "schema": {
+              "const": "accdsl.reserving.signature.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.reserving.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "arguments": {
+          "type": "object",
+          "properties": {
+            "triangle_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Triangle"
+                },
+                "schema": {
+                  "const": "accdsl.reserving.triangle.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "method_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Method"
+                },
+                "schema": {
+                  "const": "accdsl.reserving.method.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "draw_plan_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "DrawPlan"
+                },
+                "schema": {
+                  "const": "accdsl.reserving.drawplan.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "producer_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Producer"
+                },
+                "schema": {
+                  "const": "accdsl.reserving.producer.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "triangle_ref",
+            "method_ref",
+            "draw_plan_ref",
+            "producer_ref"
+          ],
+          "additionalProperties": false
+        },
+        "execution": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "const": "specification_example"
+            },
+            "budget": {
+              "type": "object",
+              "properties": {
+                "operation_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "elapsed_seconds": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "elapsed_reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "operation_count",
+                "elapsed_seconds",
+                "elapsed_reason"
+              ],
+              "additionalProperties": false
+            },
+            "environment_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Environment"
+                },
+                "schema": {
+                  "const": "accdsl.reserving.environment.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "mode",
+            "budget",
+            "environment_ref"
+          ],
+          "additionalProperties": false
+        },
+        "expected_head": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "operation",
+        "request_id",
+        "workspace_key",
+        "profile_ref",
+        "signature_ref",
+        "view_ref",
+        "arguments",
+        "execution",
+        "expected_head"
+      ],
+      "additionalProperties": false
+    },
+    "Submission": {
+      "type": "object",
+      "properties": {
+        "blob_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "media_type": {
+          "const": "application/json"
+        },
+        "transport": {
+          "const": "documentary_file"
+        },
+        "decoder": {
+          "const": "accdsl.portable.v1"
+        }
+      },
+      "required": [
+        "blob_ref",
+        "media_type",
+        "transport",
+        "decoder"
+      ],
+      "additionalProperties": false
+    },
+    "DrawDomain": {
+      "type": "object",
+      "properties": {
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.operation.request.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "draw_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "meaning": {
+          "const": "computational_draw_ids_not_economic_probability"
+        }
+      },
+      "required": [
+        "request_ref",
+        "draw_ids",
+        "meaning"
+      ],
+      "additionalProperties": false
+    },
+    "DrawRegion": {
+      "type": "object",
+      "properties": {
+        "domain_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "DrawDomain"
+            },
+            "schema": {
+              "const": "accdsl.reserving.drawdomain.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "draw_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "unresolved",
+            "cancelled",
+            "unsupported"
+          ]
+        }
+      },
+      "required": [
+        "domain_ref",
+        "draw_ids",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "DrawSummary": {
+      "type": "object",
+      "properties": {
+        "draw_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "enum": [
+            "completed",
+            "failed",
+            "pending"
+          ]
+        },
+        "total": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "successful_cells": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_cells": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pending_cells": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "draw_id",
+        "outcome",
+        "total",
+        "successful_cells",
+        "failed_cells",
+        "pending_cells"
+      ],
+      "additionalProperties": false
+    },
+    "BatchSummary": {
+      "type": "object",
+      "properties": {
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.operation.request.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "producer_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Producer"
+            },
+            "schema": {
+              "const": "accdsl.reserving.producer.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "draws": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "DrawSummary"
+              },
+              "schema": {
+                "const": "accdsl.reserving.drawsummary.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "requested": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "attempted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pending": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requested_sample_mean": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "completed_only_diagnostic_mean": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "economic_probability_mass": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "request_ref",
+        "producer_ref",
+        "draws",
+        "requested",
+        "attempted",
+        "completed",
+        "failed",
+        "pending",
+        "requested_sample_mean",
+        "completed_only_diagnostic_mean",
+        "economic_probability_mass"
+      ],
+      "additionalProperties": false
+    },
+    "OperationResult": {
+      "type": "object",
+      "properties": {
+        "submission_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Submission"
+            },
+            "schema": {
+              "const": "accdsl.reserving.submission.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "request_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "OperationRequest"
+                },
+                "schema": {
+                  "const": "accdsl.operation.request.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_view_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "View"
+                },
+                "schema": {
+                  "const": "accdsl.reserving.view.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disposition": {
+          "enum": [
+            "completed",
+            "partial",
+            "cancelled",
+            "rejected",
+            "unsupported"
+          ]
+        },
+        "statuses": {
+          "type": "object",
+          "properties": {
+            "structural_validity": {
+              "enum": [
+                "valid",
+                "invalid"
+              ]
+            },
+            "mathematical_status": {
+              "enum": [
+                "defined",
+                "unresolved"
+              ]
+            },
+            "computation_status": {
+              "enum": [
+                "complete",
+                "partial",
+                "not_computed",
+                "cancelled"
+              ]
+            },
+            "empirical_justification": {
+              "const": "not_established"
+            },
+            "capability_status": {
+              "const": "specified_only_no_runtime"
+            },
+            "accounting_validity": {
+              "const": "not_assessed"
+            },
+            "forecast_validity": {
+              "const": "not_assessed"
+            },
+            "product_readiness": {
+              "const": "not_implemented"
+            },
+            "human_acceptance": {
+              "const": "pending"
+            }
+          },
+          "required": [
+            "structural_validity",
+            "mathematical_status",
+            "computation_status",
+            "empirical_justification",
+            "capability_status",
+            "accounting_validity",
+            "forecast_validity",
+            "product_readiness",
+            "human_acceptance"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "reserving_candidate"
+                },
+                "summary_ref": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "BatchSummary"
+                    },
+                    "schema": {
+                      "const": "accdsl.reserving.batchsummary.v1"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "schema",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "summary_ref"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "stage": {
+                "type": "string",
+                "minLength": 1
+              },
+              "record_ref": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "schema": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source_locator": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "field_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "affected_query_branch_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "dependency_path": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "schema": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "schema",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "observed": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retry_advice": {
+                "type": "string",
+                "minLength": 1
+              },
+              "blocking_diagnostic_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": [
+              "code",
+              "stage",
+              "record_ref",
+              "source_locator",
+              "field_path",
+              "affected_query_branch_ids",
+              "dependency_path",
+              "observed",
+              "expected_rule",
+              "retry_advice",
+              "blocking_diagnostic_ids"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "coverage": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "domain_ref": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "DrawDomain"
+                    },
+                    "schema": {
+                      "const": "accdsl.reserving.drawdomain.v1"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "schema",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                },
+                "completed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "DrawRegion"
+                      },
+                      "schema": {
+                        "const": "accdsl.reserving.drawregion.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "unresolved": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "DrawRegion"
+                      },
+                      "schema": {
+                        "const": "accdsl.reserving.drawregion.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "unsupported": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "DrawRegion"
+                      },
+                      "schema": {
+                        "const": "accdsl.reserving.drawregion.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "infeasible": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "DrawRegion"
+                      },
+                      "schema": {
+                        "const": "accdsl.reserving.drawregion.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "cancelled": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "DrawRegion"
+                      },
+                      "schema": {
+                        "const": "accdsl.reserving.drawregion.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "relation": {
+                  "const": "disjoint_partition"
+                }
+              },
+              "required": [
+                "domain_ref",
+                "completed",
+                "unresolved",
+                "unsupported",
+                "infeasible",
+                "cancelled",
+                "relation"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "continuation_ref": {
+          "type": "null"
+        },
+        "commit_observation": {
+          "const": "not_committed"
+        },
+        "receipt_ref": {
+          "type": "null"
+        },
+        "evidence_mode": {
+          "const": "specification_example"
+        }
+      },
+      "required": [
+        "submission_ref",
+        "request_ref",
+        "operation",
+        "input_view_ref",
+        "disposition",
+        "statuses",
+        "payload",
+        "diagnostics",
+        "coverage",
+        "unresolved",
+        "continuation_ref",
+        "commit_observation",
+        "receipt_ref",
+        "evidence_mode"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

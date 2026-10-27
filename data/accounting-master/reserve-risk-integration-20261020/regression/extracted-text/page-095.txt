@@ -1,0 +1,57 @@
+CHAPTER 6.
+HISTORICAL COMPATIBILITY AND FUTURE SIMULATION
+86
+2.2, equations (2.5)–(2.8)) supplies the inverse-problem formulation, but does not establish
+identification or easy sampling for a mixed accounting model. In particular, an exact accounting
+equality can confine a model to a lower-dimensional set. Multiplying an ordinary Lebesgue
+density by its zero-volume indicator is not a posterior construction. One must parameterise
+the constrained model with its declared measure or supply an actual measurement-error model.
+Adding convenient small noise changes the target.
+6.15
+A continuous example whose posterior can be checked
+A linear Gaussian model supplies a tractable comparison for later numerical inference. Assume
+the unknown economic quantity has a Gaussian prior z ∼N(m0, V0) with positive definite
+covariance V0. Let the observation be y = Hz + ϵ, where ϵ is independent Gaussian noise with
+positive definite covariance R. The measurement-error assumption is substantive: it describes
+this example, not rounding in every financial statement.
+Multiplying prior and likelihood adds their quadratic forms. Terms that depend on z are
+(z −m0)⊤V −1
+0
+(z −m0) + (y −Hz)⊤R−1(y −Hz)
+= z⊤(V −1
+0
++ H⊤R−1H)z −2z⊤(V −1
+0
+m0 + H⊤R−1y) + constant.
+Completing the square therefore gives posterior covariance V and mean m through
+V −1 = V −1
+0
++ H⊤R−1H,
+V −1m = V −1
+0
+m0 + H⊤R−1y.
+The prior and observation contribute precision and precision-weighted information. An im-
+plementation should solve factored linear systems rather than explicitly form these inverse
+matrices, and reject an invalid covariance or unsupported rank condition.
+For m0 = 0, V0 = 4, H = 1, R = 1 and y = 2, posterior precision is 1/4 + 1 = 5/4, variance
+is 4/5 and mean is (4/5)2 = 8/5. A conditional cash quantity 100 + 10z has mean 116 and
+variance 80. A second independent measurement of 2 would give precision 9/4, variance 4/9
+and mean 16/9. Reusing the first measurement would produce those same numbers but would
+be wrong for the stated information. The analytic example can distinguish numerical error
+from information double counting.
+For a bounded non-Gaussian scalar model, quadrature requires a stated domain or tail truncation
+and sufficient integrand error bounds to enclose the normalizer and requested moments. Without
+a positive lower normalizer bound, the ratio remains unresolved. Mixed models can enumerate
+finite choices and integrate each conditional continuous model, but combining branches requires
+their evidence factors, not draw counts. Optional MCMC needs target-specific parameterisation,
+tuning, independent chains, tractable correctness comparisons, convergence and Monte Carlo
+error checks. This proposal supplies no generally validated sampler or universal tolerance.
+Nor can a more elaborate inference engine identify a quantity that the observation model
+never sees. If reports constrain only total debt 100, the likelihood may be constant in its
+floating share x. Its conditional prior then remains unchanged. A uniform prior is a chosen
+assumption, not a discovery from those reports. The inspected working version of Giacomini and
+Kitagawa (2021, Sections 2.1–2.3, equations (2.2)–(2.4)) motivates retaining posterior classes
+where a conditional prior cannot be revised. For Northstar there is a simple direct deduction:
+under all probability measures on [0, 1], the expectation of 5 + 2x lies in [5, 7], with endpoints
+attained by point masses. This deduction imports no asymptotic theorem from that paper’s
+structural-vector-autoregression setting.

@@ -1,0 +1,120 @@
+\chapter[Reconstructing joint histories]{Reconstructing joint admissible histories}
+\label{sim:reconstruction}
+
+The useful starting point for simulation is a description of what the evidence permits. That description must connect opening balances, transactions, closing balances, notes and contractual facts across time. Without these links, individually plausible entries can be jointly impossible. With unjustifiably strong links, the model can exclude real alternatives because an analyst supplied a convenient default. Reconstruction is consequently both an accounting problem and an inference problem.
+
+\section{An observation has a context}
+A reported amount comes with a concept, entity or consolidated group, period, units, measurement basis and precision. Cash at a date differs from cash generated during a quarter. Continuing operations differ from the whole group. Millions differ from currency units. These distinctions determine which equations may use the number; they are not annotations that can be restored after arithmetic.
+
+Let observation $o_i$ contain value $y_i$, context $c_i$, publication time $p_i$ and source location $\ell_i$. A reconstruction predicts $g_i(h,b;c_i)$ from history $h$ and accounting interpretation $b$. If the source rounds to increment $d_i$ using a declared rule, compatibility may take the form
+\begin{equation}
+ y_i-\frac{d_i}{2}\leq g_i(h,b;c_i)<y_i+\frac{d_i}{2}.
+ \label{sim:rounding}
+\end{equation}
+The half-open endpoint is justified only by the assumed rounding convention. Other tie-breaking rules, signs and reporting practices require a different observation set. The printed absence of decimal places does not establish an exact underlying value.
+
+A debt balance reported as 100 million might therefore permit nearby amounts. A difference of 0.4 million may be immaterial for a broad exposure chart and decisive for a covenant lying inside the reporting interval. Precision should survive extraction so that the query can determine whether it matters. An arbitrary numerical tolerance chosen for solver convenience is different from reporting precision. The first controls computation; the second describes evidence.
+
+\section{Stocks constrain net movement}
+For opening balance $B_0$, signed movements $m_k$ and closing balance $B_1$, the stock-flow identity is
+\begin{equation}
+ B_1=B_0+\sum_{k=1}^{n}m_k.
+ \label{sim:stockflow}
+\end{equation}
+It constrains the sum, not the individual events. Receivables increasing from 40 to 50 can reflect credit sales 60 and collections 50, or sales 110 and collections 100. Revenue disclosures narrow the alternatives, but returns, acquisition, currency, taxes and write-offs may add terms.
+
+For an illustrative single-entity bridge, let $A$ denote gross receivables, $S_c$ credit sales, $T_c$ tax amounts included in receivables, $K$ collections, $W$ write-offs, $X$ currency movements and $G$ acquired or transferred balances. Let $L$ be the allowance and $N$ net receivables. Then
+\begin{align}
+ A_1&=A_0+S_c+T_c-K-W+X+G,\\
+ N_1&=A_1-L_1.
+ \label{sim:receivable-bridge}
+\end{align}
+Each movement has a defined period and scope. This is a decomposition for the example, not a universal reporting-standard prescription. If only net balances and revenue are observed, interpreting the change in net receivables as uncollected sales silently sets several terms to zero. A later credit stress then begins from a distorted exposure.
+
+The repair is not to invent missing movements. Retain their domains, constrain them with relevant notes, and identify the quantities the evidence does not determine. A zero can be a verified amount, an explicit scenario assumption or an unsupported shortcut. The record must distinguish these meanings.
+
+\section{A family of compatible histories}
+Let $z$ collect unknown historical amounts and categorical choices: transaction dates, principals, customers, asset vintages and accounting interpretations. Given evidence $D$ and additional assumptions $A$, define
+\begin{equation}
+ \mathcal H(D,A)=\{z:C_{\rm obs}(z;D)\land C_{\rm acct}(z)\land
+ C_{\rm contract}(z)\land C_{\rm time}(z)\land A(z)\}.
+ \label{sim:family}
+\end{equation}
+Observation constraints reproduce the sources within precision. Accounting constraints preserve valid postings under a specified basis. Contract constraints preserve promises and exercise rights. Time constraints preserve sequence and persistence. Assumptions close parts of the model that the evidence leaves open.
+
+This separation makes contradictions interpretable. An empty family may arise from extraction error, inconsistent reports, an overstrong assumption, an unsupported mapping or an impossible contract interpretation. It does not establish misconduct by the company. The reconstruction can be wrong.
+
+Each constraint should retain its origin. A small conflicting subset may identify an annual movement table, an overlapping quarterly flow and a mistaken sign mapping. That is a focused repair task. Removing arbitrary constraints until a solver succeeds would make the result untrustworthy. Relaxation needs a reason, a changed observation model and an explanation of how answers depend on the relaxation.
+
+\section{Overlapping periods}
+If half-year revenue is 120 and first-quarter revenue is 50 under the same scope and basis, second-quarter revenue is 70. Adding both reports as independent events counts the first quarter twice. Reports constrain an underlying flow; they are not themselves transactions.
+
+Let $f_t$ denote flow on elementary intervals. A report for period $P_i$ gives
+\begin{equation}
+ y_i=\sum_{t\in P_i}f_t+\varepsilon_i.
+\end{equation}
+Here $\varepsilon_i$ denotes admitted rounding or discrepancy and is not automatically stochastic noise. Multiple reports can constrain the same $f_t$. Their source identities remain distinct even when their numerical information is redundant. The duplicate can independently confirm a value or reveal a later revision.
+
+A reconstruction must also distinguish year-to-date arithmetic from seasonal interpolation. Deriving a quarter by subtraction is valid under aligned scopes. Dividing an annual flow by four assumes an intra-year pattern. A cash stress during a seasonal trough is sensitive to precisely that assumption. Even when annual totals are exact, the within-year timing may remain unidentified.
+
+\section{Joint margins conceal concentrated exposure}
+Suppose total debt is 100. Foreign-currency and domestic-currency debt are each 50. Debt maturing within a year and later debt are each 50. These two disclosures are different partitions of one debt population. They do not give four independent amounts.
+
+Let $x$ denote foreign-currency debt maturing within a year. Compatibility requires
+\begin{equation}
+\begin{array}{c|cc|c}
+ &\text{within a year}&\text{later}&\text{total}\\\hline
+ \text{foreign}&x&50-x&50\\
+ \text{domestic}&50-x&x&50\\\hline
+ \text{total}&50&50&100
+\end{array}
+\qquad 0\leq x\leq50.
+\label{sim:joint-debt-table}
+\end{equation}
+A 20 per cent rise in the domestic-currency price of the foreign currency raises the domestic-currency value of foreign principal by 10. The additional repayment due within a year is $0.2x$, ranging from zero to 10. Matching both reported margins does not identify near-term cash exposure.
+
+Choosing $x=25$ selects a midpoint. Assuming independence also yields 25 in this symmetric example, but independence is an extra assumption about the joint exposure. A concentrated currency maturity wall is a case that this assumption can conceal. One scalar with bounds represents all compatible tables more faithfully than a list of arbitrary examples.
+
+Additional dimensions increase the difficulty. Currency, maturity, collateral, lender and rate type may each have published margins. Their joint table can be large, and feasible completions may be numerous. Maintaining constraints on that table preserves the issue even when enumerating it is impractical. Later query-driven elimination can remove dimensions irrelevant to a specified result, provided it retains the relationships they induce.
+
+\section{Accounting and economic alternatives}
+Some uncertainty concerns events: whether a sale occurred, when collection happened or which asset was pledged. Other uncertainty concerns recognition and measurement: applicable basis, estimates and policy interpretation. Their alternatives cannot be combined freely when premises conflict.
+
+A debt cannot be both repaid and continuing to accrue its old contractual interest without a further event explaining the continuation. A historical carrying amount computed under one interpretation cannot be forecast under another for the unchanged instrument without an explicit transition. A presentation difference need not imply a different cash obligation.
+
+Attach interpretation $b$ to its premises and consequences. Evolve economic state under the scenario, then apply the selected accounting rules. Where the applicable interpretation remains unresolved, report conditional statements for each admitted basis. An average of incompatible book measurements is not automatically a valid financial statement under either basis.
+
+\section{Historical record and execution state}
+Future calculation rarely needs every historical event in active memory. It may need principal, accrued interest, reset dates, tax basis, asset age and outstanding rights. The evidence history remains important for provenance and later corrections. These are separate storage needs.
+
+The evidentiary record should remain available and versioned. Execution state should contain quantities sufficient for future transitions. Compressing the latter need not delete the former. A derived state can point to supporting constraints and records, and many alternatives can share common events.
+
+An event log alone is not an inference representation. If an event's occurrence is uncertain, a definitive log entry invents certainty. Conversely, constraints without explainable event witnesses make results difficult to inspect. The proposed representation retains symbolic conditions and constructs concrete witnesses for explanations, regression fixtures and counterexamples.
+
+\section{Feasible, infeasible and undecided}
+A solver may find a witness, prove no witness exists, or stop without deciding. An adapter may not support the instrument. These outcomes are economically different. A timeout cannot become infeasibility, and unsupported debt cannot become a zero liability.
+
+For the question whether cash can fall below 20, a compatible witness with cash 18 establishes possibility. Failure to find one establishes safety only if the search is complete and successfully proves the relevant bound. A lower bound above 20 applies to the declared family, horizon and policies. Changing any of those premises can invalidate it.
+
+Floating-point feasibility adds another distinction. A small residual is evidence about a numerical calculation, not necessarily a logical certificate. Exact rational examples help detect semantic errors. Larger models may require validated bounds, solver-specific certificates or an explicit undecided status. The method used to establish a conclusion belongs with the conclusion.
+
+\section{Reconstruction as a source-research guide}
+The family can identify useful missing evidence. In the currency-maturity example, another total-debt figure contributes little. A cross-classification can determine $x$ and resolve near-term depreciation exposure. The question is which fact changes the decision, not which source is easiest to extract.
+
+Without probabilities, candidate disclosures partition the family and give possible reductions in the answer set. With an admitted observation model, one may compute expected value of information. Assigning equal weights merely to obtain an expectation would confuse these two exercises.
+
+A practical sequence is to construct the important joint constraints, locate uncertainty crossing a decision threshold, and inspect sources capable of resolving it. The source may not exist or may remain inaccessible. The process still identifies the economic consequence of the gap and prevents extraction volume from being mistaken for identification.
+
+\section{Provenance and multiplicity}
+Two records can support the same assertion, and one record can support several constraints. Provenance needs to preserve these distinctions without treating duplicate records as additional worlds. The semiring treatment in \citet{green2007} concerns algebraic provenance for database queries; its value here is a disciplined account of how source contributions combine. It is not a probability assignment to economic histories.
+
+If a source is withdrawn, a derived claim supported by another independent source may survive. If the withdrawn source supplied the only premise for a maturity date, the maturity should become unresolved. Recomputing only displayed totals can miss the effect on future liquidity. Dependencies should extend through contract state and policy eligibility to scenario results.
+
+A stable identity for an economic fact is also different from the identity of a particular source assertion. Two filings can refer to the same loan with different labels. Merging them solely because the labels resemble each other risks combining different facilities; failing to merge verified duplicates can double debt. Entity and instrument reconciliation therefore needs evidence and reversible decisions.
+
+\section{A method proposal for AccDSL}
+The proposed reconstruction service accepts an evidence view, a declared domain and an assumption set. It returns a persistent constraint family, its known contradictions or unresolved mappings, and optional witnesses. Queries request possible outcomes, certain conclusions, bounds or distributions under separately admitted measures. A request for one witness should not trigger exhaustive enumeration.
+
+Constraints should be grouped by their source and economic role. Observation intervals and unit conversions can often be checked before expensive solving. Linear bridges and discrete interpretation choices can then be combined, with nonlinear valuation isolated when possible. If a nonlinear method is needed, its completion status remains distinct from the accounting identities it evaluates.
+
+The service should preserve both a stable source snapshot and a reusable symbolic family. A later disclosure can produce a refined version without overwriting the earlier one. A scenario uses a particular version and records which assumptions it adds. This is a concrete way to carry multiple possible journals and economic histories without creating a full independent database for each possibility.

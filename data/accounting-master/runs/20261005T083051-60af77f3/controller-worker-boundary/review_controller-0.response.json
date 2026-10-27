@@ -1,0 +1,36 @@
+{
+  "assumptions": [
+    "Workers and controller are trusted; deliberate detachment and uncatchable termination during registration are excluded.",
+    "The supplied interfaces describe omitted controller behavior. Implementations of bounded_process, catch_termination and defer_shutdown were not supplied."
+  ],
+  "checks": [
+    "Statically traced worker admission, configuration queries, response validation, review retries and post-worker integrity checks.",
+    "Confirmed role-specific verdict validation, rejection of AGREE with unresolved issues, and separate verification reserves.",
+    "Used the reported 210 passing tests as supporting evidence only; test bodies were not supplied and no tests were run."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "Worker evidence can be modified without detection. Master.worker excludes the current .packet.json, .recovery.json, .schema.json and .prompt.txt from both inventories. These files are created before the actual worker launch, but Master.process guards only protected files and selected supervisor controls. Consequently, even a read-only review that accidentally rewrites or deletes its supplied packet or recovery record can return AGREE without an integrity veto. This contradicts the stated read-only byte-preservation requirement and can destroy the evidence of what the worker actually received. Repair: after preparing these inputs and immediately before launch, pin their hashes and verify them on every exit path. Keep exclusions only for files that genuinely remain supervisor-managed mutable outputs; bind those outputs separately where necessary.",
+    "Configuration-query subprocesses bypass ordinary-interruption cleanup. _worker_result.config_query uses subprocess.run directly rather than the registered bounded process lifecycle. subprocess.run's timeout handles its direct child, but it does not provide the supplied controller's process-group registration and cleanup on KeyboardInterrupt. In particular, Python's Popen context manager only briefly waits after KeyboardInterrupt and can leave the query running; the enclosing worker integrity check inventories files, not this child. If handled termination raises another exception, context-manager waiting can instead exceed the declared query timeout. Read-only configuration inspection does not eliminate this lifecycle defect. Repair: run queries through an equivalent bounded, registered lifecycle with captured output and guaranteed cleanup on handled interruption, preserving the absolute worker cutoff. The precise signal path depends on the omitted catch_termination implementation."
+  ],
+  "next_actions": [
+    "Protect prepared worker input files after their final supervisor write; add regressions for alteration and deletion on both successful and failed worker exits.",
+    "Add bounded cleanup for configuration queries; exercise handled interruption during a hanging query and confirm the child is gone before another worker can launch.",
+    "Rerun relevant controller checks and obtain a fresh review of the repaired boundary."
+  ],
+  "residuals": [
+    "The packet does not expose the implementations needed to independently verify process-group cleanup, lock ownership, command-rule matching or the complete phase acceptance state machine.",
+    "The accepted 192-report source panel, structural checks and scoped internal acceptance do not establish accounting correctness, scientific validity or human acceptance."
+  ],
+  "steps": [
+    "Reviewed only the supplied packet without tools, commands, file reads or project-history lookup.",
+    "Kept findings within accidental failure, handled interruption and evidence-preservation scope."
+  ],
+  "summary": "Two worker-boundary defects remain: prepared worker evidence is excluded from integrity enforcement, and configuration queries lack the controller's interruption-safe subprocess lifecycle.",
+  "verdict": "REVISE"
+}

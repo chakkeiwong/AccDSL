@@ -1,0 +1,1 @@
+The first integration check returned 138 passes and one failed prose predicate. It expected not be recovered on one source line, while the manuscript says cannot be recovered followed by a line break. The predicate now checks the intended phrase after whitespace normalization. No manuscript text or source conclusion changed.

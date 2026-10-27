@@ -1,0 +1,36 @@
+{
+  "assumptions": [
+    "The supervisor is single-threaded; workers are trusted and remain in their initial process group.",
+    "The supplied interfaces require recovery under the exclusive lock before another worker starts. The corresponding call sites are not supplied.",
+    "on_spawn durably records ownership before returning, and callbacks are bounded. Their implementations and timing guarantees are not supplied.",
+    "The seconds argument is an execution deadline, and outputs from an attempt exceeding that deadline must not qualify as successful implementation evidence."
+  ],
+  "checks": [
+    "Statically traced launch, deferred interruption, normal exit, timeout, cleanup escalation, and recovered-process signalling using only the supplied packet.",
+    "Checked that ordinary cleanup retains an unreaped leader during group signalling and that recovery uses validated pidfds.",
+    "Treated the reported 153 passing tests and supplied test names as supporting evidence only; test bodies were not supplied or executed."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "In bounded_process, the waitid condition observes exit before checking the deadline. If the child remains active past seconds but exits before the next polling iteration, the loop ends with reason=None. The same bypass occurs if on_spawn consumes the remaining budget and the child exits before polling starts. An exit code of zero can therefore make an over-budget attempt indistinguishable from an ordinary successful attempt, undermining the stated rule that timed-out outputs cannot become implementation responses. Repair: observe exit and elapsed time together, conservatively classify an exit first observed at or after the deadline as timeout, and retain that classification through cleanup. Check elapsed time after registration as well. Add focused coverage for exit between the last pre-deadline poll and the next observation, and for registration consuming the deadline; verify both preserve outputs without treating the attempt as successful."
+  ],
+  "next_actions": [
+    "Repair deadline classification in bounded_process and add the focused lifecycle checks described above.",
+    "Rerun the controller checks and submit the changed lifecycle code for fresh read-only review."
+  ],
+  "residuals": [
+    "The packet does not expose active-process completion publication, lock/recovery call ordering, or callback implementations; these remain interface assumptions rather than independently verified properties.",
+    "The output threshold is polled, so it permits overshoot, including during cleanup. It should be described as a termination threshold rather than a strict file-size cap.",
+    "Ambiguous recovered ownership intentionally vetoes automatic continuation; that is consistent with the supplied plan.",
+    "This review establishes no accounting correctness, scientific validity, or human acceptance. The 192-report source panel and scoped internal phase acceptance cannot close those gaps."
+  ],
+  "steps": [
+    "Performed the requested bounded packet-only review without tools, file reads, commands, or project-history inspection."
+  ],
+  "summary": "REVISE: exit detection can bypass timeout classification, allowing an over-budget process to return an ordinary success result.",
+  "verdict": "REVISE"
+}

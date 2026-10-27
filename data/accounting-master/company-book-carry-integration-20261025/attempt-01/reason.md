@@ -1,0 +1,1 @@
+Author review found an overbroad zero-profit claim. Equal nonzero income and expense balances produce zero profit but nonzero closing entries. The implementation reverses each temporary account correctly; the manuscript now distinguishes the net equity transfer from the full journal. Preserve this first PDF and its source/build evidence.

@@ -1,0 +1,35 @@
+{
+  "assumptions": [
+    "The supplied interfaces govern omitted helpers; their implementations were not independently inspected.",
+    "Ordinary run invocations may execute between a campaign run releasing runner.lock and campaign reconciliation acquiring it, as the supplied execution contract explicitly anticipates.",
+    "Workers are trusted and remain in their initial process group; the excluded containment threat models are not review requirements."
+  ],
+  "checks": [
+    "Traced campaign dispatch, terminal-result reconciliation, cached readiness, deadline preservation and stop handling.",
+    "Inspected phase repair, replanning, verification and acceptance transitions in the supplied implementation.",
+    "The packet reports 210 passing tests. Test bodies were not supplied, and no tests were run; counts and names provide supporting control-plane evidence only."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "P2 — Stale terminal readiness can become current campaign readiness. In Master.reconcile_campaign_invocation, runner.lock protects validation of the completed manifest, but current state and proposal evidence are never revalidated. After a campaign run reports proposal_reviewed_implementation_held, a serialized ordinary invocation can invalidate proposal acceptance before reconciliation. Reconciliation still consumes the historical result and sets status='proposal_ready'; campaign then exits and returns that status. This bypasses the current-evidence check implemented for the separate cached-proposal_ready startup path. Preserve the completed invocation and its progress exactly once, but before publishing campaign readiness, reload state and validate current protection and proposal_gate under runner.lock. If current evidence fails, retain the historical success while recording needs_supervisor_repair with the current failure reason. Add a regression that interposes an ordinary invocation invalidating proposal evidence between terminal run publication and reconciliation."
+  ],
+  "next_actions": [
+    "Implement current-evidence validation when reconciliation promotes the campaign to proposal_ready, without rewriting historical invocation evidence.",
+    "Run the targeted stale-readiness regression and existing campaign reconciliation tests, then obtain a fresh bounded review."
+  ],
+  "residuals": [
+    "Definitions of refresh, reload_state, exclusive_lock, controller_review, main and approval installation were omitted. Their integrity, state invalidation, locking and narrow-entrypoint guarantees are interface assumptions, not independently verified implementation findings.",
+    "The public methods expose require_review=False. Whether production callers may use it safely depends on omitted entrypoint and authorization checks; this packet does not establish an approval bypass.",
+    "Product implementation remains disabled even in the identified stale-readiness path, limiting its impact to an incorrect campaign readiness report.",
+    "The 192-report source panel, structural checks and internal phase acceptance do not establish accounting correctness, scientific validity, closure of all gaps or human acceptance."
+  ],
+  "steps": [
+    "Performed the requested packet-only review without tools, commands, file reads or project-history retrieval."
+  ],
+  "summary": "Revise campaign reconciliation: it can report proposal readiness from a completed run after intervening ordinary work has invalidated current evidence.",
+  "verdict": "REVISE"
+}

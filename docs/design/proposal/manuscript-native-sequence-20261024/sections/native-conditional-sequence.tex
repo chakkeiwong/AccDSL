@@ -1,0 +1,160 @@
+\section{Different intermediate histories can reach the same closing state}
+\label{sec:native-conditional-sequence}
+
+The preceding quantity restriction excludes a return of goods that were never
+sold. A feasible monetary assignment can still describe a payment that the
+company cannot fund, or a sale of a lot it does not hold. Applying the method
+therefore requires a complete opening state and an ordered change to that
+state. Keeping several possible carrying amounts also requires the later sale
+to use the amount created by its own preceding settlement.
+
+We retain the same synthetic return, now within one complete opening book.
+Opening cash is 400 dollars and other inventory is 60 dollars. The refund
+liability and recovery asset are 40 and 16 dollars respectively. All other
+balances, component identities, existing lots, tax memory and prior event
+identities are supplied explicitly in the retained opening. They are not
+reconstructed from those four amounts. The two events are settlement on
+1 February 2025 followed by sale of the newly recovered lot. The default case
+orders both events on that date; another checked case sells on 1 March.
+
+\subsection{Apply the conditional amount to a complete opening}
+
+The \path{ConditionalReturnStateFamily/1} definition contains the complete
+opening \path{state}, the selected \path{event}, numeric \path{event_domains},
+a proposed \path{premise}, remaining \path{obligations} and a finite
+\path{branch_limit}. A settlement domain may vary an explicitly unknown
+returned quantity, unit handling cost, unit deterioration or recoverable value.
+For a sale, only explicitly unknown proceeds may receive such a domain.
+A domain cannot replace a known event fact. Each domain retains its exact
+interval, premise and reference to the original event record and field.
+
+Dates, identities, fractions, Boolean findings and externally supplied cash
+facts keep their given known or unknown status. In particular, the solver
+cannot decide that return rights have closed, invent performance of a sale,
+or change refund cash to make its equations feasible. The original builders
+regenerate the full event-dated monetary types, prerequisite bindings and
+source references. An unknown required amount in the opening state remains
+unresolved in this fixed-opening profile.
+
+The compiler preserves every selected prerequisite and every case of the
+carrying-value minimum. It also checks the native structural conditions:
+the event identifier must be new, a settlement cannot overwrite an existing
+lot, and a sale requires an existing undisposed lot. A valid opening does not
+by itself guarantee that the next event is funded. Write \(C_0\) for opening
+cash and retain the earlier refund and handling amounts \(R\) and \(H\).
+The cash after settlement, denoted \(C_1\), must satisfy
+\begin{equation}
+\label{eq:native-family-funding}
+ C_1=C_0-R-H\geq0.
+\end{equation}
+The equality is the cash posting identity; the inequality is the selected
+native funding condition. In the example, \(400-40-8=352\) dollars remains.
+If a valid opening instead contains only one dollar of cash, every proposed
+settlement consistent with those cash facts fails the condition. The resulting
+conditional family is empty. An opening that is already cash-negative has
+the original \path{funding_failure} status before this family is constructed.
+These are different questions, and neither creates an automatic loan.
+
+\subsection{Carry the same lot cost through the sale}
+
+The complete two-event definition, \path{SequentialReturnStateFamily/1},
+contains the complete \path{first_family}, a fixed \path{sale_event}, an optional
+\path{proceeds_domain}, a continuity \path{premise}, \path{observations} and
+remaining \path{obligations}. Its first event must be settlement and its second
+event must sell the whole newly created lot. The sale date cannot precede
+settlement or fall outside the opening book's period; its identity must differ
+from the settlement and all prior events. Unknown performance or fraction
+remains unresolved. False performance and a fraction other than one retain
+their unsupported consequence in this restricted sequence.
+
+No intermediate state is selected to construct the second event. Instead,
+every first-event branch retains its original variables and constraints.
+The sale's cost is the same symbolic carrying amount \(V\) created in that
+branch. The original sale expressions provide its cash, revenue and inventory
+postings. This lowering supports the inspected references, constants, addition
+and subtraction; a changed definition outside that syntax is unsupported.
+The explicit continuity record identifies the original family, the carrying
+calculation, the lot and both dates. Thus carrying amount at settlement becomes
+cost of the same lot at sale under a stated correspondence, without silently
+removing the date from either monetary type.
+
+Let \(P\) be sale proceeds in dollars, let \(I_0=60\) be the inventory already
+held, and use subscripts 1 and 2 for the states after settlement and sale.
+Selling the entire new lot removes exactly the inventory added at settlement:
+\begin{align}
+\label{eq:native-sequence-balances}
+ I_1&=I_0+V, & I_2&=I_1-V=I_0,\\
+ C_1&=C_0-R-H, & C_2&=C_1+P.
+\end{align}
+Both cash balances must be nonnegative and proceeds must be nonnegative.
+A large later receipt cannot repair a negative \(C_1\). Even when the events
+share a calendar date, their explicit order preserves that intermediate test.
+
+The refund and handling facts still fix \(n=2\). With \(N=20\), the first
+minimum case gives \(V=20\); with \(N=5\), the second gives \(V=5\).
+These are two representative assignments within the retained family. Total
+inventory after settlement is therefore 80 or 65 dollars, not 20 or 5 dollars.
+With \(P=40\), both assignments end with cash 392 and inventory 60 dollars.
+
+Their profit paths differ too. Let \(\pi_1\) denote cumulative profit after
+settlement from the supplied zero opening income and expense balances, before
+any later tax-closing operation. The retained journal has revenue zero,
+cost of goods sold \(16-V\) and selling expense 8 dollars. The sale then
+adds revenue \(P\) and cost of goods sold \(V\). Consequently,
+\begin{align}
+\label{eq:native-sequence-profit}
+ \pi_1&=-(16-V)-8=V-24,\\
+ \pi_2&=(V-24)+(P-V)=P-24.
+\end{align}
+The carrying amount cancels from cumulative profit after the whole-lot sale.
+At the two representative assignments, \(\pi_1\) is \(-4\) or \(-19\)
+dollars, while \(\pi_2=16\) dollars in both. The retained replay also finds
+the same complete terminal native state, including the disposed lot and tax
+memory. The journals and intermediate states remain different. This
+cancellation follows from the selected two-event treatment; it does not remove
+the need to preserve the path or establish a general result about other methods.
+
+\subsection{Use observations without replacing the family}
+
+An observation contains its identifier, event prefix 1 or 2, named account,
+complete type and an exact interval with source reference and premise. Its date,
+entity, book, currency, dimensions and scale must match that prefix account.
+Requiring total inventory to equal 65 dollars after settlement restricts
+\(60+V=65\), hence \(V=5\). This excludes the first minimum case and retains
+the second. Requiring inventory 60 after sale retains both cases because
+equation~\eqref{eq:native-sequence-balances} already gives that closing value.
+
+Replacing the first family by its first witness, with \(V=20\), would wrongly
+discard the path consistent with the intermediate observation. The sequence
+instead intersects the observation with every complete first branch. Every
+new domain, observation and continuity premise remains in the result. Missing
+premises leave the formulation incomplete and unresolved; remaining source or
+state obligations keep actual history existence unknown.
+
+For a feasible assignment, replay materializes only the declared unknown
+numeric event fields. The repaired one-event family and both original native
+transitions check the complete states, journals and flows. The original sale
+monetary evaluator, every compiled prefix balance, observation and constraint
+must agree exactly. An alternative valid assignment passes the same checks;
+matching the solver's first witness is unnecessary. Saved JSON results replay
+after serialization, including the original source bindings.
+
+The global branch, cell and elapsed-time policies retain their earlier meaning.
+One valid path establishes conditional existence, while unvisited branches
+leave coverage partial. In the intermediate-inventory example, examining only
+the rejected first case yields unknown, not an empty family, because the valid
+second case remains unvisited. Emptiness requires checked infeasibility of every
+retained case. Preparation and replay are bounded Python procedures rather than
+hard interruption at the elapsed deadline.
+
+The complete definitions, adverse cases and saved replays are under
+\path{data/accounting-master/}:
+\begin{quote}\small
+\path{conditional-return-state-family-20261024-r2}\\
+\path{sequential-return-state-family-20261024}
+\end{quote}
+The repaired first package preserves its failed serialization predecessor as
+historical evidence. Both successful profiles describe hypothetical, uncommitted
+states; source admission, accounting admission and method eligibility remain
+false. Arbitrary event sequences, variable lot collections, source-based legal
+and economic state, and wider accounting methods still require separate work.

@@ -1,0 +1,1 @@
+Exact call-chain and complete stage comparisons support provisional 5.51. Missing dates/group identities and independent acceptance remain explicit. Prioritize complete acceptance dependencies next. All package criteria and historical requirement rows remain intact.

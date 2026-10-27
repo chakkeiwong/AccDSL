@@ -1,0 +1,1 @@
+Exact source preservation, complete state comparisons and bounded rendered review support provisional 5.46. Schedule generality remains unproved by the finite examples. Stale next actions for disclosure, information and compression are restored to those packages' own closure criteria. Financing evidence and all original rows are preserved.

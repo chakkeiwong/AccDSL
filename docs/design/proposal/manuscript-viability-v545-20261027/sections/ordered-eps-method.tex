@@ -1,0 +1,110 @@
+\subsection{One comparison rule for a finite set of series}
+\label{sec:ordered-eps-method}
+
+The preference shares failed because the options and debt had already reduced
+continuing EPS. An implementation needs to reproduce that changing comparison
+for any finite number of series. Assume that attribution and instrument-specific
+calculations have supplied each series' effects on the same reporting
+population, ordinary class, currency scale and retrospective share basis.
+Assume also that these effects are fixed and additive: admitting one series
+does not change another's conversion terms or earnings consequences. These
+assumptions fit the three series above; participating rights or mutually
+exclusive conversion choices require further analysis before this procedure.
+
+Write the current continuing ordinary earnings as $N$ and weighted shares
+as $D>0$. For one candidate, let $a$ be its signed continuing-earnings
+increment and $b>0$ its already time-weighted share increment. Both the
+current and enlarged denominators are positive. A strict decrease in EPS is
+therefore equivalent to
+\begin{align*}
+ \frac{N+a}{D+b}<\frac ND
+ &\quad\Longleftrightarrow\quad D(N+a)<N(D+b)\\
+ &\quad\Longleftrightarrow\quad aD<Nb
+ \quad\Longleftrightarrow\quad \frac ab<\frac ND.
+\end{align*}
+The cancellation uses $DN=ND$ and does not divide by earnings, which may be
+zero or negative. It consequently handles a loss without a separate sign
+shortcut. For example, if $N=-20$, $D=10$, $a=-15$ and $b=5$, the candidate
+changes EPS from $-2$ to $-35/15=-7/3$: it increases the loss per share and
+is dilutive. A zero earnings increment with the same positive share increment
+would reduce that loss and be excluded. Equality in the comparison is neutral
+and is also excluded under the strict dilution rule
+\citep[IAS~33, paragraphs 41--44]{eu20231803}.
+
+Sort candidates by their exact ratio $a/b$ in ascending order. Break equal
+ratios by a stable series identifier, then test each against the current
+$N,D$. On admission, replace $N,D$ with $N+a,D+b$ before proceeding.
+Use rational arithmetic for this decision; rounding an incremental ratio to
+the displayed precision can change an equality into an apparent decrease.
+The debt in the example has the exact ratio $365/184$, and the preference
+shares are compared with $7665/1684$, not with the earlier basic ratio.
+The share increment already contains its time weight; the selector must not
+apply the issue-date fraction a second time.
+
+Why does this order suffice under the additive assumptions? Admission makes
+the new ratio a weighted average of the old ratio and $a/b$, strictly between
+them. The new ratio remains above the admitted ratio. Every earlier admitted
+ratio is therefore below the final ratio, say $q$. At the first exclusion,
+the next ratio is at least $q$; every later ratio is at least as large and
+is excluded too. If $S$ is the selected set and $N_0,D_0$ the basic amounts,
+\[
+ N_0-qD_0+\sum_{i\in S}(a_i-qb_i)=0.
+\]
+Each selected summand is negative; every unselected summand is nonnegative.
+Replacing $S$ by any other subset can only increase the left side. Dividing
+by that subset's positive denominator shows that its continuing EPS is at
+least $q$. This is a local derivation for fixed independent effects, not a
+claim that arbitrary instruments satisfy those assumptions. Neutral series
+can create other subsets with the same minimum; strict admission excludes them.
+
+Total earnings have their own supplied increment for each series. Carry
+those increments through the same selected population, then subtract
+continuing earnings to obtain discontinued earnings. Selecting again on
+total profit would contradict the continuing-operations control just
+illustrated \citep[IAS~33, paragraph A3]{eu20231803}.
+
+\subsection{Keep unresolved instruments in the report}
+\label{sec:ordered-eps-report}
+
+The proposed \code{OrderedEPS/1} report accepts attributed basic earnings,
+weighted ordinary shares and a separately supported complete instrument
+inventory. Each item remains visible as a candidate, a supported no-effect
+item, an unresolved item, or an item requiring an unsupported method.
+A no-effect item has zero earnings and share increments; it is reported
+without dividing by zero. A zero-share item with a nonzero earnings effect
+requires another method. An empty inventory also requires its own completeness
+finding. These findings are inputs to the calculation: the report cannot
+discover omitted instruments from a list supplied as complete.
+
+The request fixes the entity, book and dated head, evidence view, reporting
+population and period, ordinary class, share basis, currency and scale, and
+historical rule version. Basic and instrument records repeat a hash of that
+context. Every premise also points to exact source bytes and a source anchor.
+Matching hashes establish which evidence was used; interpretation, completeness
+and operative authority still require their own findings. Potential-share
+windows must lie within the period and must not overlap. A converted series
+also identifies its subsequent actual-share window and confirms that those
+actual shares already enter basic EPS. Only the earlier potential-share window
+is added by the diluted calculation.
+The date checks prevent overlap; instrument methods must still establish the
+amount and weighting of each increment.
+
+A completed conditional report returns basic and diluted continuing, total
+and discontinued EPS, their numerators and common denominators, and the
+ordered comparison for every series. Each comparison retains its increments,
+the amounts before the test, the amounts if admitted, and the admission
+decision. Missing attribution can prevent both basic and diluted EPS. Missing
+instrument consequences or an incomplete inventory preserve an independently
+ready basic result but leave diluted EPS unresolved. Known dependent effects
+or participation terms produce an unsupported result; both kinds of obstacle
+are reported together when present. Invalid bindings, malformed fractions,
+duplicate or omitted inventoried series, and overlapping windows reject the
+request. None of these outcomes returns a partial selection as complete.
+
+The exact fields and result states are specified in
+Section~\ref{sec:ordered-eps-records}. This is a read-only proposed report:
+it creates no journal or share and changes no book. Its finite reference
+checks cover the supplied arithmetic, ordering and refusal behavior.
+Applying it to a company still requires instrument-specific preprocessing,
+complete facts and applicable authority; joining it to a company's dated
+earnings, tax and share records is a further implementation obligation.

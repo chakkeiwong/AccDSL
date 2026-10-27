@@ -1,0 +1,161 @@
+\section{A reserve estimate is not a future payment}
+\label{sec:reserving-bootstrap}
+
+The reserve of 148 leaves an important question unanswered: how much might
+the insurer ultimately pay? Repeating an estimation procedure can show how
+its fitted answer varies. Even if that answer were known exactly, however,
+the future claims would still vary. England's retained 2001 working
+addendum makes this distinction operational: first resample and refit to
+obtain future conditional means, then simulate payments conditional on
+those means. The inspected text is Actuarial Research Paper 138; its exact
+equivalence to the separately published 2002 journal addendum has not been
+established \citep[Sections 2--3 and Appendix A]{england2001addendum}.
+
+Consider a small probability example, separate from the triangle. Suppose
+a fitted future mean, denoted by $M$, is either 2 or 8 with equal
+probability. These are authored possibilities, not estimates from an
+insurer. If $M=2$, let a payment $Y$ be 0 or 4, equally likely;
+if $M=8$, let it be 4 or 12, equally likely. Within each fitted case,
+the payment has mean $M$ and variance $2M$. Across cases, the fitted mean
+has expectation 5 and variance 9. The total variation in payments includes
+both the variation left within a case and the variation between case means:
+\[
+ \operatorname{Var}(Y)
+ =\E\!\left[\operatorname{Var}(Y\mid M)\right]
+  +\operatorname{Var}\!\left(\E[Y\mid M]\right)
+ =\E[2M]+\operatorname{Var}(M)=10+9=19.
+\]
+One can check the result directly: $Y$ is 0, 4 or 12 with probabilities
+$1/4$, $1/2$ and $1/4$. Its mean is 5, and its variance is
+$(25/4)+(1/2)+(49/4)=19$. Reporting the distribution of fitted means
+alone would instead give variance 9 and no payment above 8. The full
+authored payment law gives probability $1/4$ to that event.
+
+Even those two moments do not select a unique payment law. Keep the same
+two fitted means, but, conditional on $M=2$, pay 1 or 6 with probabilities
+$4/5$ and $1/5$; conditional on $M=8$, pay 6 or 16 with those probabilities.
+The conditional means remain 2 and 8. Their variances are
+$(4/5)1+(1/5)16=4$ and $(4/5)4+(1/5)64=16$, respectively.
+The overall mean and variance remain 5 and 19, but the chance of paying
+more than 8 is now $1/10$. Matching a reserve and a prediction error
+therefore cannot determine a tail probability or the insurer's compensation
+for non-financial risk.
+
+\subsection{What the two stages require}
+
+The addendum starts from a particular model for incremental payments.
+For an observed incremental payment $X_{ij}$ in origin period $i$
+and development period $j$, its fitted mean $m_{ij}$ is strictly positive.
+The model assumes $\E[X_{ij}]=m_{ij}$,
+$\operatorname{Var}(X_{ij})=\phi m_{ij}$ and
+$\log m_{ij}=c+\alpha_i+\beta_j$, with reference levels fixed to identify
+the parameters. This incremental model and Mack's conditional cumulative
+model have separate assumptions, even where their fitted reserve amounts
+agree. A common point estimate does not make their uncertainty models
+interchangeable \citep[equations 2.1--2.3]{england2001addendum}.
+
+The first stage measures each observed increment's departure from its fitted
+mean using the Pearson residual $r_{ij}=(X_{ij}-m_{ij})/\sqrt{m_{ij}}$.
+With $N$ observed cells and $p$ fitted parameters, the paper estimates
+$\widehat\phi=\sum r_{ij}^2/(N-p)$ and resamples residuals after multiplying
+them by $\sqrt{N/(N-p)}$. The adjustment must be applied once. It cannot
+be followed by another correction of the same estimation variance
+\citep[equations 2.4--2.6 and 3.1]{england2001addendum}.
+
+Start from the observed latest cumulative amounts, work backwards through
+fitted development factors, and difference the fitted cumulative amounts
+into increments. Calculate the residuals and dispersion from those increments.
+For each bootstrap draw, resample adjusted residuals with replacement and
+invert the residual relation to form pseudo-increments. Accumulate them,
+refit the development factors, project future cumulative claims and difference
+them into future means. Retain the same fitted draw across all cells. This
+produces a joint array of conditional means, not yet a joint array of payments
+\citep[Section 2 and Appendix A, Triangles 1--9]{england2001addendum}.
+
+The second stage chooses a process law. For a positive future mean $m$
+and positive dispersion $\phi$, the paper proposes $\phi Z$, where $Z$
+has a Poisson law with mean $m/\phi$. Its mean is $m$ and variance is
+$\phi m$. A gamma law with shape $m/\phi$ and scale $\phi$ has the
+same two moments but different support and tail. That is a modeling choice,
+not a change of random-number syntax. Each future payment is drawn
+conditionally, and aligned payments are summed by origin, payment period
+and total \citep[Section 3 and Appendix A, Triangles 9--10]{england2001addendum}.
+
+Dependence must survive aggregation. In the first small example, suppose
+two cells share the same $M$ but are independent conditional on it. Their
+conditional total variance is $4M$, with expectation 20, while their
+conditional total mean is $2M$, with variance 36. Their total variance
+is therefore 56. Independently redrawing each cell from its marginal
+payment law would give $19+19=38$, losing the dependence created by the
+shared fit. Marginal distributions are insufficient instructions for a
+joint simulation.
+
+\subsection{Sparse data, failed draws and implementation choices}
+
+The six observed increments in the earlier triangle fit the incremental
+model exactly. It has $p=2(3)-1=5$ parameters and only $N-p=1$ residual
+degree of freedom, giving zero fitted dispersion. This arithmetic does
+not establish that future payments are deterministic. It also does not
+identify Mack's final development variance. The proposed interface returns
+\code{DISPERSION\_UNRESOLVED} for this illustrative input and retains the
+point reserve of 148 separately. More data or a justified additional
+assumption is required before a predictive distribution can be admitted.
+
+Every draw records its model, source version, data vintage, residual pool,
+fitted parameters, process law and random stream. Nonpositive degrees of
+freedom, an unsupported negative mean, a zero projection denominator or
+non-finite arithmetic receives an explicit failure. Structurally absent
+triangle cells have a separate mask. A failed payment is not converted
+to zero or silently replaced by another draw. In the authored example,
+if the $M=8$ case cannot be evaluated, its probability $1/2$ remains
+unresolved: the known contribution to the full mean is $\tfrac12(2)=1$,
+and a complete mean is withheld. In a finite bootstrap, attempted
+failure frequency is reported as such; it does not identify population
+probability.
+
+The retained source itself needs a qualification. Its negative-mean
+suggestion draws $X$ with mean $|m|$ and then subtracts $2m$. Read
+literally for $m<0$, the resulting mean is $|m|-2m=-3m$, not $m$;
+at $m=-4$ it is 12. That prescription is wrong relative to its stated
+mean target in the inspected working version. A translation or reflection
+can preserve a negative mean, but changes the support and requires a
+different variance model. AccDSL leaves that extension unsupported
+pending an explicit signed-claims model; this local finding does not
+reject the positive-mean two-stage procedure
+\citep[Section 3, final paragraph]{england2001addendum}.
+
+Software names also conceal consequential choices. In the inspected
+ChainLadder 0.2.17 source snapshot, \code{od.pois} calls a negative-binomial
+generator for dispersion greater than one. The paper's scaled Poisson
+and that negative binomial can share a mean and variance while assigning
+different probabilities to possible payments. The same snapshot uses
+signed gamma draws and replaces missing process values by zero. An adapter
+must distinguish structural absence from failed computation, identify the
+exact law and its parameter domain, and preserve separate resampling and
+process streams before its output can satisfy this proposal. These are
+source-code observations, not completed runtime validation
+\citep{chainladder2023snapshot}.
+
+The paper compares 1,000 simulations with analytic and earlier bootstrap
+summaries. That provides a worked implementation comparison under its
+assumptions. It does not establish future tail coverage, select an insurer's
+risk adjustment or justify 1,000 draws as a universal budget. A later
+empirical protocol must address calendar effects, tail development, pooling,
+heldout diagonals, simulation uncertainty and consequences for measured
+insurance groups \citep[Section 4, Tables 1--3 and Figure 1]{england2001addendum}.
+
+\subsection{The measurement date changes the question}
+
+A lifetime payment distribution differs from a one-year change in
+estimated liabilities. The 2019 accepted manuscript by England, Verrall
+and W\"uthrich defines the claims development result as opening reserves
+less payments during the year and less the revised closing reserve. The
+closing estimate uses the information that has emerged during that year
+\citep[equations 5--7 and Section 3.2]{england2019lifetime}.
+If the opening reserve is 100, payments are 30 and the revised closing
+reserve is 80, the result is $100-30-80=-10$. Subtracting cash alone
+would yield 70 and answer a different question. The scenario must carry
+both realized next-year payments and the prescribed re-estimation rule,
+with the correct information cutoff. A lifetime draw cannot be relabeled
+as a one-year result. Neither statistic by itself supplies the discounting,
+group allocation or risk compensation required for insurance measurement.

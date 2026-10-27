@@ -1,0 +1,1 @@
+Exact source preservation, checked recurrence and complete-state comparisons support provisional 5.47. General program resume remains open; the current continuation is an explicitly selected single step. Stale next actions for disclosure, information and compression are restored to those packages' own closure criteria. Financing evidence and all original rows are preserved.

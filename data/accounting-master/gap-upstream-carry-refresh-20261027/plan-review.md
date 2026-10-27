@@ -1,0 +1,1 @@
+Skeptical audit: upstream retained/NCI carry does not establish prior-interest acquisitions or actual continuing schedules/control. Explicit tax assumptions remain conditional. Integrate checked upstream carry,then inspect prior-interest and conversion boundaries; no global continuation veto. Preserve independent prospective-policy work.

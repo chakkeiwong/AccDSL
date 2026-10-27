@@ -1,0 +1,1 @@
+One checked upstream carry delta and one prior-interest interface challenge added. All original rows and18 open packages preserved; version5.34 and four stable links unchanged. Concurrent observation-frontier work is retained.

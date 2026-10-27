@@ -1,0 +1,1450 @@
+{
+  "created_at": "2026-10-03T13:39:24.711834+00:00",
+  "hashes": {
+    "scripts/build_accounting_p08.py": "cd5eb9375b59af7e6b7ace622ddbe69aed9b2f67c476c6d943f9b6fede1039a5",
+    "scripts/check_accounting_p08.py": "d076c799012f2d7e5ebb5ad3a5335bcba623f279b9143eb4ccdca98855eb56a4",
+    "scripts/corporate_financing_v1.py": "3a9e0e64a0048e995ae1534de8e4e3d1da6cc3870d48d09637a1257ca4adb07d",
+    "scripts/corporate_authority_eu_current.py": "6c476bec2e8a60a883b9498c7ab8e7f48f4427c401110dfe640044a653ff6c51",
+    "tests/test_accounting_p08.py": "afcb0ba90b02c31d297f5d709bc1b22e17ba7a6835cea509bc06d196720421e9",
+    "docs/design/fixtures/p08-result-spec-v1.json": "12ddf2ba5107dd74379098bf005c04d6a67106c9699e41ce6a17d0e68508085a",
+    "data/accounting-master/deliverables/P08/authority-and-methods.json": "c1c7d51541f174103b8f891d7e01ddd91026eb4122a32043975337459ede4a63",
+    "data/accounting-master/deliverables/P08/result.md": "d185d2c46b6318b3e809620b2a3f83762f07a11bf8356fdfd676513aab7a942b",
+    "docs/design/research/p08-v6/source-disposition.json": "70b662bfb1eef99c861751272767291e36827a3e89a57f7c9bec84bdf381f03c"
+  },
+  "cases": [
+    {
+      "case_id": "redeem-default",
+      "facts": {
+        "entity": "SyntheticIssuer",
+        "book": "statutory",
+        "currency": "AUD",
+        "functional_currency": "AUD",
+        "jurisdiction": "AU",
+        "basis": "AASB",
+        "tier": "Tier 1",
+        "entity_scope": "for-profit",
+        "issue_date": "2024-01-01",
+        "years": 2,
+        "principal": "100",
+        "proceeds": "100",
+        "instrument_fair_value": "100",
+        "annual_coupon": "5",
+        "comparable_yield": "1/10",
+        "conversion_shares": 10,
+        "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+        "measurement": "amortised_cost",
+        "unsupported_features": []
+      },
+      "settlement": "redeem",
+      "opening_cash": "20",
+      "initial_liability": "11050/121",
+      "journal": [
+        {
+          "id": "issue",
+          "kind": "issue",
+          "date": "2024-01-01",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "cash": "100",
+            "liability": "-11050/121",
+            "conversion_equity": "-1050/121"
+          },
+          "claims": [
+            "recognition",
+            "fair_value",
+            "classification",
+            "split",
+            "residual_equity",
+            "measurement"
+          ],
+          "state_after": {
+            "cash": "120",
+            "liability": "-11050/121",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "0"
+          }
+        },
+        {
+          "id": "accrue-1",
+          "kind": "accrue",
+          "date": "2024-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "interest_expense": "1105/121",
+            "liability": "-1105/121"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "interest"
+          ],
+          "state_after": {
+            "cash": "120",
+            "liability": "-1105/11",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "1105/121"
+          }
+        },
+        {
+          "id": "coupon-1",
+          "kind": "coupon",
+          "date": "2024-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "5",
+            "cash": "-5"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "redemption"
+          ],
+          "state_after": {
+            "cash": "115",
+            "liability": "-1050/11",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "1105/121"
+          }
+        },
+        {
+          "id": "accrue-2",
+          "kind": "accrue",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "interest_expense": "105/11",
+            "liability": "-105/11"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "interest"
+          ],
+          "state_after": {
+            "cash": "115",
+            "liability": "-105",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "2260/121"
+          }
+        },
+        {
+          "id": "coupon-2",
+          "kind": "coupon",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "5",
+            "cash": "-5"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "redemption"
+          ],
+          "state_after": {
+            "cash": "110",
+            "liability": "-100",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "2260/121"
+          }
+        },
+        {
+          "id": "settlement",
+          "kind": "redeem",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "100",
+            "cash": "-100"
+          },
+          "claims": [
+            "redemption",
+            "residual_equity"
+          ],
+          "state_after": {
+            "cash": "10",
+            "liability": "0",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "2260/121"
+          }
+        }
+      ],
+      "final_state": {
+        "ledger": {
+          "cash": "10",
+          "liability": "0",
+          "conversion_equity": "-1050/121",
+          "share_equity": "0",
+          "opening_equity": "-20",
+          "interest_expense": "2260/121"
+        },
+        "position": 6,
+        "shares": 0,
+        "principal_outstanding": "0",
+        "used_event_ids": [
+          "accrue-1",
+          "accrue-2",
+          "coupon-1",
+          "coupon-2",
+          "issue",
+          "settlement"
+        ]
+      },
+      "notes": {
+        "periods": [
+          {
+            "period_start": "2024-01-01",
+            "period_end": "2024-12-31",
+            "opening_liability": "0",
+            "issue_liability": "11050/121",
+            "interest_expense": "1105/121",
+            "coupons": "5",
+            "settlement_liability": "0",
+            "closing_liability": "1050/11",
+            "event_ids": [
+              "issue",
+              "accrue-1",
+              "coupon-1"
+            ]
+          },
+          {
+            "period_start": "2025-01-01",
+            "period_end": "2025-12-31",
+            "opening_liability": "1050/11",
+            "issue_liability": "0",
+            "interest_expense": "105/11",
+            "coupons": "5",
+            "settlement_liability": "100",
+            "closing_liability": "0",
+            "event_ids": [
+              "accrue-2",
+              "coupon-2",
+              "settlement"
+            ]
+          }
+        ],
+        "links": {
+          "financing_carrying": [
+            "note_carrying",
+            "measurement"
+          ],
+          "financing_interest": [
+            "note_interest",
+            "interest"
+          ],
+          "financing_equity": [
+            "split",
+            "residual_equity",
+            "conversion"
+          ]
+        },
+        "mandatory_disclosure_scope": "selected carrying amount and interest only; not a complete AASB 7 note",
+        "conversion_equity": "1050/121",
+        "issued_share_equity": "0",
+        "issued_shares": 0
+      },
+      "independent_oracle": {
+        "case_id": "redeem-default",
+        "settlement": "redeem",
+        "initial_liability": "11050/121",
+        "initial_equity": "1050/121",
+        "total_interest": "2260/121",
+        "ending_cash": "10",
+        "ending_shares": 0,
+        "journal_entries": 6,
+        "periods": 2,
+        "claims": [
+          "amortised_cost",
+          "classification",
+          "fair_value",
+          "interest",
+          "measurement",
+          "recognition",
+          "redemption",
+          "residual_equity",
+          "split"
+        ]
+      }
+    },
+    {
+      "case_id": "convert-default",
+      "facts": {
+        "entity": "SyntheticIssuer",
+        "book": "statutory",
+        "currency": "AUD",
+        "functional_currency": "AUD",
+        "jurisdiction": "AU",
+        "basis": "AASB",
+        "tier": "Tier 1",
+        "entity_scope": "for-profit",
+        "issue_date": "2024-01-01",
+        "years": 2,
+        "principal": "100",
+        "proceeds": "100",
+        "instrument_fair_value": "100",
+        "annual_coupon": "5",
+        "comparable_yield": "1/10",
+        "conversion_shares": 10,
+        "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+        "measurement": "amortised_cost",
+        "unsupported_features": []
+      },
+      "settlement": "convert",
+      "opening_cash": "20",
+      "initial_liability": "11050/121",
+      "journal": [
+        {
+          "id": "issue",
+          "kind": "issue",
+          "date": "2024-01-01",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "cash": "100",
+            "liability": "-11050/121",
+            "conversion_equity": "-1050/121"
+          },
+          "claims": [
+            "recognition",
+            "fair_value",
+            "classification",
+            "split",
+            "residual_equity",
+            "measurement"
+          ],
+          "state_after": {
+            "cash": "120",
+            "liability": "-11050/121",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "0"
+          }
+        },
+        {
+          "id": "accrue-1",
+          "kind": "accrue",
+          "date": "2024-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "interest_expense": "1105/121",
+            "liability": "-1105/121"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "interest"
+          ],
+          "state_after": {
+            "cash": "120",
+            "liability": "-1105/11",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "1105/121"
+          }
+        },
+        {
+          "id": "coupon-1",
+          "kind": "coupon",
+          "date": "2024-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "5",
+            "cash": "-5"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "redemption"
+          ],
+          "state_after": {
+            "cash": "115",
+            "liability": "-1050/11",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "1105/121"
+          }
+        },
+        {
+          "id": "accrue-2",
+          "kind": "accrue",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "interest_expense": "105/11",
+            "liability": "-105/11"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "interest"
+          ],
+          "state_after": {
+            "cash": "115",
+            "liability": "-105",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "2260/121"
+          }
+        },
+        {
+          "id": "coupon-2",
+          "kind": "coupon",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "5",
+            "cash": "-5"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "redemption"
+          ],
+          "state_after": {
+            "cash": "110",
+            "liability": "-100",
+            "conversion_equity": "-1050/121",
+            "share_equity": "0",
+            "opening_equity": "-20",
+            "interest_expense": "2260/121"
+          }
+        },
+        {
+          "id": "settlement",
+          "kind": "convert",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "100",
+            "share_equity": "-100"
+          },
+          "claims": [
+            "conversion",
+            "residual_equity"
+          ],
+          "state_after": {
+            "cash": "110",
+            "liability": "0",
+            "conversion_equity": "-1050/121",
+            "share_equity": "-100",
+            "opening_equity": "-20",
+            "interest_expense": "2260/121"
+          }
+        }
+      ],
+      "final_state": {
+        "ledger": {
+          "cash": "110",
+          "liability": "0",
+          "conversion_equity": "-1050/121",
+          "share_equity": "-100",
+          "opening_equity": "-20",
+          "interest_expense": "2260/121"
+        },
+        "position": 6,
+        "shares": 10,
+        "principal_outstanding": "0",
+        "used_event_ids": [
+          "accrue-1",
+          "accrue-2",
+          "coupon-1",
+          "coupon-2",
+          "issue",
+          "settlement"
+        ]
+      },
+      "notes": {
+        "periods": [
+          {
+            "period_start": "2024-01-01",
+            "period_end": "2024-12-31",
+            "opening_liability": "0",
+            "issue_liability": "11050/121",
+            "interest_expense": "1105/121",
+            "coupons": "5",
+            "settlement_liability": "0",
+            "closing_liability": "1050/11",
+            "event_ids": [
+              "issue",
+              "accrue-1",
+              "coupon-1"
+            ]
+          },
+          {
+            "period_start": "2025-01-01",
+            "period_end": "2025-12-31",
+            "opening_liability": "1050/11",
+            "issue_liability": "0",
+            "interest_expense": "105/11",
+            "coupons": "5",
+            "settlement_liability": "100",
+            "closing_liability": "0",
+            "event_ids": [
+              "accrue-2",
+              "coupon-2",
+              "settlement"
+            ]
+          }
+        ],
+        "links": {
+          "financing_carrying": [
+            "note_carrying",
+            "measurement"
+          ],
+          "financing_interest": [
+            "note_interest",
+            "interest"
+          ],
+          "financing_equity": [
+            "split",
+            "residual_equity",
+            "conversion"
+          ]
+        },
+        "mandatory_disclosure_scope": "selected carrying amount and interest only; not a complete AASB 7 note",
+        "conversion_equity": "1050/121",
+        "issued_share_equity": "100",
+        "issued_shares": 10
+      },
+      "independent_oracle": {
+        "case_id": "convert-default",
+        "settlement": "convert",
+        "initial_liability": "11050/121",
+        "initial_equity": "1050/121",
+        "total_interest": "2260/121",
+        "ending_cash": "110",
+        "ending_shares": 10,
+        "journal_entries": 6,
+        "periods": 2,
+        "claims": [
+          "amortised_cost",
+          "classification",
+          "conversion",
+          "fair_value",
+          "interest",
+          "measurement",
+          "recognition",
+          "redemption",
+          "residual_equity",
+          "split"
+        ]
+      }
+    },
+    {
+      "case_id": "second-parameters-redeem",
+      "facts": {
+        "entity": "SyntheticIssuer",
+        "book": "statutory",
+        "currency": "AUD",
+        "functional_currency": "AUD",
+        "jurisdiction": "AU",
+        "basis": "AASB",
+        "tier": "Tier 1",
+        "entity_scope": "for-profit",
+        "issue_date": "2024-01-01",
+        "years": 2,
+        "principal": "240",
+        "proceeds": "245",
+        "instrument_fair_value": "245",
+        "annual_coupon": "12",
+        "comparable_yield": "2/25",
+        "conversion_shares": 24,
+        "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+        "measurement": "amortised_cost",
+        "unsupported_features": []
+      },
+      "settlement": "redeem",
+      "opening_cash": "30",
+      "initial_liability": "18400/81",
+      "journal": [
+        {
+          "id": "issue",
+          "kind": "issue",
+          "date": "2024-01-01",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "cash": "245",
+            "liability": "-18400/81",
+            "conversion_equity": "-1445/81"
+          },
+          "claims": [
+            "recognition",
+            "fair_value",
+            "classification",
+            "split",
+            "residual_equity",
+            "measurement"
+          ],
+          "state_after": {
+            "cash": "275",
+            "liability": "-18400/81",
+            "conversion_equity": "-1445/81",
+            "share_equity": "0",
+            "opening_equity": "-30",
+            "interest_expense": "0"
+          }
+        },
+        {
+          "id": "accrue-1",
+          "kind": "accrue",
+          "date": "2024-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "interest_expense": "1472/81",
+            "liability": "-1472/81"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "interest"
+          ],
+          "state_after": {
+            "cash": "275",
+            "liability": "-736/3",
+            "conversion_equity": "-1445/81",
+            "share_equity": "0",
+            "opening_equity": "-30",
+            "interest_expense": "1472/81"
+          }
+        },
+        {
+          "id": "coupon-1",
+          "kind": "coupon",
+          "date": "2024-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "12",
+            "cash": "-12"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "redemption"
+          ],
+          "state_after": {
+            "cash": "263",
+            "liability": "-700/3",
+            "conversion_equity": "-1445/81",
+            "share_equity": "0",
+            "opening_equity": "-30",
+            "interest_expense": "1472/81"
+          }
+        },
+        {
+          "id": "accrue-2",
+          "kind": "accrue",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "interest_expense": "56/3",
+            "liability": "-56/3"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "interest"
+          ],
+          "state_after": {
+            "cash": "263",
+            "liability": "-252",
+            "conversion_equity": "-1445/81",
+            "share_equity": "0",
+            "opening_equity": "-30",
+            "interest_expense": "2984/81"
+          }
+        },
+        {
+          "id": "coupon-2",
+          "kind": "coupon",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "12",
+            "cash": "-12"
+          },
+          "claims": [
+            "measurement",
+            "amortised_cost",
+            "redemption"
+          ],
+          "state_after": {
+            "cash": "251",
+            "liability": "-240",
+            "conversion_equity": "-1445/81",
+            "share_equity": "0",
+            "opening_equity": "-30",
+            "interest_expense": "2984/81"
+          }
+        },
+        {
+          "id": "settlement",
+          "kind": "redeem",
+          "date": "2025-12-31",
+          "entity": "SyntheticIssuer",
+          "book": "statutory",
+          "currency": "AUD",
+          "postings_debit_positive": {
+            "liability": "240",
+            "cash": "-240"
+          },
+          "claims": [
+            "redemption",
+            "residual_equity"
+          ],
+          "state_after": {
+            "cash": "11",
+            "liability": "0",
+            "conversion_equity": "-1445/81",
+            "share_equity": "0",
+            "opening_equity": "-30",
+            "interest_expense": "2984/81"
+          }
+        }
+      ],
+      "final_state": {
+        "ledger": {
+          "cash": "11",
+          "liability": "0",
+          "conversion_equity": "-1445/81",
+          "share_equity": "0",
+          "opening_equity": "-30",
+          "interest_expense": "2984/81"
+        },
+        "position": 6,
+        "shares": 0,
+        "principal_outstanding": "0",
+        "used_event_ids": [
+          "accrue-1",
+          "accrue-2",
+          "coupon-1",
+          "coupon-2",
+          "issue",
+          "settlement"
+        ]
+      },
+      "notes": {
+        "periods": [
+          {
+            "period_start": "2024-01-01",
+            "period_end": "2024-12-31",
+            "opening_liability": "0",
+            "issue_liability": "18400/81",
+            "interest_expense": "1472/81",
+            "coupons": "12",
+            "settlement_liability": "0",
+            "closing_liability": "700/3",
+            "event_ids": [
+              "issue",
+              "accrue-1",
+              "coupon-1"
+            ]
+          },
+          {
+            "period_start": "2025-01-01",
+            "period_end": "2025-12-31",
+            "opening_liability": "700/3",
+            "issue_liability": "0",
+            "interest_expense": "56/3",
+            "coupons": "12",
+            "settlement_liability": "240",
+            "closing_liability": "0",
+            "event_ids": [
+              "accrue-2",
+              "coupon-2",
+              "settlement"
+            ]
+          }
+        ],
+        "links": {
+          "financing_carrying": [
+            "note_carrying",
+            "measurement"
+          ],
+          "financing_interest": [
+            "note_interest",
+            "interest"
+          ],
+          "financing_equity": [
+            "split",
+            "residual_equity",
+            "conversion"
+          ]
+        },
+        "mandatory_disclosure_scope": "selected carrying amount and interest only; not a complete AASB 7 note",
+        "conversion_equity": "1445/81",
+        "issued_share_equity": "0",
+        "issued_shares": 0
+      },
+      "independent_oracle": {
+        "case_id": "second-parameters-redeem",
+        "settlement": "redeem",
+        "initial_liability": "18400/81",
+        "initial_equity": "1445/81",
+        "total_interest": "2984/81",
+        "ending_cash": "11",
+        "ending_shares": 0,
+        "journal_entries": 6,
+        "periods": 2,
+        "claims": [
+          "amortised_cost",
+          "classification",
+          "fair_value",
+          "interest",
+          "measurement",
+          "recognition",
+          "redemption",
+          "residual_equity",
+          "split"
+        ]
+      }
+    }
+  ],
+  "comparisons": {
+    "economic_facts": {
+      "entity": "SyntheticIssuer",
+      "currency": "AUD",
+      "functional_currency": "AUD",
+      "entity_scope": "for-profit",
+      "issue_date": "2024-01-01",
+      "years": 2,
+      "principal": "100",
+      "proceeds": "100",
+      "instrument_fair_value": "100",
+      "annual_coupon": "5",
+      "comparable_yield": "1/10",
+      "conversion_shares": 10,
+      "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+      "unsupported_features": [],
+      "opening_cash": "20",
+      "settlement_outcomes": [
+        "redeem",
+        "convert"
+      ]
+    },
+    "rows": [
+      {
+        "standard": "AASB",
+        "jurisdiction": "AU",
+        "facts_sha256": "3787c8a58c36667abf13eb0e2d0ebe972226b406509f339a0119fc0cdf256365",
+        "status": "supported_bounded",
+        "initial_liability": "11050/121",
+        "initial_equity": "1050/121",
+        "total_interest": "2260/121",
+        "claims": [
+          "recognition",
+          "fair_value",
+          "classification",
+          "split",
+          "residual_equity",
+          "measurement",
+          "amortised_cost",
+          "interest",
+          "redemption",
+          "conversion",
+          "note_carrying",
+          "note_interest"
+        ],
+        "cases": {
+          "redeem": {
+            "contract": {
+              "entity": "SyntheticIssuer",
+              "book": "statutory",
+              "currency": "AUD",
+              "functional_currency": "AUD",
+              "jurisdiction": "AU",
+              "basis": "AASB",
+              "tier": "Tier 1",
+              "entity_scope": "for-profit",
+              "issue_date": "2024-01-01",
+              "years": 2,
+              "principal": "100",
+              "proceeds": "100",
+              "instrument_fair_value": "100",
+              "annual_coupon": "5",
+              "comparable_yield": "1/10",
+              "conversion_shares": 10,
+              "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+              "measurement": "amortised_cost",
+              "unsupported_features": []
+            },
+            "settlement": "redeem",
+            "opening_cash": "20",
+            "initial_liability": "11050/121",
+            "state": {
+              "ledger": {
+                "cash": "10",
+                "liability": "0",
+                "conversion_equity": "-1050/121",
+                "share_equity": "0",
+                "opening_equity": "-20",
+                "interest_expense": "2260/121"
+              },
+              "position": 6,
+              "shares": 0,
+              "principal_outstanding": "0",
+              "journal": [
+                {
+                  "id": "issue",
+                  "kind": "issue",
+                  "date": "2024-01-01",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "cash": "100",
+                    "liability": "-11050/121",
+                    "conversion_equity": "-1050/121"
+                  },
+                  "claims": [
+                    "recognition",
+                    "fair_value",
+                    "classification",
+                    "split",
+                    "residual_equity",
+                    "measurement"
+                  ],
+                  "state_after": {
+                    "cash": "120",
+                    "liability": "-11050/121",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "0"
+                  }
+                },
+                {
+                  "id": "accrue-1",
+                  "kind": "accrue",
+                  "date": "2024-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "interest_expense": "1105/121",
+                    "liability": "-1105/121"
+                  },
+                  "claims": [
+                    "measurement",
+                    "amortised_cost",
+                    "interest"
+                  ],
+                  "state_after": {
+                    "cash": "120",
+                    "liability": "-1105/11",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "1105/121"
+                  }
+                },
+                {
+                  "id": "coupon-1",
+                  "kind": "coupon",
+                  "date": "2024-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "liability": "5",
+                    "cash": "-5"
+                  },
+                  "claims": [
+                    "measurement",
+                    "amortised_cost",
+                    "redemption"
+                  ],
+                  "state_after": {
+                    "cash": "115",
+                    "liability": "-1050/11",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "1105/121"
+                  }
+                },
+                {
+                  "id": "accrue-2",
+                  "kind": "accrue",
+                  "date": "2025-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "interest_expense": "105/11",
+                    "liability": "-105/11"
+                  },
+                  "claims": [
+                    "measurement",
+                    "amortised_cost",
+                    "interest"
+                  ],
+                  "state_after": {
+                    "cash": "115",
+                    "liability": "-105",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "2260/121"
+                  }
+                },
+                {
+                  "id": "coupon-2",
+                  "kind": "coupon",
+                  "date": "2025-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "liability": "5",
+                    "cash": "-5"
+                  },
+                  "claims": [
+                    "measurement",
+                    "amortised_cost",
+                    "redemption"
+                  ],
+                  "state_after": {
+                    "cash": "110",
+                    "liability": "-100",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "2260/121"
+                  }
+                },
+                {
+                  "id": "settlement",
+                  "kind": "redeem",
+                  "date": "2025-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "liability": "100",
+                    "cash": "-100"
+                  },
+                  "claims": [
+                    "redemption",
+                    "residual_equity"
+                  ],
+                  "state_after": {
+                    "cash": "10",
+                    "liability": "0",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "2260/121"
+                  }
+                }
+              ],
+              "used_event_ids": [
+                "accrue-1",
+                "accrue-2",
+                "coupon-1",
+                "coupon-2",
+                "issue",
+                "settlement"
+              ]
+            },
+            "notes": {
+              "periods": [
+                {
+                  "period_start": "2024-01-01",
+                  "period_end": "2024-12-31",
+                  "opening_liability": "0",
+                  "issue_liability": "11050/121",
+                  "interest_expense": "1105/121",
+                  "coupons": "5",
+                  "settlement_liability": "0",
+                  "closing_liability": "1050/11",
+                  "event_ids": [
+                    "issue",
+                    "accrue-1",
+                    "coupon-1"
+                  ]
+                },
+                {
+                  "period_start": "2025-01-01",
+                  "period_end": "2025-12-31",
+                  "opening_liability": "1050/11",
+                  "issue_liability": "0",
+                  "interest_expense": "105/11",
+                  "coupons": "5",
+                  "settlement_liability": "100",
+                  "closing_liability": "0",
+                  "event_ids": [
+                    "accrue-2",
+                    "coupon-2",
+                    "settlement"
+                  ]
+                }
+              ],
+              "links": {
+                "financing_carrying": [
+                  "note_carrying",
+                  "measurement"
+                ],
+                "financing_interest": [
+                  "note_interest",
+                  "interest"
+                ],
+                "financing_equity": [
+                  "split",
+                  "residual_equity",
+                  "conversion"
+                ]
+              },
+              "mandatory_disclosure_scope": "selected carrying amount and interest only; not a complete AASB 7 note",
+              "conversion_equity": "1050/121",
+              "issued_share_equity": "0",
+              "issued_shares": 0
+            }
+          },
+          "convert": {
+            "contract": {
+              "entity": "SyntheticIssuer",
+              "book": "statutory",
+              "currency": "AUD",
+              "functional_currency": "AUD",
+              "jurisdiction": "AU",
+              "basis": "AASB",
+              "tier": "Tier 1",
+              "entity_scope": "for-profit",
+              "issue_date": "2024-01-01",
+              "years": 2,
+              "principal": "100",
+              "proceeds": "100",
+              "instrument_fair_value": "100",
+              "annual_coupon": "5",
+              "comparable_yield": "1/10",
+              "conversion_shares": 10,
+              "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+              "measurement": "amortised_cost",
+              "unsupported_features": []
+            },
+            "settlement": "convert",
+            "opening_cash": "20",
+            "initial_liability": "11050/121",
+            "state": {
+              "ledger": {
+                "cash": "110",
+                "liability": "0",
+                "conversion_equity": "-1050/121",
+                "share_equity": "-100",
+                "opening_equity": "-20",
+                "interest_expense": "2260/121"
+              },
+              "position": 6,
+              "shares": 10,
+              "principal_outstanding": "0",
+              "journal": [
+                {
+                  "id": "issue",
+                  "kind": "issue",
+                  "date": "2024-01-01",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "cash": "100",
+                    "liability": "-11050/121",
+                    "conversion_equity": "-1050/121"
+                  },
+                  "claims": [
+                    "recognition",
+                    "fair_value",
+                    "classification",
+                    "split",
+                    "residual_equity",
+                    "measurement"
+                  ],
+                  "state_after": {
+                    "cash": "120",
+                    "liability": "-11050/121",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "0"
+                  }
+                },
+                {
+                  "id": "accrue-1",
+                  "kind": "accrue",
+                  "date": "2024-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "interest_expense": "1105/121",
+                    "liability": "-1105/121"
+                  },
+                  "claims": [
+                    "measurement",
+                    "amortised_cost",
+                    "interest"
+                  ],
+                  "state_after": {
+                    "cash": "120",
+                    "liability": "-1105/11",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "1105/121"
+                  }
+                },
+                {
+                  "id": "coupon-1",
+                  "kind": "coupon",
+                  "date": "2024-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "liability": "5",
+                    "cash": "-5"
+                  },
+                  "claims": [
+                    "measurement",
+                    "amortised_cost",
+                    "redemption"
+                  ],
+                  "state_after": {
+                    "cash": "115",
+                    "liability": "-1050/11",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "1105/121"
+                  }
+                },
+                {
+                  "id": "accrue-2",
+                  "kind": "accrue",
+                  "date": "2025-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "interest_expense": "105/11",
+                    "liability": "-105/11"
+                  },
+                  "claims": [
+                    "measurement",
+                    "amortised_cost",
+                    "interest"
+                  ],
+                  "state_after": {
+                    "cash": "115",
+                    "liability": "-105",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "2260/121"
+                  }
+                },
+                {
+                  "id": "coupon-2",
+                  "kind": "coupon",
+                  "date": "2025-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "liability": "5",
+                    "cash": "-5"
+                  },
+                  "claims": [
+                    "measurement",
+                    "amortised_cost",
+                    "redemption"
+                  ],
+                  "state_after": {
+                    "cash": "110",
+                    "liability": "-100",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "0",
+                    "opening_equity": "-20",
+                    "interest_expense": "2260/121"
+                  }
+                },
+                {
+                  "id": "settlement",
+                  "kind": "convert",
+                  "date": "2025-12-31",
+                  "entity": "SyntheticIssuer",
+                  "book": "statutory",
+                  "currency": "AUD",
+                  "postings_debit_positive": {
+                    "liability": "100",
+                    "share_equity": "-100"
+                  },
+                  "claims": [
+                    "conversion",
+                    "residual_equity"
+                  ],
+                  "state_after": {
+                    "cash": "110",
+                    "liability": "0",
+                    "conversion_equity": "-1050/121",
+                    "share_equity": "-100",
+                    "opening_equity": "-20",
+                    "interest_expense": "2260/121"
+                  }
+                }
+              ],
+              "used_event_ids": [
+                "accrue-1",
+                "accrue-2",
+                "coupon-1",
+                "coupon-2",
+                "issue",
+                "settlement"
+              ]
+            },
+            "notes": {
+              "periods": [
+                {
+                  "period_start": "2024-01-01",
+                  "period_end": "2024-12-31",
+                  "opening_liability": "0",
+                  "issue_liability": "11050/121",
+                  "interest_expense": "1105/121",
+                  "coupons": "5",
+                  "settlement_liability": "0",
+                  "closing_liability": "1050/11",
+                  "event_ids": [
+                    "issue",
+                    "accrue-1",
+                    "coupon-1"
+                  ]
+                },
+                {
+                  "period_start": "2025-01-01",
+                  "period_end": "2025-12-31",
+                  "opening_liability": "1050/11",
+                  "issue_liability": "0",
+                  "interest_expense": "105/11",
+                  "coupons": "5",
+                  "settlement_liability": "100",
+                  "closing_liability": "0",
+                  "event_ids": [
+                    "accrue-2",
+                    "coupon-2",
+                    "settlement"
+                  ]
+                }
+              ],
+              "links": {
+                "financing_carrying": [
+                  "note_carrying",
+                  "measurement"
+                ],
+                "financing_interest": [
+                  "note_interest",
+                  "interest"
+                ],
+                "financing_equity": [
+                  "split",
+                  "residual_equity",
+                  "conversion"
+                ]
+              },
+              "mandatory_disclosure_scope": "selected carrying amount and interest only; not a complete AASB 7 note",
+              "conversion_equity": "1050/121",
+              "issued_share_equity": "100",
+              "issued_shares": 10
+            }
+          }
+        }
+      },
+      {
+        "standard": "US GAAP",
+        "jurisdiction": "US",
+        "facts_sha256": "3787c8a58c36667abf13eb0e2d0ebe972226b406509f339a0119fc0cdf256365",
+        "status": "unresolved",
+        "initial_liability": null,
+        "initial_equity": null,
+        "total_interest": null,
+        "claims": [],
+        "cases": null,
+        "missing": "ASU 2020-06 retained and selected amendment paragraphs inspected; full ASC 815-15/815-40 eligibility, general debt measurement/derecognition and subsequent amendment applicability remain uninspected."
+      },
+      {
+        "standard": "ASBE",
+        "jurisdiction": "CN",
+        "facts_sha256": "3787c8a58c36667abf13eb0e2d0ebe972226b406509f339a0119fc0cdf256365",
+        "status": "unresolved",
+        "initial_liability": null,
+        "initial_equity": null,
+        "total_interest": null,
+        "claims": [],
+        "cases": null,
+        "missing": "Official CAS 22/37 text, applicable edition and entity transition uninspected; two official MoF candidate routes returned 502."
+      },
+      {
+        "standard": "EU-endorsed IFRS",
+        "jurisdiction": "EU",
+        "facts_sha256": "3787c8a58c36667abf13eb0e2d0ebe972226b406509f339a0119fc0cdf256365",
+        "status": "unresolved",
+        "initial_liability": null,
+        "initial_equity": null,
+        "total_interest": null,
+        "claims": [],
+        "cases": null,
+        "missing": "Original EU IAS 32/IFRS 9/IFRS 7 provisions, Regulation 1606/2002 Article 4 and four amendment annexes inspected. Applicable 2024\u20132025 amendment/corrigendum chain and remaining eligibility cross-references unresolved; see p08-v3/authority-register.json. No EU lifecycle admitted."
+      }
+    ],
+    "supported_difference": null,
+    "criterion_status": "incomplete: no second fully inspected applicable treatment",
+    "interpretation": "No complete numerical cross-standard lifecycle is established. The inspected FASB amendment supplies a conditional classification difference; remaining eligibility and lifecycle authority must be inspected before admission."
+  }
+}

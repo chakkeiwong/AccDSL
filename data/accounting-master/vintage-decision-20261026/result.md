@@ -1,0 +1,21 @@
+# A correction changes decisions only within the actor's information
+
+26 October2026. W03/W12/W16; MC05/08/10/12/14/24/25/28/33/34/35.
+
+The selected finite registry adapter chooses available, unreplaced observation heads for an actor at an exact cutoff, then calls the existing FiniteVintageInference/1 evaluator. A separate exact decision step compares declared feasible actions. Fifty-six assertions across eleven retained cases pass, including the call path through the existing inference implementation. Four protected finite-inference dependencies remain unchanged; full requests, decisions and refusal reasons are retained in attempt-01.
+
+In the hypothetical example, an unhedged exposure costs0 for a fixed type and20 for a floating type; a perfect hedge costs6. These are supplied diagnostic losses, not observed prices or accounting entries. Under the old (1,0) posterior, unhedged expected loss is0. After the corrected (1/4,3/4) posterior, it is15 and the hedge is selected. A separate (7/10,3/10) case retains both actions as ties at6.
+
+The analyst receives the correction on1 February2026; the manager receives it on1 March2026. At15 February, the analyst and manager therefore obtain different posteriors and actions under the declared information times. Adding the future correction to the registry leaves the manager's15 January request and decision exactly unchanged. The stored earlier decision remains reproducible after later inference. Using the analyst's information for the manager fails the action discriminator.
+
+Unknown availability is unresolved, not silently future or absent. Two available incomparable revisions in the same slot remain unresolved; the adapter neither chooses the newest arbitrarily nor invents probabilities between them. Missing ancestry, corrupt source content and fabricated posterior results refuse. Unknown action losses remain unresolved. All selected information retains the source content and revision ancestry required by the existing evaluator.
+
+| Decision | Primary criterion | Veto diagnostics | Main uncertainty | Next justified action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Retain actor-specific finite selection and decision | Complete posterior/action comparisons and old-request equality pass | Wrong actor timing, unknown/conflicting revisions, corrupt data and forged posterior do not yield accepted decisions | Supplied availability and registry completeness | Bind an actual evidence-view adapter and instrument-specific actions | Actual source admission or a general information service |
+| Keep uncertainty explicit | Competing revisions remain unresolved; ties retain all minimizers | No arbitrary branch probability or tie-breaking policy | Which source version is authoritative | Source-supported revision/applicability analysis | That every unresolved case can be resolved internally |
+| Continue inference-to-decision integration | Existing evaluator is invoked and unchanged | No changed predecessor or comparator mismatch | Observation independence, feasibility, causal effects and real action losses | Connect selected financial execution and review source assumptions | Economically optimal real-company hedging or forecast ranking |
+
+The claimed target is expected loss under a declared finite posterior and declared feasible action set. The implementation computes that target exactly for these examples. The strongest alternative explanation for real-world disagreement is a false availability time, incomplete registry, wrong likelihood or omitted action constraint. The example selects actions but does not execute a hedge, generate journals, infer historical decisions or establish a causal intervention. An old decision is reproducible conditional on its original request; newly discovered evidence that its availability declaration was wrong could require a separate historical reconstruction.
+
+The registry is closed only as supplied. The adapter validates stored identities but cannot discover unprovided source versions or authenticate actor access. This result narrows W03/W12/W16 without closing them. It is companion evidence after Version5.18 and awaits protected manuscript integration; the latest PDF and its hashes are unchanged.

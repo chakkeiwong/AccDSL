@@ -1,0 +1,39 @@
+
+
+\section{A finite filter that preserves contract identity}
+Let $\theta$ be an unknown but fixed contract type, $x_t$ a changing hidden
+operating state, and $y_t$ the analyst's observation. A declared probabilistic
+model supplies transition probabilities $P_\theta(x'\mid x)$ and observation
+likelihoods $\ell_t(y\mid\theta,x')$. With joint posterior weights
+$w_{t-1}(\theta,x)$, the prediction and update are
+\begin{align}
+w_t^-(\theta,x')&=\sum_x
+  P_\theta(x'\mid x)w_{t-1}(\theta,x),\\
+Z_t&=\sum_{\theta,x'}\ell_t(y_t\mid\theta,x')w_t^-(\theta,x'),\\
+w_t(\theta,x')&=\ell_t(y_t\mid\theta,x')w_t^-(\theta,x')/Z_t.
+\end{align}
+There is no summation that changes $\theta$ into another contract type. A
+contract modification needs an explicit event and a different transition
+model. If $Z_t=0$, the result is an evidence conflict under the declared model;
+normalizing arbitrary fallback weights would answer another question.
+
+An uninformative observation has constant likelihood across states, so its
+update does not change the predicted relative weights. A missing disclosure
+is uninformative only when the observation model makes it so. If no prior is
+justified, propagate a feasible set of joint $(\theta,x)$ pairs through the
+transition relation and evidence restrictions. That procedure produces support,
+not posterior probabilities. A declared set of priors can instead be updated
+member by member; zero-likelihood members need an explicit conditioning rule,
+and one must not replace the result by independently chosen period marginals.
+
+A source correction can remove an earlier restriction. Retaining only the
+last posterior may then be insufficient: a zeroed type cannot be recovered
+by multiplying it by another likelihood. Keep the original prior or feasible
+family, the evidence versions and the transition model, and replay all
+currently active evidence. Checkpoints can accelerate replay only when their
+evidence dependencies remain valid. The reference filter compares this
+recursion with direct path enumeration for four priors and all 27 length-three
+observation sequences. It also checks rare positive types, uninformative
+observations, conflict, and a correction that reopens a discarded type. This
+is an exact finite method; estimating a defensible issuer likelihood and
+controlling particle approximation remain separate problems.

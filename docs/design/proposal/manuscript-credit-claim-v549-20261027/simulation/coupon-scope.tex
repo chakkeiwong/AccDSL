@@ -1,0 +1,29 @@
+\section{Which payment histories have the same future consequences?}
+\label{sim:coupon-continuation-scope}
+
+The residual claim is a property of the cash-only payment rule, not an accident of dividing the payment into one or two instalments. Let $S_i=\sum_{j=1}^i q_j$ be cumulative payment after $i$ accepted instructions. Each positive amount $q_j$ reduces cash and the unpaid coupon equally and increases the paid amount by the same quantity. Starting from $C_0=85/16$, $U_0=86/16$ and $P_0=0$, repeated substitution gives
+\begin{equation}
+ C_i=\frac{85}{16}-S_i,\qquad
+ U_i=\frac{86}{16}-S_i,\qquad P_i=S_i,
+ \qquad U_i-C_i=\frac1{16}.
+ \label{eq:coupon-schedule-invariant}
+\end{equation}
+The zero-payment prefix satisfies these identities. If they hold after $i$ instructions, subtracting $q_{i+1}$ from cash and claim, and adding it to payment, replaces $S_i$ with $S_i+q_{i+1}$ in all three expressions. This proves the recurrence by induction. It also preserves $U_i+P_i=86/16$, the originally accrued coupon.
+
+Because the unpaid claim always exceeds cash by $1/16$, any positive affordable payment $q\le C_i$ is strictly below $U_i$. For a finite schedule of positive payments, affordability is therefore equivalent to its total being at most $85/16$: every earlier prefix sum is smaller. This statement concerns the economic amounts. Dates, identities and runtime support impose separate conditions. At cash exhaustion the company still owes $1/16$; further cash-only payment cannot remove that claim. A separate cash inflow or a supported change to the claim would be needed.
+
+The selected method's actual expressions, account bindings, cumulative memory write and preserved fields match this recurrence on both charts. Twenty complete runtime comparisons include nonuniform and same-day payments, unequal rational fractions, a tiny first payment, and a schedule leaving exactly $1/2^{64}$ in cash. The last residual is retained rather than rounded to zero. These finite checks support the selected implementation while the induction establishes the algebraic result.\footnote{\path{data/accounting-master/coupon-schedule-invariant-20261027/} retains four method inspections, 517 assertions and eight controls. The runtime permits at most 64 commands per program, bounds its accumulated trace at 8 MiB, and imposes record-size and exact-rational limits. A 65-command schedule whose total equals available cash is refused by the command limit. Such a resource refusal is not economic infeasibility; satisfying one limit alone does not guarantee execution.}
+
+\subsection{A date or an event identity can distinguish equal balances}
+
+Now compare a payment of 1 on 2 January with payments of $1/2$ on 2 and 3 January. Both leave cash $69/16$, unpaid coupon $35/8$ and cumulative payment 1. Their contract memory agrees. Their current dates, accepted event identities and dated gross flows do not.
+
+A fresh instruction dated 2 January can follow the first history. It cannot follow the second, whose last accepted event is already dated 3 January. Similarly, an instruction using the second instalment's event identity can be fresh in the one-payment history and a replay in the split-payment history. The runtime rejects the replay without changing balances. Thus equal financial totals do not preserve the full set of permissible instructions.
+
+A common fresh payment of 1 on 4 January succeeds in both histories and leaves cash $53/16$, claim $27/8$ and cumulative payment 2. Numeric statements and activity totals agree, but complete reports retain different dated gross flows. This gives a useful restricted result. For the same original obligations and rules, equal cumulative payment, identical future amounts, dates no earlier than either current date, and identities unused in either history, the financial recurrence remains equal whenever bounded execution accepts. It does not make the complete histories equal or establish compatibility with every future method, observation or policy.\footnote{\path{data/accounting-master/coupon-continuation-scope-20261027/} retains 24 complete continuation comparisons, 514 assertions and ten controls on the four chart/action origins. Original refusal archives and complete reports are checked against the external identified prefix. Altering a prefix and assigning it a new identity does not bypass the independent comparison.}
+
+\subsection{Resume from the current book and report from the period opening}
+
+Execution and reporting need different dates here. The original period opening supplies the starting cash and empty current-period flow history for a cumulative report. The current book supplies the balances, last event date, used identities and contract memory for the next instruction. Replacing one with the other would either forget accepted events or misstate the reporting interval.
+
+The present declared-program runner validates a fiscal opening at the period start with no flows. It therefore refuses a midperiod current book as its opening. The selected continuation uses the same typed event engine directly for one instruction, retains the actual prefix unchanged, and reports the resulting book against the original period opening. This is a checked single-step interface. A general program-resumption interface still needs explicit bindings for both books, the verified prefix and the remaining commands; it cannot be implemented by resetting a date or discarding prior flows.

@@ -1,0 +1,206 @@
+\section{Preserving a model before extending its accounts}
+\label{sec:company-module-language}
+
+The scenario family now keeps each company's instructions and consequences
+together. Exchanging those results with another implementation raises two
+further questions. Can it identify the same input despite a different text
+encoding? Can it add a new accounting method without creating another cash
+balance or losing the company's tax history? The first is a representation
+question. The second requires a richer account of company state.
+
+\paragraph{Different bytes can express the same instruction.}
+A company name containing an accented character may be written directly in
+UTF-8 or through a JSON escape. Both decode to the same sequence of characters,
+but their original files differ. Keeping the exact source file and identifying
+the decoded model therefore require separate identities.
+
+The legacy import retains the original bytes and their hash, the declared local
+decoder and profile, and the existing company draft's decoded identity. A
+separate portable content record binds the canonical decoded value. Equivalent
+escaping or whitespace can share that content record while retaining distinct
+original imports. Different character sequences are not normalized into one
+name. The exchange itself changes when its original bytes change.
+
+A field extracted from a saved result is not passed off as an original file.
+Its import identifies the parent and exact JSON pointer, and validation checks
+that the value is present there. Family-member records expose names, paths,
+results, contexts and annual outcomes; expression records connect the program,
+policy, selected parent, generated child and declared dependencies. Recovery
+records retain the same family and method with the completed member prefix.
+Missing dependencies and wrong reference kinds prevent import. This is an
+explicit reference to legacy drafts, rather than a conversion of every field
+into the full portable numeric and type language.
+
+Identity checks alone cannot establish that cash was calculated correctly.
+One adverse example changes a cash amount and recomputes the affected hashes,
+including the saved recovery result. The resulting packet is internally
+consistent and passes content binding. Repeating the calculation with the
+trusted local engine rejects it. The two verdicts remain distinct: a complete
+dependency graph preserves what was supplied, while semantic replay checks
+what the selected method computes. Neither supplies an actual source's
+publication date, proves historical execution or establishes physical storage
+durability. Executable methods are selected by the caller; packet content
+cannot load code.
+
+\paragraph{A module uses a company's existing book.}
+Consider the retained return-right example. Its legal book already contains
+cash 100, a recovery asset 16 and a refund liability 40. A return module must
+refer to those balances. Adding its opening cash or capital to the company
+again would create resources that no event supplied.
+
+The finite invocation therefore binds the original entity, legal book,
+branch, source context, information view, method and complete opening state.
+The trusted return method produces a proposed state transition. It uses the
+named book's cash, preserves other legal books and exposes the journal and
+gross cash effects. The checked example pays 48 and ends with cash 52. No
+commit is implied by the proposal. Changing the owner, method, source, state,
+event or account map prevents reuse; missing and false findings remain
+distinct from a successful calculation.
+
+The retained owner is \code{Synthetic-return-expected}, with settlement on
+30 June 2024. It is not Northstar. Northstar's current language has no
+return-right memory, refund/recovery accounts or return-settlement operation.
+Its homogeneous inventory and immediate-deductible tax method also cannot
+represent this case unchanged. The successful finite proposal identifies a
+usable method boundary; native company support needs the state design below.
+The separate sector-company method remains report-only and cannot be turned
+into a posting operation by relabelling its result.
+
+\paragraph{Returned goods need their own carrying value.}
+The original return contract sold ten units at cost 12, with a refund of 20
+per returned unit. Its opening estimates recognize a refund liability 40 and
+recovery asset 16. These amounts depend on the supplied expected returns,
+handling and deterioration. The historical accounting source requires the
+refund liability and recovery asset to be distinguished, with the latter
+based on former carrying amount less expected recovery costs and loss of
+value \citep[IFRS~15.B21--B27]{eu20231803}.
+
+At final settlement, two units return. Their deterioration is 2 per unit,
+handling costs 4 per unit and the supplied net realizable value of the lot is
+20. Handling is assumed to be selling administration; costs needed to bring
+inventory to its location and condition would require a different treatment
+\citep[IAS~2.15--16]{eu20231803}. The recovered lot is therefore carried at
+$\min\{2(12-2),20\}=20$, and cash payments are 40 for refunds and 8 for handling.
+
+The settlement debits the refund liability 40 and inventory 20, credits the
+recovery asset 16 and cash 48, credits cost of sales 4 and debits selling
+expense 8. The journal balances and records a book loss of 4. A later sale
+of the whole recovered lot for 40 gives revenue 40 and cost of sales 20.
+The lot retains its original contract, quantity, carrying amount, tax base
+and date so this second event can consume the right stock once.
+
+Simply adding two units to Northstar's homogeneous inventory would value them
+at its existing unit cost, which differs from the recovered lot's cost of 10.
+The extended book instead reconciles the original homogeneous lot and each
+recovered lot separately. Let $q_0$ and $c_0$ denote the homogeneous units and
+unit cost, and let $V_\ell$ denote each recovered lot's carrying amount, all
+for the same legal book and currency. The proposed inventory control is
+\begin{equation}
+ I=q_0c_0+\sum_{\ell}V_\ell.
+ \label{eq:module-return-inventory}
+\end{equation}
+The sum preserves different carrying values without silently selecting a
+cost-flow method. With no recovered lots, equation~\eqref{eq:module-return-inventory}
+reduces to the existing inventory rule. Whole-lot sale is the initial subset;
+partial sales and changes of estimates require further specified methods.
+
+\paragraph{Tax history changes the cash needed at the close.}
+The same return appears in the joined company case of
+Section~\ref{sec:company-composition}. Its legal parent P supplies a complete
+trace through settlement, later sale and two tax closes. P's opening, dates
+and tax premises are retained; they are not new facts about Northstar.
+The case assumes that the original sale and cost were taxed and deducted,
+refunds and handling become deductible on settlement, and recovered inventory
+enters tax stock at its carrying amount. The supplied tax rate is 25 percent.
+The required enactment and recoverability findings remain explicit. Tax bases,
+recognition conditions and recovery manner matter independently of book profit
+\citep[IAS~12.7--10,24--25,46--51]{eu20231803}.
+
+To see the difference, let $F$ and $R$ be the opening refund liability and
+recovery asset, $n$ actual returned units, $u$ refund per unit, $h$ selling
+handling per unit and $V$ recovered stock. Under these particular tax premises,
+the settlement's book profit $B$ and taxable profit $T$ are
+\begin{align}
+ B&=F-nu-R+V-nh, & T&=-nu-nh+V,\\
+ T-B&=R-F. &&
+ \label{eq:module-return-tax}
+\end{align}
+The tax deduction still includes the refund whose book expense was recognized
+before the opening; the book reversal of recovery value has its own earlier
+tax difference. Substituting $F=40$, $R=16$, $nu=40$, $nh=8$ and $V=20$ gives
+$B=-4$, $T=-28$ and the one-time adjustment $T-B=-24$.
+
+The opening liability's zero tax base gives a deferred tax asset of 10, while
+the recovery asset's zero tax base gives a deferred tax liability of 4. Their
+reversal adds deferred tax expense 6. P's first-half pretax profit 56 therefore
+produces taxable income 32, current tax 8 and after-tax profit 42. Annual
+pretax profit 66 gives taxable income 42 and total current tax 10.5; the
+second close recognizes only the remaining 2.5. Applying the $-24$ adjustment
+afresh to each interval would deduct it twice. The tax history binds the
+settlement event and subtracts tax already recognized from the cumulative
+calculation.
+
+Multiplying first-half book profit by 25 percent would instead give current
+tax 14 and omit the separate deferred expense 6. A coincidentally equal total
+expense would not make the current cash payment correct. A complete native
+tax close consequently needs tax bases, timing, rate, origin, recovery support
+and the full temporary-difference inventory. Without them the tax-dependent
+annual report remains unresolved, while earlier valid journals survive as a
+dated prefix. The example establishes no actual tax statute.
+
+\paragraph{The statement bridge must retain opening obligations.}
+P's annual profit is 49.5, but operating cash is 101.5. Depreciation 20 and
+deferred tax expense 6 are noncash charges. Inventory falls by 60, the recovery
+asset falls by 16 and the refund liability falls by 40. Another payment is
+easy to overlook: the matured opening debt includes 10 of interest expensed
+before this year. The selected historical interest policy classifies that
+payment as operating, although current finance expense is zero
+\citep[IAS~7.31--33]{eu20231803}. The exact indirect bridge is
+\begin{equation}
+ 49.5+20+6+60+16-40-10=101.5.
+ \label{eq:module-return-cash}
+\end{equation}
+Omitting the last term overstates operating cash by 10. Subtracting the whole
+debt payment instead would move 90 of financing principal into operating
+cash. Equation~\eqref{eq:module-return-cash} agrees with the separate gross
+cash events. Opening cash 500, operating cash 101.5, investing cash $-20$ and
+financing cash $-90$ yield closing cash 491.5. Opening equity 622 plus profit
+49.5 yields 671.5.
+
+These are P's legal-book amounts. Its internal receipt from S remains a legal
+cash inflow and is eliminated only in the group report. The same distinction
+prevents an apparently balanced module from double-counting internal flows.
+Deferred tax is added back once in the indirect bridge; separately adjusting
+DTA and DTL again would repeat the same effect.
+
+\paragraph{What the native extension must carry.}
+The richer profile needs closed account and component schemas, explicit
+return/lot authoring, strict eligibility findings, one chronological shared
+journal executor, tax-origin history and extended report mappings. Every
+temporary account must enter profit and the closing transfer to retained
+earnings. A complete year carries remaining lots, rights, tax bases, event
+identities and source context forward. It resets period income and cash-flow
+totals without deleting the history needed to prevent a second settlement.
+A partial year supplies no complete next-year opening.
+
+The existing company profile remains unchanged. Selecting the richer profile
+is explicit; it cannot redefine old record fields or silently replace a
+method. The design and exact legal-book trace specify the required repair.
+Section~\ref{sec:company-return-reference} now supplies a closed component
+authoring profile and a finite reference for return, tax, legal reports and
+carry. Section~\ref{sec:company-source-state} adds a finite composed-company
+declaration and a separate partial-state description for actual disclosures.
+General composition and production integration remain unfinished. Broader
+corporate, group, bank and insurance methods retain their separate obligations.
+
+The supporting reference records are under \path{data/accounting-master/}:
+\begin{quote}\small
+\path{company-portable-authoring-20261023}\\
+\path{company-module-boundary-20261023}\\
+\path{company-native-return-design-20261023}
+\end{quote}
+They preserve original bytes, a finite shared-book proposal and the complete
+retained legal-book comparison. Independent implementation, domain and human
+acceptance remain pending.
+
+\input{sections/company-return-reference}

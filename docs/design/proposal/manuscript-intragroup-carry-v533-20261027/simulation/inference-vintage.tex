@@ -1,0 +1,105 @@
+
+\section{Replaying a declared evidence vintage}
+\label{sim:finite-vintage}
+The preceding correction becomes an executable calculation once the inference
+request says exactly which information remains active. A document identifier
+alone is insufficient. Two documents may repeat one observation, and a new
+document may replace an earlier assertion rather than supply a second
+independent measurement. The model must retain these relations before it
+multiplies likelihoods.
+
+Consider a finite set of persistent company types $h\in H$, with declared prior
+masses $p(h)$. Each active observation occupies a named slot and supplies a
+likelihood $L_j(h)$. We assume that these observation blocks are conditionally
+independent given $h$ in this example. Under that assumption, for a selected
+evidence vintage $v$ with active slots $A_v$,
+\begin{equation}
+ Z_v=\sum_{h\in H}p(h)\prod_{j\in A_v}L_j(h),\qquad
+ \pi_v(h)=\frac{p(h)\prod_{j\in A_v}L_j(h)}{Z_v}.
+ \label{sim:finite-vintage-posterior}
+\end{equation}
+The normalizer must be positive. A zero value means that this finite model
+assigns zero likelihood to the selected evidence; it does not justify returning
+an arbitrary distribution. Missing prior probabilities or likelihoods instead
+leave the calculation unresolved. Neither circumstance supplies probabilities
+for a family that was specified only as a feasible set.
+
+The selected reference, \texttt{FiniteVintageInference/1}, retains the named
+types, exact rational prior, observation-model identity and factorization
+assumption. A request also names the actor and information cutoff, the active
+observation versions and their replacement ancestry. Each observation retains
+its source content, information identity, slot, likelihood vector, supplied
+actor-availability time and any superseded version. Its content identifier
+changes when any of those fields changes. The semantic information identity
+answers a different question: whether two records purport to describe the
+same informational contribution. A replacement keeps that identity even when
+its likelihood or source changes.
+
+The supplied availability time must be no later than the request's cutoff.
+An unknown time remains unresolved; a later time is ineligible for that
+request. The reference uses the existing exact fixed-offset timestamp
+conversion, including fractional seconds, rather than rounding time to a
+calendar day. Its convention excludes leap seconds and unspecified offsets.
+These checks establish consistency with declared availability. Establishing
+when an actual investor, manager or system could obtain the information still
+requires a source-selection procedure.
+
+Replacement selects a new head for an existing slot and preserves the chain
+to the earlier record. Retraction removes that slot's likelihood contribution,
+equivalently replacing it by one for every type. The request cannot select two
+heads for one slot, use a missing predecessor, or treat a different information
+identity as a revision of the same observation. Several unresolved candidate
+revisions therefore require several conditional requests. Selecting a head
+does not establish that it is the authoritative version.
+
+The numerical consequences are immediate in the two-type example. After the
+correction, the posterior is $(1/4,3/4)$. Suppose a separately declared,
+conditionally independent signal has likelihoods $(1/2,1/4)$. Multiplying
+gives unnormalized masses $(1/8,3/16)$, whose sum is $5/16$, and hence
+\begin{equation}
+ \pi_{\rm corrected+signal}=(2/5,3/5).
+\end{equation}
+Retracting the corrected observation leaves only the new signal; with the
+original equal prior the resulting posterior is $(2/3,1/3)$. Retracting the
+only observation restores the prior. A type assigned zero prior mass remains
+at zero unless the prior itself is changed explicitly. Restoring support lost
+through an erroneous observation is distinct from inventing support absent
+from the declared model.
+
+Repackaging the corrected observation under another slot would produce a
+different answer. With the equal prior, counting its likelihood twice gives
+masses proportional to $(1/16,9/16)$ and posterior $(1/10,9/10)$. The reference
+rejects two active observations that declare the same semantic information
+identity. An earlier implementation checked distinct slots but omitted this
+condition: its arithmetic tests passed while the declared information
+contract remained incomplete. The repaired example makes the resulting
+overconfidence visible. False distinct identities can still conceal repeated
+information, just as a false independence assumption can make a well-formed
+calculation substantively wrong.
+
+A checkpoint retains its complete request and computed result. Reuse requires
+the same model and prior, actor and exact cutoff, with the old active records
+forming an unchanged prefix of the new sequence. New independent records can
+then update that prefix. A replacement that changes the prefix instead causes
+replay from the preserved prior. This avoids the failed operation that starts
+from $(1,0)$ and attempts to recover the excluded type by reweighting it.
+Corrupt checkpoint contents or incompatible model and information definitions
+are rejected rather than silently relabelled.
+
+In this finite reference the old checkpoint calculation is itself recomputed
+before reuse, so the test establishes the posterior relation without claiming
+a computational saving. Safe reuse from a larger store would require a proved
+sufficient dependency set. Particle checkpoints would additionally retain the
+likelihood estimate, proposal and ancestor state required by the extended
+target. A vector of posterior weights alone is insufficient.
+
+The reference compares complete masses and normalizers over a finite rational
+test grid and explicit contrary cases, including a correction, retraction,
+duplicate information, unknown times and a later fractional-second timestamp.
+An uninformative observation leaves both types alive. This illustrates a
+representation in which uncertainty can persist without enumerating a new
+copy of every historical node. It establishes the exact finite calculation
+under its declared premises; continuous inference, source completeness and
+the suitability of the likelihood for a real company remain further questions.
+
+\input{simulation/actor-decision}

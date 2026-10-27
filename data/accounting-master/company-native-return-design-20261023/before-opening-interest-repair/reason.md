@@ -1,0 +1,1 @@
+The exact parent indirect cash calculation was 111.5 versus direct operating cash 101.5. The missing -10 is settlement of the opening matured debt operating interest portion, previously expensed. Repair the bridge and specification to include operating classifications of opening liability changes; no balancing plug and no current interest expense is created.

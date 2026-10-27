@@ -1,0 +1,186 @@
+{
+  "id": "DemoDebt@1",
+  "status": "illustrative executable-method specification; no standard compliance",
+  "registry": {
+    "synthetic-note-7": {
+      "document": "synthetic disclosure NS.debt variant Acme",
+      "locator": "debt and interest paragraph",
+      "literal": "Debt 100; interest 5; fixed/floating split not disclosed",
+      "entity": "Acme",
+      "perimeter": "Acme-only",
+      "basis": "DemoDebt@1",
+      "concept": "debt_principal",
+      "currency": "USD",
+      "instant": "2025-12-31",
+      "precision": "Exact",
+      "amount": {
+        "n": "100",
+        "d": "1"
+      },
+      "accepted_reading": "demo-review-1"
+    },
+    "after-2025-close": {
+      "book": "Local",
+      "date": "2025-12-31",
+      "signed_balances": {
+        "Cash": "95",
+        "Debt": "-100",
+        "Retained": "5",
+        "InterestExpense": "0"
+      },
+      "contracts": [
+        "loans"
+      ],
+      "unpaid_interest": "0"
+    },
+    "DemoDebt.statements.v1": {
+      "balance_sheet": {
+        "cash": "Cash",
+        "debt": "-Debt",
+        "equity": "-Retained-current_temporary_total"
+      },
+      "income": "interest expense movements excluding closing",
+      "comprehensive_income": "profit; OCI zero",
+      "cash_flow": "interest cash settlement operating",
+      "equity": "opening equity + profit; no dividends",
+      "closing": "debit Retained / credit InterestExpense for expense balance; omit current profit from equity after closing"
+    }
+  },
+  "symbol_admission": {
+    "alpha": {
+      "kind": "HistoricalFact",
+      "domain": "[0,1]",
+      "evidence": "synthetic-note-7",
+      "reason": "Composition undisclosed",
+      "probability": null
+    }
+  },
+  "currency": {
+    "USD": {
+      "scale": 2,
+      "posting_rounding": "half_even"
+    }
+  },
+  "DebtMix": {
+    "fields": {
+      "principal": "Money<book.currency>, >=0",
+      "fixed_fraction": "Real [0,1]",
+      "fixed_rate": "Rate<annual_simple> >=0",
+      "initial_floating_rate": "Rate<annual_simple> >=0"
+    },
+    "additional_terms": {
+      "maturity": "2027-12-31",
+      "fees": "0",
+      "currency": "USD",
+      "pay_date": "2026-12-31",
+      "accrual_period": [
+        "2026-01-01",
+        "2027-01-01"
+      ],
+      "year_fraction": "1",
+      "default_rule": "halt settlement with unpaid obligation; no hidden credit facility"
+    },
+    "state": [
+      "principal",
+      "fixed_principal",
+      "floating_principal",
+      "current_floating_rate",
+      "unpaid_interest",
+      "status"
+    ],
+    "initialization": "F=alpha*principal; V=(1-alpha)*principal; current_floating_rate=initial_floating_rate; unpaid_interest=0; status=performing",
+    "operations": [
+      {
+        "name": "reset",
+        "phase": "market",
+        "precondition": "date=2026-01-01; driver available",
+        "payload": [
+          "market_rate"
+        ],
+        "effect": "current_floating_rate=market_rate",
+        "postings": "none; explicit non-recognition operation"
+      },
+      {
+        "name": "accrue_and_pay",
+        "phase": "settlement",
+        "precondition": "principal>=0 and cash>=rounded_interest",
+        "payload": [
+          "F",
+          "V",
+          "fixed_rate",
+          "current_floating_rate",
+          "year_fraction"
+        ],
+        "amount": "roundMoney((F*fixed_rate+V*current_floating_rate)*year_fraction,2,half_even)",
+        "postings": [
+          "Dr InterestExpense amount",
+          "Cr Cash amount"
+        ],
+        "effect": "interest obligation accrued and settled atomically"
+      },
+      {
+        "name": "close",
+        "phase": "closing",
+        "precondition": "all required period operations committed",
+        "payload": [
+          "InterestExpense balance"
+        ],
+        "postings": [
+          "Dr Retained expense",
+          "Cr InterestExpense expense"
+        ],
+        "effect": "temporary account zero"
+      }
+    ]
+  },
+  "request": {
+    "model": "BorrowingExample@1",
+    "evidence_view": "synthetic-2025-exact",
+    "initial_state": "after-2025-close",
+    "horizon": [
+      "2026-01-01",
+      "2027-01-01"
+    ],
+    "conditions": [
+      "allFixed",
+      "allFloating"
+    ],
+    "scenarios": [
+      "rateShock"
+    ],
+    "mode": "conditional",
+    "weight_model": null,
+    "reports": [
+      "balance_sheet",
+      "income",
+      "comprehensive_income",
+      "cash_flow",
+      "equity",
+      "journals"
+    ]
+  },
+  "expected": {
+    "allFixed": {
+      "interest": "5",
+      "cash": "90",
+      "debt": "100",
+      "profit": "-5",
+      "equity": "-10"
+    },
+    "allFloating": {
+      "interest": "7",
+      "cash": "88",
+      "debt": "100",
+      "profit": "-7",
+      "equity": "-12"
+    },
+    "parent": {
+      "interest": "7-2*alpha",
+      "bounds": [
+        "5",
+        "7"
+      ],
+      "measure": null
+    }
+  }
+}

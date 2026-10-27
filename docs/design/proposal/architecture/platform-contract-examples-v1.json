@@ -1,0 +1,1322 @@
+{
+  "schema": "accdsl.proposal.platform.examples.v1",
+  "evidence_mode": "specification_example",
+  "product_implemented": false,
+  "human_acceptance": "pending",
+  "baseline": {
+    "path": "docs/design/fixtures/northstar.json",
+    "sha256": "3ca1b8c9f128e2ad77bf2e618388caf7b139203fafc1f60bffde1d4094b71b2e",
+    "locator": "opening; historical_events; forecast; expected"
+  },
+  "references": [
+    {
+      "path": "docs/design/proposal/architecture/language-ir-contract-v1.md",
+      "sha256": "6169a21460fd5b6e82b3ebd166dc08d923de04ba4c990a59a0c556b32c8d511c",
+      "locator": "Proposed contract sections and named example families"
+    },
+    {
+      "path": "docs/design/proposal/architecture/persistence-contract-v1.md",
+      "sha256": "30d4fb6a88821e57329ffb416ad8a76ae883b26c214e02f94e29ae9496d43de4",
+      "locator": "Proposed contract sections and named example families"
+    },
+    {
+      "path": "docs/design/proposal/architecture/interfaces-contract-v1.md",
+      "sha256": "d305133f10e667d402d9357e9597099eb83bd065d8d18c94171f3d0ce60bbb41",
+      "locator": "Proposed contract sections and named example families"
+    },
+    {
+      "path": "docs/design/proposal/architecture/failure-contract-v1.md",
+      "sha256": "7a89698262396c12781b2ce74af33734b224b606b41dfa78052c71534ff61aaf",
+      "locator": "Proposed contract sections and named example families"
+    },
+    {
+      "path": "docs/design/proposal/architecture/initial-profile-v1.md",
+      "sha256": "7bdb16b6e5eac40c296e8fe7a4d38438d5f719853b7c078c2842a0f8fbfb7cbb",
+      "locator": "Proposed contract sections and named example families"
+    },
+    {
+      "path": "docs/design/proposal/architecture/architecture-integration-v1.md",
+      "sha256": "8f153c516d299ee92bbf4396cf93264e2e2202bdea2d17a37005ca18984a532e",
+      "locator": "Proposed contract sections and named example families"
+    },
+    {
+      "path": "docs/design/proposal/architecture/cross-contract-amendment-v1.md",
+      "sha256": "ddfeee3d95d96ab02654fececd920033ea0d7af187bdf55985aa473dd5a435b0",
+      "locator": "A1–A6 final integration repairs"
+    }
+  ],
+  "cases": [
+    {
+      "id": "LX01",
+      "operation": "model.compile@1",
+      "inputs": {
+        "text_source": "module BorrowingExample version \"1\";\nuse DemoDebt version \"1\";\nsource note7 = external(\"synthetic-note-7\");\nentity Acme functional USD;\nbook Local entity Acme basis DemoDebt version \"1\";\naccount Cash : Asset book Local;\naccount Debt : Liability book Local;\naccount InterestExpense : Expense book Local;\naccount Retained : Equity book Local;\nopening after2025 for Local from external(\"after-2025-close\");\nobservation debt : Money<USD> instant @2025-12-31 = 100 USD from note7;\nsymbol x : Real in [0, 1] because \"Floating-rate proportion not disclosed\";\ncontract loans : DebtMix book Local {\n  principal = value(debt);\n  fixed_fraction = 1 - x;\n  fixed_rate = 0.05 per year;\n  initial_floating_rate = 0.05 per year;\n}\nscenario rateShock { set market_rate = constant(0.07 per year); }\nreport statements for Local { mapping = external(\"DemoDebt.statements.v1\"); }\n",
+        "typed_construction": {
+          "principal": {
+            "n": "100",
+            "d": "1"
+          },
+          "floating_fraction": {
+            "symbol": "x",
+            "domain": [
+              {
+                "n": "0",
+                "d": "1"
+              },
+              {
+                "n": "1",
+                "d": "1"
+              }
+            ],
+            "uncertainty": "unknown_economic_fact"
+          },
+          "fixed_annual_rate": {
+            "n": "1",
+            "d": "20"
+          },
+          "floating_annual_rate": {
+            "n": "7",
+            "d": "100"
+          },
+          "year_fraction": {
+            "n": "1",
+            "d": "1"
+          },
+          "currency": "USD",
+          "admission": "authored synthetic assumption; not source or accounting acceptance"
+        },
+        "binding_obligations": [
+          "source note7",
+          "debt reading",
+          "opening after2025",
+          "DemoDebt package/report",
+          "symbol assumption admission",
+          "scenario assumption admission"
+        ],
+        "legacy_profile": "Core0 lexical/declaration fragment; proposed portable lowering; no execution of the old compiler"
+      },
+      "expected": {
+        "semantic_projection": {
+          "principal": {
+            "n": "100",
+            "d": "1"
+          },
+          "floating_fraction": {
+            "symbol": "x",
+            "domain": [
+              {
+                "n": "0",
+                "d": "1"
+              },
+              {
+                "n": "1",
+                "d": "1"
+              }
+            ],
+            "uncertainty": "unknown_economic_fact"
+          },
+          "fixed_annual_rate": {
+            "n": "1",
+            "d": "20"
+          },
+          "floating_annual_rate": {
+            "n": "7",
+            "d": "100"
+          },
+          "year_fraction": {
+            "n": "1",
+            "d": "1"
+          },
+          "currency": "USD",
+          "admission": "authored synthetic assumption; not source or accounting acceptance"
+        },
+        "interest_affine": {
+          "constant": {
+            "n": "5",
+            "d": "1"
+          },
+          "coefficient_x": {
+            "n": "2",
+            "d": "1"
+          }
+        },
+        "at_x_0_half_1": [
+          {
+            "n": "5",
+            "d": "1"
+          },
+          {
+            "n": "6",
+            "d": "1"
+          },
+          {
+            "n": "7",
+            "d": "1"
+          }
+        ],
+        "frontend_agreement": "specified, not measured",
+        "law": null
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "LX02",
+      "operation": "model.compile@1",
+      "inputs": {
+        "base": "LX01",
+        "replace": {
+          "floating_annual_rate": {
+            "n": "9",
+            "d": "100"
+          }
+        }
+      },
+      "expected": {
+        "interest_affine": {
+          "constant": {
+            "n": "5",
+            "d": "1"
+          },
+          "coefficient_x": {
+            "n": "4",
+            "d": "1"
+          }
+        },
+        "at_x_0_half_1": [
+          {
+            "n": "5",
+            "d": "1"
+          },
+          {
+            "n": "7",
+            "d": "1"
+          },
+          {
+            "n": "9",
+            "d": "1"
+          }
+        ]
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "LX03",
+      "operation": "model.compile@1",
+      "inputs": {
+        "add": [
+          {
+            "value": {
+              "n": "1",
+              "d": "1"
+            },
+            "currency": "USD"
+          },
+          {
+            "value": {
+              "n": "1",
+              "d": "1"
+            },
+            "currency": "EUR"
+          }
+        ]
+      },
+      "expected": {
+        "code": "CONTEXT_MISMATCH",
+        "executable_ir": null,
+        "committed": false
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "LX04",
+      "operation": "model.compile@1",
+      "inputs": {
+        "candidate_symbol": "x",
+        "admission_ref": null
+      },
+      "expected": {
+        "code": "ADMISSION_REQUIRED",
+        "executable_ir": null,
+        "committed": false
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "LX05",
+      "operation": "model.compile@1",
+      "inputs": {
+        "formula": "x*x",
+        "domain": [
+          {
+            "n": "0",
+            "d": "1"
+          },
+          {
+            "n": "1",
+            "d": "1"
+          }
+        ],
+        "backend": "rational_affine"
+      },
+      "expected": {
+        "code": "UNSUPPORTED_CAPABILITY",
+        "executable_ir": null,
+        "committed": false
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "LX06",
+      "operation": "model.compile@1",
+      "inputs": {
+        "wire": "{\"revision\":1,\"revision\":2}"
+      },
+      "expected": {
+        "code": "DUPLICATE_KEY",
+        "executable_ir": null,
+        "committed": false
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "LX07",
+      "operation": "model.compile@1",
+      "inputs": {
+        "package": "Unknown@1",
+        "lock": []
+      },
+      "expected": {
+        "code": "MISSING_REQUIRED_DEPENDENCY",
+        "executable_ir": null,
+        "committed": false
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "LX08",
+      "operation": "model.compile@1",
+      "inputs": {
+        "opening_stock": {
+          "date": "2024-01-01",
+          "cash": {
+            "n": "60",
+            "d": "1"
+          }
+        },
+        "closing_stock": {
+          "date": "2024-12-31",
+          "cash": {
+            "n": "373",
+            "d": "5"
+          }
+        },
+        "operation": "sum_as_flow"
+      },
+      "expected": {
+        "code": "CONTEXT_MISMATCH",
+        "executable_ir": null,
+        "committed": false
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "PX01",
+      "operation": "accounting.commit@1",
+      "inputs": {
+        "stable_key": [
+          "E",
+          "B",
+          "projection-A",
+          "event-1"
+        ],
+        "fingerprint": "fp1",
+        "head": [
+          "s0",
+          0
+        ],
+        "schedule": [
+          "validate",
+          "commit journal j1/delta d1/state s1/receipt r1",
+          "response lost",
+          "retry same key/fingerprint"
+        ]
+      },
+      "expected": {
+        "client_first_observation": "unknown",
+        "recovered_receipt": "r1",
+        "recovered_head": [
+          "s1",
+          1
+        ],
+        "event_posting_count": 1,
+        "additional_commit_on_retry": false
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "PX02",
+      "operation": "accounting.commit@1",
+      "inputs": {
+        "stored_key": [
+          "E",
+          "B",
+          "projection-A",
+          "event-1"
+        ],
+        "stored_fingerprint": "fp1",
+        "stored_receipt": "r1",
+        "historical_opening": "s0",
+        "current_head": [
+          "s2",
+          2
+        ],
+        "retry_fingerprint": "fp1"
+      },
+      "expected": {
+        "disposition": "replayed",
+        "receipt": "r1",
+        "head": [
+          "s2",
+          2
+        ],
+        "additional_commit": false,
+        "freshness_evaluated": false
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "PX03",
+      "operation": "accounting.commit@1",
+      "inputs": {
+        "stored_fingerprint": "fp1",
+        "same_stable_key": true,
+        "submitted_fingerprint": "fp2",
+        "changed": "event version or payload"
+      },
+      "expected": {
+        "code": "EVENT_ID_CONFLICT",
+        "committed_domains": "unchanged"
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "PX04",
+      "operation": "accounting.commit@1",
+      "inputs": {
+        "head": [
+          "s0",
+          0
+        ],
+        "writers": [
+          {
+            "event": "a",
+            "expected": [
+              "s0",
+              0
+            ]
+          },
+          {
+            "event": "b",
+            "expected": [
+              "s0",
+              0
+            ]
+          }
+        ],
+        "commit_order": [
+          "a",
+          "b"
+        ]
+      },
+      "expected": {
+        "a": "committed",
+        "b": "STALE_OPENING_STATE",
+        "generation": 1,
+        "event_posting_count": 1
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "PX05",
+      "operation": "review.commit@1",
+      "inputs": {
+        "old_view": "v1",
+        "edges": [
+          [
+            "candidate_membership",
+            "selection"
+          ],
+          [
+            "selection",
+            "model"
+          ],
+          [
+            "model",
+            "result"
+          ]
+        ],
+        "correction": "new eligible source member",
+        "new_descendant": {
+          "name": "late_result",
+          "depends_on": "model",
+          "created_after_correction": true
+        }
+      },
+      "expected": {
+        "new_view": "v2",
+        "current_invalid": [
+          "selection",
+          "model",
+          "result",
+          "late_result"
+        ],
+        "historical_v1": "readable",
+        "unrelated_closure": "usable"
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "PX06",
+      "operation": "accounting.commit@1",
+      "inputs": {
+        "events": [
+          {
+            "key": [
+              "E",
+              "B",
+              "projection-A",
+              "event-1"
+            ],
+            "fingerprint": "fp1"
+          },
+          {
+            "key": [
+              "E",
+              "B",
+              "projection-B",
+              "event-1"
+            ],
+            "fingerprint": "fpB"
+          }
+        ],
+        "projection_B": "separately commissioned hypothetical"
+      },
+      "expected": {
+        "separate_receipts": true,
+        "realized_event_count": "cannot sum hypothetical projections",
+        "retry_projection_A": "original identity"
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "PX07",
+      "operation": "store.import@1",
+      "inputs": {
+        "manifest_required": [
+          "request",
+          "rule",
+          "raw_source"
+        ],
+        "available": [
+          "request",
+          "rule"
+        ]
+      },
+      "expected": {
+        "code": "MISSING_REQUIRED_DEPENDENCY",
+        "domain_mutation": false
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "PX08",
+      "operation": "store.migrate@1",
+      "inputs": {
+        "original_value": "102.00",
+        "decoded_exact": {
+          "n": "102",
+          "d": "1"
+        },
+        "candidate_exact": {
+          "n": "102",
+          "d": "1"
+        },
+        "adversarial_candidate": {
+          "n": "100",
+          "d": "1"
+        },
+        "original_identity": "legacy1"
+      },
+      "expected": {
+        "representation_mapping": "preserve legacy1 and portable identity; exact value 102",
+        "adversarial": "MIGRATION_COMPARISON_FAILED",
+        "old_snapshot": "unchanged and usable"
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "FX01",
+      "operation": "uncertainty.evaluate@1",
+      "inputs": {
+        "masses": [
+          {
+            "n": "3",
+            "d": "5"
+          },
+          {
+            "n": "2",
+            "d": "5"
+          }
+        ],
+        "cash": [
+          {
+            "n": "120",
+            "d": "1"
+          },
+          null
+        ],
+        "independent_unresolved_bounds": [
+          {
+            "n": "80",
+            "d": "1"
+          },
+          {
+            "n": "110",
+            "d": "1"
+          }
+        ]
+      },
+      "expected": {
+        "disposition": "partial",
+        "known_mass": {
+          "n": "3",
+          "d": "5"
+        },
+        "unresolved_mass": {
+          "n": "2",
+          "d": "5"
+        },
+        "unconditional_mean": null,
+        "mean_bounds": [
+          {
+            "n": "104",
+            "d": "1"
+          },
+          {
+            "n": "116",
+            "d": "1"
+          }
+        ],
+        "without_independent_bounds": null
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "FX02",
+      "operation": "specified_failure",
+      "inputs": {
+        "prior": [
+          {
+            "n": "1",
+            "d": "2"
+          },
+          {
+            "n": "1",
+            "d": "2"
+          }
+        ],
+        "event_members": []
+      },
+      "expected": {
+        "math": "undefined",
+        "normalizer": {
+          "n": "0",
+          "d": "1"
+        },
+        "posterior": null,
+        "computation": "complete"
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "FX03",
+      "operation": "specified_failure",
+      "inputs": {
+        "query": "bound x*x",
+        "backend": "affine_only",
+        "domain": "x in [0,1]"
+      },
+      "expected": {
+        "disposition": "unsupported",
+        "exact_bound": null,
+        "family": "retained"
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "FX04",
+      "operation": "specified_failure",
+      "inputs": {
+        "due": {
+          "n": "100",
+          "d": "1"
+        },
+        "available_cash": {
+          "n": "80",
+          "d": "1"
+        },
+        "funding_limit": {
+          "n": "0",
+          "d": "1"
+        },
+        "method": "authored contractual shortfall only"
+      },
+      "expected": {
+        "shortfall": {
+          "n": "20",
+          "d": "1"
+        },
+        "economic_outcome": "payment_shortfall",
+        "computation": "complete",
+        "legal_insolvency_or_accounting_loss": "not inferred"
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "FX05",
+      "operation": "specified_failure",
+      "inputs": {
+        "work": "solver",
+        "checkpoint": "cp1",
+        "service_timeout": true
+      },
+      "expected": {
+        "math": "unresolved",
+        "computation": "failed",
+        "continuation": "cp1",
+        "infeasible": false
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "FX06",
+      "operation": "specified_failure",
+      "inputs": {
+        "C09_required": true,
+        "C09_routes": [
+          true,
+          null
+        ],
+        "C09_inner_reason": null,
+        "C09_outer_reason": "Second route unknown"
+      },
+      "expected": {
+        "code": "INVALID_UNKNOWN_REPRESENTATION",
+        "stage": "shape",
+        "lookup_performed": false,
+        "commit": "not_committed"
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "FX07",
+      "operation": "specified_failure",
+      "inputs": {
+        "write_started": true,
+        "acknowledgement": null
+      },
+      "expected": {
+        "disposition": "commit_unknown",
+        "commit": "unknown",
+        "retry": "inspect_commit_then_retry_same_identity"
+      },
+      "evidence_limit": "Specified transaction trace; no database, crash or concurrency experiment."
+    },
+    {
+      "id": "IX01",
+      "operation": "scenario.project@1 → report.build@1",
+      "inputs": {
+        "northstar": {
+          "path": "docs/design/fixtures/northstar.json",
+          "sha256": "3ca1b8c9f128e2ad77bf2e618388caf7b139203fafc1f60bffde1d4094b71b2e",
+          "locator": "opening; historical_events; forecast; expected"
+        },
+        "floating_fraction_domain": [
+          {
+            "n": "0",
+            "d": "1"
+          },
+          {
+            "n": "1",
+            "d": "1"
+          }
+        ],
+        "scenario_rate": {
+          "n": "7",
+          "d": "100"
+        },
+        "source_scope": "closed synthetic package",
+        "measure": null,
+        "method_status": "authored teaching assumptions"
+      },
+      "expected": {
+        "joint_affine": {
+          "interest": {
+            "constant": {
+              "n": "5",
+              "d": "1"
+            },
+            "coefficient_x": {
+              "n": "2",
+              "d": "1"
+            }
+          },
+          "profit_before_tax": {
+            "constant": {
+              "n": "82",
+              "d": "1"
+            },
+            "coefficient_x": {
+              "n": "-2",
+              "d": "1"
+            }
+          },
+          "tax": {
+            "constant": {
+              "n": "82",
+              "d": "5"
+            },
+            "coefficient_x": {
+              "n": "-2",
+              "d": "5"
+            }
+          },
+          "profit": {
+            "constant": {
+              "n": "328",
+              "d": "5"
+            },
+            "coefficient_x": {
+              "n": "-8",
+              "d": "5"
+            }
+          },
+          "operating_cash": {
+            "constant": {
+              "n": "243",
+              "d": "5"
+            },
+            "coefficient_x": {
+              "n": "-8",
+              "d": "5"
+            }
+          },
+          "cash": {
+            "constant": {
+              "n": "476",
+              "d": "5"
+            },
+            "coefficient_x": {
+              "n": "-8",
+              "d": "5"
+            }
+          },
+          "equity": {
+            "constant": {
+              "n": "741",
+              "d": "5"
+            },
+            "coefficient_x": {
+              "n": "-8",
+              "d": "5"
+            }
+          },
+          "assets": {
+            "constant": {
+              "n": "1441",
+              "d": "5"
+            },
+            "coefficient_x": {
+              "n": "-8",
+              "d": "5"
+            }
+          }
+        },
+        "constant_balances": {
+          "receivables": {
+            "n": "55",
+            "d": "1"
+          },
+          "inventory": {
+            "n": "40",
+            "d": "1"
+          },
+          "plant_net": {
+            "n": "98",
+            "d": "1"
+          },
+          "payables": {
+            "n": "40",
+            "d": "1"
+          },
+          "debt": {
+            "n": "100",
+            "d": "1"
+          }
+        },
+        "historical_reconstruction": {
+          "collections": {
+            "n": "245",
+            "d": "1"
+          },
+          "purchases": {
+            "n": "155",
+            "d": "1"
+          },
+          "supplier_payments": {
+            "n": "145",
+            "d": "1"
+          }
+        },
+        "midpoint": {
+          "cash": {
+            "n": "472",
+            "d": "5"
+          },
+          "profit": {
+            "n": "324",
+            "d": "5"
+          },
+          "tax": {
+            "n": "81",
+            "d": "5"
+          }
+        },
+        "probabilities": null,
+        "journal_effect": "proposals, no committed-book write"
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "IX02",
+      "operation": "scenario.project@1 → report.build@1",
+      "inputs": {
+        "base": "IX01",
+        "scenario_rate": {
+          "n": "9",
+          "d": "100"
+        }
+      },
+      "expected": {
+        "all_floating": {
+          "interest": {
+            "n": "9",
+            "d": "1"
+          },
+          "cash": {
+            "n": "92",
+            "d": "1"
+          },
+          "profit": {
+            "n": "312",
+            "d": "5"
+          },
+          "equity": {
+            "n": "145",
+            "d": "1"
+          },
+          "assets": {
+            "n": "285",
+            "d": "1"
+          }
+        }
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "IX03",
+      "operation": "scenario.project@1",
+      "inputs": {
+        "base": "IX01",
+        "current_sales_collection_fraction": null,
+        "reason": "not specified"
+      },
+      "expected": {
+        "unresolved": [
+          "collections",
+          "cash",
+          "receivables",
+          "operating_cash",
+          "assets"
+        ],
+        "still_conditional": [
+          "revenue",
+          "cost_of_sales",
+          "interest",
+          "profit"
+        ],
+        "cash_not_zero": true
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "IX04",
+      "operation": "time.select@1",
+      "inputs": {
+        "mode": "investor_information",
+        "cutoff": "2024-08-01T00:00:00Z",
+        "candidate_available": "2025-02-01T00:00:00Z",
+        "ingested": "2025-02-02T00:00:00Z"
+      },
+      "expected": {
+        "candidate_admitted": false,
+        "code": "AFTER_INFORMATION_CUTOFF",
+        "old_view": "preserved"
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "IX05",
+      "operation": "report.build@1",
+      "inputs": {
+        "revenue_by_product": [
+          {
+            "n": "180",
+            "d": "1"
+          },
+          {
+            "n": "120",
+            "d": "1"
+          }
+        ],
+        "revenue_by_region": [
+          {
+            "n": "200",
+            "d": "1"
+          },
+          {
+            "n": "100",
+            "d": "1"
+          }
+        ],
+        "same_total_population": true,
+        "requested": "sum both classifications"
+      },
+      "expected": {
+        "code": "OVERLAPPING_AGGREGATION",
+        "revenue": {
+          "n": "300",
+          "d": "1"
+        },
+        "forbidden_total": {
+          "n": "600",
+          "d": "1"
+        }
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "IX06",
+      "operation": "accounting.assess@1",
+      "inputs": {
+        "extension": "insurance contract group",
+        "typed_record_available": true,
+        "eligible_measurement_method": null
+      },
+      "expected": {
+        "assessment": "unresolved",
+        "code": "MISSING_REQUIRED_METHOD",
+        "journal": null,
+        "commit": false
+      },
+      "evidence_limit": "Specified financial consequences only; no frontend, solver or runtime execution."
+    },
+    {
+      "id": "FX08",
+      "operation": "decode malformed OperationRequest",
+      "inputs": {
+        "raw_bytes": "{invalid JSON",
+        "validated_request": null
+      },
+      "expected": {
+        "submission_ref": "required reference to preserved raw bytes",
+        "request_ref": null,
+        "operation": null,
+        "input_view_ref": null,
+        "coverage": null,
+        "payload": null,
+        "disposition": "rejected",
+        "structural_validity": "invalid",
+        "mathematical_status": "unresolved",
+        "computation_status": "not_computed"
+      },
+      "evidence_limit": "Specified malformed-input response; no parser or runtime endpoint."
+    },
+    {
+      "id": "FX09",
+      "operation": "map native invalid-law mathematical verdict",
+      "inputs": {
+        "native_mathematical_status": "failed",
+        "predicate": "masses sum to 6/5 rather than 1"
+      },
+      "expected": {
+        "disposition": "rejected",
+        "mathematical_status": "failed",
+        "probability_value": null,
+        "family_infeasible": false
+      },
+      "evidence_limit": "Specified status preservation; not a solver or runtime inference."
+    }
+  ],
+  "canonical_examples": {
+    "raw_source_a": "é",
+    "raw_source_b": "é",
+    "different_codepoints_distinct": true,
+    "wire_equivalent": [
+      "{\"label\":\"é\"}",
+      "{\"label\":\"\\u00e9\"}"
+    ],
+    "metadata_boolean": {
+      "revision": true
+    },
+    "rational_zero": {
+      "n": "0",
+      "d": "1"
+    },
+    "ordered_events_a": [
+      "sale",
+      "collection"
+    ],
+    "ordered_events_b": [
+      "collection",
+      "sale"
+    ],
+    "set_dependencies_a": [
+      "a",
+      "b"
+    ],
+    "set_dependencies_b": [
+      "b",
+      "a"
+    ]
+  },
+  "amendment_cases": [
+    {
+      "id": "AX01",
+      "operation": "accounting.commit@1",
+      "arguments_kind": "AccountingCommitArguments/v1",
+      "authorization_kind": "native assess_only assessment",
+      "expected": {
+        "disposition": "rejected",
+        "code": "INVALID_REFERENCE_KIND",
+        "lookup": false,
+        "commit": false
+      }
+    },
+    {
+      "id": "AX02",
+      "operation": "accounting.commit@1",
+      "authorization_kind": "PostingAuthorization/v1",
+      "posting_permitted": false,
+      "expected": {
+        "disposition": "rejected",
+        "code": "POSTING_NOT_AUTHORIZED",
+        "lookup": false,
+        "commit": false
+      }
+    },
+    {
+      "id": "AX03",
+      "operation": "accounting.commit@1",
+      "declared_basis": "synthetic equal-price FVTPL acquisition",
+      "supported_posting_profile": "authored example only",
+      "authorization": "eligible; all named bindings/admissions satisfied",
+      "journal": [
+        {
+          "account": "asset",
+          "debit": "100",
+          "credit": "0"
+        },
+        {
+          "account": "expense",
+          "debit": "2",
+          "credit": "0"
+        },
+        {
+          "account": "cash",
+          "debit": "0",
+          "credit": "102"
+        }
+      ],
+      "expected": {
+        "candidate_balance": "0",
+        "commit": "specified only if unchanged absent-key/head recheck succeeds",
+        "accounting_authority": "authored synthetic; not actual-entity compliance"
+      },
+      "limit": "Specified schema/transaction conditions; no record compiler/store executed",
+      "book_mode": "synthetic",
+      "supported_book_modes": [
+        "synthetic"
+      ],
+      "evidence_level": "authored-synthetic"
+    },
+    {
+      "id": "AX04",
+      "native_response": "assessed",
+      "native_assessment": "unresolved",
+      "native_math": "unresolved",
+      "native_computation": "specified_exact",
+      "expected": {
+        "disposition": "completed",
+        "math": "unresolved",
+        "computation": "complete",
+        "evidence_mode": "specification_example",
+        "journal": null
+      }
+    },
+    {
+      "id": "AX05",
+      "regions": [
+        {
+          "native": "completed",
+          "mass": "3/5"
+        },
+        {
+          "native": "numerical_failure",
+          "mass": "2/5"
+        }
+      ],
+      "expected": [
+        {
+          "platform": "completed",
+          "mass": "3/5"
+        },
+        {
+          "platform": "unresolved",
+          "native_subtype": "numerical_failure",
+          "mass": "2/5"
+        }
+      ]
+    },
+    {
+      "id": "AX06",
+      "regions": [
+        {
+          "native": "unexplored",
+          "mass": null,
+          "obligation": "measure of symbolic region unknown"
+        }
+      ],
+      "expected": [
+        {
+          "platform": "unresolved",
+          "native_subtype": "unexplored",
+          "mass": null,
+          "obligation": "measure of symbolic region unknown"
+        }
+      ]
+    },
+    {
+      "id": "AX07",
+      "operation": "condition_event",
+      "same_semantic_condition": true,
+      "already_consumed_observation_lineage": [
+        "D"
+      ],
+      "submitted_as_new_block": false,
+      "expected": {
+        "normalizer": "1",
+        "new_atoms": [],
+        "masses": "unchanged"
+      }
+    },
+    {
+      "id": "AX08",
+      "operation": "likelihood_update",
+      "submitted_incremental_atom": "D",
+      "already_consumed": [
+        "D"
+      ],
+      "expected": {
+        "code": "DUPLICATE_INFORMATION",
+        "new_posterior": null
+      }
+    },
+    {
+      "id": "AX09",
+      "old_selection_owner": [
+        "family",
+        "evidence-v1",
+        "time-v1",
+        "scenario"
+      ],
+      "query_owner": [
+        "family",
+        "evidence-v2",
+        "time-v2",
+        "scenario"
+      ],
+      "inherited_selection": "superseded",
+      "expected": {
+        "code": "SELECTION_SUPERSEDED",
+        "old_owner_usable_in_frozen_scope": true,
+        "fallback_to_old_owner": false
+      }
+    },
+    {
+      "id": "AX10",
+      "same_correction_inputs": true,
+      "different_optional_descendants": true,
+      "expected": {
+        "same_correction_basis": true,
+        "same_corrected_law": true,
+        "same_invalidation_report": false
+      }
+    },
+    {
+      "id": "AX11",
+      "original_head": [
+        "s0",
+        0
+      ],
+      "current_head": [
+        "s1",
+        1
+      ],
+      "original_event_and_fingerprint": true,
+      "expected": {
+        "retry_expected_head": [
+          "s0",
+          0
+        ],
+        "result": "replayed",
+        "additional_commit": false
+      }
+    },
+    {
+      "id": "AX12",
+      "partial_run_limit": "wall_time",
+      "environment_changed": true,
+      "expected": {
+        "require_equal_matched_exact_values": true,
+        "require_equal_explored_domain": false,
+        "retain_both_frontiers": true
+      }
+    },
+    {
+      "id": "AX13",
+      "book_mode": "real",
+      "profile_supported_book_modes": [
+        "synthetic"
+      ],
+      "evidence_level": "authored-synthetic",
+      "expected": {
+        "code": "POSTING_NOT_AUTHORIZED",
+        "request_ref": null,
+        "lookup": false,
+        "commit": false
+      },
+      "limit": "Mode and evidence-scope mismatch is rejected before lookup; not a runtime conformance result"
+    }
+  ]
+}

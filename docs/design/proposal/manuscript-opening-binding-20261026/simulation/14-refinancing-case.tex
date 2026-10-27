@@ -1,0 +1,126 @@
+\chapter[A refinancing crisis in dated events]{A refinancing crisis: dates, offers, covenants, and recovery}
+\label{sim:refinancing-case}
+
+A year-end debt ratio can look manageable while a particular morning's payment is impossible. This chapter follows a synthetic treasury problem through dated cash events. The company has several potential responses, but each has conditions. The purpose is to show how financing feasibility differs from choosing a debt amount in an optimization formula. All offers and legal consequences below are assumptions of the example; they are not estimates or statements of general law.
+
+\section{The payment calendar}
+At the opening of day 1, unrestricted cash is 12. A customer receipt of 18 is due on day 5, wages of 10 on day 3, an old loan principal of 30 on day 4 and its coupon of 2 on day 4. Inventory worth 20 in the accounting records can be sold, but only through a specified offer. There is no automatic overdraft.
+
+If all receipts and payments are netted over five days, closing cash is
+\begin{equation}
+ 12+18-10-30-2=-12.
+\end{equation}
+The total shortfall is 12. But the timing problem is larger: after wages, cash is 2 before the day-4 debt payment of 32. The company needs 30 by day 4, even though 18 is expected the next day. A facility that supplies only the final net shortfall cannot bridge the maturity.
+
+The receipt is also uncertain. In history H1 it is contractually due and collected on day 5. In H2 it is subject to customer acceptance and may be delayed to day 9. Both histories fit an opening receivable of 18. The financing decision must distinguish the customer's contractual obligation, actual collection policy and the analyst's uncertainty.
+
+\section{Three offers}
+Offer A is a bridge facility settling on day 4 before the old payment, with maximum principal 30 and a fee of 1 withheld at draw. Its repayment of principal plus 1 is due on day 6. Offer B is a term debt issue settling on day 5, priced at 0.9 per unit face, with a fixed fee of 2 and maximum face 40. Offer C is an inventory sale settling on day 4, paying 15 for inventory carried at 20.
+
+These offers have different cash, accounting and future consequences. A supplies short-term cash but creates another near maturity. B can supply longer funding but arrives too late to pay the old loan without a bridge or deferral. C supplies timely cash and incurs a disposal loss under the illustrative carrying-value treatment, while removing inventory needed for operations.
+
+The offers are not interchangeable columns in a financing plug. Their settlement dates and quantity constraints determine feasible sequences. The company can choose combinations only if the contracts permit them and management accepts their economic costs.
+
+\section{Why the bridge alone fails}
+Drawing maximum bridge principal 30 supplies net cash 29 after the withheld fee. Cash before old debt payment becomes $2+29=31$, one short of 32. A model that treats principal as proceeds would declare the payment feasible and miss the fee-induced shortfall.
+
+Required bridge principal to supply net cash 30 would be 31 under this fixed fee, but the cap is 30. The transaction is infeasible at the needed amount. This conclusion does not require a default-probability model; it follows from offer terms and dates.
+
+If the company can defer wages by 1 under a separately permitted agreement, the bridge becomes sufficient for day 4. But that deferral creates another obligation and may have costs. It must be represented as a negotiated event, not as a spreadsheet reduction of operating expenses.
+
+\section{The inventory sale plus bridge}
+Suppose management accepts the inventory sale. After wages, cash 2 plus sale proceeds 15 gives 17. The remaining need for old debt payment is 15. A bridge principal of 16 supplies 15 net after its fee, so day-4 cash reaches 32 and the old obligation is paid exactly.
+
+At day 5, customer receipt 18 arrives in H1. The bridge repayment due day 6 is 17. Paying it leaves cash 1. The old debt is extinguished, bridge debt is extinguished, inventory is lower by 20, and the company has recognized the illustrative sale loss 5 and bridge cost 2 in total under the assumed expense convention.
+
+This path solves the payment problem at an economic cost. The inventory sale can reduce future production or require replacement. A short-horizon model ending on day 6 would miss that operational consequence unless the terminal state retains the missing inventory and relevant commitments.
+
+\section{Delayed collection changes the result}
+In H2, the customer does not pay until day 9. After the old debt payment, cash is zero. Bridge repayment 17 is due day 6. The inventory-plus-bridge sequence therefore creates a later shortfall unless another offer or deferral is available.
+
+The term debt issue B can settle on day 5. To raise net cash 17 after a fixed fee 2 at price 0.9, required face is
+\begin{equation}
+ F_B=\frac{17+2}{0.9}=\frac{190}{9}\approx21.1111.
+\end{equation}
+This is within the face cap 40. If B remains eligible, its proceeds repay the bridge and leave a new longer-term promise. Customer collection on day 9 then raises cash 18. The company has transformed a timing mismatch into longer funding at a cost.
+
+The financing path depends on the continued availability of B. A policy that assumes B simply because it is numerically sufficient confuses an offer with an executed transaction. Eligibility, acceptance and settlement must be checked at the relevant dates.
+
+\section{A covenant can remove the rescue}
+Assume offer B requires inventory carrying amount at least 10 at settlement. The company initially has exactly 20 and the sale C disposes of all of it. After C, the condition fails. B is unavailable in the very path that needed it to refinance the bridge.
+
+A modular simulator can miss this interaction if the asset-sale module reports cash but does not update the collateral or eligibility state used by financing. The cash schedule appears feasible until day 6, then fails. The root error is a missing cross-module dependency, not arithmetic.
+
+If C can sell only half the inventory for 7.5, inventory remains 10 and B stays eligible. After wages and partial sale, cash is 9.5. To reach 32 requires net bridge 22.5, so principal 23.5 is within cap. Bridge repayment is 24.5. In H1, receipt 18 leaves a day-6 need of 6.5; in H2 it leaves a need of 24.5. B can supply either need subject to its own cap.
+
+\section{Face caps and net funding}
+Under B, maximum face 40 supplies gross proceeds 36 and net cash 34 after the fee. In H2 the need 24.5 is feasible. Required face is $(24.5+2)/0.9=265/9$, about 29.4444. In H1 the need 6.5 requires face $85/9$, about 9.4444.
+
+If B's price falls to 0.6 after a market shock, maximum net proceeds become $40(0.6)-2=22$. The H2 need 24.5 is no longer feasible. H1 remains feasible. Thus identical opening statements and the same price shock produce different financing outcomes because collection timing differs.
+
+A sensitivity table should vary offer price and collection history jointly. Reporting only the average required face can hide the infeasible H2 path. A midpoint collection date may produce a third path that neither contract history permits.
+
+\section{A symbolic feasibility boundary}
+Let $q$ be B's price per unit face and $K$ the net funding need on day 6. With fixed fee 2 and cap 40, feasibility requires
+\begin{equation}
+ 40q-2\geq K\quad\Longleftrightarrow\quad q\geq\frac{K+2}{40}.
+\end{equation}
+For H1 after partial inventory sale, $K=6.5$, so the threshold is $8.5/40=0.2125$. For H2, $K=24.5$, so it is $26.5/40=0.6625$. These thresholds are exact for the offer structure.
+
+The price may itself depend on face or the asset sale. If so, the linear threshold no longer applies without modification. The symbolic result should carry its premises. A new price model is a new financing query, not merely a different number substituted into an unchanged guarantee.
+
+\section{Who knows the collection history}
+Suppose management knows whether customer acceptance has occurred, while the public analyst sees only the receivable total. Management can condition its financing plan on H1 versus H2. The analyst should evaluate that informed policy across the two histories.
+
+If management does not know the eventual delay, it must choose a plan before observing collection. A robust plan must remain feasible in both histories, or specify a contingent action after the day-5 observation. A term issue requested only after nonreceipt may settle too late if the offer has a notice period. The observation date and action lead time determine the policy's feasibility.
+
+A simulator that waits to see H1 or H2 and then retroactively chooses the best day-1 plan gives management foresight. A correct tree branches at the observation time and shares decisions before that branch. A symbolic policy representation enforces the same restriction through its allowed inputs.
+
+\section{Default after a failed refinancing}
+Suppose H2 occurs, B is unavailable and bridge repayment 17 cannot be made on day 6. Under a stipulated contract, a two-day cure period begins. The day-9 customer receipt arrives after the cure deadline. Whether the lender can accelerate, waive or restructure is specified by additional terms.
+
+The economic state on day 6 contains unpaid principal and fee or interest according to the contract. It does not set debt to zero. The company may continue operations during cure. If a waiver is granted on day 7 for fee 0.5 and repayment on day 9, the receipt can resolve the arrears. If not, enforcement may proceed.
+
+These branches are not numerical solver failures. They are economic transitions. Conversely, inability to solve a pricing equation for B is not itself the bridge default event. The simulator should preserve the distinction even if both ultimately leave the funding need unresolved.
+
+\section{A recovery waterfall}
+Assume enforcement yields distributable assets of 25 after costs. The bridge has senior claim 17 and another unsecured creditor has claim 20. Under the example's strict priority rule, the bridge receives 17 and the unsecured creditor 8. Total recovery equals available assets 25.
+
+If the bridge is secured only on an asset that realizes 12 and has no further recourse under the assumed contract, its recovery may instead be 12. The remaining distribution depends on ownership and priority of the other assets. A single aggregate recovery percentage cannot represent both cases without additional assumptions.
+
+If recovery occurs one year later, creditor valuation discounts it from that date. The accounting treatment of the debtor's unresolved obligation and eventual extinguishment requires its own rules. Cash recovery to creditors and book debt removal at the debtor need not occur at the same instant.
+
+\section{Why aggregate net debt fails here}
+At opening, net debt may be calculated as debt less cash. That statistic does not contain the day-3 wage date, day-4 maturity, day-5 receipt or day-6 bridge repayment. It cannot decide feasibility of the sequence.
+
+After the partial sale and term refinancing, net debt may improve when the customer finally pays. Yet the company may have lost productive inventory and paid substantial financing costs. A net-debt chart alone omits these consequences. A useful result reports cash timing, remaining obligations, inventory capacity and owner value separately.
+
+A compressed state can still be possible. For this bounded problem it must retain the ordered obligation calendar, collection state, inventory eligibility amount and offer terms. The full historical journal need not be replayed at every step, but its economically relevant consequences must survive.
+
+\section{A finite policy comparison}
+The admissible choices are no sale, full sale or half sale, combined with feasible bridge draws and term issuance. Before optimizing, enumerate this small policy set and apply the same timing and eligibility rules to each history. Reject actions exceeding caps or settling too late.
+
+For each feasible policy, record minimum cash, final cash, fees, remaining debt and inventory. A policy minimizing fees may differ from one preserving inventory or maximizing worst-case liquidity. There is no single best policy until the objective is stated.
+
+This finite enumeration is a reference calculation for later optimization. A continuous optimizer should reproduce its results when restricted to the same choices. If it finds a better result, inspect whether it used fractional sale rights, ignored notice periods or assumed a different offer. Apparent improvement can be a target mismatch.
+
+\section{Accounting consequences of the sequence}
+The old loan repayment reduces cash and the old obligation. Bridge issuance increases cash by net proceeds and creates the specified liability and fee treatment. Inventory disposal removes the asset and records proceeds and loss under the illustrative basis. Term issuance creates a new obligation with proceeds distinct from face.
+
+The exact treatment of debt discounts and transaction costs requires the accounting basis. A cash schedule can be checked without prematurely choosing that treatment. The accounting layer should then reconcile carrying amounts separately from contractual face.
+
+A journal test should ensure that the old debt is repaid once, the bridge is extinguished only when settled or legally discharged, and the term debt remains after bridge repayment. Netting all financing flows into one closing debt amount would make these checks impossible.
+
+\section{Sensitivity that preserves the same company}
+Vary B's price while holding the collection history, asset sale and contractual caps fixed. This produces a meaningful price sensitivity for each policy. Vary the collection date while retaining the same receivable identity and amount. This produces a timing sensitivity.
+
+Changing both at once can be a joint stress, but it should be named as such. Comparing a high-price H1 case with a low-price H2 case and attributing the entire difference to price would confound two mechanisms. Paired scenario comparisons should preserve the dimensions not intended to change.
+
+The same discipline applies to recovery. A lower recovery value can affect price at issuance if anticipated, but a surprise enforcement loss after issuance is a different information path. The model should specify whether creditors knew the recovery change when making the offer.
+
+\section{A practical implementation slice}
+This case suggests a bounded event scheduler with exact rational amounts and ordered timestamps. It needs offer admission, net-proceeds calculation, inventory eligibility, collection observation, policy action and arrears transitions. It does not need a neural network to expose the important errors.
+
+The fixture should include both successful and refused paths, with reasons. The refused bridge-only path fails by one due to the fee. The full-sale H2 path loses term eligibility. The half-sale H2 path fails when price falls below 0.6625. The cure-period variant distinguishes late collection from timely cure.
+
+These cases provide a concrete basis for extending the repository's financing methods. They also show what remains outside a small implementation: actual market offers, legal enforceability, operational cost of inventory sale and empirically supported management preferences. The model can explain those dependencies without pretending to have resolved them.

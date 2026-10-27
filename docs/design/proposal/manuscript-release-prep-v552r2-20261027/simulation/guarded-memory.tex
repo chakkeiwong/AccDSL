@@ -1,0 +1,53 @@
+\section{Connecting the history to accounting execution}
+\label{sim:guarded-memory-execution}
+
+A financial path can be correct in a small mathematical model and still be translated incorrectly into a company's accounting system. The preceding example treats equity as a single amount after income and expenses. An accounting book usually distinguishes capital, operating income, interest expense and fees. Those distinctions matter when the simulator must produce an income statement, cash-flow statement and retained claim history as well as a closing balance sheet.
+
+The checked connection uses the existing common accounting executor with explicit definitions of the selected events. It does not put the earlier Python posting calculation inside that executor. The comparison instead asks whether independently specified methods produce the same full accounts, journals, cash-flow origins and contractual memory. Two different account charts test whether a method depends on accounting roles rather than convenient account names.
+
+\subsection{Equity agrees only after the accounts are mapped}
+
+Let $B_k$ be an account's signed balance, positive for a debit and negative for a credit. Assets and expenses then normally have positive balances, while liabilities, capital and income normally have negative balances. In this example the reduced equity $E$ used in the earlier calculation corresponds to
+\begin{equation}
+ E=-B_{\mathrm{capital}}-B_{\mathrm{income}}
+   -B_{\mathrm{interest\ expense}}-B_{\mathrm{fee\ expense}}.
+\end{equation}
+For example, an operating receipt of 7 gives the income account a credit balance of $-7$. Two coupons of 6 give interest expense a debit balance of 12, and a facility fee adds expense of 0.25. With no opening capital, the reported equity after profit is $7-12-0.25=-5.25$. This equals the reduced model's equity without hiding the income statement inside the capital account.
+
+An interest accrual $I$ adds $I$ to expense and $-I$ to interest payable. Under the mapping, equity falls by $I$ and the creditor's claim rises by $I$. Paying the coupon reduces cash and removes the payable, leaving profit unchanged. A combined draw-and-pay instruction has the following signed account changes:
+\begin{align}
+ \Delta B_{\mathrm{cash}}&=0.75-I,&
+ \Delta B_{\mathrm{facility\ debt}}&=-1,\\
+ \Delta B_{\mathrm{fee\ expense}}&=0.25,&
+ \Delta B_{\mathrm{interest\ payable}}&=I.
+\end{align}
+Their sum is zero. The cash-flow record separately retains borrowing of 1, the fee payment of 0.25 and the interest payment of $I$. Netting those amounts in the journal's cash entry must not erase their origins in the cash-flow statement.
+
+Repayment removes the facility liability and reduces cash by the same amount. Its accounting balance becomes zero, but the separate memory that the facility has already been used remains true. Each method also checks that interest payable agrees with accrued coupons less paid coupons, that the event occurs at the declared phase and date, and that its prerequisites are satisfied. A refused payment leaves the accepted prefix unchanged, including the coupon already accrued.
+
+For the concrete execution comparison, the two decisions are assigned to 30 June and 31 December 2027 within one supplied reporting period. The coupon amounts remain the one-period charges of the earlier example. These dates test ordering; they do not supply an actual instrument's day-count convention. Each comparison checks the complete account balances, income statement, balance sheet, gross cash flows, journals and memory. Applying the equity mapping also recovers the earlier independent financial calculation.
+
+\subsection{A checked path is not a checked continuous region}
+
+The common executor accepts concrete rational amounts. The selected comparison therefore uses exact points at the coupon cap, at the first trigger, and at and immediately to either side of the later joint cash boundary. Those executions exercise important failure mechanisms. They do not by themselves establish that every rate in a continuous region produces the correct accounting result.
+
+Within a region where the guards are fixed, the amount relations above are affine. If the opening accounts map correctly, each event has the stated affine effect, and the same guard, timing and memory conditions govern both descriptions, induction over the accepted events gives the same mapped financial quantities. The conditions carry the argument: a wrong guard or lost drawing right can change which event occurs even when its monetary formula is correct. A general checker must verify those conditions and every supported method, rather than replace that obligation with a larger sample of rates.
+
+The concrete evidence at this stage has two parts. The exact continuous reference establishes its financial formulas and feasible domains. The concrete common-engine comparison checks complete accounting execution at declared points. The explicit mapping and local event derivation motivate the selected symbolic certificates in Section~\ref{sim:certified-rate-regions}; extending them to general methods remains a separate problem. Source-backed terms and actual accounting applicability also remain distinct from agreement between two synthetic representations.
+
+\subsection{Stopping computation must preserve what remains unknown}
+
+Suppose the simulator has executed the first coupon and then reaches its computation budget. A useful saved result contains the complete accepted book and journal, the next command, and the commands still pending. It must also retain the alternative histories and regions that have not been evaluated. A successful payment on one path supplies no reason to delete a different path that may fail tomorrow.
+
+The selected checkpoint reference validates a saved concrete prefix by replaying it from its declared opening and method registry. It compares the complete transition records and current state before continuing. The tested interruptions recover the same result as uninterrupted execution, including the first-date and second-date refusal prefixes. Altering cash while keeping the book balanced, changing paid-coupon memory or removing the used-facility flag fails that comparison. Merely recomputing a checksum on the altered record would not establish that the altered history followed from its opening.
+
+A zero budget attempts no new financial event. It can still incur the cost of checking the saved prefix. More generally, the budget in this reference counts new event attempts, while replay validation costs additional work. A practical implementation would need a separately justified way to reduce that cost. The present result establishes a small exact recovery comparison, not an efficient or crash-durable storage system.
+
+The queue also distinguishes a completed concrete program from a resolved continuous region. For the two-date example, the declared roster contains four persistent contract combinations, $11\times11$ rate-atom pairs, four order pairs and two receipt hypotheses:
+\begin{equation}
+ 4\times121\times4\times2=3{,}872
+ \quad\text{region and instruction obligations}.
+\end{equation}
+A finite witness cannot mark any of those whole regions complete. Their identities remain unresolved under this concrete checkpoint even when individual concrete jobs succeed or refuse; Section~\ref{sim:certified-rate-regions} supplies separate certificates for the selected whole regions. Within the finite job queue, pending, completed and refused jobs form an exact partition. A refused job retains both its payable and its unexecuted commands; it is a completed assessment of that particular instruction sequence, not proof that every alternative has failed.
+
+Finally, reuse depends on what was asked and what information was available. The saved record names the source revision, clause, actor's observation map, available actions, horizon, query, precision and method. A changed scope refuses reuse under the old record. An earlier query can still use its earlier explicitly supplied scope, preserving the distinction between later knowledge and information available at the time. Those bindings do not authenticate the source or establish when a real manager received it. Source admission, extension beyond the selected symbolic domains, efficient refinement and durable recovery require their own evidence.\footnote{The complete common-engine and checkpoint comparisons are retained in \path{data/accounting-master/guarded-memory-runtime-20261026/}, respectively under \path{attempt-01/} and \path{checkpoint-attempt-01/}. The former checks concrete accounting execution; the latter checks replay and queue preservation. Neither promotes a concrete witness to a whole-region certificate.}

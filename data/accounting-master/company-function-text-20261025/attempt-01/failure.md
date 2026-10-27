@@ -1,0 +1,1 @@
+18 test methods: two errors. The forward-call fixture collected local call r declarations as main nodes, causing duplicate_node. The malformed rational test exposed a raw jsonschema ValidationError rather than frontend Invalid. Preserve the typed compiler; fix frontend exception normalization and select only top-level fixture nodes.

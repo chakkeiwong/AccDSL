@@ -1,0 +1,159 @@
+\section{A balanced closing statement can hide a stock shortage}
+\label{sec:typed-economic-history}
+
+The preceding history records monetary balances and movements. A company also
+needs goods to deliver. A closing inventory value can agree with a closing
+quantity even when the proposed sequence sells goods before they are available.
+Testing that sequence requires quantities with their own units and conditions
+on the intermediate states.
+
+Consider an authored example with opening cash of 20 dollars, no inventory and
+a credit equity balance of 20 dollars. Four units arrive at a fixed cost of
+2 dollars each, and three units are sold for 3 dollars each. Both events are
+dated 30 June 2024; the supplied order says which occurs first. The dates and
+amounts are synthetic conformance inputs. The assumed postings illustrate a
+fixed-cost, cash-settled transaction, without establishing the recognition
+requirements of an actual inventory or revenue policy.
+
+Let \(C\) denote cash in dollars, \(V\) inventory carrying amount in dollars,
+\(E\) the signed, debit-positive equity balance in dollars, and \(Q\) the
+number of units. Thus the opening state is
+\((C,V,E,Q)=(20,0,-20,0)\). For a restock quantity \(u\) and a sale
+quantity \(v\), the assumed effects are
+\begin{align}
+\label{eq:typed-stock-effects}
+ (\Delta C,\Delta V,\Delta E,\Delta Q)_{\mathrm{restock}}
+   &=(-2u,\;2u,\;0,\;u),\\
+ (\Delta C,\Delta V,\Delta E,\Delta Q)_{\mathrm{sale}}
+   &=(3v,\;-2v,\;-v,\;-v).
+\end{align}
+The coefficients 2 and 3 carry dollars per unit in the monetary components;
+the quantity coefficients are dimensionless. The three monetary changes sum
+to zero for each event. The quantity change is retained separately and is
+never added to dollars merely because both are represented by rational numbers.
+
+Substituting \(u=4\) first gives \((12,8,-20,4)\). Substituting \(v=3\)
+next gives \((21,2,-23,1)\). The closing book balances because
+\(21+2-23=0\), and the remaining unit has the assumed carrying amount 2.
+Now reverse the order. The sale first gives \((29,-6,-23,-3)\), and the
+later restock still produces \((21,2,-23,1)\). Every monetary posting
+balances in both orders. Only the second order requires an intermediate stock
+of minus three units.
+
+\subsection{Apply a stated economic condition at every event}
+
+Suppose the authored model permits between zero and 100 units at every state.
+This is an explicit stock condition, not something inferred from the balance
+sheet. Write \(x_j\) for the state just after event \(j\), with \(x_0\)
+the opening, and \(Q_j\) for its quantity component. The conditional family
+then requires
+\begin{equation}
+\label{eq:typed-stock-prefix}
+ 0\leq Q_j\leq100\qquad\text{for }j=0,1,\ldots,n.
+\end{equation}
+The restock-first path satisfies equation~\eqref{eq:typed-stock-prefix},
+with quantities 0, 4 and 1. The sale-first path fails at its first event,
+where \(Q_1=-3\). Testing only the final date would miss the violation.
+Same-day events therefore retain their declared sequence, even though a daily
+snapshot includes all events on that day.
+
+The \path{TypedAffineHistory/1} reference permits a typed linear form of the
+accounts and memory to be bounded in this way. Each supplied condition applies
+to the opening and every post-event state. Its interval and proposed premise
+are retained with the family. If no stock condition is supplied, the algebraic
+sale-first path remains a candidate and the result reports that the condition
+was not checked. A missing premise instead leaves the conditional question
+unresolved. Neither case establishes that selling before delivery is allowed
+for the company being studied.
+
+The type of an event size need not be money. In equation~\eqref{eq:typed-stock-effects}
+it is a quantity of goods, while each affected field has its own type. Before
+forming scalar equations, the checker requires
+\begin{equation}
+\label{eq:typed-history-product}
+ \operatorname{type}(b_{ij})\,\times\,
+ \operatorname{type}(u_j)=\operatorname{type}(x_i),
+\end{equation}
+where \(b_{ij}\) is the fixed coefficient taking event size \(u_j\) into
+field \(i\). Adding the coefficient's dimension exponents to those of the
+event type, and multiplying their scales, must yield the field's exact dimension
+and scale; their book
+contexts must agree. For a cash effect, dollars per unit times units gives
+dollars. A euro coefficient, a different book or an uncompensated thousand-unit
+scale fails this check before solving. A measurement coefficient is checked
+against its field and result type in the same way.
+
+The reference retains the original types and definition after lowering to
+scalar rational equations. Independent replay starts with the original opening
+domains, applies the typed coefficients, checks every balanced posting and
+declared intermediate condition, then recomputes the snapshot measurements.
+Unmeasured economic memory remains a shared unknown. This extension is affine:
+prices and other coefficients are fixed authored values, while event sizes and
+openings may be unknown. Unknown prices multiplied by unknown quantities,
+integer lots, endogenous event discovery and general contract methods need
+additional methods. The declared stock condition checks one economic
+restriction; it does not supply all operational or accounting prerequisites.
+
+\input{sections/typed-history-observation-attachment}
+
+\subsection{Author the same family as text and as typed records}
+
+A conditional family must keep the same meaning when it is written as text.
+The closed \path{ConditionalFamilyExchange/1} authoring interface covers joint
+measurements, temporal measurements, monetary histories, typed affine histories
+and the existing history--measurement attachment. Declarations name observations,
+equations, accounts, memory, templates, events, measurements and intermediate
+conditions. Their payloads retain the complete typed records, intervals,
+premises and source references. The author supplies the computational budget
+and the exact digest of the selected complete definition.
+
+For example, the two event declarations in the stock case begin as follows;
+the angle-bracketed domain markers here stand for the complete authored interval
+records and are explanatory placeholders, not accepted syntax:
+\begin{quote}\small\ttfamily
+event \{"id":"restock","date":"2024-06-30",\\
+\hspace*{1em}"template":"restock","amount":<four-unit domain>\};\\
+event \{"id":"sale","date":"2024-06-30",\\
+\hspace*{1em}"template":"sale","amount":<three-unit domain>\};
+\end{quote}
+Each complete declaration occupies one line in the actual source. The complete
+examples contain the bounds, endpoint inclusion flags, named proposed premise
+and provenance that the excerpt abbreviates. Reversing the two declarations
+changes the event sequence and the selected definition's digest. It can change
+feasibility under the stock condition even though the closing statement agrees.
+
+Attachment declarations refer to earlier complete family definitions. The
+parser embeds both parent formulas; it never substitutes their chosen witnesses.
+The existing attachment still accepts the monetary-history and temporal-measurement
+parents described in Section~\ref{sec:conditional-history-families}.
+The separate typed attachment in Section~\ref{sec:typed-history-observation-attachment}
+is not yet a profile of this five-profile exchange. Its complete typed records
+therefore use the separate checked interface rather than that text grammar.
+
+The text and byte decoders reject duplicate keys or declarations, unavailable
+profiles, malformed UTF-8, floating or non-finite numeric tokens, wrong selection
+digests, omitted budgets and trailing content. Rational quantities remain exact
+reduced strings. Explicit zero budgets retain the original unknown result;
+missing proposed premises remain unresolved. The parser treats declarations
+as data and does not execute their contents or retrieve source references.
+
+Map keys are normalized for both typed and text exchange inputs, while every
+ordered list remains intact. This distinction matters because the preceding
+solver reports assign internal variable names in insertion order: semantically
+equal maps can otherwise produce different diagnostic text. Replay uses the
+normalized definition, and independent witness checks also agree with the
+original unsorted record. This normalization does not promise identical outcomes
+for arbitrary old requests stopped at tight resource limits.
+
+The full grammar, strict error behavior and eight retained source-to-record-to-result
+examples accompany the implementation. The monetary embedding also preserves
+the earlier alternative histories, and adverse cases retain the stock shortage,
+missing premises and resource stops. The supporting specifications and checks
+are under \path{data/accounting-master/}:
+\begin{quote}\small
+\path{typed-affine-history-20261024}\\
+\path{conditional-family-authoring-20261024}
+\end{quote}
+These references make the declared state and authoring subset reproducible.
+Whole-company method coverage, richer contracts, source admission and an
+independent implementation of the broader language remain separate tasks.

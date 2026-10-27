@@ -1,0 +1,7 @@
+# ASU 2019-05: verified transition-relief lead
+
+12 October 2026. E07/E01 and MC15/16/21/29/30/34/35. Official ASU 2019-10 names ASU 2019-05 in its Topic 326 pending-content heading (PDF 14–15). The source number is therefore a verified locator, not yet a verified interpretation. The comparator is the retained 2016, 2018-19, 2019-04 and 2019-10 source set; the manuscript remains Version 2.33.
+
+Evidence contract: retrieve one exact official PDF with a 25-second, 25-MB limit and retain headers/bytes. Verify cover, ASU status, title, date, selected amended paragraph IDs and transition text. Determine whether the relief changes the selected off-balance measurement/presentation and guarantee paragraphs or affects only another Topic 326 path. Read relevant markup visually and retain exact spans. A wrong edition, ambiguous text or unsupported application to current cases vetoes admission. Even a pass does not complete the later amendment chain, current Codification or company-specific policy check.
+
+Skeptical audit: a reference in a transition heading does not imply the later ASU changed every paragraph in the heading. Start with the amendment/status list and compare the exact paragraph IDs. A valid fair-value election, if present, may have asset-specific exclusions and cannot be generalized to off-balance commitments. Record the bounded result and then seek an official update index or other verified later leads. No runtime, GPU, paid review, outreach or publication is involved.

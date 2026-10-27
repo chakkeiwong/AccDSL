@@ -1,0 +1,1 @@
+Audit passes: the current5.25 source-policy edition, not stale5.24, is preserved. Whole-interval assertions remain conditional; complete coverage does not authenticate sources or admit journals. Counts and builds do not establish scientific or human acceptance. Keep the independent source-time plan and all inherited obligations.

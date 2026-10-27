@@ -1,0 +1,38 @@
+{
+  "assumptions": [
+    "The supplied interfaces are authoritative; omitted scheduler, process, lock and worker-adapter implementations were not inspected.",
+    "No supplied interface guarantees that preflight checkers cannot modify editable files.",
+    "Workers are trusted, with containment limited to the stated process group and ordinary handled interruption."
+  ],
+  "checks": [
+    "Traced planning, implementation, repair, partial continuation, pending-review resume and acceptance branches.",
+    "Compared preservation and contribution capture ordering against preflight verification.",
+    "Checked continuation freshness against the input hashes used for pending-review freshness.",
+    "The reported 141 passing tests are supporting control-plane evidence; test bodies and execution were not independently checked."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "P1 — Preflight verification runs outside the preservation and attribution window. In Master.execute_phase, check_phase(phase, preflight) executes before creating the phase entry inventory and before any pre-edit preservation or capture_phase_changes call. A checker that accidentally overwrites or deletes an editable manuscript file can therefore alter the baseline subsequently preserved for a new phase. On resume, preflight changes likewise fall outside the recorded work window. check_protection protects frozen evidence, but does not restore or attribute ordinary editable files. Repair: preserve and persist the entry inventory before preflight; wrap preflight in its own preserved before-snapshot and finally-based contribution capture; enforce deletion obligations and pass its changes to subsequent planning and review. Alternatively, enforce and verify a strictly read-only preflight with prior-byte preservation. Add regression coverage for preflight overwrite, deletion and failure after a write.",
+    "P2 — Partial-continuation freshness omits declared verification inputs. Master.save_continuation hashes contributed files, the test file and deliverables, but does not include checked['input_hashes']. In contrast, save_pending_review includes those inputs. phase_recovery then labels a continuation 'checked_snapshot_not_acceptance' solely from the incomplete evidence_hashes map. Changing a declared research or other checker input that is neither a contribution nor a deliverable leaves that label unchanged and supplies the next plan with stale checked-snapshot guidance. Repair: include declared check inputs in the continuation fingerprint and compare their current hashes with the values recorded by verification; record changed or missing inputs as requiring recheck. Bind the saved check record as well. Add a regression where only a declared checker input changes between partial work and recovery."
+  ],
+  "next_actions": [
+    "Move preflight into the preservation and contribution-accounting boundary.",
+    "Make partial-continuation freshness cover verification inputs and the saved check record.",
+    "Run focused regressions for these cases, then rerun controller verification and a fresh bounded review."
+  ],
+  "residuals": [
+    "Process cleanup, exclusive locking and reusable narrow command approval cannot be independently certified from the implementations supplied in this packet.",
+    "A stale partial continuation does not itself grant acceptance: the supplied execution path reruns checks. The second finding concerns accurate recovery and fresh-plan inputs.",
+    "The accepted 192-report panel and scoped internal phase acceptance do not close accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Reviewed only the supplied packet without tools, commands, file reads or project-history lookup."
+  ],
+  "summary": "Two defects remain: preflight checks can modify editable files before preservation and attribution, and partial-continuation freshness omits declared verification inputs.",
+  "verdict": "REVISE"
+}

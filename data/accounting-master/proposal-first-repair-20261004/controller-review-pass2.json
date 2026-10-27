@@ -1,0 +1,286 @@
+{
+  "verdict": "REVISE",
+  "issues": [
+    "process-lifecycle: In bounded_process, the waitid condition observes exit before checking the deadline. If the child remains active past seconds but exits before the next polling iteration, the loop ends with reason=None. The same bypass occurs if on_spawn consumes the remaining budget and the child exits before polling starts. An exit code of zero can therefore make an over-budget attempt indistinguishable from an ordinary successful attempt, undermining the stated rule that timed-out outputs cannot become implementation responses. Repair: observe exit and elapsed time together, conservatively classify an exit first observed at or after the deadline as timeout, and retain that classification through cleanup. Check elapsed time after registration as well. Add focused coverage for exit between the last pre-deadline poll and the next observation, and for registration consuming the deadline; verify both preserve outputs without treating the attempt as successful.",
+    "worker-boundary: scripts/run_accounting_master.py — validate_response performs set membership on value['verdict'] before checking its type. A response containing all required fields but a list or object verdict raises TypeError ('unhashable type'), rather than MasterError. _worker_result has the same problem earlier in response.get('verdict') in {'REVISE', 'BLOCKED'}. phase_review catches MasterError, ValueError and OSError, so this malformed response bypasses the promised bounded retry and ReviewPending recovery. Repair both sites by checking that the verdict is a string before set membership, and classify invalid verdict types as MasterError. Add focused coverage for list/object verdicts demonstrating preservation of the rejected response, a fresh read-only retry, and ReviewPending after two invalid responses.",
+    "state-refresh: REVISE: Persisted state does not bind the complete phase catalog. Master.__init__ stores only workflow_sha256, and verify_workflow() compares only catalog['workflow']. A change to a pending phase's deps, criteria, deliverables, checker, retry_inputs, or other phase contract can therefore pass validate_state(), pass verify_workflow(), and be scheduled by refresh() under a newly reviewed-looking contract. The accepted-phase path partially detects contract changes via accepted_phase_hash, but pending and non-accepted phases have no equivalent protection. This violates stale-state handling and can execute a phase from a catalog different from the one that produced the checkpoint. Repair by persisting a canonical full-catalog hash (or per-phase contract hashes) in state at creation and checking it before refresh/eligibility; reject with an explicit migration ContinuationVeto on mismatch. If intentional migrations are needed, require a reviewed migration record that preserves prior evidence and rebinds every affected phase. Add a regression covering a persisted pending phase whose criteria/dependencies/checker changes and asserting scheduling is vetoed until migration.",
+    "scheduler: Blocked responses lose their actionable findings. In execute_phase, both the work['verdict'] == 'BLOCKED' branch and the ordinary response['verdict'] == 'BLOCKED' branch update status, issues and residuals but omit next_actions. The partial-review BLOCKED branch correctly saves next_actions. Consequently an external block can leave the phase's previous next_actions intact, or retain none, while subsequent refreshes construct the next plan from that record. Repair both branches to persist the current response's next_actions, replacing stale values even when the new list is empty. Verify that the refreshed plan and a resumed invocation expose the actual unblock instructions.",
+    "scheduler: Run finalization is not protected against an ordinary handled interruption. Master.run catches KeyboardInterrupt in its main try, but its finally block performs refresh/save, plan publication, manifest publication and event writing outside that handler. The nested finalization handler catches only ContinuationVeto, ValueError and OSError. A SIGTERM translated to KeyboardInterrupt during final refresh or terminal publication therefore escapes to the module entrypoint, potentially leaving the manifest without finished_at/outcome and leaving the previous executable next plan published. A second interruption while finalizing an already interrupted run has the same problem. Repair this with a bounded, signal-deferred finalization section that durably records interruption and either publishes a verified current plan or a non-executable recovery record before restoring signal handling. Preserve the existing worker-cleanup guarantees. Verify interruption during final refresh and terminal publication, including interruption after a prior stop.",
+    "phase-plan-repair: P1 — Verification input hashes can be replaced by current hashes without detecting stale verification. In scripts/run_accounting_master.py, check_phase validates the raw checker capture but never verifies result['input_hashes']. save_pending_review uses only their names and calls evidence_hashes to snapshot current bytes; final acceptance does the same. Consequently, if a checker reports hashes for inputs it checked and those inputs subsequently change during verification, the checkpoint binds the changed bytes while retaining the earlier passing result. Later checkpoint verification passes because it compares against that new snapshot. save_continuation explicitly detects this mismatch, but the acceptance path does not. Repair: compare every declared input hash with the current file before pending-review creation and acceptance, and reject/recheck mismatches without rebasing them. Preserve the checker’s original hash mapping as the verification binding. Add a regression where a passing checker reports an old input digest after that input changes; neither acceptance nor resumable accepted-check status should result.",
+    "phase-plan-repair: P2 — Recovery omits the latest failed replan review. execute_phase writes repair plans and their reviews beneath replan-N directories, but phase_recovery in scripts/accounting_master_support.py searches plan_review only at the attempt root and its direct review_plan-retry directories. If an initial plan passes, implementation fails, and a subsequent replan receives REVISE or BLOCKED, recovery can present the original AGREE as the recent plan review. The root approved-plan.json also remains the previous approved plan when replanning fails. This gives the next planning pass stale structured navigation precisely when it needs the latest repair findings. Repair: discover replan-N plan responses and reviews, including their retries, and distinguish the latest proposed/rejected plan from the latest approved plan. Preserve their ordering explicitly or select consistently across those directories. Add a regression covering failed replanning followed by recovery in a new invocation.",
+    "evidence: P18 does not establish that its PDF was built from the pinned source bytes. In scripts/check_accounting_proposal.py, anchor() verifies current hashes, while the recorder check verifies only dependency paths. build.exit_code, the build log and rendered_pdf_sha256 do not bind the PDF to source hashes observed during that build. An ordinary stale-build case therefore passes the structural checks: retain an earlier PDF, recorder and rendered pages; edit main.tex or an included figure; update its source_files hash; and submit the new manuscript manifest. All current checks can succeed although the rendered review concerns an earlier source version. Repair by preserving a build-time record containing the actual input hashes and resulting PDF hash, and require those hashes to match the current candidate. Capture inputs around the successful build and reject changed inputs; bind rendering to that recorded PDF. Add a regression that edits and re-pins a source or figure without rebuilding and requires P18 to fail. The supplied interfaces do not identify another component that already enforces this build-time binding."
+  ],
+  "scope_reviews": [
+    {
+      "scope": "process-lifecycle",
+      "assumptions": [
+        "The supervisor is single-threaded; workers are trusted and remain in their initial process group.",
+        "The supplied interfaces require recovery under the exclusive lock before another worker starts. The corresponding call sites are not supplied.",
+        "on_spawn durably records ownership before returning, and callbacks are bounded. Their implementations and timing guarantees are not supplied.",
+        "The seconds argument is an execution deadline, and outputs from an attempt exceeding that deadline must not qualify as successful implementation evidence."
+      ],
+      "checks": [
+        "Statically traced launch, deferred interruption, normal exit, timeout, cleanup escalation, and recovered-process signalling using only the supplied packet.",
+        "Checked that ordinary cleanup retains an unreaped leader during group signalling and that recovery uses validated pidfds.",
+        "Treated the reported 153 passing tests and supplied test names as supporting evidence only; test bodies were not supplied or executed."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "In bounded_process, the waitid condition observes exit before checking the deadline. If the child remains active past seconds but exits before the next polling iteration, the loop ends with reason=None. The same bypass occurs if on_spawn consumes the remaining budget and the child exits before polling starts. An exit code of zero can therefore make an over-budget attempt indistinguishable from an ordinary successful attempt, undermining the stated rule that timed-out outputs cannot become implementation responses. Repair: observe exit and elapsed time together, conservatively classify an exit first observed at or after the deadline as timeout, and retain that classification through cleanup. Check elapsed time after registration as well. Add focused coverage for exit between the last pre-deadline poll and the next observation, and for registration consuming the deadline; verify both preserve outputs without treating the attempt as successful."
+      ],
+      "next_actions": [
+        "Repair deadline classification in bounded_process and add the focused lifecycle checks described above.",
+        "Rerun the controller checks and submit the changed lifecycle code for fresh read-only review."
+      ],
+      "residuals": [
+        "The packet does not expose active-process completion publication, lock/recovery call ordering, or callback implementations; these remain interface assumptions rather than independently verified properties.",
+        "The output threshold is polled, so it permits overshoot, including during cleanup. It should be described as a termination threshold rather than a strict file-size cap.",
+        "Ambiguous recovered ownership intentionally vetoes automatic continuation; that is consistent with the supplied plan.",
+        "This review establishes no accounting correctness, scientific validity, or human acceptance. The 192-report source panel and scoped internal phase acceptance cannot close those gaps."
+      ],
+      "steps": [
+        "Performed the requested bounded packet-only review without tools, file reads, commands, or project-history inspection."
+      ],
+      "summary": "REVISE: exit detection can bypass timeout classification, allowing an over-budget process to return an ordinary success result.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "permissions-install",
+      "assumptions": [
+        "The explicit upfront authorization covers installation and the stated sequential worker permissions; the installer records that authorization rather than obtaining it.",
+        "Master.run enforces the stated fresh controller-review and protection checks before executing phases. Its implementation is outside this packet.",
+        "The supervisor issues grants only to the intended helper and retains its writer lock until helper cleanup completes. Grant issuance and cleanup implementations are not supplied."
+      ],
+      "checks": [
+        "The rule matches the fixed Python entrypoint. Inline match/not_match entries are correctly treated as rule tests, not an action allowlist.",
+        "Installation checks every public action, rejects unrelated commands under the candidate rule, and checks compatibility with existing rule files.",
+        "Publication uses a same-directory temporary file, file synchronization and an atomic no-overwrite link; conflicting existing rules are preserved.",
+        "Prepared and published receipts support interrupted installation recovery while binding the candidate, target, controller hashes and standing authorization.",
+        "Internal helpers require matching supervisor identity, a one-use capability, the inherited lock, an active phase and fresh output paths.",
+        "The supplied status response explicitly leaves mission completion false."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "The supplied 153-test success report and test names are supporting evidence only; test bodies and execution were not independently inspected.",
+        "Effective-policy checks cover the supplied local rule-file set. Runtime-managed policy may still reject execution, as the reviewed permission scope acknowledges.",
+        "Grant validation does not explicitly bind the capability to _checks versus _builtin. Under the stated trusted-supervisor assumption this is nonblocking; adding an action field would detect accidental helper-dispatch mismatches.",
+        "This scoped approval establishes neither accounting correctness nor closure of scientific or human-acceptance gaps for the 192-report source panel."
+      ],
+      "steps": [
+        "Reviewed only the supplied permissions-install code and interfaces, tracing publication, interrupted recovery, authorization preservation and helper access. No tools or external history were used."
+      ],
+      "summary": "AGREE for the bounded permissions-install scope. No blocking defect is established by the supplied code and stated interfaces; installation preserves conflicting policy and supports recovery without replacing the standing authorization.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "worker-boundary",
+      "assumptions": [
+        "The supervisor and workers are trusted, remain in the initial process group, and execute sequentially under the stated lock contract.",
+        "Unshown scheduling, process cleanup and acceptance implementations are treated as stated interfaces, not independently verified code.",
+        "A malformed worker response is an unavailable review that should receive the documented bounded retry."
+      ],
+      "checks": [
+        "Reviewed only the supplied packet; used no tools or external history.",
+        "Traced response validation, review retries, worker write inventories, protection checks and recovery construction.",
+        "Treated the reported 153 passing tests and supplied test names as supporting control-plane evidence, without inferring unseen assertions or accounting correctness."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "scripts/run_accounting_master.py — validate_response performs set membership on value['verdict'] before checking its type. A response containing all required fields but a list or object verdict raises TypeError ('unhashable type'), rather than MasterError. _worker_result has the same problem earlier in response.get('verdict') in {'REVISE', 'BLOCKED'}. phase_review catches MasterError, ValueError and OSError, so this malformed response bypasses the promised bounded retry and ReviewPending recovery. Repair both sites by checking that the verdict is a string before set membership, and classify invalid verdict types as MasterError. Add focused coverage for list/object verdicts demonstrating preservation of the rejected response, a fresh read-only retry, and ReviewPending after two invalid responses."
+      ],
+      "next_actions": [
+        "Guard verdict types before either membership operation and verify the malformed-response retry path.",
+        "Clarify the checker-only phase interface and attempt-directory freshness guarantees identified in residuals.",
+        "Rerun the relevant controller checks and obtain a fresh review of the repair."
+      ],
+      "residuals": [
+        "Missing interface assumption: phase_recovery unconditionally accesses phase['test_file'], while run_phase_tests supports a checker branch without that field. The packet does not supply catalog entries establishing that every checker-backed phase also has a meaningful test_file. Confirm that invariant, or construct recovery requirements from the selected verification mechanism; otherwise a checker-only phase raises KeyError before worker launch.",
+        "Missing interface assumption: callers must allocate fresh attempt directories after interrupted invocations. worker rejects only an existing response file; other prompt, schema, recovery and log destinations can already exist. The supplied caller interfaces do not establish directory freshness sufficiently to verify preservation of incomplete attempts.",
+        "Process-group cleanup, lock acquisition, protection initialization and the CLI's effective sandbox/feature behavior are not fully shown. No broader containment requirement is imposed.",
+        "The accepted 192-report panel, structural checks and internal phase acceptance leave accounting, scientific and human-acceptance gaps open."
+      ],
+      "steps": [
+        "Checked the proposed review against its bounded worker-boundary scope and ordinary failure model.",
+        "Separated a reproducible response-validation defect from interface assumptions that cannot be resolved from this packet."
+      ],
+      "summary": "REVISE: malformed verdict types escape the bounded review-retry path. The remaining concerns are explicit, unverified interface assumptions.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "state-refresh",
+      "assumptions": [
+        "A persisted state may be resumed after the catalog file changes between invocations.",
+        "The controller hash map in Master.__init__ is initialized from the current files, so it is not by itself a historical binding to the catalog used to create the state."
+      ],
+      "checks": [
+        "Reviewed only the supplied packet and the shown state-refresh/catalog code paths.",
+        "Checked whether persisted state binds all phase contracts before eligibility is recomputed."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_catalog.json",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "REVISE: Persisted state does not bind the complete phase catalog. Master.__init__ stores only workflow_sha256, and verify_workflow() compares only catalog['workflow']. A change to a pending phase's deps, criteria, deliverables, checker, retry_inputs, or other phase contract can therefore pass validate_state(), pass verify_workflow(), and be scheduled by refresh() under a newly reviewed-looking contract. The accepted-phase path partially detects contract changes via accepted_phase_hash, but pending and non-accepted phases have no equivalent protection. This violates stale-state handling and can execute a phase from a catalog different from the one that produced the checkpoint. Repair by persisting a canonical full-catalog hash (or per-phase contract hashes) in state at creation and checking it before refresh/eligibility; reject with an explicit migration ContinuationVeto on mismatch. If intentional migrations are needed, require a reviewed migration record that preserves prior evidence and rebinds every affected phase. Add a regression covering a persisted pending phase whose criteria/dependencies/checker changes and asserting scheduling is vetoed until migration."
+      ],
+      "next_actions": [
+        "Add full-catalog or per-phase contract binding to persisted state and enforce it during load/refresh.",
+        "Add the pending-phase catalog-mutation regression and record the migration requirement in the plan/checkpoint."
+      ],
+      "residuals": [
+        "The packet does not expose the full implementation of protection-hash initialization or migration helpers, so their interaction with this missing catalog binding was not independently checked."
+      ],
+      "steps": [
+        "Identify the unbound catalog surface.",
+        "Trace its effect through state load, refresh, and eligibility selection.",
+        "Specify the smallest evidence-preserving repair and regression."
+      ],
+      "summary": "REVISE: refresh protects accepted contracts but allows persisted pending work to resume under changed phase contracts because state binds only workflow policy, not the complete catalog.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "scheduler",
+      "assumptions": [
+        "The supplied worker, process-cleanup, locking, integrity-check and fresh-plan interfaces are honored by their omitted implementations.",
+        "refresh and save implementations are not supplied. Whether they independently suppress executable plans after every scheduler failure is not established.",
+        "Workers are trusted and remain in their initial process group; deliberate detachment and uncatchable termination during registration are outside this review."
+      ],
+      "checks": [
+        "Reviewed the supplied scheduler, proposal gate, phase execution and support code without tools.",
+        "Checked exception boundaries, blocked-result propagation, acceptance bindings and proposal-only scheduling.",
+        "Treated the reported 153 passing tests and supplied test names as supporting evidence, without inferring unprovided assertions or accounting correctness."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "scripts/accounting_master_catalog.json",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "Blocked responses lose their actionable findings. In execute_phase, both the work['verdict'] == 'BLOCKED' branch and the ordinary response['verdict'] == 'BLOCKED' branch update status, issues and residuals but omit next_actions. The partial-review BLOCKED branch correctly saves next_actions. Consequently an external block can leave the phase's previous next_actions intact, or retain none, while subsequent refreshes construct the next plan from that record. Repair both branches to persist the current response's next_actions, replacing stale values even when the new list is empty. Verify that the refreshed plan and a resumed invocation expose the actual unblock instructions.",
+        "Run finalization is not protected against an ordinary handled interruption. Master.run catches KeyboardInterrupt in its main try, but its finally block performs refresh/save, plan publication, manifest publication and event writing outside that handler. The nested finalization handler catches only ContinuationVeto, ValueError and OSError. A SIGTERM translated to KeyboardInterrupt during final refresh or terminal publication therefore escapes to the module entrypoint, potentially leaving the manifest without finished_at/outcome and leaving the previous executable next plan published. A second interruption while finalizing an already interrupted run has the same problem. Repair this with a bounded, signal-deferred finalization section that durably records interruption and either publishes a verified current plan or a non-executable recovery record before restoring signal handling. Preserve the existing worker-cleanup guarantees. Verify interruption during final refresh and terminal publication, including interruption after a prior stop."
+      ],
+      "next_actions": [
+        "Persist next_actions consistently in every BLOCKED response branch and add focused regression coverage for stale instructions.",
+        "Make terminal state publication resilient to handled termination and add focused interruption coverage.",
+        "Rerun the controller checks and obtain a fresh review of the repaired code."
+      ],
+      "residuals": [
+        "The implementations of refresh, controller_review, process, approval installation and several acceptance helpers are omitted; their stated interfaces were assumed, not independently verified.",
+        "The shown gate preserves human_acceptance as pending and implementation_enabled as false. Historical phases are held, and product implementation is explicitly blocked.",
+        "The accepted 192-report panel, structural checks and internal phase acceptance do not establish accounting correctness, scientific validity, mission completion or human acceptance."
+      ],
+      "steps": [
+        "Compared the supplied execution paths with the reviewed resumability, interruption and fresh-plan requirements.",
+        "Identified two concrete state-propagation and finalization defects; no files were read or changed."
+      ],
+      "summary": "REVISE: blocked responses can leave stale next actions, and handled termination during finalization can prevent durable terminal publication.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "phase-plan-repair",
+      "assumptions": [
+        "Review is limited to the supplied packet; no tools, files, commands or project history were consulted.",
+        "The stated trusted-worker, initial-process-group and ordinary-interruption interfaces apply.",
+        "Checker input_hashes describe the bytes used for verification. The packet does not supply a checker-side guarantee that those bytes remain current when acceptance is recorded."
+      ],
+      "checks": [
+        "Traced plan approval, executed repairs, partial continuation, pending-review reuse and acceptance branches.",
+        "Compared verification input bindings with continuation, pending-review and accepted-evidence hashing.",
+        "Compared replan output locations with structured recovery discovery.",
+        "The reported 153 passing tests and listed test names provide supporting control-plane evidence; their implementations were not supplied or independently checked."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "P1 — Verification input hashes can be replaced by current hashes without detecting stale verification. In scripts/run_accounting_master.py, check_phase validates the raw checker capture but never verifies result['input_hashes']. save_pending_review uses only their names and calls evidence_hashes to snapshot current bytes; final acceptance does the same. Consequently, if a checker reports hashes for inputs it checked and those inputs subsequently change during verification, the checkpoint binds the changed bytes while retaining the earlier passing result. Later checkpoint verification passes because it compares against that new snapshot. save_continuation explicitly detects this mismatch, but the acceptance path does not. Repair: compare every declared input hash with the current file before pending-review creation and acceptance, and reject/recheck mismatches without rebasing them. Preserve the checker’s original hash mapping as the verification binding. Add a regression where a passing checker reports an old input digest after that input changes; neither acceptance nor resumable accepted-check status should result.",
+        "P2 — Recovery omits the latest failed replan review. execute_phase writes repair plans and their reviews beneath replan-N directories, but phase_recovery in scripts/accounting_master_support.py searches plan_review only at the attempt root and its direct review_plan-retry directories. If an initial plan passes, implementation fails, and a subsequent replan receives REVISE or BLOCKED, recovery can present the original AGREE as the recent plan review. The root approved-plan.json also remains the previous approved plan when replanning fails. This gives the next planning pass stale structured navigation precisely when it needs the latest repair findings. Repair: discover replan-N plan responses and reviews, including their retries, and distinguish the latest proposed/rejected plan from the latest approved plan. Preserve their ordering explicitly or select consistently across those directories. Add a regression covering failed replanning followed by recovery in a new invocation."
+      ],
+      "next_actions": [
+        "Enforce original checker-input hash bindings throughout checkpoint creation and acceptance.",
+        "Include failed replans and their reviews in structured recovery.",
+        "Run focused regressions for both cases, then rerun the controller checks and obtain a fresh bounded review."
+      ],
+      "residuals": [
+        "Process cleanup, lock enforcement, scheduler persistence and narrow approval publication are stated interfaces here; their implementations are outside the supplied phase-plan-repair excerpts.",
+        "The supplied paths and hashes identify catalog, schema and proposal-checker files, but their full contents and test assertions are not available in this packet.",
+        "Source acceptance for 192 reports and accepted_internal phase status do not establish accounting correctness, scientific validity, overall mission completion or human acceptance."
+      ],
+      "steps": [
+        "Completed a packet-only static review of the assigned phase-plan-repair scope."
+      ],
+      "summary": "REVISE: acceptance can rebind stale checker inputs to current bytes, and recovery can surface an older successful plan review after a failed replan.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "evidence",
+      "assumptions": [
+        "Controller and workers are trusted; review covers accidental failures, handled interruptions and stale evidence within the stated process-group guarantee.",
+        "Unshown controller behavior is assessed only through the supplied interfaces. Test names and the reported 153-test pass are supporting evidence, not independently inspected test results."
+      ],
+      "checks": [
+        "Reviewed supplied evidence hashing, preservation, change attribution, recovery, fixed-operation validation and proposal readiness code without tools.",
+        "Confirmed proposal readiness retains human_acceptance=pending and implementation_enabled=false.",
+        "Confirmed fixed-operation validation distinguishes deterministic PASS from model AGREE and preserves bounded source acceptance."
+      ],
+      "evidence": [
+        "scripts/check_accounting_proposal.py",
+        "scripts/accounting_master_support.py",
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_proposal.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "P18 does not establish that its PDF was built from the pinned source bytes. In scripts/check_accounting_proposal.py, anchor() verifies current hashes, while the recorder check verifies only dependency paths. build.exit_code, the build log and rendered_pdf_sha256 do not bind the PDF to source hashes observed during that build. An ordinary stale-build case therefore passes the structural checks: retain an earlier PDF, recorder and rendered pages; edit main.tex or an included figure; update its source_files hash; and submit the new manuscript manifest. All current checks can succeed although the rendered review concerns an earlier source version. Repair by preserving a build-time record containing the actual input hashes and resulting PDF hash, and require those hashes to match the current candidate. Capture inputs around the successful build and reject changed inputs; bind rendering to that recorded PDF. Add a regression that edits and re-pins a source or figure without rebuilding and requires P18 to fail. The supplied interfaces do not identify another component that already enforces this build-time binding."
+      ],
+      "next_actions": [
+        "Add and validate build-time input/output bindings, then rerun the proposal checks and independent result review for the resulting candidate.",
+        "Add the stale-build regression while preserving the existing distinction between structural checks, substantive review and human acceptance."
+      ],
+      "residuals": [
+        "phase_recovery unconditionally reads phase['test_file'], whereas run_phase_tests supports checker-backed phases without consulting that key. The catalog contents are not supplied; confirm that every recoverable checker phase has a meaningful test_file, or make recovery enumerate checker inputs instead.",
+        "Process cleanup, locking, command approval and repair execution implementations are outside the supplied code excerpts; their stated interfaces and named tests cannot establish those implementations independently.",
+        "The 192-report source panel and internal phase acceptance do not close accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Traced proposal evidence from current file hashes through structural validation to the readiness gate.",
+        "Compared the build and render checks against the requirement to review the same candidate."
+      ],
+      "summary": "REVISE: manuscript evidence binds current files and PDF separately, but does not establish that the PDF was built from those source bytes.",
+      "verdict": "REVISE"
+    }
+  ],
+  "controller_hashes": {
+    "scripts/run_accounting_master.py": "b45cb5f498cb1c43234e2041048f87f203a6392ca3fe4ca780b2c9336eff2726",
+    "scripts/accounting_master_support.py": "6cab55ba36d436c30419ac737a3d302654c4b2ea38a5e401210af09bf790c785",
+    "scripts/accounting_master_catalog.json": "dcbf1e4a75481b90e26ae781dffb45b01e7340efba89bea24f39b6623d6ae8fc",
+    "scripts/accounting_master_response.schema.json": "4b492e3495e6a64bf8e74d0798362b3c52073aef182c06dd9a06a658184f1269",
+    "tests/test_accounting_master.py": "2a66bd7ba4fbc10e5b13c178209d04844fbc530d7c4d726178925ae44d2f6085",
+    "docs/plans/accounting-master-program.md": "9eb8b4d887178a035266b31ef9cd840002e162826a494d0f20cdaf49e7e2df09",
+    "scripts/check_accounting_proposal.py": "ce3359ebade9a3e0ff88db4481d1176aa5fd6d2734da45db17cf5a220aede927",
+    "tests/test_accounting_proposal.py": "edbc6ebe41d4b18e8d43c43ce18c0d4e07ea32706cc44afc6155fbc886ae5f76"
+  },
+  "reviewed_at": "2026-10-03T19:33:05.225247+00:00"
+}

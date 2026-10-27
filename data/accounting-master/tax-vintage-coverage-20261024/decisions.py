@@ -1,0 +1,13 @@
+EVIDENCE={'continuation':'tax-vintage-continuation-20261024','manuscript':'tax-vintage-integration-20261024'}
+UPDATES={}
+def add(ids,advance,residual,next_action):
+    for key in ids.split():UPDATES[key]={'evidence':['continuation','manuscript'],'advance':advance,'residual':residual,'next_action':next_action,'full_requirement_closed':False,'acceptance':'not_promoted'}
+add('MC05','Payment day and ordinary-event endpoint retain the recorded assessment interval.','Later reassessment,deferred renewal and repeated carry remain incomplete.','Bind a cumulative replacement covering continued activity.')
+add('MC11 MC13 I05','Explicit settlement allocations preserve both vintage histories and the full 26-account book.','General annual state interfaces and repeated replacement absent.','Retain old/current settlements when replacing only current assessment.')
+add('MC16 G4 P17-04.10','Named positive allocations reconcile each vintage and the actual aggregate cash payment.','Actual law,credit/refund handling and new-period deferred recognition remain unadmitted.','Use current-vintage payments only in new cumulative liability calculation.')
+add('MC24 G2','Closed continuation request preserves complete predecessor and successful prefix with full-result apply.','General authoring and annual execution remain incomplete.','Specify a compatible reassessment successor without projecting state.')
+add('MC26','701 checks across34 cases,15 focused and25 regression methods validate explicit allocation and continuation.','Synthetic checks do not establish actual company/accounting admission.','Check cumulative/incremental tax and original-opening loss replacement independently.')
+add('MC28','Split payment3 then depreciation2 gives cash715/2,profit-17 and payable27/4 with four statement ties.','A selected hypothetical book is not a complete historical company.','Reassess continued income without consuming prior losses twice.')
+add('MC32','Version3.88 preserves174 sources,286 displays and739 citations;actual pages1,8,99,441–444 reviewed.','Dense navigation and whole-document/domain/human acceptance remain open.','Integrate subsequent repairs with protected predecessors and bounded review.')
+add('MC33 MC34 MC35','Settlement ambiguity repaired and all prior coverage preserved.','No whole phase closes;S6 held,S7 deferred.','Continue cumulative assessment and source-completeness work internally.')
+add('P17-04.11','Selected ordinary events and explicitly allocated payments continue after a partial first assessment.','Reassessment,new deferred recognition,repeated carry and annual acceptance remain open.','Resolve cumulative tax replacement before another provisional boundary.')

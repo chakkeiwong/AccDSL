@@ -1,0 +1,1 @@
+Skeptical audit: partition arithmetic does not establish transaction measurement. The measured conversion-to-control branch is locally evidence-blocked; retain source work and continue independent prospective-policy design. No global continuation veto; all original obligations preserved.

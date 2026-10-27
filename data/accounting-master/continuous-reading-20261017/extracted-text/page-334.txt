@@ -1,0 +1,51 @@
+CHAPTER 13.
+IMPLEMENTATION CONTRACTS
+325
+Relation
+Key information and constraints
+run
+Evidence and model hashes, cutoff, scenarios, branch
+selection, weight model, solver/numerical settings, seeds
+and environment.
+report_cell
+Run, branch/scenario, context, amount or result family,
+dependency references and completeness status.
+Persistent identifiers are opaque; display labels can change without changing identity. References
+use foreign keys or validated content-addressed links. The full logical key of a reported fact
+includes its dimensions, not merely company, label and year. Duplicate assertions are stored as
+distinct source claims until a documented duplicate-resolution operation relates them.
+Version records are append-only. A derived transaction-time interval can be closed by the
+next version event without deleting the original payload. Validity intervals can overlap when
+assertions conflict. Such overlap is diagnosed and resolved by the evidence view, not prohibited
+by a database constraint that would erase one assertion. Scenario states use structural sharing
+of immutable historical nodes and branch-local changes.
+Large simulation output is indexed by run, explanation, parameter draw, scenario, innovation
+path, entity, book, date and account. Reducing this to means across all dimensions would
+destroy the product’s central feature. Online summaries may compress draws within a declared
+distribution, while retaining conditional summaries and representative replay identifiers. A
+retention policy that removes individual traces must state which explanations can still be
+reconstructed.
+13.3
+Public API and result types
+The following unversioned names describe the user workflow. They are conceptual shorthand,
+not the portable operation registry. The exact versioned requests are specified below; Python,
+command-line and any service binding must exchange the same typed values:
+ingest(manifest, extractor_config) -> EvidenceVersion
+compile(source_or_ir, evidence_view, package_lock) -> ModelPlan | Diagnostics
+reconcile(plan, cutoff, solver_config) -> HistoryFamily | Diagnostics
+condition(family, assumptions) -> ConditionalFamily | Infeasible
+simulate(family, scenario_set, run_config) -> RunResult
+render(run_id, report_request) -> ReportBundle
+explain(node_id, evidence_view_or_run_id) -> ExplanationGraph
+compare(run_a, run_b, alignment_spec) -> Comparison
+HistoryFamily contains a model-scope declaration, shared variables, constraints, finite choices,
+feasibility status and solver-completeness status. It may contain witness histories without claim-
+ing that those witnesses enumerate the family. RunResult is a tagged union of concrete outputs,
+conditional samples, certified bounds, explored ranges and unresolved outputs. Probability-
+bearing results reference a probability-model record. Results without that reference cannot be
+presented as probabilities.
+Comparison requires an alignment specification: entity/perimeter, dates, reporting basis,
+scenarios and shared innovations where applicable. Comparing IFRS and US GAAP books
+holds economic events fixed and changes accounting rules. Comparing management responses
+holds the specified scenario and initial information fixed and changes the behavioural model.
+These are different questions and must not be combined into an unexplained difference.

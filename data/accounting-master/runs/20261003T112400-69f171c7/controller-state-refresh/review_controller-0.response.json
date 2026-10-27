@@ -1,0 +1,35 @@
+{
+  "assumptions": [
+    "The stated worker, review, locking and protection interfaces are trusted. Their implementations are outside this packet.",
+    "No supplied interface binds persisted phase acceptance to the phase contract and prerequisite evidence used when acceptance occurred.",
+    "Review was limited to the supplied packet; no tools or commands were used."
+  ],
+  "checks": [
+    "Inspected state validation, reload, evidence invalidation, dependency propagation, eligibility and next-plan publication.",
+    "The supplied verification reports 104 passing tests. Test bodies were not supplied, so their names do not establish coverage of the findings below.",
+    "The visible validation and refresh paths preserve mission_complete=false and all G1–G18 as open."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py: Master.__init__, Master.reload_state, validate_state, Master.refresh and Master.input_fingerprint.",
+    "tests/test_accounting_master.py: supplied test names and verification metadata only."
+  ],
+  "issues": [
+    "Persisted acceptance is not bound to the accepted phase contract. Master.__init__ snapshots the current controller/catalog hashes, while validate_state checks only that phase IDs match. Master.refresh reuses accepted_internal whenever recorded file hashes survive and current dependencies are accepted. Changing criteria, checker arguments, deliverables or dependencies while retaining IDs can therefore reuse acceptance earned under a different contract. The catalog hash in input_fingerprint affects blocked/deferred eligibility, not accepted phases; publishing the current catalog hash in next-plan does not repair this. Persist a canonical phase-contract digest and the prerequisite evidence identity at acceptance, compare both during refresh, and mark mismatches or missing legacy bindings stale. Add a regression where a contract changes without changing phase IDs or output bytes and verify that acceptance is invalidated."
+  ],
+  "next_actions": [
+    "Bind accepted records to their reviewed contract and prerequisite evidence, then invalidate incompatible acceptance before selecting work.",
+    "Make reload_state fail closed when previously observed canonical state disappears.",
+    "Add focused regression coverage and rerun controller verification and packet review."
+  ],
+  "residuals": [
+    "Master.reload_state silently retains its in-memory state if state.json disappears. If this method is the authoritative reload after lock acquisition, a previously constructed instance can subsequently save an obsolete snapshot or initial pending state. Distinguish first initialization from disappearance of previously observed state and raise ContinuationVeto for the latter. The lock/reload call sites are absent, so whether this becomes a reachable overwrite cannot be established from this packet.",
+    "Atomic-write durability, lock coverage, actual repair execution and process cleanup cannot be independently verified from the supplied function excerpts.",
+    "The accepted 192-report source panel and controller test results do not establish accounting correctness, scientific completeness or human acceptance."
+  ],
+  "steps": [
+    "Compared acceptance reuse and refresh behavior with the stated stale-state and honest-acceptance requirements.",
+    "Separated a visible acceptance-binding defect from limitations requiring omitted caller implementations."
+  ],
+  "summary": "Refresh can retain internal acceptance after a phase contract changes because acceptance is checked against surviving files, not the contract that earned it.",
+  "verdict": "REVISE"
+}

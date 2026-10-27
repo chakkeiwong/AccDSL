@@ -1,0 +1,46 @@
+{
+  "schema": "accdsl.bank-prudential.documentary.v1",
+  "evidence_mode": "authored_conditional_example",
+  "runtime_executed": false,
+  "identity": {"bank_id":"USBank-Synthetic","book_id":"USGAAP-Supplied","perimeter_id":"bank-only-no-subsidiaries","view":"authored-complete-case","currency":"USD","unit":"millions"},
+  "rule_snapshot": "2026-01-01",
+  "assessment_date": "2026-03-31",
+  "reporting_window": {"window_id":"authored-reporting-quarter","start":"2026-01-01","end":"2026-03-31","law_mode":"conditional_frozen_2026-01-01_rules","actual_period_end_applicability":"not_established"},
+  "timing_scope": "Conditional ordered events under a fixed historical rule snapshot; not an actual Call Report or an assertion about an actual bank's reporting period.",
+  "scope": {"national_bank":true,"cecl_adopted":true,"advanced_approaches":false,"category_III":false,"market_risk":false,"cblr_elected":false,"cecl_transition_adjustment":false,"special_supervisory_adjustment":false,"aoci":false,"subsidiaries":false,"minority_interests":false,"other_capital_instruments":false,"pcd":false,"allocated_transfer_risk_reserve":false,"off_balance_credit_exposures":false,"deferred_tax":false,"other_capital_deductions":false},
+  "stock_eligibility": {"i":true,"ii":true,"iii":true,"iv":true,"v":true,"vi":true,"vii":true,"viii":true,"ix":true,"x":true,"xi":true,"xii":true,"xiii":true},
+  "stock_eligibility_provenance": "All thirteen §3.20(b)(1) conditions are supplied assumptions, not verified contracts.",
+  "exposures": {"cash":"direct Federal Reserve balance","loans":"ordinary unsecured performing corporate loans, non-PCD, amortized cost","loan_days_past_due":0,"nonaccrual":false,"hvcre":false,"credit_mitigation":false,"qccp":false,"securities_or_derivatives":false},
+  "opening": {"cash":"30","loans":"100","goodwill":"2","allowance":"-4/5","deposits":"-110","borrowing":"0","common_stock":"-20","retained_earnings":"-6/5","interest_income":"0","interest_expense":"0","credit_loss_expense":"0"},
+  "events": [
+    {"id":"origination","kind":"originate_credit_deposit","amount":"20","expected_lines":[["loans","20"],["deposits","-20"]]},
+    {"id":"external_transfer","kind":"pay_deposit_externally","amount":"15","expected_lines":[["deposits","15"],["cash","-15"]]},
+    {"id":"loan_interest","kind":"receive_earned_interest","amount":"6","expected_lines":[["cash","6"],["interest_income","-6"]]},
+    {"id":"deposit_interest","kind":"credit_deposit_interest","amount":"2","expected_lines":[["interest_expense","2"],["deposits","-2"]]},
+    {"id":"allowance_remeasurement","kind":"supplied_allowance_remeasurement","target_allowance":"12/5","measurement_status":"supplied_not_estimated","expected_lines":[["credit_loss_expense","8/5"],["allowance","-8/5"]]},
+    {"id":"close_profit","kind":"close_income_accounts","expected_lines":[["interest_income","6"],["interest_expense","-2"],["credit_loss_expense","-8/5"],["retained_earnings","-12/5"]]}
+  ],
+  "funding": {"limit":"10","eligibility":"supplied unconditional availability within limit","runoff":"25","stress_runoff":"40","unpaid_obligation_policy":"retained_within_deposits_flagged_unpaid"},
+  "average_assets_input": {"bank_id":"USBank-Synthetic","perimeter_id":"bank-only-no-subsidiaries","currency":"USD","unit":"millions","window_id":"authored-reporting-quarter","statistic":"average_total_consolidated_assets","value":"145","provenance":"separate supplied conditional average; not inferred from the path or an actual report"},
+  "rule_parameters": {"cash_weight":"0","loan_weight":"1","allowance_cap_rate":"1/80","goodwill_deduction_fraction":"1"},
+  "expected": {
+    "opening": {"cash":"30","net_assets":"656/5","equity":"106/5","cet1":"96/5","cap_base":"100","cap":"5/4","tier2":"4/5","excess":"0","rwa":"100","total_capital":"20"},
+    "pre_runoff": {"cash":"21","net_assets":"703/5","equity":"118/5","cet1":"108/5","cap_base":"120","cap":"3/2","tier2":"3/2","excess":"9/10","rwa":"1191/10","total_capital":"231/10"},
+    "runoff": {"cash":"0","deposits":"92","borrowing":"4","net_assets":"598/5","equity":"118/5","unpaid":"0"},
+    "stress": {"cash":"0","deposits":"86","borrowing":"10","net_assets":"598/5","equity":"118/5","unpaid":"9"},
+    "risk_ratios": {"cet1":"72/397","tier1":"72/397","total":"77/397"},
+    "leverage": {"numerator":"108/5","denominator":"143","ratio":"108/715"}
+  },
+  "adverse_cases": [
+    {"id":"missing_stock_eligibility","mutation":"stock_eligibility.x_unknown","expected":"capital_unresolved"},
+    {"id":"failed_stock_eligibility","mutation":"stock_eligibility.x_false","expected":"unsupported_capital_profile"},
+    {"id":"wrong_perimeter","mutation":"request.perimeter_parent","expected":"input_rejected"},
+    {"id":"wrong_rule_date","mutation":"request.rule_snapshot_changed","expected":"input_rejected"},
+    {"id":"missing_average","mutation":"average_absent","expected":"leverage_unresolved_only"},
+    {"id":"closing_assets_substitution","mutation":"average_statistic_closing_assets","expected":"leverage_input_rejected"},
+    {"id":"wrong_average_perimeter","mutation":"average.perimeter_parent","expected":"leverage_input_rejected"},
+    {"id":"nonaccrual_loan","mutation":"exposures.nonaccrual_true","expected":"unsupported_exposure_profile"},
+    {"id":"pcd_loan","mutation":"scope.pcd_true","expected":"unsupported_exposure_profile"},
+    {"id":"nonpositive_leverage_base","mutation":"average_equals_goodwill","expected":"leverage_undefined"}
+  ]
+}

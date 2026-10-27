@@ -1,0 +1,1 @@
+Exact source preservation, checked continuity and bounded rendered review support provisional 5.43. Actor messages must not disclose the analyst world by construction. Financing evidence and all original rows are preserved.

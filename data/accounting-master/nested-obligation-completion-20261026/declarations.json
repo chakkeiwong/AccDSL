@@ -1,0 +1,4620 @@
+{
+  "alpha": {
+    "terms": {
+      "profile": "NestedQueryInvariantTemplate/1",
+      "context": {
+        "entity": "Operating-alpha",
+        "book": "legal-alpha",
+        "currency": "USD",
+        "case_id": "synthetic-cycle-alpha",
+        "mode": "synthetic"
+      },
+      "iteration": {
+        "profile": "NestedMapProjection/1",
+        "context": {
+          "entity": "Operating-alpha",
+          "book": "legal-alpha",
+          "currency": "USD",
+          "case_id": "synthetic-cycle-alpha",
+          "mode": "synthetic"
+        },
+        "parent_pointer": "/claims",
+        "child_pointer": "/terms",
+        "fields": {
+          "owner": {
+            "kind": "parent_key",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "identity": {
+            "kind": "child_key",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "parent_issued": {
+            "kind": "parent_field",
+            "pointer": "/issued",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "due": {
+            "kind": "child_field",
+            "pointer": "/due",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "effective": {
+            "kind": "child_field",
+            "pointer": "/effective",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "event_id": {
+            "kind": "child_field",
+            "pointer": "/event_id",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "predecessor": {
+            "kind": "child_field",
+            "pointer": "/predecessor",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "premise": {
+            "kind": "child_field",
+            "pointer": "/premise",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          }
+        },
+        "residuals": [
+          "Supplied structural query fixture; financial validity is separate"
+        ]
+      },
+      "mode": "rows",
+      "captures": {
+        "key": {
+          "kind": "child_key",
+          "type": {
+            "kind": "text",
+            "context": {}
+          }
+        },
+        "effective": {
+          "kind": "child_field",
+          "pointer": "/effective",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "issued": {
+          "kind": "parent_field",
+          "pointer": "/issued",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "now": {
+          "kind": "book_field",
+          "pointer": "/date",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        }
+      },
+      "template": {
+        "profile": "QueryGuardedInvariant/1",
+        "context": {
+          "entity": "Operating-alpha",
+          "book": "legal-alpha",
+          "currency": "USD",
+          "case_id": "synthetic-cycle-alpha",
+          "mode": "synthetic"
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "finite.query.invariant",
+          "version": "1",
+          "inputs": {
+            "has_previous": {
+              "type": {
+                "kind": "boolean",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:has_previous"
+            },
+            "previous_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:previous_id"
+            },
+            "identity": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:identity"
+            },
+            "predecessor": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:predecessor"
+            },
+            "effective": {
+              "type": {
+                "kind": "date",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:effective"
+            },
+            "due": {
+              "type": {
+                "kind": "date",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:due"
+            }
+          },
+          "requirements": [
+            {
+              "id": "unique_effective_identity",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "identity"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  },
+                  "value": "initial"
+                }
+              },
+              "requires": [
+                "identity"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "predecessor_chain",
+              "guard": {
+                "op": "ref",
+                "id": "has_previous"
+              },
+              "guard_requires": [
+                "has_previous"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "predecessor"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "previous_id"
+                }
+              },
+              "requires": [
+                "predecessor",
+                "previous_id"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "initial_sentinel",
+              "guard": {
+                "op": "not",
+                "arg": {
+                  "op": "ref",
+                  "id": "has_previous"
+                }
+              },
+              "guard_requires": [
+                "has_previous"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "predecessor"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  },
+                  "value": "none"
+                }
+              },
+              "requires": [
+                "predecessor"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "issued_before_effective",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2027-01-02"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "effective"
+                }
+              },
+              "requires": [
+                "effective"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "effective_by_book",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "effective"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2028-01-31"
+                }
+              },
+              "requires": [
+                "effective"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "effective_before_due",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "effective"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "due"
+                }
+              },
+              "requires": [
+                "effective",
+                "due"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            }
+          ],
+          "required_known": [],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Supplied internal finite query relations only"
+          ]
+        },
+        "queries": {
+          "self": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/terms",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "due": {
+                  "kind": "child_field",
+                  "pointer": "/due",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "effective": {
+                  "kind": "child_field",
+                  "pointer": "/effective",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "predecessor": {
+                  "kind": "child_field",
+                  "pointer": "/predecessor",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "premise": {
+                  "kind": "child_field",
+                  "pointer": "/premise",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "mode": "match",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/terms"
+              },
+              "field": "effective",
+              "allow_empty": false,
+              "value": {
+                "type": {
+                  "kind": "date",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "2027-01-02"
+                }
+              }
+            },
+            "on_ambiguous": "invalid"
+          },
+          "previous": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/terms",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "due": {
+                  "kind": "child_field",
+                  "pointer": "/due",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "effective": {
+                  "kind": "child_field",
+                  "pointer": "/effective",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "predecessor": {
+                  "kind": "child_field",
+                  "pointer": "/predecessor",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "premise": {
+                  "kind": "child_field",
+                  "pointer": "/premise",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "mode": "greatest",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/terms"
+              },
+              "field": "effective",
+              "allow_empty": true,
+              "upper_bound": {
+                "type": {
+                  "kind": "date",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "2027-01-02"
+                },
+                "inclusive": false
+              }
+            },
+            "on_ambiguous": "invalid"
+          }
+        },
+        "bindings": {
+          "has_previous": {
+            "kind": "has_row",
+            "query": "previous"
+          },
+          "previous_id": {
+            "kind": "selected_field",
+            "query": "previous",
+            "field": "identity"
+          },
+          "identity": {
+            "kind": "selected_field",
+            "query": "self",
+            "field": "identity"
+          },
+          "predecessor": {
+            "kind": "selected_field",
+            "query": "self",
+            "field": "predecessor"
+          },
+          "effective": {
+            "kind": "selected_field",
+            "query": "self",
+            "field": "effective"
+          },
+          "due": {
+            "kind": "selected_field",
+            "query": "self",
+            "field": "due"
+          }
+        },
+        "residuals": [
+          "No dynamic parent/child enumeration or financial admission"
+        ]
+      },
+      "slots": [
+        {
+          "kind": "group",
+          "query": "self"
+        },
+        {
+          "kind": "group",
+          "query": "previous"
+        },
+        {
+          "kind": "scalar",
+          "capture": "key",
+          "target": "/manifest/requirements/0/predicate/right/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "effective",
+          "target": "/queries/self/query/value/binding/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "effective",
+          "target": "/queries/previous/query/upper_bound/binding/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "issued",
+          "target": "/manifest/requirements/3/predicate/left/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "now",
+          "target": "/manifest/requirements/4/predicate/right/value"
+        }
+      ],
+      "residuals": [
+        "Explicit term dates and chain; event membership and structural premises separate"
+      ]
+    },
+    "assessments": {
+      "profile": "NestedQueryInvariantTemplate/1",
+      "context": {
+        "entity": "Operating-alpha",
+        "book": "legal-alpha",
+        "currency": "USD",
+        "case_id": "synthetic-cycle-alpha",
+        "mode": "synthetic"
+      },
+      "iteration": {
+        "profile": "NestedMapProjection/1",
+        "context": {
+          "entity": "Operating-alpha",
+          "book": "legal-alpha",
+          "currency": "USD",
+          "case_id": "synthetic-cycle-alpha",
+          "mode": "synthetic"
+        },
+        "parent_pointer": "/claims",
+        "child_pointer": "/assessments",
+        "fields": {
+          "owner": {
+            "kind": "parent_key",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "identity": {
+            "kind": "child_key",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "parent_issued": {
+            "kind": "parent_field",
+            "pointer": "/issued",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "term_id": {
+            "kind": "child_field",
+            "pointer": "/term_id",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "as_of": {
+            "kind": "child_field",
+            "pointer": "/as_of",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "remaining": {
+            "kind": "child_field",
+            "pointer": "/remaining",
+            "type": {
+              "kind": "rational",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "scale": "1/1"
+            }
+          },
+          "overdue": {
+            "kind": "child_field",
+            "pointer": "/overdue",
+            "type": {
+              "kind": "rational",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "scale": "1/1"
+            }
+          },
+          "origin": {
+            "kind": "child_field",
+            "pointer": "/origin",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "event_id": {
+            "kind": "child_field",
+            "pointer": "/event_id",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          }
+        },
+        "residuals": [
+          "Supplied structural query fixture; financial validity is separate"
+        ]
+      },
+      "mode": "rows",
+      "captures": {
+        "identity": {
+          "kind": "child_key",
+          "type": {
+            "kind": "text",
+            "context": {}
+          }
+        },
+        "at": {
+          "kind": "child_field",
+          "pointer": "/as_of",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "issued": {
+          "kind": "parent_field",
+          "pointer": "/issued",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "now": {
+          "kind": "book_field",
+          "pointer": "/date",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "cursor": {
+          "kind": "book_field",
+          "pointer": "/memory/collection_clock/cursor",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        }
+      },
+      "template": {
+        "profile": "QueryGuardedInvariant/1",
+        "context": {
+          "entity": "Operating-alpha",
+          "book": "legal-alpha",
+          "currency": "USD",
+          "case_id": "synthetic-cycle-alpha",
+          "mode": "synthetic"
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "finite.query.invariant",
+          "version": "1",
+          "inputs": {
+            "count": {
+              "type": {
+                "kind": "rational",
+                "context": {},
+                "dimensions": {},
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:count"
+            },
+            "has_term": {
+              "type": {
+                "kind": "boolean",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:has_term"
+            },
+            "due": {
+              "type": {
+                "kind": "date",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:due"
+            },
+            "selected_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:selected_id"
+            },
+            "referenced_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:referenced_id"
+            },
+            "as_of": {
+              "type": {
+                "kind": "date",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:as_of"
+            },
+            "remaining": {
+              "type": {
+                "kind": "rational",
+                "context": {
+                  "entity": "Operating-alpha",
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:remaining"
+            },
+            "overdue": {
+              "type": {
+                "kind": "rational",
+                "context": {
+                  "entity": "Operating-alpha",
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:overdue"
+            },
+            "unique_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:unique_id"
+            },
+            "self_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:self_id"
+            },
+            "origin": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:origin"
+            },
+            "event": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:event"
+            }
+          },
+          "requirements": [
+            {
+              "id": "terms_nonempty",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "lt",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "kind": "rational",
+                    "context": {},
+                    "dimensions": {},
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "count"
+                }
+              },
+              "requires": [
+                "count"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "unique_term_exists",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "ref",
+                "id": "has_term"
+              },
+              "requires": [
+                "has_term"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "historical_term_reference",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "selected_id"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "referenced_id"
+                }
+              },
+              "requires": [
+                "selected_id",
+                "referenced_id"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "overdue_after_due",
+              "guard": {
+                "op": "lt",
+                "left": {
+                  "op": "ref",
+                  "id": "due"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "as_of"
+                }
+              },
+              "guard_requires": [
+                "due",
+                "as_of"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "overdue"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "remaining"
+                }
+              },
+              "requires": [
+                "overdue",
+                "remaining"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "zero_by_due",
+              "guard": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "as_of"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "due"
+                }
+              },
+              "guard_requires": [
+                "as_of",
+                "due"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "overdue"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-alpha",
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                }
+              },
+              "requires": [
+                "overdue"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "issued_before_assessment",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2027-01-02"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "as_of"
+                }
+              },
+              "requires": [
+                "as_of"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "assessment_by_book",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "as_of"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2028-01-31"
+                }
+              },
+              "requires": [
+                "as_of"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "assessment_before_cursor",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "lt",
+                "left": {
+                  "op": "ref",
+                  "id": "as_of"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2028-02-01"
+                }
+              },
+              "requires": [
+                "as_of"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "unique_assessment_date",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "unique_id"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "self_id"
+                }
+              },
+              "requires": [
+                "unique_id",
+                "self_id"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "assessed_remaining_nonnegative",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-alpha",
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "remaining"
+                }
+              },
+              "requires": [
+                "remaining"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "supported_origin",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "any",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "op": "ref",
+                      "id": "origin"
+                    },
+                    "right": {
+                      "op": "const",
+                      "type": {
+                        "kind": "text",
+                        "context": {}
+                      },
+                      "value": "imported_snapshot"
+                    }
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "op": "ref",
+                      "id": "origin"
+                    },
+                    "right": {
+                      "op": "const",
+                      "type": {
+                        "kind": "text",
+                        "context": {}
+                      },
+                      "value": "recorded_event"
+                    }
+                  }
+                ]
+              },
+              "requires": [
+                "origin"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "imported_event_unknown",
+              "guard": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "origin"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  },
+                  "value": "imported_snapshot"
+                }
+              },
+              "guard_requires": [
+                "origin"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "event"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  },
+                  "value": "unknown"
+                }
+              },
+              "requires": [
+                "event"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            }
+          ],
+          "required_known": [],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Supplied internal finite query relations only"
+          ]
+        },
+        "queries": {
+          "term": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/terms",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "due": {
+                  "kind": "child_field",
+                  "pointer": "/due",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "effective": {
+                  "kind": "child_field",
+                  "pointer": "/effective",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "predecessor": {
+                  "kind": "child_field",
+                  "pointer": "/predecessor",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "premise": {
+                  "kind": "child_field",
+                  "pointer": "/premise",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "mode": "greatest",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/terms"
+              },
+              "field": "effective",
+              "allow_empty": false,
+              "upper_bound": {
+                "type": {
+                  "kind": "date",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "2027-02-28"
+                },
+                "inclusive": true
+              }
+            },
+            "on_ambiguous": "invalid"
+          },
+          "assessment": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/assessments",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "term_id": {
+                  "kind": "child_field",
+                  "pointer": "/term_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "as_of": {
+                  "kind": "child_field",
+                  "pointer": "/as_of",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "remaining": {
+                  "kind": "child_field",
+                  "pointer": "/remaining",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-alpha",
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "overdue": {
+                  "kind": "child_field",
+                  "pointer": "/overdue",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-alpha",
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "origin": {
+                  "kind": "child_field",
+                  "pointer": "/origin",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "mode": "match",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/assessments"
+              },
+              "field": "identity",
+              "allow_empty": false,
+              "value": {
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "imported"
+                }
+              }
+            },
+            "on_ambiguous": "invalid"
+          },
+          "term_count": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/terms",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "due": {
+                  "kind": "child_field",
+                  "pointer": "/due",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "effective": {
+                  "kind": "child_field",
+                  "pointer": "/effective",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "predecessor": {
+                  "kind": "child_field",
+                  "pointer": "/predecessor",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "premise": {
+                  "kind": "child_field",
+                  "pointer": "/premise",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "mode": "count",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/terms"
+              }
+            },
+            "on_ambiguous": "invalid"
+          },
+          "unique_date": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/assessments",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "term_id": {
+                  "kind": "child_field",
+                  "pointer": "/term_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "as_of": {
+                  "kind": "child_field",
+                  "pointer": "/as_of",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "remaining": {
+                  "kind": "child_field",
+                  "pointer": "/remaining",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-alpha",
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "overdue": {
+                  "kind": "child_field",
+                  "pointer": "/overdue",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-alpha",
+                      "book": "legal-alpha",
+                      "case_id": "synthetic-cycle-alpha",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "origin": {
+                  "kind": "child_field",
+                  "pointer": "/origin",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-alpha",
+                "book": "legal-alpha",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-alpha",
+                "mode": "synthetic"
+              },
+              "mode": "match",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/assessments"
+              },
+              "field": "as_of",
+              "allow_empty": false,
+              "value": {
+                "type": {
+                  "kind": "date",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "2027-02-28"
+                }
+              }
+            },
+            "on_ambiguous": "invalid"
+          }
+        },
+        "bindings": {
+          "count": {
+            "kind": "count",
+            "query": "term_count"
+          },
+          "has_term": {
+            "kind": "has_row",
+            "query": "term"
+          },
+          "due": {
+            "kind": "selected_field",
+            "query": "term",
+            "field": "due"
+          },
+          "selected_id": {
+            "kind": "selected_field",
+            "query": "term",
+            "field": "identity"
+          },
+          "referenced_id": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "term_id"
+          },
+          "as_of": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "as_of"
+          },
+          "remaining": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "remaining"
+          },
+          "overdue": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "overdue"
+          },
+          "unique_id": {
+            "kind": "selected_field",
+            "query": "unique_date",
+            "field": "identity"
+          },
+          "self_id": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "identity"
+          },
+          "origin": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "origin"
+          },
+          "event": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "event_id"
+          }
+        },
+        "residuals": [
+          "No dynamic parent/child enumeration or financial admission"
+        ]
+      },
+      "slots": [
+        {
+          "kind": "group",
+          "query": "term"
+        },
+        {
+          "kind": "group",
+          "query": "assessment"
+        },
+        {
+          "kind": "group",
+          "query": "term_count"
+        },
+        {
+          "kind": "scalar",
+          "capture": "identity",
+          "target": "/queries/assessment/query/value/binding/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "at",
+          "target": "/queries/term/query/upper_bound/binding/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "issued",
+          "target": "/manifest/requirements/5/predicate/left/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "now",
+          "target": "/manifest/requirements/6/predicate/right/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "cursor",
+          "target": "/manifest/requirements/7/predicate/right/value"
+        },
+        {
+          "kind": "group",
+          "query": "unique_date"
+        },
+        {
+          "kind": "scalar",
+          "capture": "at",
+          "target": "/queries/unique_date/query/value/binding/value"
+        }
+      ],
+      "residuals": [
+        "Explicit assessment relation template; remaining native obligations separate"
+      ]
+    },
+    "events": {
+      "profile": "ProjectedStateCollections/1",
+      "context": {
+        "entity": "Operating-alpha",
+        "book": "legal-alpha",
+        "currency": "USD",
+        "case_id": "synthetic-cycle-alpha",
+        "mode": "synthetic"
+      },
+      "definition": {
+        "profile": "MethodCollections/1",
+        "method_id": "term.event.membership",
+        "version": "1",
+        "inputs": {},
+        "collections": {
+          "terms": {
+            "fields": {
+              "id": {
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                },
+                "role": "state",
+                "source_ref": "explicit supplied event membership"
+              }
+            }
+          },
+          "recorded": {
+            "fields": {
+              "id": {
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                },
+                "role": "state",
+                "source_ref": "explicit supplied event membership"
+              }
+            }
+          },
+          "seen": {
+            "fields": {
+              "id": {
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                },
+                "role": "state",
+                "source_ref": "explicit supplied event membership"
+              }
+            }
+          }
+        },
+        "constraints": [
+          {
+            "id": "term_events_seen",
+            "op": "references",
+            "source": "terms",
+            "field": "id",
+            "target": "seen",
+            "target_field": "id"
+          },
+          {
+            "id": "recorded_events_seen",
+            "op": "references",
+            "source": "recorded",
+            "field": "id",
+            "target": "seen",
+            "target_field": "id"
+          }
+        ],
+        "residual_prerequisites": [
+          "Supplied event membership; source completeness separate"
+        ]
+      },
+      "sources": {
+        "terms": {
+          "profile": "NestedMapProjection/1",
+          "context": {
+            "entity": "Operating-alpha",
+            "book": "legal-alpha",
+            "currency": "USD",
+            "case_id": "synthetic-cycle-alpha",
+            "mode": "synthetic"
+          },
+          "parent_pointer": "/claims",
+          "child_pointer": "/terms",
+          "fields": {
+            "owner": {
+              "kind": "parent_key",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "identity": {
+              "kind": "child_key",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "parent_issued": {
+              "kind": "parent_field",
+              "pointer": "/issued",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "due": {
+              "kind": "child_field",
+              "pointer": "/due",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "effective": {
+              "kind": "child_field",
+              "pointer": "/effective",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "event_id": {
+              "kind": "child_field",
+              "pointer": "/event_id",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "predecessor": {
+              "kind": "child_field",
+              "pointer": "/predecessor",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "premise": {
+              "kind": "child_field",
+              "pointer": "/premise",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            }
+          },
+          "residuals": [
+            "Supplied structural query fixture; financial validity is separate"
+          ]
+        },
+        "assessments": {
+          "profile": "NestedMapProjection/1",
+          "context": {
+            "entity": "Operating-alpha",
+            "book": "legal-alpha",
+            "currency": "USD",
+            "case_id": "synthetic-cycle-alpha",
+            "mode": "synthetic"
+          },
+          "parent_pointer": "/claims",
+          "child_pointer": "/assessments",
+          "fields": {
+            "owner": {
+              "kind": "parent_key",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "identity": {
+              "kind": "child_key",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "parent_issued": {
+              "kind": "parent_field",
+              "pointer": "/issued",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "term_id": {
+              "kind": "child_field",
+              "pointer": "/term_id",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "as_of": {
+              "kind": "child_field",
+              "pointer": "/as_of",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "remaining": {
+              "kind": "child_field",
+              "pointer": "/remaining",
+              "type": {
+                "kind": "rational",
+                "context": {
+                  "entity": "Operating-alpha",
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "scale": "1/1"
+              }
+            },
+            "overdue": {
+              "kind": "child_field",
+              "pointer": "/overdue",
+              "type": {
+                "kind": "rational",
+                "context": {
+                  "entity": "Operating-alpha",
+                  "book": "legal-alpha",
+                  "case_id": "synthetic-cycle-alpha",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "scale": "1/1"
+              }
+            },
+            "origin": {
+              "kind": "child_field",
+              "pointer": "/origin",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "event_id": {
+              "kind": "child_field",
+              "pointer": "/event_id",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            }
+          },
+          "residuals": [
+            "Supplied structural query fixture; financial validity is separate"
+          ]
+        }
+      },
+      "bindings": {
+        "terms": {
+          "kind": "projected",
+          "source": "terms",
+          "fields": {
+            "id": "event_id"
+          },
+          "filter": null
+        },
+        "recorded": {
+          "kind": "projected",
+          "source": "assessments",
+          "fields": {
+            "id": "event_id"
+          },
+          "filter": {
+            "field": "origin",
+            "type": {
+              "kind": "text",
+              "context": {}
+            },
+            "value": "recorded_event"
+          }
+        },
+        "seen": {
+          "kind": "seen",
+          "fields": {
+            "id": "value"
+          }
+        }
+      },
+      "residuals": [
+        "Imported origin/event predicates are declared separately"
+      ]
+    }
+  },
+  "beta": {
+    "terms": {
+      "profile": "NestedQueryInvariantTemplate/1",
+      "context": {
+        "entity": "Operating-beta",
+        "book": "legal-beta",
+        "currency": "USD",
+        "case_id": "synthetic-cycle-beta",
+        "mode": "synthetic"
+      },
+      "iteration": {
+        "profile": "NestedMapProjection/1",
+        "context": {
+          "entity": "Operating-beta",
+          "book": "legal-beta",
+          "currency": "USD",
+          "case_id": "synthetic-cycle-beta",
+          "mode": "synthetic"
+        },
+        "parent_pointer": "/claims",
+        "child_pointer": "/terms",
+        "fields": {
+          "owner": {
+            "kind": "parent_key",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "identity": {
+            "kind": "child_key",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "parent_issued": {
+            "kind": "parent_field",
+            "pointer": "/issued",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "due": {
+            "kind": "child_field",
+            "pointer": "/due",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "effective": {
+            "kind": "child_field",
+            "pointer": "/effective",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "event_id": {
+            "kind": "child_field",
+            "pointer": "/event_id",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "predecessor": {
+            "kind": "child_field",
+            "pointer": "/predecessor",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "premise": {
+            "kind": "child_field",
+            "pointer": "/premise",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          }
+        },
+        "residuals": [
+          "Supplied structural query fixture; financial validity is separate"
+        ]
+      },
+      "mode": "rows",
+      "captures": {
+        "key": {
+          "kind": "child_key",
+          "type": {
+            "kind": "text",
+            "context": {}
+          }
+        },
+        "effective": {
+          "kind": "child_field",
+          "pointer": "/effective",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "issued": {
+          "kind": "parent_field",
+          "pointer": "/issued",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "now": {
+          "kind": "book_field",
+          "pointer": "/date",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        }
+      },
+      "template": {
+        "profile": "QueryGuardedInvariant/1",
+        "context": {
+          "entity": "Operating-beta",
+          "book": "legal-beta",
+          "currency": "USD",
+          "case_id": "synthetic-cycle-beta",
+          "mode": "synthetic"
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "finite.query.invariant",
+          "version": "1",
+          "inputs": {
+            "has_previous": {
+              "type": {
+                "kind": "boolean",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:has_previous"
+            },
+            "previous_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:previous_id"
+            },
+            "identity": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:identity"
+            },
+            "predecessor": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:predecessor"
+            },
+            "effective": {
+              "type": {
+                "kind": "date",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:effective"
+            },
+            "due": {
+              "type": {
+                "kind": "date",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:due"
+            }
+          },
+          "requirements": [
+            {
+              "id": "unique_effective_identity",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "identity"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  },
+                  "value": "initial"
+                }
+              },
+              "requires": [
+                "identity"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "predecessor_chain",
+              "guard": {
+                "op": "ref",
+                "id": "has_previous"
+              },
+              "guard_requires": [
+                "has_previous"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "predecessor"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "previous_id"
+                }
+              },
+              "requires": [
+                "predecessor",
+                "previous_id"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "initial_sentinel",
+              "guard": {
+                "op": "not",
+                "arg": {
+                  "op": "ref",
+                  "id": "has_previous"
+                }
+              },
+              "guard_requires": [
+                "has_previous"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "predecessor"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  },
+                  "value": "none"
+                }
+              },
+              "requires": [
+                "predecessor"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "issued_before_effective",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2027-01-02"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "effective"
+                }
+              },
+              "requires": [
+                "effective"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "effective_by_book",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "effective"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2028-01-31"
+                }
+              },
+              "requires": [
+                "effective"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "effective_before_due",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "effective"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "due"
+                }
+              },
+              "requires": [
+                "effective",
+                "due"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            }
+          ],
+          "required_known": [],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Supplied internal finite query relations only"
+          ]
+        },
+        "queries": {
+          "self": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/terms",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "due": {
+                  "kind": "child_field",
+                  "pointer": "/due",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "effective": {
+                  "kind": "child_field",
+                  "pointer": "/effective",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "predecessor": {
+                  "kind": "child_field",
+                  "pointer": "/predecessor",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "premise": {
+                  "kind": "child_field",
+                  "pointer": "/premise",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "mode": "match",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/terms"
+              },
+              "field": "effective",
+              "allow_empty": false,
+              "value": {
+                "type": {
+                  "kind": "date",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "2027-01-02"
+                }
+              }
+            },
+            "on_ambiguous": "invalid"
+          },
+          "previous": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/terms",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "due": {
+                  "kind": "child_field",
+                  "pointer": "/due",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "effective": {
+                  "kind": "child_field",
+                  "pointer": "/effective",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "predecessor": {
+                  "kind": "child_field",
+                  "pointer": "/predecessor",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "premise": {
+                  "kind": "child_field",
+                  "pointer": "/premise",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "mode": "greatest",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/terms"
+              },
+              "field": "effective",
+              "allow_empty": true,
+              "upper_bound": {
+                "type": {
+                  "kind": "date",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "2027-01-02"
+                },
+                "inclusive": false
+              }
+            },
+            "on_ambiguous": "invalid"
+          }
+        },
+        "bindings": {
+          "has_previous": {
+            "kind": "has_row",
+            "query": "previous"
+          },
+          "previous_id": {
+            "kind": "selected_field",
+            "query": "previous",
+            "field": "identity"
+          },
+          "identity": {
+            "kind": "selected_field",
+            "query": "self",
+            "field": "identity"
+          },
+          "predecessor": {
+            "kind": "selected_field",
+            "query": "self",
+            "field": "predecessor"
+          },
+          "effective": {
+            "kind": "selected_field",
+            "query": "self",
+            "field": "effective"
+          },
+          "due": {
+            "kind": "selected_field",
+            "query": "self",
+            "field": "due"
+          }
+        },
+        "residuals": [
+          "No dynamic parent/child enumeration or financial admission"
+        ]
+      },
+      "slots": [
+        {
+          "kind": "group",
+          "query": "self"
+        },
+        {
+          "kind": "group",
+          "query": "previous"
+        },
+        {
+          "kind": "scalar",
+          "capture": "key",
+          "target": "/manifest/requirements/0/predicate/right/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "effective",
+          "target": "/queries/self/query/value/binding/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "effective",
+          "target": "/queries/previous/query/upper_bound/binding/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "issued",
+          "target": "/manifest/requirements/3/predicate/left/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "now",
+          "target": "/manifest/requirements/4/predicate/right/value"
+        }
+      ],
+      "residuals": [
+        "Explicit term dates and chain; event membership and structural premises separate"
+      ]
+    },
+    "assessments": {
+      "profile": "NestedQueryInvariantTemplate/1",
+      "context": {
+        "entity": "Operating-beta",
+        "book": "legal-beta",
+        "currency": "USD",
+        "case_id": "synthetic-cycle-beta",
+        "mode": "synthetic"
+      },
+      "iteration": {
+        "profile": "NestedMapProjection/1",
+        "context": {
+          "entity": "Operating-beta",
+          "book": "legal-beta",
+          "currency": "USD",
+          "case_id": "synthetic-cycle-beta",
+          "mode": "synthetic"
+        },
+        "parent_pointer": "/claims",
+        "child_pointer": "/assessments",
+        "fields": {
+          "owner": {
+            "kind": "parent_key",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "identity": {
+            "kind": "child_key",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "parent_issued": {
+            "kind": "parent_field",
+            "pointer": "/issued",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "term_id": {
+            "kind": "child_field",
+            "pointer": "/term_id",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "as_of": {
+            "kind": "child_field",
+            "pointer": "/as_of",
+            "type": {
+              "kind": "date",
+              "context": {}
+            }
+          },
+          "remaining": {
+            "kind": "child_field",
+            "pointer": "/remaining",
+            "type": {
+              "kind": "rational",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "scale": "1/1"
+            }
+          },
+          "overdue": {
+            "kind": "child_field",
+            "pointer": "/overdue",
+            "type": {
+              "kind": "rational",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "dimensions": {
+                "currency:USD": 1
+              },
+              "scale": "1/1"
+            }
+          },
+          "origin": {
+            "kind": "child_field",
+            "pointer": "/origin",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          },
+          "event_id": {
+            "kind": "child_field",
+            "pointer": "/event_id",
+            "type": {
+              "kind": "text",
+              "context": {}
+            }
+          }
+        },
+        "residuals": [
+          "Supplied structural query fixture; financial validity is separate"
+        ]
+      },
+      "mode": "rows",
+      "captures": {
+        "identity": {
+          "kind": "child_key",
+          "type": {
+            "kind": "text",
+            "context": {}
+          }
+        },
+        "at": {
+          "kind": "child_field",
+          "pointer": "/as_of",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "issued": {
+          "kind": "parent_field",
+          "pointer": "/issued",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "now": {
+          "kind": "book_field",
+          "pointer": "/date",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        },
+        "cursor": {
+          "kind": "book_field",
+          "pointer": "/memory/collection_clock/cursor",
+          "type": {
+            "kind": "date",
+            "context": {}
+          }
+        }
+      },
+      "template": {
+        "profile": "QueryGuardedInvariant/1",
+        "context": {
+          "entity": "Operating-beta",
+          "book": "legal-beta",
+          "currency": "USD",
+          "case_id": "synthetic-cycle-beta",
+          "mode": "synthetic"
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "finite.query.invariant",
+          "version": "1",
+          "inputs": {
+            "count": {
+              "type": {
+                "kind": "rational",
+                "context": {},
+                "dimensions": {},
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:count"
+            },
+            "has_term": {
+              "type": {
+                "kind": "boolean",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:has_term"
+            },
+            "due": {
+              "type": {
+                "kind": "date",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:due"
+            },
+            "selected_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:selected_id"
+            },
+            "referenced_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:referenced_id"
+            },
+            "as_of": {
+              "type": {
+                "kind": "date",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:as_of"
+            },
+            "remaining": {
+              "type": {
+                "kind": "rational",
+                "context": {
+                  "entity": "Operating-beta",
+                  "book": "legal-beta",
+                  "case_id": "synthetic-cycle-beta",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:remaining"
+            },
+            "overdue": {
+              "type": {
+                "kind": "rational",
+                "context": {
+                  "entity": "Operating-beta",
+                  "book": "legal-beta",
+                  "case_id": "synthetic-cycle-beta",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "scale": "1/1"
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:overdue"
+            },
+            "unique_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:unique_id"
+            },
+            "self_id": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:self_id"
+            },
+            "origin": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:origin"
+            },
+            "event": {
+              "type": {
+                "kind": "text",
+                "context": {}
+              },
+              "role": "state",
+              "source_ref": "explicit query binding:event"
+            }
+          },
+          "requirements": [
+            {
+              "id": "terms_nonempty",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "lt",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "kind": "rational",
+                    "context": {},
+                    "dimensions": {},
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "count"
+                }
+              },
+              "requires": [
+                "count"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "unique_term_exists",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "ref",
+                "id": "has_term"
+              },
+              "requires": [
+                "has_term"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "historical_term_reference",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "selected_id"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "referenced_id"
+                }
+              },
+              "requires": [
+                "selected_id",
+                "referenced_id"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "overdue_after_due",
+              "guard": {
+                "op": "lt",
+                "left": {
+                  "op": "ref",
+                  "id": "due"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "as_of"
+                }
+              },
+              "guard_requires": [
+                "due",
+                "as_of"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "overdue"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "remaining"
+                }
+              },
+              "requires": [
+                "overdue",
+                "remaining"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "zero_by_due",
+              "guard": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "as_of"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "due"
+                }
+              },
+              "guard_requires": [
+                "as_of",
+                "due"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "overdue"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-beta",
+                      "book": "legal-beta",
+                      "case_id": "synthetic-cycle-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                }
+              },
+              "requires": [
+                "overdue"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "issued_before_assessment",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2027-01-02"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "as_of"
+                }
+              },
+              "requires": [
+                "as_of"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "assessment_by_book",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "as_of"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2028-01-31"
+                }
+              },
+              "requires": [
+                "as_of"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "assessment_before_cursor",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "lt",
+                "left": {
+                  "op": "ref",
+                  "id": "as_of"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  },
+                  "value": "2028-02-01"
+                }
+              },
+              "requires": [
+                "as_of"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "unique_assessment_date",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "unique_id"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "self_id"
+                }
+              },
+              "requires": [
+                "unique_id",
+                "self_id"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "assessed_remaining_nonnegative",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "const",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-beta",
+                      "book": "legal-beta",
+                      "case_id": "synthetic-cycle-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  },
+                  "value": "0/1"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "remaining"
+                }
+              },
+              "requires": [
+                "remaining"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "supported_origin",
+              "guard": {
+                "op": "const",
+                "type": {
+                  "kind": "boolean",
+                  "context": {}
+                },
+                "value": true
+              },
+              "guard_requires": [],
+              "predicate": {
+                "op": "any",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "op": "ref",
+                      "id": "origin"
+                    },
+                    "right": {
+                      "op": "const",
+                      "type": {
+                        "kind": "text",
+                        "context": {}
+                      },
+                      "value": "imported_snapshot"
+                    }
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "op": "ref",
+                      "id": "origin"
+                    },
+                    "right": {
+                      "op": "const",
+                      "type": {
+                        "kind": "text",
+                        "context": {}
+                      },
+                      "value": "recorded_event"
+                    }
+                  }
+                ]
+              },
+              "requires": [
+                "origin"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            },
+            {
+              "id": "imported_event_unknown",
+              "guard": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "origin"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  },
+                  "value": "imported_snapshot"
+                }
+              },
+              "guard_requires": [
+                "origin"
+              ],
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "event"
+                },
+                "right": {
+                  "op": "const",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  },
+                  "value": "unknown"
+                }
+              },
+              "requires": [
+                "event"
+              ],
+              "admission_refs": [],
+              "on_false": "invalid",
+              "on_unknown": "unresolved"
+            }
+          ],
+          "required_known": [],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Supplied internal finite query relations only"
+          ]
+        },
+        "queries": {
+          "term": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/terms",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "due": {
+                  "kind": "child_field",
+                  "pointer": "/due",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "effective": {
+                  "kind": "child_field",
+                  "pointer": "/effective",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "predecessor": {
+                  "kind": "child_field",
+                  "pointer": "/predecessor",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "premise": {
+                  "kind": "child_field",
+                  "pointer": "/premise",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "mode": "greatest",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/terms"
+              },
+              "field": "effective",
+              "allow_empty": false,
+              "upper_bound": {
+                "type": {
+                  "kind": "date",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "2027-02-28"
+                },
+                "inclusive": true
+              }
+            },
+            "on_ambiguous": "invalid"
+          },
+          "assessment": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/assessments",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "term_id": {
+                  "kind": "child_field",
+                  "pointer": "/term_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "as_of": {
+                  "kind": "child_field",
+                  "pointer": "/as_of",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "remaining": {
+                  "kind": "child_field",
+                  "pointer": "/remaining",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-beta",
+                      "book": "legal-beta",
+                      "case_id": "synthetic-cycle-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "overdue": {
+                  "kind": "child_field",
+                  "pointer": "/overdue",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-beta",
+                      "book": "legal-beta",
+                      "case_id": "synthetic-cycle-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "origin": {
+                  "kind": "child_field",
+                  "pointer": "/origin",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "mode": "match",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/assessments"
+              },
+              "field": "identity",
+              "allow_empty": false,
+              "value": {
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "imported"
+                }
+              }
+            },
+            "on_ambiguous": "invalid"
+          },
+          "term_count": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/terms",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "due": {
+                  "kind": "child_field",
+                  "pointer": "/due",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "effective": {
+                  "kind": "child_field",
+                  "pointer": "/effective",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "predecessor": {
+                  "kind": "child_field",
+                  "pointer": "/predecessor",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "premise": {
+                  "kind": "child_field",
+                  "pointer": "/premise",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "mode": "count",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/terms"
+              }
+            },
+            "on_ambiguous": "invalid"
+          },
+          "unique_date": {
+            "projection": {
+              "profile": "NestedMapProjection/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "parent_pointer": "/claims",
+              "child_pointer": "/assessments",
+              "fields": {
+                "owner": {
+                  "kind": "parent_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "identity": {
+                  "kind": "child_key",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "parent_issued": {
+                  "kind": "parent_field",
+                  "pointer": "/issued",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "term_id": {
+                  "kind": "child_field",
+                  "pointer": "/term_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "as_of": {
+                  "kind": "child_field",
+                  "pointer": "/as_of",
+                  "type": {
+                    "kind": "date",
+                    "context": {}
+                  }
+                },
+                "remaining": {
+                  "kind": "child_field",
+                  "pointer": "/remaining",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-beta",
+                      "book": "legal-beta",
+                      "case_id": "synthetic-cycle-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "overdue": {
+                  "kind": "child_field",
+                  "pointer": "/overdue",
+                  "type": {
+                    "kind": "rational",
+                    "context": {
+                      "entity": "Operating-beta",
+                      "book": "legal-beta",
+                      "case_id": "synthetic-cycle-beta",
+                      "mode": "synthetic"
+                    },
+                    "dimensions": {
+                      "currency:USD": 1
+                    },
+                    "scale": "1/1"
+                  }
+                },
+                "origin": {
+                  "kind": "child_field",
+                  "pointer": "/origin",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                },
+                "event_id": {
+                  "kind": "child_field",
+                  "pointer": "/event_id",
+                  "type": {
+                    "kind": "text",
+                    "context": {}
+                  }
+                }
+              },
+              "residuals": [
+                "Supplied structural query fixture; financial validity is separate"
+              ]
+            },
+            "query": {
+              "profile": "GroupedRowQuery/1",
+              "context": {
+                "entity": "Operating-beta",
+                "book": "legal-beta",
+                "currency": "USD",
+                "case_id": "synthetic-cycle-beta",
+                "mode": "synthetic"
+              },
+              "mode": "match",
+              "group": {
+                "parent_key": "invoice/a~1",
+                "parent_path": "/memory/claims/invoice~1a~01",
+                "child_map_path": "/memory/claims/invoice~1a~01/assessments"
+              },
+              "field": "as_of",
+              "allow_empty": false,
+              "value": {
+                "type": {
+                  "kind": "date",
+                  "context": {}
+                },
+                "binding": {
+                  "status": "known",
+                  "value": "2027-02-28"
+                }
+              }
+            },
+            "on_ambiguous": "invalid"
+          }
+        },
+        "bindings": {
+          "count": {
+            "kind": "count",
+            "query": "term_count"
+          },
+          "has_term": {
+            "kind": "has_row",
+            "query": "term"
+          },
+          "due": {
+            "kind": "selected_field",
+            "query": "term",
+            "field": "due"
+          },
+          "selected_id": {
+            "kind": "selected_field",
+            "query": "term",
+            "field": "identity"
+          },
+          "referenced_id": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "term_id"
+          },
+          "as_of": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "as_of"
+          },
+          "remaining": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "remaining"
+          },
+          "overdue": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "overdue"
+          },
+          "unique_id": {
+            "kind": "selected_field",
+            "query": "unique_date",
+            "field": "identity"
+          },
+          "self_id": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "identity"
+          },
+          "origin": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "origin"
+          },
+          "event": {
+            "kind": "selected_field",
+            "query": "assessment",
+            "field": "event_id"
+          }
+        },
+        "residuals": [
+          "No dynamic parent/child enumeration or financial admission"
+        ]
+      },
+      "slots": [
+        {
+          "kind": "group",
+          "query": "term"
+        },
+        {
+          "kind": "group",
+          "query": "assessment"
+        },
+        {
+          "kind": "group",
+          "query": "term_count"
+        },
+        {
+          "kind": "scalar",
+          "capture": "identity",
+          "target": "/queries/assessment/query/value/binding/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "at",
+          "target": "/queries/term/query/upper_bound/binding/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "issued",
+          "target": "/manifest/requirements/5/predicate/left/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "now",
+          "target": "/manifest/requirements/6/predicate/right/value"
+        },
+        {
+          "kind": "scalar",
+          "capture": "cursor",
+          "target": "/manifest/requirements/7/predicate/right/value"
+        },
+        {
+          "kind": "group",
+          "query": "unique_date"
+        },
+        {
+          "kind": "scalar",
+          "capture": "at",
+          "target": "/queries/unique_date/query/value/binding/value"
+        }
+      ],
+      "residuals": [
+        "Explicit assessment relation template; remaining native obligations separate"
+      ]
+    },
+    "events": {
+      "profile": "ProjectedStateCollections/1",
+      "context": {
+        "entity": "Operating-beta",
+        "book": "legal-beta",
+        "currency": "USD",
+        "case_id": "synthetic-cycle-beta",
+        "mode": "synthetic"
+      },
+      "definition": {
+        "profile": "MethodCollections/1",
+        "method_id": "term.event.membership",
+        "version": "1",
+        "inputs": {},
+        "collections": {
+          "terms": {
+            "fields": {
+              "id": {
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                },
+                "role": "state",
+                "source_ref": "explicit supplied event membership"
+              }
+            }
+          },
+          "recorded": {
+            "fields": {
+              "id": {
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                },
+                "role": "state",
+                "source_ref": "explicit supplied event membership"
+              }
+            }
+          },
+          "seen": {
+            "fields": {
+              "id": {
+                "type": {
+                  "kind": "text",
+                  "context": {}
+                },
+                "role": "state",
+                "source_ref": "explicit supplied event membership"
+              }
+            }
+          }
+        },
+        "constraints": [
+          {
+            "id": "term_events_seen",
+            "op": "references",
+            "source": "terms",
+            "field": "id",
+            "target": "seen",
+            "target_field": "id"
+          },
+          {
+            "id": "recorded_events_seen",
+            "op": "references",
+            "source": "recorded",
+            "field": "id",
+            "target": "seen",
+            "target_field": "id"
+          }
+        ],
+        "residual_prerequisites": [
+          "Supplied event membership; source completeness separate"
+        ]
+      },
+      "sources": {
+        "terms": {
+          "profile": "NestedMapProjection/1",
+          "context": {
+            "entity": "Operating-beta",
+            "book": "legal-beta",
+            "currency": "USD",
+            "case_id": "synthetic-cycle-beta",
+            "mode": "synthetic"
+          },
+          "parent_pointer": "/claims",
+          "child_pointer": "/terms",
+          "fields": {
+            "owner": {
+              "kind": "parent_key",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "identity": {
+              "kind": "child_key",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "parent_issued": {
+              "kind": "parent_field",
+              "pointer": "/issued",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "due": {
+              "kind": "child_field",
+              "pointer": "/due",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "effective": {
+              "kind": "child_field",
+              "pointer": "/effective",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "event_id": {
+              "kind": "child_field",
+              "pointer": "/event_id",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "predecessor": {
+              "kind": "child_field",
+              "pointer": "/predecessor",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "premise": {
+              "kind": "child_field",
+              "pointer": "/premise",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            }
+          },
+          "residuals": [
+            "Supplied structural query fixture; financial validity is separate"
+          ]
+        },
+        "assessments": {
+          "profile": "NestedMapProjection/1",
+          "context": {
+            "entity": "Operating-beta",
+            "book": "legal-beta",
+            "currency": "USD",
+            "case_id": "synthetic-cycle-beta",
+            "mode": "synthetic"
+          },
+          "parent_pointer": "/claims",
+          "child_pointer": "/assessments",
+          "fields": {
+            "owner": {
+              "kind": "parent_key",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "identity": {
+              "kind": "child_key",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "parent_issued": {
+              "kind": "parent_field",
+              "pointer": "/issued",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "term_id": {
+              "kind": "child_field",
+              "pointer": "/term_id",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "as_of": {
+              "kind": "child_field",
+              "pointer": "/as_of",
+              "type": {
+                "kind": "date",
+                "context": {}
+              }
+            },
+            "remaining": {
+              "kind": "child_field",
+              "pointer": "/remaining",
+              "type": {
+                "kind": "rational",
+                "context": {
+                  "entity": "Operating-beta",
+                  "book": "legal-beta",
+                  "case_id": "synthetic-cycle-beta",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "scale": "1/1"
+              }
+            },
+            "overdue": {
+              "kind": "child_field",
+              "pointer": "/overdue",
+              "type": {
+                "kind": "rational",
+                "context": {
+                  "entity": "Operating-beta",
+                  "book": "legal-beta",
+                  "case_id": "synthetic-cycle-beta",
+                  "mode": "synthetic"
+                },
+                "dimensions": {
+                  "currency:USD": 1
+                },
+                "scale": "1/1"
+              }
+            },
+            "origin": {
+              "kind": "child_field",
+              "pointer": "/origin",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            },
+            "event_id": {
+              "kind": "child_field",
+              "pointer": "/event_id",
+              "type": {
+                "kind": "text",
+                "context": {}
+              }
+            }
+          },
+          "residuals": [
+            "Supplied structural query fixture; financial validity is separate"
+          ]
+        }
+      },
+      "bindings": {
+        "terms": {
+          "kind": "projected",
+          "source": "terms",
+          "fields": {
+            "id": "event_id"
+          },
+          "filter": null
+        },
+        "recorded": {
+          "kind": "projected",
+          "source": "assessments",
+          "fields": {
+            "id": "event_id"
+          },
+          "filter": {
+            "field": "origin",
+            "type": {
+              "kind": "text",
+              "context": {}
+            },
+            "value": "recorded_event"
+          }
+        },
+        "seen": {
+          "kind": "seen",
+          "fields": {
+            "id": "value"
+          }
+        }
+      },
+      "residuals": [
+        "Imported origin/event predicates are declared separately"
+      ]
+    }
+  }
+}

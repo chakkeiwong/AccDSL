@@ -1,0 +1,38 @@
+{
+  "assumptions": [
+    "Controllers and workers are trusted; deliberate detachment and uncatchable termination between fork and durable registration remain outside scope.",
+    "The omitted callers must hold the exclusive writer lock before reload_state, refresh, save and event.",
+    "The omitted proposal_gate and consumers of derived readiness files must validate their bindings against current canonical state before relying on readiness."
+  ],
+  "checks": [
+    "Reviewed only the supplied code and interfaces; used no tools or external history.",
+    "Traced acceptance invalidation, dependency propagation, eligibility filtering, retry fingerprints and canonical-state publication.",
+    "The reported 141 passing tests support control-plane verification; test bodies were not supplied and the count establishes no accounting correctness.",
+    "Confirmed that refresh preserves mission_complete=false, all G1–G18 open, and the held product implementation queue."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_catalog.json",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "P2 — reload_state silently reuses cached state when a previously existing state.json disappears. __init__ can load accepted phases and run history, but reload_state only replaces self.state when the file exists. If the checkpoint is accidentally removed before reload, validation checks the old in-memory copy and succeeds; a subsequent refresh/save recreates that copy as canonical state. This conceals checkpoint loss and can resurrect outdated acceptance or discard newer history if the instance's snapshot is older. Repair: distinguish a genuinely new controller from one that has observed or committed persisted state. Under the writer lock, veto a missing checkpoint after persistence has been observed; require explicit evidence-preserving recovery instead of silently saving cached state. Preserve normal first-run initialization."
+  ],
+  "next_actions": [
+    "Add a regression covering checkpoint disappearance after construction and before reload; require a continuation veto and no replacement checkpoint or derived plan.",
+    "Also cover disappearance after a successful save on an initially new controller, while retaining a successful clean first-run case.",
+    "Rerun the relevant controller checks and submit the bounded repair for fresh review."
+  ],
+  "residuals": [
+    "Lock acquisition, atomic-write durability, process cleanup, repair execution and approval installation are supplied as interfaces rather than implementations in this packet; this review does not independently establish them.",
+    "refresh commits canonical state before publishing derived views. Ordinary interruption can therefore leave older derived files temporarily present. Their safety depends on consumers rejecting mismatched generations/state hashes and rebuilding on resume; consumer code and proposal_gate were not supplied.",
+    "The accepted panel of 192 reports, structural checks and scoped internal acceptance cannot close accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Audited ordinary missing-checkpoint recovery separately from hostile mutation.",
+    "Checked that the proposed repair preserves first-run initialization and the existing evidence-preserving resume contract."
+  ],
+  "summary": "Revise checkpoint reload: disappearance of previously persisted state currently falls back silently to an in-memory snapshot. The supplied scheduling logic otherwise preserves proposal-only execution and open mission gaps.",
+  "verdict": "REVISE"
+}

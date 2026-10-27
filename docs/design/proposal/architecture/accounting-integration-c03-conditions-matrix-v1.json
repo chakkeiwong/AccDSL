@@ -1,0 +1,104 @@
+{
+  "schema_version": "accdsl.proposal.c03.matrix.v1",
+  "scope": "Amends F185/F186 only; F182 unknown_reason remains governed by the retained six-row reason amendment",
+  "rows": [
+    {
+      "id": "F185",
+      "path": "source/C03/value/contractual_date",
+      "observed_types": [
+        "null",
+        "string"
+      ],
+      "allowed_types": [
+        "null",
+        "string"
+      ],
+      "required": true,
+      "expected_rule": "required string|null; string is exact ASCII YYYY-MM-DD and a valid proleptic Gregorian date in years 0001-9999; null is admissible only when party_to_contract is false; evaluate null condition only for an exact Boolean party"
+    },
+    {
+      "id": "F186",
+      "path": "source/C03/value/party_to_contract",
+      "observed_types": [
+        "boolean"
+      ],
+      "allowed_types": [
+        "boolean"
+      ],
+      "required": true,
+      "expected_rule": "required exact JSON boolean; no coercion and no null"
+    }
+  ],
+  "truth_table": [
+    {
+      "party_to_contract": true,
+      "date_class": "valid_date",
+      "representation_valid": true,
+      "assessment": "C03 eligible subject to retained source/method context"
+    },
+    {
+      "party_to_contract": false,
+      "date_class": "null",
+      "representation_valid": true,
+      "assessment": "C03 ineligible; date not applicable"
+    },
+    {
+      "party_to_contract": false,
+      "date_class": "valid_date",
+      "representation_valid": true,
+      "assessment": "C03 ineligible; date preserved as context only"
+    },
+    {
+      "party_to_contract": true,
+      "date_class": "null",
+      "representation_valid": false,
+      "assessment": "not assessed",
+      "code": "INVALID_UNKNOWN_REPRESENTATION"
+    }
+  ],
+  "date_policy": {
+    "grammar": "[0-9]{4}-[0-9]{2}-[0-9]{2} full string",
+    "calendar": "proleptic Gregorian",
+    "year_min": 1,
+    "year_max": 9999,
+    "normalization": "none",
+    "time_zone": "not applicable to calendar dates"
+  },
+  "diagnostics": [
+    {
+      "when": "required leaf absent",
+      "code": "INVALID_CONDITION_PACKET"
+    },
+    {
+      "when": "present party not exact Boolean or date outside string|null",
+      "code": "INVALID_FIELD_TYPE"
+    },
+    {
+      "when": "date string has invalid grammar or calendar day",
+      "code": "INVALID_CONDITION_PACKET"
+    },
+    {
+      "when": "exact true party and present null date",
+      "code": "INVALID_UNKNOWN_REPRESENTATION"
+    }
+  ],
+  "guards": [
+    "Check missingness before type and type before date parsing.",
+    "Evaluate true/null only if party is an exact Boolean.",
+    "A missing or malformed party does not suppress independently decidable date defects.",
+    "A malformed value parent yields one parent finding, suppressing descendant predicates."
+  ],
+  "finding_fields": [
+    "stage",
+    "path",
+    "code",
+    "expected",
+    "observed"
+  ],
+  "finding_order": [
+    "path",
+    "code"
+  ],
+  "stage": "shape",
+  "limitations": "Only party/date representation; source truth, enforceability and general recognition timing remain unestablished."
+}

@@ -1,0 +1,297 @@
+\chapter{Credit losses and the bank balance sheet}
+\label{ch:banking}
+
+The funding and default distinctions become central in a bank. A loan creates
+an asset, customer payments affect settlement liquidity, and a forecast of
+credit loss affects an allowance before cash is lost. The first case connects
+funding to a simple allowance; the later dated loan schedule separates credit
+stages, interest recognition and eventual recovery.
+
+\section{Banks: accounting capital is not regulatory capital}
+
+A bank package needs instrument and cohort states for loans, securities,
+deposits, wholesale funding, repos, derivatives, collateral and commitments.
+For interest-rate analysis, currency and repricing buckets matter alongside
+remaining maturity. For credit analysis, exposure, default state, loss severity,
+recoveries, guarantees and their dependencies matter. For liquidity analysis,
+deposit behaviour, collateral eligibility, encumbrance and payment timing matter.
+These states can be represented at an explicitly chosen aggregation level;
+the public record rarely identifies every contract.
+
+\subsection{A reported group boundary}
+
+JPMorgan Chase's filings make the boundary between a bank, its parent and its
+securities issuers concrete. In the 2022--2025 reports, Item~1 identifies
+JPMorgan Chase Bank, N.A. as the principal bank subsidiary and describes an
+intermediate holding company, JPMorgan Chase Holdings LLC (the IHC). The
+reports also describe J.P.~Morgan Securities LLC as a principal non-bank
+subsidiary and place J.P.~Morgan Securities plc and J.P.~Morgan SE beneath the
+bank. These are reported relationships for the stated dates, not a complete
+legal-entity graph \citep{jpmorgan2022tenk,jpmorgan2023tenk,jpmorgan2024tenk,jpmorgan2025tenk}.
+
+The attached Exhibit~21 tables qualify their scope: they list significant
+legal-entity subsidiaries, some parents of significant subsidiaries and certain
+entities designated for resolution planning, while excluding subsidiaries that
+would not be significant in aggregate under the stated SEC definition. Their
+indentation shows how the issuer presents the rows, but it does not supply
+ownership percentages, tax residence, functional currency or unrestricted
+transfer rights. A model therefore keeps a reported display relationship
+separate from a confirmed control edge.
+
+Exhibit~22.2 adds a different edge. It names JPMorgan Chase Financial Company
+LLC as issuer of Global Medium-Term Notes, Series~A, and JPMorgan Chase \& Co.
+as guarantor. Financial Company LLC does not appear in those qualified
+Exhibit~21 lists. The 2022--2023 text describes Series~A notes as currently
+offered and sold under one cited registration; the 2024--2025 text also says
+that the issuer may issue debt securities and warrants under a later cited
+registration. The descriptions say that the relevant securities are fully and
+unconditionally guaranteed, but they give no outstanding principal, guarantee
+valuation or accounting recognition. They also do not establish that a warrant
+was issued or that an earlier note was redeemed.
+
+The same reports state that the parent depends on subsidiary cash flows to pay
+its securities. The bank's dividends are subject to regulatory restrictions,
+and the IHC cannot pay dividends or extend credit to the parent when stated
+capital or liquidity thresholds, or management and board limits, apply. This
+means that consolidated cash, a subsidiary's assets and the parent's
+distributable funding are different state variables. The example gives the
+simulator a place to record the legal entity, guarantee and conditional funding
+path before it assigns a cash movement; it does not infer a balance or a
+probability of default.
+
+The complete Form~10-Ks describe Series~A as the issuer's direct, unsecured
+general obligations, ranking equally with its other unsecured and
+unsubordinated debt. Claims under the parent guarantee generally rank behind
+those of subsidiary creditors. Their summary of the 2016~Indenture requires
+the parent, on demand after issuer nonpayment, to make full and punctual
+payment of principal, interest and other amounts due: a guarantee of payment,
+not collection
+(Sections~14.01--14.02). It excludes amounts the issuer is excused from paying
+or beyond those actually due. Issuer defenses and counterclaims carry over,
+except those arising solely from insolvency or bankruptcy status. These
+descriptions refer to the Indenture and applicable prospectus supplements;
+they specify reported terms but do not supply a current balance, valuation or
+accounting recognition.
+
+The complete filings also describe one particular Series~A population: the
+Callable Fixed Rate Notes due 10 June 2032. They report US\$5,000,000 of
+aggregate principal outstanding at 31 December 2022 in the 2022 filing, at
+31 December 2023 in the 2023 filing, and at 31 December 2024 in both the 2024
+and 2025 filings. The last report repeats a 2024 as-of date; this passage
+supplies no 2025 year-end balance. The notes were issued on 10 June 2021 and bear 2.60\%
+annual interest payable semiannually on 10 June and 10 December. They mature
+on 10 June 2032 unless an earlier contractual outcome applies. The issuer
+may redeem all, but not part, on 10 June 2031 at principal plus accrued and
+unpaid interest. Upon acceleration after a continuing event of default, the
+stated amount is US\$1,000 per US\$1,000 principal plus accrued and unpaid
+interest. The descriptions report NYSE listing under JPM/32, DTC global
+book-entry issuance, and the possibility that a reopening increases aggregate
+principal outstanding \citep{jpmorgan2022tenk,jpmorgan2023tenk,jpmorgan2024tenk,jpmorgan2025tenk}.
+
+These dated amounts are reported principal, not carrying or fair value. Nor do
+they establish the accounting classification or value of the parent guarantee,
+the entire Series~A population, or an unchanged balance between the stated
+dates. Each filing's Exhibit~4.4 identifies the 19 February 2016 Indenture
+and incorporates it by reference to Exhibit~4(a)(7) of Form S-3 file
+333-209682, filed 24 February 2016. The complete filings summarize that
+instrument; its text and applicable supplements or amendments require their
+own inspection before being used as complete legal terms.
+
+\newpage
+The filings then describe general Series~A terms that may apply to securities
+including the Callable Notes. In their summary, unpaid interest must continue
+for 30 days to become an event of default; principal and other amounts default
+when due. An issuer covenant breach has a 90-day period after the specified
+written notice. For listed continuing payment, issuer-covenant or guarantee
+events, the trustee or holders of at least 25\% of the aggregate principal
+then outstanding for the relevant series may, by written notice to the issuer
+and guarantor, declare principal and accrued interest due. Specified continuing
+issuer insolvency events accelerate the debt automatically without a declaration. Guarantor insolvency
+alone is excluded and does not authorize acceleration under this description,
+while a payment default by the guarantor remains a separate possibility
+\citep{jpmorgan2022tenk,jpmorgan2023tenk,jpmorgan2024tenk,jpmorgan2025tenk}.
+A history must therefore keep the failure, notice, elapsed time, actor,
+declaration and changed due schedule distinct, rather than record one
+group-wide default flag.
+
+Collective remedy control also differs from an individual's right to payment.
+The summaries condition an ordinary holder remedy action on prior trustee
+notice, a request by holders meeting the stated 25\% threshold, 60 days of
+trustee inaction, indemnity and no inconsistent majority direction. They
+separately protect each holder's right to receive and sue for payment when due
+against impairment without that holder's consent. The summary permits certain
+amendments without holder consent under Section~8.01. For consent-based
+modifications under Section~8.02, it specifies a majority in aggregate
+principal amount of each affected outstanding series, whereas
+listed changes to maturity, amounts, currency, payment method, redemption,
+payment suit or specified holder repurchase rights, voting threshold or adverse guarantee terms require each
+affected holder's consent. These thresholds attach to different actions and
+voting populations, not a generic creditor vote. The 2022 default-and-waiver
+subsection omits the trustee-conflict paragraph that the 2023--2025 versions
+place there. The 2022 filing discusses a potential default, trustee conflict
+and possible resignation later under its trustee heading. This change in
+placement does not establish a contract amendment. The original Indenture and
+series-specific supplements remain uninspected
+\citep{jpmorgan2022tenk,jpmorgan2023tenk,jpmorgan2024tenk,jpmorgan2025tenk}.
+
+\newpage
+Reported succession terms give another reason to keep the obligor separate
+from the debt claim. Under the general Series~A summary, a successor to the
+issuer in a covered merger, consolidation or transfer of all or substantially
+all assets must be a U.S.\ corporation or limited liability company that
+expressly assumes due payment and the issuer's covenants. A successor to the
+guarantor must instead be a U.S.\ corporation that assumes the full guarantee
+and the guarantor's covenants. The continuing issuer or guarantor is the other
+stated route. Each party's route also requires that no default or event that
+would become a default with notice or time has occurred or would be continuing
+immediately after the transaction. The descriptions deem certain
+resolution-related transfers of the guarantor's material assets to meet the
+all-or-substantially-all category; they do not define a numeric percentage
+\citep{jpmorgan2022tenk,jpmorgan2023tenk,jpmorgan2024tenk,jpmorgan2025tenk}.
+
+The same summaries say a recapitalization, change of control or highly
+leveraged transaction alone receives no additional holder protection from
+these merger provisions; a particular supplement may provide a put or higher
+interest. The model therefore needs a dated successor, assumed payment and
+covenant duties, separate issuer/guarantor conditions and any evidenced
+series-specific protection. Succession itself does not prove repayment,
+accounting derecognition or unrestricted access to the group's cash. These
+are reported terms that may apply, pending inspection of the original
+Indenture and applicable supplements.
+
+Loan origination can debit loans and credit a customer deposit in the bank's
+book. Subsequent transfer to another bank produces settlement flows. Treating
+all loan growth as an immediate cash outflow would therefore encode a specific
+funding assumption, not a universal banking identity. A system-wide model must
+also link counterparties and settlement assets; single-company simulation
+records external counterparties without claiming to close the whole economy.
+
+\newpage
+An allowance calculation is a dated measurement based on forecast information.
+For a single horizon, let EAD be a fixed exposure at default, PD the probability
+of default, and LGD the mean loss fraction conditional on default. Ignoring
+discounting, the illustrative expected loss in currency units is
+\[
+ L=EAD\times PD\times LGD.
+\]
+With exposure 100, default probability 0.02 and loss given default 0.4, it
+produces 0.8. Changing those inputs to 0.04 and 0.5 produces 2, so the allowance
+increase is 1.2 if there are no other movements. This calculation is a
+demonstration model. A standard-specific expected-credit-loss implementation
+must determine horizon, staging or other classification, discounting,
+forward-looking information, write-offs and purchased-credit-impaired or
+other special cases. The simple formula is not an IFRS 9 or US GAAP compliance
+implementation.
+
+The exposure entering an allowance calculation also needs a defined
+population. JPMorgan's 2025 report gives four different amounts for
+lending-related commitments at 31 December 2025:
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}Xr@{}}
+\toprule
+Reported quantity & US\$ millions \\
+\midrule
+Contractual lending-related amount & 1,817,307 \\
+Commitments in the allowance-methodology table & 603,947 \\
+Allowance for lending-related commitments & 5,071 \\
+Lending-related carrying value & 6,278 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Notes 13 and 28 define these populations and measurements separately
+\citep[pp.~258--262, 295--297]{jpmorgan2025tenk}. The contractual total
+contains consumer and wholesale commitments; the allowance table excludes
+specified populations. The commitment allowance is reported in accounts
+payable and other liabilities. Carrying value can also contain guarantee
+liabilities, fair-value measurements and deferred fees or purchase adjustments,
+as applicable. For standby letters of credit and other financial guarantees,
+the report explicitly reconciles a US\$175m allowance and a US\$441m guarantee
+liability to US\$616m of carrying value. Treating either the contractual total
+or carrying value as the allowance would compute the wrong quantity.
+
+The report also distinguishes contractual capacity from expected funding.
+Customers may leave facilities unused, refinance them or let them expire;
+some commitments can be reduced or cancelled under their contracts or law.
+The reported policy records no allowance for future draws on unconditionally
+cancellable commitments. That exclusion concerns the loss measurement;
+a liquidity scenario still needs the conditions under which a customer can
+draw, the bank can cancel, and a payment requires settlement funds. Those
+conditions and their dependence on borrower distress cannot be recovered
+from a commitment total. Comparisons also need the same reporting basis:
+specified wholesale amounts are net of risk participations here but gross
+in Federal Reserve filings. Parent guarantees of subsidiary debt are
+expressly outside the Note~28 table
+\citep[pp.~258, 295--296, 300]{jpmorgan2025tenk}.
+
+A commitment to acquire loans makes the time distinction especially clear.
+The report dates the Apple Card forward purchase commitment to 30 December
+2025, its announcement to 7 January 2026, and expected closing to
+approximately 24 months later. The commitment disclosure includes about
+US\$104bn of estimated credit exposure at closing, including about US\$23bn
+of estimated drawn loans, while the reported transaction allowance is
+US\$2.2bn \citep[pp.~47, 260, 296]{jpmorgan2025tenk}. The expected drawn
+loans at that future closing are not loans already owned at the 2025 reporting
+date. A reconstruction therefore retains the forward commitment, the future
+portfolio estimate and the dated allowance as different facts. A forecast
+must supply closing and subsequent draw assumptions before generating loan
+and settlement events. These reported policies and amounts support the
+distinctions; their application to a new calculation still requires the
+operative accounting rules and actual contract facts.
+
+Regulatory capital is computed in a separate prudential layer with its own
+perimeter, eligibility, deductions, risk weights and transition provisions.
+Accounting equity feeds a reconciliation to capital; it is not automatically
+Common Equity Tier 1. Liquidity and capital constraints influence the
+management policy, which in turn generates asset sales, funding or capital
+events. A breached ratio can be an economically meaningful scenario outcome.
+No hidden capital injection is permitted to repair it.
+
+\section{A bank's cash, allowance and capital in one path}
+
+The bank reference state contains settlement cash 30, gross loans 100,
+allowance 0.8, deposits 110 and equity 19.2. Originating a loan of 20 first
+debits loans and credits the borrower's deposit. A subsequent transfer of 15
+to another bank debits deposits and credits settlement cash. Loan origination
+and external cash use are consequently distinct events. Receive loan interest
+6 in cash and credit deposit interest 2 to customer balances. Remeasure the
+allowance to 2.4, posting an additional loss of 1.6. The resulting state is
+cash 21, gross loans 120, allowance 2.4, deposits 117 and equity 21.6.
+Net assets are $21+120-2.4=138.6=117+21.6$.
+
+Now 25 of deposits runs off. The declared funding policy uses cash first,
+then a committed facility with limit 10. It draws 4 and settles 25, leaving
+cash zero, deposits 92 and wholesale debt 4. A runoff of 40 instead leaves
+9 unpaid even after the maximum facility draw. The simulator records default
+and retains the unpaid deposit obligation. It does not assume unlimited
+central-bank or shareholder funding.
+
+The prudential calculation is a separate, illustrative policy. Deduct 2 from
+accounting equity to obtain capital 19.6; apply a 75\% risk weight to gross
+loans for risk-weighted assets 90. The resulting ratio is $19.6/90$.
+Neither the deduction nor the weight is a Basel default. Actual prudential
+packages require jurisdiction, exposure class, eligibility, buffers and dated
+rules, with a reconciliation from the accounting book. The structure follows
+the need to model capital and liquidity jointly in
+\citet[Section 2]{behn2019}, without transferring that paper's estimated
+preferences or shock parameters to this bank.
+
+For a richer credit adapter, partition borrower cohorts by currency, vintage,
+credit state, remaining maturity, collateral and measurement category. At date
+$t$, supply scenario probabilities, conditional default-time probabilities,
+exposure paths, conditional loss severity and discount factors. Its expected
+loss calculation has the declared form
+\[
+ L_t=\sum_s p_s\sum_{k\in H}
+  d_{t,k}\Pr(\tau=k\mid s,\mathcal F_t)
+  \E[\mathrm{EAD}_k\mathrm{LGD}_k\mid\tau=k,s,\mathcal F_t].
+\]
+The conditional product expectation retains dependence between exposure and
+severity. The horizon $H$ concerns eligible default times; associated cash
+shortfalls may continue later. The rule package decides twelve-month versus
+lifetime default scope, credit-state transfers, interest basis and write-off
+recognition. Changes in allowance must be attributed to origination,
+derecognition, transfers, revised expectations, currency and write-offs.
+Contract and prudential support can be specified now, while full IFRS~9/CECL/
+ASBE classification and paragraph-level validation remain later obligations.
+
+\input{sections/bank-methods}

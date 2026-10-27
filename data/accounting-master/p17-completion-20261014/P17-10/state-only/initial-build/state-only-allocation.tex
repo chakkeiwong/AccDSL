@@ -1,0 +1,65 @@
+Take the wholly prepaid invoice in a synthetic book containing only cash 30
+and a contract liability of 30. No performance has occurred. Advance A1 has
+30 unused; there is no invoice yet. The new invoice I1 records gross billings
+of 30 and applies all of A1. Cumulative $G$ and $K$ both rise from zero to 30,
+so $T=G+A-K$ remains 30. Cash, revenue, receivables and contract balances do
+not change. But A1 is now fully used and I1 is paid. Omitting this transition
+would let a later invoice claim the same credit again.
+
+The authored advance-allocation profile therefore pins a closed journal
+variant and a separate economic delta. In addition to their common context,
+basis and authorization references, their distinguishing fields are:
+\begin{lstlisting}
+JournalProposal {
+  effect: "state_only", lines: []
+}
+EconomicDelta {
+  account_changes: zero for every chart account,
+  before_contract: advance A1 unused 30; no invoice,
+  after_contract: A1 used 30; invoice I1 gross 30,
+                  applied 30, unpaid 0; allocation A1->I1
+}
+\end{lstlisting}
+This display abbreviates the required common references; the pinned schema
+bundle supplies the closed field lists and complete portable records. The
+independent calculation checks both levels. It derives zero account changes
+from the contract equations and verifies that the advance, invoice and
+allocation agree with the new cumulative values. Empty lines with a proposed
+receivable increase of 1 fail that reconciliation. Zero account changes with
+the allocation omitted also fail: the required economic effect is missing.
+
+Authorization uses the identified unused advance, a fresh invoice identity,
+the zero unpaid amount and the admitted contract bounds. A caller cannot
+replace those findings with a true permission flag. The profile supports a
+synthetic book only; its historical source support and authored facts provide
+no authorization for a real company's posting. An assurance that the empty
+journal balances would establish none of these conditions.
+
+For a valid first event E1, the atomic transaction publishes the state-only
+proposal, independent delta, new contract state, receipt and event-index entry,
+and advances the branch generation once. The receipt is evidence that the
+allocation was committed, even though every account balance stayed the same.
+The stable identity remains the entity, book, branch and business event.
+Its fingerprint covers the whole portable request, including the original
+expected head, generation, request identifier and execution settings.
+
+Retrying the identical request after the commit returns the original receipt.
+The lookup must precede comparison with today's head; otherwise a successful
+retry would wrongly fail because its own earlier commit advanced the branch.
+Changing I1 to I2 under E1 instead conflicts, as does changing the request
+identifier while keeping the amounts. A genuinely new event E2 submitted
+against the old opening fails freshness. Rebuilding E2 against the current
+opening cannot rescue the reused credit: A1 has no unused amount, so
+authorization fails before lookup. These are different reasons for preserving
+the current book unchanged.
+
+On replay, the response identifies the original committed event but reports
+no additional commit by this invocation. A lost acknowledgement remains
+unknown until lookup under the original identity resolves it; inventing a new
+event identity could double the allocation. Exports and recovery must also
+retain the economic transition. A format limited to monetary journal lines
+must preserve the state-only event separately or report that a lossless export
+is unsupported. Dropping it because revenue and cash did not change would
+make the recovered advance available twice. The complete documentary exchanges
+exercise these distinctions; transaction durability and concurrent execution
+remain implementation checks.

@@ -1,0 +1,1 @@
+All53 obligations,6 interactions and46 operations retain exact predecessor references. Scoped authoring evidence advances17 obligations without whole-row closure. This is documentary continuity,not a fresh domain audit of every row. Hash and identity mismatches veto the refresh.

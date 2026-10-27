@@ -1,0 +1,13 @@
+# Bounded source and rendered review
+
+26 October 2026. The audited plan is docs/plans/accounting-vintage-carry-integration-20261026.md. Version 5.17 is protected: all 240 source files remain, with only two cover edits and two shared include additions; two new teaching units are added. Twenty-three immediate result/source files are pinned. Accepted inference and carry source locks were also checked transitively without rerunning their successful writers.
+
+The finite inference unit states the independence assumption before its posterior equation. It distinguishes unknown probabilities, incompatible zero likelihood, genuine zero prior support, source content identity and semantic information identity. It derives corrected (1/4,3/4), independent-signal (2/5,3/5), retracted (2/3,1/3), and duplicate-information (1/10,9/10) results. It preserves the checkpoint recomputation cost and supplied-availability limitations. Its implementation claim is restricted to FiniteVintageInference/1, with the accepted attempt-02 and recorded earlier semantic-identity omission.
+
+The carry unit preserves unpaid claim/cash/arrears40, historical miss40, new shares40 and closing interest20. It distinguishes preserved observations from current findings, a selected carry policy from universal fiscal rules, and checked /3 compatibility from implicit schema migration. The source of these synthetic quantities is the existing financing case and independently checked carry continuation, not a claim about an actual issuer.
+
+The first build failed because transported escapes damaged new LaTeX commands. The failed log and exact source bytes remain in build-attempt-01 and source-before-escape-repair. The repaired build restores the intended equations and commands; no predecessor source or research result changes. Build-attempt-02 succeeds for both editions. The verifier passes 806 source/include/citation/label/layout checks, with no new warnings or clipped text.
+
+Actual rendered review covers main physical pages 1, 40–46 and 68–74, and standalone pages 1, 31–37 and 59–65. All new material and adjacent transitions are visible; equations, headings, citations and paragraphs are legible. The standalone contains 172 body pages; its bibliography begins on physical page187 (numbered173), with190 total pages. The main has757 pages. These counts describe document size, not research completeness.
+
+This is bounded author review, not independent or human-reader acceptance. The additions preserve the source qualifications and logical claims listed in the plan. Whole-document consistency, actual-source validity, broader inference and financial-method coverage remain open.

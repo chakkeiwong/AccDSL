@@ -1,0 +1,96 @@
+{
+  "schema_version": "accdsl.accounting.fixtures.v1",
+  "scope": "Synthetic contract fixtures only; no runtime or accounting-validity claim",
+  "source_bindings": [
+    {
+      "path": "docs/design/proposal/methods/standards-fixtures-v1.json",
+      "cases": ["A01", "A02", "A03"],
+      "sha256_required": "abc88bf75ded39516f43db0fdb45b9a905609ea11543072f7411540f33fd0798"
+    },
+    {
+      "path": "docs/design/proposal/methods/standards-source-register-v1.json",
+      "paragraphs": ["S9 5.1.1", "S9 5.1.1A", "S9 B5.1.2A"],
+      "sha256_required": "a10080c5080ae8e663c805590bb63f00103d9b7a60c8fc0cd4143a7662ea01bc"
+    }
+  ],
+  "common_context": {
+    "entity": "illustrative_for_profit_entity",
+    "book": "illustrative_book",
+    "annual_period_start": "2024-01-01",
+    "currency": "CU",
+    "scale": "units",
+    "authority_scope": "retained AASB 9 compilation 5; 31 December 2022",
+    "implementation_status": "specified_only"
+  },
+  "cases": [
+    {
+      "id": "AC01_A01_eligible_fvtpl",
+      "source_case": "A01",
+      "event": {"business_event_id": "acq-001", "event_version": 1, "price": "100", "fair_value": "100", "fee": "2", "category": "FVTPL"},
+      "opening_state": {"digest": "open-0", "cash": "1000", "asset": "0", "expense": "0"},
+      "expected": {
+        "assessment_status": "eligible",
+        "journal": [["asset", "100", "0"], ["expense", "2", "0"], ["cash", "0", "102"]],
+        "state_delta": {"cash": "-102", "asset": "100", "expense": "2"},
+        "receipt_status": "committed",
+        "commit": true
+      }
+    },
+    {
+      "id": "AC02_A02_eligible_amortised_cost",
+      "source_case": "A02",
+      "event": {"business_event_id": "acq-002", "event_version": 1, "price": "100", "fair_value": "100", "fee": "2", "category": "amortised_cost"},
+      "opening_state": {"digest": "open-0", "cash": "1000", "asset": "0", "expense": "0"},
+      "expected": {
+        "assessment_status": "eligible",
+        "journal": [["asset", "102", "0"], ["cash", "0", "102"]],
+        "state_delta": {"cash": "-102", "asset": "102"},
+        "receipt_status": "committed",
+        "commit": true
+      }
+    },
+    {
+      "id": "AC03_A03_missing_valuation_evidence",
+      "source_case": "A03",
+      "event": {"business_event_id": "acq-003", "event_version": 1, "price": "100", "fair_value": "105", "fee": "2", "category": "FVTPL"},
+      "opening_state": {"digest": "open-0", "cash": "1000", "asset": "0", "expense": "0"},
+      "expected": {
+        "assessment_status": "unresolved",
+        "failure_code": "TREATMENT_UNRESOLVED",
+        "journal": [],
+        "state_delta": null,
+        "receipt_status": "rejected",
+        "mathematical_status": "unresolved",
+        "computation_status": "not_computed",
+        "commit": false
+      }
+    },
+    {
+      "id": "AC04_replay_same_identity",
+      "source_case": "AC01_A01_eligible_fvtpl",
+      "event": {"business_event_id": "acq-001", "event_version": 1, "payload_digest": "same-as-AC01"},
+      "opening_state": {"digest": "open-1"},
+      "expected": {"receipt_status": "replayed", "original_receipt_id": "AC01_A01_eligible_fvtpl", "commit": false, "additional_posting": false}
+    },
+    {
+      "id": "AC05_stale_opening_state",
+      "source_case": "AC01_A01_eligible_fvtpl",
+      "event": {"business_event_id": "acq-004", "event_version": 1, "payload_digest": "new-event"},
+      "opening_state": {"digest": "open-0"},
+      "current_state": {"digest": "open-1"},
+      "expected": {"receipt_status": "rejected", "failure_code": "STALE_OPENING_STATE", "commit": false, "additional_posting": false}
+    }
+  ],
+  "acceptance_checks": [
+    "Eligible A01/A02 journals balance and match their independently stated state deltas.",
+    "A03 preserves known facts, returns TREATMENT_UNRESOLVED and writes no domain state.",
+    "Replay returns the original receipt without a second posting.",
+    "A stale expected opening digest is rejected without a journal/state write.",
+    "A balanced journal alone is never treated as eligibility evidence."
+  ],
+  "limits": [
+    "Fixtures are synthetic and source-scoped.",
+    "No runtime transaction, persistence, standards compliance, forecast validity or human acceptance is established.",
+    "Later corporate, financing, bank, insurance, group/FX, standards and forecasting methods remain P17 obligations."
+  ]
+}

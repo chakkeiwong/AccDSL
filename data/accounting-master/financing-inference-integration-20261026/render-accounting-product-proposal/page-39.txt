@@ -1,0 +1,51 @@
+CHAPTER 3.
+LEARNING AND PERSISTENT UNCERTAINTY
+17
+optimal after reoptimization, and another in which the optimal policy sets agree although the
+two optimal values differ (Xin and Goldberg, 2021, Definitions 3.1–3.3, Observations 5–7, proofs
+in Sections 6.3–6.5). The company model must specify whether management can commit to a
+policy, what information each later decision uses, and which family of joint laws is retained.
+For a finite reference problem, enumerate complete admissible laws and observation-measurable
+policies before choosing an approximation. For larger problems, a set of beliefs over persistent
+types or an explicit precommitment formulation can retain those restrictions, but its recursive
+sufficiency and computational cost need a separate derivation. Repeated worst-case optimization
+remains useful as a stress test when the changed family is stated explicitly.
+3.14
+Persistent parameters and particle approximation
+A particle approximation can reduce computation after a probability model is chosen. It
+does not create that model. A type with probability 0.01 has probability 0.99100 > 1/3 of
+disappearing from 100 independent multinomial resampling draws. No new evidence is involved
+in this loss. Rare but material types therefore need explicit support checks, stratification or
+separate conditional computations, with the resulting approximation stated.
+For state-space models with persistent unknown parameters, SMC2 combines parameter particles
+and state filters, with particle-MCMC rejuvenation (Chopin et al., 2013, Section 3.2, equation (7),
+Proposition 1, Appendix A). Its extended target has the desired parameter posterior as a marginal
+under the source assumptions. Finite particles still approximate that posterior; exactness of a
+target marginal does not mean that one finite run represents every possible type. The unbiased
+full particle likelihood estimate used in this construction must be distinguished from an arbitrary
+estimated likelihood ratio.
+The inspected author-linked modern implementation creates a state filter for each parameter
+particle, runs that filter through the current observation date when evaluating a proposed
+parameter, and incorporates a likelihood correction when increasing the state-particle count.
+These operations have real time and memory costs. Retaining only filtering arrays differs from
+retaining complete genealogies. This is a candidate for explicitly probabilistic filtering, not a
+replacement for symbolic unweighted historical ambiguity.
+3.15
+Changing particles without changing the target
+Increasing the number of particles can change an inference result even before new evidence
+arrives. The reason is that a likelihood estimate and its random construction belong to the
+state used by particle MCMC. Replacing the estimate with another unbiased estimate does not
+automatically preserve their joint distribution. A test that examines only current company-type
+probabilities can miss the error.
+Fix an evidence revision v and a persistent type θ. Write its prior as p(θ) and likelihood as
+Lv(θ). A particle representation of size N uses random variables u with law mN(u | θ) and
+produces a nonnegative unbiased estimate ZN,v(θ, u) of that likelihood. Assume the normalizing
+constant Cv is finite and positive. The joint target weights the random construction by the
+estimate it produces:
+eπN,v(θ, u) = p(θ)mN(u | θ)ZN,v(θ, u)
+Cv
+.
+(3.10)
+Integrating over u replaces ZN,v by its expectation Lv, giving the desired type posterior. This is
+the extended-target argument in the retained SMC2 source, arXiv 1101.1528v3, 27 January 2012
+(Chopin et al., 2013, equation (7), Proposition 1 and Appendix A). Unbiasedness establishes

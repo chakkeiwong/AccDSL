@@ -1,0 +1,127 @@
+\subsection{Begin a reporting period with live claims}
+\label{sec:complete-claims-opening}
+
+A new reporting period need not begin with an empty receivables register.
+Customers may still owe amounts from sales in the preceding year. The closing
+procedure carries those claims forward with their identifiers, issue dates,
+remaining amounts and assessment history. An opening rule that requires an
+empty register would reject this ordinary continuation even when the carried
+book and opening statements are internally consistent.
+
+The retained examples make that conflict concrete. Two company charts carry
+one live claim with a remaining amount of 20 into 1 January 2028. Two further
+programs carry three claims whose remaining amounts are 13 each, giving a
+receivables balance of 39. The claims were issued during 2027 and assessed on
+31 December 2027. The new reporting period ends exclusively on 1 January 2029;
+its period flows are empty, while the claim records and previously seen event
+identities remain. The original continuation contains three commands in each
+one-claim case and two in each three-claim case. Those ten commands supply an
+exact comparison for the opening extension.
+
+The selected empty-opening template rejects all four books at
+\code{empty\_claims}. Removing that stage alone exposes a second empty-specific
+condition: \code{claim\_total} requires the receivables balance to be zero.
+Removing both conditions makes the remaining opening checks pass, but it also
+admits five deliberately corrupted books. The corruptions are a wrong
+receivables total, a negative remaining claim, a missing sale identity, an
+issue date after the opening and an inconsistent overdue amount. The full
+selected state invariant rejects each corruption. Thus the required change
+is not simply to permit a nonempty map. It is to retain the relationship
+between every supplied claim and the book as a whole.
+
+\code{CompleteClaimsOpening/1} makes that change under an independently
+selected contract. The selection identifies the original empty-opening
+template and the full state invariant. The new contract carries both
+definitions, their canonical identities, the exact two excluded stage names
+and an explicit description of its scope. Before deriving the revised
+structural template, the adapter checks that \code{empty\_claims} is the
+reviewed equality with the empty claim map and that \code{claim\_total} is
+the reviewed zero-receivables predicate. Every other stage remains unchanged.
+A newly supplied predicate does not acquire reviewed status merely because
+the caller computes its digest.
+
+The accompanying \code{SuppliedClaimPopulation/1} declaration states whether
+the supplied internal claim map is complete, partial or unknown. It names
+\code{/claims}, identifies the exact opening book and supplies provenance.
+Only an explicit \code{complete} declaration proceeds under this profile;
+partial and unknown declarations return unresolved before any command runs.
+Completeness here concerns the supplied internal state. A populated map, a
+balanced book and a successful continuation cannot establish that a real
+issuer has disclosed every claim. That different question still belongs to
+source-constrained reconstruction.
+
+Admission first runs the retained structural and opening-report checks on the
+same input. It then evaluates the full selected invariant over the unchanged
+book, schemas and memory definition. The invariant checks the aggregate
+receivables relationship and the claim conditions that the simple relaxation
+missed. A malformed schema or incomplete statement mapping therefore still
+fails its original check. A mid-period snapshot also remains unsuitable as a
+new-period opening even if its claims satisfy the invariant. This profile
+deliberately checks structure and the opening report before the full
+invariant; it does not promise an older profile's failure precedence when
+several conditions fail together.
+
+The program wrapper, \code{AdmittedCompleteClaimsProgram/1}, retains the
+complete admission result. After admission succeeds, it delegates to the
+existing opening-to-program binding using the derived structural template
+and its corresponding internal selection. That binding again checks shared
+facts, schemas, mapping, memory definition, roles, policy, rules, invariant,
+complete projected commands and event-input order before the unchanged
+composer runs. A caller-supplied success flag cannot replace these checks.
+The retained delegated result exposes the requests, transitions, reports,
+carry state, trace and any stopped suffix.
+
+The same distinction is explicit in company source.
+\code{CompleteClaimsCompanyText/1} surrounds the full selected company
+source with a reviewed-selection identity, population declaration and contract
+residuals. The declaration below supplies the population premise in a checked
+carried example; the opening-book identity is computed from the exact imported
+book rather than typed a second time.
+
+\begin{quote}\small\ttfamily
+population "SuppliedClaimPopulation/1" complete "/claims"\\
+\hspace*{1em}"Exact retained synthetic carry; complete supplied internal map";
+\end{quote}
+
+This display wraps one source declaration for readability. The complete
+program begins with the text and target profiles, then names the expected
+reviewed-selection digest. The caller supplies that reviewed selection
+separately. Between \code{begin\_selected\_company} and
+\code{end\_selected\_company}, the author writes the complete opening,
+invariant, eligibility, recipe and command source described in
+Section~\ref{sec:selected-company-source}. Its only imported resources remain
+the opening book, schemas, statement mapping and memory definition. An extra
+resource containing an opaque algorithm is refused.
+
+Lowering checks that both the named identity and the nested source selection
+match the independently supplied selection. Editing an opening condition or
+invariant cannot silently replace that reviewed choice. Lowering also verifies
+the structural contract, but does not admit the opening or run commands.
+Execution invokes admission anew. UTF-8 bytes and line endings remain part of
+source identity; nested errors retain their original parent-source locations.
+The invariant parser supplies declaration locations, while the opening lexer
+can identify an offending token. The outer source preserves that difference
+instead of asserting precision the inner parser does not provide.
+
+Four carried and four empty-opening source programs reproduce the complete
+typed results. The carried programs retain all ten continuation commands;
+the empty-opening programs retain all 44 commands. The five corrupted states
+still refuse before execution. Native lifecycle callbacks and the operating
+method builder are disabled throughout these comparisons. The result
+comparison permits differences only in the outer and delegated
+\code{program\_order\_sha256} fields: both record the full program's
+serialization order, which source reconstruction can change while preserving
+canonical content. Both identities are independently recomputed and retained.
+Every other field, including complete execution and event-input-order identity,
+matches the typed comparison.
+
+The checked successor therefore admits these complete supplied carried books
+without weakening the selected invariant. It leaves partial actual histories,
+arbitrary alternative financial rules and accounting applicability unresolved.
+The carried-state audit, typed contracts and full source comparisons are kept
+together with their explicit refusal cases under
+\begingroup\raggedright
+\path{data/accounting-master/nonempty-opening-audit-20261026/},
+\path{data/accounting-master/complete-claims-opening-20261026/}
+and \path{data/accounting-master/complete-claims-source-20261026/}.
+\par\endgroup

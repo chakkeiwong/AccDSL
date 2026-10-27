@@ -1,60 +1,23 @@
-# P08 implementation checkpoint
+# P08 scope/eligibility checkpoint
 
-2026-10-03. Recovery and structured approved plan/review inspected. The two required deliverables and checker were missing at recovery; the partial
-engine, tests and source register were present and have now been verified. Approved scope is a synthetic
-issuer compound convertible bond; MC06/15/17/19/29/30 and G4/G7/G8 stay wider.
+The approved coherent-bundle repair is complete. The builder regenerated
+`authority-and-methods.json` with `--history-dir docs/design/research/p08-v6/build-history`
+and archived the prior canonical bytes by hash. The rebuilt manifest includes
+current applicability, fixture, builder, checker and test pins.
 
-## Pre-execution skeptical audit and evidence contract
+Exact parsed `cases` and `comparisons` equal
+`docs/design/research/p08-v6/applicability-baseline.json`. The standalone checker
+passed six groups and 51 tests with zero failures, errors or skips in 101.268319
+seconds. `admission_allowed` remains false; criterion 3 and
+`phase_criteria_complete` remain incomplete. The final JSON report is
+`docs/design/research/p08-v6/final-check.json`; the complete evidence contract,
+commands, hashes, changed-artifact inventory and residuals are in
+`docs/design/research/p08-v6/applicability-check-report.json`.
 
-Question: can applicable primary authority support a parameterized, exact issuer
-lifecycle and same-fact comparison? Comparator: existing compound-bond dossier
-(arithmetic regression only), independently derived present values and cash flows.
-Pass: inspected applicable recognition/measurement/classification/settlement
-anchors, parameterized atomic journals, both multi-period settlements, matched
-inputs and reproducible notes. Vetoes: unsupported authority blocks the affected
-treatment; invalid dates, ineligible terms, imbalance, negative funding or state
-mismatch block implementation acceptance. Source failures do not stop independent
-preparation. No short check establishes accounting compliance, forecast validity,
-human acceptance, superiority or whole-gap closure. Result and source/hash evidence
-will be preserved in authority-and-methods.json and result.md.
-
-Defaults audit: annual periods, two coupons, fixed shares, functional currency,
-no fees/tax/options and 10% comparable yield come from the reviewed synthetic
-example (hypotheses, not real-market estimates). Wrong eligibility or yield can
-produce balanced but wrong accounting: reject unsupported clauses and independently
-check PV, alternative parameters and authority applicability. Australian for-profit
-Tier 1 basis is a bounded scope choice; check edition and period-start limits.
-Opening cash/equity 20 is synthetic settlement funding; test insufficient cash and
-atomic rollback. Exact rational arithmetic is an engineering choice; this does not
-validate real currency rounding. Inspection dates do not substitute for effective
-periods. Matched comparisons hold economics fixed; absent sources stay unresolved.
-
-Audit passes for this bounded plan: no ranking/proxy promotion, source-dependent
-stops are local, and exact outputs answer only the stated conformance question.
-
-## Files and next steps
-
-Declared new files: scripts/corporate_financing_v1.py,
-scripts/check_accounting_p08.py, tests/test_accounting_p08.py,
-docs/design/research/p08-v1/*, and the three permitted P08 files. Existing dossier,
-shared engines, frozen corpus and protected supervisor files remain preserved.
-Checked AASB 9, AASB 132 and AASB 7 retained primary text with hashes and anchors;
-ASC/ASBE/EU routes remain explicitly blocked or uninspected. The engine, checker,
-unit tests and exact-case deliverables are now written. Next: run the full unit
-suite and checker, repair any failure, then record the final result and residuals.
-
-## Verification checkpoint
-
-The focused suite passed 12 tests. The first checker run passed authority
-admission, independent PV/cash-flow oracles, matched-fact handling, and the
-authority-methods schema; it found one result-note wording mismatch. The note
-now states the required professional-accounting-validity boundary explicitly.
-Next exact checks: rerun `python3 -B scripts/check_accounting_p08.py --check`,
-inspect its bounded JSON summary, and verify the three required files and final
-changed-file inventory.
-
-Final verification passed: `python3 -B scripts/check_accounting_p08.py --check`
-reported authority=3 sources/12 claims, 12 focused tests, 3 independent oracles,
-4 matched-comparison rows with three unresolved cells, and valid result and
-authority-methods deliverables. Remaining work is explicitly source-dependent
-cross-standard comparison and the six queued corporate methods.
+This bounded repair changes no source, code or test file and does not establish
+substantive legal/accounting validity. The 15 scope/eligibility decisions remain
+independent-review pending. Stop here with PARTIAL. Next task: independently
+review those decisions, then address classification/issuance in a separate
+bounded group. Measurement/settlement/notes, remaining amendments/corrigenda,
+EU lifecycle admission, US GAAP, ASBE and wider MC15/MC29 obligations remain
+open.

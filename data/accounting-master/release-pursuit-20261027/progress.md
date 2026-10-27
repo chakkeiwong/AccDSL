@@ -1,0 +1,45 @@
+# Eight-hour release pursuit progress
+
+Start 2026-10-27 07:19:56 UTC; deadline 15:19:56 UTC. Baseline 5.52-R1. Reviewed plan: docs/plans/accounting-release-eight-hour-20261027.md. Source audit completed since prior checkpoint; original source/network boundaries must remain explicit. Active goal is ongoing; no release acceptance claimed.
+
+Finite-coupling theorem repaired in protected 5.52-R2; initial pairing and common-loss conditions explicit, including generalized initial/matched-path error. Exact checks and both builds pass; local rendered pages inspected. Stable pointers not yet changed; concurrent debt-reading integration is preserved.
+
+27 October, ongoing: read R2 physical pages 1–72 in ordered six-page segments. Confirmed and repaired sole-cash-movement assumption, common-family equivalence premise, five-date heading, explicit joint scenario admissibility and EPS numerator-sign qualification in a protected 5.53-R1 successor. The successor retains the complete 5.53 selected-source addition, imports the exact checked coupling repair, adds one-page reading orientation and pins adapted-estimation arXiv v2. Both volumes build (833/263 pages), 441 source/build checks pass, 19 actual rendered pages reviewed and the 410-file package verifies. Clean-copy reproduction is running; links remain on 5.53 until it passes. Whole-document and independent acceptance remain open. Concurrent source and source/opening compatibility work has advanced; reuse it instead of repeating it.
+
+09:58 UTC: selected reconciled 5.53-R1 after both clean-copy builds reproduced every page. The 833-page main and 263-total/242-body-page simulation volumes remain not_ready. Nine live controls and four stable links updated with exact pre-write guards. The selected-reading/history adapter completed concurrently; its newer 5.54 integration plan is preserved and now explicitly requires the checked R1 repairs. Ordered author reading is recorded through R2 page 78. No acceptance population was promoted.
+
+27 October, continuing: selected5.54-R1 after the particle-weight convention repair, complete approximation-chapter author regression,425 source/build checks,411-file package verification and both separate-copy reproductions. Ten current controls and four links were guarded and refreshed, preserving the active remaining-claim plan and all frozen acceptance hashes. Ordered baseline reading reached132. Section14.13 needs an explicit continuous-financing domain; extra bridge borrowing can improve minimum cash without changing final cash. This is ready internal repair, not a reason to stop.
+
+11:33 UTC: selected 5.54-R2 after the continuous financing repair, all 428 source/build checks, complete chapter14 author regression, 414-file package and both relocated document builds. The new standard-library companion reproduces every trace and both independent expected counterexamples. Ten controls and four stable links refreshed with guarded writes, preserving the newer 37-exchange executable replay and all 27 bounded claim dispositions. Ordered 5.52-R2 reading is recorded through physical150. No acceptance population promoted; all larger closure requirements remain.
+
+12:03 UTC reconciliation: selected 5.54-R2 package revision 2 preserves every manuscript/PDF byte and adds the verified source/history/opening/report replay. The 423-file copied package reproduces all 37 exchanges under the reviewed comparison rules (1,667 checks). Ordered baseline reading is recorded through162; resume163. Pursuit state and reset memo now match the guarded master update in replay-package/advancement.json. No acceptance population promoted.
+
+2026-10-27T13:18:25.929936+00:00: bank consolidation passes 20,339 original checks over1,659 complete exchanges plus63 exact-time cases,42 retries and12 additional controls. The1,452-input separate copy and internal archive preserve every declared input. Four MC21 clauses receive evidence-specific dispositions without broad closure. Three preceding supplements are reconciled in pursuit state; the selected manuscript remains5.54-R2 package revision2.
+
+13:51 UTC: ordered read reaches192. Chapter18 implies monotonic midpoint-grid improvement; n=4/5 and10/11 disprove that interpretation. A protected5.54-R3 repair now derives the exact all-threshold bound and adds an isolated portable companion. All169 retained teaching checks reproduce and6,552 rational boundary/interior cases pass. Both PDFs and package integration remain in progress; stable links still select5.54-R2 package2.
+
+2026-10-27T14:18:38.032324+00:00: selected 5.55 after all 437 source/build checks, 15 page inspections, 447-file verification, exact copied sector replay and full copied-volume text comparisons. Separately saved ordered reading reaches 192; the existing current work unit is preserved for reconciliation. Release remains not_ready.
+
+2026-10-27T14:39:08.921750+00:00: ordered author reading of protected 5.52-R2 reaches physical page 216; resume at 217. Segment continuity and PDF identity checked; no independent or whole-document acceptance inferred. Selected candidate and active work unit preserved.
+
+2026-10-27T14:50:03.089367+00:00: selected5.55-R1 after merging the exact midpoint repair into current5.55. All460 source/build checks,452-file package,12 rendered-page bindings and both copied-document reproductions pass. Six preceding companions retained exactly; seventh numerical companion reproduces169 original checks and6,552 rational cases. Original acceptance remains unchanged; final timed reconciliation continues.
+
+2026-10-27T14:54:48.109020+00:00: ordered author reading of protected 5.52-R2 reaches physical page 234; resume at 235. Segment continuity and PDF identity checked; no independent or whole-document acceptance inferred. Selected candidate and active work unit preserved.
+
+## 2026-10-27T15:06:42.225851+00:00 — Final release reconciliation in progress
+
+Selected 5.55-R1 remains not_ready. Final decision: data/accounting-master/release-pursuit-20261027/final-reconciliation/release-decision.md.
+Snapshot: data/accounting-master/release-pursuit-20261027/final-reconciliation/snapshot-02. All declared package bytes, frozen
+acceptance, archive identities and saved review continuity pass. Ordered main
+reading reaches 240; no node-level or independent acceptance inferred.
+Remaining work: data/accounting-master/release-pursuit-20261027/final-reconciliation/remaining-program.md. Objective achieved: false.
+
+## 2026-10-27T15:20:35.937410+00:00 — Eight-hour effort concluded
+
+Selected 5.55-R1 remains not_ready. Final decision: data/accounting-master/release-pursuit-20261027/final-reconciliation/release-decision.md.
+Snapshot: data/accounting-master/release-pursuit-20261027/final-reconciliation/snapshot-deadline. All declared package bytes, frozen
+acceptance, archive identities and saved review continuity pass. Ordered main
+reading reaches 252; no node-level or independent acceptance inferred.
+Remaining work: data/accounting-master/release-pursuit-20261027/final-reconciliation/remaining-program.md. Objective achieved: false.
+
+2026-10-27T15:21:16.749425+00:00: ordered author reading of protected 5.52-R2 reaches physical page 252; resume at 253. Segment continuity and PDF identity checked; no independent or whole-document acceptance inferred. Selected candidate and active work unit preserved.

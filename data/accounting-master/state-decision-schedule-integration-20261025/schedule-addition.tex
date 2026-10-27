@@ -1,0 +1,53 @@
+\paragraph{Bind a scheduled decision when its date arrives.}
+The preceding sequence fixes the state read by each decision, but its caller
+must supply the corresponding future book hashes. An authored simulation should
+instead supply its starting book and a calendar, then calculate those later
+states as it proceeds. The bounded \texttt{StateDecisionSchedule/1} extension
+does this by materializing each decision request only at its turn. Its expected
+state hash is the hash of the current book, after earlier successful events.
+
+A schedule supplies a named rule, explicit priority and either a list of
+calendar dates or a start date, exclusive end date and positive integer number
+of days between occurrences. For example, daily decisions from 2 January 2027
+up to, but excluding, 5 January produce the same three decisions as the explicit
+dates 2, 3 and 4 January. Calendar arithmetic includes leap days. It introduces
+no month-end adjustment, business calendar, timezone conversion or contractual
+day-count convention. All occurrences must fall within the current fiscal
+period and no earlier than the book's last event.
+
+Different decisions on the same day need distinct explicit priorities. An
+unresolved tie stops scheduling before economic execution; rearranging the input
+array does not choose an order. Each decision and sale receives a stable identity
+derived from the declared root and schedule names and its occurrence number.
+The complete schedule also retains its own content identity, so an equivalent
+list of dates and recurrence can produce identical execution while remaining
+different authored documents. Every declared policy is statically checked
+before the first event, including a later policy that an earlier refusal might
+otherwise prevent the runner from reaching.
+
+The checked calendar reproduces the manually assembled stock/reserve sequence:
+one unit sold, then half a unit, then no action. Cash is USD~474.50. The selected
+lot retains USD~5 of carrying amount, while the inventory control totals USD~65:
+the opening USD~80 also included USD~60 outside that lot. With a zero reserve,
+the same rule sells both units over two decisions and cash reaches USD~482;
+the next decision observes depletion and takes no action. Distinguishing a
+selected lot from the company's inventory control is necessary when checking
+the full balance sheet.
+
+An unresolved or refused decision stops the sequence with the exact current
+book, earlier outcomes and pending calendar retained. The stop record includes
+the materialized request, its state hash and the proposed event where available.
+A no-action advances the decision cursor without changing the book's event
+date. The scheduler accepts up to 32 schedules and 64 total decisions; the
+existing request checker also bounds serialized size, nesting and structure.
+These limits keep the reference finite and do not establish production capacity.
+
+Eighteen focused scheduler methods, 28 direct decision regression methods and
+49 exact comparisons across five cases preserve manually assembled requests,
+complete native outcomes and all financial report fields. The evidence is in
+\path{data/accounting-master/state-decision-schedule-20261025/}. The calendar
+retains the explicit premise that no external economic event is omitted.
+Combining decisions with separately supplied financing, tax, purchase or period
+events requires those events' own timing and accounting rules. General calendar
+generation, historical completeness and durable restart remain separate work.
+

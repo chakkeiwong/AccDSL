@@ -1,0 +1,114 @@
+\chapter[Equity and ownership]{Equity funding, ownership, and dilution}
+\label{sim:equity}
+
+An equity issue can provide cash while changing ownership and future claims. A model that records only an increase in cash and book equity captures one accounting consequence but misses the allocation of control and value. A structural model that charges an issuance cost captures a financing friction but does not automatically create a share register. Scenario simulation needs quantities, prices, rights, holders and dates, together with an explanation of who is willing to subscribe.
+
+\section{Book equity, market value and share capital}
+Book equity is the residual of recognized assets and liabilities under an accounting basis. Market equity value is the value assigned to owners' economic claims. Legal share capital is a legally defined component of capital that may be related to nominal share values. These quantities have different meanings. Dividing book equity by shares produces book value per share, not automatically the market subscription price.
+
+A company can have positive book equity and insufficient cash to pay a maturity. It can have negative book equity and valuable future opportunities. Limited liability can bound the value of a shareholder's claim below by zero in a model without forcing the accounting residual to zero. The simulator should retain these quantities separately and define any relation between them.
+
+Let $N$ be the number of existing ordinary shares, $V_E$ the total economic value assigned to their claim, and $p=V_E/N$ a per-share value when shares are homogeneous and $N>0$. This division presumes that $V_E$ refers to exactly that class. If preferred shares, options or noncontrolling interests are included in total equity value, allocating all of it to ordinary shares is wrong.
+
+\section{A simple cash issue}
+Suppose the company issues $n$ new homogeneous ordinary shares at subscription price $p_s>0$. Gross proceeds are $G=np_s$. If cash issuance costs are $f$, net cash is $G-f$. With no simultaneous repurchase or conversion, the post-issue count is
+\begin{equation}
+ N^+=N+n=N+\frac{G}{p_s}.
+ \label{sim:share-issue}
+\end{equation}
+An existing holder with $n_i$ shares has ownership fraction $n_i/N$ before and $n_i/(N+n)$ after the issue, assuming that holder does not subscribe. This is percentage dilution. Its economic consequence depends on the price received and the use of the proceeds.
+
+For example, let $N=100$, pre-issue equity value be 1,000, and issue 20 shares at 10. If the cash adds 200 of value and there are no costs or other effects, post-issue value is 1,200 and each share remains worth 10. The old holders' percentage falls from 100 per cent to $100/120$, but their combined value remains 1,000. Percentage dilution is not necessarily a wealth loss.
+
+If the same 20 shares are issued at 8 while pre-issue assets remain worth 1,000, post-issue value is 1,160 and each share is worth $1,160/120$. Old holders then own $100(1,160/120)=966.666\ldots$. The transfer arises from the discounted subscription price under these assumptions. A model that equates all share-count dilution with value destruction misses the first case; one that ignores issue price misses the second.
+
+\section{Raising a target amount after a price shock}
+Suppose net funding need is $K$ and a fixed cash fee is $f$. At a supplied price $p_s$, required shares are $(K+f)/p_s$. A price decline therefore increases the share count required to raise the same cash. If authorized issuance or investor demand limits $n$, the funding target may be infeasible.
+
+Take $K=90$, $f=10$ and an initial subscription price 10. The company needs ten shares. After a price shock to 5 it needs twenty. If only fifteen shares may be issued under the assumed authorization, maximum net proceeds become $15(5)-10=65$, leaving a shortfall of 25. Increasing book equity by 90 would conceal both the share constraint and the cash shortfall.
+
+The fee may instead be proportional, for example $f=\lambda G$. Net proceeds are $G(1-\lambda)$ and required gross proceeds are $K/(1-\lambda)$ for $0\leq\lambda<1$. A fixed plus proportional fee gives $G=(K+f_0)/(1-\lambda)$. These equations specify different cost structures. The choice should come from a declared offer or empirical assumption, not a silent generic parameter.
+
+\section{Pricing is not supplied by an accounting identity}
+The equation $G=np_s$ is an identity once shares and price are specified. It does not determine investor willingness to pay. A subscription price can be an external offer, an assumed discount to an observed market price, or the result of a valuation and demand model. Each supports a different claim.
+
+A public market quote can be stale, illiquid or refer to a different class. A large issue can affect price. A distressed company may face a discontinuous demand schedule or no feasible offer. A model that uses yesterday's price for unlimited new shares assumes unlimited demand at that price. That may be useful in a deliberately simplified scenario, but should not be presented as a financing solution established by the statements.
+
+The same caution applies to an endogenous equity value function. It may value existing shareholders' future payouts under a particular policy and financing friction. Converting that value into a new issue price requires assumptions about how new investors share those payouts and how issuance changes the state. A scalar cost function $\eta(e)$ for external equity is not a complete security issuance model.
+
+\section{The rights attached to a share}
+Shares can differ in voting rights, dividends, liquidation preference, conversion rights and redemption terms. An aggregate share count is sufficient only when the distinctions are irrelevant to the question or explicitly normalized. A dollar of preferred funding is not generally equivalent to a dollar of ordinary funding for future payouts.
+
+A simple preference waterfall illustrates the point. Suppose new investors contribute 30 for a nonparticipating preference claim entitled to 30 before ordinary holders, with the option to convert into 25 per cent of ordinary equity. If distributable value is 80, the preference payment 30 exceeds conversion value 20. If value is 200, conversion value 50 exceeds the preference. The exercise threshold is 120 under these assumptions.
+
+This example requires a declared contract: no accrued preference dividend, no senior claims, no participation after the preference and no other options. Adding any of these changes the waterfall. A flat share-percentage allocation would misallocate value below the conversion threshold. The model should retain class-specific rights and exercise policy.
+
+\section{Options, warrants and contingent issuance}
+An option can create future shares when exercised. Exercise can bring cash to the company, transfer existing shares or settle in cash, depending on terms. Counting all potential shares as already issued can distort current ownership; ignoring them can distort future dilution.
+
+Let an option cover $m$ shares at exercise price $k$. In a simplified physical exercise, the company receives $mk$ and issues $m$ shares. The holder's decision depends on share value, expiry, constraints and possibly tax or employment conditions. A purely intrinsic-value rule is a modeling policy, not a universal description of exercise behavior.
+
+Contingent performance awards add dependence on future operating outcomes. A scenario changing revenue can affect both the company's value and the number of shares delivered. Treating share count as independent of the operating shock loses that dependence. Historical statement totals may not identify all award terms, so the family must preserve unresolved conditions.
+
+\section{Conversion joins debt and equity}
+A convertible instrument links a liability schedule to ownership changes. At conversion, principal or another contractual amount may be exchanged for shares according to a fixed ratio, a variable price or a contingent formula. Cash settlement alternatives can change liquidity materially.
+
+Suppose debt face 100 converts into ten ordinary shares. Physical conversion removes the specified debt obligation and increases shares by ten under the assumed terms. It does not also pay cash principal 100 unless the contract requires a separate payment. A simulator that schedules both redemption and conversion double settles the same obligation.
+
+Accounting derecognition and allocation can involve carrying amounts different from face and separate components. Those postings need the applicable basis and facts. The economic event should identify exactly which obligations and rights are extinguished or created before the accounting module measures the consequences. Existing bounded conversion methods in the repository can support this event discipline without claiming a universal convertible classification.
+
+\section{Repurchases and treasury shares}
+A repurchase uses cash and changes outstanding shares or treasury holdings according to the legal and accounting treatment. A net increase in equity during a period can conceal both gross issuance and gross repurchase. Their timing and prices matter for liquidity and ownership.
+
+Suppose 20 shares are issued at 10 and ten are repurchased at 12. Net cash inflow before costs is 80, while outstanding shares increase by ten if repurchased shares cease to be outstanding. Reconstructing the period as a simple issue of ten shares for 80 uses an implied price of 8 and loses the actual transactions. A future policy inferred from that synthetic price can be misleading.
+
+Repurchase authorization is not settlement. A board may authorize up to an amount while management executes only part. A scenario should not consume cash for the entire authorization unless the policy calls for it and execution is feasible. Conversely, an already binding purchase commitment may create obligations before the cash settlement date.
+
+\section{Dividends require both claims and capacity}
+A dividend policy can specify a target payout, but payment depends on declaration, entitlement dates, cash, legal restrictions, covenants and class rights. Retained earnings are not a cash account. A positive accumulated balance does not establish that funds are available in the paying entity.
+
+A declared dividend can create a payable before payment. The event sequence must avoid expensing it as an operating cost in an illustrative ordinary distribution model, while still recognizing the liability and equity movement under the selected basis. Payment reduces cash and the payable. The exact legal and accounting treatment requires its admitted rules.
+
+A cash-constrained policy may reduce or suspend a prospective dividend. It cannot necessarily cancel an already enforceable obligation. Distinguishing intended, declared and paid distributions is therefore important in stress scenarios. A single annual dividend line cannot capture all of these states.
+
+\section{Ownership and control are related but distinct}
+Economic ownership percentages do not always determine control. Voting rights, contractual arrangements, dispersed holdings and substantive options can matter. A scenario that changes ownership may alter the consolidation perimeter, but the threshold and assessment are not supplied by a generic percentage rule.
+
+The security register should record holders and rights, while a separate control assessment uses the applicable facts and accounting basis. When control changes, group reporting can change even without a large contemporaneous cash flow. Conversely, a minority issue can raise cash without changing control. The two calculations should communicate without being collapsed.
+
+Historical disclosures may report total shares but not every beneficial holder. A model can represent ownership categories and unknown allocations where sufficient for the query. It must not invent holder identities or treat an unknown allocation as evenly spread. Concentration can matter for approval, takeover and financing decisions.
+
+\section{Earnings per share is not the financing price}
+Basic and diluted earnings-per-share calculations use accounting earnings, weighted share counts and rules for potential ordinary shares. They are reporting calculations. They do not determine market value per share or subscription price. A price-to-earnings heuristic is a separate valuation assumption.
+
+Timing matters even in a simple weighted count. If 100 shares are outstanding for half a year and 120 for the other half, the simple time-weighted average is 110. Using closing count 120 understates basic earnings per share relative to that assumed timing. Actual calculations require the applicable conventions, participation rights and events.
+
+Diluted measures may exclude antidilutive instruments under the reporting rules. Exclusion from diluted earnings per share does not mean the contract cannot create future cash or ownership consequences under another scenario. The scenario engine must retain the instrument even when one reporting calculation excludes it.
+
+\section{An issuance changes future incentives}
+Financing can change not only cash but the distribution of gains and losses. Existing shareholders, new investors and creditors may prefer different policies after an issue. A model holding behavior fixed is a conditional mechanical simulation. A model claiming an optimal response must specify whose objective is optimized and what constraints apply.
+
+For example, a deeply subordinated new equity contribution can protect creditors while diluting existing owners. Existing owners may refuse it even when total enterprise value rises. A policy maximizing total firm value can therefore differ from one maximizing existing shareholders' value. Treating these objectives as interchangeable can change default or investment decisions.
+
+The structural literature surveyed by \citet{strebulaev2012} makes financing frictions and shareholder objectives explicit in stylized models. Transfer to AccDSL requires matching the actor, security rights and timing. A convenient objective function should remain a hypothesis until its application is justified.
+
+\section{A complete small financing comparison}
+Consider an immediate cash need of 40, current cash 10 and no available debt facility. Net new funding need is 30. Existing shares are 100 and an admissible offer supplies ordinary shares at price 5 with a fixed cash cost of 5. Raising 35 gross requires seven shares, gives 30 net cash and permits the payment. Closing cash is zero and shares are 107.
+
+If the offer instead caps issuance at six shares, gross proceeds are 30 and net proceeds 25. Available cash is 35, leaving a payment shortfall of 5. The difference is an economic feasibility result. The journal cannot repair it by crediting equity for another 5 without a transaction.
+
+If management can defer 10 of the payment at a cost, the capped issue may become feasible. That is a different policy and contract path, with future obligations. If a shareholder loan supplies the missing 5, it creates debt and related rights. The model should show these alternatives explicitly rather than use a generic balancing source.
+
+\section{Proposed register and execution methods}
+A dated security register should identify issuer, class, units, holder or holder category, rights, issue price where relevant, subscription and settlement state, and links to conversion or cancellation events. Outstanding, authorized, treasury and potentially issuable units should be distinct. Changes should reconcile through events.
+
+An equity-financing method should accept a funding request, eligible offers, authorization limits and actor policy. It returns an accepted transaction or a shortfall. The transaction then produces cash, ownership and accounting events. Price formation may be supplied or solved by a separate model; the result records which.
+
+The repository's simple shares-times-price postings and bounded capital events are useful components. The proposed extension adds offer feasibility, class rights and ownership evolution. It should reuse existing atomic posting and timing checks while adding negative cases: zero or negative subscription price, unsupported class, duplicate settlement, insufficient authorization, failed subscription and inconsistent conversion.
+
+\section{What the equity checks establish}
+Conservation checks can establish that cash equals settled subscriptions less costs and that share movements reconcile. Waterfall checks can establish that distributions do not exceed available value under the assumed priority rules. Timing checks can establish that ownership changes occur at the declared event date.
+
+These checks do not establish that an issue price is fair, that investors will subscribe, that a legal approval is valid or that management will choose the modeled action. Those claims need their own evidence. The simulator should be able to give useful conditional calculations while keeping these unresolved questions visible.
+
+A useful adversarial fixture issues shares below an assumed pre-issue value, then compares percentage dilution with wealth transfer. Another changes the price while holding funding need fixed and tests an authorization cap. A third combines conversion and redemption to ensure that the same obligation is settled once. These examples expose mistakes hidden by a simple par issuance with unlimited demand.

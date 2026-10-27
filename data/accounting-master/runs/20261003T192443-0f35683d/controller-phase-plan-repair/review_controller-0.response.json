@@ -1,0 +1,38 @@
+{
+  "assumptions": [
+    "Review is limited to the supplied packet; no tools, files, commands or project history were consulted.",
+    "The stated trusted-worker, initial-process-group and ordinary-interruption interfaces apply.",
+    "Checker input_hashes describe the bytes used for verification. The packet does not supply a checker-side guarantee that those bytes remain current when acceptance is recorded."
+  ],
+  "checks": [
+    "Traced plan approval, executed repairs, partial continuation, pending-review reuse and acceptance branches.",
+    "Compared verification input bindings with continuation, pending-review and accepted-evidence hashing.",
+    "Compared replan output locations with structured recovery discovery.",
+    "The reported 153 passing tests and listed test names provide supporting control-plane evidence; their implementations were not supplied or independently checked."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "P1 — Verification input hashes can be replaced by current hashes without detecting stale verification. In scripts/run_accounting_master.py, check_phase validates the raw checker capture but never verifies result['input_hashes']. save_pending_review uses only their names and calls evidence_hashes to snapshot current bytes; final acceptance does the same. Consequently, if a checker reports hashes for inputs it checked and those inputs subsequently change during verification, the checkpoint binds the changed bytes while retaining the earlier passing result. Later checkpoint verification passes because it compares against that new snapshot. save_continuation explicitly detects this mismatch, but the acceptance path does not. Repair: compare every declared input hash with the current file before pending-review creation and acceptance, and reject/recheck mismatches without rebasing them. Preserve the checker’s original hash mapping as the verification binding. Add a regression where a passing checker reports an old input digest after that input changes; neither acceptance nor resumable accepted-check status should result.",
+    "P2 — Recovery omits the latest failed replan review. execute_phase writes repair plans and their reviews beneath replan-N directories, but phase_recovery in scripts/accounting_master_support.py searches plan_review only at the attempt root and its direct review_plan-retry directories. If an initial plan passes, implementation fails, and a subsequent replan receives REVISE or BLOCKED, recovery can present the original AGREE as the recent plan review. The root approved-plan.json also remains the previous approved plan when replanning fails. This gives the next planning pass stale structured navigation precisely when it needs the latest repair findings. Repair: discover replan-N plan responses and reviews, including their retries, and distinguish the latest proposed/rejected plan from the latest approved plan. Preserve their ordering explicitly or select consistently across those directories. Add a regression covering failed replanning followed by recovery in a new invocation."
+  ],
+  "next_actions": [
+    "Enforce original checker-input hash bindings throughout checkpoint creation and acceptance.",
+    "Include failed replans and their reviews in structured recovery.",
+    "Run focused regressions for both cases, then rerun the controller checks and obtain a fresh bounded review."
+  ],
+  "residuals": [
+    "Process cleanup, lock enforcement, scheduler persistence and narrow approval publication are stated interfaces here; their implementations are outside the supplied phase-plan-repair excerpts.",
+    "The supplied paths and hashes identify catalog, schema and proposal-checker files, but their full contents and test assertions are not available in this packet.",
+    "Source acceptance for 192 reports and accepted_internal phase status do not establish accounting correctness, scientific validity, overall mission completion or human acceptance."
+  ],
+  "steps": [
+    "Completed a packet-only static review of the assigned phase-plan-repair scope."
+  ],
+  "summary": "REVISE: acceptance can rebind stale checker inputs to current bytes, and recovery can surface an older successful plan review after a failed replan.",
+  "verdict": "REVISE"
+}

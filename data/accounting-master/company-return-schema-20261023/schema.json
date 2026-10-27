@@ -1,0 +1,547 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "ReturnModuleAuthoringDraft/1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "packet_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "opening_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "meaning": {
+          "const": "retained_synthetic_case"
+        }
+      },
+      "required": [
+        "packet_sha256",
+        "opening_sha256",
+        "meaning"
+      ],
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "entity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "book_role": {
+          "const": "legal"
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "not": {
+            "const": "unknown"
+          }
+        }
+      },
+      "required": [
+        "entity",
+        "book_role",
+        "currency",
+        "case_id"
+      ],
+      "additionalProperties": false
+    },
+    "period": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "end_exclusive": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "start",
+        "end_exclusive"
+      ],
+      "additionalProperties": false
+    },
+    "accounts": {
+      "type": "object",
+      "properties": {
+        "cash": {
+          "const": "cash"
+        },
+        "inventory": {
+          "const": "inventory"
+        },
+        "refund_liability": {
+          "const": "refund_liability"
+        },
+        "recovery_asset": {
+          "const": "recovery_asset"
+        },
+        "revenue": {
+          "const": "revenue"
+        },
+        "cogs": {
+          "const": "cogs"
+        },
+        "selling_expense": {
+          "const": "selling_expense"
+        },
+        "dta": {
+          "const": "dta"
+        },
+        "dtl": {
+          "const": "dtl"
+        },
+        "current_tax": {
+          "const": "current_tax"
+        },
+        "deferred_tax": {
+          "const": "deferred_tax"
+        }
+      },
+      "required": [
+        "cash",
+        "inventory",
+        "refund_liability",
+        "recovery_asset",
+        "revenue",
+        "cogs",
+        "selling_expense",
+        "dta",
+        "dtl",
+        "current_tax",
+        "deferred_tax"
+      ],
+      "additionalProperties": false
+    },
+    "component": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "not": {
+            "const": "unknown"
+          }
+        },
+        "source_pointer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sold_units": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "expected_units": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "unit_refund": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "unit_cost": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "estimated_handling": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "estimated_deterioration": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "refund": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "recovery": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "settled": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "source_pointer",
+        "sold_units",
+        "expected_units",
+        "unit_refund",
+        "unit_cost",
+        "estimated_handling",
+        "estimated_deterioration",
+        "refund",
+        "recovery",
+        "settled"
+      ],
+      "additionalProperties": false
+    },
+    "tax": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "const": "refund_and_recovered_stock_on_settlement"
+        },
+        "source_pointer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "opening_source_pointer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rate": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "refund_tax_base": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "recovery_tax_base": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "opening_dta": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "opening_dtl": {
+          "type": "string",
+          "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+        },
+        "rate_enacted": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "recovery_supported": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "temporary_difference_inventory_complete": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "outside_basis_timing_control": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "outside_basis_no_foreseeable_reversal": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "source_pointer",
+        "opening_source_pointer",
+        "rate",
+        "refund_tax_base",
+        "recovery_tax_base",
+        "opening_dta",
+        "opening_dtl",
+        "rate_enacted",
+        "recovery_supported",
+        "temporary_difference_inventory_complete",
+        "outside_basis_timing_control",
+        "outside_basis_no_foreseeable_reversal"
+      ],
+      "additionalProperties": false
+    },
+    "lots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "not": {
+              "const": "unknown"
+            }
+          },
+          "component_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "not": {
+              "const": "unknown"
+            }
+          },
+          "units": {
+            "type": "string",
+            "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+          },
+          "carrying": {
+            "type": "string",
+            "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+          },
+          "tax_base": {
+            "type": "string",
+            "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+          },
+          "acquired": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        },
+        "required": [
+          "id",
+          "component_id",
+          "units",
+          "carrying",
+          "tax_base",
+          "acquired"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                "not": {
+                  "const": "unknown"
+                }
+              },
+              "kind": {
+                "const": "settle"
+              },
+              "method": {
+                "const": "returns.settle"
+              },
+              "date": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "source_pointer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "component_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                "not": {
+                  "const": "unknown"
+                }
+              },
+              "lot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                "not": {
+                  "const": "unknown"
+                }
+              },
+              "actual_units": {
+                "type": "string",
+                "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+              },
+              "unit_handling": {
+                "type": "string",
+                "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+              },
+              "unit_deterioration": {
+                "type": "string",
+                "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+              },
+              "refund_cash": {
+                "type": "string",
+                "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+              },
+              "handling_cash": {
+                "type": "string",
+                "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+              },
+              "inventory_nrv": {
+                "type": "string",
+                "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+              },
+              "all_rights_closed": {
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "const": "unknown"
+                  }
+                ]
+              },
+              "handling_is_selling_cost": {
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "const": "unknown"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "method",
+              "date",
+              "source_pointer",
+              "component_id",
+              "lot_id",
+              "actual_units",
+              "unit_handling",
+              "unit_deterioration",
+              "refund_cash",
+              "handling_cash",
+              "inventory_nrv",
+              "all_rights_closed",
+              "handling_is_selling_cost"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                "not": {
+                  "const": "unknown"
+                }
+              },
+              "kind": {
+                "const": "sell"
+              },
+              "method": {
+                "const": "inventory.sell"
+              },
+              "date": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "source_pointer": {
+                "type": "string",
+                "minLength": 1
+              },
+              "lot_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                "not": {
+                  "const": "unknown"
+                }
+              },
+              "fraction": {
+                "type": "string",
+                "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+              },
+              "proceeds": {
+                "type": "string",
+                "pattern": "^(unknown|-?(0|[1-9][0-9]*)/[1-9][0-9]*)$"
+              },
+              "performance_complete": {
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "const": "unknown"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "method",
+              "date",
+              "source_pointer",
+              "lot_id",
+              "fraction",
+              "proceeds",
+              "performance_complete"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "profile",
+    "name",
+    "source",
+    "context",
+    "period",
+    "accounts",
+    "component",
+    "tax",
+    "lots",
+    "events"
+  ],
+  "additionalProperties": false
+}

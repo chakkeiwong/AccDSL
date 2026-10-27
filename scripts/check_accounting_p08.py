@@ -14,9 +14,11 @@ from fractions import Fraction
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import platform
 import sys
+from time import perf_counter
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +27,8 @@ REGISTER = ROOT / "docs/design/research/p08-v1/authority-register.json"
 ENGINE = ROOT / "scripts/corporate_financing_v1.py"
 TEST_FILE = ROOT / "tests/test_accounting_p08.py"
 REQUIRED_CLAIMS = {
-    "recognition", "classification", "split", "measurement", "interest",
+    "recognition", "fair_value", "classification", "split", "residual_equity",
+    "measurement", "amortised_cost", "interest",
     "redemption", "conversion", "note_carrying", "note_interest",
 }
 
@@ -40,6 +43,37 @@ def load_json(path: Path):
 
 def frac(value) -> Fraction:
     return Fraction(value)
+
+
+def check_manifest_pins(hashes, required_paths):
+    """Validate the manifest itself, separately from authority admission.
+
+    A valid source register cannot justify a conflicting or incomplete copy of
+    its input hashes in the result manifest. Additional recorded inputs must
+    also resolve to current repository files.
+    """
+    if not isinstance(hashes, dict):
+        return ['source_hashes must be an object']
+    failures = []
+    missing = set(required_paths) - set(hashes)
+    failures.extend('missing manifest input pin: ' + path for path in sorted(missing))
+    for name, expected in hashes.items():
+        try:
+            relative = Path(name)
+            path = ROOT / relative
+            if (relative.is_absolute() or '..' in relative.parts
+                    or relative.as_posix() != name
+                    or not path.resolve().is_relative_to(ROOT.resolve())
+                    or path.is_symlink()):
+                failures.append('unsafe manifest input path: ' + name)
+                continue
+            if not path.is_file():
+                failures.append('missing manifest input file: ' + name)
+            elif expected != sha256(path):
+                failures.append('stale manifest input hash: ' + name)
+        except (TypeError, ValueError, OSError) as exc:
+            failures.append('invalid manifest input: ' + str(name) + ': ' + str(exc))
+    return failures
 
 
 def run_tests() -> dict:
@@ -107,7 +141,19 @@ def independent_case(contract, settlement, opening_cash, authority):
             raise AssertionError("unbalanced journal")
         if sum(frac(v) for v in entry["state_after"].values()) != 0:
             raise AssertionError("unbalanced state")
-    for period in result["notes"]["periods"]:
+    carrying = pv
+    for index, period in enumerate(result["notes"]["periods"]):
+        expected_interest = carrying * rate
+        accrued = journal[1 + 2 * index]
+        paid = journal[2 + 2 * index]
+        if (frac(accrued['postings_debit_positive']['interest_expense']) != expected_interest
+                or frac(paid['postings_debit_positive']['cash']) != -coupon
+                or frac(period['interest_expense']) != expected_interest
+                or frac(period['coupons']) != coupon):
+            raise AssertionError('independent annual interest/coupon oracle')
+        carrying += expected_interest - coupon
+        if index < contract.years - 1 and frac(period['closing_liability']) != carrying:
+            raise AssertionError('independent annual carrying amount')
         lhs = (frac(period["opening_liability"]) + frac(period["issue_liability"])
                + frac(period["interest_expense"]) - frac(period["coupons"])
                - frac(period["settlement_liability"]))
@@ -127,47 +173,211 @@ def independent_case(contract, settlement, opening_cash, authority):
     }
 
 
-def check_deliverable(payload: dict, authority) -> list[str]:
+def check_comparison(comparison, authority):
+    from corporate_financing_v1 import (comparison_cases, economics_hash, REQUIRED)
     failures = []
-    if payload.get("schema_version") != "accdsl.p08.authority-methods.v1":
-        failures.append("authority-methods schema_version")
-    if payload.get("authority_register_path") != "docs/design/research/p08-v1/authority-register.json":
-        failures.append("authority register path")
-    if payload.get("authority_register_sha256") != sha256(REGISTER):
-        failures.append("authority register hash")
-    if {x.get("id") for x in payload.get("authorities", [])} != set(authority.sources):
-        failures.append("authority ids")
-    if {x.get("id") for x in payload.get("claims", [])} != set(authority.claims):
-        failures.append("claim ids")
-    operations = payload.get("operations", [])
+    economic = comparison.get('economic_facts', {})
+    digest = economics_hash(economic)
+    rows = comparison.get('rows', [])
+    if len(rows) != 4 or {r.get('standard') for r in rows} != {'AASB', 'US GAAP', 'ASBE', 'EU-endorsed IFRS'}:
+        failures.append('comparison regime coverage')
+    supported = []
+    for row in rows:
+        label = row.get('standard', '?')
+        if row.get('facts_sha256') != digest:
+            failures.append(label + ': economic facts hash')
+        if row.get('status') == 'unresolved':
+            if (any(row.get(k) is not None for k in ('initial_liability', 'initial_equity', 'total_interest', 'cases'))
+                    or row.get('claims') != [] or not row.get('missing')):
+                failures.append(label + ': unresolved treatment contains results or lacks dependency')
+        elif row.get('status') == 'supported_bounded':
+            try:
+                expected = comparison_cases(label, economic, authority)
+                case = expected['redeem']
+                if (row.get('cases') != expected or row.get('initial_liability') != case['initial_liability']
+                        or row.get('initial_equity') != case['notes']['conversion_equity']
+                        or row.get('total_interest') != case['state']['ledger']['interest_expense']
+                        or set(row.get('claims', [])) != set(REQUIRED)
+                        or row.get('jurisdiction') != case['contract']['jurisdiction']):
+                    failures.append(label + ': supported treatment replay')
+                else:
+                    supported.append(label)
+            except (ValueError, TypeError, KeyError) as exc:
+                failures.append(label + ': unsupported treatment: ' + str(exc))
+        else:
+            failures.append(label + ': invalid treatment status')
+    complete = len(supported) >= 2 and not failures
+    if complete:
+        if comparison.get('criterion_status') != 'complete_bounded' or not comparison.get('supported_difference'):
+            failures.append('supported comparison lacks anchored interpretation')
+    elif (not comparison.get('criterion_status', '').startswith('incomplete:')
+          or comparison.get('supported_difference') is not None):
+        failures.append('unsupported cross-standard acceptance')
+    return failures
+
+
+def check_deliverable(payload: dict, authority) -> list[str]:
+    from corporate_financing_v1 import Contract, run_case, comparison_economics, EVENT_CLAIMS, wire
+    failures = []
+    try:
+        authority.validate()
+    except (ValueError, KeyError, TypeError, OSError) as exc:
+        return ['invalid authority: ' + str(exc)]
+    if payload.get('schema_version') != 'accdsl.p08.authority-methods.v1':
+        failures.append('authority-methods schema_version')
+    if payload.get('authority_register_path') != str(REGISTER.relative_to(ROOT)):
+        failures.append('authority register path')
+    if payload.get('authority_register_sha256') != sha256(REGISTER):
+        failures.append('authority register hash')
+    for key in ('authorities', 'claims', 'research', 'method_queue'):
+        if payload.get(key) != authority.records[key]:
+            failures.append('full embedded ' + key + ' differ from register')
+    historical_access = load_json(ROOT / 'docs/design/research/p08-v1/access-records.json')
+    historical_access += [load_json(ROOT / 'docs/design/research/p08-v1/eu-access.json')]
+    if payload.get('source_access') != historical_access:
+        failures.append('historical access evidence differs from retained records')
+    preparation_path = ROOT / 'docs/design/research/p08-v2/source-inspection.json'
+    preparation = load_json(preparation_path)
+    if payload.get('authority_preparation') != preparation:
+        failures.append('authority preparation differs from source inspection')
+    if payload.get('authority_preparation_sha256') != sha256(preparation_path):
+        failures.append('authority preparation hash')
+    access_ref = preparation['source_access']
+    access_path = ROOT / access_ref['path']
+    if sha256(access_path) != access_ref['sha256']:
+        failures.append('supplementary access record hash')
+    if payload.get('source_access_recovery') != load_json(access_path):
+        failures.append('supplementary access evidence differs from retained records')
+    for research in authority.records['research']:
+        if sha256(ROOT / research['source']) != research['sha256']:
+            failures.append('deferred research source hash')
+    source = preparation['source']
+    for key in ('retained', 'text'):
+        if sha256(ROOT / source[key]['path']) != source[key]['sha256']:
+            failures.append('supplementary primary source hash')
+    pages = (ROOT / source['text']['path']).read_text().split('\f')
+    for anchor in preparation['anchors']:
+        if ' '.join(anchor['quote'].split()) not in ' '.join(pages[anchor['pdf_page']-1].split()):
+            failures.append('supplementary source anchor')
+    from corporate_authority_eu_v1 import EUAuthorityPreparation, REGISTER as EU_REGISTER
+    try:
+        eu = EUAuthorityPreparation()
+        if payload.get('eu_authority_preparation') != eu.records:
+            failures.append('EU preparation differs from retained source inspection')
+        if payload.get('eu_authority_preparation_sha256') != sha256(ROOT / EU_REGISTER):
+            failures.append('EU preparation hash')
+    except (ValueError, KeyError, TypeError, OSError) as exc:
+        failures.append('invalid EU preparation: ' + str(exc))
+        eu = None
+    required_inputs = {
+        str(path.relative_to(ROOT)) for path in
+        (ENGINE, Path(__file__), TEST_FILE, REGISTER, preparation_path, access_path)
+    }
+    required_inputs.update({'scripts/corporate_authority_eu_v1.py', EU_REGISTER})
+    from corporate_authority_eu_recovery_v1 import validate_recovery, REGISTER as RECOVERY_REGISTER
+    try:
+        recovery = validate_recovery(ROOT)
+        if payload.get('eu_source_recovery') != recovery:
+            failures.append('EU source recovery differs from retained inspection')
+        if payload.get('eu_source_recovery_sha256') != sha256(ROOT / RECOVERY_REGISTER):
+            failures.append('EU source recovery hash')
+        required_inputs.update(pin['path'] for pin in recovery['source_pins'])
+    except (ValueError, OSError, KeyError, TypeError) as exc:
+        failures.append('invalid EU source recovery: ' + str(exc))
+    required_inputs.update({RECOVERY_REGISTER, 'scripts/corporate_authority_eu_recovery_v1.py'})
+    from corporate_authority_eu_current import validate_disposition, REGISTER as DISPOSITION_REGISTER
+    try:
+        disposition = validate_disposition(ROOT)
+        if payload.get('eu_source_disposition') != disposition:
+            failures.append('EU source disposition differs from validated preparation')
+        if payload.get('eu_source_disposition_sha256') != sha256(ROOT / DISPOSITION_REGISTER):
+            failures.append('EU source disposition hash')
+        required_inputs.update(pin['path'] for pin in disposition['source_pins'])
+    except (ValueError, OSError, KeyError, TypeError) as exc:
+        failures.append('invalid EU source disposition: ' + str(exc))
+    required_inputs.update({DISPOSITION_REGISTER, 'scripts/corporate_authority_eu_current.py'})
+    from corporate_authority_eu_applicability_v1 import validate_applicability, REGISTER as APPLICABILITY_REGISTER
+    try:
+        applicability = validate_applicability(ROOT)
+        if payload.get('eu_applicability_disposition') != applicability:
+            failures.append('EU applicability differs from bounded record')
+        if payload.get('eu_applicability_disposition_sha256') != sha256(ROOT / APPLICABILITY_REGISTER):
+            failures.append('EU applicability hash')
+    except (ValueError, OSError, KeyError, TypeError) as exc:
+        failures.append('invalid EU applicability: ' + str(exc))
+    required_inputs.update({APPLICABILITY_REGISTER, 'scripts/corporate_authority_eu_applicability_v1.py'})
+    if eu is not None:
+        required_inputs.update(pin['path'] for pin in eu.records['source_pins'])
+    required_inputs.update({
+        'docs/design/research/p08-v1/access-records.json',
+        'docs/design/research/p08-v1/eu-access.json',
+    })
+    for registered_source in authority.sources.values():
+        if registered_source['access_status'] == 'inspected_primary':
+            required_inputs.update(registered_source[key]['path'] for key in ('retained', 'text'))
+    required_inputs.update(source[key]['path'] for key in ('retained', 'text'))
+    required_inputs.update(research['source'] for research in authority.records['research'])
+    required_inputs.update(record['path'] for record in historical_access + load_json(access_path)
+                           if record.get('path'))
+    failures.extend(check_manifest_pins(payload.get('manifest', {}).get('source_hashes'), required_inputs))
+    operations = payload.get('operations', [])
     if len(operations) != 1:
-        failures.append("one supported operation")
+        failures.append('one supported operation')
     else:
         op = operations[0]
-        for key in ("preconditions", "recognition", "measurement", "state_effects",
-                    "posting_templates", "note_links", "excluded_features"):
-            if not op.get(key):
-                failures.append("operation " + key)
-        if op.get("authority_claims", []) == [] or not set(op["authority_claims"]) <= set(authority.claims):
-            failures.append("operation authority claims")
-    cases = payload.get("cases", [])
-    if {c.get("case_id") for c in cases} != {"redeem-default", "convert-default", "second-parameters-redeem"}:
-        failures.append("case ids")
-    comparison = payload.get("comparisons", {})
-    rows = comparison.get("rows", [])
-    if len(rows) != 4 or len({r.get("facts_sha256") for r in rows}) != 1:
-        failures.append("matched comparison facts")
-    if comparison.get("supported_difference") is not None:
-        failures.append("unsupported comparison difference")
-    for row in rows[1:]:
-        if row.get("status") != "unresolved" or row.get("initial_liability") is not None or row.get("claims") != []:
-            failures.append("unresolved comparison inheritance")
-    queue = payload.get("method_queue", [])
-    if {x.get("method") for x in queue} != {"revenue", "tax", "leases", "FX", "complex_groups", "bonds"}:
-        failures.append("method queue")
-    blocks = payload.get("access_blocks", [])
-    if not blocks or not all(x.get("status") in {"unavailable", "uninspected"} for x in blocks):
-        failures.append("access blocks")
+        for key in ('preconditions', 'recognition', 'measurement', 'state_effects', 'posting_templates', 'excluded_features'):
+            if not op.get(key): failures.append('operation ' + key)
+        if set(op.get('authority_claims', [])) != REQUIRED_CLAIMS:
+            failures.append('operation lifecycle authority')
+        if op.get('note_links') != authority.records['note_links']:
+            failures.append('operation note links')
+        if set(op.get('recognition', {}).get('authority_claims', [])) != set(EVENT_CLAIMS['issue']):
+            failures.append('issuance authority dependencies')
+        if op.get('event_authority_claims') != wire(EVENT_CLAIMS):
+            failures.append('event authority dependencies')
+        if set(op.get('measurement', {}).get('authority_claims', [])) != {'fair_value', 'measurement', 'interest', 'amortised_cost'}:
+            failures.append('measurement authority dependencies')
+    cases = payload.get('cases', [])
+    if len(cases) != 3 or {c.get('case_id') for c in cases} != {'redeem-default', 'convert-default', 'second-parameters-redeem'}:
+        failures.append('case ids')
+    for case in cases:
+        label = case.get('case_id', '?')
+        try:
+            contract = Contract(**case['facts'])
+            result = run_case(contract, case['settlement'], case['opening_cash'], authority)
+            state = dict(result['state']); journal = state.pop('journal')
+            expected = {'facts': result['contract'], 'opening_cash': result['opening_cash'],
+                        'settlement': result['settlement'], 'initial_liability': result['initial_liability'],
+                        'journal': journal, 'final_state': state, 'notes': result['notes']}
+            for key, value in expected.items():
+                if case.get(key) != value: failures.append(label + ': replay ' + key)
+            oracle = independent_case(contract, case['settlement'], case['opening_cash'], authority)
+            oracle['case_id'] = label
+            if case.get('independent_oracle') != oracle:
+                failures.append(label + ': independent arithmetic')
+        except (KeyError, ValueError, TypeError) as exc:
+            failures.append(label + ': invalid case: ' + str(exc))
+    comparison = payload.get('comparisons', {})
+    failures.extend(check_comparison(comparison, authority))
+    for case in cases:
+        if case.get('case_id') in ('redeem-default', 'convert-default'):
+            try:
+                if comparison_economics(Contract(**case['facts']), case['opening_cash']) != comparison.get('economic_facts'):
+                    failures.append('comparison economics differ from baseline case')
+            except (TypeError, ValueError, KeyError): failures.append('invalid baseline economics')
+    queue = payload.get('method_queue', [])
+    if {x.get('method') for x in queue} != {'revenue', 'tax', 'leases', 'FX', 'complex_groups', 'bonds'}:
+        failures.append('method queue')
+    blocks = payload.get('access_blocks', [])
+    if not blocks or not all(x.get('status') in {'unavailable', 'uninspected', 'partially_inspected'} for x in blocks):
+        failures.append('access blocks')
+    criteria = payload.get('acceptance', {}).get('criteria', {})
+    comparison_complete = comparison.get('criterion_status') == 'complete_bounded' and not check_comparison(comparison, authority)
+    expected = {'criterion_1': 'complete_bounded', 'criterion_2': 'complete_bounded',
+                'criterion_3': 'complete_bounded' if comparison_complete else 'incomplete',
+                'criterion_4': 'complete_bounded'}
+    if criteria != expected or payload.get('acceptance', {}).get('phase_criteria_complete') is not comparison_complete:
+        failures.append('criterion acceptance status')
     return failures
 
 
@@ -199,6 +409,7 @@ def main(argv=None) -> int:
     if out != OUT:
         parser.error("use the declared P08 output directory")
     started = datetime.now(timezone.utc)
+    timer = perf_counter()
     sys.path.insert(0, str(ROOT / "scripts"))
     from corporate_financing_v1 import AuthorityBook, Contract, compare_same_facts
 
@@ -238,14 +449,11 @@ def main(argv=None) -> int:
         try:
             comparison = compare_same_facts(authority=authority)
             rows = comparison["rows"]
-            passed = (len(rows) == 4 and len({r["facts_sha256"] for r in rows}) == 1
-                      and rows[0]["status"] == "supported_bounded"
-                      and all(r["status"] == "unresolved" and r["initial_liability"] is None
-                              and r["claims"] == [] for r in rows[1:]))
-            checks.append({"id": "matched_comparison", "passed": passed,
-                           "observed": {"rows": len(rows), "criterion_status": comparison.get("criterion_status")}})
-            if not passed:
-                errors.append("matched comparison did not preserve unresolved cells")
+            findings = check_comparison(comparison, authority)
+            checks.append({'id': 'matched_comparison', 'passed': not findings,
+                           'observed': {'rows': len(rows), 'criterion_status': comparison.get('criterion_status'),
+                                        'failures': findings}})
+            errors.extend('matched comparison: ' + x for x in findings)
         except Exception as exc:
             errors.append("matched_comparison: " + repr(exc))
             checks.append({"id": "matched_comparison", "passed": False, "error": repr(exc)})
@@ -276,6 +484,7 @@ def main(argv=None) -> int:
     payload = {
         "schema_version": "accdsl.p08.check.v1",
         "passed": passed,
+        "tests": tests["methods"],
         "checks": checks,
         "errors": errors,
         "cases": case_reports,
@@ -285,15 +494,23 @@ def main(argv=None) -> int:
             "command": "python3 -B scripts/check_accounting_p08.py --check",
             "working_directory": str(ROOT),
             "python": platform.python_version(),
-            "hardware": "CPU only; CUDA_VISIBLE_DEVICES=-1; no accelerator framework imported",
+            "python_executable": sys.executable,
+            "python_prefix": sys.prefix,
+            "conda_env": os.environ.get('CONDA_DEFAULT_ENV'),
+            "hardware": "CPU only; no accelerator framework imported",
+            "CUDA_VISIBLE_DEVICES": os.environ.get('CUDA_VISIBLE_DEVICES'),
             "random_seeds": "N/A: exact deterministic fixtures",
             "started_utc": started.isoformat(),
+            "completed_utc": datetime.now(timezone.utc).isoformat(),
+            "wall_seconds": round(perf_counter() - timer, 6),
             "authority_register_sha256": sha256(REGISTER),
             "engine_sha256": sha256(ENGINE),
             "test_sha256": sha256(TEST_FILE),
         },
         "acceptance": {
             "engineering": passed,
+            "phase_criteria_complete": bool(passed and comparison.get("criterion_status") == "complete_bounded"),
+            "criteria": (authority_payload or {}).get("acceptance", {}).get("criteria", {}),
             "accounting_validity": "not established",
             "forecast_validity": "not established",
             "human_acceptance": "pending",

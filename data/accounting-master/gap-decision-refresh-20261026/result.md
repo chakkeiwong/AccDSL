@@ -1,0 +1,1 @@
+Refreshed the full program with actor-specific information/decision and two-date financing/control evidence. Preserved all original scope;27 successor deltas,18 interface challenges and18 open packages. Governing5.18 PDFs unchanged. Next active plan is accounting-conversion-rights-bridge-20261026.md. See remaining-work.md and verification.json.

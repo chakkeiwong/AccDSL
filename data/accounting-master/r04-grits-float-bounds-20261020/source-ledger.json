@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-20",
+  "created_utc": "2026-10-20T00:40:47.761814+00:00",
+  "new_acquisitions": 0,
+  "repository": "kensho-technologies/grits",
+  "commit": "8a281a3e2fd4cfa600d1c1f70f33b5eccc6294f1",
+  "bindings": [
+    {
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4"
+    },
+    {
+      "path": "data/accounting-master/r04-grits-assignment-bounds-20261020/completion.json",
+      "sha256": "a35ef4d3f0b28f92399ba709265150db891b75ca0622c7ea9f14c6f5506bfe69"
+    },
+    {
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/source-ledger.json",
+      "sha256": "f248f5c8dea03755a75c7c244c9544b7b8144fcba72ffe4513a5ff1e06b2d0e3"
+    }
+  ],
+  "anchors": [
+    {
+      "id": "exact_reward",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 399,
+      "last_line": 415,
+      "excerpt": "def lcs_similarity(string1: str, string2: str) -> float:\n    \"\"\"Compute similarity between two strings using the longest common subsequence (LCS).\n\n    Args:\n        string1: First string to compare.\n        string2: Second string to compare.\n\n    Returns:\n        float: Similarity score between 0 and 1, computed as\n            2 * len(LCS) / (len(string1) + len(string2)).\n    \"\"\"\n    if string1 == string2:\n        return 1.0\n\n    lcs_length = pylcs.lcs_sequence_length(string1, string2)\n\n    return 2 * lcs_length / (len(string1) + len(string2))",
+      "supports": "Normalized LCS and equality shortcut."
+    },
+    {
+      "id": "one_cell_identity",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 306,
+      "last_line": 328,
+      "excerpt": "    # Early exit: if matrices are the same shape and the elementwise (identity)\n    # alignment score exceeds the maximum possible score from any smaller\n    # submatrix, the identity alignment is provably optimal\u2014skip the full DP.\n    if true_shape == pred_shape:\n        grid_scores = np.zeros((true_grid_n_rows, true_grid_n_cols))\n        true_positive_score = 0.0\n        for true_row, true_col in itertools.product(range(true_shape[0]), range(true_shape[1])):\n            cell_score = reward_function(\n                true_grid[true_row][true_col], pred_grid[true_row][true_col]\n            )\n            grid_scores[true_row, true_col] = cell_score\n            true_positive_score += cell_score\n        if true_positive_score >= (max(true_shape) - 1) * min(true_shape):\n            is_exact_match = true_positive_score == num_true_cells == num_pred_cells\n            return GritsMatchingResult(\n                true_positive_score=true_positive_score,\n                true_positive_score_upper_bound=true_positive_score,\n                true_grid_scores=grid_scores,\n                pred_grid_scores=grid_scores,\n                is_exact_match=is_exact_match,\n            )\n\n    pre_computed_rewards = {}",
+      "supports": "One-cell nonnegative reward takes identity alignment."
+    },
+    {
+      "id": "matrix_precision",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 603,
+      "last_line": 622,
+      "excerpt": "    true_grid_scores_matrix = np.empty((num_true_grids, num_pred_grids), dtype=object)\n    pred_grid_scores_matrix = np.empty((num_true_grids, num_pred_grids), dtype=object)\n    score_matrix = np.empty((num_true_grids, num_pred_grids), dtype=np.float32)\n    score_upper_bound_matrix = np.empty((num_true_grids, num_pred_grids), dtype=np.float32)\n    is_exact_match_matrix = np.empty((num_true_grids, num_pred_grids), dtype=np.int8)\n\n    for true_idx, true_grid in enumerate(true_grids):\n        for pred_idx, pred_grid in enumerate(pred_grids):\n            grits_result = grits_function(true_grid, pred_grid)\n\n            true_grid_scores_matrix[true_idx, pred_idx] = grits_result.true_grid_scores\n            pred_grid_scores_matrix[true_idx, pred_idx] = grits_result.pred_grid_scores\n            score_matrix[true_idx, pred_idx] = grits_result.true_positive_score\n            score_upper_bound_matrix[true_idx, pred_idx] = (\n                grits_result.true_positive_score_upper_bound\n            )\n            is_exact_match_matrix[true_idx, pred_idx] = grits_result.is_exact_match\n\n    matched_true_indices, matched_pred_indices = linear_sum_assignment(score_matrix, maximize=True)\n",
+      "supports": "Lower and upper stored in float32 before assignment."
+    },
+    {
+      "id": "selection_and_sums",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 624,
+      "last_line": 644,
+      "excerpt": "    pred_grid_scores = pred_grid_scores_matrix[matched_true_indices, matched_pred_indices]\n    true_positive_scores_per_grid = score_matrix[matched_true_indices, matched_pred_indices]\n    true_positive_scores_upper_bound = score_upper_bound_matrix[\n        matched_true_indices, matched_pred_indices\n    ]\n\n    exact_match_by_grid = is_exact_match_matrix[matched_true_indices, matched_pred_indices]\n    num_exact_grid_matches = int(sum(exact_match_by_grid))\n\n    true_positive_score = float(true_positive_scores_per_grid.sum())\n    true_positive_score_upper_bound = float(true_positive_scores_upper_bound.sum())\n\n    return HungarianGritsMatchingResult(\n        true_positive_score=true_positive_score,\n        true_positive_score_upper_bound=true_positive_score_upper_bound,\n        true_grid_scores=true_grid_scores,\n        pred_grid_scores=pred_grid_scores,\n        matched_true_indices=list(matched_true_indices),\n        matched_pred_indices=list(matched_pred_indices),\n        num_exact_grid_matches=num_exact_grid_matches,\n    )",
+      "supports": "Assignment on stored lower values; selected sums cast to Python float afterward."
+    }
+  ],
+  "scope": "Selected pinned code plus independent stdlib IEEE-binary32 model; no native execution."
+}

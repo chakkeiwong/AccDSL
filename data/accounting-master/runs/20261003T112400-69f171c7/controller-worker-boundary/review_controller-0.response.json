@@ -1,0 +1,32 @@
+{
+  "assumptions": [
+    "The supplied interfaces are authoritative; controller and workers are trusted, and containment covers only the initial process group.",
+    "Master.remaining(seconds) caps execution at the remaining run deadline. Its implementation is not supplied, and no interface states that it independently preserves the editable-worker verification reserve."
+  ],
+  "checks": [
+    "Reviewed worker configuration isolation, role-specific verdict validation, response freshness, failure-path integrity checks, and budget propagation from the supplied snippets only.",
+    "The packet reports 104 passing tests; test bodies were not supplied, so their names do not establish coverage of the finding below.",
+    "No tools, files, commands, or project history were accessed."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "Verification reserve can be consumed by worker startup. In Master._worker_result, editable-worker seconds is calculated as deadline - time.monotonic() - reserve before recovery preparation and two sequential subprocess.run configuration queries, each permitting 30 seconds. That stale duration is later passed to self.process, which calls self.remaining(seconds) without subtracting the reserve again. For example, with 100 seconds remaining, a 40-second reserve, and a nominal worker limit of at least 60 seconds, the worker receives a 60-second allowance. If preparation and queries consume 30 seconds, the worker can still run for 60 seconds, leaving only 10 seconds for supervisor verification. The fixed query timeouts can themselves exhaust a short remaining run budget. Repair by using an absolute editable-work cutoff of self.deadline - reserve, bounding each query by the remaining preparation/work allowance, and recalculating the worker allowance immediately before launch. Refuse launch once that cutoff is reached and refresh the reported budget to reflect actual availability. Add focused regression coverage for delayed configuration queries and an exhausted cutoff."
+  ],
+  "next_actions": [
+    "Enforce the absolute editable-work cutoff across preparation, configuration inspection, and worker execution.",
+    "Rerun focused budget tests and the controller suite, then obtain a fresh read-only review of the changed controller."
+  ],
+  "residuals": [
+    "Definitions of bounded_process, remaining, defer_shutdown, integrity helpers, and the CLI override parser are not supplied. Their detailed behavior remains an interface assumption rather than independently reviewed implementation.",
+    "The packet does not include phase scheduling or repair-loop implementations; this worker-boundary review cannot independently establish the complete sequential execution and acceptance workflow.",
+    "Source-panel checks and scoped internal acceptance do not close accounting, scientific, or human-acceptance gaps. The reported test count is control-plane evidence only."
+  ],
+  "steps": [
+    "Traced worker setup through process launch and compared elapsed-time accounting with the promised supervisor verification reserve."
+  ],
+  "summary": "REVISE: editable-worker startup uses a stale duration, allowing configuration inspection and execution to consume the promised verification reserve.",
+  "verdict": "REVISE"
+}

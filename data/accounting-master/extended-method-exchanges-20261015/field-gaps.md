@@ -1,0 +1,69 @@
+# P1 operation-to-field reconciliation
+
+15 October 2026. All 46 original rows are preserved in coverage.json and protected/.
+The mappings are authored judgments; the check verifies coverage and byte integrity.
+
+| Row | Operation | Required fields and semantics | Separate dependencies |
+|---|---|---|---|
+| P17-04.01 | Performance, invoice and collection | performance_obligation_id; gross_bill; advance_allocated; contract_asset; contract_liability; unconditional_right | actual_fact: eligibility, control, price, progress and rights |
+| P17-04.02 | Unbilled customer advance | allocation_id; advance_before/after; state_only journal variant; one-use business identity | actual_fact: identified paid right; no new base example required |
+| P17-04.03 | Sale with return right | refund_liability; return_recovery_asset; expected_return_units; returned_units; estimate_time | valuation_method: actual return estimation; actual_fact: recovery costs |
+| P17-04.04 | Bundles, principal/agent, warranties, modifications | service/assurance distinction; separate_obligation_ids; allocation; cumulative_progress; catch_up; reimbursement | actual_fact: contract and assurance law; authority: historical source interval only |
+| P17-04.05 | Inventory and supplier payables | production_stage; opening/cohort component costs; completion fractions; normal_loss; policy FIFO/average; joint_product basis; financing schedule | actual_fact: normal capacity, yield, NRV and payable terms; no no-opening-WIP default |
+| P17-04.06 | Payroll and benefits | DBO; plan_assets; ceiling; available_refund/reduction; past/future_service_funding; curtailment/settlement quantities; contribution timing | actual_fact: employee law/rights/funding; valuation_method: actuarial assumptions |
+| P17-04.07 | PPE and estimate/modification | asset/component_id; inspection cost and derecognition; available_use date; restoration; depreciation; class revaluation; error/estimate origin | actual_fact: values/cohorts and original information; authority: dated source |
+| P17-04.08 | Impairment and provisions | CGU/corporate allocation; goodwill_owner/NCI fractions; individual_floor; prior_loss/reversal_cap; revaluation_reserve; provision change origin | valuation_method: recoverable values; design: all-zero reversal allocation remains unresolved |
+| P17-04.09 | Leases | lease/right_id; scope_fraction; liability/ROU; original/revised rate; remaining schedule; non_index_usage | actual_fact: rights/options/rates; design: heterogeneous rights require value-based allocation |
+| P17-04.10 | Current/deferred tax | tax_basis; enacted_rate; recognition_probability; origin profit/OCI/equity/acquisition; investment exception; uncertain_tax approach; explicit uncomputed status | authority: enacted local law and source dates; actual_fact: recovery/grouping; no universal rate |
+| P17-04.11 | Closing and cash-flow presentation | gross balance and component maps; origin-specific OCI/equity; activity-specific cash classifications; uncomputed tax boundary | design: restoration cash interpretation retained with competing consequence; P5 cross-method assembly |
+| P17-04.12 | Currency/group interaction | legal_book/entity; reporting_date; control_interval; reciprocal transaction; monetary/nonmonetary class; current purchasing power; rate provenance | actual_fact: control, currency and settlement; P3 group joins |
+| P17-04.13 | US GAAP and ASBE admission | authority edition; issuer_class; effective interval; source pin; unsupported jurisdiction result | authority: operative ASC and ASBE issuance/amendment chains; examples do not substitute |
+| P17-05.01 | Debt issue/EIR/accrual/settlement | instrument_id; original_EIR; principal/carrying/FV; dated cash schedule; fee purpose | actual_fact: calendars/fixings/agreements; P3 extends original finite purchase profile |
+| P17-05.02 | Modification/default | amendment effective/discharge/delivery dates; fees; qualitative and ten_percent findings; unpaid obligation; separate debt/equity settlement | actual_fact: enforceability, remedies and values; no automatic waiver |
+| P17-05.03 | Equity/conversion | original/modified_rights; original/new conversion_values; debt discharge; pending_share_entitlement; cash_bonus_liability; actual delivery | valuation_method: option values; authority: actual legal capital; conditional event order now specified |
+| P17-05.04 | Awards/EPS | grant/modification/service clocks; original/incremental costs; vesting condition kinds; cash/equity choice; participation; share days; EPS numerator/denominator | valuation_method: actual award values; actual_fact: vesting and participation; current-standard admission |
+| P17-05.05 | Benchmark/hedges | hedge_designation; aligned/actual component values; separate reserve origin; rebalancing date; gross/net position; affected_periods; earnings/basis release | valuation_method: financial pricing; actual_fact: risk management and qualifying group; authority: reform window |
+| P17-05.06 | Control/acquisition | business/control findings; acquisition date; goodwill and partial_NCI; tax origin; separate legal/consolidated books | actual_fact: business, control, fair values and tax; P3 binds G impairment |
+| P17-05.07 | Ownership changes and disposal | loss_of_control; disposed/retained fractions; fair value; parent/NCI reserve attribution; cash recipient | actual_fact: rights and valuations; preserve GroupForeignOperation/1 exchanges |
+| P17-05.08 | Reciprocal/inventory elimination | seller/buyer book refs; transaction identity; balance-date membership versus event control interval; reciprocal amounts; unrealised inventory/tax | actual_fact: counterparties and settlements; P3 forbids cross-book/cross-date joins |
+| P17-05.09 | Currency | functional/presentation currency; index/date; opening tax restatement; monetary position; exchange purpose; exchangeability assessment and estimated rate | actual_fact: price indices and currency access; valuation_method: estimated spot rate; dated amendments |
+| P17-05.10 | Guarantees/succession/real perimeter | exact issuer/guarantor/legal successor; rights/contract revision; source and effective date; unresolved findings | actual_fact: actual JPMorgan/Apple agreements remain absent; no fabricated real perimeter |
+| P17-06.01 | Origination/deposit/external transfer | loan/deposit/facility identities; internal credit versus external settlement; confirmed_receipt | actual_fact: funding and counterparty records |
+| P17-06.02 | Funded ECL and credit state | business_model and SPPI findings; original credit risk; gross/allowance/stage; FV category and OCI origin; cure assessment | valuation_method: ECL/FV calibration; actual_fact: business model and credit evidence |
+| P17-06.03 | Undrawn commitments | facility limit; revolving/partial draw; repaid capacity; original recognition; funded/undrawn ECL and conditional draw law | actual_fact: facility terms; valuation_method: EAD/LGD/dependence |
+| P17-06.04 | Modification/default | modification/derecognition findings; partial transfer eligibility; retained asset/liability; option call/put/collar; guarantee maximum; no duplicate derivative | valuation_method: option and retained-interest prices; actual_fact: risks/rewards/control and cash |
+| P17-06.05 | Funding/liquidity | collateral eligibility/haircut; capacity; request/confirmed/pending cash; payment allocation; fee purpose and maturity | actual_fact: venues/contracts; valuation_method: calibrated stress behavior |
+| P17-06.06 | Regulatory capital | legal regulatory scope; dated rule; capital deductions; RWA and separate leverage denominator; allowance cap/excess; payout constraints | authority: operative-date rule chain; actual_fact: eligible capital/exposures; broader exposure methods remain scoped |
+| P17-06.07 | Forecast/decision policy | policy information set; joint default/EAD/LGD law id; cash/default status; target/data-vintage protocol | valuation_method: target-specific calibration and validation; empirical work held |
+| P17-07.01 | GMM/service/finance | FCF/RA/CSM/loss components; future/current service; equivalent_premium and actual_extra_cash; finance schedule/OCI origin; derecognition | valuation_method: actual curves/claims; actual_fact: modification admission |
+| P17-07.02 | Grouping/cohorts | portfolio; annual cohort; profitability; issued/held role; group_id unrestricted by A/B/R labels; membership evidence | actual_fact: actual insurer classification; preserve adverse pooling case |
+| P17-07.03 | Reinsurance | covered_subset_ids; share/limits; recognition and binding dates; changed coverage; loss_recovery_component; held margin and collectability | actual_fact: treaty terms; valuation_method: recovery law/counterparty |
+| P17-07.04 | Acquisition costs | acquisition allocation/asset; recognised group transfer; impairment/reversal; PAA expense election; eligibility; LRC before/after | actual_fact: costs and eligibility; valuation_method: recovery of acquisition asset |
+| P17-07.05 | VFA/guarantees | underlying_pool; direct_participation admission; variable_fee; service units; guarantee; investment_component; mitigation strategy and derivative; loss ordering | valuation_method: market/physical laws and RA; actual_fact: eligible rights/strategy |
+| P17-07.06 | Transition | transition date; method selection; impracticability findings; opening components/equity; loss-recovery timing evidence | actual_fact: complete historical valuation; valuation_method: transition fair value; no calibrated engine claim |
+| P17-07.07 | Actuarial estimation | conditional target; triangle/process-law id; backward-law; retained failed draws; exact joint transition law; stop_loss functional | valuation_method: calibration and justified competitors; R04/R05 obligations remain |
+| P17-07.08 | Shared interfaces | new phase/event tagged unions; atomic component and account publication; exact replay; whole receipt/dependency closure | interface: P4 successor and P5 recovery; implementation: runtime isolation/durability held |
+| P17-08.01 | Construction/search | explicit model scope; candidate symbols and completeness; source-dependent domain; unknown remainder | interface: extended event-domain bindings; implementation: general solver held |
+| P17-08.02 | Empty/unknown/certainty | empty/unknown/partial distinction; unresolved obligation and coverage; no fabricated witness | interface: reuse existing result semantics, new method refusals |
+| P17-08.03 | Exact/rounded/integer | reduced rational; exact versus posted cents; rounding allocation; integer-domain admission | interface: successor amount fields and P5 rounding/order checks |
+| P17-08.04 | Grouping/state | component memory and grouping key; query/horizon restrictions; exact/approximate status | interface: successor economic state; no balance-only equivalence |
+| P17-08.05 | Time/revision | evidence/publication/system/effective clocks; original/corrected views; stale descendants; event semantic identity | actual_fact: availability; interface: corrections without historical mutation and replay before freshness |
+| P17-08.06 | Uncertainty/partial execution | joint-law identity; unweighted admissible laws; conditional probability; unresolved/failed mass; observational/intervention mode | valuation_method: no empirical law inferred from examples; interface: P4 law records |
+| P17-08.07 | Mappings/partitions | units/context; disjoint exhaustive population; cross-domain concept mapping; role and rule identity | interface: P3/P4/P5 cross-book/context refusals; authority: cross-standard mappings |
+| P17-08.08 | Continuous forecasting | target-specific plan; data vintage; budget/seed ladder; downstream metric; veto/repair classifications | valuation_method: later empirical evidence; protocol delivered R05, execution held |
+
+## Exact baseline restrictions
+
+CorporateJointHistory/1: the method is northstar.purchase@1, event parameters are amount/units/consideration, the 16-account state has no component ledgers, tax is positive-profit-only with no deferred tax, and OCI is zero. Its 70 exchanges and 525 records remain valid under that restricted lock.
+
+GroupForeignOperation/1: 22 exchanges/197 records cover the A/O/R/D acquisition, operation, translation and disposal stages with USD/EUR books. They do not type inflation indices, reciprocal joins, exchangeability or corporate-asset impairment.
+
+Insurance atomic: 27 exchanges/274 records cover A/B/R groups and finance/service/incurrence/settlement phases. The fixed assumptions and account set lack PAA/VFA, equivalent premiums, coverage subsets and finance-OCI origins.
+
+## Dependency decision
+
+R03-F/G/L resolve the named finite corporate event/cohort/tax methods; R03-H/M resolve financing conditions/components/dates; R03-I/N resolve bank funding/transfer/classification branches; R03-J/O resolve the named insurance branches; R03-K resolves conditional group joins/restatement/exchangeability. Their source limits and supplied valuations remain. An old matrix naming those methods as absent is historical evidence, not a reason to create another example.
+
+The successor still needs closed state/event variants, exact method/source/date/context bindings, independent finances, explicit uncomputed-tax handling, adverse and atomic replay/recovery paths. Current ASC/ASBE admission, real contracts, actual valuation/calibration, all-zero impairment reversal and heterogeneous-lease allocation are distinct dependencies. They cannot be repaired with empty fields, arbitrary zeroes or a schema pass. R03 remains open.
+
+Next P2 starts with the named corporate variants and a complete production-cohort transition; it then adds benefits, asset/lease/provision/tax and customer operations. P3/P4 retain sector-specific records; P5 reconciles all 46 rows.

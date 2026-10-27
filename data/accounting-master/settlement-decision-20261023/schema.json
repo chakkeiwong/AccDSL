@@ -1,0 +1,400 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile",
+    "context",
+    "decision_at",
+    "payment_at",
+    "information_as_of",
+    "evidence",
+    "assumption_ref",
+    "opening",
+    "claim",
+    "funding",
+    "decision"
+  ],
+  "properties": {
+    "profile": {
+      "const": "SettlementDecisionDraft/1"
+    },
+    "context": {
+      "$ref": "#/$defs/context"
+    },
+    "decision_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "payment_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "information_as_of": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "evidence": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "path",
+              "sha256"
+            ],
+            "properties": {
+              "kind": {
+                "const": "retained_source"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "description"
+            ],
+            "properties": {
+              "kind": {
+                "const": "scenario_assumption"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    "assumption_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "opening": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_at",
+        "cash",
+        "payables",
+        "other_payables",
+        "debt",
+        "source_ref"
+      ],
+      "properties": {
+        "snapshot_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+        },
+        "cash": {
+          "$ref": "#/$defs/amount"
+        },
+        "payables": {
+          "$ref": "#/$defs/amount"
+        },
+        "other_payables": {
+          "$ref": "#/$defs/amount"
+        },
+        "debt": {
+          "$ref": "#/$defs/amount"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "context",
+        "recognised",
+        "adjustments",
+        "settled",
+        "outstanding",
+        "due_at",
+        "source_ref"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "$ref": "#/$defs/context"
+        },
+        "recognised": {
+          "$ref": "#/$defs/amount"
+        },
+        "adjustments": {
+          "$ref": "#/$defs/amount"
+        },
+        "settled": {
+          "$ref": "#/$defs/amount"
+        },
+        "outstanding": {
+          "$ref": "#/$defs/amount"
+        },
+        "due_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "funding": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tag",
+            "source_ref"
+          ],
+          "properties": {
+            "tag": {
+              "const": "known_none"
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tag",
+            "reason",
+            "obligations"
+          ],
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligations": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tag",
+            "id",
+            "context",
+            "limit",
+            "drawn",
+            "reserved",
+            "available_from",
+            "expires_exclusive",
+            "eligibility",
+            "source_ref"
+          ],
+          "properties": {
+            "tag": {
+              "const": "facility"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "context": {
+              "$ref": "#/$defs/context"
+            },
+            "limit": {
+              "$ref": "#/$defs/amount"
+            },
+            "drawn": {
+              "$ref": "#/$defs/amount"
+            },
+            "reserved": {
+              "$ref": "#/$defs/amount"
+            },
+            "available_from": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+            },
+            "expires_exclusive": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+            },
+            "eligibility": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "tag",
+                    "reason",
+                    "obligations"
+                  ],
+                  "properties": {
+                    "tag": {
+                      "const": "unknown"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "obligations": {
+                      "type": "array",
+                      "minItems": 1,
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "decision": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "policy"
+          ],
+          "properties": {
+            "policy": {
+              "const": "cash_only"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "policy",
+            "facility_id",
+            "amount",
+            "settles_at",
+            "draw_before_payment",
+            "authorisation_ref"
+          ],
+          "properties": {
+            "policy": {
+              "const": "explicit_draw"
+            },
+            "facility_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "amount": {
+              "$ref": "#/$defs/amount"
+            },
+            "settles_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+            },
+            "draw_before_payment": {
+              "type": "boolean"
+            },
+            "authorisation_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SettlementDecisionDraft/1 documentary input",
+  "$defs": {
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "n",
+        "d"
+      ],
+      "properties": {
+        "n": {
+          "type": "string",
+          "pattern": "^(0|-?[1-9][0-9]*)$"
+        },
+        "d": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity",
+        "book",
+        "currency"
+      ],
+      "properties": {
+        "entity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "book": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

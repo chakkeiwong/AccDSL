@@ -1,0 +1,35 @@
+{
+  "assumptions": [
+    "The supervisor is single-threaded on Linux; trusted workers remain in their initial process group.",
+    "Launches use normal child-reaping semantics: no SIGCHLD auto-reaping or other component reaps the child before terminate_group.",
+    "The supplied registration callback durably records ownership before returning. Its implementation and failure-state persistence are not included."
+  ],
+  "checks": [
+    "Reviewed launch, deferred interruption, group cleanup, recovered-process signalling and lock lifetime from the supplied code only.",
+    "The packet reports 218 passing tests. Test bodies were not supplied; names and counts do not establish coverage of persistent identity-read failures or accounting correctness."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "High — bounded_process can leave an unregistered running child after an ordinary identity-read failure. Immediately after Popen succeeds, it calls process_identity before on_spawn. If that lookup raises, finally calls terminate_group, whose _terminate_group immediately repeats the same lookup. A persistent OSError or PermissionError reading the child's /proc entry or boot identity therefore prevents both registration and termination. If the lookup instead repeatedly returns None, cleanup can also fail to find members and reach proc.wait(timeout=5) while the child remains alive. The parent then unwinds without a durable identity available to recover_process. This is an accidental failure after a successful fork, not the excluded uncatchable-kill window. Repair by establishing an exception-safe cleanup path for a newly created, unreaped direct child that does not depend on the metadata read that failed. Under the stated no-other-reaper assumption, retain the child as the ownership anchor, terminate its known initial group with bounded escalation, and reap only after cleanup. Persist unresolved cleanup state if termination cannot be established; never silently resume from an absent active-process record."
+  ],
+  "next_actions": [
+    "Implement the launch-failure cleanup path and explicitly enforce or document its child-reaping assumptions.",
+    "Add a regression in tests/test_accounting_master.py where Popen succeeds and identity lookup fails persistently through cleanup; verify that the child cannot remain running without an unresolved durable record. Include handled interruption during that failure path.",
+    "Rerun lifecycle verification and obtain a fresh review of the repaired code."
+  ],
+  "residuals": [
+    "Recovered ownership ambiguity correctly blocks continuation rather than signalling a potentially unrelated process.",
+    "Process enumeration assumes visibility of every relevant group member. live_group_members skips PermissionError; document the required /proc visibility and same-credential operating conditions.",
+    "Atomic persistence, scheduling, narrow command approval and frozen-evidence enforcement are supplied as interfaces rather than implementations in this lifecycle packet; they were not independently verified.",
+    "The 192-report source panel and scoped internal acceptance do not close accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Performed the requested bounded packet-only static review without tools, commands or project-history reads."
+  ],
+  "summary": "The launch exception path can lose containment when process identity reads fail persistently before durable registration.",
+  "verdict": "REVISE"
+}

@@ -1,0 +1,199 @@
+\section{From a valid record to a financial transition}
+\label{sec:typed-return-transitions}
+
+A company can have a balanced opening book and enough information to assess
+the conditions of a method without yet having a journal for the next event.
+The method must determine the amounts, identify the accounts, and change the
+contract and inventory records consistently. The return example makes these
+steps concrete. At the settlement date, the company pays refunds and handling
+costs, extinguishes the remaining return rights, and receives a recovered lot.
+Cash, income, liabilities and inventory change together.
+
+Begin with the complete preceding record. The concrete native-state profile
+specifies the outer record and every nested component, lot, balance, tax premise,
+cash flow and prior-period record. It rejects a missing field, an unexpected
+field, a noncanonical rational or a non-Boolean disposition flag before projecting
+selected values into a requirement. Fields that can retain an explicit unknown
+are named by the schema; unknown tax findings need not prevent an earlier
+non-tax event. Structural validity establishes that the record has the specified
+meaning and shape. Balance, allocation, financial domains and source authority
+remain separate questions.
+
+\subsection{Derive the amounts before changing the book}
+
+Suppose the company accepts two returned units. Each unit entitles the customer
+to a refund of USD~20. Its original unit cost is USD~12, deterioration is USD~2
+per unit, and handling costs USD~4 per unit. The supplied net realisable value
+of the recovered lot is USD~20. The selected method treats handling as a selling
+expense and requires an explicit finding that all return rights are closed.
+These are the assumptions of this example, including the specified treatment
+of the recovered stock; a different accounting method needs its own definition.
+
+Let $n$ be the returned quantity, $p$ the per-unit refund, $c$ the original unit
+cost, $d$ the per-unit deterioration, $h$ the handling cost per unit and $N$ the
+lot's net realisable value. All monetary inputs refer to the same currency and
+selected measurement context. The refund $Q$, handling payment $H$ and recovered
+carrying amount $V$ are
+\begin{equation}
+ Q=np=40,\qquad H=nh=8,\qquad
+ V=\min\{n(c-d),N\}=\min\{2(12-2),20\}=20.
+\label{eq:typed-return-amounts}
+\end{equation}
+Units multiplied by currency per unit produce currency. Subtracting $c-d$
+requires matching units, scale and context; taking the minimum requires two
+amounts with the same full type. If $N$ were USD~5 under a separately supplied
+scenario, the carrying amount would be USD~5. That changed scenario would no
+longer be the exact retained source event.
+
+The preceding refund liability has a positive magnitude $F=40$, and the
+preceding recovery asset is $R=16$. These are balances carried from the preceding
+state, not estimates recalculated at settlement. With debits positive, the
+selected journal is described by
+\begin{equation}
+\begin{aligned}
+ \Delta\mathrm{RefundLiability}&=F,&
+ \Delta\mathrm{RecoveryAsset}&=-R,&
+ \Delta\mathrm{Inventory}&=V,\\
+ \Delta\mathrm{Revenue}&=Q-F,&
+ \Delta\mathrm{CostOfSales}&=R-V,&
+ \Delta\mathrm{SellingExpense}&=H,\\
+ \Delta\mathrm{Cash}&=-Q-H.
+\end{aligned}
+\label{eq:typed-return-journal}
+\end{equation}
+Thus the liability receives a debit of~40, the recovery asset a credit of~16,
+and inventory a debit of~20. Revenue has no net adjustment; cost of sales is
+credited by~4, selling expense debited by~8, and cash credited by~48. Adding the
+signed entries cancels $F$, $R$, $V$, $Q$ and $H$ exactly. The cash-flow record
+retains the refund outflow of~40 and handling outflow of~8 separately as operating
+flows. Netting them into one number would lose their distinct origins.
+
+\code{MethodMonetaryEffects/1} expresses these calculations as a closed program
+of named inputs, ordered calculations, signed postings and gross flows. It
+reuses the dimensional product rules of the requirement language. Addition,
+subtraction, multiplication and binary minimum evaluate exact rational
+coefficients; no implicit rounding, scale conversion or currency conversion is
+performed. A calculation can reference an original input or an earlier named
+calculation. Its declared dependencies identify the original inputs even when
+intermediate names are used.
+
+Unknown values remain unknown through this arithmetic. If $N$ is unavailable,
+the program retains that reason and withholds a complete monetary proposal.
+Independent known calculations, such as the refund, remain available for
+diagnosis. Even multiplication by zero does not silently turn an unobserved
+input into an observed fact. The profile also checks finite expression, record
+and coefficient limits; exceeding a limit produces an explicit rejection.
+
+Balance and cash agreement are necessary checks, but they do not establish the
+measurement. Replacing $V$ by $V+1$ in both affected postings still gives a
+balanced journal. The inventory and cost-of-sales amounts would nevertheless
+be wrong relative to equation~\eqref{eq:typed-return-amounts}. The implementation
+therefore compares the derived amounts and complete effects, rather than using
+journal balance as a substitute for the method.
+
+\subsection{Stage the whole event or retain the preceding state}
+
+Settlement also changes memory. The component's refund and recovery amounts
+become zero and its settled flag becomes true. A new lot records the two units,
+carrying amount~20, acquisition date and component identity. In this selected
+tax treatment its tax base equals its carrying amount, and the tax adjustment
+is $R-F=-24$. Those tax choices are retained conditional premises. They are not
+inferred from the mere existence of the accounting journal.
+
+\code{MethodMemoryEffects/1} provides three operations over closed typed records:
+replace an existing object member, insert an absent map member, and append an
+array item. A value may be a literal, an exact read from the preceding state or
+event-derived inputs, or a constructed record or array. Reads always use the
+original records; they cannot accidentally observe an earlier staged write.
+The complete preceding and resulting states must satisfy the selected schema.
+
+Paths use explicit tokens. A lot identifier supplied through an input is one
+map key, including any slash or tilde that the applicable schema permits. It
+cannot redirect an update into another branch of the record. Overlapping writes
+are rejected, apart from repeated appends to the same array, whose supplied
+order is retained. A duplicate lot insertion, missing parent, wrong value type
+or failed final schema check discards the staged result. The caller's original
+state remains unchanged.
+
+For a subsequent whole-lot sale with proceeds $P$ and carrying amount $V$, the
+selected method requires completed performance and a live, undisposed lot. It
+posts cash $P$, revenue $-P$, inventory $-V$ and cost of sales $V$. The lot remains
+in memory with zero units, carrying amount and tax base, and a true disposition
+flag. Its identity cannot be reused for another sale. Events with equal dates
+retain supplied order: a sale before its lot is created fails, while a sale
+after settlement on that same date can satisfy the identity condition.
+
+The complete transition checks the preceding book, evaluates the event's
+requirements, derives monetary effects, adds them to balances, stages memory
+and validates the resulting book. Cash below zero is a funding failure under
+this profile's absence of an additional financing policy. It is not repaired
+by inventing borrowing or by committing only the noncash entries. The preceding
+state and all its identity records remain available after a rejected event.
+
+\subsection{Recompute the proposal from its inputs}
+
+The selected \code{TypedReturnTransition/1} adapter binds exact raw state and
+event bytes to the two recorded programs. Its guarded requirements retain
+original input paths and raw identities. Dates must lie inside the reporting
+period and cannot precede either the state date or the tax close. Refund and
+handling cash facts must equal the quantities derived by the method. A false
+rights or performance finding is outside the selected method; an unavailable
+required finding remains unresolved.
+
+The adapter carries preceding state amounts into the declared event measurement
+context. This is an explicit interpretation of the selected transition: the
+original state date and source path remain recorded. Equality of type contexts
+does not itself establish that information was available at the event date.
+The concrete profile is restricted to the retained USD legal book and the two
+selected operations. Other currencies and tax or surrounding operations require
+their own admitted method routes.
+
+A proposal includes the raw and decoded input identities, selected program and
+schema identities, prerequisite findings, journal, gross flows and complete
+after-state. Applying it recomputes every field from the original inputs before
+returning the result. A modified journal, cash-flow origin, lot flag, input
+identity or extra proposal field fails that comparison. A matching hash supplied
+by a caller cannot replace the computation. Applying the same event to its
+resulting state also fails the lifetime-event uniqueness condition.
+
+The reference adapter reuses the frozen native invariant before and after the
+transition. Agreement with the native implementation therefore provides an
+independent check of the typed effect derivation, but not an independent proof
+of that shared invariant. The separate state-requirement examples provide
+additional, explicitly scoped evidence. Where several requirements fail,
+the common assessment retains all findings and may summarize them differently
+from the native function's first-error order.
+
+\subsection{Correspondence with a source is a separate check}
+
+A source pointer with the right syntax does not show that an event was reported
+or that its preceding book follows from the source. The retained example has an
+additional finite binder. It accepts the exact original synthetic packet,
+checks the schema-prefixed identities of its records, and reconstructs the
+prescribed event projection. Legacy exact numbers such as \code{2} become
+canonical rationals such as \code{2/1}; both the original packet identity and
+the derived record identity remain available.
+
+To establish the preceding book for a selected event, the binder initializes the
+opening and recomputes the prior events in the packet's supplied order. It uses
+the pinned native and surrounding financial methods, without adopting saved
+after-states or expected journals. It then requires exact agreement between that
+recomputed state, the prescribed event and the supplied transition inputs. A
+balanced book with an extra unit of cash offset by capital is consequently
+rejected: balance alone does not establish correspondence with this history.
+
+The projection includes authored interface identifiers and conditional tax
+premises. Its zero opening tax bases follow the retained taxable-history
+assumption; they are not observations extracted from a company's filing. The
+packet also contains nonfinancial build timing, handled by a separate bounded
+parser for these exact bytes. The strict financial-record decoder continues to
+reject floating monetary inputs and ambiguous encodings.
+
+This chain supplies a reproducible transition for the selected synthetic case:
+complete state structure, explicit prerequisites, typed amounts, atomic memory,
+full proposal replay and exact source correspondence. It leaves accounting and
+source-authority admission false, and its in-memory application makes no durable
+storage or production-concurrency claim. Reporting, annual carry, alternative
+histories and real-company feasibility retain their distinct obligations. The
+checked implementation packages and their exact limitations are preserved in
+the accompanying transition and source-binding evidence records.

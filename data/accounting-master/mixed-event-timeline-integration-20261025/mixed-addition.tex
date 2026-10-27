@@ -1,0 +1,51 @@
+\paragraph{A payment can change the decision that follows it.}
+Separately supplied economic events can alter the state read by a scheduled
+rule. The bounded \texttt{MixedEventTimeline/1} joins directly dated native
+payments and inventory sales with the preceding decision calendar. It preserves
+the native accounting operation and materializes each decision against the book
+at its turn. Every action has an explicit date and priority; a same-day tie
+remains unresolved rather than inheriting the order of the input array.
+
+An order-sensitive example starts with cash of USD~452 and tax payable of
+USD~10.25, split between carried vintages of USD~5.25 and USD~5. Management's
+authored rule permits a one-unit inventory sale at USD~15 only if cash is below
+USD~450. Paying USD~4 from the first tax vintage before the decision reduces
+cash to USD~448 and enables the sale. Cash then becomes USD~463, total inventory
+falls from USD~80 to USD~70, and the selected lot's carrying amount falls from
+USD~20 to USD~10. The sale contributes USD~5 of profit; the payment reduces cash
+and payable without creating a new expense.
+
+Reverse the explicit same-day order and the decision sees cash of USD~452,
+so it takes no action. The later payment leaves cash of USD~448 and inventory
+of USD~80. In both cases tax payable is USD~6.25, with vintages of USD~1.25 and
+USD~5. These differences follow from the specified threshold and order, not an
+estimated company policy. The comparison checks the complete native journals,
+state histories and financial reports as well as these independent controls.
+
+The initial adapters accept allocated payments of carried tax vintages and the
+existing proportional inventory sale. Their declared schedule date must match
+the date inside the native event. Structural checks cover every supplied entry
+before execution, but remaining cash, stock, payable and accounting findings
+are assessed against the book at the relevant action. A later unknown vintage
+or unavailable authorization therefore preserves the earlier successful prefix
+and the exact failed event. An unresolved decision after a successful payment
+retains that payment; it is not rolled back merely because the subsequent sale
+could not be evaluated.
+
+Assessment and period-boundary operations need different treatment. A current
+tax assessment names an interval, a deferred measurement binds to a particular
+state, and a carry changes the fiscal period. The mixed reference leaves these
+operations, and nested return/lease envelopes, unsupported rather than assigning
+them an arbitrary event date or rewriting a stale measurement. This is an
+explicit implementation gap in the integrated timeline; the separate native
+methods retain their existing scope.
+
+Seventeen focused methods, 18 scheduler regression methods and 61 exact
+comparisons across six cases are retained in
+\path{data/accounting-master/mixed-event-timeline-20261025/}. The runner bounds
+the combined population to 64 actions, including at most 32 supplied native
+entries, and retains the current book, successful outcomes, failed action and
+remaining timeline on refusal. Its closed-path premise covers both supplied
+events and decisions. General financing, richer calendars, historical
+completeness and production durability remain open.
+

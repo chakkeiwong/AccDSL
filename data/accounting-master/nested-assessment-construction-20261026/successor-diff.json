@@ -1,0 +1,43 @@
+{
+  "source": "/home/chakwong/python/AccDSL/data/accounting-master/ordered-assessment-expansion-20261026/expander.py",
+  "source_sha256": "9fd620823339e7d84d68308351dd6016333f288417dd4d4d58931b60143984c7",
+  "target_sha256": "60d227f197c10bc69a11e19570f054b5672a6102689844cb05b5a0106dbf2af6",
+  "edits": [
+    {
+      "before": "Explicit bounded ordered expansion; no native lifecycle specializer.",
+      "after": "Bounded nested-record expansion; preserved scalar expression semantics."
+    },
+    {
+      "before": "PROFILE='OrderedMethodExpansion/1'",
+      "after": "PROFILE='OrderedNestedMethodExpansion/1'"
+    },
+    {
+      "before": "'map_pointer','row_types','row_operations'",
+      "after": "'map_pointer','row_definition','row_operations'"
+    },
+    {
+      "before": "fields=node['values']['fields'];c.need(type(template['row_types']) is dict and set(template['row_types'])==set(fields),'row_type_population')\n    for name,typ in template['row_types'].items():\n        c.base.scalar_type(typ,book);c.need(fields[name]=={'node':'scalar','type':typ},'row_type_mismatch')",
+      "after": "fields=node['values']['fields']\n    c.need(template['row_definition']==node['values'],'row_definition_mismatch')\n    row_types={name:field['type'] for name,field in fields.items() if field['node']=='scalar'}"
+    },
+    {
+      "before": "c.need(row_allowed and expr['field'] in template['row_types'],'row_field')\n            return template['row_types'][expr['field']]",
+      "after": "c.need(row_allowed and expr['field'] in row_types,'row_field')\n            return row_types[expr['field']]"
+    },
+    {
+      "before": "c.closed(expr,['expr','prefix'],'operation_id_expression');c.need(row_allowed,'operation_id_scope');c.base.text(expr['prefix'],'operation_prefix');return c.TEXT",
+      "after": "c.closed(expr,['expr','prefix'],'operation_id_expression');c.base.text(expr['prefix'],'operation_prefix');return c.TEXT"
+    },
+    {
+      "before": "    def validate_operation(expr,row_allowed):\n        inferred=infer(expr,row_allowed)\n        c.need(set(inferred)=={'record'} and set(inferred['record'])=={'id','op','path','value'},'operation_expression_shape')\n        fields=expr['fields'];shape=inferred['record']\n        c.need(shape['id']==shape['op']==c.TEXT,'operation_expression_type')\n        c.need(fields['op']=={'expr':'literal','type':c.TEXT,'value':'replace'},'declared_replace_operation')\n        c.need(set(shape['path'])=={'array'} and all(t==c.TEXT for t in shape['path']['array']),'operation_path_type')\n        tokens=fields['path']['items']\n        if row_allowed:\n            c.need(len(tokens)==len(parts)+2,'row_write_path')\n            for token,part in zip(tokens,parts):\n                c.need(token=={'expr':'literal','type':c.TEXT,'value':part},'row_write_prefix')\n            c.need(tokens[-2]=={'expr':'key'},'row_write_key')\n            last=tokens[-1];c.need(last.get('expr')=='literal' and last.get('type')==c.TEXT and last.get('value') in template['row_types'],'row_write_field')\n            target=template['row_types'][last['value']]\n        else:\n            c.need(all(t.get('expr')=='literal' and t.get('type')==c.TEXT for t in tokens),'suffix_literal_path')\n            pointer=c.types.pointer([t['value'] for t in tokens]);c.need(pointer in book['memory_types'],'suffix_target')\n            target=book['memory_types'][pointer]\n        c.need(set(shape['value'])=={'record'} and set(shape['value']['record'])=={'kind','value'},'write_value_shape')\n        c.need(fields['value']['fields']['kind']=={'expr':'literal','type':c.TEXT,'value':'literal'},'write_value_literal_kind')\n        c.need(shape['value']['record']['value']==target,'write_value_type')\n",
+      "after": "    def validate_operation(expr,row_allowed):\n        inferred=infer(expr,row_allowed)\n        c.need(set(inferred)=={'record'} and set(inferred['record'])=={'id','op','path','value'},'operation_expression_shape')\n        operation=expr['fields'];shape=inferred['record']\n        c.need(shape['id']==shape['op']==c.TEXT,'operation_expression_type')\n        op_expr=operation['op']\n        c.need(op_expr.get('expr')=='literal' and op_expr.get('type')==c.TEXT and op_expr.get('value') in ('replace','insert'),'declared_write_operation')\n        op=op_expr['value'];tokens=operation['path']['items']\n        c.need(set(shape['path'])=={'array'} and all(t==c.TEXT for t in shape['path']['array']),'operation_path_type')\n        c.need(bool(tokens),'nonempty_write_path')\n        current=memory_definition['root'];parent=None\n        if row_allowed:\n            c.need(len(tokens)>len(parts)+1,'row_write_path')\n            for token,part in zip(tokens,parts):\n                c.need(token=={'expr':'literal','type':c.TEXT,'value':part},'row_write_prefix')\n            c.need(tokens[len(parts)]=={'expr':'key'},'row_write_key')\n        for token in tokens:\n            parent=current\n            if current['node']=='record':\n                c.need(token.get('expr')=='literal' and token.get('type')==c.TEXT and token.get('value') in current['fields'],'record_write_field')\n                current=current['fields'][token['value']]\n            elif current['node']=='map':\n                c.need(infer(token,row_allowed)==c.TEXT,'map_key_text_type');current=current['values']\n            else:raise c.Refusal('invalid','scalar_write_parent')\n        c.need(parent['node']=='map' if op=='insert' else current['node']=='scalar','write_target_kind')\n        def check_value(value,target):\n            c.need(value.get('expr')=='object','memory_template_object')\n            fields=value['fields'];kind=fields.get('kind',{})\n            if target['node']=='scalar':\n                c.need(set(fields)=={'kind','value'} and kind=={'expr':'literal','type':c.TEXT,'value':'literal'},'scalar_template_shape')\n                c.need(infer(fields['value'],row_allowed)==target['type'],'write_value_type')\n            else:\n                c.need(set(fields)=={'kind','fields'} and kind=={'expr':'literal','type':c.TEXT,'value':'object'},'record_template_shape')\n                body=fields['fields'];c.need(body.get('expr')=='object','record_template_fields')\n                body=body['fields']\n                if target['node']=='record':\n                    c.need(set(body)==set(target['fields']),'complete_record_fields')\n                    for name,item in body.items():check_value(item,target['fields'][name])\n                else:\n                    c.need(len(body)<=target['max_items'],'memory_map_capacity')\n                    for name,item in body.items():\n                        c.base.text(name,'map_key');check_value(item,target['values'])\n        check_value(operation['value'],current)\n"
+    },
+    {
+      "before": "row=population[key];c.need(type(row) is dict and set(row)==set(template['row_types']),'row_population')\n        for name,typ in template['row_types'].items():",
+      "after": "row=population[key];c.need(type(row) is dict and set(row)==set(fields),'row_population')\n        for name,typ in row_types.items():"
+    },
+    {
+      "before": "evaluate(expr,None,None,None)",
+      "after": "evaluate(expr,None,None,len(operations))"
+    }
+  ]
+}

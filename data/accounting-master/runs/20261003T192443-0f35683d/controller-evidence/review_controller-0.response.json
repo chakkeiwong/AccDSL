@@ -1,0 +1,36 @@
+{
+  "assumptions": [
+    "Controller and workers are trusted; review covers accidental failures, handled interruptions and stale evidence within the stated process-group guarantee.",
+    "Unshown controller behavior is assessed only through the supplied interfaces. Test names and the reported 153-test pass are supporting evidence, not independently inspected test results."
+  ],
+  "checks": [
+    "Reviewed supplied evidence hashing, preservation, change attribution, recovery, fixed-operation validation and proposal readiness code without tools.",
+    "Confirmed proposal readiness retains human_acceptance=pending and implementation_enabled=false.",
+    "Confirmed fixed-operation validation distinguishes deterministic PASS from model AGREE and preserves bounded source acceptance."
+  ],
+  "evidence": [
+    "scripts/check_accounting_proposal.py",
+    "scripts/accounting_master_support.py",
+    "scripts/run_accounting_master.py",
+    "tests/test_accounting_proposal.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "P18 does not establish that its PDF was built from the pinned source bytes. In scripts/check_accounting_proposal.py, anchor() verifies current hashes, while the recorder check verifies only dependency paths. build.exit_code, the build log and rendered_pdf_sha256 do not bind the PDF to source hashes observed during that build. An ordinary stale-build case therefore passes the structural checks: retain an earlier PDF, recorder and rendered pages; edit main.tex or an included figure; update its source_files hash; and submit the new manuscript manifest. All current checks can succeed although the rendered review concerns an earlier source version. Repair by preserving a build-time record containing the actual input hashes and resulting PDF hash, and require those hashes to match the current candidate. Capture inputs around the successful build and reject changed inputs; bind rendering to that recorded PDF. Add a regression that edits and re-pins a source or figure without rebuilding and requires P18 to fail. The supplied interfaces do not identify another component that already enforces this build-time binding."
+  ],
+  "next_actions": [
+    "Add and validate build-time input/output bindings, then rerun the proposal checks and independent result review for the resulting candidate.",
+    "Add the stale-build regression while preserving the existing distinction between structural checks, substantive review and human acceptance."
+  ],
+  "residuals": [
+    "phase_recovery unconditionally reads phase['test_file'], whereas run_phase_tests supports checker-backed phases without consulting that key. The catalog contents are not supplied; confirm that every recoverable checker phase has a meaningful test_file, or make recovery enumerate checker inputs instead.",
+    "Process cleanup, locking, command approval and repair execution implementations are outside the supplied code excerpts; their stated interfaces and named tests cannot establish those implementations independently.",
+    "The 192-report source panel and internal phase acceptance do not close accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Traced proposal evidence from current file hashes through structural validation to the readiness gate.",
+    "Compared the build and render checks against the requirement to review the same candidate."
+  ],
+  "summary": "REVISE: manuscript evidence binds current files and PDF separately, but does not establish that the PDF was built from those source bytes.",
+  "verdict": "REVISE"
+}

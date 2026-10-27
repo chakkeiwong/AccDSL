@@ -1,0 +1,76 @@
+{
+  "total": 331,
+  "literal_blocks_retained": 317,
+  "changed_blocks": [
+    {
+      "file": "docs/design/chapters/06-language.tex",
+      "paragraph": 2,
+      "text": "AccDSL Core 0 describes entities and books, accounts, observations, shared\nunknowns, constraints, alternative interpretations, contract instances,\naccounting rules and reporting mappings. It has pure expressions and a\nrestricted posting effect. Economic forecasting algorithms can live in typed\nplugins; unrestricted numerical code does not need to be reimplemented in\nthe DSL. The grammar and interface details in Appendix~\\ref{app:contracts}\nare normative for the first parser."
+    },
+    {
+      "file": "docs/design/chapters/06-language.tex",
+      "paragraph": 5,
+      "text": "The complete grammar is supplied as \\code{spec/core-0.lark}, and the exact\nrecord fields as \\code{spec/core-ir.schema.json}. The companion\n\\code{spec/core-contract.md} defines reference resolution, expression arity,\ntype/context checks, operations, failures and identity. Structural schema\nvalidation alone does not establish those semantic properties. ASCII\nidentifiers and UTF-8 strings are used in this revision; currency suffixes,\ndates and decimal literals have explicit lexical rules. The grammar is checked\nby parsing the complete demonstration file, not by claiming that its parser\nalso implements a compiler or solver."
+    },
+    {
+      "file": "docs/design/chapters/07-execution.tex",
+      "paragraph": 15,
+      "text": "\\begin{lstlisting}\nexecute_event(event, state, run_context):\n    verify prerequisites and information availability\n    resolve applicable measurement and recognition rules\n    compute proposed economic changes and measurements\n    compute proposed journal batch(es)\n    validate types, contexts, balance, constraints and idempotency\n    atomically commit state, journals and explanation edges\n    return new state, emitted dependent events, diagnostics\n\\end{lstlisting}"
+    },
+    {
+      "file": "docs/design/chapters/08-modules.tex",
+      "paragraph": 5,
+      "text": "The official IFRS overviews for IFRS 9, IAS 32 and IFRS 17 establish the relevant\nscope of financial-instrument measurement, presentation and insurance\ncontracts \\citep{ifrs9,ias32,ifrs17}. They are orientation sources, not substitutes\nfor reviewed paragraph-level implementations. Public retrieval of the selected\nChinese Ministry of Finance page and SEC API documentation failed during this\ncampaign; the source register records these access gaps. ASBE and US GAAP\nsemantic modules therefore have explicit primary-text acquisition and\naccounting-review tasks before they can be marked executable and compliant."
+    },
+    {
+      "file": "docs/design/chapters/09-implementation.tex",
+      "paragraph": 2,
+      "text": "The initial implementation uses Python for orchestration and a deterministic\nreference evaluator, exact decimal/rational arithmetic for booked amounts,\nSQLite for transactional metadata and versioned records, and columnar files\nfor large scenario outputs. DuckDB is an optional analytical reader. These\nare convenience choices justified by inspectability and modest initial scale;\nthey do not establish production performance. The IR and conformance tests\nallow a later compiled executor without changing accounting meaning."
+    },
+    {
+      "file": "docs/design/chapters/09-implementation.tex",
+      "paragraph": 11,
+      "text": "The Python and command-line interfaces expose the same operations:\n\\begin{lstlisting}\ningest(manifest, extractor_config) -> EvidenceVersion\ncompile(source_or_ir, evidence_view, package_lock) -> ModelPlan | Diagnostics\nreconcile(plan, cutoff, solver_config) -> HistoryFamily | Diagnostics\ncondition(family, assumptions) -> ConditionalFamily | Infeasible\nsimulate(family, scenario_set, run_config) -> RunResult\nrender(run_id, report_request) -> ReportBundle\nexplain(node_id, evidence_view_or_run_id) -> ExplanationGraph\ncompare(run_a, run_b, alignment_spec) -> Comparison\n\\end{lstlisting}\n\\end{minipage}"
+    },
+    {
+      "file": "docs/design/chapters/09-implementation.tex",
+      "paragraph": 30,
+      "text": "The reference serialisation uses UTF-8 JSON with NFC strings, sorted ASCII\nkeys, no insignificant whitespace and no floating-point literals. Exact\nnumbers are reduced rational numerator/denominator strings; zero is $0/1$.\nDuplicate keys, NaN, infinities and unpaired Unicode surrogates are rejected.\nArrays preserve order unless the schema declares a set, such as a constraint\nconjunction or source-ID set, in which case IDs are sorted. This normalisation\nrecognises representational equality, not arbitrary economic equivalence."
+    },
+    {
+      "file": "docs/design/chapters/09-implementation.tex",
+      "paragraph": 32,
+      "text": "An economic event ID derives from owner, schedule version, date, phase,\noperation and occurrence ordinal. The idempotency key pairs run ID and event\nID. Identical payloads return the committed result; different payloads under\nthe same key produce \\code{EventIdentityConflict}. Independent events\nmay reorder only when read/write sets are disjoint or a package proves\ncommutation, including funding constraints. Alphabetical ordering cannot\nsettle an economic timing ambiguity."
+    },
+    {
+      "file": "docs/design/chapters/09-implementation.tex",
+      "paragraph": 36,
+      "text": "Exact method arguments and result fields are specified in\n\\code{spec/core-contract.md}; \\path{spec/core-ir.schema.json} supplies closed\nstructural definitions. Every method returns a success record or a\ndiagnostic with code, source IDs, entity/period, dependency path and retry\nstatus. The principal sequence is \\code{ingest}, \\code{review},\n\\code{compile}, \\code{reconstruct}, \\code{simulate}, \\code{report}, with\n\\code{bound}, \\code{explain} and \\code{replay} over frozen identities."
+    },
+    {
+      "file": "docs/design/chapters/10-validation.tex",
+      "paragraph": 28,
+      "text": "The immediate implementation task is P0 using the complete Northstar and debt\nfixtures, the temporal/review cases and the declared IR. Broader corporate and\nsector support grows through the specified operations and reviewed examples;\nno generic rule package is presumed to cover all financial statements."
+    },
+    {
+      "file": "docs/design/chapters/10-validation.tex",
+      "paragraph": 32,
+      "text": "The disclosure corpus grows in distinct strata: an ordinary US-GAAP issuer\n(Apple, with Caterpillar as a contrasting inventory policy), an IFRS corporate\nissuer, an ASBE corporate issuer, a bank and an insurer with contract-group\ndisclosures. The acquired Apple package is the initial real stratum, not a\nrepresentative population sample. Each later stratum requires an annual and\ninterim package, at least three dates, policies, note links and a changed\ncomparative or a documented absence of one. Synthetic restatement cases supply\ncontrolled revisions when the real package contains none. Candidate issuer\nselection, acquisition status and operations to annotate are explicit in\n\\code{fixtures/corpus-protocol.json}; unacquired strata remain pending."
+    },
+    {
+      "file": "docs/design/chapters/11-contracts.tex",
+      "paragraph": 2,
+      "text": "The normative grammar is reproduced from \\code{spec/core-0.lark}. Names are\ncase-sensitive ASCII identifiers; strings are UTF-8 with JSON escaping. All\nliteral words in the grammar are reserved. The companion contract specifies\nvalid dates, exact rational literals, argument arity, type/context checks and\npackage resolution. A syntax parse is not semantic validation."
+    },
+    {
+      "file": "docs/design/chapters/11-contracts.tex",
+      "paragraph": 5,
+      "text": "The closed machine-readable definitions are in\n\\path{spec/core-ir.schema.json}. They define contexts, source spans,\nobservations, narratives, coverage units, mappings, partitions, entity/control\nrecords, books, accounts, symbols, choices, expressions, constraints, assumptions,\nalternatives, contracts, events, rules, packages, measurements, states,\njournals, scenarios, information views, review decisions, evidence views,\nmodel scopes, historical families, probability models, report mappings,\nresult cells, branches, runs and diagnostics. The schema is normative for\nfield spelling and structural shape; the semantic contract is normative for\nreference resolution, units, contexts, applicability and operations."
+    },
+    {
+      "file": "docs/design/chapters/11-contracts.tex",
+      "paragraph": 8,
+      "text": "A value is a reduced rational, or a typed symbolic/domain reference. A\nposting is nonnegative with its side carrying the sign, in the book's\nfunctional currency. Original units and the valuation reference survive\nconversion. Monetary contexts require currency; a period flow requires a\ncalendar and exclusive end boundary. Zero postings may preserve traceability\nbut do not establish that an economic event occurred. The amount may have\nfiner precision before the declared posting-rounding operation."
+    }
+  ]
+}

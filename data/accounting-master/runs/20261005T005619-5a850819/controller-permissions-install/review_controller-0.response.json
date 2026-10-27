@@ -1,0 +1,37 @@
+{
+  "assumptions": [
+    "The reviewed plan's two-hour ordinary invocation limit remains binding; the separately authorized campaign may span 48 hours.",
+    "Controllers and workers are trusted under the supplied process-containment assumptions.",
+    "Master.run's implementation is not supplied; any independent downstream enforcement of the two-hour limit is an unverified interface assumption."
+  ],
+  "checks": [
+    "Inspected only the supplied packet; used no tools.",
+    "Checked rule-prefix semantics, publication conflict handling, interrupted installation recovery, internal helper validation, and public CLI permission boundaries.",
+    "Treated the reported 197 passing tests as supporting control-plane evidence; test bodies were not supplied."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py: main accepts max_seconds up to 86400 for non-campaign actions and forwards args.max_seconds unchanged to master.run.",
+    "docs/plans/accounting-master-program.md: the supplied reviewed plan repeatedly retains a two-hour invocation limit while separately authorizing a 48-hour campaign.",
+    "scripts/run_accounting_master.py: rule_text permits the fixed entrypoint prefix, including subsequent CLI arguments."
+  ],
+  "issues": [
+    "The public CLI permits execution budgets beyond the reviewed ordinary-run authorization. main sets the non-campaign maximum to 86400, so both run --max-seconds 86400 and install-and-run --max-seconds 86400 pass argument validation and reach master.run with a 24-hour budget. The installed prefix also permits these arguments. This conflicts with the reviewed two-hour invocation ceiling. Enforce a 7200-second maximum for ordinary run/install-and-run execution and retain the separate campaign total limit. Also enforce the per-invocation ceiling within campaign dispatch or Master.run, so internal callers cannot extend it. If Master.run already clamps the budget, supply that interface evidence; the CLI should still reject unsupported values explicitly."
+  ],
+  "next_actions": [
+    "Correct action-specific budget validation and verify that ordinary execution rejects 7201 seconds before installation or worker execution.",
+    "Verify that a 48-hour campaign remains allowed while each constituent run stays within the two-hour ceiling and remaining campaign deadline.",
+    "Rerun the relevant controller checks and obtain a fresh review of the changed controller."
+  ],
+  "residuals": [
+    "Installation recovery preserves a conflicting published rule and binds pending installation to the prepared candidate and controller hashes.",
+    "The effective-policy check covers the enumerated local rules; runtime-managed policy may still deny execution, as the supplied plan acknowledges.",
+    "Actual policy-check output omits campaign, although install_rule iterates over all PUBLIC_ACTIONS and the supplied prefix semantics cover campaign.",
+    "This bounded review does not establish accounting correctness, completeness of the 192-report panel, or human acceptance. Scoped internal acceptance leaves those gaps open."
+  ],
+  "steps": [
+    "Compared the exposed command permissions and recovery paths with the supplied reviewed execution limits.",
+    "Identified the ordinary invocation budget mismatch without extending the stated threat model."
+  ],
+  "summary": "REVISE: the reusable command prefix exposes ordinary run budgets up to 24 hours despite the reviewed two-hour invocation ceiling.",
+  "verdict": "REVISE"
+}

@@ -1,0 +1,3 @@
+# Integrate verified financing schedules
+
+MC02/06/11/13–18/23–28/32/34/35. Preserve Version4.14 and 174 source files. Add Version4.15 discussion of debt, interest payable, capital, retained direct movements and dividends derived from a verified v2 program trace. Show exact method identity, gross postings, period/carry/stopped-report selection, explicit interest-date coverage, and the unexplained cash residual. Protect all prior mathematics and citations, build and inspect the changed segment, then refresh complete 53/6/46 coverage. S1–S5 remain partial; S6 held; S7 deferred; forecasting remains deferred.

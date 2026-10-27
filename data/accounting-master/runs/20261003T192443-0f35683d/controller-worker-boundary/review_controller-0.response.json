@@ -1,0 +1,38 @@
+{
+  "assumptions": [
+    "The supervisor and workers are trusted, remain in the initial process group, and execute sequentially under the stated lock contract.",
+    "Unshown scheduling, process cleanup and acceptance implementations are treated as stated interfaces, not independently verified code.",
+    "A malformed worker response is an unavailable review that should receive the documented bounded retry."
+  ],
+  "checks": [
+    "Reviewed only the supplied packet; used no tools or external history.",
+    "Traced response validation, review retries, worker write inventories, protection checks and recovery construction.",
+    "Treated the reported 153 passing tests and supplied test names as supporting control-plane evidence, without inferring unseen assertions or accounting correctness."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "scripts/run_accounting_master.py — validate_response performs set membership on value['verdict'] before checking its type. A response containing all required fields but a list or object verdict raises TypeError ('unhashable type'), rather than MasterError. _worker_result has the same problem earlier in response.get('verdict') in {'REVISE', 'BLOCKED'}. phase_review catches MasterError, ValueError and OSError, so this malformed response bypasses the promised bounded retry and ReviewPending recovery. Repair both sites by checking that the verdict is a string before set membership, and classify invalid verdict types as MasterError. Add focused coverage for list/object verdicts demonstrating preservation of the rejected response, a fresh read-only retry, and ReviewPending after two invalid responses."
+  ],
+  "next_actions": [
+    "Guard verdict types before either membership operation and verify the malformed-response retry path.",
+    "Clarify the checker-only phase interface and attempt-directory freshness guarantees identified in residuals.",
+    "Rerun the relevant controller checks and obtain a fresh review of the repair."
+  ],
+  "residuals": [
+    "Missing interface assumption: phase_recovery unconditionally accesses phase['test_file'], while run_phase_tests supports a checker branch without that field. The packet does not supply catalog entries establishing that every checker-backed phase also has a meaningful test_file. Confirm that invariant, or construct recovery requirements from the selected verification mechanism; otherwise a checker-only phase raises KeyError before worker launch.",
+    "Missing interface assumption: callers must allocate fresh attempt directories after interrupted invocations. worker rejects only an existing response file; other prompt, schema, recovery and log destinations can already exist. The supplied caller interfaces do not establish directory freshness sufficiently to verify preservation of incomplete attempts.",
+    "Process-group cleanup, lock acquisition, protection initialization and the CLI's effective sandbox/feature behavior are not fully shown. No broader containment requirement is imposed.",
+    "The accepted 192-report panel, structural checks and internal phase acceptance leave accounting, scientific and human-acceptance gaps open."
+  ],
+  "steps": [
+    "Checked the proposed review against its bounded worker-boundary scope and ordinary failure model.",
+    "Separated a reproducible response-validation defect from interface assumptions that cannot be resolved from this packet."
+  ],
+  "summary": "REVISE: malformed verdict types escape the bounded review-retry path. The remaining concerns are explicit, unverified interface assumptions.",
+  "verdict": "REVISE"
+}

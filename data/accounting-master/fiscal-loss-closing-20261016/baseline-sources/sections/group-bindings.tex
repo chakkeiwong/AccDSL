@@ -1,0 +1,109 @@
+\section{Keeping the group calculation attached to its books}
+\label{sec:group-record-bindings}
+
+The disposal example gives the parent a cash receipt while removing cash
+from the consolidated balance sheet. A software implementation must know
+whose cash each entry describes. If it posts the removal of the subsidiary's
+156 to the parent's legal book, it records a payment the parent never made.
+If it leaves the subsidiary's cash in the group after control ends, it
+overstates the group's assets. The consolidation calculation therefore needs
+its own book and exact references to the legal books it reads.
+
+Call the legal entities Parent-P and Subsidiary-S, and the reporting entity
+Group-P. Parent-P's functional currency is USD; Subsidiary-S's is EUR.
+Their identifiers remain distinct even if two imported records have the same
+display name. Each legal-book snapshot identifies its entity, book, currency,
+relative date and signed balances. At acquisition the parent's investment
+115.2 and cash payment stay in its own USD book. The subsidiary's opening
+cash 20, inventory 140 and payable 60 stay in its EUR book. Group-P's
+consolidation entries refer to both snapshots without altering either.
+This implements the separation between combining balances and eliminating
+the parent's investment against subsidiary equity
+\citep[IFRS~10.B86--88]{eu20231803}.
+
+The selected perimeter has equally precise dependencies. Its control
+assessment records the investor, investee, substantive rights, variable
+returns and ability to use power, together with the interval for which
+those findings hold. Ordinary ownership of 80\% and proportionate NCI
+measurement are separate inputs. The currency record distinguishes the
+subsidiary's functional currency from the group's presentation currency.
+A rate of 1.30 is usable here only when its units are USD per EUR and its
+date is the closing date R. An inverse quote or a later rate is a different
+input, even when its label looks familiar. The relative A, O, R and D
+calendar defines this synthetic history; it supplies no evidence of when an
+actual investor could have known its facts.
+
+The group needs more state than the initial corporate example. Goodwill,
+the parent's translation reserve and NCI have distinct balances, while
+profit, OCI and cash movements retain their period histories. The proposed
+\texttt{GroupForeignOperation/1} profile supplies those fields under its own
+schema lock. It preserves the common request and result fields rather than
+silently adding accounts to the closed corporate profile. Loading this
+extension would still require an implementation to declare support for it;
+there is no automatic conversion of a corporate state into a group state.
+
+Follow the existing history through that representation. At A the group
+records the acquisition. At O it translates the opening balances before the
+subsidiary's operating entries. At R it finishes cash and goodwill
+translation and allocates operating profit. A and O are intermediate
+worksheet states; they are not presented as fully closed interim reports.
+The R state retains cash 340.8, goodwill 20.8, parent translation reserve
+10.4 and NCI 31.2, together with profit 25, OCI 12.6 and the separate cash
+exchange effect 7. Closing the income accounts does not erase those movements.
+
+Full disposal and disposal with a retained 20\% interest then start from
+separate copies of that same immutable R state. Their branch identities
+prevent the second alternative from being posted after the first. Each
+disposal proposal identifies its opening state, control change, source books,
+cash consideration, retained fair value, rates and accounting method.
+Its permission to post is conditional on this synthetic profile and exact
+proposal. It is not permission to post to an actual company's books.
+
+In the retained-interest alternative, the parent's receipt is 126.75.
+The group removes subsidiary cash 156, producing investing cash
+$126.75-156=-29.25$. The retained investment 42.25 is a separate noncash
+asset. Both disposal alternatives remove the entire NCI balance 31.2,
+including its translation reserve 2.2. Only the parent's reserve 10.4 is
+recycled into the disposal gain. These are checks on the meaning of the
+journal, beyond the fact that its debits equal its credits
+\citep[IFRS~10.B98--99; IAS~21.48A--B; IAS~7.39--42]{eu20231803}.
+
+The report reads one branch and one dependency view. In both alternatives,
+period profit is 58.8, of which 53.8 belongs to the parent and 5 to NCI.
+Period OCI is 2.2, attributable to NCI. Ending NCI is nevertheless zero,
+because the disposal removes its accumulated balance. The equity movement
+must therefore retain both its introduction and removal:
+\[
+ 300+24+58.8+2.2-31.2=353.8.
+\]
+Reading only the closing NCI account would lose the subsidiary's contribution
+while it was controlled. Reading only final equity would also miss the
+difference between full-sale cash 353.8 and retained-interest cash 311.55
+plus investment 42.25.
+
+Publication follows the common accounting transaction rule. The request
+identifies the group owner and expected opening revision; its business-event
+identity includes the branch. Before publishing, an implementation must
+validate the source and currency bindings, posting authorization, ordered
+journals and independently specified state changes. It then publishes the
+closing state, journal, economic delta, receipt and new group head together.
+The parent and subsidiary legal-book owners remain untouched.
+
+An acknowledgement can be lost after that publication. Retrying the exact
+original request then finds the existing receipt and has no second effect,
+even though its original opening revision is now old. If publication never
+occurred, the same request can commit once. Changing the request identifier,
+budget or expected head changes the fingerprint and cannot masquerade as
+that retry. A newly proposed event with an outdated opening is rejected.
+The documentary packet preserves both complete acknowledgement histories
+and an invalid partial-publication example; later runtime tests must exercise
+those failures in the chosen storage system.
+
+A corrected exchange-rate source creates a new evidence view. It makes the
+old group's calculation unsuitable for a request using the corrected view,
+but does not overwrite the old books or remove the old explanation.
+Unknown control or an unknown rate instead returns the missing-input
+obligation, with no fabricated zero amount. The companion group-binding
+specification supplies exact records and exchanges for these cases.
+Actual control, valuation, tax, policy alignment and subsequent accounting
+for the retained investment retain their separate evidence requirements.

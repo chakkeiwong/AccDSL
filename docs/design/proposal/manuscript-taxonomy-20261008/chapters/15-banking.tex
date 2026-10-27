@@ -1,0 +1,101 @@
+\chapter{Credit losses and the bank balance sheet}
+\label{ch:banking}
+
+The funding and default distinctions become central in a bank. A loan creates
+an asset, customer payments affect settlement liquidity, and a forecast of
+credit loss affects an allowance before cash is lost. The first case connects
+funding to a simple allowance; the later dated loan schedule separates credit
+stages, interest recognition and eventual recovery.
+
+\section{Banks: accounting capital is not regulatory capital}
+
+A bank package needs instrument and cohort states for loans, securities,
+deposits, wholesale funding, repos, derivatives, collateral and commitments.
+For interest-rate analysis, currency and repricing buckets matter alongside
+remaining maturity. For credit analysis, exposure, default state, loss severity,
+recoveries, guarantees and their dependencies matter. For liquidity analysis,
+deposit behaviour, collateral eligibility, encumbrance and payment timing matter.
+These states can be represented at an explicitly chosen aggregation level;
+the public record rarely identifies every contract.
+
+Loan origination can debit loans and credit a customer deposit in the bank's
+book. Subsequent transfer to another bank produces settlement flows. Treating
+all loan growth as an immediate cash outflow would therefore encode a specific
+funding assumption, not a universal banking identity. A system-wide model must
+also link counterparties and settlement assets; single-company simulation
+records external counterparties without claiming to close the whole economy.
+
+An allowance calculation is a dated measurement based on forecast information.
+For a single horizon, let EAD be a fixed exposure at default, PD the probability
+of default, and LGD the mean loss fraction conditional on default. Ignoring
+discounting, the illustrative expected loss in currency units is
+\[
+ L=EAD\times PD\times LGD.
+\]
+With exposure 100, default probability 0.02 and loss given default 0.4, it
+produces 0.8. Changing those inputs to 0.04 and 0.5 produces 2, so the allowance
+increase is 1.2 if there are no other movements. This calculation is a
+demonstration model. A standard-specific expected-credit-loss implementation
+must determine horizon, staging or other classification, discounting,
+forward-looking information, write-offs and purchased-credit-impaired or
+other special cases. The simple formula is not an IFRS 9 or US GAAP compliance
+implementation.
+
+Regulatory capital is computed in a separate prudential layer with its own
+perimeter, eligibility, deductions, risk weights and transition provisions.
+Accounting equity feeds a reconciliation to capital; it is not automatically
+Common Equity Tier 1. Liquidity and capital constraints influence the
+management policy, which in turn generates asset sales, funding or capital
+events. A breached ratio can be an economically meaningful scenario outcome.
+No hidden capital injection is permitted to repair it.
+
+\section{A bank's cash, allowance and capital in one path}
+
+The bank reference state contains settlement cash 30, gross loans 100,
+allowance 0.8, deposits 110 and equity 19.2. Originating a loan of 20 first
+debits loans and credits the borrower's deposit. A subsequent transfer of 15
+to another bank debits deposits and credits settlement cash. Loan origination
+and external cash use are consequently distinct events. Receive loan interest
+6 in cash and credit deposit interest 2 to customer balances. Remeasure the
+allowance to 2.4, posting an additional loss of 1.6. The resulting state is
+cash 21, gross loans 120, allowance 2.4, deposits 117 and equity 21.6.
+Net assets are $21+120-2.4=138.6=117+21.6$.
+
+Now 25 of deposits runs off. The declared funding policy uses cash first,
+then a committed facility with limit 10. It draws 4 and settles 25, leaving
+cash zero, deposits 92 and wholesale debt 4. A runoff of 40 instead leaves
+9 unpaid even after the maximum facility draw. The simulator records default
+and retains the unpaid deposit obligation. It does not assume unlimited
+central-bank or shareholder funding.
+
+The prudential calculation is a separate, illustrative policy. Deduct 2 from
+accounting equity to obtain capital 19.6; apply a 75\% risk weight to gross
+loans for risk-weighted assets 90. The resulting ratio is $19.6/90$.
+Neither the deduction nor the weight is a Basel default. Actual prudential
+packages require jurisdiction, exposure class, eligibility, buffers and dated
+rules, with a reconciliation from the accounting book. The structure follows
+the need to model capital and liquidity jointly in
+\citet[Section 2]{behn2019}, without transferring that paper's estimated
+preferences or shock parameters to this bank.
+
+For a richer credit adapter, partition borrower cohorts by currency, vintage,
+credit state, remaining maturity, collateral and measurement category. At date
+$t$, supply scenario probabilities, conditional default-time probabilities,
+exposure paths, conditional loss severity and discount factors. Its expected
+loss calculation has the declared form
+\[
+ L_t=\sum_s p_s\sum_{k\in H}
+  d_{t,k}\Pr(\tau=k\mid s,\mathcal F_t)
+  \E[\mathrm{EAD}_k\mathrm{LGD}_k\mid\tau=k,s,\mathcal F_t].
+\]
+The conditional product expectation retains dependence between exposure and
+severity. The horizon $H$ concerns eligible default times; associated cash
+shortfalls may continue later. The rule package decides twelve-month versus
+lifetime default scope, credit-state transfers, interest basis and write-off
+recognition. Changes in allowance must be attributed to origination,
+derecognition, transfers, revised expectations, currency and write-offs.
+Contract and prudential support can be specified now, while full IFRS~9/CECL/
+ASBE classification and paragraph-level validation remain later obligations.
+
+\input{sections/bank-methods}
+

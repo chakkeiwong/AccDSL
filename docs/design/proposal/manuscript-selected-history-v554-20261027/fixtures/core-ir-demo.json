@@ -1,0 +1,691 @@
+{
+  "models": [
+    {
+      "id": "BorrowingExample@1",
+      "language_version": "Core0.1",
+      "declarations": [
+        "Acme",
+        "Local",
+        "Cash",
+        "Debt",
+        "InterestExpense",
+        "Retained",
+        "debt",
+        "alpha",
+        "loans",
+        "allFixed",
+        "allFloating",
+        "rateShock",
+        "statements",
+        "after-2025-close"
+      ],
+      "package_lock": [
+        "DemoDebt@1"
+      ],
+      "scope": "BorrowingScope"
+    }
+  ],
+  "contexts": [
+    {
+      "id": "debt-context",
+      "entity": "Acme",
+      "perimeter": "Acme-only",
+      "concept": "debt_principal",
+      "basis": "DemoDebt@1",
+      "measurement": "principal",
+      "time": {
+        "kind": "instant",
+        "start": "2025-12-31",
+        "end_exclusive": null,
+        "calendar": "DemoCalendar@1"
+      },
+      "unit": "USD",
+      "currency": "USD",
+      "taxonomy_version": null,
+      "dimensions": []
+    }
+  ],
+  "sourceSpans": [
+    {
+      "id": "synthetic-note-7",
+      "document": "synthetic-note-document",
+      "locator": "fixture:registry/synthetic-note-7/literal",
+      "literal": "Debt 100; interest 5; fixed/floating split not disclosed",
+      "extraction": "authored-fixture@1"
+    }
+  ],
+  "documents": [
+    {
+      "id": "synthetic-note-document",
+      "sha256": "079450779ba2c675ae3763b4eab5be5a9f5652d9a229a9826fe37ce769eb788e",
+      "uri": "fixture:demo-debt-package.json#registry/synthetic-note-7",
+      "filing_id": "synthetic-2025",
+      "available": "2026-01-01T00:00:00Z",
+      "availability_policy": "exact_synthetic_timestamp",
+      "ingested": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "observations": [
+    {
+      "id": "debt",
+      "context": "debt-context",
+      "domain": {
+        "kind": "exact",
+        "lower": {
+          "n": "100",
+          "d": "1"
+        },
+        "upper": {
+          "n": "100",
+          "d": "1"
+        },
+        "lower_closed": true,
+        "upper_closed": true,
+        "values": [],
+        "missing_reason": null,
+        "display": "100 USD",
+        "rounding_rule": "exact_authored_fixture"
+      },
+      "source_spans": [
+        "synthetic-note-7"
+      ],
+      "reading": "fixture:synthetic-note-7/exact-reading",
+      "review_decision": "demo-review-1",
+      "supersedes": [],
+      "revision_group": "synthetic-v1"
+    }
+  ],
+  "narratives": [],
+  "coverageUnits": [],
+  "mappings": [],
+  "partitions": [],
+  "entities": [
+    {
+      "id": "Acme",
+      "functional_currency": "USD"
+    }
+  ],
+  "controls": [],
+  "books": [
+    {
+      "id": "Local",
+      "entity": "Acme",
+      "basis": "DemoDebt@1",
+      "package": "DemoDebt@1",
+      "currency": "USD"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "Cash",
+      "book": "Local",
+      "role": "Asset",
+      "report_concept": "cash"
+    },
+    {
+      "id": "Debt",
+      "book": "Local",
+      "role": "Liability",
+      "report_concept": "debt"
+    },
+    {
+      "id": "InterestExpense",
+      "book": "Local",
+      "role": "Expense",
+      "report_concept": "interest"
+    },
+    {
+      "id": "Retained",
+      "book": "Local",
+      "role": "Equity",
+      "report_concept": "retained"
+    }
+  ],
+  "symbols": [
+    {
+      "id": "alpha",
+      "type": "Real",
+      "context": null,
+      "domain": {
+        "kind": "interval",
+        "lower": {
+          "n": "0",
+          "d": "1"
+        },
+        "upper": {
+          "n": "1",
+          "d": "1"
+        },
+        "lower_closed": true,
+        "upper_closed": true,
+        "values": [],
+        "missing_reason": null,
+        "display": null,
+        "rounding_rule": null
+      },
+      "uncertainty_kind": "HistoricalFact",
+      "scope": "BorrowingExample@1",
+      "dependencies": [],
+      "admission": "demo-review-1",
+      "provenance": [
+        "synthetic-note-7"
+      ]
+    }
+  ],
+  "choices": [],
+  "expressions": [
+    {
+      "id": "debt.value",
+      "op": "call",
+      "type": "Money<USD>",
+      "context": "debt-context",
+      "args": [
+        "debt.ref"
+      ],
+      "rational": null,
+      "text": null,
+      "target": "builtin:value@1",
+      "field_names": []
+    },
+    {
+      "id": "debt.ref",
+      "op": "ref",
+      "type": "Observation<Money<USD>>",
+      "context": "debt-context",
+      "args": [],
+      "rational": null,
+      "text": null,
+      "target": "debt",
+      "field_names": []
+    },
+    {
+      "id": "alpha.ref",
+      "op": "ref",
+      "type": "Real",
+      "context": null,
+      "args": [],
+      "rational": null,
+      "text": null,
+      "target": "alpha",
+      "field_names": []
+    },
+    {
+      "id": "rate.fixed",
+      "op": "literal",
+      "type": "Rate<annual_simple>",
+      "context": null,
+      "args": [],
+      "rational": {
+        "n": "1",
+        "d": "20"
+      },
+      "text": null,
+      "target": null,
+      "field_names": []
+    },
+    {
+      "id": "rate.stress",
+      "op": "literal",
+      "type": "Rate<annual_simple>",
+      "context": null,
+      "args": [],
+      "rational": {
+        "n": "7",
+        "d": "100"
+      },
+      "text": null,
+      "target": null,
+      "field_names": []
+    },
+    {
+      "id": "rate.driver",
+      "op": "call",
+      "type": "Driver<Rate<annual_simple>>",
+      "context": null,
+      "args": [
+        "rate.stress"
+      ],
+      "rational": null,
+      "text": null,
+      "target": "builtin:constant@1",
+      "field_names": []
+    },
+    {
+      "id": "zero",
+      "op": "literal",
+      "type": "Real",
+      "context": null,
+      "args": [],
+      "rational": {
+        "n": "0",
+        "d": "1"
+      },
+      "text": null,
+      "target": null,
+      "field_names": []
+    },
+    {
+      "id": "one",
+      "op": "literal",
+      "type": "Real",
+      "context": null,
+      "args": [],
+      "rational": {
+        "n": "1",
+        "d": "1"
+      },
+      "text": null,
+      "target": null,
+      "field_names": []
+    },
+    {
+      "id": "slot.one",
+      "op": "literal",
+      "type": "Int",
+      "context": null,
+      "args": [],
+      "rational": {
+        "n": "1",
+        "d": "1"
+      },
+      "text": null,
+      "target": null,
+      "field_names": []
+    },
+    {
+      "id": "is.fixed",
+      "op": "eq",
+      "type": "Bool",
+      "context": null,
+      "args": [
+        "alpha.ref",
+        "one"
+      ],
+      "rational": null,
+      "text": null,
+      "target": null,
+      "field_names": []
+    },
+    {
+      "id": "is.floating",
+      "op": "eq",
+      "type": "Bool",
+      "context": null,
+      "args": [
+        "alpha.ref",
+        "zero"
+      ],
+      "rational": null,
+      "text": null,
+      "target": null,
+      "field_names": []
+    },
+    {
+      "id": "report.mapping",
+      "op": "literal",
+      "type": "SourceRef",
+      "context": null,
+      "args": [],
+      "rational": null,
+      "text": "DemoDebt.statements.v1",
+      "target": null,
+      "field_names": []
+    }
+  ],
+  "constraints": [
+    {
+      "id": "condition.fixed",
+      "expression": "is.fixed",
+      "kind": "assumption",
+      "scope": "allFixed",
+      "source_refs": []
+    },
+    {
+      "id": "condition.floating",
+      "expression": "is.floating",
+      "kind": "assumption",
+      "scope": "allFloating",
+      "source_refs": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "admission.allFixed",
+      "expression": "is.fixed",
+      "scope": "allFixed",
+      "rationale": "Named endpoint condition for comparison, not inferred from disclosure",
+      "provenance": "ScenarioDesign",
+      "source_refs": [],
+      "valid": {
+        "kind": "interval",
+        "start": "2026-01-01",
+        "end_exclusive": "2027-01-01",
+        "calendar": "DemoCalendar@1"
+      },
+      "information_cutoff": "2026-01-01T00:00:00Z",
+      "role": "Hypothesis"
+    },
+    {
+      "id": "admission.allFloating",
+      "expression": "is.floating",
+      "scope": "allFloating",
+      "rationale": "Named endpoint condition for comparison, not inferred from disclosure",
+      "provenance": "ScenarioDesign",
+      "source_refs": [],
+      "valid": {
+        "kind": "interval",
+        "start": "2026-01-01",
+        "end_exclusive": "2027-01-01",
+        "calendar": "DemoCalendar@1"
+      },
+      "information_cutoff": "2026-01-01T00:00:00Z",
+      "role": "Hypothesis"
+    },
+    {
+      "id": "admission.rateShock",
+      "expression": "rate.driver",
+      "scope": "rateShock",
+      "rationale": "Illustrative constant 7% annual simple stress; not an estimated future rate",
+      "provenance": "ScenarioDesign",
+      "source_refs": [],
+      "valid": {
+        "kind": "interval",
+        "start": "2026-01-01",
+        "end_exclusive": "2027-01-01",
+        "calendar": "DemoCalendar@1"
+      },
+      "information_cutoff": "2026-01-01T00:00:00Z",
+      "role": "Hypothesis"
+    },
+    {
+      "id": "admission.loans",
+      "expression": "rate.fixed",
+      "scope": "loans",
+      "rationale": "Both initial component rates are assumed to be 5%; the aggregate disclosure alone does not identify them",
+      "provenance": "ScenarioDesign",
+      "source_refs": [],
+      "valid": {
+        "kind": "interval",
+        "start": "2026-01-01",
+        "end_exclusive": "2027-01-01",
+        "calendar": "DemoCalendar@1"
+      },
+      "information_cutoff": "2026-01-01T00:00:00Z",
+      "role": "Hypothesis"
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "allFixed",
+      "parent": "BorrowingFamily",
+      "scope": "BorrowingScope",
+      "author": "synthetic-fixture-author",
+      "created_at": "2026-01-01T00:00:00Z",
+      "constraints": [
+        "condition.fixed"
+      ],
+      "choice_group": null,
+      "reason": "Named endpoint view; not exhaustive alternatives",
+      "evidence": [
+        "synthetic-note-7"
+      ],
+      "opposing_evidence": []
+    },
+    {
+      "id": "allFloating",
+      "parent": "BorrowingFamily",
+      "scope": "BorrowingScope",
+      "author": "synthetic-fixture-author",
+      "created_at": "2026-01-01T00:00:00Z",
+      "constraints": [
+        "condition.floating"
+      ],
+      "choice_group": null,
+      "reason": "Named endpoint view; not exhaustive alternatives",
+      "evidence": [
+        "synthetic-note-7"
+      ],
+      "opposing_evidence": []
+    }
+  ],
+  "contracts": [
+    {
+      "id": "loans",
+      "type": "DemoDebt@1/DebtMix",
+      "book": "Local",
+      "fields": [
+        {
+          "name": "principal",
+          "expression": "debt.value"
+        },
+        {
+          "name": "fixed_fraction",
+          "expression": "alpha.ref"
+        },
+        {
+          "name": "fixed_rate",
+          "expression": "rate.fixed"
+        },
+        {
+          "name": "initial_floating_rate",
+          "expression": "rate.fixed"
+        }
+      ],
+      "package": "DemoDebt@1",
+      "source_refs": [
+        "synthetic-note-7"
+      ]
+    }
+  ],
+  "postings": [],
+  "states": [
+    {
+      "id": "after-2025-close",
+      "date": "2025-12-31",
+      "book": "Local",
+      "balances": [
+        {
+          "account": "Cash",
+          "signed_amount": {
+            "n": "95",
+            "d": "1"
+          }
+        },
+        {
+          "account": "Debt",
+          "signed_amount": {
+            "n": "-100",
+            "d": "1"
+          }
+        },
+        {
+          "account": "Retained",
+          "signed_amount": {
+            "n": "5",
+            "d": "1"
+          }
+        },
+        {
+          "account": "InterestExpense",
+          "signed_amount": {
+            "n": "0",
+            "d": "1"
+          }
+        }
+      ],
+      "contracts": [
+        "loans"
+      ],
+      "measurements": [],
+      "dependencies": [
+        "synthetic-2025-exact"
+      ]
+    }
+  ],
+  "events": [],
+  "rules": [],
+  "packages": [
+    {
+      "id": "DemoDebt@1",
+      "version": "1",
+      "digest": "8d3c0c10876eb60361e3370db29c5f3ae2b42c8d8bc9b6c1f9841b6c1ef71d1b",
+      "basis": "DemoDebt",
+      "effective": {
+        "kind": "interval",
+        "start": "2025-01-01",
+        "end_exclusive": "2028-01-01",
+        "calendar": "DemoCalendar@1"
+      },
+      "operations": [
+        "DemoDebt@1/reset",
+        "DemoDebt@1/accrue_and_pay",
+        "DemoDebt@1/close",
+        "DemoDebt@1/statements"
+      ],
+      "extension_points": [],
+      "dependencies": [
+        "builtin:Core0@1",
+        "DemoCalendar@1"
+      ],
+      "authority": [
+        "fixture:demo-debt-package.json"
+      ],
+      "review_status": "illustrative",
+      "implementation": null
+    }
+  ],
+  "measurements": [],
+  "journals": [],
+  "scenarios": [
+    {
+      "id": "rateShock",
+      "kind": "ExogenousStress",
+      "drivers": [
+        {
+          "name": "market_rate",
+          "expression": "rate.driver"
+        }
+      ],
+      "probability_model": null,
+      "observed_event": null,
+      "structural_model": null,
+      "replaced_equations": [],
+      "visibility": "announced"
+    }
+  ],
+  "informationViews": [],
+  "reviewDecisions": [
+    {
+      "id": "demo-review-1",
+      "reading_ids": [
+        "fixture:synthetic-note-7/exact-reading"
+      ],
+      "action": "Accept",
+      "reviewer": "synthetic-fixture-author",
+      "date": "2026-01-01T00:00:00Z",
+      "reason": "Exact authored disclosure and context, not extracted from a real issuer",
+      "evidence": [
+        "synthetic-note-7"
+      ],
+      "prior_view": "fixture:empty-view",
+      "new_view": "synthetic-2025-exact",
+      "invalidated_descendants": []
+    }
+  ],
+  "evidenceViews": [
+    {
+      "id": "synthetic-2025-exact",
+      "cutoff": "2026-01-01T00:00:00Z",
+      "system_as_of": null,
+      "mode": "ExplicitSelection",
+      "documents": [
+        "synthetic-note-document"
+      ],
+      "observations": [
+        "debt"
+      ],
+      "decisions": [
+        "demo-review-1"
+      ],
+      "conflict_sets": [],
+      "transforms": []
+    }
+  ],
+  "modelScopes": [
+    {
+      "id": "BorrowingScope",
+      "templates": [
+        "DemoDebt@1/DebtMix"
+      ],
+      "slot_limits": [
+        {
+          "name": "debt_contracts",
+          "expression": "slot.one"
+        }
+      ],
+      "resolution": "one fixed/floating aggregate, annual simple accrual, maturity after horizon",
+      "calendars": [
+        "DemoCalendar@1"
+      ],
+      "choices": [],
+      "exclusions": [
+        "fees",
+        "foreign_currency",
+        "embedded_options"
+      ],
+      "obligations": []
+    }
+  ],
+  "historyFamilies": [
+    {
+      "id": "BorrowingFamily",
+      "scope": "BorrowingScope",
+      "evidence_view": "synthetic-2025-exact",
+      "opening_state": "after-2025-close",
+      "symbols": [
+        "alpha"
+      ],
+      "choices": [],
+      "constraints": [],
+      "alternatives": [
+        "allFixed",
+        "allFloating"
+      ],
+      "feasibility": "Feasible",
+      "coverage": "ExactWithinScope",
+      "completed_cells": 1,
+      "unresolved_cells": 0,
+      "witnesses": [
+        "fixture:alpha=0",
+        "fixture:alpha=1"
+      ],
+      "solver_results": [
+        "fixture:borrowings.json#exact"
+      ]
+    }
+  ],
+  "probabilityModels": [],
+  "reportMappings": [
+    {
+      "id": "statements",
+      "book": "Local",
+      "basis": "DemoDebt@1",
+      "rows": [
+        {
+          "name": "package_mapping",
+          "expression": "report.mapping"
+        }
+      ],
+      "closing_policy": "DemoDebt@1/close",
+      "cash_flow_policy": "DemoDebt@1/interest_operating",
+      "required_operations": [
+        "DemoDebt@1/accrue_and_pay"
+      ]
+    }
+  ],
+  "resultCells": [],
+  "branchResults": [],
+  "runs": [],
+  "diagnostics": [],
+  "schema_version": "0.1"
+}

@@ -1,0 +1,47 @@
+CHAPTER 8.
+RECONSTRUCTION AND EXECUTION PROCEDURES
+97
+example histories only when needed for review or execution.
+6. Check whether each requested simulation has sufficient economic state. Missing maturities,
+reset dates or cohort composition become declared assumptions or explicit unresolved
+inputs.
+Unrestricted journal enumeration would be unbounded: arbitrary offsetting transactions can
+be inserted without changing reports. The model therefore declares allowed event types, time
+resolution, relevant accounts, lot/cohort resolution and limits on latent contract instances.
+These limits describe the represented family; they are not evidence that all real possibilities
+were searched. The compiler canonicalises syntactic duplicates and equivalences established
+by its supported rewrite rules. It does not decide arbitrary economic equivalence. Probability
+measures attach to declared economic hypotheses or parameters, never to a count of encodings;
+adding a duplicate representation therefore cannot create extra probability mass or coverage.
+The first implementation uses symbolic linear bridges and finite structural choices. Nonlinear
+economic models can be evaluated on feasible states through plugins. A solver timeout preserves
+the unresolved family and returns SolverIncomplete; it does not prune the family as impossible.
+Search budgets belong to run configuration and are recorded with the results.
+8.2
+Condition a run without rewriting history
+A run selects an evidence view and cutoff, a historical family, a forecast starting date, scenario
+definitions, accounting packages, management policies, output queries and numerical settings.
+A run may use a concrete history, an exact symbolic family, a finite set of conditional histories,
+or weighted draws from a declared distribution. The output records which mode was used.
+Suppose no debt maturity is disclosed. An analyst may run a conditional case that assumes all
+debt matures after the forecast horizon. The run is valid under that assumption even though
+the historical representation remains incomplete. The interface must display the assumption
+next to the result and provide sensitivity cases when the assumption is material. It must not
+label the assumed maturity as a discovered historical fact.
+Management behaviour normally uses only information available at the decision date. A perfect-
+foresight stress case is a separate, explicitly labelled policy. Scenarios should share the same
+underlying innovations when estimating paired differences where appropriate, with stable stream
+identifiers so branch order does not change the draws. Common random numbers improve
+the comparability of paired simulations; they do not imply that every branch has the same
+economic event counts or shock distribution.
+8.3
+Schedule and commit events
+Each event carries an economic occurrence time, accrual interval when relevant, settlement time,
+entity, contract or cohort identifier, currency, inputs and provenance. Its ordering key consists of
+date, declared phase, dependency edges and a deterministic tie identifier. The reference phases
+are: opening and scheduled contractual changes; market observations and rate resets; business
+events and decisions; accrual and measurement; settlement; period closing and reporting. A
+contract can require a more specific dependency. These phases are an engineering starting point,
+not a universal description of market timing.
+Two events may share a tie order only if their order is either specified or irrelevant to the
+result. If payment before remeasurement and payment after remeasurement differ, an unresolved

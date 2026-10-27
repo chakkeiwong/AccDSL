@@ -1,0 +1,33 @@
+# P05 bounded company execution
+
+Engineering result: **PASS**. Actual economic inputs generate Northstar journals and all statements. The protected posting fixture is read only by the independent comparator. 83 unittest methods ran across P05 and P02–P04; exact outcomes and complete check output are in execution.json. Failure, skip, absent check or integrity mismatch blocks acceptance.
+
+Recovery repaired two reproduced failures: a balanced commit-hook rewrite previously changed journals without changing staged state, and forecast construction previously granted measurement permission to a behaviour-only driver. Commit hooks now receive a checked copy; original driver permissions, dates and provenance survive construction and are rechecked on execution. Required checks and unittest obligations are named explicitly. Independent verification additionally checks input hashes, cash-flow endpoints and asset schedules. Incomplete forecast branches prevent a complete top-level status.
+
+The second repair corrected branch-specific payroll provenance: a payroll-60 hypothesis previously executed with payroll-50 information recorded in its journals. Branch hypotheses now enter the shared behaviour and measurement checks before event construction. Invalid fixed fractions or malformed payroll amounts return Rejected branches with their original probability mass and last committed state; valid neighbours still execute. Invalid joint weights or coordinates reject the family before execution. The branch_validation record preserves two rejected thirds and one complete third, with no unconditional mean or success-only renormalisation. Endpoint regression tests check the actual guarded call path, order invariance and explicit conditioning.
+
+Northstar's H1, H2, FY and fixed/floating forecast paths reproduce the independent reference. Every batch, account bridge, closing entry, balance sheet, income/zero OCI, direct/indirect cash flow, equity, debt and plant schedule is independently replayed. Aggregate ordering, cost-5 goods, 20% simple tax, half-year accrual, end-period capex and zero OCI are synthetic conventions with source provenance in the input fixture; they are not general defaults. Atomic rejection, duplicate identity, conflicting identity, economic funding default, unsupported operations and internal failure have distinct outcomes. A failed payment preserves the accrued obligation and last committed state.
+
+Behaviour and measurement read through role/date checks. Future economic realizations, future publication/ingestion and unknown availability are rejected. Explicit prospective stresses are marked as assumptions. Original/corrected disclosures remain separate and incompatible revision groups cannot be subtracted. The synthetic reference starts from specified economic history; it does not establish that corrected disclosures were available at the forecast origin. An as-known historical reconstruction from those disclosures remains outside this bounded demonstration.
+
+The P03/P04 adapter retains the joint fixed-plus-floating principal constraint and continuous parent family. Its mapping is structural; Acme's synthetic evidence dates do not prove Northstar facts. Endpoint company executions do not exhaust the continuous family. The illustrative finite joint law preserves complete, default and unsupported branches without success-only renormalisation; conditioning changes weights only under explicit likelihoods. These probabilities are assumptions, not estimates.
+
+Apple's marginal +200bp, 13/52-year calculation uses an explicitly assumed USD 14.575bn effective floating exposure: additional interest and immediate cash/equity reduction are USD 72.875m, with no tax. This assumed exposure numerically matches a reported notional for illustration but is not identified by it. P02 observation IDs, contexts, scales, precision, source spans and pins are retained; principal, carrying amount and notional remain different measurements. Computational balancing capital is not reported Apple equity. Retained-byte historical availability, actual hedge allocation, debt movements and asset histories remain unresolved. The calculation is not a full Apple forecast.
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next justified action | Not concluded |
+|---|---|---|---|---|---|
+| Bounded engineering candidate passes | Economic execution and independent bridges | All recorded checks pass | General operations and timing omitted | Independent result review | Accounting/forecast validity |
+| Conditional real-case illustration | Shared interest/settlement/closing engine | Source and measurement distinctions retained | Effective floating exposure unknown | Resolve source-specific allocation evidence | Actual exposure or forecast accuracy |
+
+| Evidence ledger | Status |
+|---|---|
+| Engineering correctness | Passed declared bounded checks |
+| Accounting validity | Not established professionally; journal balance alone is insufficient |
+| Empirical forecast validity | Not evaluated; no stochastic ranking |
+| Human acceptance | Pending; no paid review requested |
+
+Pre-run audit/evidence/defaults are preserved in progress.md. Strongest alternative explanation: shared economic assumptions may be incomplete despite independent arithmetic. A disagreement with checked contract/source semantics would overturn any wider accounting interpretation. Weakest evidence: illustrative chronology and conditional real exposure. Broader MC01–MC35/G1–G18 obligations remain open.
+
+The requirement mapping in execution.json links MC13 to economic inputs and atomic event identity; MC14 to information access and scenario meaning; MC15 to bounded corporate operations; MC16 to all statement bridges; MC17 to cash-equity/par-debt lifecycles; MC18 to retained joint branches and distinct failures; and MC28 to Northstar plus the conditional Apple case. These mappings identify bounded evidence rather than whole-requirement closure.
+
+Actual command and environment, elapsed time, source/code/test hashes, approval and inventory references, and protected-file comparisons are recorded in execution.json. Git provenance remains unavailable. Changed source/code/test files this repair: scripts/company_execution_v1.py, scripts/check_accounting_p05.py, tests/test_accounting_p05.py. Full P05 contributions: scripts/company_execution_v1.py, scripts/check_accounting_p05.py, tests/test_accounting_p05.py, docs/design/fixtures/p05-economic-inputs-v1.json. Only declared P05 files were authored. No benchmark, statistical superiority, production-readiness or human-acceptance claim is made.

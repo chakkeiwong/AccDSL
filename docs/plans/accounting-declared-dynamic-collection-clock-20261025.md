@@ -1,0 +1,9 @@
+# Declared dynamic collection and assessment clock
+
+MC02/06/11/13–18/23–28/32/34/35. Audit retained collection-state, deferred-assessment and annual-period methods before coding. The current declared book handles direct dated collections and explicit financing intervals; it does not yet bind a collection promise to due dates, delinquency state, assessment windows or a period boundary while preserving the same report and carry semantics.
+
+Question: can a bounded successor represent a dated receivable collection clock and an assessment that reads the state at its declared date without inventing payment, impairment, tax or source facts? Define exact state, event identity, due-date and assessment-window policies, and unknown/false handling. Principal events must not silently move an assessment window. Backdated, overlapping, duplicate and post-cutoff observations refuse. A collection may settle only the recorded receivable; an assessment must be state-only unless a separately declared measurement method is supplied.
+
+Baseline: independent receivable roll-forwards and existing native collection/assessment results under matching premises. Primary pass: exact state, report, carry and stopped-prefix equality across two charts and matched text, plus independent date-window checks. Veto: hidden state mutation, invented delinquency/impairment, wrong cutoff, lost refusal or unsupported source admission. Counts are explanatory. No forecast study or legal/accounting completeness claim.
+
+Before implementation, record the skeptical/default audit and evidence contract. Preserve existing working-capital and financing packages; use a successor only where a structural incompatibility is demonstrated. Keep collection notes, payment terms, ageing, impairment, tax, source population and actual-company admission unresolved. After the bounded method, integrate and refresh coverage, then reassess broader history reconstruction and sector requirements.

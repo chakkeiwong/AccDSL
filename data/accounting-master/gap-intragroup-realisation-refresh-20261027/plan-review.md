@@ -1,0 +1,1 @@
+Skeptical audit: same-year complete legal-event journals and external resale do not establish next-year opening equity and retained-margin release. Explicit tax assumptions remain conditional. Integrate the checked comparison, then continue the planned two-year comparison; no global continuation veto. Preserve independent observation-map work.

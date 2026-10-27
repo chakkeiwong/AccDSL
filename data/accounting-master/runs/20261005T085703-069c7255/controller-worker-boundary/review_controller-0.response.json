@@ -1,0 +1,39 @@
+{
+  "assumptions": [
+    "This review uses only the supplied packet; no tools, files or commands were accessed.",
+    "Workers and controller are trusted, and containment covers only the initial process group and ordinary handled interruption.",
+    "Missing interface assumption: runtime_json and event are not shown to run exclusively inside an enclosing defer_shutdown context. The findings below concern their supplied implementations and visible call sites."
+  ],
+  "checks": [
+    "Traced worker admission, role validation, configuration inspection, response validation and final integrity checks.",
+    "Examined runtime-record publication against ordinary handled interruption.",
+    "Compared editable-worker phase validation with the stated requirement that worker launch enforce proposal eligibility and declared write scope.",
+    "Treated the reported 218 passing tests as supporting control-plane evidence only; test bodies were not supplied."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py: Master.runtime_json, Master.event, Master.process, Master.worker and Master.check_runtime.",
+    "scripts/accounting_master_support.py: atomic_json durably publishes bytes before returning.",
+    "docs/plans/accounting-master-program.md: ordinary interruption/resume, exact supervisor-write tracking and phase-specific write-scope requirements.",
+    "tests/test_accounting_master.py: supplied test names cover runtime mutation and interruption, but do not establish coverage of interruption between runtime publication and expected-hash update."
+  ],
+  "issues": [
+    "Runtime publication and its expected-hash update are interruptible separately. In runtime_json, atomic_json can replace the destination before runtime_expected is updated; in event, the append can complete before its expected hash is updated. An ordinary handled SIGTERM/KeyboardInterrupt in either interval leaves legitimate supervisor bytes different from the recorded expectation. The subsequent process cleanup or worker finally calls check_runtime and converts the interruption into a ContinuationVeto alleging an outside write; cleanup status publication can also fail for the same reason. Repair: defer handled shutdown across each complete check/write/expected-hash-update/check transaction, including event append, flush and fsync. Keep actual publication failures fail-closed. Add focused interruption tests at the publication-to-hash-update boundary for both methods, verifying cleanup and resumable interruption without a false integrity accusation.",
+    "Master.worker fails open for editable roles with an unknown phase ID. Both the phase_block check and the final declared-write-scope check execute only when phase['id'] is in self.phases. Consequently, worker('implement', unknown_phase, ...) or worker('repair', unknown_phase, ...) passes role validation, receives workspace-write access, and can change any inventoried file outside the globally protected controls without a phase-scope veto. This contradicts the stated worker-launch boundary and can arise from an ordinary erroneous caller; no hostile actor is needed. Repair: reject editable roles unless the phase ID is registered and passes phase_block, before writing budgets or launching queries. Explicitly allow only the required non-phase read-only roles. Add tests showing an unknown editable phase is rejected before launch and cannot bypass write-scope enforcement."
+  ],
+  "next_actions": [
+    "Make runtime publication and expected-hash bookkeeping one shutdown-deferred transaction.",
+    "Require registered, eligible phases for every editable worker invocation.",
+    "Run focused regressions and the existing controller suite, then obtain a fresh bounded review of the repaired boundary."
+  ],
+  "residuals": [
+    "Process-group cleanup internals, signal-context implementations, scheduler callers and approval-rule implementation were not included; their broader guarantees remain interface assumptions in this packet review.",
+    "The supplied source protections and acceptance interfaces preserve the distinction between 192 accepted reports, scoped internal acceptance and unresolved accounting, scientific and human-acceptance gaps.",
+    "The packet does not establish accounting correctness, substantive manuscript adequacy or human acceptance."
+  ],
+  "steps": [
+    "Reviewed the supplied worker-boundary code against its stated interfaces.",
+    "Identified two repairable boundary defects without extending the threat model."
+  ],
+  "summary": "REVISE: ordinary interruption can falsely trigger runtime-integrity vetoes, and unknown phase IDs bypass editable-worker phase and write-scope enforcement.",
+  "verdict": "REVISE"
+}

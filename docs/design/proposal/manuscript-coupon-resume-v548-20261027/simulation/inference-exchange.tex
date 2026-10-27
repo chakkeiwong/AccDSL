@@ -1,0 +1,131 @@
+\section{Changing particles without changing the target}
+\label{sim:inference-exchange}
+
+Increasing the number of particles can change an inference result even before
+new evidence arrives. The reason is that a likelihood estimate and its random
+construction belong to the state used by particle MCMC. Replacing the estimate
+with another unbiased estimate does not automatically preserve their joint
+distribution. A test that examines only current company-type probabilities
+can miss the error.
+
+Fix an evidence revision $v$ and a persistent type $\theta$. Write its prior
+as $p(\theta)$ and likelihood as $L_v(\theta)$. A particle representation of
+size $N$ uses random variables $u$ with law $m_N(u\mid\theta)$ and produces
+a nonnegative unbiased estimate $Z_{N,v}(\theta,u)$ of that likelihood.
+Assume the normalizing constant $C_v$ is finite and positive. The joint target
+weights the random construction by the estimate it produces:
+\begin{equation}
+ \widetilde\pi_{N,v}(\theta,u)=
+ \frac{p(\theta)m_N(u\mid\theta)Z_{N,v}(\theta,u)}{C_v}.
+ \label{sim:extended-particle-target}
+\end{equation}
+Integrating over $u$ replaces $Z_{N,v}$ by its expectation $L_v$, giving the
+desired type posterior. This is the extended-target argument in the retained
+SMC$^2$ source, arXiv 1101.1528v3, 27 January 2012
+\citep[equation (7), Proposition 1 and Appendix A]{litclosesmc2}.
+Unbiasedness establishes this marginal relation; it does not make an
+arbitrary finite particle population equal to the posterior.
+
+Now change representation from $N$ to $M$ and draw fresh randomness $u'$ from
+$m_M(\cdot\mid\theta)$. The augmented proposal law is
+$\widetilde\pi_{N,v}(\theta,u)m_M(u'\mid\theta)$. With backward law
+$m_N(u\mid\theta)$, the desired augmented target is
+$\widetilde\pi_{M,v}(\theta,u')m_N(u\mid\theta)$. Their ratio is
+\begin{align}
+ w(\theta,u,u')
+ &=\frac{\widetilde\pi_{M,v}(\theta,u')m_N(u\mid\theta)}
+         {\widetilde\pi_{N,v}(\theta,u)m_M(u'\mid\theta)}\\
+ &=\frac{Z_{M,v}(\theta,u')}{Z_{N,v}(\theta,u)}.
+ \label{sim:exchange-weight}
+\end{align}
+The prior, normalizer and auxiliary proposal laws cancel because the type and
+evidence revision are unchanged. This recovers the exchange correction in
+Section 3.6.1 of the inspected source. The ratio requires the relevant support
+conditions. The following example uses strictly positive estimates, so it
+does not hide a zero-denominator problem inside that cancellation.
+
+Take two types with prior probability $1/2$ each and true likelihood one.
+For type zero the old estimate is $1/2$ or $3/2$ with equal probabilities;
+the new estimate is $1/4$ or $7/4$, again equally likely. Type one's estimate
+is always one. Each estimator is unbiased. Order the new joint states as
+$(0,1/4),(0,7/4),(1,1)$. The likelihood-weighted target in
+equation~\eqref{sim:extended-particle-target} and the distribution produced by
+unweighted replacement are respectively
+\begin{equation}
+ \pi=\left(\frac1{16},\frac7{16},\frac12\right),\qquad
+ q=\left(\frac14,\frac14,\frac12\right).
+\end{equation}
+Both assign probability $1/2$ to type one. Immediate marginal agreement
+therefore passes a test that the joint target fails.
+
+To see the consequence, make one valid particle marginal Metropolis--Hastings
+move. Propose the other type, draw its new estimate, and accept with
+$\min(1,Z_{\rm proposed}/Z_{\rm current})$. From $(0,1/4)$ the proposal is
+accepted certainly. From $(0,7/4)$ it is accepted with probability $4/7$.
+From type one, the low-estimate proposal has total accepted probability
+$(1/2)(1/4)=1/8$, and the high proposal has probability $1/2$. The transition
+matrix, with the same state order, is thus
+\begin{equation}
+ K=\begin{pmatrix}
+ 0&0&1\\
+ 0&3/7&4/7\\
+ 1/8&1/2&3/8
+ \end{pmatrix}.
+\end{equation}
+The correct joint law satisfies $\pi K=\pi$ and detailed balance. Starting
+instead from $q$, the probability of type one after the move is
+\begin{equation}
+ (qK)_3=\frac14+\frac14\frac47+\frac12\frac38
+       =\frac{65}{112}
+       =\frac12+\frac9{112}.
+\end{equation}
+The transition is valid for its stated target; the wrongly initialized joint
+distribution is the problem. This is an exact one-step counterexample, not a
+claim that a valid PMMH kernel has the wrong stationary distribution. Applying
+the exchange weight restores the desired joint law in the finite enumeration.
+
+The inspected author-linked implementation includes the exchange
+correction \citep[\texttt{SMC2.exchange\_step}, pinned source]{particlesgap2026}.
+Its new filter is run through the preceding observation before
+the next incremental weight is added; processing that next observation in
+both places would count it twice. Rejected Metropolis proposals retain their
+existing filter state, and repeated resampled selections receive distinct
+mutable filter copies. These are scoped source-code correspondences, not a
+run of the full modern package or a performance comparison. The modern
+waste-free extension requires its own dependence and finite-run analysis.
+
+\section{A correction can restore an excluded history}
+Changing the particle representation preserves the likelihood being computed.
+Correcting a historical disclosure can change that likelihood itself. Suppose
+two histories have prior probabilities $(1/2,1/2)$. An old hard observation
+has likelihoods $(1,0)$, producing posterior $(1,0)$. Its replacement has
+likelihoods $(1/4,3/4)$. Recomputing from the prior gives
+\begin{equation}
+ \pi_{\rm replacement}=(1/4,3/4).
+\end{equation}
+Multiplying the restricted old posterior by the replacement likelihood and
+normalizing instead gives $(1,0)$. The operation conjoins the old observation
+with the new one. It cannot recover the history the old assertion excluded.
+The new-to-old likelihood ratio is also undefined on that restored history,
+where the denominator was zero.
+
+A replacement therefore requires replay from a sufficiently informative
+preserved checkpoint, or a separately justified bridge with the required
+support. The inference request must identify the evidence revision and which
+assertion is replaced. Merely attaching a corrected document to an existing
+particle population does not establish the corrected posterior. This is the
+probabilistic counterpart of retaining alternative histories that become
+admissible after a source correction.
+
+The source's quantitative guarantees require additional premises. Its
+Appendix B uses uniform transition and observation-density ratio bounds and
+posterior regularity conditions, and its refreshed-particle idealization is
+stronger than a finite PMCMC move
+\citep[Proposition 2 and Appendix B]{litclosesmc2}. A permanent deterministic
+type, a hard zero-likelihood accounting observation or an unidentified
+parameter direction can violate the intended transfer assumptions. Exact
+finite target calculations establish the distinctions above; they do not
+establish company-model mixing, scaling, likelihood identification or
+forecast accuracy.
+
+\input{simulation/inference-vintage}

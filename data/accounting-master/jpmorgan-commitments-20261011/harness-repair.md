@@ -1,0 +1,1 @@
+The first source checker stopped before writing a result because its final paragraph anchor expected long-term without a PDF line-break space. The retained reading text says long- term. The anchor was changed to those exact extracted bytes; source text and interpretation are unchanged. This is a source-location harness repair, not an issuer/source correction.

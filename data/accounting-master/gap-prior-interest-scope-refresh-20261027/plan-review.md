@@ -1,0 +1,1 @@
+Skeptical audit: typed prior-equity expressions do not establish complete measured reports,legal-book accounting or tax. Explicit tax assumptions remain conditional. Compare full prior-equity worksheet with explicit legal/measurement/tax premises; no global continuation veto. Preserve independent prospective-policy work.

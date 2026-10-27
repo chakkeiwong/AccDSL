@@ -1,0 +1,854 @@
+{
+  "schema_version": "accdsl.proposal.history_families.fixtures.v1",
+  "status": "specified_examples_not_runtime_results",
+  "synthetic": true,
+  "product_implemented": false,
+  "boundary": "All values, dates, identities, rules and decisions below are stipulated synthetic examples; no accounting compliance, source truth or probability is established.",
+  "base_context": {
+    "entity": "Example Company",
+    "perimeter": "P1",
+    "basis": "synthetic B1",
+    "calendar": "Gregorian",
+    "currency": "USD",
+    "unit": "USD",
+    "scale": "1",
+    "sign": "positive components",
+    "precision": "exact by stipulation",
+    "rounding": "none",
+    "economic_instant": "2025-06-30",
+    "reporting_interval": [
+      "2025-01-01",
+      "2025-07-01"
+    ]
+  },
+  "base_request": {
+    "view": "V2",
+    "review_snapshot": "R2",
+    "admission_mode": "archival_exploration",
+    "selection": "latest_available",
+    "source_versions": [
+      "Sx-v1"
+    ],
+    "candidate_set_revision": "components-v1",
+    "target_layer": "conditional_economic_amounts",
+    "templates": [
+      "two_components-v1"
+    ],
+    "mappings": [
+      "component_sum-v1"
+    ],
+    "assumptions": [
+      "A-exact",
+      "A-complete-two-components"
+    ],
+    "opening_state": {
+      "status": "not_needed_for_static_amount_query"
+    },
+    "source_obligations": [
+      {
+        "id": "O-total",
+        "status": "mapped",
+        "constraint": "C-total"
+      }
+    ],
+    "query": {
+      "outputs": [
+        "x",
+        "y"
+      ],
+      "views": [],
+      "composition": "parent",
+      "horizon": "2025-06-30",
+      "scenarios": [],
+      "resolution": "individual_components"
+    },
+    "budget": {
+      "max_cells": 1,
+      "wall_seconds": 1,
+      "traversal": [
+        "joint-region"
+      ]
+    }
+  },
+  "inheritance": "All cases use base_context unless they explicitly replace a context field. base_request is the complete common joint-component example request for HF01, HF02, HF04, HF06, HF07, HF15, HF16 and HF18. Other cases are specified interface fragments with their own explicit quantities/conditions and the common synthetic V2/R2 evidence context; no two-component template or O-total mapping is inherited by them. These are design examples, not instances of an implemented request schema.",
+  "cases": [
+    {
+      "id": "HF01",
+      "question": "Joint dependence and invalid marginal recombination",
+      "input": {
+        "domain": "x,y real >=0",
+        "constraints": [
+          "x+y=100"
+        ],
+        "candidates": [
+          {
+            "x": "40",
+            "y": "60"
+          },
+          {
+            "x": "100",
+            "y": "100"
+          }
+        ]
+      },
+      "expected": {
+        "included": [
+          {
+            "x": "40",
+            "y": "60"
+          }
+        ],
+        "rejected": [
+          {
+            "x": "100",
+            "y": "100",
+            "reason": "C-total violated: 200 != 100"
+          }
+        ],
+        "marginals": {
+          "x": [
+            "0",
+            "100"
+          ],
+          "y": [
+            "0",
+            "100"
+          ]
+        },
+        "joint_region": "0<=x<=100 and y=100-x",
+        "independent_marginal_join_allowed": false
+      }
+    },
+    {
+      "id": "HF02",
+      "question": "Overlapping views need explicit set composition",
+      "input": {
+        "parent": "HF01 joint_region",
+        "views": {
+          "A": "x>=40",
+          "B": "x<=60"
+        },
+        "probe": {
+          "x": "50",
+          "y": "50"
+        }
+      },
+      "expected": {
+        "intersection": "40<=x<=60 and y=100-x",
+        "union": "0<=x<=100 and y=100-x",
+        "probe_membership": [
+          "A",
+          "B"
+        ],
+        "unique_probe_count_in_union": 1,
+        "weights": null,
+        "omitted_composition": "REQUEST_INVALID"
+      }
+    },
+    {
+      "id": "HF03",
+      "question": "Conflicting interpretations remain conditional",
+      "input": {
+        "context_override": {
+          "concept": "revenue",
+          "precision": "exact by stipulation"
+        },
+        "source_assertions": {
+          "A": "120",
+          "B": "110"
+        },
+        "cash": "40",
+        "selected_condition": null,
+        "admission": "faithful extractions; competing interpretations",
+        "treatment_authority": null,
+        "target_layer": "reported_value_arithmetic; accounting request shown separately",
+        "conditional_assumptions": [
+          "select source A",
+          "select source B"
+        ]
+      },
+      "expected": {
+        "reported_value_status": "unresolved",
+        "conditional_branches": [
+          {
+            "k": "A",
+            "revenue": "120",
+            "ratio": "3"
+          },
+          {
+            "k": "B",
+            "revenue": "110",
+            "ratio": "11/4"
+          }
+        ],
+        "weights": null,
+        "unconditional_conjunction_admitted": false,
+        "accounting_status": "TREATMENT_UNSUPPORTED",
+        "journals": null
+      }
+    },
+    {
+      "id": "HF04",
+      "question": "Continuous region is not exhausted by witnesses",
+      "input": {
+        "constraints": [
+          "x+y=100",
+          "0<x<100"
+        ],
+        "returned_witnesses": [
+          {
+            "x": "25",
+            "y": "75"
+          },
+          {
+            "x": "75",
+            "y": "25"
+          }
+        ],
+        "query_output": "projection x",
+        "source_obligations": [
+          {
+            "id": "O-total",
+            "status": "mapped",
+            "constraint": "C-total"
+          },
+          {
+            "id": "O-positive-components",
+            "status": "mapped",
+            "constraint": "0<x<100 by stipulation"
+          }
+        ]
+      },
+      "expected": {
+        "region": "0<x<100 and y=100-x",
+        "interior_example_not_returned": {
+          "x": "50",
+          "y": "50"
+        },
+        "infimum": "0",
+        "supremum": "100",
+        "infimum_attained": false,
+        "supremum_attained": false,
+        "witness_enumeration_complete": false,
+        "region_representation_complete": true
+      }
+    },
+    {
+      "id": "HF05",
+      "question": "Included, rejected and out-of-scope are distinct",
+      "input": {
+        "scope": "one synthetic cash balance and one known cash event; no FX",
+        "opening": "100",
+        "event": "20",
+        "candidates": [
+          {
+            "id": "h-ok",
+            "closing": "120"
+          },
+          {
+            "id": "h-bad",
+            "closing": "110"
+          },
+          {
+            "id": "h-fx",
+            "closing": "110",
+            "unmodeled_fx": "-10"
+          }
+        ]
+      },
+      "expected": {
+        "included": [
+          "h-ok"
+        ],
+        "rejected": {
+          "h-bad": "opening+event-closing=10, violates declared bridge"
+        },
+        "out_of_scope": {
+          "h-fx": "FX event excluded by scope; not refuted as an actual history"
+        },
+        "economic_scope": "explicitly_limited"
+      }
+    },
+    {
+      "id": "HF06",
+      "question": "Zero budget preserves unresolved formula",
+      "input": {
+        "family": "F-finite",
+        "partition": "D-v1",
+        "decisions": {
+          "q": [
+            "low",
+            "high"
+          ]
+        },
+        "cells": {
+          "low": "x=40 and y=60",
+          "high": "x=70 and y=30"
+        },
+        "budget": {
+          "max_cells": 0,
+          "wall_seconds": 1,
+          "traversal": [
+            "low",
+            "high"
+          ]
+        }
+      },
+      "expected": {
+        "existence": "unknown",
+        "declared_search": "not_started",
+        "economic_scope": "explicitly_limited",
+        "witnesses": [],
+        "unresolved": [
+          {
+            "key": [
+              "D-v1",
+              "q",
+              "low"
+            ],
+            "formula": "x=40 and y=60"
+          },
+          {
+            "key": [
+              "D-v1",
+              "q",
+              "high"
+            ],
+            "formula": "x=70 and y=30"
+          }
+        ],
+        "proved_empty": false
+      }
+    },
+    {
+      "id": "HF07",
+      "question": "Interruption and continuation retain exact cell identities",
+      "input": {
+        "family": "F-finite",
+        "partition": "D-v1",
+        "cells_from": "HF06",
+        "committed_keys": [
+          [
+            "D-v1",
+            "q",
+            "low"
+          ]
+        ],
+        "stop": "cancelled before high cell committed",
+        "resume_budget": {
+          "max_cells": 1,
+          "wall_seconds": 1,
+          "traversal": [
+            "high"
+          ]
+        }
+      },
+      "expected": {
+        "existence": "witness",
+        "declared_search": "partial",
+        "economic_scope": "explicitly_limited",
+        "witnesses": [
+          {
+            "x": "40",
+            "y": "60"
+          }
+        ],
+        "unresolved": [
+          {
+            "key": [
+              "D-v1",
+              "q",
+              "high"
+            ],
+            "formula": "x=70 and y=30",
+            "reason": "cancelled"
+          }
+        ],
+        "resume_same_manifest": "continue high only",
+        "resume_changed_manifest": "STALE_CONTINUATION",
+        "after_high_validated": {
+          "declared_search": "complete",
+          "economic_scope": "explicitly_limited"
+        }
+      }
+    },
+    {
+      "id": "HF08",
+      "question": "Proof, unknown and unsupported are different",
+      "input": {
+        "queries": [
+          {
+            "id": "proof",
+            "constraints": [
+              "x+y=100",
+              "x>=70",
+              "y>=40"
+            ],
+            "capability": "linear"
+          },
+          {
+            "id": "unknown",
+            "constraints": [
+              "x+y=100",
+              "x>=0",
+              "y>=0"
+            ],
+            "backend_reply": "unknown"
+          },
+          {
+            "id": "unsupported",
+            "constraints": [
+              "x*y=1",
+              "x>=0",
+              "y>=0"
+            ],
+            "capability": "linear_only"
+          }
+        ]
+      },
+      "expected": {
+        "proof": {
+          "existence": "proved_empty",
+          "declared_search": "complete",
+          "reason": "x+y>=110 contradicts x+y=100",
+          "formulation_complete": true
+        },
+        "unknown": {
+          "existence": "unknown",
+          "unresolved_region": "x+y=100 and x>=0 and y>=0"
+        },
+        "unsupported": {
+          "existence": "unknown",
+          "code": "OPERATION_UNSUPPORTED",
+          "unresolved_region": "x*y=1 and x>=0 and y>=0",
+          "candidate_not_a_validated_witness": {
+            "x": "1",
+            "y": "1"
+          }
+        },
+        "empty_witness_list_is_proof": false
+      }
+    },
+    {
+      "id": "HF09",
+      "question": "Unmapped sources and unsupported treatment cannot be discarded",
+      "input": {
+        "enforced_subset": [
+          "x+y=100",
+          "x>=0",
+          "y>=0"
+        ],
+        "candidate": {
+          "x": "40",
+          "y": "60"
+        },
+        "source_obligations": [
+          {
+            "id": "O-total",
+            "status": "mapped",
+            "constraint": "C-total"
+          },
+          {
+            "id": "O-guarantee",
+            "status": "unresolved",
+            "affects": [
+              "economic_history",
+              "future_cash"
+            ]
+          },
+          {
+            "id": "O-sector",
+            "status": "out_of_scope",
+            "reason": "sector model not in declared scope"
+          },
+          {
+            "id": "O-narrative",
+            "status": "not_applicable_with_reason",
+            "reason": "no predicate about requested components; synthetic review R2"
+          }
+        ],
+        "treatment_proposal": {
+          "id": "T-unbacked",
+          "authority": null
+        },
+        "target_layer": "accounting_history"
+      },
+      "expected": {
+        "formulation_complete": false,
+        "existence": "unknown",
+        "candidate_status": "candidate_of_relaxed_formulation",
+        "economic_scope": "unresolved",
+        "admitted_treatment_branches": [],
+        "journals": null,
+        "unresolved_ids": [
+          "O-guarantee",
+          "T-unbacked"
+        ],
+        "retained_out_of_scope": [
+          "O-sector"
+        ],
+        "subset_search_completion_promotes_target": false
+      }
+    },
+    {
+      "id": "HF10",
+      "question": "Equal historical postings conceal rate exposure",
+      "input": {
+        "principal": "100",
+        "prior_year_fraction": "1",
+        "historical_fixed_rate": "1/20",
+        "historical_floating_rate": "1/20",
+        "next_year_fraction": "1",
+        "next_fixed_rate": "1/20",
+        "next_floating_rate": "7/100",
+        "assumptions": [
+          "simple interest",
+          "no principal changes",
+          "no hedge",
+          "maturity outside both years"
+        ]
+      },
+      "expected": {
+        "historical_interest": [
+          "5",
+          "5"
+        ],
+        "future_interest": [
+          "5",
+          "7"
+        ],
+        "economic_equivalence_for_rate_scenario": false,
+        "retain": [
+          "rate_type",
+          "reset_terms",
+          "scenario",
+          "contract_id"
+        ]
+      }
+    },
+    {
+      "id": "HF11",
+      "question": "Equal balances conceal maturity exposure",
+      "input": {
+        "as_of": "2025-12-31",
+        "query_end": "2026-12-31",
+        "principal": "100",
+        "contracts": [
+          {
+            "id": "early",
+            "maturity": "2026-06-30"
+          },
+          {
+            "id": "late",
+            "maturity": "2027-06-30"
+          }
+        ],
+        "assumptions": [
+          "principal paid in full at maturity",
+          "no prepayment",
+          "no default"
+        ],
+        "outputs": [
+          "principal repayments in horizon"
+        ]
+      },
+      "expected": {
+        "current_principal": [
+          "100",
+          "100"
+        ],
+        "principal_repayments": [
+          "100",
+          "0"
+        ],
+        "economic_equivalence_for_horizon": false,
+        "group_by_balance_only": "GROUPING_UNSUPPORTED"
+      }
+    },
+    {
+      "id": "HF12",
+      "question": "A justified narrow grouping and changed-query revalidation",
+      "input": {
+        "principals": [
+          "40",
+          "60"
+        ],
+        "rate": "1/20",
+        "year_fraction": "1/2",
+        "assumptions": [
+          "same entity and currency",
+          "fixed rate",
+          "same day count",
+          "no intermediate principal changes",
+          "no options or guarantees relevant to outputs",
+          "maturities beyond horizon"
+        ],
+        "outputs": [
+          "total_principal",
+          "total_simple_interest"
+        ],
+        "retain_constituents": true,
+        "changed_query": {
+          "outputs": [
+            "individual_contract_exposure"
+          ]
+        }
+      },
+      "expected": {
+        "individual_interest": [
+          "1",
+          "3/2"
+        ],
+        "group_principal": "100",
+        "group_interest": "5/2",
+        "certificate_scope": "only declared simple transitions and aggregate outputs",
+        "constituent_links_preserved": true,
+        "changed_query": "RESOLUTION_REVALIDATION_REQUIRED",
+        "refinement": "new resolution with original constituent IDs",
+        "missing_constituent_detail": "DETAIL_UNAVAILABLE",
+        "approximation_tolerance": null
+      }
+    },
+    {
+      "id": "HF13",
+      "question": "Revision, candidate membership and frozen access",
+      "input": {
+        "old_view": "V2",
+        "new_view": "V3",
+        "old_revenue_family": "F-revenue-V2",
+        "cash_family": "F-cash-V2",
+        "change": {
+          "new_competitor": "C",
+          "selected_A_unchanged": true,
+          "membership_key": "revenue",
+          "old_revision": "revenue-1",
+          "new_revision": "revenue-2"
+        },
+        "dependencies": {
+          "F-revenue-V2": [
+            "revenue-1",
+            "R2"
+          ],
+          "ratio-V2": [
+            "F-revenue-V2",
+            "F-cash-V2"
+          ],
+          "F-cash-V2": [
+            "cash-1",
+            "R2"
+          ]
+        },
+        "cash_reuse_assumptions": [
+          "complete dependency graph",
+          "unchanged cash query/context/rules",
+          "time admission proves cutoff extension adds no cash candidate"
+        ]
+      },
+      "expected": {
+        "invalidated_current": [
+          "F-revenue-V2",
+          "ratio-V2"
+        ],
+        "new_revenue_family_required": true,
+        "cash_reusable_with_receipt": true,
+        "frozen_V2": "original immutable payload with historical label",
+        "old_result_as_current": "STALE_VIEW",
+        "unknown_dependency_completeness": "reuse_unestablished"
+      }
+    },
+    {
+      "id": "HF14",
+      "question": "Different observation context cannot silently identify one variable",
+      "input": {
+        "observation_A": {
+          "entity": "Example Company",
+          "period": [
+            "2025-01-01",
+            "2025-07-01"
+          ],
+          "concept": "revenue",
+          "value": "120"
+        },
+        "observation_B": {
+          "entity": "Example Company",
+          "period": [
+            "2025-01-01",
+            "2026-01-01"
+          ],
+          "concept": "revenue",
+          "value": "230"
+        },
+        "explicit_context_mapping": null
+      },
+      "expected": {
+        "same_variable_allowed": false,
+        "genuine_conflict_established": false,
+        "mapping_status": "unresolved",
+        "annual_minus_half_year_automatic": false
+      }
+    },
+    {
+      "id": "HF15",
+      "question": "Identity is independent of traversal but not meaning",
+      "input": {
+        "family": "F-finite",
+        "partition": "D-v1",
+        "decision": "q",
+        "values": [
+          "low",
+          "high"
+        ],
+        "traversal_A": [
+          "low",
+          "high"
+        ],
+        "traversal_B": [
+          "high",
+          "low"
+        ],
+        "changed_assumption": "A-exact-v2"
+      },
+      "expected": {
+        "keys_A": [
+          [
+            "D-v1",
+            "q",
+            "low"
+          ],
+          [
+            "D-v1",
+            "q",
+            "high"
+          ]
+        ],
+        "keys_B": [
+          [
+            "D-v1",
+            "q",
+            "high"
+          ],
+          [
+            "D-v1",
+            "q",
+            "low"
+          ]
+        ],
+        "key_set_equal": true,
+        "traversal_changes_family_identity": false,
+        "changed_assumption_changes_family_identity": true,
+        "old_ordinal_suffix_under_new_order": "STALE_CONTINUATION",
+        "economic_equivalence_from_hash": false
+      }
+    },
+    {
+      "id": "HF16",
+      "question": "Matched representation alternatives",
+      "input": {
+        "continuous_target": "x+y=100 and x>=0 and y>=0",
+        "outputs": [
+          "joint set",
+          "membership 50,50",
+          "membership 100,100",
+          "overlapping views A and B"
+        ],
+        "endpoint_enumeration": [
+          {
+            "x": "0",
+            "y": "100"
+          },
+          {
+            "x": "100",
+            "y": "0"
+          }
+        ],
+        "separate_finite_scope": {
+          "x": [
+            "40",
+            "70"
+          ],
+          "y": "100-x"
+        }
+      },
+      "expected": {
+        "symbolic": {
+          "includes_50_50": true,
+          "includes_100_100": false,
+          "completeness_requires": "supported construction and query proof"
+        },
+        "endpoint_enumeration": {
+          "includes_50_50": false,
+          "continuous_target_complete": false,
+          "honest_status": "witnesses plus unresolved remainder"
+        },
+        "independent_intervals": {
+          "includes_100_100": true,
+          "equal_to_joint_target": false
+        },
+        "separate_finite_scope": {
+          "members": [
+            {
+              "x": "40",
+              "y": "60"
+            },
+            {
+              "x": "70",
+              "y": "30"
+            }
+          ],
+          "exhaustive_only_for_declared_finite_scope": true
+        },
+        "performance_ranking": null
+      }
+    },
+    {
+      "id": "HF17",
+      "question": "Evidence eligibility is not repaired by conditional branching",
+      "input": {
+        "reported_value": "110",
+        "source": "B",
+        "public_availability": null,
+        "admission_mode": "investor_information",
+        "information_cutoff": "2025-08-31T23:59:59Z",
+        "conditional_selection": "B"
+      },
+      "expected": {
+        "unconditional_admissibility": "unresolved",
+        "selected_condition_does_not_prove_eligibility": true,
+        "retained_obligation": "B availability",
+        "accounting_permission": false
+      }
+    },
+    {
+      "id": "HF18",
+      "question": "Layer, constraint and search statuses stay independent",
+      "input": {
+        "candidate": {
+          "x": "40",
+          "y": "60"
+        },
+        "complete_static_constraints": [
+          "x>=0",
+          "y>=0",
+          "x+y=100"
+        ],
+        "query_target": "conditional_economic_amounts",
+        "searched_cells": 1,
+        "total_declared_cells": 1,
+        "accounting_authority": null,
+        "excluded_economics": [
+          "FX",
+          "options"
+        ]
+      },
+      "expected": {
+        "formulation_complete": true,
+        "existence": "witness",
+        "declared_search": "complete",
+        "economic_scope": "explicitly_limited",
+        "accounting_validity": "unestablished",
+        "whole_company_coverage": false,
+        "future_distribution": null
+      }
+    }
+  ]
+}

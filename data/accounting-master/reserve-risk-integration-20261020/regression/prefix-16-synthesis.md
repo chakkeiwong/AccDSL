@@ -1,0 +1,9 @@
+# Cumulative argument through Appendix B
+
+21 October 2026. Version 3.45, physical pages 1–384. Sixteen chapter/appendix syntheses and contiguous actual-view records support this provisional author assessment. Appendix C and the bibliography remain unread in this chain.
+
+The narrative and its technical references now connect the financial question to proposed execution. Source evidence restricts possible histories without necessarily choosing one. Accounting recognition, conditional forecasts, probability admission and risk compensation answer different questions. Corporate, bank and insurer methods make those distinctions concrete; the architecture preserves them through records, transactions and bounded computation. Acceptance then requires evidence matched to each claim.
+
+Appendices A and B consolidate the implementation consequences without replacing the argument. Exact signatures distinguish candidate construction, admission, selection and state change. The schemas retain financial context and limited capabilities. Core typing and logical rules preserve unknowns, feasibility and scope. The operation reference therefore does not undo the narrative's central distinction between a known observation, an admissible history, an authorized treatment and a conditional outcome.
+
+Reference tables and code blocks are appropriate here because they support implementation lookup after the necessary explanation. They do not establish a working engine or independent acceptance. No new cross-prefix contradiction was confirmed. RR-001 and RR-002 remain the two manuscript defects to repair in a protected successor. Source questions, broader method cases, dated authority, actual facts and empirical choices remain open. The mission retains 53 obligations, six interactions, 46 operations, zero whole-row closures and `not_ready`.

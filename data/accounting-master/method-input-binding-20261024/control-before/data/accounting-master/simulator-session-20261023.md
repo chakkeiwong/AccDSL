@@ -1,0 +1,21 @@
+# Simulator-first continuation checkpoint
+
+## Current candidate Version 3.59 — 24 October 2026
+
+Version 3.59 is 429 pages, not_ready. PDF: docs/design/proposal/manuscript-method-requirements-20261024/accounting-product-proposal.pdf.
+SHA256: d012df34794bf2860acc2fc7411c4402453fed982c405d75910613c688d0a8b5.
+Reusable typed method requirements and matched text/exchange are integrated.
+Core:197 checks and 35 selected comparisons; authoring:139 checks, 19 unit methods.
+All 154 predecessor sources and its PDF remain protected; 320 labels,
+111 references, 738 citations and 227 exact displays are retained.
+Clean build and bounded rendered author review pass; whole-document,
+independent/domain/human acceptance remain pending.
+Result: data/accounting-master/method-requirement-integration-20261024/result.md.
+
+Next: docs/plans/accounting-method-input-binding-20261024.md.
+Bind requirements to explicit typed records with immutable source identity,
+context and unknown conventions; preserve residual full-method prerequisites.
+S1–S5 partial; S6 held; S7 deferred. No whole requirement closes.
+
+No command running. Preserve recorded packages and dirty work.
+No commit/subagents/controller campaign/outreach/forecast experiment.

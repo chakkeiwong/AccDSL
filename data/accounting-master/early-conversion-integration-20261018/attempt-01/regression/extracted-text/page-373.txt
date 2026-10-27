@@ -1,0 +1,52 @@
+APPENDIX A. PORTABLE OPERATION REFERENCE
+364
+continuing_increment, total_increment, share_increment,
+reason
+}
+series (unresolved or unsupported) {
+id, resolution: unresolved | unsupported,
+context_ref, support, reason
+}
+A candidate has a positive, already weighted share increment; earnings increments may be
+signed. Both completeness findings must be true for diluted calculation. It has at least one
+potential window. All windows have positive length, lie within the reporting period and do not
+overlap within that series. For a conversion, actual windows are nonempty, follow the potential
+windows, and actual_in_basic is true. For lapse or period-end treatment, actual windows are
+empty and that finding is false. A period-end series’ final potential window ends at the period
+boundary. A no-effect record has all three increments zero. Reasons retain missing facts or the
+further method required; they never stand for a silently omitted series.
+Result {
+wire: "OrderedEPS/1", request_sha256, context_ref,
+status, basic: EPSBundle | null, diluted: EPSBundle | null,
+trace: [Comparison], issues: [{code, path, series_id}],
+mutations: [], acceptance: "conditional_documentary_only"
+}
+EPSBundle {
+continuing_numerator, total_numerator,
+discontinued_numerator, denominator,
+continuing_eps, total_eps, discontinued_eps
+}
+Comparison {
+id, resolution: candidate | no_effect,
+continuing_increment, total_increment, share_increment,
+incremental_ratio,
+before: {continuing_numerator, denominator},
+after_if_included: {continuing_numerator, denominator},
+included, reason: strictly_dilutive | neutral |
+antidilutive | no_effect
+}
+Result quantities remain reduced rational strings. The request digest uses the same serialization
+over the complete request. The context reference is null only when no valid reference can be
+read. An issue identifies its code, JSON path and series ID or null. A no-effect comparison has
+a null ratio and unchanged amounts. Candidates appear in exact increasing-ratio order, IDs
+breaking ties; no-effect items follow in ID order. The schema permits null comparison states;
+the completed reference report supplies them.
+conditional_complete returns both bundles, the complete trace and no issues.
+unresolved
+records missing findings or source bytes, incomplete inventory or unresolved items. unsupported
+records unsupported scope or series; blocked records both obstacles. These three statuses retain
+independently ready basic EPS, with null diluted EPS and an empty trace. rejected takes
+precedence for structural, binding, rational, sign, inventory, date or source-hash violations
+and returns neither bundle. Issues sort by path, code and series ID; mutations are always
+empty. Application methods remain responsible for live head freshness, source truth, accounting
+admission and future publication.

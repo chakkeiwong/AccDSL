@@ -1,0 +1,1 @@
+Exact source preservation, checked Boolean derivation and bounded rendered review support provisional 5.44. Economic versus information failure must be diagnosed at one consistent financial point. Financing evidence and all original rows are preserved.

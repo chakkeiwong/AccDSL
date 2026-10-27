@@ -5,11 +5,12 @@ from __future__ import annotations
 import argparse
 import ast
 import ctypes
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 import fcntl
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -28,7 +29,11 @@ from accounting_master_support import (atomic_json, baseline, digest, load_json,
                                       local_path, release_hashes, run_phase_tests,
                                       source_register, verify_hashes, preserve_editable, changes_since, protected_hashes,
                                       atomic_bytes, merge_hashes, verify_builtin,
-                                      phase_recovery, recovery_excerpt, contributed_changes)
+                                      phase_recovery, recovery_excerpt, contributed_changes,
+                                      editable_files, worker_inventory, validate_artifact_contract, verification_input_errors,
+                                      compact_worker_packet, historical_resolution_checks)
+from accounting_worker_clock import worker_budget
+from accounting_worker_supervision import ProgressMonitor, scoped_inventory, inventory_hash
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = 'scripts/accounting_master_catalog.json'
@@ -37,11 +42,23 @@ CONTROLS = [
     'scripts/run_accounting_master.py', 'scripts/accounting_master_support.py',
     CATALOG, SCHEMA, 'tests/test_accounting_master.py',
     'docs/plans/accounting-master-program.md',
+    'scripts/check_accounting_proposal.py', 'tests/test_accounting_proposal.py',
+    'docs/plans/accounting-p15-execution-repair-20261004.md',
+    'scripts/accounting_worker_clock.py',
+    'scripts/accounting_worker_supervision.py',
+    'docs/plans/accounting-progress-supervision-20261006.md',
+    'docs/plans/accounting-progress-supervision-evidence-classification-20261006.md',
+    'docs/plans/accounting-worker-timing-repair-20261004.md',
+    'docs/plans/accounting-master-campaign-20261005.md',
+    'tests/test_accounting_proposal_current.py',
+    'docs/plans/accounting-proposal-evidence-supplement-20261005.md',
+    'docs/plans/accounting-master-controller-repair-20261005.md',
 ]
 ACCEPTED = 'accepted_internal'
-PUBLIC_ACTIONS = ['install-and-run', 'run', 'status', 'refresh', 'stop', 'review']
+PUBLIC_ACTIONS = ['install-and-run', 'run', 'campaign', 'status', 'refresh', 'stop', 'review']
 RESPONSE_KEYS = {'verdict', 'summary', 'steps', 'assumptions', 'checks',
                  'evidence', 'issues', 'residuals', 'next_actions'}
+MAX_RUN_SECONDS = 7200
 
 
 class MasterError(RuntimeError):
@@ -52,6 +69,18 @@ class ContinuationVeto(MasterError):
     pass
 
 
+class ProcessTimeout(MasterError):
+    pass
+
+
+class ReviewPending(MasterError):
+    pass
+
+
+class BudgetDeferred(MasterError):
+    """No useful worker can be launched within this invocation's budget."""
+
+
 def now():
     return datetime.now(timezone.utc).isoformat()
 
@@ -59,6 +88,73 @@ def now():
 def stable_hash(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
                                      separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+
+
+def campaign_remaining(record):
+    if (not isinstance(record, dict) or record.get('schema_version') != 'accdsl.master.campaign.v1'
+            or not record.get('boot_id') or record['boot_id'] != boot_identity()):
+        raise ContinuationVeto('Campaign host boot changed or state is invalid; supervisor recovery required without resetting its allowance')
+    values = [record.get(k) for k in ('started_monotonic', 'deadline_monotonic', 'allowance_seconds')]
+    if (any(type(v) not in (float, int) or not math.isfinite(v) for v in values)
+            or not 0 < values[2] <= 172800 or abs(values[1] - values[0] - values[2]) > .001):
+        raise ContinuationVeto('Invalid campaign deadline or allowance')
+    current = time.monotonic()
+    if current < values[0]:
+        raise ContinuationVeto('Campaign monotonic clock moved backwards')
+    return max(0, values[1] - current)
+
+
+def campaign_progress(root, run_folder, before_accepted, state):
+    accepted = sorted(p for p, record in state['phases'].items()
+                      if record['status'] == ACCEPTED and p not in before_accepted)
+    changed = set()
+    for path in run_folder.glob('*/execution-*/changes.json'):
+        delta = load_json(path)
+        changed.update(n for names in delta.values() for n in names
+                       if not n.endswith('/progress.md'))
+    reviewed = []
+    for identifier, record in state['phases'].items():
+        review = record.get('last_partial_review', {})
+        try:
+            path = local_path(root, review['path'])
+            if (not path.is_relative_to(run_folder) or not path.name.endswith('.response.json')
+                    or review.get('scope') != 'bounded_partial_work'
+                    or digest(path) != review.get('sha256')):
+                continue
+            result = validate_response(load_json(path), {'AGREE', 'REVISE'})
+            process = load_json(path.with_name(path.name.replace('.response.json', '.process.json')))
+            if (process.get('exit_code') == 0 and process.get('reason') is None
+                    and result['verdict'] == review.get('verdict')):
+                reviewed.append(identifier)
+        except (KeyError, ValueError, OSError, MasterError):
+            continue
+    # A terminal review of retained work advances the campaign without edits.
+    # None of these operational signals establishes full proposal acceptance.
+    return {'accepted_phases': accepted, 'changed_files': sorted(changed),
+            'completed_partial_reviews': sorted(reviewed),
+            'progress': bool(accepted or changed or reviewed)}
+
+
+def git_provenance(root):
+    """Observe HEAD; the existing content hashes identify uncommitted work."""
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--verify', 'HEAD'], cwd=root,
+                                capture_output=True, encoding='utf-8', errors='replace',
+                                timeout=5, check=False)
+    except subprocess.TimeoutExpired:
+        reason = 'git rev-parse --verify HEAD timed out after 5 seconds'
+    except OSError as error:
+        reason = f'{type(error).__name__}: {error}'[:500]
+    else:
+        commit = result.stdout.strip()
+        if result.returncode:
+            detail = (result.stderr.strip() or result.stdout.strip() or 'no diagnostic')[:500]
+            reason = f'git rev-parse --verify HEAD exited {result.returncode}: {detail}'
+        elif not re.fullmatch(r'(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})', commit):
+            reason = 'git rev-parse returned an invalid commit ID'
+        else:
+            return {'git_commit': commit, 'git_reason': None}
+    return {'git_commit': None, 'git_reason': reason}
 
 
 def worker_overrides(mode, config, role=None):
@@ -84,13 +180,16 @@ def worker_seconds(role, limits):
         return limits['phase_seconds']
     if role == 'plan':
         return limits['plan_seconds']
+    if role in {'review_plan', 'review_result'}:
+        return limits.get('phase_review_seconds', limits['review_seconds'])
     return limits['review_seconds']
 
 
 def validate_response(value, allowed):
     if not isinstance(value, dict) or set(value) != RESPONSE_KEYS:
         raise MasterError('Invalid worker response fields')
-    if value['verdict'] not in allowed or not isinstance(value['summary'], str) or not value['summary'].strip():
+    if (not isinstance(value['verdict'], str) or value['verdict'] not in allowed
+            or not isinstance(value['summary'], str) or not value['summary'].strip()):
         raise MasterError('Invalid worker verdict or summary')
     for key in RESPONSE_KEYS - {'verdict', 'summary'}:
         if not isinstance(value[key], list) or any(not isinstance(x, str) for x in value[key]):
@@ -99,7 +198,36 @@ def validate_response(value, allowed):
         raise MasterError('A plan requires concrete steps and checks')
     if value['verdict'] == 'AGREE' and value['issues']:
         raise MasterError('AGREE cannot retain unresolved review issues')
+    if value['verdict'] == 'PARTIAL' and not value['next_actions']:
+        raise MasterError('Partial work requires an explicit next bounded task')
     return value
+
+
+def role_verdicts(role):
+    if role == 'plan':
+        return {'PLAN', 'BLOCKED'}
+    if role in {'probe', 'review_plan', 'review_result', 'review_controller'}:
+        return {'AGREE', 'REVISE', 'BLOCKED'}
+    if role in {'implement', 'repair'}:
+        return {'IMPLEMENTED', 'PARTIAL', 'BLOCKED'}
+    raise MasterError('Unknown worker role')
+
+
+def acceptance_ready(phase, checked):
+    """Engineering success cannot override a declared incomplete criterion."""
+    if (checked.get('passed') is not True or type(checked.get('tests')) is not int
+            or checked['tests'] <= 0):
+        return False
+    acceptance = checked.get('acceptance', {})
+    if not isinstance(acceptance, dict):
+        return False
+    if checked.get('phase_criteria_complete') is False or acceptance.get('phase_criteria_complete') is False:
+        return False
+    if phase.get('checker'):
+        expected = {f'criterion_{i + 1}': 'complete_bounded' for i in range(len(phase['criteria']))}
+        return (acceptance.get('phase_criteria_complete') is True
+                and acceptance.get('criteria') == expected)
+    return True
 
 
 def validate_catalog(catalog):
@@ -115,17 +243,62 @@ def validate_catalog(catalog):
             raise MasterError('Catalog must be an ordered acyclic dependency graph')
         if p['kind'] not in {'builtin', 'worker'} or not p['criteria'] or not p['deliverables']:
             raise MasterError('Invalid phase contract')
+        if 'checker' in p:
+            argv = p['checker']
+            if (not isinstance(argv, list) or not argv or any(not isinstance(a, str) or not a for a in argv)
+                    or not argv[0].startswith('scripts/') or not argv[0].endswith('.py')
+                    or '..' in Path(argv[0]).parts):
+                raise MasterError('Checker must be a repository Python script and literal argument list')
+        for name in p.get('retry_inputs', []):
+            if not isinstance(name, str) or Path(name).is_absolute() or '..' in Path(name).parts:
+                raise MasterError('Unsafe retry input path')
+        if p.get('continuation_policy', 'fresh_plan') not in {'fresh_plan', 'reviewed_scope'}:
+            raise MasterError('Unknown continuation policy')
+        for key in ('execution_plan', 'historical_input_resolutions'):
+            if key in p and (not isinstance(p[key], str) or not p[key]
+                             or Path(p[key]).is_absolute() or '..' in Path(p[key]).parts):
+                raise MasterError('Unsafe phase document path')
         seen.add(p['id'])
     gaps = {g for p in phases for g in p['gaps']}
     if gaps != {f'G{i}' for i in range(1, 19)}:
         raise MasterError('Catalog does not preserve all G1–G18')
+    workflow = catalog.get('workflow', {})
+    if workflow.get('mode') != 'proposal':
+        raise MasterError('This master runs proposal work only; implementation needs a separately selected plan')
+    policies = workflow.get('phase_policy', {})
+    if set(policies) != set(ids):
+        raise MasterError('Every phase needs an explicit workflow policy')
+    proposal = workflow.get('proposal_phases', [])
+    if (not proposal or len(proposal) != len(set(proposal)) or not set(proposal) <= set(ids)
+            or workflow.get('gate_phase') != proposal[-1]):
+        raise MasterError('Invalid proposal sequence')
+    for identifier, policy in policies.items():
+        if policy.get('class') not in {'design', 'research', 'exploratory_probe', 'product_implementation', 'review'}:
+            raise MasterError('Unknown phase class')
+        if identifier not in proposal and policy.get('schedule') != 'held':
+            raise MasterError('Legacy work must remain held during proposal preparation')
+        if identifier in proposal:
+            if policy.get('schedule') != 'active' or policy['class'] == 'product_implementation':
+                raise MasterError('Product work cannot be a proposal prerequisite')
+            phase = next(p for p in phases if p['id'] == identifier)
+            if any(d not in proposal for d in phase['deps']):
+                raise MasterError('Proposal work cannot depend on the held implementation queue')
+            if not policy.get('write_scope'):
+                raise MasterError('Proposal work needs an explicit write scope')
+            if policy['class'] == 'exploratory_probe' and not all(policy.get(k) for k in ('design_question', 'decision_effect', 'stop_condition')):
+                raise MasterError('A probe must answer a named design decision')
+        for name in policy.get('write_scope', []):
+            if (not isinstance(name, str) or not name or name.strip('/') in {'', '.'}
+                    or Path(name).is_absolute() or '..' in Path(name).parts
+                    or '*' in name or Path(name).as_posix() != name.rstrip('/')):
+                raise MasterError('Unsafe workflow write scope')
 
 
 def validate_state(state, phases):
     """Reject damaged or incompatible state before it can select work."""
     required = {'schema_version', 'created_at', 'mission_complete', 'gap_status', 'phases', 'runs', 'last_outcome'}
     statuses = {'pending', 'running', 'repairing', 'interrupted', 'stale',
-                'blocked_external', 'needs_plan_repair', 'needs_repair', ACCEPTED}
+                'blocked_external', 'needs_plan_repair', 'needs_repair', 'needs_review', 'budget_deferred', ACCEPTED}
     def reject(message):
         raise ContinuationVeto('Invalid persisted state: ' + message)
     def strings(value):
@@ -152,7 +325,8 @@ def validate_state(state, phases):
         for field in ['attempts', 'residuals', 'issues', 'next_actions', 'outstanding_deletions', 'contributed_files']:
             if field in record and not strings(record[field]):
                 reject(name + ' invalid ' + field)
-        for field in ['entry_inventory_path', 'accepted_at', 'block_signature']:
+        for field in ['entry_inventory_path', 'accepted_at', 'block_signature',
+                      'pending_review', 'pending_review_sha256']:
             if field in record and not isinstance(record[field], str):
                 reject(name + ' invalid ' + field)
         if 'evidence_hashes' in record:
@@ -208,11 +382,20 @@ def _terminate_group(proc):
     if getattr(proc, '_master_cleanup_done', False):
         return
     original = getattr(proc, '_master_identity', None)
-    current = process_identity(proc.pid)
+    if getattr(proc, '_master_direct_group', False) and original is None:
+        return terminate_unidentified_child(proc)
+    try:
+        current = process_identity(proc.pid)
+    except (OSError, ValueError):
+        if getattr(proc, '_master_direct_group', False):
+            return terminate_unidentified_child(proc)
+        raise
     if original is None:
         if proc.returncode is not None:
             return  # Already reaped by the caller: do not signal a reusable PID.
         original = current
+    if current is None and getattr(proc, '_master_direct_group', False):
+        return terminate_unidentified_child(proc)
     if current is None:
         if live_group_members(proc.pid):
             raise ContinuationVeto('Group leader was reaped before cleanup; ownership needs inspection')
@@ -238,10 +421,59 @@ def _terminate_group(proc):
     proc._master_cleanup_done = True
 
 
+def terminate_unidentified_child(proc):
+    """An unreaped Popen child anchors its initial group without /proc identity."""
+    if proc.returncode is not None:
+        raise ContinuationVeto('Unidentified child was already reaped; no group signal sent')
+    # WNOWAIT verifies that this is still our direct, unreaped child. No other
+    # thread/reaper is permitted by bounded_process's single-threaded contract.
+    os.waitid(os.P_PID, proc.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+    if os.getpgid(proc.pid) != proc.pid:
+        raise ContinuationVeto('New child no longer anchors its initial process group')
+    def members():
+        found = []
+        for entry in Path('/proc').iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                fields = (entry / 'stat').read_text().rsplit(') ', 1)[1].split()
+            except (FileNotFoundError, ProcessLookupError):
+                continue
+            # Unreadable metadata cannot establish quiescence; preserve a veto.
+            if int(fields[2]) == proc.pid and fields[0] != 'Z':
+                found.append(int(entry.name))
+        return found
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            os.killpg(proc.pid, sig)
+        except ProcessLookupError:
+            pass
+        deadline = time.monotonic() + 3
+        try:
+            while members() and time.monotonic() < deadline:
+                time.sleep(.02)
+            if not members():
+                proc.wait(timeout=5)
+                proc._master_cleanup_done = True
+                return
+        except (OSError, ValueError, IndexError):
+            if sig == signal.SIGKILL:
+                raise ContinuationVeto('Cannot verify new-child group cleanup; supervisor inspection required')
+    raise ContinuationVeto('New-child group remained live after bounded escalation')
+
+
+def boot_identity():
+    value = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+    if not value:
+        raise ContinuationVeto('Host boot identity is unavailable')
+    return value
+
+
 def process_identity(pid):
     try:
         fields = (Path('/proc') / str(pid) / 'stat').read_text().rsplit(') ', 1)[1].split()
-        return {'pid': pid, 'state': fields[0], 'pgid': int(fields[2]), 'start_ticks': int(fields[19])}
+        return {'pid': pid, 'state': fields[0], 'pgid': int(fields[2]), 'start_ticks': int(fields[19]),
+                'boot_id': boot_identity()}
     except FileNotFoundError:
         return None
 
@@ -283,6 +515,8 @@ def stop_recovered_group(previous):
 
 def _stop_recovered_group(previous):
     """Freeze membership before destroying the live group-lifetime anchor."""
+    if previous.get('boot_id') != boot_identity():
+        raise ContinuationVeto('Recovered worker has no matching host boot identity; no signal was sent')
     leader = process_identity(previous['pid'])
     if not leader or any(leader[k] != previous[k] for k in ['pid', 'pgid', 'start_ticks']):
         raise ContinuationVeto('Recovered worker ownership changed before signalling')
@@ -362,27 +596,48 @@ def catch_termination():
         signal.signal(signal.SIGTERM, previous)
 
 
-def bounded_process(argv, cwd, log, seconds, *, prompt=None, heartbeat=None, stopped=None, on_spawn=None, pass_fds=()):
+def bounded_process(argv, cwd, log, seconds, *, prompt=None, heartbeat=None, stopped=None, on_spawn=None, pass_fds=(), deadline=None, separate_stderr=False, progress_monitor=None):
     """Bound the initial process group. Workers are trusted not to detach jobs."""
     log.parent.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
+    cutoff = min(started + seconds, deadline) if deadline is not None else started + seconds
     prompt_file = log.with_suffix('.stdin.txt')
     if prompt is not None:
         prompt_file.write_text(prompt)
     if threading.active_count() != 1:
         raise ContinuationVeto('The reviewed process launcher requires a single-threaded supervisor')
-    with log.open('wb') as stream, (prompt_file.open('rb') if prompt is not None else open(os.devnull, 'rb')) as input_stream:
+    stderr_path = log.with_suffix('.stderr.log') if separate_stderr else log
+    with log.open('wb') as stream, (prompt_file.open('rb') if prompt is not None else open(os.devnull, 'rb')) as input_stream, (stderr_path.open('wb') if separate_stderr else nullcontext(stream)) as error_stream:
         proc = None
         old_mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTERM, signal.SIGINT})
         try:
+            # Preparation can consume the remaining window or observe a stop.
+            # Refuse before any child exists; callers must not charge a retry.
+            reason = ('stop_requested' if stopped and stopped() else
+                      'timeout' if time.monotonic() >= (min(cutoff, progress_monitor.soft_deadline)
+                          if progress_monitor is not None else cutoff) else None)
+            if reason:
+                return {'argv': argv, 'exit_code': None, 'reason': reason,
+                        'launched': False, 'started_monotonic': started,
+                        'deadline_monotonic': cutoff,
+                        'wall_seconds': round(time.monotonic() - started, 3), 'log': str(log)}
             # Defer handled interruption until ownership is durably registered.
             # Restore the child's inherited mask before exec. This preexec path
             # is restricted above to a dedicated single-threaded supervisor.
             proc = subprocess.Popen(argv, cwd=cwd, stdin=input_stream,
-                                    stdout=stream, stderr=subprocess.STDOUT, start_new_session=True,
+                                    stdout=stream, stderr=error_stream, start_new_session=True,
                                     env={**os.environ, 'PYTHONUNBUFFERED': '1', 'CUDA_VISIBLE_DEVICES': '-1'}, pass_fds=pass_fds,
                                     preexec_fn=lambda: signal.pthread_sigmask(signal.SIG_SETMASK, old_mask))
-            proc._master_identity = process_identity(proc.pid)
+            proc._master_direct_group = True
+            try:
+                proc._master_identity = process_identity(proc.pid)
+                if proc._master_identity is None:
+                    raise ContinuationVeto('New child metadata is unavailable')
+            except (OSError, ValueError, ContinuationVeto):
+                proc._master_identity = None
+                if on_spawn:
+                    on_spawn(proc)
+                raise
             if on_spawn:
                 on_spawn(proc)
             signal.pthread_sigmask(signal.SIG_SETMASK, old_mask)
@@ -390,24 +645,32 @@ def bounded_process(argv, cwd, log, seconds, *, prompt=None, heartbeat=None, sto
             reason = None
             # WNOWAIT observes exit without reaping the group leader. Cleanup
             # retains an unambiguous ownership anchor until all signalling ends.
-            while os.waitid(os.P_PID, proc.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+            while True:
+                exited = os.waitid(os.P_PID, proc.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
                 elapsed = time.monotonic() - started
-                if elapsed >= seconds:
-                    reason = 'timeout'
-                elif log.stat().st_size > 16 * 1024 * 1024:
-                    reason = 'output_limit'
-                elif stopped and stopped():
+                if stopped and stopped():
                     reason = 'stop_requested'
-                if reason:
+                elif sum(p.stat().st_size for p in {log, stderr_path}) > 16 * 1024 * 1024:
+                    reason = 'output_limit'
+                elif started + elapsed >= cutoff:
+                    reason = 'timeout'
+                elif progress_monitor is not None:
+                    reason = progress_monitor.poll(force=exited is not None)
+                if reason or exited is not None:
                     break
                 if heartbeat and time.monotonic() - last_beat >= 20:
                     heartbeat(round(elapsed, 1))
                     last_beat = time.monotonic()
                 time.sleep(0.1)
             terminate_group(proc)
-            if log.stat().st_size > 16 * 1024 * 1024:
+            if sum(p.stat().st_size for p in {log, stderr_path}) > 16 * 1024 * 1024:
                 reason = 'output_limit'
-            return {'argv': argv, 'exit_code': proc.returncode, 'reason': reason,
+            if progress_monitor is not None:
+                progress_monitor.finish(reason)
+            return {'argv': argv, 'exit_code': proc.returncode, 'reason': reason, 'launched': True,
+                    'started_monotonic': started, 'deadline_monotonic': cutoff,
+                    'effective_deadline_monotonic': (progress_monitor.effective_deadline()
+                                                     if progress_monitor is not None else cutoff),
                     'wall_seconds': round(time.monotonic() - started, 3), 'log': str(log)}
         finally:
             try:
@@ -418,8 +681,13 @@ def bounded_process(argv, cwd, log, seconds, *, prompt=None, heartbeat=None, sto
 
 
 class Master:
-    def __init__(self, root=ROOT, worker=None, check=None, builtin=None):
+    def __init__(self, root=ROOT, worker=None, check=None, builtin=None, *, test_only=False):
         self.root = root.resolve()
+        self.test_only = test_only
+        if test_only and self.root == ROOT:
+            raise MasterError('Test injection is prohibited in the live worktree')
+        if any(x is not None for x in (worker, check, builtin)) and not test_only:
+            raise MasterError('Overrides require explicit isolated test-only mode')
         self.home = self.root / 'data/accounting-master'
         self.catalog = load_json(self.root / CATALOG)
         validate_catalog(self.catalog)
@@ -430,40 +698,137 @@ class Master:
         self.run_id = 'not-running'
         self.lock_fd = None
         self.protected = {}
+        self.runtime_expected = None
         self.controls = {name: digest(self.root / name) for name in CONTROLS if (self.root / name).exists()}
         self.state_path = self.home / 'state.json'
+        self.state_observed = self.state_path.exists()
         self.state = load_json(self.state_path) if self.state_path.exists() else {
             'schema_version': 'accdsl.master.state.v1', 'created_at': now(),
             'mission_complete': False, 'gap_status': {f'G{i}': 'open' for i in range(1, 19)},
             'phases': {p: {'status': 'pending', 'attempts': [], 'residuals': []} for p in self.phases},
             'runs': [], 'last_outcome': None,
+            'workflow_sha256': stable_hash(self.catalog['workflow']),
         }
         validate_state(self.state, self.phases)
+        self.verify_workflow()
+
+    def verify_workflow(self):
+        if self.state.get('workflow_sha256') != stable_hash(self.catalog['workflow']):
+            raise ContinuationVeto('Workflow changed; explicit evidence-preserving state migration required')
+
+    def phase_block(self, identifier):
+        policy = self.catalog['workflow']['phase_policy'][identifier]
+        if policy['class'] == 'product_implementation':
+            return 'blocked_by_proposal_gate: product implementation is outside the current proposal campaign'
+        if policy['schedule'] != 'active':
+            return 'held_historical_evidence: use the new proposal sequence'
+        return None
+
+    def proposal_gate(self):
+        workflow = self.catalog['workflow']
+        pending = [p for p in workflow['proposal_phases'] if self.state['phases'][p]['status'] != ACCEPTED]
+        value = {'schema_version': 'accdsl.proposal.readiness.v1', 'ready': False,
+                 'status': 'incomplete', 'pending_phases': pending,
+                 'workflow_sha256': stable_hash(workflow), 'human_acceptance': 'pending',
+                 'implementation_enabled': False,
+                 'reason': 'Complete and independently review the governing proposal before choosing implementation.'}
+        if not pending:
+            try:
+                for identifier in workflow['proposal_phases']:
+                    accepted = self.state['phases'][identifier]
+                    if (accepted.get('accepted_phase_hash') != stable_hash(self.phases[identifier])
+                            or accepted.get('accepted_dependencies') != self.review_dependencies(self.phases[identifier])
+                            or not accepted.get('evidence_hashes')
+                            or verify_hashes(self.root, accepted['evidence_hashes'])):
+                        raise ValueError('stale proposal phase: ' + identifier)
+                from check_accounting_proposal import check_proposal
+                checked = check_proposal(self.root, workflow['gate_phase'])
+                if not checked['passed']:
+                    raise ValueError('; '.join(checked['errors']))
+                record = self.state['phases'][workflow['gate_phase']]
+                if any(record['evidence_hashes'].get(name) != sha
+                       for name, sha in checked['input_hashes'].items()):
+                    raise ValueError('proposal acceptance does not bind every current input')
+                review_path = record['accepted_review_path']
+                process_path = review_path.replace('.response.json', '.process.json')
+                if (not review_path.endswith('.response.json')
+                        or review_path not in record['evidence_hashes']
+                        or process_path not in record['evidence_hashes']):
+                    raise ValueError('proposal review/evidence changed')
+                review = load_json(local_path(self.root, review_path))
+                validate_response(review, {'AGREE'})
+                process = load_json(local_path(self.root, process_path))
+                if (process['exit_code'] != 0 or process['reason']
+                        or process.get('surviving_group_members')):
+                    raise ValueError('proposal review process did not finish cleanly')
+                value.update(ready=True, status='reviewed_internal',
+                             evidence_hashes=record['evidence_hashes'], review=review_path,
+                             reason='Proposal reviewed internally; present it to the user before selecting product implementation.')
+            except (OSError, ValueError, KeyError, TypeError, MasterError) as error:
+                value.update(status='evidence_incomplete', reason=str(error))
+        return value
 
     def reload_state(self):
         if self.state_path.exists():
             self.state = load_json(self.state_path)
+            self.state_observed = True
+        elif self.state_observed:
+            raise ContinuationVeto('Persisted checkpoint disappeared; explicit recovery is required')
         validate_state(self.state, self.phases)
+        self.verify_workflow()
 
     def save(self):
+        if self.state_observed and not self.state_path.exists():
+            raise ContinuationVeto('Persisted checkpoint disappeared; refusing to recreate cached state')
         self.state['updated_at'] = now()
         self.state['mission_complete'] = False
         validate_state(self.state, self.phases)
         atomic_json(self.state_path, self.state)
+        self.state_observed = True
 
     def event(self, kind, **fields):
-        record = {'time': now(), 'run': self.run_id, 'event': kind, **fields}
-        with (self.home / 'events.jsonl').open('a') as stream:
-            stream.write(json.dumps(record, ensure_ascii=False, allow_nan=False) + '\n')
-            stream.flush()
-            os.fsync(stream.fileno())
-        print(json.dumps(record, ensure_ascii=False), flush=True)
+        with defer_shutdown():
+            self.check_runtime()
+            record = {'time': now(), 'run': self.run_id, 'event': kind, **fields}
+            path = self.home / 'events.jsonl'
+            prior = path.read_bytes() if self.runtime_expected is not None and path.exists() else b''
+            line = json.dumps(record, ensure_ascii=False, allow_nan=False) + '\n'
+            with path.open('a') as stream:
+                stream.write(line)
+                stream.flush()
+                os.fsync(stream.fileno())
+            if self.runtime_expected is not None:
+                self.runtime_expected[str(path.relative_to(self.root))] = hashlib.sha256(prior + line.encode()).hexdigest()
+            self.check_runtime()
+            print(json.dumps(record, ensure_ascii=False), flush=True)
+
+    def check_runtime(self):
+        for name, expected in (self.runtime_expected or {}).items():
+            path = self.root / name
+            actual = digest(path) if path.exists() else None
+            if actual != expected:
+                raise ContinuationVeto('Supervisor runtime file changed outside its recorded writes: ' + name)
+
+    def runtime_json(self, path, value):
+        with defer_shutdown():
+            self.check_runtime()
+            atomic_json(path, value)
+            if self.runtime_expected is not None:
+                encoded = (json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + '\n').encode()
+                self.runtime_expected[str(path.relative_to(self.root))] = hashlib.sha256(encoded).hexdigest()
+            self.check_runtime()
 
     def remaining(self, requested):
         value = min(requested, self.deadline - time.monotonic())
         if value <= 0:
             raise MasterError('Run wall-time limit reached; preserve partial work and resume')
         return value
+
+    def require_budget(self, seconds, purpose):
+        available = self.deadline - time.monotonic()
+        if available < seconds:
+            raise BudgetDeferred(f'Budget deferred before {purpose}: need {seconds:g} seconds, '
+                                 f'have {max(0, available):.1f}; preserve work and resume with a fresh invocation.')
 
     def check_protection(self):
         try:
@@ -476,11 +841,16 @@ class Master:
 
     def refresh(self):
         self.check_protection()
+        self.verify_workflow()
         validate_state(self.state, self.phases)
         # A previous accepted phase is reusable only while its recorded evidence survives.
         for identifier, record in self.state['phases'].items():
             if record['status'] == ACCEPTED:
                 stale = verify_hashes(self.root, record.get('evidence_hashes', {})) if record.get('evidence_hashes') else ['missing acceptance evidence']
+                if record.get('accepted_phase_hash') != stable_hash(self.phases[identifier]):
+                    stale.append('accepted phase contract changed or requires explicit legacy migration')
+                if record.get('accepted_dependencies') != self.review_dependencies(self.phases[identifier]):
+                    stale.append('accepted prerequisite evidence changed')
                 if stale:
                     record['status'] = 'stale'
                     record['issues'] = ['Accepted evidence changed: ' + ', '.join(stale[:10])]
@@ -489,13 +859,18 @@ class Master:
             if record['status'] == ACCEPTED and any(self.state['phases'][d]['status'] != ACCEPTED for d in p['deps']):
                 record['status'] = 'stale'
                 record['issues'] = ['A prerequisite is no longer accepted']
+        blocked = {p: self.phase_block(p) for p in self.phases if self.phase_block(p)}
         eligible = [p['id'] for p in self.catalog['phases']
                     if self.state['phases'][p['id']]['status'] != ACCEPTED
+                    and p['id'] not in blocked
                     and (self.state['phases'][p['id']]['status'] != 'blocked_external'
                          or self.state['phases'][p['id']].get('block_signature') != self.input_fingerprint(p['id']))
+                    and self.state['phases'][p['id']].get('deferred_signature') != self.input_fingerprint(p['id'])
                     and all(self.state['phases'][d]['status'] == ACCEPTED for d in p['deps'])]
         self.state['plan_generation'] = self.state.get('plan_generation', 0) + 1
         self.save()  # Canonical commit first; derived views are rebuilt on every resume.
+        gate = self.proposal_gate()
+        atomic_json(self.home / 'proposal-ready.json', gate)
         plan = {'schema_version': 'accdsl.master.next_plan.v1', 'created_at': now(),
                 'generation': self.state['plan_generation'], 'state_sha256': digest(self.state_path),
                 'catalog_sha256': digest(self.root / CATALOG), 'controller_hashes': self.controls,
@@ -506,29 +881,59 @@ class Master:
                 'next_actions': {k: v.get('next_actions', []) for k, v in self.state['phases'].items() if v.get('next_actions')},
                 'issues': {k: v.get('issues', []) for k, v in self.state['phases'].items() if v.get('issues')},
                 'gap_status': self.state['gap_status'], 'mission_complete': False,
+                'workflow_mode': self.catalog['workflow']['mode'], 'proposal_gate': gate,
+                'blocked_phases': blocked,
+                'phase_classes': {p: v['class'] for p, v in self.catalog['workflow']['phase_policy'].items()},
                 'external_retry_policy': 'Unknown external changes are not polled. After a known access/input change, explicitly run --retry-blocked with the same approved prefix.',
-                'continuation': 'Review the next eligible slice against these actual outcomes; all gap closures require separate requirement evidence.'}
+                'continuation': 'Complete the governing product proposal. Preserve prototypes as evidence; product implementation is held. ' + gate['reason']}
         atomic_json(self.home / 'next-plan.json', plan)
         lines = ['# Accounting master — refreshed next plan', '', f'Updated: {plan["created_at"]}', '',
                  f'Next eligible phase: {plan["next_phase"] or "none in this catalog"}.',
+                 f'Workflow: proposal first. Proposal ready: **{gate["ready"]}**. Product implementation enabled: **false**.',
                  'Mission complete: **no**. Scoped phase acceptance does not close the original gaps.', '',
                  '| Phase | State | Residual work |', '| --- | --- | --- |']
         for identifier, record in self.state['phases'].items():
             residual = '; '.join(record.get('residuals', [])).replace('|', '/')
-            lines.append(f'| {identifier} — {self.phases[identifier]["name"]} | {record["status"]} | {residual} |')
+            scheduling = blocked.get(identifier, 'active proposal sequence')
+            lines.append(f'| {identifier} — {self.phases[identifier]["name"]} | {record["status"]}; {scheduling} | {residual} |')
         lines.extend(['', '## Latest outcome', '', json.dumps(plan['last_outcome'], indent=2), '',
                       '## Next action', '', plan['continuation'], ''])
         atomic_bytes(self.home / 'next-plan.md', '\n'.join(lines).encode())
         return plan
 
+    def refresh_worker_plan(self):
+        """Keep retries focused while retaining the complete plan on disk."""
+        plan = self.refresh()
+        compact = {key: plan[key] for key in
+                   ('generation', 'next_phase', 'workflow_mode', 'proposal_gate',
+                    'continuation', 'last_outcome', 'phase_states')}
+        active = set(self.catalog['workflow']['proposal_phases'])
+        for key in ('next_actions', 'issues', 'residuals'):
+            compact[key] = {phase: values for phase, values in plan[key].items()
+                            if phase in active and values}
+        compact['full_plan_path'] = str((self.home / 'next-plan.json').relative_to(self.root))
+        return compact
+
     def input_fingerprint(self, identifier):
+        inputs = {}
+        for name in self.phases[identifier].get('retry_inputs', []):
+            path = local_path(self.root, name)
+            if path.is_dir():
+                for child in sorted(path.rglob('*')):
+                    if child.is_file() and not child.is_symlink() and '__pycache__' not in child.parts:
+                        inputs[str(child.relative_to(self.root))] = digest(child)
+            else:
+                inputs[name] = digest(path) if path.is_file() else None
         return stable_hash({'catalog': digest(self.root / CATALOG), 'controls': self.controls,
+            'relevant_inputs': inputs,
             'dependencies': {d: self.state['phases'][d].get('evidence_hashes', {}) for d in self.phases[identifier]['deps']}})
 
-    def process(self, argv, log, seconds, prompt=None, internal_phase=None):
+    def process(self, argv, log, seconds, prompt=None, internal_phase=None, deadline=None,
+                separate_stderr=False, progress_monitor=None):
         active_path = self.home / 'active-process.json'
         active = {}
-        guarded, absent = control_snapshot(self.root, [self.state_path, self.home / 'authorization.json', self.home / 'next-plan.json'])
+        owned_process = None
+        guarded, absent = control_snapshot(self.root, [self.state_path, self.home / 'authorization.json', self.home / 'next-plan.json', self.home / 'proposal-ready.json'])
         if internal_phase:
             if self.lock_fd is None:
                 raise MasterError('An internal operation requires the held supervisor lock')
@@ -540,23 +945,33 @@ class Master:
                                'capability_sha256': hashlib.sha256(capability.encode()).hexdigest()})
             argv = [*argv, '--lock-fd', str(self.lock_fd), '--grant', str(grant), '--capability', capability]
         def spawned(proc):
+            nonlocal owned_process
+            owned_process = proc
             active.update({'status': 'running', 'run_id': self.run_id, 'started_at': now(),
-                           'identity': process_identity(proc.pid), 'argv': argv, 'log': str(log.relative_to(self.root))})
-            atomic_json(active_path, active)
+                           'identity': getattr(proc, '_master_identity', None) or {'pid': proc.pid, 'pgid': proc.pid, 'metadata_unavailable': True},
+                           'argv': argv, 'log': str(log.relative_to(self.root))})
+            self.runtime_json(active_path, active)
         try:
             result = bounded_process(argv, self.root, log, self.remaining(seconds), prompt=prompt,
                                      heartbeat=lambda elapsed: self.event('heartbeat', stage=log.stem, seconds=elapsed),
                                      stopped=lambda: (self.home / 'stop-request.json').exists(), on_spawn=spawned,
-                                     pass_fds=(self.lock_fd,) if internal_phase and self.lock_fd is not None else ())
+                                     deadline=deadline, separate_stderr=separate_stderr,
+                                     pass_fds=(self.lock_fd,) if internal_phase and self.lock_fd is not None else (),
+                                     progress_monitor=progress_monitor)
         finally:
             with defer_shutdown():
                 errors, remaining, changed = [], [], []
                 original_error = str(sys.exception())
                 try:
                     if active.get('identity'):
-                        remaining = live_group_members(active['identity']['pgid'])
+                        if owned_process is not None and getattr(owned_process, '_master_cleanup_done', False):
+                            remaining = []
+                        elif active['identity'].get('metadata_unavailable'):
+                            remaining = [{'pid': active['identity']['pid'], 'cleanup': 'unverified; metadata unavailable'}]
+                        else:
+                            remaining = live_group_members(active['identity']['pgid'])
                         active.update(status='cleanup_required' if remaining else 'finished', finished_at=now(), survivors=remaining)
-                        atomic_json(active_path, active)
+                        self.runtime_json(active_path, active)
                         if remaining:
                             errors.append('Owned child group is still live; another writer is prohibited')
                 except (OSError, ValueError) as error:
@@ -572,20 +987,43 @@ class Master:
                         'original_error': original_error, 'snapshot_provisional_while_survivors_live': bool(remaining)})
                     raise ContinuationVeto('; '.join(errors))
         atomic_json(log.with_suffix('.process.json'), result)
+        if result.get('launched') is False:
+            raise BudgetDeferred('Process not launched: ' + result['reason'])
         if result['exit_code'] != 0 or result['reason']:
-            raise MasterError(f'Command failed ({result["reason"] or result["exit_code"]}); inspect {log.relative_to(self.root)}')
+            error_type = (ProcessTimeout if result['reason'] in {
+                'timeout', 'progress_no_ack', 'progress_stagnation',
+                'progress_finish_timeout'} else MasterError)
+            raise error_type(f'Command failed ({result["reason"] or result["exit_code"]}); inspect {log.relative_to(self.root)}')
         return result
 
     def recover_process(self):
         path = self.home / 'active-process.json'
         if not path.exists():
             return
-        saved = load_json(path)
+        try:
+            saved = load_json(path)
+            if not isinstance(saved, dict) or saved.get('status') not in {'running', 'finished', 'cleanup_required'}:
+                raise ValueError('Invalid active-process record shape or status')
+            if saved['status'] != 'finished':
+                identity = saved.get('identity')
+                if (not isinstance(identity, dict) or
+                        any(type(identity.get(k)) is not int or identity[k] <= 0 for k in ('pid', 'pgid', 'start_ticks'))):
+                    raise ValueError('Incomplete prior-worker identity; inspect before resuming')
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            raise ContinuationVeto('Invalid prior-worker recovery record: ' + str(error)) from error
         if saved.get('status') == 'finished':
             return
         previous = saved.get('identity')
         if not previous or previous['pgid'] != previous['pid']:
             raise ContinuationVeto('Incomplete prior-worker identity; inspect before resuming')
+        if not previous.get('boot_id'):
+            raise ContinuationVeto('Prior worker has no boot identity; explicit ownership recovery is required')
+        if previous['boot_id'] != boot_identity():
+            saved.update(status='finished', survivors=[], finished_at=now(),
+                         recovery='Prior host boot ended; no current process was inspected or signalled')
+            atomic_json(path, saved)
+            self.event('prior_worker_recovered', recovery=saved['recovery'])
+            return
         current = process_identity(previous['pid'])
         if current and current['start_ticks'] != previous['start_ticks']:
             if live_group_members(previous['pgid']):
@@ -609,29 +1047,162 @@ class Master:
         atomic_json(path, saved)
         self.event('prior_worker_recovered', recovery=saved['recovery'])
 
+    def record_startup_stop(self, error, paths):
+        folder = self.home / 'recovery-stops' / uuid.uuid4().hex
+        folder.mkdir(parents=True)
+        preserved = {}
+        for path in paths:
+            if path.is_file():
+                destination = folder / path.name
+                atomic_bytes(destination, path.read_bytes())
+                preserved[str(destination.relative_to(self.root))] = digest(destination)
+        record = {'status': 'continuation_veto', 'reason': str(error), 'recorded_at': now(),
+                  'preserved_inputs': preserved, 'mission_complete': False, 'product_implementation_enabled': False}
+        atomic_json(folder / 'stop.json', record)
+        atomic_json(self.home / 'startup-stop.json', record)
+        atomic_json(self.home / 'next-plan.json', {**record, 'next_phase': None, 'eligible_phases': []})
+        atomic_bytes(self.home / 'next-plan.md', ('# Startup stopped\n\n' + str(error) + '\n').encode())
+        self.event('run_stopped', reason=str(error), recovery_record=str((folder / 'stop.json').relative_to(self.root)))
+        return record
+
     def worker(self, role, phase, packet, folder, attempt=0):
+        role_verdicts(role)
+        if phase.get('id') not in self.phases and not (phase.get('id') == 'controller' and role in {'probe', 'review_controller'}):
+            raise ContinuationVeto('Worker requires a registered phase or the read-only controller review role')
+        if phase['id'] in self.phases and self.phase_block(phase['id']):
+            raise ContinuationVeto(self.phase_block(phase['id']))
         if (folder / f'{role}-{attempt}.response.json').exists():
             raise MasterError('Worker response destination is not fresh')
-        guarded, absent = control_snapshot(self.root, [self.state_path, self.home / 'authorization.json', self.home / 'next-plan.json'])
+        seconds = worker_seconds(role, self.catalog['limits'])
+        editable = role in {'implement', 'repair'}
+        reserve = self.catalog['limits'].get('verification_reserve_seconds', 0) if editable else 0
+        self.require_budget(seconds + reserve, role + ' including supervisor verification reserve')
+        worker_id = f'{self.run_id}:{phase["id"]}:{role}:{attempt}:{uuid.uuid4().hex}'
+        monitored = role != 'probe' and not packet.get('packet_only')
+        budget = worker_budget(seconds, boot_identity(), editable=editable,
+                              latest_deadline=self.deadline - reserve,
+                              monitored=monitored)
+        budget_path = folder / f'{role}-{attempt}.budget.json'
+        if budget_path.exists():
+            raise MasterError('Worker budget destination is not fresh')
+        control_path = folder / f'{role}-{attempt}.control.json'
+        supervision_path = folder / f'{role}-{attempt}.supervision.json'
+        checkpoint_path = folder / f'{role}-{attempt}.checkpoint.json'
+        budget.update(
+            worker_id=worker_id, role=role, root_directory=str(self.root),
+            write_scope=self.catalog['workflow']['phase_policy'].get(phase['id'], {}).get('write_scope', []),
+            budget_file=str(budget_path.relative_to(self.root)),
+            clock_command=['python3', str(self.root / 'scripts/accounting_worker_clock.py'), str(budget_path)])
+        if monitored:
+            budget.update(control_file=str(control_path.relative_to(self.root)),
+                          supervision_file=str(supervision_path.relative_to(self.root)))
+        atomic_json(budget_path, budget)
+        # The fixed clock record is included in the inventory before launch;
+        # unlike response/log files it is not a mutable generated-file exception.
+        packet = {**packet, 'budget': budget}
+        guarded, absent = control_snapshot(self.root, [self.state_path, self.home / 'authorization.json', self.home / 'next-plan.json', self.home / 'proposal-ready.json'])
+        generated = [str((folder / f'{role}-{attempt}{suffix}').relative_to(self.root)) for suffix in
+                     ('.response.json', '.schema.json', '.recovery.json', '.packet.json', '.prompt.txt', '.log',
+                      '.stdin.txt', '.process.json', '.raw-negative-response.json', '.integrity-failure.json',
+                      '.control.json', '.supervision.json', '.checkpoint.json')]
+        generated += [str((folder / f'{role}-{attempt}.config-{i}{suffix}').relative_to(self.root))
+                      for i in range(2) for suffix in ('.log', '.stderr.log', '.process.json', '.integrity-failure.json')]
+        generated += ['data/accounting-master/events.jsonl', 'data/accounting-master/active-process.json',
+                      'data/accounting-master/stop-request.json']
         try:
-            return self._worker_result(role, phase, packet, folder, attempt)
+            before = worker_inventory(self.root, generated)
+            editable_before = scoped_inventory(self.root, budget['write_scope']) if editable else {}
+        except (ValueError, OSError) as error:
+            raise ContinuationVeto('Cannot establish worker write inventory: ' + str(error)) from error
+        if self.runtime_expected is not None:
+            raise ContinuationVeto('Nested worker execution is prohibited')
+        runtime_paths = [self.home / name for name in ('events.jsonl', 'active-process.json')]
+        runtime_paths += [control_path, supervision_path, checkpoint_path]
+        self.runtime_expected = {str(p.relative_to(self.root)): digest(p) if p.exists() else None for p in runtime_paths}
+        stop_path = self.home / 'stop-request.json'
+        stop_before = digest(stop_path) if stop_path.exists() else None
+        try:
+            monitor = None
+            if monitored:
+                monitor = ProgressMonitor(root=self.root, log=folder / f'{role}-{attempt}.log',
+                    budget=budget, before_inventory=editable_before,
+                    publish_control=lambda value: self.runtime_json(control_path, value),
+                    publish_record=lambda value: self.runtime_json(supervision_path, value),
+                    save_checkpoint=lambda value: self.save_worker_checkpoint(
+                        value, phase, packet, budget_path, checkpoint_path))
+            return self._worker_result(role, phase, packet, folder, attempt, progress_monitor=monitor)
+        finally:
+            pending_error = sys.exception()
+            original_error = str(sys.exception())
+            try:
+                self.check_runtime()
+                if stop_before is not None and (not stop_path.exists() or digest(stop_path) != stop_before):
+                    raise ValueError('Existing stop request changed during worker execution')
+                if stop_before is None and stop_path.exists():
+                    request = load_json(stop_path)
+                    if (not isinstance(request, dict) or set(request) != {'requested_at'}
+                            or not isinstance(request['requested_at'], str)):
+                        raise ValueError('Invalid stop request appeared during worker execution')
+                    datetime.fromisoformat(request['requested_at'])
+                expected = merge_hashes(self.protected, self.controls, guarded)
+                changed = verify_hashes(self.root, expected) + created_controls(self.root, absent)
+                after = worker_inventory(self.root, generated)
+                touched = [n for n in before.keys() | after.keys() if before.get(n) != after.get(n)]
+                # Also reject introduced editable symlinks or unreadable inputs.
+                editable_files(self.root)
+                if role not in {'implement', 'repair'}:
+                    changed += touched
+                elif phase['id'] in self.phases:
+                    scope = self.catalog['workflow']['phase_policy'][phase['id']]['write_scope']
+                    changed += [name for name in touched if not any(
+                        name.startswith(s) if s.endswith('/') else name == s for s in scope)]
+                if changed:
+                    raise ValueError('Changed outside role/write scope: ' + ', '.join(sorted(set(changed))[:15]))
+                if stop_path.exists() and pending_error is None:
+                    raise MasterError('Stop requested during worker execution; response is not accepted')
+            except (ValueError, OSError, ContinuationVeto) as error:
+                try:
+                    atomic_json(folder / f'{role}-{attempt}.integrity-failure.json',
+                                {'verification_error': str(error), 'original_error': original_error})
+                except OSError:
+                    pass
+                raise ContinuationVeto('Worker integrity failure (read-only or declared write scope): ' + str(error)) from error
+            finally:
+                self.runtime_expected = None
+
+    @contextmanager
+    def prepared_inputs(self, role, folder, attempt):
+        paths = [folder / f'{role}-{attempt}{suffix}' for suffix in
+                 ('.budget.json', '.packet.json', '.recovery.json', '.schema.json', '.prompt.txt')]
+        paths += [folder / f'{role}-{attempt}.config-{i}{suffix}' for i in range(2)
+                  for suffix in ('.log', '.stderr.log', '.process.json')]
+        hashes, absent = control_snapshot(self.root, paths)
+        try:
+            yield
         finally:
             try:
-                expected = merge_hashes(self.protected, self.controls, guarded)
-            except ValueError as error:
-                raise ContinuationVeto(str(error)) from error
-            changed = verify_hashes(self.root, expected) + created_controls(self.root, absent)
-            if changed:
-                atomic_json(folder / f'{role}-{attempt}.integrity-failure.json', {'changed': changed, 'original_error': str(sys.exception())})
-                raise ContinuationVeto('Worker integrity failure: ' + ', '.join(changed[:15]))
+                changed = verify_hashes(self.root, hashes) + created_controls(self.root, absent)
+                if changed:
+                    raise ValueError(', '.join(changed))
+            except (OSError, ValueError) as error:
+                raise ContinuationVeto('Prepared worker inputs changed: ' + str(error)) from error
 
-    def _worker_result(self, role, phase, packet, folder, attempt=0):
+    def _worker_result(self, role, phase, packet, folder, attempt=0,
+                       *, progress_monitor=None):
         runtime_guard = {str(p.relative_to(self.root)): digest(p) for p in [self.state_path, self.home / 'authorization.json'] if p.exists()}
         seconds = worker_seconds(role, self.catalog['limits'])
-        available = self.remaining(seconds)
-        budget = {'worker_limit_seconds': seconds, 'available_attempt_seconds': round(available, 1),
+        reserve = self.catalog['limits'].get('verification_reserve_seconds', 0) if role in {'implement', 'repair'} else 0
+        cutoff = (packet['budget']['nominal_deadline_monotonic'] if progress_monitor is not None
+                  else packet['budget']['deadline_monotonic'])
+        def remaining_work():
+            available = cutoff - time.monotonic()
+            if available <= 0:
+                raise BudgetDeferred('Startup consumed the worker window; preserve the supervisor verification reserve')
+            return available
+        available = remaining_work()
+        budget = {**packet['budget'], 'available_attempt_seconds': round(available, 1),
                   'run_remaining_seconds': round(self.deadline - time.monotonic(), 1) if self.deadline != float('inf') else None,
-                  'reserve_for_checks_and_response_seconds': min(120, round(available / 5, 1)),
+                  'supervisor_verification_reserve_seconds': reserve,
                   'measured_at': now()}
         packet = {**packet, 'budget': budget}
         if phase['id'] in self.phases:
@@ -644,8 +1215,14 @@ class Master:
             # remain intact in the original packet.
             compact = {**recovery, 'current_changes': recovery_excerpt(recovery['current_changes'], 2400)}
             packet['recovery'] = {**compact, 'full_record': str(destination.relative_to(self.root))}
+        packet_path = folder / f'{role}-{attempt}.packet.json'
+        packet['full_packet_path'] = str(packet_path.relative_to(self.root))
+        atomic_json(packet_path, packet)
         if self.worker_override:
-            response = self.worker_override(role, phase, packet, folder, attempt)
+            if not self.test_only or self.root == ROOT:
+                raise ContinuationVeto('Worker override is restricted to isolated test-only mode')
+            with self.prepared_inputs(role, folder, attempt):
+                response = self.worker_override(role, phase, packet, folder, attempt)
         else:
             grant = self.home / 'authorization.json'
             if not grant.exists() or not load_json(grant).get('sequential_workers'):
@@ -654,34 +1231,52 @@ class Master:
             if not executable:
                 raise MasterError('Codex CLI unavailable')
             mode = 'workspace-write' if role in {'implement', 'repair'} else 'read-only'
-            prompt = self.prompt(role, phase, packet)
-            (folder / f'{role}-{attempt}.prompt.txt').write_text(prompt)
             destination = folder / f'{role}-{attempt}.response.json'
             if destination.exists():
                 raise MasterError('Worker output path already exists; allocate a fresh invocation directory')
+            schema_path = folder / f'{role}-{attempt}.schema.json'
+            schema = load_json(self.root / SCHEMA)
+            schema['properties']['verdict']['enum'] = sorted(role_verdicts(role))
+            atomic_json(schema_path, schema)
             argv = [executable, '-a', 'never', 'exec', '--sandbox', mode, '--ephemeral',
                     '--skip-git-repo-check', '--ignore-rules', '--json', '--color', 'never',
-                    '--output-schema', str(self.root / SCHEMA), '-o', str(destination),
+                    '--output-schema', str(schema_path), '-o', str(destination),
                     '-C', str(self.root), '-c', 'sandbox_workspace_write.network_access=true', '-']
             # Isolate this program's workers from unrelated startup integrations.
             # Keep the user's configured model/authentication; change no global setting.
             # Ask the CLI to resolve its own effective config, including CODEX_HOME
             # and project layers. Do not copy authentication/provider configuration.
-            listed = subprocess.run([executable, '-C', str(self.root), 'mcp', 'list', '--json'],
-                                    capture_output=True, text=True, timeout=30, check=True)
-            servers = json.loads(listed.stdout)
+            def config_query(command, index):
+                log = folder / f'{role}-{attempt}.config-{index}.log'
+                self.process(command, log, min(30, remaining_work()), deadline=cutoff, separate_stderr=True)
+                return load_json(log)
+            servers = config_query([executable, '-C', str(self.root), 'mcp', 'list', '--json'], 0)
             names = [entry['name'] for entry in servers]
             overrides = worker_overrides(mode, {'mcp_servers': dict.fromkeys(names)}, role)
-            checked = subprocess.run([executable, '-C', str(self.root), *overrides, 'mcp', 'list', '--json'],
-                                     capture_output=True, text=True, timeout=30, check=True)
-            if any(entry.get('enabled', True) for entry in json.loads(checked.stdout)):
+            checked = config_query([executable, '-C', str(self.root), *overrides, 'mcp', 'list', '--json'], 1)
+            if any(entry.get('enabled', True) for entry in checked):
                 raise MasterError('Worker integration isolation was not effective')
             argv[-1:-1] = overrides
-            self.process(argv, folder / f'{role}-{attempt}.log', seconds, prompt)
+            budget.update(available_attempt_seconds=round(remaining_work(), 1), measured_at=now())
+            if remaining_work() <= budget['reserve_for_checks_and_response_seconds']:
+                raise BudgetDeferred('Startup left only the finishing interval; preserve the supervisor verification reserve')
+            if phase['id'] in self.phases:
+                atomic_json(local_path(self.root, packet['recovery']['full_record']), recovery)
+            atomic_json(packet_path, packet)
+            prompt = self.prompt(role, phase, packet)
+            (folder / f'{role}-{attempt}.prompt.txt').write_text(prompt)
+            process_seconds = max(0.01, (progress_monitor.hard_deadline
+                                         if progress_monitor is not None else cutoff)
+                                 - time.monotonic())
+            with self.prepared_inputs(role, folder, attempt):
+                self.process(argv, folder / f'{role}-{attempt}.log', process_seconds, prompt,
+                             deadline=(progress_monitor.hard_deadline if progress_monitor is not None else cutoff),
+                             progress_monitor=progress_monitor)
             if not destination.exists():
                 raise MasterError('Worker did not produce its structured final response')
             response = load_json(destination)
-        if isinstance(response, dict) and response.get('verdict') in {'REVISE', 'BLOCKED'}:
+        if (isinstance(response, dict) and isinstance(response.get('verdict'), str)
+                and response['verdict'] in {'REVISE', 'BLOCKED'}):
             # Preserve structured negative findings without ever promoting a
             # malformed positive response. Their JSON text retains every field.
             fields = RESPONSE_KEYS - {'verdict', 'summary'}
@@ -689,8 +1284,7 @@ class Master:
                 atomic_json(folder / f'{role}-{attempt}.raw-negative-response.json', response)
                 response = {k: [json.dumps(x, ensure_ascii=False, sort_keys=True) if isinstance(x, (dict, list)) else x for x in v]
                             if k in fields and isinstance(v, list) else v for k, v in response.items()}
-        allowed = {'PLAN', 'BLOCKED'} if role == 'plan' else {'AGREE', 'REVISE', 'BLOCKED'} if role in {'probe', 'review_plan', 'review_result', 'review_controller'} else {'IMPLEMENTED', 'BLOCKED'}
-        value = validate_response(response, allowed)
+        value = validate_response(response, role_verdicts(role))
         atomic_json(folder / f'{role}-{attempt}.response.json', value)
         self.check_protection()
         if verify_hashes(self.root, runtime_guard):
@@ -719,13 +1313,29 @@ class Master:
                 format_instruction,
                 json.dumps({'scope': phase, 'packet': packet}, ensure_ascii=False, indent=2),
             ])
+        policy = self.catalog['workflow']['phase_policy'].get(phase['id'])
+        workflow_instruction = ('The current task is proposal preparation. Product implementation is disabled. '
+            'Existing P00–P14 results are historical source/prototype evidence, not approval of the architecture. '
+            'Read the phase design question and produce its document/research deliverable. '
+            'IMPLEMENTED is the response protocol for completed work, not a product-readiness claim. '
+            'Do not create or extend production modules, or add a test suite merely to certify prose. '
+            'The registered supervisor checker supplies structural checks; independent review assesses substantive completeness. '
+            'The artifact format is documented in docs/plans/accounting-proposal-artifact-format.md with required P18/P19 additions in docs/plans/accounting-proposal-evidence-supplement-20261005.md. '
+            'Allowed project edits for this task: ' + json.dumps(policy['write_scope'])) if policy else ''
+        role_instruction = ('You are ONLY reviewing the supplied current plan. Return AGREE, REVISE or BLOCKED; '
+                            'do not return PLAN or replace this review with a new planning task.') if role == 'review_plan' else ''
         return '\n'.join([
             'You are a sequential worker for the user-authorised AccDSL master program.',
             f'Role: {role}. Repository: {self.root}. Phase contract follows below.',
+            workflow_instruction, role_instruction,
             'Work from this current phase packet and relevant code/source evidence. The master plan preserves MC01–MC35 and G1–G18. Consult specific requirement rows when needed; do not repeat whole-project or historical gap audits.',
             'Use the supplied recovery snapshot first. It identifies current missing deliverables, changed files and the latest structured process/check/review records. Excerpts are navigation aids; inspect the linked structured records for any omitted finding that affects the work. Verify worker-authored progress against actual files.',
             'Do not dump raw worker logs, session JSONL, nested tool output or your own active log. Never recover by concatenating prior logs. If a diagnostic is absent from structured records, parse only the needed fields and return a bounded excerpt. Keep each tool response near 2000 tokens and each combined batch near 4000; retain full output on disk.',
-            'The packet budget is in seconds and is enforced by the supervisor. Start checks and write required deliverables before the reserved final interval. Return the required structured response before the attempt expires. If incomplete, identify exact remaining work honestly; a timeout or partial implementation cannot pass acceptance.',
+            'Before your first substantial tool batch, run the exact argv in budget.clock_command. Run it again before EVERY substantial tool batch and after checks. It reads the same host monotonic clock as the supervisor. Never compute remaining time from measured_at, UTC, date, or wall-clock tools; civil time can drift or jump. The fixed budget_file is read-only.',
+            'The clock reports work, finish, respond or expired. At finish, stop new research/drafting: save current work, run only bounded checks, update progress and respond. At respond, return the structured response immediately; do not start another tool batch. The supervisor keeps nominal_deadline_monotonic as the ordinary window and may grant a small finishing extension only after new verified progress and acknowledgement; deadline_monotonic is absolute. Plan one subsection small enough for seconds_to_save_and_check.',
+            'Use budget.clock_command with additional arguments after each substantive subsection and at least within five minutes: --kind milestone (editable work) or --kind finding (read-only plan/review), --summary "concrete saved section or conclusion", --next-action "one bounded next task", --evidence repository/relative/file ... and --locator "source lines or section supporting the finding". Use literal shell quoting or a subprocess argument list. The helper hashes evidence. A milestone needs new saved substantive content; read-only findings need distinct conclusions and source locators. Clock calls, progress.md, log volume and repeated reports are not progress.',
+            'Read-only findings must cite a substantive source or deliverable. They may also cite progress.md in a deliverable/source folder and structured proposal checks.checker.json under runs/<run-id>/<phase>/preflight or execution-N as supporting context. Supporting context alone, or changed context attached to the same conclusion, cannot renew progress. Other operational run records, logs, budgets, process/control/supervision records remain excluded. Editable milestones and checkpoints must cite substantive saved work within their phase scope.',
+            'Read the clock instruction and its acknowledgement deadline. On checkpoint, report concrete new progress or return your structured response before its grace expires; clock acknowledgement alone does not resolve stagnation. Editable workers should send a recovery checkpoint immediately after completing a saved bounded subsection: append --kind checkpoint, --summary, --next-action, --evidence, and --checkpoint-json with the complete response-schema PARTIAL JSON (all required keys, nonempty next_actions). Pass JSON as a literal argv value. The helper prints it and exact scoped hashes; the supervisor saves it. Do not write supervisor records. Changed files require a new checkpoint. Read-only workers cannot submit editable checkpoints. Recovery needs matching files, fresh checks and independent review; a checkpoint never accepts the phase.',
             'No agents/delegation/recursive workers. Do not launch another model or this master runner. Do not start detached/background jobs.',
             'No paid service/data, accounts, outreach, publication, deployment, global or conda package installation, Git initialization, source deletion or permission changes.',
             'Never use approval/sandbox bypass. Do not request approvals. Record inaccessible capabilities once and continue independent authorised work.',
@@ -739,16 +1349,29 @@ class Master:
             'Before scientific runs, write the research intent/evidence/default audit and matched baseline plan required by project policy. Short checks cannot establish superiority.',
             'For PLAN, inspect existing artifacts and produce concrete implementation steps, explicit assumptions, exact checks, risks/nonclaims and residuals. Address every supplied review finding before revising a plan.',
             'Planning must stay bounded: use a few grouped targeted reads of relevant existing inputs/interfaces, then return the executable plan. Do not perform the entire accounting analysis or implementation during planning. On recovery, use the prior approved plan and current partial work to plan the remaining repairs under every original criterion. Do not restart discovery. Keep the final plan under 1800 words.',
+            ('When repair_workflow is supplied, select only the first unresolved bounded task using current checks and retained evidence. State its stop condition, required outputs and next task explicitly. Do not combine unresolved authority research with complete lifecycle implementation in one attempt. After partial work or timeout, narrow the remaining scope using the supervisor continuation/check record; do not repeat the unchanged broad plan.')
+            if phase.get('continuation_policy') != 'reviewed_scope' else
+            'The initial plan must sequence every remaining group in execution_plan, with outputs and stops for each. Each editable attempt executes only the first unfinished group; a saved complete group is not repeated. A material new finding requires a revised reviewed plan.',
+            ('This phase continues within one reviewed scope. Read execution_plan and cover its remaining task sequence in the initial plan. '
+             'On continuation, use current findings and saved substantive sections to choose the next unfinished group within that plan; '
+             'do not redo completed groups. Intermediate structural checks are not substantive acceptance; full result review remains mandatory. '
+             'The supervisor writes check/continuation records. Do not invent additional completion JSON, validator versions, or reporting-only acceptance prerequisites. '
+             'Historical reports describe their retained input versions, not current mutable deliverables. Use the registered historical resolution checks; '
+             'never recursively revalidate archived reports against current files. Current evidence references still require current hashes.')
+            if phase.get('continuation_policy') == 'reviewed_scope' else '',
             'For review_plan, actively check wrong baselines, proxy promotion, missing stops, unfair comparisons, hidden assumptions, stale context, environment mismatch and whether proposed artifacts answer the question. AGREE requires no unresolved material objection.',
-            'For implement/repair, execute the reviewed plan, write the specified actual deliverables and meaningful unittest cases at the required test_file. Execute checks and fix failures. Do not merely write a plan or call authored expected values the implementation.',
+            'For implement/repair, execute the reviewed task and write its actual deliverables. For proposal phases, repair the specification itself and use the registered checker; do not edit controller-owned checker/tests. For an explicitly scoped probe, use meaningful tests of the named design question.',
+            'Never redirect a checker onto an existing result file. Use a fresh task-local filename, validate nonempty JSON before citing it, and preserve previous evidence. Read-only reviewers may use disposable /tmp output only; never redirect into the project or rebuild project files.',
             'For implement/repair, maintain a concise progress.md in the declared output_dir after the first inspection and meaningful edits. Record checked findings, changed files, exact next checks and unfinished deliverables within 600 words. This checkpoint is partial progress, never a substitute for the required result or acceptance.',
-            'For review_result, inspect actual code, tests, source evidence and deterministic check reports. A returned success or many tests alone is insufficient. Return REVISE with actionable repairs if acceptance criteria fail.',
+            'For proposal writing, save each completed substantive section or group of assessments to the actual deliverable before inspecting the next group. Do not defer substantive writing until the end. Use budget.clock_command for remaining time; save current progress and return PARTIAL with the exact next task when time is short. Full-phase checks can remain incomplete while a bounded subsection is complete; report both honestly.',
+            'For review_result, inspect actual code, tests, source evidence and deterministic check reports. A returned success or many tests alone is insufficient. Under bounded_partial_work, assess the completed task against its approved plan and actual artifacts, distinguish relevant failures from unfinished whole-phase criteria, and never accept the full phase. Otherwise return REVISE with actionable repairs if phase acceptance criteria fail.',
+            'The supervisor dispatches independent review after returned partial work and resumes pending reviews without an editable worker. For plan, use the terminal partial-review disposition to choose the next substantive edit; do not request another assessment merely to obtain a review that the supervisor has already completed.',
             'An AGREE response must have issues=[]; put nonblocking limitations in residuals. An empty implementation or a plan-only deliverable must not pass an implementation phase.',
             'For review_controller, audit orchestration, recovery, permissions, repair, plan refresh, child-process limits and honest completion against the plan and tests. Do not change files.',
             'Every evidence entry must be an existing repository-relative FILE path, never prose, a directory or an invented artifact. Include concrete unresolved work in residuals and justified next tasks in next_actions.',
-            'Return only the response schema. Verdict: PLAN for plan; AGREE/REVISE for review; IMPLEMENTED for actual work; BLOCKED only for a real dependency preventing the stated slice. Explain partial work without claiming whole-gap closure.',
+            'Return only the response schema. Verdict: PLAN for plan; AGREE/REVISE for review; IMPLEMENTED for completed phase work; PARTIAL for a completed bounded task with explicit next_actions; BLOCKED only for a real dependency preventing the stated slice. A partial-task review may AGREE on that task only when review_scope says bounded_partial_work; it does not accept the phase.',
             format_instruction,
-            json.dumps({'phase': phase, 'packet': packet}, ensure_ascii=False, indent=2),
+            json.dumps({'phase': phase, 'packet': compact_worker_packet(packet)}, ensure_ascii=False, indent=2),
         ])
 
     def controller_review(self, folder):
@@ -783,48 +1406,69 @@ class Master:
         master_node = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'Master')
         functions.update({'Master.' + n.name: excerpt(n) for n in master_node.body if isinstance(n, ast.FunctionDef)})
         scopes = {
-            'process-lifecycle': ['exclusive_lock', 'defer_shutdown', 'terminate_group', '_terminate_group', 'process_identity', 'live_group_members', 'open_pidfd', 'catch_termination', 'bounded_process', 'stop_recovered_group', '_stop_recovered_group', 'Master.recover_process'],
+            'process-lifecycle': ['exclusive_lock', 'defer_shutdown', 'terminate_group', '_terminate_group', 'boot_identity', 'process_identity', 'live_group_members', 'open_pidfd', 'catch_termination', 'bounded_process', 'stop_recovered_group', '_stop_recovered_group', 'Master.recover_process'],
             'permissions-install': ['rule_text', 'check_rule', 'atomic_rule_publish', 'install_rule', 'validate_internal', 'main'],
-            'worker-boundary': ['worker_overrides', 'validate_response', 'control_snapshot', 'created_controls', 'Master.process', 'Master.worker', 'Master._worker_result'],
-            'state-refresh': ['validate_catalog', 'validate_state', 'Master.__init__', 'Master.reload_state', 'Master.save', 'Master.event', 'Master.check_protection', 'Master.refresh', 'Master.input_fingerprint'],
-            'scheduler': ['Master.run', 'Master.remaining', 'Master.recover_process'],
-            'phase-plan-repair': ['validate_response', 'Master.execute_phase', 'Master.check_phase', 'Master.evidence_hashes', 'Master.worker'],
-            'evidence': ['Master.check_protection', 'Master.evidence_hashes', 'Master.ensure_controller_tests'],
+            'worker-boundary': ['BudgetDeferred', 'Master.require_budget', 'worker_overrides', 'worker_seconds', 'role_verdicts', 'validate_response', 'control_snapshot', 'created_controls', 'Master.process', 'Master.worker', 'Master._worker_result', 'Master.phase_review'],
+            'state-refresh': ['validate_catalog', 'validate_state', 'Master.__init__', 'Master.verify_workflow', 'Master.phase_block', 'Master.reload_state', 'Master.save', 'Master.event', 'Master.check_protection', 'Master.refresh', 'Master.input_fingerprint', 'Master.review_dependencies'],
+            'scheduler': ['BudgetDeferred', 'Master.require_budget', 'Master.run', 'Master.campaign', 'Master.reconcile_campaign_invocation', 'campaign_remaining', 'campaign_progress', 'Master.remaining', 'boot_identity', 'Master.recover_process', 'Master.phase_block', 'Master.proposal_gate', 'Master.review_dependencies'],
+            'phase-plan-repair': ['BudgetDeferred', 'Master.require_budget', 'validate_response', 'acceptance_ready', 'Master.refresh_worker_plan', 'Master.approve_phase_plan', 'Master.save_continuation', 'Master.execute_phase', 'Master.check_phase', 'Master.load_pending_review', 'Master.save_pending_review', 'Master.phase_review', 'Master.evidence_hashes', 'Master.preserve_work', 'Master.worker'],
+            'evidence': ['Master.check_protection', 'Master.evidence_hashes', 'Master.ensure_controller_tests', 'Master.capture_phase_changes', 'Master.proposal_gate', 'Master.review_dependencies'],
         }
-        tests_source = (self.root / 'tests/test_accounting_master.py').read_text()
+        for name in ('worker-boundary', 'state-refresh', 'phase-plan-repair'):
+            scopes[name] += ['Master.check_runtime', 'Master.runtime_json', 'Master.event']
+        for name in ('worker-boundary', 'phase-plan-repair'):
+            scopes[name] += ['Master.prepared_inputs', 'Master.save_worker_checkpoint', 'Master.load_supervision_checkpoint']
+        scopes['process-lifecycle'] += ['terminate_unidentified_child']
+        scopes['scheduler'] += ['Master.record_startup_stop']
+        tests_source = '\n'.join((self.root / n).read_text() for n in
+            ['tests/test_accounting_master.py','tests/test_accounting_proposal_current.py']
+            if (self.root / n).exists())
         tests_tree = ast.parse(tests_source)
         test_names = [n.name for n in ast.walk(tests_tree) if isinstance(n, ast.FunctionDef) and n.name.startswith('test_')]
         full_plan = (self.root / 'docs/plans/accounting-master-program.md').read_text()
-        plan_contract = full_plan.split('## Evidence contract and verification', 1)[1].split('## Phase coverage and continuation', 1)[0]
+        plan_contract = (full_plan.split('Date: 2 October 2026.', 1)[0] + '\n' +
+                         full_plan.split('## Evidence contract and verification', 1)[1].split('## Phase coverage and continuation', 1)[0])
         decisions = []
         for name, symbols in scopes.items():
             subfolder = folder / ('controller-' + name)
             subfolder.mkdir(exist_ok=True)
             packet = {'packet_only': True, 'scope': name,
-                      'files': ['scripts/run_accounting_master.py', 'scripts/accounting_master_support.py', 'tests/test_accounting_master.py'],
+                      'files': list(CONTROLS),
                       'code': {symbol: functions[symbol] for symbol in symbols},
                       'module_imports': '\n'.join(excerpt(n) for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))),
                       'module_entrypoint': excerpt(tree.body[-1]),
-                      'constants': {'ACCEPTED': ACCEPTED, 'PUBLIC_ACTIONS': PUBLIC_ACTIONS, 'CONTROLS': CONTROLS, 'ROOT': str(self.root)},
+                      'constants': {'ACCEPTED': ACCEPTED, 'PUBLIC_ACTIONS': PUBLIC_ACTIONS, 'CONTROLS': CONTROLS, 'ROOT': str(self.root), 'MAX_RUN_SECONDS': MAX_RUN_SECONDS},
                       'interfaces': {
                           'worker_modes': 'implement/repair workspace-write; other roles read-only; approval never; sequential, no nested workers',
                           'protection': 'check_protection verifies current hashes of frozen release/source/research/snapshot evidence and controller files; worker checks state/grant before and after',
                           'acceptance': 'Worker phases require passing nonzero tests and read-only result-review AGREE. P00/P01 fixed operations require deterministic independent output validation with saved checks and a deterministic PASS review record, never a fabricated model AGREE. All original gaps stay open.',
-                          'repair_limits': 'two repairs per invocation; one attempt of each eligible phase per run; unchanged external blocks skipped until changed inputs or explicit retry',
+                          'repair_limits': f"one initial attempt plus up to {self.catalog['limits']['max_repairs']} retries per phase execution within the run wall limit; each eligible phase is scheduled once per run; unchanged external blocks skipped until changed inputs or explicit retry",
                           'preservation': 'before editable work, preserve source/manuscript bytes; delta goes to the result reviewer; deleted tracked files fail',
                           'controller_failure': 'requires supervisor repair and fresh read-only review, never implicit approval',
                           'lifecycle_scope': 'Initial process group only. Trusted workers must not detach; this is an explicit unenforced assumption, not cgroup/malicious-worker containment.',
                           'internal_helpers': 'Only supervisor children with the live inherited lock, matching parent identity, one-use capability, active phase and fresh output may run. Parent retains the lock; child closes its validated copy.',
                           'source_protection': 'Frozen source/release/PDF/snapshot hashes are checked across child and worker failure paths. CLI query helpers are bounded read-only local configuration inspections.',
-                          'per_phase_plan': 'execute_phase obtains a fresh plan and separate review_plan verdict, stores its hash and checks it before and after implementation. Builtins P00/P01 use a stored fresh instance of an already reviewed fixed-operation contract plus verified input hashes; they invent no scientific method.',
-                          'resume_semantics': 'run is the explicit operator resume action. There is no self-restarting daemon. It archives a prior stop only on that new invocation; a stop during execution prevents further work.',
+                          'per_phase_plan': 'execute_phase obtains a fresh plan and separate review_plan verdict and checks its hash around work. P15 checked partial progress can continue within that reviewed scope; failed checks or substantive findings replan. Full result review is mandatory. Builtins use a reviewed fixed-operation contract and verified inputs.',
+                          'resume_semantics': 'run is explicit operator resume and may archive an existing stop. campaign repeats bounded invocations within a fixed authorized deadline; its automatic runs never archive a stop request. Integrity, repeated no-progress, missing eligibility and deadline stops require supervisor attention; no infinite restart daemon.',
+                          'runtime_inputs': 'Event and active-process files are checked against exact supervisor writes. A new valid stop request is an external operator input: it always stops the worker response from being accepted; it is not attributed to an actor by file hashing. Existing stop bytes cannot change unnoticed. Deliberate same-user forgery is outside this trusted-workspace guarantee.',
+                          'test_injection': 'All worker/check/builtin overrides require explicit test_only=True and an isolated root different from ROOT. The live CLI never enables this mode. Synthetic override checks are not live proposal acceptance evidence.',
                           'external_blocks': 'Unobservable external changes are deliberately not polled. A known access change is retried by the explicit --retry-blocked option, using the same approved entrypoint. Changed declared dependencies also invalidate a block signature.',
                       },
                       'verification': load_json(self.home / 'controller-tests.json') if (self.home / 'controller-tests.json').exists() else {'status': 'missing'},
                       'test_names': test_names, 'controller_hashes': self.controls,
                       'reviewed_evidence_contract_and_permission_scope': plan_contract}
-            if name in {'evidence', 'phase-plan-repair', 'scheduler'}:
+            if name in {'evidence', 'phase-plan-repair', 'scheduler', 'worker-boundary'}:
                 packet['support_code'] = (self.root / 'scripts/accounting_master_support.py').read_text()
+            if name in {'process-lifecycle', 'worker-boundary'}:
+                packet['clock_code'] = (self.root / 'scripts/accounting_worker_clock.py').read_text()
+            if name in {'process-lifecycle', 'worker-boundary', 'phase-plan-repair'}:
+                packet['supervision_code'] = (self.root / 'scripts/accounting_worker_supervision.py').read_text()
+            if name == 'evidence':
+                packet['proposal_checker'] = (self.root / 'scripts/check_accounting_proposal.py').read_text()
+                packet['proposal_tests'] = (self.root / 'tests/test_accounting_proposal_current.py').read_text()
+            if name in {'scheduler', 'state-refresh'}:
+                packet['workflow'] = self.catalog['workflow']
+                packet['proposal_contracts'] = [self.phases[p] for p in self.catalog['workflow']['proposal_phases']]
             if name == 'scheduler':
                 packet['phase_planning_implementation'] = functions['Master.execute_phase']
             if name == 'permissions-install':
@@ -878,19 +1522,41 @@ class Master:
         self.event('controller_tests_started')
         failed = None
         try:
-            self.process([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests',
-                          '-p', 'test_accounting_master.py', '-v'], log, 120)
+            test_command = '''import json, unittest
+rows = []
+for pattern in ("test_accounting_master.py", "test_accounting_proposal_current.py"):
+    suite = unittest.TestLoader().discover("tests", pattern=pattern)
+    discovered = suite.countTestCases()
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    rows.append({"suite": pattern, "discovered": discovered, "run": result.testsRun,
+                 "skipped": len(result.skipped), "successful": result.wasSuccessful()})
+print("MASTER_TEST_SUITES=" + json.dumps(rows), flush=True)
+raise SystemExit(0 if all(r["successful"] and r["run"] > r["skipped"] and r["run"] == r["discovered"] for r in rows) else 1)
+'''
+            self.process([sys.executable, '-c', test_command], log, 180)
         except ContinuationVeto:
             raise
         except MasterError as error:
             failed = str(error)
         text = log.read_text() if log.exists() else ''
-        count = re.search(r'Ran (\d+) tests? in', text)
-        skipped = re.search(r'OK \(skipped=(\d+)\)', text)
-        tests = int(count[1]) if count else 0
-        passed = failed is None and tests > 0 and (not skipped or int(skipped[1]) < tests)
+        records = [line.removeprefix('MASTER_TEST_SUITES=') for line in text.splitlines() if line.startswith('MASTER_TEST_SUITES=')]
+        suites = []
+        try:
+            if len(records) != 1:
+                raise ValueError('Missing or repeated per-suite execution evidence')
+            suites = json.loads(records[0])
+            if (not isinstance(suites, list) or len(suites) != 2 or
+                    {r['suite'] for r in suites} != {'test_accounting_master.py', 'test_accounting_proposal_current.py'} or
+                    not all(r['successful'] is True and
+                            all(type(r[k]) is int for k in ('discovered', 'run', 'skipped')) and
+                            r['discovered'] == r['run'] > r['skipped'] >= 0 for r in suites)):
+                raise ValueError('Every required suite must run non-skipped tests successfully')
+        except (ValueError, KeyError, TypeError) as error:
+            failed = failed or str(error)
+        tests = sum(r.get('run', 0) for r in suites if isinstance(r, dict) and type(r.get('run')) is int) if isinstance(suites, list) else 0
+        passed = failed is None
         result = {'passed': passed, 'tests': tests, 'error': failed, 'sha256': expected,
-                  'log': str(log.relative_to(self.root)), 'checked_at': now()}
+                  'suites': suites, 'log': str(log.relative_to(self.root)), 'checked_at': now()}
         atomic_json(report, result)
         atomic_json(folder / 'controller-tests.json', result)
         self.event('controller_tests_finished', passed=passed, tests=tests)
@@ -898,8 +1564,22 @@ class Master:
             raise ContinuationVeto('Current controller tests failed; model review and phase execution are blocked')
 
     def check_phase(self, phase, folder):
+        if self.check_override and (not self.test_only or self.root == ROOT):
+            raise ContinuationVeto('Checker override is restricted to isolated test-only mode')
+        if (self.home / 'stop-request.json').exists():
+            result = {'passed': False, 'tests': 0, 'verification_deferred': 'stop_requested'}
+            atomic_json(folder / 'checks.json', result)
+            return result
         if self.check_override:
-            result = self.check_override(phase, folder)
+            try:
+                result = self.check_override(phase, folder)
+            except ContinuationVeto:
+                raise
+            except (MasterError, ValueError, OSError) as error:
+                result = {'passed': False, 'tests': 0, 'error': str(error)}
+            stale = verification_input_errors(self.root, result)
+            if stale:
+                result.update(passed=False, stale_check_inputs=stale)
             atomic_json(folder / 'checks.json', result)
             return result
         try:
@@ -909,13 +1589,36 @@ class Master:
             result = load_json(folder / 'checks.json')
         except ContinuationVeto:
             raise
-        except MasterError as error:
-            result = load_json(folder / 'checks.json') if (folder / 'checks.json').exists() else {'passed': False, 'tests': 0}
+        except (MasterError, ValueError, OSError) as error:
+            try:
+                result = load_json(folder / 'checks.json')
+                if not isinstance(result, dict):
+                    raise ValueError('check output is not an object')
+            except (ValueError, OSError):
+                result = {'passed': False, 'tests': 0}
             result.update(passed=False, error=str(error))
         missing = [str((Path(phase['output_dir']) / name)) for name in phase['deliverables']
                    if not local_path(self.root, str(Path(phase['output_dir']) / name)).is_file()]
         if missing:
             result.update(passed=False, missing_deliverables=missing)
+        failures = validate_artifact_contract(self.root, phase)
+        stale = verification_input_errors(self.root, result)
+        if stale:
+            result.update(passed=False, stale_check_inputs=stale)
+        if phase.get('checker'):
+            raw = folder / 'checks.checker.json'
+            if (not raw.is_file() or raw.stat().st_size == 0
+                    or result.get('checker_output_sha256') != digest(raw)):
+                failures.append('Missing, empty or inconsistent supervisor checker capture')
+        if failures:
+            result.update(passed=False, artifact_errors=failures)
+        if phase.get('historical_input_resolutions'):
+            try:
+                historical = historical_resolution_checks(self.root, phase['historical_input_resolutions'])
+                result['historical_inputs'] = historical
+                result['input_hashes'] = merge_hashes(result.get('input_hashes', {}), historical['input_hashes'])
+            except (ValueError, OSError, KeyError, TypeError) as error:
+                result.update(passed=False, historical_input_error=str(error))
         atomic_json(folder / 'checks.json', result)
         self.check_protection()
         return result
@@ -936,6 +1639,12 @@ class Master:
         # interval in which other phases or the supervisor were editing files.
         changes = changes_since(self.root, before)
         atomic_json(stage / 'changes.json', changes)
+        identifier = next(k for k, value in self.state['phases'].items() if value is record)
+        scope = self.catalog['workflow']['phase_policy'][identifier]['write_scope']
+        outside = [name for names in changes.values() for name in names
+                   if not any(name.startswith(s) if s.endswith('/') else name == s for s in scope)]
+        if outside:
+            raise ContinuationVeto('Phase/check wrote outside its proposal scope: ' + ', '.join(outside[:15]))
         touched = set(record['contributed_files'])
         touched.update(n for names in changes.values() for n in names)
         record['contributed_files'] = sorted(touched)
@@ -946,10 +1655,219 @@ class Master:
         self.save()
         return changes, cumulative
 
+    def phase_review(self, role, phase, packet, folder, attempt):
+        """Retry unavailable review read-only; never treat timeout text as a verdict."""
+        for retry in range(2):
+            if (self.home / 'stop-request.json').exists():
+                raise ReviewPending('Stop requested before review; checked work retained')
+            if self.deadline - time.monotonic() < worker_seconds(role, self.catalog['limits']):
+                raise ReviewPending('Insufficient run budget for a full review; checked work retained')
+            target = folder if retry == 0 else folder / f'{role}-retry-{retry}'
+            target.mkdir(parents=True, exist_ok=True)
+            try:
+                verdict = self.worker(role, phase, packet, target, attempt)
+                return verdict, str((target / f'{role}-{attempt}.response.json').relative_to(self.root))
+            except ContinuationVeto:
+                raise
+            except (MasterError, ValueError, OSError) as error:
+                self.event('review_timeout' if isinstance(error, ProcessTimeout) else 'review_unavailable',
+                           phase=phase['id'], role=role, retry=retry, reason=str(error))
+                if retry == 1:
+                    raise ReviewPending('Review unavailable twice; retained work needs a fresh read-only review: ' + str(error)) from error
+
+    def review_dependencies(self, phase):
+        return stable_hash({d: self.state['phases'][d].get('evidence_hashes', {}) for d in phase['deps']})
+
+    def preserve_work(self):
+        try:
+            return preserve_editable(self.root, self.home / 'prior-bytes')
+        except (OSError, ValueError) as error:
+            raise ContinuationVeto('Cannot preserve complete editable inventory: ' + str(error)) from error
+
+    def save_pending_review(self, phase, record, packet, stage):
+        if verification_input_errors(self.root, packet['checks']):
+            raise MasterError('Checked inputs changed; rerun verification before review')
+        names = set(record['contributed_files']) | set(packet['work']['evidence']) | {phase['test_file']}
+        names.update(packet['checks'].get('input_hashes', {}))
+        names.update(str(Path(phase['output_dir']) / n) for n in phase['deliverables'])
+        required = {packet['check_path'], packet['approved_plan_path'], packet['work_path']}
+        names.update(required)
+        absent = []
+        if packet.get('review_scope') == 'bounded_partial_work':
+            absent = sorted(n for n in names - required if not local_path(self.root, n).exists())
+            names.difference_update(absent)
+        checkpoint = {'phase_hash': stable_hash(phase), 'dependencies': self.review_dependencies(phase),
+                      'absent_evidence': absent,
+                      'packet': packet, 'evidence_hashes': merge_hashes(self.evidence_hashes(names),
+                                                                      packet['checks'].get('input_hashes', {}))}
+        path = stage / 'pending-review.json'
+        atomic_json(path, checkpoint)
+        record.update(pending_review=str(path.relative_to(self.root)), pending_review_sha256=digest(path))
+        self.save()
+        return checkpoint
+
+    def load_pending_review(self, phase, record):
+        if not record.get('pending_review'):
+            return None
+        try:
+            path = local_path(self.root, record['pending_review'])
+            if digest(path) != record.get('pending_review_sha256'):
+                raise ValueError('pending review record changed')
+            saved = load_json(path)
+            checked = saved['packet']['checks']
+            bounded = (saved['packet'].get('review_scope') == 'bounded_partial_work'
+                       and saved['packet'].get('work', {}).get('verdict') in {'PARTIAL', 'IMPLEMENTED'}
+                       and type(checked.get('tests')) is int and checked['tests'] > 0)
+            if (saved['phase_hash'] != stable_hash(phase)
+                    or saved['dependencies'] != self.review_dependencies(phase)
+                    or not saved['evidence_hashes'] or verify_hashes(self.root, saved['evidence_hashes'])
+                    or any(local_path(self.root, n).exists() for n in saved.get('absent_evidence', []))
+                    or (not bounded and not acceptance_ready(phase, checked))
+                    or record.get('outstanding_deletions')):
+                raise ValueError('checked work, requirements, or prerequisite evidence changed')
+            return saved['packet']
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.event('pending_review_invalidated', phase=phase['id'], reason=str(error))
+            record.pop('pending_review', None)
+            record.pop('pending_review_sha256', None)
+            return None
+
+    def approve_phase_plan(self, phase, record, packet, folder):
+        folder.mkdir(parents=True, exist_ok=True)
+        for attempt in range(self.catalog['limits']['max_repairs'] + 1):
+            limits = self.catalog['limits']
+            self.require_budget(worker_seconds('plan', limits) + worker_seconds('review_plan', limits)
+                                + worker_seconds('implement', limits) + limits.get('verification_reserve_seconds', 0),
+                                'planning, plan review and useful execution')
+            plan = self.worker('plan', phase, packet, folder, attempt)
+            if plan['verdict'] == 'BLOCKED':
+                record.update(status='blocked_external', issues=plan['issues'], residuals=plan['residuals'], next_actions=plan['next_actions'])
+                return None
+            plan_hash = stable_hash(plan)
+            try:
+                review, _ = self.phase_review('review_plan', phase, {**packet, 'plan': plan, 'plan_hash': plan_hash}, folder, attempt)
+            except ReviewPending as error:
+                record.update(status='needs_plan_repair', issues=[str(error)])
+                return None
+            if review['verdict'] == 'BLOCKED':
+                record.update(status='blocked_external', issues=review['issues'], residuals=review['residuals'], next_actions=review['next_actions'])
+                return None
+            if review['verdict'] == 'AGREE':
+                approved = {'plan': plan, 'review': review, 'plan_hash': plan_hash}
+                atomic_json(folder / 'approved-plan.json', approved)
+                return approved
+            packet['required_plan_repairs'] = review
+            self.event('plan_repair_required', phase=phase['id'], attempt=attempt, issues=review['issues'])
+        record.update(status='needs_plan_repair', issues=review['issues'], residuals=review['residuals'])
+        return None
+
+    def save_continuation(self, phase, record, stage, checked, reason, next_actions):
+        names = set(record['contributed_files']) | {phase['test_file']}
+        names.update(checked.get('input_hashes', {}))
+        check_name = str((stage / 'checks.json').relative_to(self.root))
+        if (stage / 'checks.json').is_file():
+            names.add(check_name)
+        names.update(str(Path(phase['output_dir']) / n) for n in phase['deliverables'])
+        existing = [n for n in names if local_path(self.root, n).is_file()]
+        value = {'phase': phase['id'], 'recorded_at': now(), 'reason': reason,
+                 'checks': checked, 'check_path': str((stage / 'checks.json').relative_to(self.root)),
+                 'evidence_hashes': self.evidence_hashes(existing) if existing else {},
+                 'missing_files': sorted(names - set(existing)), 'next_actions': next_actions,
+                 'acceptance': False}
+        value['changed_check_inputs'] = verify_hashes(self.root, checked.get('input_hashes', {}))
+        if value['changed_check_inputs']:
+            value['verification_requires_recheck'] = True
+        path = stage / 'continuation.json'
+        atomic_json(path, value)
+        record.update(continuation=str(path.relative_to(self.root)), continuation_sha256=digest(path),
+                      next_actions=next_actions)
+        self.save()
+        return value
+
+    def save_worker_checkpoint(self, report, phase, packet, budget_path, destination):
+        """Pin a cooperative PARTIAL report, without granting acceptance."""
+        try:
+            value = validate_response(report.get('checkpoint_response'), {'PARTIAL'})
+        except MasterError as error:
+            raise ValueError(str(error)) from error
+        scope = self.catalog['workflow']['phase_policy'][phase['id']]['write_scope']
+        snapshot = scoped_inventory(self.root, scope)
+        if report.get('scoped_sha256') != inventory_hash(snapshot):
+            raise ValueError('Checkpoint scoped files changed before supervisor observation')
+        try:
+            evidence = self.evidence_hashes(value['evidence'])
+        except MasterError as error:
+            raise ValueError(str(error)) from error
+        if report.get('checkpoint_evidence') != evidence:
+            raise ValueError('Checkpoint response evidence changed before supervisor observation')
+        approved = packet.get('approved')
+        if not isinstance(approved, dict) or approved.get('plan_hash') != stable_hash(approved.get('plan')):
+            raise ValueError('Checkpoint has no valid approved plan')
+        saved = {'schema_version': 'accdsl.worker-checkpoint.v1',
+                 'worker_id': report['worker_id'], 'work': value,
+                 'phase_hash': stable_hash(phase), 'dependencies': self.review_dependencies(phase),
+                 'approved_hash': stable_hash(approved), 'scoped_hashes': snapshot,
+                 'evidence_hashes': evidence, 'budget_path': str(budget_path.relative_to(self.root)),
+                 'budget_sha256': digest(budget_path), 'saved_at': now(), 'acceptance': False}
+        self.runtime_json(destination, saved)
+        return str(destination.relative_to(self.root))
+
+    def load_supervision_checkpoint(self, phase, approved, stage, role, attempt):
+        """Only an unchanged checkpoint from this failed worker can be reviewed."""
+        prefix = stage / f'{role}-{attempt}'
+        checkpoint_path = prefix.with_suffix('.checkpoint.json')
+        if not checkpoint_path.is_file():
+            return None
+        try:
+            saved = load_json(checkpoint_path)
+            supervision = load_json(prefix.with_suffix('.supervision.json'))
+            process = load_json(prefix.with_suffix('.process.json'))
+            budget = load_json(prefix.with_suffix('.budget.json'))
+            scope = self.catalog['workflow']['phase_policy'][phase['id']]['write_scope']
+            if (process.get('reason') not in {'timeout', 'progress_no_ack', 'progress_stagnation', 'progress_finish_timeout'}
+                    or (self.home / 'stop-request.json').exists()
+                    or prefix.with_suffix('.integrity-failure.json').exists()
+                    or saved.get('schema_version') != 'accdsl.worker-checkpoint.v1'
+                    or saved.get('worker_id') != budget.get('worker_id')
+                    or supervision.get('worker_id') != budget.get('worker_id')
+                    or supervision.get('checkpoint') != str(checkpoint_path.relative_to(self.root))
+                    or saved.get('phase_hash') != stable_hash(phase)
+                    or saved.get('dependencies') != self.review_dependencies(phase)
+                    or saved.get('approved_hash') != stable_hash(approved)
+                    or saved.get('budget_path') != str(prefix.with_suffix('.budget.json').relative_to(self.root))
+                    or saved.get('budget_sha256') != digest(prefix.with_suffix('.budget.json'))
+                    or saved.get('scoped_hashes') != scoped_inventory(self.root, scope)
+                    or not saved.get('evidence_hashes')
+                    or verify_hashes(self.root, saved['evidence_hashes'])):
+                raise ValueError('Checkpoint no longer matches the failed worker, plan or scoped evidence')
+            work = validate_response(saved['work'], {'PARTIAL'})
+            return {'work': work, 'checkpoint_path': str(checkpoint_path.relative_to(self.root)),
+                    'supervision_path': str(prefix.with_suffix('.supervision.json').relative_to(self.root))}
+        except (OSError, ValueError, KeyError, TypeError, MasterError) as error:
+            self.event('worker_checkpoint_invalidated', phase=phase['id'], reason=str(error))
+            return None
+
     def execute_phase(self, phase, folder):
         identifier = phase['id']
+        if self.phase_block(identifier):
+            raise ContinuationVeto(self.phase_block(identifier))
         folder.mkdir(parents=True, exist_ok=True)
         record = self.state['phases'][identifier]
+        atomic_json(folder / 'previous-outcome.json', {key: record.get(key) for key in
+                    ('status', 'issues', 'residuals', 'stop_reason', 'execution_usage')})
+        record['residuals'] = [r for r in record.get('residuals', []) if r !=
+            'Repair allowance exhausted for this invocation; retain partial work and refresh the next slice.']
+        record.pop('stop_reason', None)
+        record['execution_usage'] = {'max_retries': self.catalog['limits']['max_repairs'],
+                                     'editable_attempts': 0, 'retries_used': 0,
+                                     'completed_partial_tasks': 0, 'timeouts': 0}
+        if record.get('preflight_integrity'):
+            failed = load_json(local_path(self.root, record['preflight_integrity']))
+            unrestored = verify_hashes(self.root, failed['restore_hashes'])
+            unrestored += [n for n in failed['unexpected_additions'] if (self.root / n).exists()]
+            if unrestored:
+                raise ContinuationVeto('Prior preflight changes need restoration: ' + ', '.join(unrestored[:15]))
+            record.pop('preflight_integrity')
         if phase['kind'] != 'builtin':
             if record.get('entry_inventory_path') and 'contributed_files' not in record:
                 raise ContinuationVeto('Legacy phase needs recorded contribution attribution before resume: ' + identifier)
@@ -965,6 +1883,8 @@ class Master:
                           'controller_hashes': self.controls}
             atomic_json(folder / 'approved-plan.json', {**fixed_plan, 'plan_hash': stable_hash(fixed_plan)})
             if self.builtin_override:
+                if not self.test_only or self.root == ROOT:
+                    raise ContinuationVeto('Builtin override is restricted to isolated test-only mode')
                 result = self.builtin_override(phase, folder)
             else:
                 self.process([sys.executable, str(self.root / 'scripts/run_accounting_master.py'),
@@ -979,97 +1899,296 @@ class Master:
                 raise MasterError('Builtin output validation failed: ' + str(error)) from error
             if checked['passed'] is not True or checked['tests'] <= 0:
                 raise MasterError('Builtin deterministic result review failed')
+            if verification_input_errors(self.root, checked):
+                raise ContinuationVeto('Builtin primary deliverable changed after verification')
             self.check_protection()
             evidence = [str(p.relative_to(self.root)) for p in folder.rglob('*') if p.is_file()]
             record.update(status=ACCEPTED, residuals=result.get('residuals', []), issues=[],
-                          evidence_hashes=self.evidence_hashes(evidence), accepted_at=now())
+                          evidence_hashes=self.evidence_hashes(evidence), accepted_at=now(),
+                          accepted_phase_hash=stable_hash(phase), accepted_dependencies=self.review_dependencies(phase))
             return
-        packet = {'next_plan': self.refresh(), 'phase_output_dir': phase['output_dir'],
+        packet = {'next_plan': self.refresh_worker_plan(), 'phase_output_dir': phase['output_dir'],
                   'prior_attempts': record['attempts'][:-1], 'prior_issues': record.get('issues', []),
-                  'original_criteria': phase['criteria']}
-        approved = None
-        for attempt in range(self.catalog['limits']['max_repairs'] + 1):
-            plan = self.worker('plan', phase, packet, folder, attempt)
-            if plan['verdict'] == 'BLOCKED':
-                record.update(status='blocked_external', issues=plan['issues'], residuals=plan['residuals'])
-                return
-            plan_hash = stable_hash(plan)
-            review = self.worker('review_plan', phase, {**packet, 'plan': plan, 'plan_hash': plan_hash}, folder, attempt)
-            if review['verdict'] == 'BLOCKED':
-                record.update(status='blocked_external', issues=review['issues'], residuals=review['residuals'])
-                return
-            if review['verdict'] == 'AGREE':
-                approved = {'plan': plan, 'review': review, 'plan_hash': plan_hash}
-                atomic_json(folder / 'approved-plan.json', approved)
-                break
-            packet['required_plan_repairs'] = review
-            self.event('plan_repair_required', phase=identifier, attempt=attempt, issues=review['issues'])
+                  'original_criteria': phase['criteria'], 'repair_workflow': phase.get('repair_workflow', [])}
+        scoped_continuation = phase.get('continuation_policy') == 'reviewed_scope'
+        if phase.get('execution_plan'):
+            packet['execution_plan'] = phase['execution_plan']
+        resumed = self.load_pending_review(phase, record)
+        approved = resumed['approved'] if resumed else None
+        if resumed:
+            atomic_json(folder / 'approved-plan.json', approved)
+            if 'supervisor_review_focus' in resumed:
+                packet['supervisor_review_focus'] = resumed['supervisor_review_focus']
+            self.event('checked_work_resumed', phase=identifier, prior_check=resumed['check_path'])
+        if not resumed:
+            if phase.get('checker'):
+                preflight = folder / 'preflight'
+                preflight.mkdir()
+                before_preflight = self.preserve_work()
+                atomic_json(preflight / 'pre-edit-files.json', before_preflight)
+                try:
+                    packet['current_checks'] = self.check_phase(phase, preflight)
+                finally:
+                    try:
+                        preflight_changes = changes_since(self.root, before_preflight)
+                        atomic_json(preflight / 'changes.json', preflight_changes)
+                        if any(preflight_changes.values()):
+                            failure = preflight / 'restore-required.json'
+                            atomic_json(failure, {
+                                'restore_hashes': {n: before_preflight[n] for n in
+                                    preflight_changes['changed'] + preflight_changes['deleted']},
+                                'unexpected_additions': preflight_changes['added'],
+                                'prior_bytes': 'data/accounting-master/prior-bytes'})
+                            record['preflight_integrity'] = str(failure.relative_to(self.root))
+                            self.save()
+                            raise ContinuationVeto('Read-only preflight changed project files; prior bytes preserved')
+                    except (ValueError, OSError) as error:
+                        raise ContinuationVeto('Preflight integrity check failed: ' + str(error)) from error
+            approved = self.approve_phase_plan(phase, record, packet, folder)
         if approved is None:
-            record.update(status='needs_plan_repair', issues=review['issues'], residuals=review['residuals'])
             return
         packet['approved'] = approved
         if record.get('entry_inventory_path'):
             entry = load_json(local_path(self.root, record['entry_inventory_path']))
         else:
-            entry = preserve_editable(self.root, self.home / 'prior-bytes')
+            entry = self.preserve_work()
             entry_path = folder / 'phase-entry-inventory.json'
             atomic_json(entry_path, entry)
             record['entry_inventory_path'] = str(entry_path.relative_to(self.root))
             self.save()
         packet['phase_entry_inventory'] = record['entry_inventory_path']
-        for attempt in range(self.catalog['limits']['max_repairs'] + 1):
+        execution_slots = self.catalog['limits']['max_repairs'] + 1 + int(resumed is not None)
+        for attempt in range(execution_slots):
+            if (self.home / 'stop-request.json').exists():
+                record.update(status='interrupted', issues=['Stop requested; preserved work needs verification on resume.'])
+                return
+            # Internal helpers verify this persisted execution state. A partial
+            # continuation temporarily changes it during replanning.
+            record['status'] = 'repairing' if attempt else 'running'
+            record.pop('stop_reason', None)
+            self.save()
             self.check_protection()
             if stable_hash(load_json(folder / 'approved-plan.json')['plan']) != approved['plan_hash']:
                 raise ContinuationVeto('Approved phase plan changed after review')
             stage = folder / f'execution-{attempt}'
             stage.mkdir()
+            atomic_json(stage / 'approved-plan.json', approved)
             role = 'implement' if attempt == 0 else 'repair'
-            self.event('repair_started' if attempt else 'implementation_started', phase=identifier, attempt=attempt)
+            reuse_work = resumed is not None and attempt == 0
+            self.event('verification_resumed' if reuse_work else 'proposal_repair_started' if attempt else 'proposal_work_started', phase=identifier, attempt=attempt)
             try:
-                before = preserve_editable(self.root, self.home / 'prior-bytes')
+                before = self.preserve_work()
                 atomic_json(stage / 'pre-edit-files.json', before)
+                work_error = None
+                work_timed_out = False
+                work = None
                 try:
-                    work = self.worker(role, phase, packet, stage, attempt)
+                    if reuse_work:
+                        work = resumed['work']
+                        work_path = stage / 'resumed-work.response.json'
+                        atomic_json(work_path, work)
+                    else:
+                        self.require_budget(worker_seconds(role, self.catalog['limits']) +
+                                            self.catalog['limits'].get('verification_reserve_seconds', 0),
+                                            'editable work and supervisor verification reserve')
+                        usage = record['execution_usage']
+                        usage['editable_attempts'] += 1
+                        usage['retries_used'] = max(0, usage['editable_attempts'] - 1)
+                        self.save()
+                        try:
+                            work = self.worker(role, phase, packet, stage, attempt)
+                        except BudgetDeferred:
+                            # Startup refusal occurs before the editable process.
+                            usage['editable_attempts'] -= 1
+                            usage['retries_used'] = max(0, usage['editable_attempts'] - 1)
+                            self.save()
+                            raise
+                        work_path = stage / f'{role}-{attempt}.response.json'
+                except BudgetDeferred:
+                    raise
+                except ContinuationVeto:
+                    raise
+                except (MasterError, ValueError, OSError) as error:
+                    work_error = f'{type(error).__name__}: {error}'
+                    work_timed_out = isinstance(error, ProcessTimeout)
+                    record['execution_usage']['timeouts'] += int(work_timed_out)
                 finally:
                     changes, cumulative = self.capture_phase_changes(record, stage, before, entry)
                 if stable_hash(load_json(folder / 'approved-plan.json')['plan']) != approved['plan_hash']:
                     raise ContinuationVeto('Implementation changed its approved plan')
+                recovered_checkpoint = None
+                if work is None and work_timed_out and not (self.home / 'stop-request.json').exists():
+                    recovered_checkpoint = self.load_supervision_checkpoint(phase, approved, stage, role, attempt)
+                    if recovered_checkpoint is not None:
+                        work = recovered_checkpoint['work']
+                        work_path = stage / 'recovered-work.response.json'
+                        atomic_json(work_path, work)
+                        self.event('worker_partial_checkpoint_recovered', phase=identifier,
+                                   attempt=attempt, checkpoint_path=recovered_checkpoint['checkpoint_path'],
+                                   original_process_error=work_error)
+                        # The failed process remains failed in its own record.
+                        # Recovery only supplies a candidate PARTIAL for fresh
+                        # checks and ordinary independent bounded review.
+                        atomic_json(stage / 'checkpoint-recovery.json', {
+                            'original_process_error': work_error,
+                            'checkpoint_path': recovered_checkpoint['checkpoint_path'],
+                            'supervision_path': recovered_checkpoint['supervision_path'],
+                            'acceptance': False})
+                        work_error = None
                 if record['outstanding_deletions']:
                     raise MasterError('Restore prohibited phase deletions before acceptance: ' + ', '.join(record['outstanding_deletions']))
-                if work['verdict'] == 'BLOCKED':
-                    record.update(status='blocked_external', issues=work['issues'], residuals=work['residuals'])
-                    return
                 try:
                     checked = self.check_phase(phase, stage)
                 finally:
                     changes, cumulative = self.capture_phase_changes(record, stage, before, entry)
                 if record['outstanding_deletions']:
                     raise MasterError('Verification deleted preserved project files: ' + ', '.join(record['outstanding_deletions']))
-                response = self.worker('review_result', phase,
-                    {**packet, 'work': work, 'checks': checked, 'actual_changes': changes,
+                packet['current_checks'] = checked
+                if recovered_checkpoint and self.load_supervision_checkpoint(phase, approved, stage, role, attempt) is None:
+                    work = None
+                    work_error = 'Recovered checkpoint changed during fresh verification; repair from current files.'
+                if (work_error or work['verdict'] in {'PARTIAL', 'BLOCKED'}
+                        or (reuse_work and resumed.get('review_scope') == 'bounded_partial_work')
+                        or (phase.get('checker') and checked.get('passed') is True and not acceptance_ready(phase, checked))):
+                    reason = work_error or work['summary']
+                    actions = (work['next_actions'] if work else []) or ['Plan one smaller remaining task from the current checks and preserved changes.']
+                    continuation = self.save_continuation(phase, record, stage, checked, reason, actions)
+                    if work and work['verdict'] == 'BLOCKED':
+                        record.update(status='blocked_external', issues=work['issues'], residuals=work['residuals'], next_actions=work['next_actions'])
+                        return
+                    partial_review = None
+                    if (not scoped_continuation and work and not work_error
+                            and type(checked.get('tests')) is int and checked['tests'] > 0):
+                        partial_packet = {**packet, 'work': work, 'checks': checked,
+                            'review_scope': 'bounded_partial_work', 'continuation': continuation,
+                            'actual_changes': changes, 'cumulative_changes': cumulative,
+                            'work_path': str(work_path.relative_to(self.root)),
+                            'approved_plan_path': str((stage / 'approved-plan.json').relative_to(self.root)),
+                            'preserved_inputs': str((stage / 'pre-edit-files.json').relative_to(self.root)),
+                            'check_path': str((stage / 'checks.json').relative_to(self.root))}
+                        checkpoint = self.save_pending_review(phase, record, partial_packet, stage)
+                        try:
+                            partial_review, partial_review_path = self.phase_review(
+                                'review_result', phase, partial_packet, stage, attempt)
+                        except ReviewPending as error:
+                            record.update(status='needs_review', issues=[str(error)],
+                                next_actions=['Resume the saved bounded review read-only; do not reimplement or repeat the assessment.'])
+                            return
+                        if verify_hashes(self.root, checkpoint['evidence_hashes']):
+                            raise ContinuationVeto('Checked partial work changed during read-only review')
+                        record.pop('pending_review', None)
+                        record.pop('pending_review_sha256', None)
+                        record['last_partial_review'] = {
+                            'path': partial_review_path, 'sha256': digest(local_path(self.root, partial_review_path)),
+                            'verdict': partial_review['verdict'], 'scope': 'bounded_partial_work'}
+                        packet.pop('supervisor_review_focus', None)
+                        actions = partial_review['next_actions'] or [
+                            'Use the terminal bounded review to plan the next substantive task; do not repeat the completed review.']
+                        reason = 'Bounded result review ' + partial_review['verdict'] + ': ' + partial_review['summary']
+                        continuation = self.save_continuation(phase, record, stage, checked, reason, actions)
+                        if partial_review and partial_review['verdict'] == 'BLOCKED':
+                            record.update(status='blocked_external', issues=partial_review['issues'],
+                                          residuals=partial_review['residuals'], next_actions=partial_review['next_actions'])
+                            return
+                    file_progress = any(n != str(Path(phase['output_dir']) / 'progress.md')
+                                        for names in changes.values() for n in names)
+                    # A resumed terminal review advances the work without an edit.
+                    progress = file_progress or (reuse_work and partial_review is not None)
+                    if progress and work and work['verdict'] == 'PARTIAL' and checked.get('passed') is True:
+                        record['execution_usage']['completed_partial_tasks'] += 1
+                    record['no_progress_count'] = 0 if progress else record.get('no_progress_count', 0) + 1
+                    issues = [reason] + (partial_review['issues'] if partial_review else work['issues'] if work else [])
+                    packet['repair_findings'] = {'continuation': continuation, 'partial_review': partial_review,
+                                                'work': work,
+                                                'required_action': 'Fresh reviewed plan for one smaller unresolved task.'}
+                    record.update(status='needs_repair', issues=issues)
+                    self.save()
+                    self.event('partial_work_checked', phase=identifier, attempt=attempt, passed=checked.get('passed'), progress=progress)
+                    if not progress:
+                        record['status'] = 'needs_plan_repair'
+                        record['stop_reason'] = 'no_file_progress'
+                        if record['no_progress_count'] >= 2:
+                            record['deferred_signature'] = self.input_fingerprint(identifier)
+                            record['issues'].append('Repeated unchanged partial failure deferred until relevant inputs change or explicit --retry-blocked.')
+                        if not scoped_continuation or record['no_progress_count'] >= 2:
+                            return
+                    if attempt == execution_slots - 1:
+                        record['stop_reason'] = 'retry_limit'
+                        return
+                    packet['next_plan'] = self.refresh_worker_plan()
+                    if (scoped_continuation and progress and checked.get('passed') is True
+                            and checked.get('tests', 0) > 0 and (not work_error or work_timed_out)
+                            and (not work or not work['issues'])):
+                        packet['repair_findings']['required_action'] = (
+                            'Continue the first unfinished substantive group within the existing reviewed scope. '
+                            'Use current checks and saved files. No additional completion record is required; '
+                            'full phase result review remains outstanding.')
+                        packet['continuation_of_reviewed_scope'] = True
+                        record.pop('stop_reason', None)
+                        self.event('reviewed_scope_continued', phase=identifier, attempt=attempt,
+                                   reason='Checked file progress; substantive acceptance pending')
+                        continue
+                    packet.pop('continuation_of_reviewed_scope', None)
+                    approved = self.approve_phase_plan(phase, record, packet, folder / f'replan-{attempt + 1}')
+                    if approved is None:
+                        return
+                    atomic_json(folder / 'approved-plan.json', approved)
+                    packet['approved'] = approved
+                    continue
+                review_packet = {**packet, 'work': work, 'checks': checked, 'actual_changes': changes,
                      'cumulative_changes': cumulative,
+                     'work_path': str(work_path.relative_to(self.root)),
+                     'approved_plan_path': str((stage / 'approved-plan.json').relative_to(self.root)),
                      'preserved_inputs': str((stage / 'pre-edit-files.json').relative_to(self.root)),
-                     'check_path': str((stage / 'checks.json').relative_to(self.root))},
-                    stage, attempt)
+                     'check_path': str((stage / 'checks.json').relative_to(self.root))}
+                checkpoint = None
+                record.pop('pending_review', None)
+                record.pop('pending_review_sha256', None)
+                if acceptance_ready(phase, checked):
+                    checkpoint = self.save_pending_review(phase, record, review_packet, stage)
+                try:
+                    response, review_path = self.phase_review('review_result', phase, review_packet, stage, attempt)
+                except ReviewPending as error:
+                    if checkpoint is not None:
+                        record.update(status='needs_review', issues=[str(error)],
+                                      next_actions=['Resume unchanged checked work for read-only review; do not reimplement without a finding.'])
+                        return
+                    raise MasterError('Checks failed and review is unavailable; repair the failed checks') from error
+                if checkpoint is not None and verify_hashes(self.root, checkpoint['evidence_hashes']):
+                    raise ContinuationVeto('Checked phase evidence changed during read-only review')
+                record.pop('pending_review', None)
+                record.pop('pending_review_sha256', None)
                 if stable_hash(load_json(folder / 'approved-plan.json')['plan']) != approved['plan_hash']:
                     raise ContinuationVeto('Result review changed the approved plan')
                 if response['verdict'] == 'BLOCKED':
-                    record.update(status='blocked_external', issues=response['issues'], residuals=response['residuals'])
+                    record.update(status='blocked_external', issues=response['issues'], residuals=response['residuals'], next_actions=response['next_actions'])
                     return
-                if checked.get('passed') is True and checked.get('tests', 0) > 0 and response['verdict'] == 'AGREE':
+                if acceptance_ready(phase, checked) and response['verdict'] == 'AGREE':
+                    if verification_input_errors(self.root, checked):
+                        raise MasterError('Checked inputs changed before acceptance; rerun verification')
                     names = set(work['evidence']) | set(response['evidence']) | {phase['test_file']}
+                    names.update(checked.get('input_hashes', {}))
                     names.update(record['contributed_files'])
                     names.update(str(Path(phase['output_dir']) / n) for n in phase['deliverables'])
                     names.add(str((stage / 'checks.json').relative_to(self.root)))
                     names.add(str((folder / 'approved-plan.json').relative_to(self.root)))
-                    record.update(status=ACCEPTED, issues=[], accepted_at=now(),
+                    names.add(review_path)
+                    for evidence_path in (stage / 'checks.checker.json', stage / 'checks-process.process.json',
+                                          local_path(self.root, review_path.replace('.response.json', '.process.json'))):
+                        if evidence_path.is_file():
+                            names.add(str(evidence_path.relative_to(self.root)))
+                    record.update(status=ACCEPTED, issues=[], stop_reason='accepted', accepted_at=now(),
+                                  accepted_phase_hash=stable_hash(phase), accepted_dependencies=self.review_dependencies(phase),
                                   residuals=list(dict.fromkeys(work['residuals'] + response['residuals'])),
                                   next_actions=list(dict.fromkeys(work['next_actions'] + response['next_actions'])),
-                                  evidence_hashes=self.evidence_hashes(names))
+                                  accepted_review_path=review_path,
+                                  evidence_hashes=merge_hashes(self.evidence_hashes(names), checked.get('input_hashes', {})))
                     return
                 packet['repair_findings'] = {'checks': checked, 'result_review': response, 'work': work}
                 issues = checked.get('missing_deliverables', []) + response['issues']
-            except ContinuationVeto:
+                if not acceptance_ready(phase, checked):
+                    issues.append('Machine checks do not establish all declared phase criteria.')
+            except (ContinuationVeto, BudgetDeferred):
                 raise
             except (MasterError, ValueError, OSError) as error:
                 issues = [str(error)]
@@ -1077,20 +2196,208 @@ class Master:
             record.update(status='repairing', issues=issues)
             self.save()
             self.event('verification_requires_repair', phase=identifier, attempt=attempt, issues=issues)
-        record.update(status='needs_repair', issues=issues,
-                      residuals=record.get('residuals', []) + ['Repair allowance exhausted for this invocation; retain partial work and refresh the next slice.'])
+            if attempt < execution_slots - 1:
+                packet['next_plan'] = self.refresh_worker_plan()
+                packet.pop('continuation_of_reviewed_scope', None)
+                approved = self.approve_phase_plan(phase, record, packet, folder / f'replan-{attempt + 1}')
+                if approved is None:
+                    return
+                atomic_json(folder / 'approved-plan.json', approved)
+                packet['approved'] = approved
+        record.update(status='needs_repair', issues=issues, stop_reason='retry_limit')
         if record.get('outstanding_deletions'):
             raise ContinuationVeto('Phase left prohibited deletions unresolved; preserve the entry inventory and repair before continuing')
 
-    def run(self, max_phases=15, seconds=7200, require_review=True, retry_blocked=False):
+    def reconcile_campaign_invocation(self, campaign):
+        """Consume only a terminal result published under the runner lock."""
+        pending = campaign.get('pending_invocation')
+        if pending is None:
+            return None
+        if (not isinstance(pending, dict) or not isinstance(pending.get('id'), str) or not pending['id']
+                or not isinstance(pending.get('run_id'), str)
+                or not re.fullmatch(r'[0-9]{8}T[0-9]{6}-[0-9a-f]{8}', pending['run_id'])):
+            raise ContinuationVeto('Invalid pending campaign run identity')
+        run_id = pending['run_id']
+        name = 'data/accounting-master/runs/' + run_id
+        with exclusive_lock(self.home / 'runner.lock'):
+            path = local_path(self.root, name) / 'manifest.json'
+            if not path.is_file():
+                raise ContinuationVeto('Pending invocation has no start record; supervisor must reconcile it before new work')
+            manifest = load_json(path)
+            if not manifest.get('startup_stop'):
+                self.recover_process()
+            result = manifest.get('campaign_result')
+            if (not isinstance(result, dict) or result.get('invocation_id') != pending['id']
+                    or result.get('run') != name or manifest.get('run_id') != run_id
+                    or manifest.get('campaign_invocation_id') != pending['id']
+                    or manifest.get('outcome') != result.get('outcome')
+                    or not manifest.get('finished_at') or type(result.get('progress')) is not bool
+                    or not isinstance(result.get('eligible_phases'), list)):
+                raise ContinuationVeto('Pending invocation has no complete bound outcome; preserve it for supervisor recovery')
+            entry = {**result, 'manifest_sha256': digest(path)}
+            existing = [r for r in campaign['invocations'] if r.get('invocation_id') == pending['id']]
+            if existing:
+                if len(existing) != 1 or existing[0] != entry:
+                    raise ContinuationVeto('Conflicting campaign invocation accounting')
+            else:
+                campaign['invocations'].append(entry)
+                campaign['consecutive_no_progress'] = (0 if result['progress'] else
+                                                       campaign['consecutive_no_progress'] + 1)
+            campaign['pending_invocation'] = None
+            outcome = result['outcome']
+            if outcome == 'proposal_reviewed_implementation_held':
+                try:
+                    self.reload_state()
+                    if (self.root / 'data/financial-report-benchmark/release-manifest.json').exists():
+                        self.protected = merge_hashes(self.protected, protected_hashes(self.root))
+                    elif not self.test_only:
+                        raise ContinuationVeto('Required accepted-source release manifest is absent')
+                    self.check_protection()
+                    gate = self.proposal_gate()
+                    if not gate['ready']:
+                        raise ContinuationVeto(gate.get('reason', 'Current proposal evidence is no longer ready'))
+                except (MasterError, ValueError, OSError) as error:
+                    campaign.update(status='needs_supervisor_repair', reason='Historical readiness is no longer current: ' + str(error))
+                else:
+                    campaign.update(status='proposal_ready', reason='Historical success and current proposal evidence agree')
+            elif outcome in {'stop_requested', 'interrupted', 'continuation_veto'}:
+                campaign.update(status=outcome, reason=result.get('stop_reason') or outcome)
+            elif outcome not in {'phase_limit', 'budget_exhausted', 'wall_limit',
+                                 'remaining_work_requires_repair_or_dependency'}:
+                campaign.update(status='needs_supervisor_repair', reason='Unexpected invocation outcome: ' + outcome)
+            elif not result['eligible_phases']:
+                campaign.update(status='needs_supervisor_repair', reason='No eligible phase in completed invocation result')
+            campaign.update(remaining_seconds=round(campaign_remaining(campaign), 3), updated_at=now())
+            atomic_json(self.home / 'campaign.json', campaign)
+            return entry
+
+    def campaign(self, seconds=172800, max_phases=15, require_review=True):
+        """Continue authorized proposal invocations under one durable deadline."""
+        with exclusive_lock(self.home / 'campaign.lock'):
+            path = self.home / 'campaign.json'
+            campaign = None
+            try:
+                if path.exists():
+                    campaign = load_json(path)
+                else:
+                    started = time.monotonic()
+                    campaign = {'schema_version': 'accdsl.master.campaign.v1', 'status': 'prepared',
+                        'started_at': now(), 'started_monotonic': started,
+                        'deadline_monotonic': started + seconds, 'allowance_seconds': seconds,
+                        'boot_id': boot_identity(), 'invocations': [], 'consecutive_no_progress': 0,
+                        'plan': 'docs/plans/accounting-master-campaign-20261005.md',
+                        'mission_complete': False, 'product_implementation_enabled': False}
+                campaign_remaining(campaign)  # Resume never silently grants more time.
+                if (not isinstance(campaign.get('invocations'), list)
+                        or type(campaign.get('consecutive_no_progress')) is not int
+                        or campaign['consecutive_no_progress'] < 0):
+                    raise ContinuationVeto('Invalid campaign progress record')
+            except (MasterError, ValueError, OSError, KeyError, TypeError, AttributeError) as error:
+                record = self.record_startup_stop(error, [path])
+                campaign = dict(campaign) if isinstance(campaign, dict) else {}
+                campaign.update(status='continuation_veto', reason=str(error), supervisor=None,
+                                startup_recovery=record, allowance_reset=False)
+                atomic_json(path, campaign)
+                return 'continuation_veto'
+            if campaign.get('status') == 'budget_exhausted':
+                return 'budget_exhausted'
+            if campaign.get('status') == 'proposal_ready':
+                with exclusive_lock(self.home / 'runner.lock'):
+                    self.reload_state()
+                    if self.proposal_gate()['ready']:
+                        return 'proposal_ready'
+                campaign.update(status='needs_supervisor_repair', reason='Prior campaign readiness no longer matches current evidence')
+                atomic_json(path, campaign)
+                return campaign['status']
+            campaign.update(status='running', supervisor=process_identity(os.getpid()), resumed_at=now(), reason=None)
+            atomic_json(path, campaign)
+            limits = self.catalog['limits']
+            admission = (worker_seconds('plan', limits) + worker_seconds('review_plan', limits)
+                         + worker_seconds('implement', limits)
+                         + limits.get('verification_reserve_seconds', 0) + 180)
+            try:
+                # A completed run may have outlived its caller's final update.
+                # Reconcile it before any budget/no-progress/admission decision.
+                self.reconcile_campaign_invocation(campaign)
+                while campaign['status'] == 'running':
+                    remaining = campaign_remaining(campaign)
+                    campaign['remaining_seconds'] = round(remaining, 3)
+                    if (self.home / 'stop-request.json').exists():
+                        campaign['status'] = 'stop_requested'
+                        break
+                    if campaign['consecutive_no_progress'] >= 2:
+                        campaign['status'] = 'needs_supervisor_repair'
+                        campaign['reason'] = 'Two invocations without substantive file or new phase-acceptance progress'
+                        break
+                    if remaining < admission:
+                        campaign['status'] = 'budget_exhausted'
+                        campaign['reason'] = f'Need {admission:g} seconds for startup and a full useful cycle; have {remaining:.1f}'
+                        break
+                    allowance = min(MAX_RUN_SECONDS, limits.get('run_seconds', MAX_RUN_SECONDS), int(remaining))
+                    pending = {'id': uuid.uuid4().hex,
+                        'run_id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S') + '-' + uuid.uuid4().hex[:8],
+                        'scheduled_at': now()}
+                    campaign.update(next_invocation_seconds=allowance, updated_at=now(), pending_invocation=pending)
+                    atomic_json(path, campaign)
+                    self.run(max_phases=max_phases, seconds=allowance,
+                             require_review=require_review, resume_stop=False,
+                             campaign_deadline=campaign['deadline_monotonic'], campaign_invocation=pending)
+                    result = self.reconcile_campaign_invocation(campaign)
+                    self.event('campaign_invocation_accounted', previous_outcome=result['outcome'],
+                               remaining_seconds=campaign['remaining_seconds'], progress=result['progress'])
+            except (MasterError, ValueError, OSError, KeyboardInterrupt) as error:
+                campaign.update(status='continuation_veto' if isinstance(error, ContinuationVeto) else 'interrupted',
+                                reason=f'{type(error).__name__}: {error}')
+            finally:
+                campaign.update(updated_at=now(), supervisor=None)
+                atomic_json(path, campaign)
+            self.event('campaign_finished', status=campaign['status'], invocations=len(campaign['invocations']))
+            return campaign['status']
+
+    def run(self, max_phases=15, seconds=7200, require_review=True, retry_blocked=False,
+            resume_stop=True, campaign_deadline=float('inf'), campaign_invocation=None):
+        if any(x is not None for x in (self.worker_override, self.check_override, self.builtin_override)) and (not self.test_only or self.root == ROOT):
+            raise ContinuationVeto('Overrides are restricted to isolated test-only mode')
+        if type(seconds) not in (float, int) or not 0 < seconds <= MAX_RUN_SECONDS:
+            raise MasterError('An ordinary invocation requires 0 < seconds <= 7200')
         with exclusive_lock(self.home / 'runner.lock') as lock_fd:
             self.lock_fd = lock_fd
-            self.recover_process()
-            self.reload_state()
-            self.run_id = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S') + '-' + uuid.uuid4().hex[:8]
+            startup_run = (campaign_invocation.get('run_id') if isinstance(campaign_invocation, dict) else None)
+            if not isinstance(startup_run, str) or not re.fullmatch(r'[0-9]{8}T[0-9]{6}-[0-9a-f]{8}', startup_run):
+                startup_run = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S') + '-' + uuid.uuid4().hex[:8]
+            self.run_id = startup_run
+            try:
+                self.recover_process()
+                self.reload_state()
+            except (MasterError, ValueError, OSError, KeyError, TypeError, AttributeError) as error:
+                stopped = self.record_startup_stop(error, [self.home / 'active-process.json', self.state_path])
+                folder = self.home / 'runs' / startup_run
+                folder.mkdir(parents=True)
+                manifest = {'run_id': startup_run, 'outcome': 'continuation_veto', 'finished_at': now(),
+                            'stop_reason': str(error), 'phases_attempted': [], 'startup_stop': stopped,
+                            'campaign_invocation_id': campaign_invocation.get('id') if campaign_invocation else None}
+                if campaign_invocation:
+                    manifest['campaign_result'] = {'invocation_id': campaign_invocation['id'],
+                        'run': str(folder.relative_to(self.root)), 'outcome': 'continuation_veto',
+                        'stop_reason': str(error), 'completed_at': manifest['finished_at'],
+                        'progress': False, 'accepted_phases': [], 'changed_files': [], 'eligible_phases': []}
+                atomic_json(folder / 'manifest.json', manifest)
+                return 'continuation_veto'
+            before_accepted = {p for p, r in self.state['phases'].items() if r['status'] == ACCEPTED}
+            if campaign_invocation is not None:
+                current = load_json(self.home / 'campaign.json')
+                if (not isinstance(campaign_invocation, dict)
+                        or not isinstance(campaign_invocation.get('run_id'), str)
+                        or not re.fullmatch(r'[0-9]{8}T[0-9]{6}-[0-9a-f]{8}', campaign_invocation['run_id'])
+                        or not campaign_invocation.get('id')
+                        or current.get('pending_invocation') != campaign_invocation):
+                    raise ContinuationVeto('Campaign invocation is not durably scheduled')
+                self.run_id = campaign_invocation['run_id']
+            else:
+                self.run_id = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S') + '-' + uuid.uuid4().hex[:8]
             folder = self.home / 'runs' / self.run_id
             folder.mkdir(parents=True)
-            self.deadline = time.monotonic() + seconds
+            self.deadline = min(time.monotonic() + seconds, campaign_deadline)
             self.protected = {}
             for record in self.state['phases'].values():
                 if record['status'] in {'running', 'repairing'}:
@@ -1098,23 +2405,31 @@ class Master:
                     record['issues'] = ['Prior process ended before acceptance; review actual partial work before resuming.']
                 if retry_blocked and record['status'] == 'blocked_external':
                     record['status'] = 'pending'
+                if retry_blocked:
+                    record.pop('deferred_signature', None)
+                    record.pop('no_progress_count', None)
             stop = self.home / 'stop-request.json'
-            if stop.exists():
+            if stop.exists() and resume_stop:
                 stop.rename(folder / 'prior-stop-request.json')
             manifest = {'run_id': self.run_id, 'started_at': now(), 'command': sys.argv,
+                        'campaign_invocation_id': campaign_invocation['id'] if campaign_invocation else None,
+                        'baseline_accepted': sorted(before_accepted),
                         'python': sys.executable, 'python_version': sys.version, 'controller_hashes': self.controls,
-                        'catalog_sha256': digest(self.root / CATALOG), 'git_commit': None,
-                        'git_reason': 'Existing marker unusable; no Git initialization',
+                        'catalog_sha256': digest(self.root / CATALOG), **git_provenance(self.root),
                         'device': 'CPU; CUDA_VISIBLE_DEVICES=-1 in child commands',
                         'seeds': 'N/A for controller; scientific phases must declare their own',
                         'max_phases': max_phases, 'wall_limit_seconds': seconds,
-                        'plan': 'docs/plans/accounting-master-program.md', 'mission_complete': False}
-            atomic_json(folder / 'manifest.json', manifest)
-            self.state['runs'].append(str(folder.relative_to(self.root)))
-            self.refresh()
+                        'deadline_monotonic': self.deadline,
+                        'plan': 'docs/plans/accounting-master-program.md', 'mission_complete': False,
+                        'workflow_mode': self.catalog['workflow']['mode'], 'product_implementation_enabled': False}
             tried = set()
             outcome = 'stopped'
+            initialized = False
             try:
+                atomic_json(folder / 'manifest.json', manifest)
+                self.state['runs'].append(str(folder.relative_to(self.root)))
+                self.refresh()
+                initialized = True
                 release = self.root / 'data/financial-report-benchmark/release-manifest.json'
                 if release.exists():
                     self.protected = protected_hashes(self.root)
@@ -1125,7 +2440,7 @@ class Master:
                     raise ContinuationVeto('Required accepted-source release manifest is absent')
                 atomic_json(folder / 'manifest.json', manifest)
                 self.check_protection()
-                if require_review:
+                if require_review and not stop.exists():
                     self.controller_review(folder)
                 while len(tried) < max_phases and time.monotonic() < self.deadline and not stop.exists():
                     plan = self.refresh()
@@ -1136,6 +2451,13 @@ class Master:
                     tried.add(identifier)
                     try:
                         self.execute_phase(self.phases[identifier], folder / identifier)
+                    except BudgetDeferred as error:
+                        record = self.state['phases'][identifier]
+                        record.update(status='budget_deferred', stop_reason='budget_exhausted', issues=[str(error)])
+                        atomic_json(folder / identifier / 'budget-stop.json', {
+                            'reason': str(error), 'execution_usage': record.get('execution_usage', {}),
+                            'continuation': record.get('continuation'), 'next_actions': record.get('next_actions', []),
+                            'acceptance': False, 'recorded_at': now()})
                     except ContinuationVeto:
                         raise
                     except MasterError as error:
@@ -1143,17 +2465,30 @@ class Master:
                     except Exception as error:
                         raise ContinuationVeto(f'Unexpected controller failure in {identifier}: {type(error).__name__}: {error}') from error
                     record = self.state['phases'][identifier]
+                    unresolved = [n for r in self.state['phases'].values()
+                                  for n in r.get('outstanding_deletions', [])
+                                  if not local_path(self.root, n).is_file()]
+                    if unresolved:
+                        raise ContinuationVeto('Phase left prohibited deletions unresolved: ' + ', '.join(unresolved[:15]))
                     if record['status'] == 'blocked_external':
                         record['block_signature'] = self.input_fingerprint(identifier)
                     self.state['last_outcome'] = {'phase': identifier, 'status': record['status'],
-                                                  'issues': record.get('issues', []), 'residuals': record.get('residuals', [])}
+                                                  'issues': record.get('issues', []), 'residuals': record.get('residuals', []),
+                                                  'stop_reason': record.get('stop_reason', record['status']),
+                                                  'execution_usage': record.get('execution_usage', {})}
                     self.event('phase_finished', phase=identifier, status=record['status'])
                     refreshed = self.refresh()
                     self.event('next_plan_refreshed', previous_phase=identifier, next_phase=refreshed['next_phase'])
+                    if record['status'] == 'budget_deferred':
+                        break
                 if stop.exists():
                     outcome = 'stop_requested'
                 elif time.monotonic() >= self.deadline:
                     outcome = 'wall_limit'
+                elif any(self.state['phases'][p]['status'] == 'budget_deferred' for p in tried):
+                    outcome = 'budget_exhausted'
+                elif self.proposal_gate()['ready']:
+                    outcome = 'proposal_reviewed_implementation_held'
                 elif all(p['status'] == ACCEPTED for p in self.state['phases'].values()):
                     outcome = 'catalog_slices_accepted_mission_open'
                 elif len(tried) >= max_phases:
@@ -1168,20 +2503,38 @@ class Master:
                 self.event('run_stopped', reason=str(error))
                 manifest['stop_reason'] = str(error)
             finally:
-                manifest.update(finished_at=now(), outcome=outcome, phases_attempted=sorted(tried),
-                                phase_states={k: v['status'] for k, v in self.state['phases'].items()})
-                atomic_json(folder / 'manifest.json', manifest)
-                try:
-                    self.refresh()
-                except (ContinuationVeto, ValueError, OSError) as error:
-                    # Preserve a stop without publishing an executable plan from
-                    # controls that failed their integrity check.
-                    self.save()
-                    atomic_json(self.home / 'next-plan.json', {'mission_complete': False,
-                        'next_phase': None, 'eligible_phases': [], 'status': 'continuation_veto',
-                        'reason': str(error), 'state_sha256': digest(self.state_path)})
-                    atomic_bytes(self.home / 'next-plan.md', ('# Execution stopped\n\n' + str(error) + '\n').encode())
-                self.event('run_finished', outcome=outcome, manifest=str((folder / 'manifest.json').relative_to(self.root)))
+                with defer_shutdown():
+                    try:
+                        if initialized:
+                            self.refresh()
+                        else:
+                            self.save()
+                            atomic_json(self.home / 'next-plan.json', {'mission_complete': False,
+                                'next_phase': None, 'eligible_phases': [], 'status': outcome,
+                                'reason': manifest.get('stop_reason', 'Run initialization did not complete'),
+                                'state_sha256': digest(self.state_path)})
+                            atomic_bytes(self.home / 'next-plan.md', b'# Run initialization interrupted\n\nResume verifies current state before selecting work.\n')
+                    except (ContinuationVeto, ValueError, OSError) as error:
+                        # Preserve a stop without publishing an executable plan from
+                        # controls that failed their integrity check.
+                        outcome = 'continuation_veto'
+                        manifest['stop_reason'] = str(error)
+                        self.save()
+                        atomic_json(self.home / 'next-plan.json', {'mission_complete': False,
+                            'next_phase': None, 'eligible_phases': [], 'status': 'continuation_veto',
+                            'reason': str(error), 'state_sha256': digest(self.state_path)})
+                        atomic_bytes(self.home / 'next-plan.md', ('# Execution stopped\n\n' + str(error) + '\n').encode())
+                    manifest.update(finished_at=now(), outcome=outcome, phases_attempted=sorted(tried),
+                                    phase_states={k: v['status'] for k, v in self.state['phases'].items()})
+                    if campaign_invocation:
+                        manifest['campaign_result'] = {
+                            'invocation_id': campaign_invocation['id'], 'run': str(folder.relative_to(self.root)),
+                            'outcome': outcome, 'completed_at': manifest['finished_at'],
+                            'stop_reason': manifest.get('stop_reason'),
+                            **campaign_progress(self.root, folder, before_accepted, self.state),
+                            'eligible_phases': load_json(self.home / 'next-plan.json').get('eligible_phases', [])}
+                    atomic_json(folder / 'manifest.json', manifest)
+                    self.event('run_finished', outcome=outcome, manifest=str((folder / 'manifest.json').relative_to(self.root)))
             return outcome
 
 
@@ -1341,8 +2694,9 @@ def main():
     parser.add_argument('--grant', help=argparse.SUPPRESS)
     parser.add_argument('--capability', help=argparse.SUPPRESS)
     args = parser.parse_args()
-    if not 1 <= args.max_phases <= 15 or not 1 <= args.max_seconds <= 86400:
-        parser.error('Use 1..15 phases and 1..86400 seconds')
+    max_seconds = 172800 if args.action == 'campaign' else MAX_RUN_SECONDS
+    if not 1 <= args.max_phases <= 15 or not 1 <= args.max_seconds <= max_seconds:
+        parser.error(f'Use 1..15 phases and 1..{max_seconds} seconds')
     master = Master()
     if args.action not in {'_checks', '_builtin'} and (args.phase or args.out or args.lock_fd is not None or args.grant or args.capability):
         parser.error('Internal operation arguments are reserved for supervisor children')
@@ -1366,7 +2720,11 @@ def main():
         plan_file = master.home / 'next-plan.json'
         plan_current = (master.state_path.exists() and plan_file.exists()
                         and load_json(plan_file).get('state_sha256') == digest(master.state_path))
-        print(json.dumps({'mission_complete': False, 'phase_states': {k: v['status'] for k, v in master.state['phases'].items()},
+        print(json.dumps({'mission_complete': False, 'workflow_mode': master.catalog['workflow']['mode'],
+                          'product_implementation_enabled': False,
+                          'blocked_phases': {p: master.phase_block(p) for p in master.phases if master.phase_block(p)},
+                          'phase_states': {k: v['status'] for k, v in master.state['phases'].items()},
+                          'campaign': load_json(master.home / 'campaign.json') if (master.home / 'campaign.json').exists() else None,
                           'last_outcome': master.state['last_outcome'], 'state': str(master.state_path), 'plan_matches_saved_state': plan_current}, indent=2))
         return 0
     if args.action == 'stop':
@@ -1406,8 +2764,13 @@ def main():
             master.protected = protected_hashes(ROOT)
             master.controller_review(folder)
         return 0
+    if args.action == 'campaign':
+        if args.retry_blocked:
+            parser.error('Campaign cannot bypass blocked/no-progress deferrals; inspect and repair them explicitly')
+        outcome = master.campaign(args.max_seconds, args.max_phases)
+        return 0 if outcome == 'proposal_ready' else 2
     outcome = master.run(args.max_phases, args.max_seconds, retry_blocked=args.retry_blocked)
-    return 0 if outcome in {'catalog_slices_accepted_mission_open', 'phase_limit'} else 2
+    return 0 if outcome in {'catalog_slices_accepted_mission_open', 'phase_limit', 'proposal_reviewed_implementation_held'} else 2
 
 
 if __name__ == '__main__':

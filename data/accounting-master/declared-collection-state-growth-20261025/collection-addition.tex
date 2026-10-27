@@ -1,0 +1,65 @@
+\paragraph{A credit sale must create the claim that can later be collected.}
+The fixed population above can follow claims already present at opening. A new
+sale poses a different problem: the invoice identifier, customer and payment
+terms must enter the state when the receivable arises. Increasing only the
+aggregate receivable account leaves later collection without an identified
+claim. Reserving zero-valued invoices before they exist would instead confuse
+absence with an existing claim whose balance happens to be zero.
+
+The additive \texttt{CompanyMemoryTypes/1} declaration distinguishes fixed
+records, exact scalar values and finite maps of typed records. An empty map
+contains no claims. Once a sale inserts an invoice, each of its actual fields
+has an explicit type, including the company and currency context of its
+monetary amount. \texttt{CompanyBookTransition/2} checks that these declarations
+agree with the current book and its memory schema. It permits insertion of a
+complete map entry and replacement of a scalar field. It refuses duplicate
+identities, incomplete records, incompatible types and excess capacity. Map
+keys remain single identities even when they contain slashes or tildes.
+The frozen schema validator does not express the declared capacity, so the
+successor checks the typed population again after staging and before returning
+the proposed book. Monetary effects, memory changes and postconditions must
+all succeed; a failure leaves the supplied book unchanged.
+
+Consider a separate synthetic company opening with cash of USD~100, inventory
+of USD~20 and equity of USD~120. It sells two units costing USD~5 each on
+2~January 2027 for consideration of USD~30, due on 31~January. The declared sale
+creates the named customer's invoice for USD~30 and records its date and sale
+event. At the same step it debits receivables and credits revenue by USD~30,
+then debits cost of sales and credits inventory by USD~10. There is no cash
+movement. A receipt of USD~10 on 15~January debits cash, credits receivables
+and reduces only this invoice to USD~20. Receipts identify both the invoice
+and its declared customer; neither another customer's label nor a payment
+larger than the remainder is accepted.
+
+\texttt{DeclaredReceivableLifecycle/1} requires the sum of invoice remainders
+to equal the receivable account before and after each successful command.
+It begins with an explicitly empty claim population; the preceding profile
+retains its separate opening-claim example. Assessment uses the same declared
+strictly-after-due-date convention and contiguous half-open windows. An
+assessment on 31~January records zero overdue; one on 28~February records
+USD~20. These operations update invoice memory without a journal or cash
+flow. Each invoice records whether it has been assessed and at which date.
+An invoice created after an earlier assessment therefore remains visibly
+unassessed until a subsequent assessment includes it. A receipt preserves
+the old snapshot rather than silently recomputing it. Assessment seals its
+date against later sales or receipts intended to change that observation.
+
+With no further transactions in 2027, cash is USD~110, receivables USD~20 and
+inventory USD~10. Assets and equity are USD~140, profit is USD~20 and operating
+cash flow is USD~10. Provisional year-end carry transfers the profit to
+retained earnings and preserves every existing invoice field and the
+assessment cursor. Collecting the remaining USD~20 in January 2028 raises
+cash to USD~130, clears the receivable and produces operating cash flow of
+USD~20 in that year. It leaves the prior overdue snapshot historical until
+the next declared assessment records zero.
+
+The versioned \texttt{DeclaredReceivableText/1} adapter uses the existing
+event, report and carry syntax with explicitly hashed lifecycle imports.
+Its checked executions reproduce the structured requests on two different
+charts of accounts. An unresolved or refused command retains earlier
+successful transactions and reports. These examples establish a bounded
+sale-to-collection composition, including identity creation and carry; they
+do not supply source-backed opening invoices, revised payment terms,
+impairment, tax, arbitrary method authoring or production durability. Those
+remain substantive requirements of the wider company simulator.
+

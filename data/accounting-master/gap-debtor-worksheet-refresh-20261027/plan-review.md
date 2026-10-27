@@ -1,0 +1,1 @@
+Skeptical audit: complete conditional issuer accounts do not establish creditor or acquisition methods. Inspect asset derecognition,classification and fair-value measurement; retain influence/control and tax dependencies. No global continuation veto; preserve independent prospective-policy work.

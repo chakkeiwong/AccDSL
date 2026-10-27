@@ -1,0 +1,3 @@
+# Refreshed master and gap program
+
+26 October 2026. The current design candidate is 5.17 (755-page main; 188-page simulation volume, 170 body pages). Preserved all 53 obligations, six interactions, 46 operations, nine literature gaps, 67 original failures and 48 literature extensions. Seven scoped deltas extend the existing 15 to 22; two cross-interface failures extend 14 to 16. All 18 broad packages remain open. Completed term/invariant/integration work receives credit, stale next actions are replaced, and concurrent carry work remains active. See verification.json for source and route checks; remaining-work.md and closure-program.md give the executable next sequence. No general design, real-company or independent-reader acceptance follows.

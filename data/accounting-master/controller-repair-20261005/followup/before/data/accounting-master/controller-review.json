@@ -1,0 +1,294 @@
+{
+  "verdict": "REVISE",
+  "issues": [
+    "worker-boundary: Worker evidence can be modified without detection. Master.worker excludes the current .packet.json, .recovery.json, .schema.json and .prompt.txt from both inventories. These files are created before the actual worker launch, but Master.process guards only protected files and selected supervisor controls. Consequently, even a read-only review that accidentally rewrites or deletes its supplied packet or recovery record can return AGREE without an integrity veto. This contradicts the stated read-only byte-preservation requirement and can destroy the evidence of what the worker actually received. Repair: after preparing these inputs and immediately before launch, pin their hashes and verify them on every exit path. Keep exclusions only for files that genuinely remain supervisor-managed mutable outputs; bind those outputs separately where necessary.",
+    "worker-boundary: Configuration-query subprocesses bypass ordinary-interruption cleanup. _worker_result.config_query uses subprocess.run directly rather than the registered bounded process lifecycle. subprocess.run's timeout handles its direct child, but it does not provide the supplied controller's process-group registration and cleanup on KeyboardInterrupt. In particular, Python's Popen context manager only briefly waits after KeyboardInterrupt and can leave the query running; the enclosing worker integrity check inventories files, not this child. If handled termination raises another exception, context-manager waiting can instead exceed the declared query timeout. Read-only configuration inspection does not eliminate this lifecycle defect. Repair: run queries through an equivalent bounded, registered lifecycle with captured output and guaranteed cleanup on handled interruption, preserving the absolute worker cutoff. The precise signal path depends on the omitted catch_termination implementation.",
+    "scheduler: P2 — Stale terminal readiness can become current campaign readiness. In Master.reconcile_campaign_invocation, runner.lock protects validation of the completed manifest, but current state and proposal evidence are never revalidated. After a campaign run reports proposal_reviewed_implementation_held, a serialized ordinary invocation can invalidate proposal acceptance before reconciliation. Reconciliation still consumes the historical result and sets status='proposal_ready'; campaign then exits and returns that status. This bypasses the current-evidence check implemented for the separate cached-proposal_ready startup path. Preserve the completed invocation and its progress exactly once, but before publishing campaign readiness, reload state and validate current protection and proposal_gate under runner.lock. If current evidence fails, retain the historical success while recording needs_supervisor_repair with the current failure reason. Add a regression that interposes an ordinary invocation invalidating proposal evidence between terminal run publication and reconciliation.",
+    "phase-plan-repair: `Master.worker` unconditionally excludes `data/accounting-master/events.jsonl`, `data/accounting-master/active-process.json`, and `data/accounting-master/stop-request.json` from `worker_inventory` for every role. Consequently a read-only review worker can modify, truncate, or create these files without `touched` detecting the change, and an editable worker can alter controller runtime state without the integrity veto. This contradicts the stated requirement that read-only reviewers leave project bytes unchanged and weakens evidence/state protection. Repair by separating supervisor-owned runtime mutations from worker output: snapshot/hash these files before launch, permit only explicitly identified supervisor updates, and reject any worker-originated change (or move all runtime updates behind a controller-only mechanism). Add regression coverage for modification, truncation, and deletion by both read-only and editable workers.",
+    "phase-plan-repair: `Master.check_phase` returns immediately through the `check_override` branch after only stale-input checking and writing `checks.json`; it skips deliverable existence checks, `validate_artifact_contract`, checker-capture freshness/hash validation, historical-input resolution, and the final protection check. A positive override can therefore make `acceptance_ready` true and allow result review/acceptance while required artifacts or checker evidence are absent or invalid. Repair by routing override results through the same post-processing and contract checks as normal checks, or reject overrides outside an explicitly test-only mode before scheduling/acceptance.",
+    "evidence: P1 — verify_builtin validates the supplied result dictionary without establishing that it equals the saved primary deliverable. In scripts/accounting_master_support.py, the deliverables loop checks only is_file(); P01 then validates records from result, never loading source-work-register.json. P00 similarly uses result for the baseline summary without loading baseline.json. Consequently, a correct returned result alongside a stale, truncated or different saved primary deliverable can receive checks.json passed=true and a deterministic PASS review. Merely hashing that deliverable later preserves the wrong bytes rather than validating them. Repair: load the required primary JSON deliverable, require exact agreement with the returned result, and perform independent validation on that loaded value. Bind the checked primary bytes into the verification evidence and verify that binding before acceptance. Add regressions that retain a valid result argument while replacing the saved primary deliverable with malformed JSON and with a different valid object; both must prevent PASS."
+  ],
+  "scope_reviews": [
+    {
+      "scope": "process-lifecycle",
+      "assumptions": [
+        "The supervisor runs on Linux with readable /proc, usable pidfds, and visibility of every process in the initial worker group.",
+        "No SIGCHLD handler or other code reaps the child before terminate_group completes; retaining the unreaped leader is essential to its PID-reuse protection.",
+        "Missing caller interface: on_spawn durably saves the identity before returning; active-process status becomes finished only after successful cleanup; cleanup failure prevents further scheduling.",
+        "Missing lock interface: the same stable lock file covers recovery and execution, and workers do not replace or unlink it.",
+        "Workers remain in the initial process group, as explicitly required by the supplied operating assumptions."
+      ],
+      "checks": [
+        "Inspected launch, identity capture and registration ordering: handled SIGINT/SIGTERM are blocked until registration, and finally attempts cleanup before restoring the mask.",
+        "Inspected normal exit and timeout cleanup: WNOWAIT preserves the leader until descendant signalling finishes; unsuccessful quiescence raises a continuation veto.",
+        "Inspected recovery: boot mismatch avoids signalling current processes; identity mismatch vetoes ambiguous ownership; pidfds bind signals to individual processes.",
+        "Inspected recovery enumeration: members must be observed stopped with retained handles before termination; another scan accounts for children created during freezing.",
+        "Inspected deadline and stop handling: the final pre-launch check can return launched=false, and an exit first observed after the cutoff remains a timeout.",
+        "Treated the reported 210 passing tests and supplied test names as supporting evidence only; no test bodies were supplied and no tests were run."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_worker_clock.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "The packet supplies lifecycle functions but not their registration, finalization and lock-owning callers. Those interface assumptions remain unverified by this review.",
+        "Timeout enforcement is polling-based, with additional bounded termination grace periods. Preparation, callbacks and filesystem operations are not independently timed, so the cutoff is not a hard wall-clock bound on every supervisor operation.",
+        "Ambiguous recovery deliberately stops for inspection, including an absent or zombie leader with surviving descendants. This preserves safety but does not guarantee automatic recovery of every stale process record.",
+        "Atomic publication, frozen-evidence protection, reusable command approval and phase acceptance implementations are outside the supplied lifecycle excerpts.",
+        "This verdict establishes no accounting or scientific correctness, completeness of the 192-report source panel, closure of original gaps, or human acceptance."
+      ],
+      "steps": [
+        "Performed the requested static, packet-only review without tools, commands, file access or project-history lookup.",
+        "Traced ordinary interruption, successful child exit, timeout escalation, stale identity and restart recovery against the stated containment scope."
+      ],
+      "summary": "AGREE for the supplied process-lifecycle implementation under the stated and explicitly identified caller assumptions. No concrete blocking defect was established within this packet.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "permissions-install",
+      "assumptions": [
+        "The explicit install-and-run authorization described in the packet remains valid.",
+        "Missing interface assumption: ~/.codex/rules is the active policy directory for this invocation; no alternate CODEX_HOME redirects rule loading.",
+        "Missing interface assumption: Master.run and Master.campaign require current controller review before execution, including after installation recovery. Their implementations are not supplied.",
+        "The stated atomic-write, writer-lock, worker-recovery and protection interfaces hold. Controllers and workers are trusted within the supplied interruption model."
+      ],
+      "checks": [
+        "Reviewed only the supplied packet; used no tools, commands or external history.",
+        "Checked the fixed entrypoint prefix against the supplied rule semantics. Inline match examples do not restrict runtime actions; private operations rely on validate_internal.",
+        "Traced prepared, published and complete installation states, including interruption after rule publication and after authorization creation.",
+        "Checked that publication preserves conflicting rules and that pending recovery rejects changed candidates, controller hashes and original authorization.",
+        "Checked internal parent identity, capability consumption, inherited lock identity, active phase and output freshness requirements.",
+        "Treated the reported 210 passing tests as supporting control-plane evidence, without inferring assertions from test names."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "The supplied test names and passing summary do not expose test bodies; regression coverage could not be independently assessed.",
+        "The displayed policy-check results omit campaign, although install_rule checks every PUBLIC_ACTIONS entry, including campaign.",
+        "Effective-policy checks cover the enumerated local rule files. They do not establish that managed policy permits execution or that the application has loaded the installed file.",
+        "Installation recovery and private-helper validation depend on omitted implementations of atomic_json, exclusive_lock, process_identity and supervisor grant creation.",
+        "This scoped agreement does not establish accounting correctness, completeness of the 192-report source panel, scientific validity or human acceptance."
+      ],
+      "steps": [
+        "Audited the review scope against the stated trusted-process and ordinary-interruption guarantees.",
+        "Traced installation publication, authorization preservation and resumable recovery.",
+        "Reviewed public dispatch and private-helper permission boundaries."
+      ],
+      "summary": "AGREE for the supplied permissions-install scope. No concrete blocking defect is established by the packet; installation preserves existing policy and authorization, supports interrupted recovery, and separately guards private helper execution.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "worker-boundary",
+      "assumptions": [
+        "Workers and controller are trusted; deliberate detachment and uncatchable termination during registration are excluded.",
+        "The supplied interfaces describe omitted controller behavior. Implementations of bounded_process, catch_termination and defer_shutdown were not supplied."
+      ],
+      "checks": [
+        "Statically traced worker admission, configuration queries, response validation, review retries and post-worker integrity checks.",
+        "Confirmed role-specific verdict validation, rejection of AGREE with unresolved issues, and separate verification reserves.",
+        "Used the reported 210 passing tests as supporting evidence only; test bodies were not supplied and no tests were run."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "Worker evidence can be modified without detection. Master.worker excludes the current .packet.json, .recovery.json, .schema.json and .prompt.txt from both inventories. These files are created before the actual worker launch, but Master.process guards only protected files and selected supervisor controls. Consequently, even a read-only review that accidentally rewrites or deletes its supplied packet or recovery record can return AGREE without an integrity veto. This contradicts the stated read-only byte-preservation requirement and can destroy the evidence of what the worker actually received. Repair: after preparing these inputs and immediately before launch, pin their hashes and verify them on every exit path. Keep exclusions only for files that genuinely remain supervisor-managed mutable outputs; bind those outputs separately where necessary.",
+        "Configuration-query subprocesses bypass ordinary-interruption cleanup. _worker_result.config_query uses subprocess.run directly rather than the registered bounded process lifecycle. subprocess.run's timeout handles its direct child, but it does not provide the supplied controller's process-group registration and cleanup on KeyboardInterrupt. In particular, Python's Popen context manager only briefly waits after KeyboardInterrupt and can leave the query running; the enclosing worker integrity check inventories files, not this child. If handled termination raises another exception, context-manager waiting can instead exceed the declared query timeout. Read-only configuration inspection does not eliminate this lifecycle defect. Repair: run queries through an equivalent bounded, registered lifecycle with captured output and guaranteed cleanup on handled interruption, preserving the absolute worker cutoff. The precise signal path depends on the omitted catch_termination implementation."
+      ],
+      "next_actions": [
+        "Protect prepared worker input files after their final supervisor write; add regressions for alteration and deletion on both successful and failed worker exits.",
+        "Add bounded cleanup for configuration queries; exercise handled interruption during a hanging query and confirm the child is gone before another worker can launch.",
+        "Rerun relevant controller checks and obtain a fresh review of the repaired boundary."
+      ],
+      "residuals": [
+        "The packet does not expose the implementations needed to independently verify process-group cleanup, lock ownership, command-rule matching or the complete phase acceptance state machine.",
+        "The accepted 192-report source panel, structural checks and scoped internal acceptance do not establish accounting correctness, scientific validity or human acceptance."
+      ],
+      "steps": [
+        "Reviewed only the supplied packet without tools, commands, file reads or project-history lookup.",
+        "Kept findings within accidental failure, handled interruption and evidence-preservation scope."
+      ],
+      "summary": "Two worker-boundary defects remain: prepared worker evidence is excluded from integrity enforcement, and configuration queries lack the controller's interruption-safe subprocess lifecycle.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "state-refresh",
+      "assumptions": [
+        "All mutating entrypoints acquire the exclusive writer lock and reload persisted state under that lock before refreshing or scheduling; those callers are not supplied.",
+        "Acceptance creation binds all required checker inputs, outputs and review evidence into evidence_hashes. The supplied refresh code verifies recorded hashes but cannot establish whether that inventory is complete.",
+        "proposal_gate independently validates current readiness evidence, and consumers reject mismatched derived-view generations or rebuild them from canonical state.",
+        "Trusted workers remain in their initial process group, as specified."
+      ],
+      "checks": [
+        "Accepted evidence with missing hashes, changed bytes, changed phase contracts or changed prerequisite evidence becomes stale.",
+        "The second invalidation pass follows the validated topological catalog order, propagating stale prerequisite status through accepted descendants.",
+        "Eligibility excludes held implementation work, requires accepted prerequisites and suppresses unchanged external blocks and deferred inputs.",
+        "Observed checkpoint disappearance vetoes reload and save rather than recreating cached state.",
+        "Refresh commits canonical state before publishing derived views and includes current outcomes, issues, residuals and next actions.",
+        "State validation requires mission_complete=false and every original gap to remain open."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_catalog.json",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md",
+        "docs/plans/accounting-master-controller-repair-20261005.md"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "Lock acquisition, acceptance inventory construction, atomic-write implementation, proposal_gate and derived-view consumers are supplied as interfaces rather than executable bodies. Their guarantees remain interface assumptions for this bounded review.",
+        "The derived files are published separately. Handled interruption can leave mixed generations until refresh rebuilds them; downstream consumers must enforce the stated freshness assumption.",
+        "Directory retry fingerprints exclude symlink files. The packet does not specify whether such files are forbidden as retry inputs or have their resolved targets bound elsewhere.",
+        "The reported 210 passing tests and listed test names are supporting control-plane evidence; their bodies were not supplied or executed.",
+        "This review establishes no accounting correctness, scientific completeness or human acceptance for the 192-report source panel or proposal."
+      ],
+      "steps": [
+        "Reviewed only the supplied state validation, persistence, invalidation, fingerprinting and refresh code against the stated interfaces.",
+        "Traced checkpoint loss, upstream evidence changes, phase-contract changes and interruption between canonical and derived publication without using tools."
+      ],
+      "summary": "AGREE for the bounded state-refresh packet: no concrete blocking defect is established in the supplied code under the explicitly stated interface assumptions. This verdict does not extend to omitted controller implementations.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "scheduler",
+      "assumptions": [
+        "The supplied interfaces govern omitted helpers; their implementations were not independently inspected.",
+        "Ordinary run invocations may execute between a campaign run releasing runner.lock and campaign reconciliation acquiring it, as the supplied execution contract explicitly anticipates.",
+        "Workers are trusted and remain in their initial process group; the excluded containment threat models are not review requirements."
+      ],
+      "checks": [
+        "Traced campaign dispatch, terminal-result reconciliation, cached readiness, deadline preservation and stop handling.",
+        "Inspected phase repair, replanning, verification and acceptance transitions in the supplied implementation.",
+        "The packet reports 210 passing tests. Test bodies were not supplied, and no tests were run; counts and names provide supporting control-plane evidence only."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "P2 — Stale terminal readiness can become current campaign readiness. In Master.reconcile_campaign_invocation, runner.lock protects validation of the completed manifest, but current state and proposal evidence are never revalidated. After a campaign run reports proposal_reviewed_implementation_held, a serialized ordinary invocation can invalidate proposal acceptance before reconciliation. Reconciliation still consumes the historical result and sets status='proposal_ready'; campaign then exits and returns that status. This bypasses the current-evidence check implemented for the separate cached-proposal_ready startup path. Preserve the completed invocation and its progress exactly once, but before publishing campaign readiness, reload state and validate current protection and proposal_gate under runner.lock. If current evidence fails, retain the historical success while recording needs_supervisor_repair with the current failure reason. Add a regression that interposes an ordinary invocation invalidating proposal evidence between terminal run publication and reconciliation."
+      ],
+      "next_actions": [
+        "Implement current-evidence validation when reconciliation promotes the campaign to proposal_ready, without rewriting historical invocation evidence.",
+        "Run the targeted stale-readiness regression and existing campaign reconciliation tests, then obtain a fresh bounded review."
+      ],
+      "residuals": [
+        "Definitions of refresh, reload_state, exclusive_lock, controller_review, main and approval installation were omitted. Their integrity, state invalidation, locking and narrow-entrypoint guarantees are interface assumptions, not independently verified implementation findings.",
+        "The public methods expose require_review=False. Whether production callers may use it safely depends on omitted entrypoint and authorization checks; this packet does not establish an approval bypass.",
+        "Product implementation remains disabled even in the identified stale-readiness path, limiting its impact to an incorrect campaign readiness report.",
+        "The 192-report source panel, structural checks and internal phase acceptance do not establish accounting correctness, scientific validity, closure of all gaps or human acceptance."
+      ],
+      "steps": [
+        "Performed the requested packet-only review without tools, commands, file reads or project-history retrieval."
+      ],
+      "summary": "Revise campaign reconciliation: it can report proposal readiness from a completed run after intervening ordinary work has invalidated current evidence.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "phase-plan-repair",
+      "assumptions": [
+        "The supplied `check_override` and worker execution paths are reachable through ordinary controller operation or test configuration; if `check_override` is provably test-only, issue 2 is limited to test-harness safety.",
+        "Read-only reviewers are required to leave every project byte unchanged, including controller runtime records."
+      ],
+      "checks": [
+        "Reviewed the supplied controller/support excerpts and stated interfaces only.",
+        "Compared worker integrity exceptions and check-phase branches against the packet's acceptance and preservation criteria."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py",
+        "docs/plans/accounting-master-controller-repair-20260505.md"
+      ],
+      "issues": [
+        "`Master.worker` unconditionally excludes `data/accounting-master/events.jsonl`, `data/accounting-master/active-process.json`, and `data/accounting-master/stop-request.json` from `worker_inventory` for every role. Consequently a read-only review worker can modify, truncate, or create these files without `touched` detecting the change, and an editable worker can alter controller runtime state without the integrity veto. This contradicts the stated requirement that read-only reviewers leave project bytes unchanged and weakens evidence/state protection. Repair by separating supervisor-owned runtime mutations from worker output: snapshot/hash these files before launch, permit only explicitly identified supervisor updates, and reject any worker-originated change (or move all runtime updates behind a controller-only mechanism). Add regression coverage for modification, truncation, and deletion by both read-only and editable workers.",
+        "`Master.check_phase` returns immediately through the `check_override` branch after only stale-input checking and writing `checks.json`; it skips deliverable existence checks, `validate_artifact_contract`, checker-capture freshness/hash validation, historical-input resolution, and the final protection check. A positive override can therefore make `acceptance_ready` true and allow result review/acceptance while required artifacts or checker evidence are absent or invalid. Repair by routing override results through the same post-processing and contract checks as normal checks, or reject overrides outside an explicitly test-only mode before scheduling/acceptance."
+      ],
+      "next_actions": [
+        "Patch the worker inventory/integrity boundary and apply the complete check validation pipeline to overrides, then add focused regressions for both defects."
+      ],
+      "residuals": [
+        "This packet does not establish accounting correctness, scientific validity, human acceptance, or closure of the 192-report mission gaps; test counts remain control-plane evidence only.",
+        "The packet does not specify whether `check_override` is production-inaccessible. That reachability assumption should be made explicit in code and enforced if the override is intended only for tests."
+      ],
+      "steps": [
+        "Revise the two identified interfaces before accepting the controller repair.",
+        "Re-run the existing controller acceptance suite and inspect the new integrity and override-validation evidence."
+      ],
+      "summary": "Two control-plane bypasses remain: worker integrity ignores mutable runtime records, and the check override bypasses required artifact/checker validation.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "evidence",
+      "assumptions": [
+        "The stated trusted-worker, initial-process-group and ordinary-interruption boundaries apply.",
+        "Protection, locking and process supervision outside the supplied methods operate as described; their implementations were not independently inspected.",
+        "The immutable coverage inputs establish the accepted 192-report panel. The supplied source-register functions check counts against coverage metadata rather than independently requiring 192."
+      ],
+      "checks": [
+        "Reviewed the supplied evidence hashing, preservation, attribution, recovery, builtin validation and proposal-readiness code without tools.",
+        "Compared proposal checks with the supplied current proposal test bodies.",
+        "Treated the reported 210 passing tests and other test names as supplied control-plane evidence, not independently executed checks or accounting validation."
+      ],
+      "evidence": [
+        "scripts/accounting_master_support.py",
+        "scripts/run_accounting_master.py",
+        "scripts/check_accounting_proposal.py",
+        "tests/test_accounting_proposal_current.py",
+        "docs/plans/accounting-master-program.md"
+      ],
+      "issues": [
+        "P1 — verify_builtin validates the supplied result dictionary without establishing that it equals the saved primary deliverable. In scripts/accounting_master_support.py, the deliverables loop checks only is_file(); P01 then validates records from result, never loading source-work-register.json. P00 similarly uses result for the baseline summary without loading baseline.json. Consequently, a correct returned result alongside a stale, truncated or different saved primary deliverable can receive checks.json passed=true and a deterministic PASS review. Merely hashing that deliverable later preserves the wrong bytes rather than validating them. Repair: load the required primary JSON deliverable, require exact agreement with the returned result, and perform independent validation on that loaded value. Bind the checked primary bytes into the verification evidence and verify that binding before acceptance. Add regressions that retain a valid result argument while replacing the saved primary deliverable with malformed JSON and with a different valid object; both must prevent PASS."
+      ],
+      "next_actions": [
+        "Bind builtin validation to the actual saved primary deliverables and add the targeted mismatch regressions.",
+        "Rerun the controller suites and obtain fresh read-only review of the repaired controller before resuming execution."
+      ],
+      "residuals": [
+        "The packet does not show whether the builtin caller already enforces exact returned-result versus saved-deliverable equality. If such a guard exists, supply that interface and its regression evidence; file existence, nonempty-content checks or hashing alone do not establish equality.",
+        "The source-register input-hash validator accepts any nonempty matching map; complete binding to coverage and source-evidence therefore depends on the producer and surrounding acceptance logic.",
+        "The proposal checker explicitly establishes structural evidence only. Substantive accounting adequacy, actual rendered-page inspection and preservation of mathematical content remain responsibilities of independent review.",
+        "Internal readiness correctly retains human_acceptance=pending and implementation_enabled=false. Neither source checks nor this review closes the accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Traced primary builtin results from production through deterministic validation.",
+        "Checked proposal freshness and review-process bindings.",
+        "Separated the concrete validation defect from interfaces and execution behavior not supplied."
+      ],
+      "summary": "REVISE: builtin deterministic acceptance does not bind the validated result to the saved primary deliverable, leaving a concrete false-PASS path unless an omitted caller explicitly closes it.",
+      "verdict": "REVISE"
+    }
+  ],
+  "controller_hashes": {
+    "scripts/run_accounting_master.py": "1bb6076296649747cedd3101c128862657b19a571f2ecb6d9f1d97aa192da4d2",
+    "scripts/accounting_master_support.py": "0e12215cb74cfcaef5ee008a934cbc3347d2910e33b96c2e978ed4a31ad5ae9d",
+    "scripts/accounting_master_catalog.json": "2ec65623fe2b048c01f37599c3193f99a42b29767112cfe13da136964b793e1c",
+    "scripts/accounting_master_response.schema.json": "4b492e3495e6a64bf8e74d0798362b3c52073aef182c06dd9a06a658184f1269",
+    "tests/test_accounting_master.py": "f5077db67e3b0c9d0ee135505877e24bcb874acd9804e179ec6a549733a53ddb",
+    "docs/plans/accounting-master-program.md": "0c8b4f28de6709f4eb411fb6073f833393361676c9ad2aaf38b3957954ebf87b",
+    "scripts/check_accounting_proposal.py": "4087aa778b940977639eeb52f8249546b57221b20d4537b03703f419139a320a",
+    "tests/test_accounting_proposal.py": "07b41c28c10740767de5d01f9fb4c6082589074ec842069106aa73a7c7224fcd",
+    "docs/plans/accounting-p15-execution-repair-20261004.md": "d389d0e38822cea3a822545c3af8fb7b7db0b87e4a7a2be0b176e07633f3ca69",
+    "scripts/accounting_worker_clock.py": "6d23817fcc160afd9245172d0cf8e65425f097694afa2300fe1fc54d9253ac61",
+    "docs/plans/accounting-worker-timing-repair-20261004.md": "68458dd071fa7d77656df5a09d2170a0b2ca4ac849bb54b3cb6804de184d9763",
+    "docs/plans/accounting-master-campaign-20261005.md": "5a74aba76821e8a660f4c394916a06ca3183f41a5d453d93c462561da7d741b2",
+    "tests/test_accounting_proposal_current.py": "3ed4678eb7b626e4d6d7f8ccfc4670950d610c3b6302c9a0a359ffdb62288c46",
+    "docs/plans/accounting-proposal-evidence-supplement-20261005.md": "472e57909ccf489d3e9ff88b112762187015e0771094d1ed1e87b9fe8e7b90ad",
+    "docs/plans/accounting-master-controller-repair-20261005.md": "6d420767951925b677a35c87b523a6e9e196d55a3e756663e3769ee883341df6"
+  },
+  "reviewed_at": "2026-10-05T08:42:43.001595+00:00"
+}

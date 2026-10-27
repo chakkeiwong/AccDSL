@@ -1,0 +1,140 @@
+{
+  "status": "proposed adapter conformance cases; no production adapter executed",
+  "record_semantics": {
+    "source_version": "full original SHA256 + immutable byte version + acquisition receipt; upstream indices/hashes retained as tool fields",
+    "occurrence": "source version + original locator + occurrence identity; never numeric-value identity",
+    "reading": "literal and transformed value separate; explicit known/unknown/conflicting context fields with supporting occurrences",
+    "admission": "proposal until a qualifying append-only review event; publication/ingestion/review/byte-vintage evidence separate",
+    "compatibility": "existing corpus annotation schema plus separate occurrence sidecar; final portable IR awaits P16"
+  },
+  "cases": [
+    {
+      "id": "AD01",
+      "kind": "real_source",
+      "input": {"case_file": "apple-instant-case.json", "fact_id": "f-134", "literal": "344,085", "scale": "6", "decimals": "-6", "instant": "2024-12-28"},
+      "expected": {"normalized_decimal": "344085000000", "reported_instant": "2024-12-28", "normalized_xbrl_boundary": "2024-12-29T00:00:00", "original_occurrences": 1, "review_status": "proposed"},
+      "reject": ["double application of inline scale", "decimals treated as amount scale", "2024-12-29 relabeled as source reported date", "missing exact original source occurrence"],
+      "evidence": ["A01", "A02", "A03", "A06", "X03"]
+    },
+    {
+      "id": "AD02",
+      "kind": "synthetic",
+      "input": {"unit_numerator": ["{http://www.xbrl.org/2003/iso4217}USD"], "unit_denominator": ["{http://www.xbrl.org/2003/instance}shares"], "value": "2.40"},
+      "expected": {"unit_numerator": ["{http://www.xbrl.org/2003/iso4217}USD"], "unit_denominator": ["{http://www.xbrl.org/2003/instance}shares"], "unit_kind": "currency_per_share", "review_status": "proposed"},
+      "reject": ["currency USD alone replaces complete unit"],
+      "evidence": ["A08", "X03"]
+    },
+    {
+      "id": "AD03",
+      "kind": "synthetic",
+      "input": {"facts": [{"occurrence_id": "o-parent", "literal": "100", "perimeter": "parent"}, {"occurrence_id": "o-group", "literal": "100", "perimeter": "consolidated"}]},
+      "expected": {"retained_occurrence_ids": ["o-parent", "o-group"], "proposed_assertion_count": 2, "alias_decisions": []},
+      "reject": ["merge by equal value", "merge by upstream context hash alone"],
+      "evidence": ["A04", "A07"]
+    },
+    {
+      "id": "AD04",
+      "kind": "synthetic",
+      "input": {"context_id": "ctx-typed", "dimensions": [{"dimension": "{urn:company}ContractAxis", "kind": "typed", "member_xml": "<contract xmlns='urn:company'>L-01</contract>"}]},
+      "expected": {"dimensions_retained": 1, "typed_member_original_xml_preserved": true, "review_status": "proposed", "unsupported_path_disposition": "retain source and unresolved context with typed issue"},
+      "reject": ["drop dimensions", "call absent explicit-member QName as if typed member were explicit", "unscoped conversion crash erases original filing"],
+      "evidence": ["A05", "X03"]
+    },
+    {
+      "id": "AD05",
+      "kind": "synthetic",
+      "input": {"values": [{"id": "zero", "literal": "0", "nil": false}, {"id": "nil", "literal": "", "nil": true}, {"id": "blank", "literal": "", "nil": false, "schema_default": null}, {"id": "defaulted", "literal": "", "nil": false, "schema_default": "5"}]},
+      "expected": {"zero": "reported zero proposal", "nil": "nil proposal", "blank": "unresolved empty reading", "defaulted": "derived schema-default proposal linked to taxonomy; no literal 5 claim"},
+      "reject": ["empty or nil becomes zero", "schema default becomes literal disclosed text"],
+      "evidence": ["A01", "X02", "X03"]
+    },
+    {
+      "id": "AD06",
+      "kind": "synthetic",
+      "input": {"source_sha256_a": "0000000000000000000000000000000000000000000000000123456789abcdef", "source_sha256_b": "1000000000000000000000000000000000000000000000000123456789abcdef"},
+      "expected": {"source_version_count": 2, "docling_origin_low64_equal": true, "use_low64_as_canonical_source_id": false},
+      "reject": ["truncated origin hash substitutes full SHA256"],
+      "evidence": ["C01", "D01"]
+    },
+    {
+      "id": "AD07",
+      "kind": "synthetic",
+      "input": {"page": 2, "page_width": 600, "page_height": 800, "bbox": {"l": 50, "t": 700, "r": 150, "b": 680, "coord_origin": "BOTTOMLEFT"}, "text": "100"},
+      "expected": {"physical_page": 2, "top_left_bbox": {"l": 50, "t": 100, "r": 150, "b": 120, "coord_origin": "TOPLEFT"}, "page_dimensions_preserved": true, "charspan_is_original_byte_range": false},
+      "reject": ["interpret bottom-left bbox in top-left frame", "derive source byte offsets from OCR character spans"],
+      "evidence": ["C02", "D05"]
+    },
+    {
+      "id": "AD08",
+      "kind": "synthetic",
+      "input": {"known_page_inventory": [1, 2, 3], "successful_pages": [1, 3], "failed_placeholder_pages": [2], "errors": [{"page": 2, "category": "TIMEOUT"}]},
+      "expected": {"status": "partial", "acquired_page_count": 3, "processed_page_count": 2, "unresolved_pages": [2], "semantic_closure": false},
+      "reject": ["three PageItems means all pages extracted", "drop unrelated pages 1 and 3 because page 2 failed"],
+      "evidence": ["D03", "D04"]
+    },
+    {
+      "id": "AD09",
+      "kind": "synthetic",
+      "input": {"docling_save_timestamp": "2026-10-05T09:00:00", "publication": null, "acquisition_receipt": {"source_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "ingested_at": "2026-10-05T01:00:00+00:00"}, "system_cutoff": "2026-10-05T02:00:00+00:00", "investor_cutoff": "2026-10-05T02:00:00+00:00"},
+      "expected": {"archival_raw": "available", "system_possession": "supported subject to verified receipt", "investor_information": "unresolved publication/byte-vintage", "docling_save_time_admitted_as_publication": false},
+      "reject": ["assume local timezone for naive save timestamp", "save timestamp establishes publication", "ingestion proves public byte vintage"],
+      "evidence": ["D03"]
+    },
+    {
+      "id": "AD10",
+      "kind": "synthetic",
+      "input": {"table_grid_position": [1, 1], "source_cell_present": false, "computed_grid_cell_text": ""},
+      "expected": {"source_blank_verified": false, "numeric_zero": false, "inventory_disposition": "unresolved missing source cell"},
+      "reject": ["synthesized blank grid cell becomes reported zero", "view-generated cell counted as acquired source unit"],
+      "evidence": ["C04"]
+    },
+    {
+      "id": "AD11",
+      "kind": "synthetic",
+      "input": {"original_source_literal": "100", "proposal": "120", "locator_resolves": true},
+      "expected": {"location_status": "valid", "support_status": "contradicted", "reading_acceptance": "rejected", "original_and_proposal_retained": true},
+      "reject": ["location existence interpreted as faithful source support"],
+      "evidence": ["C02"]
+    },
+    {
+      "id": "AD12",
+      "kind": "synthetic",
+      "input": {"proposal_occurrences": [{"id": "heading", "type": "table_header", "text": "USD millions"}, {"id": "p1", "type": "cell", "text": "2024"}, {"id": "p2", "type": "cell", "text": "2023"}, {"id": "v1", "type": "cell", "text": "100"}, {"id": "v2", "type": "cell", "text": "90"}], "header_edges": [{"header": "p1", "value": "v1"}, {"header": "p2", "value": "v2"}]},
+      "expected": {"v1_reporting_label": "2024", "v2_reporting_label": "2023", "value_scale": "6", "scope_support_occurrence": "heading", "exact_reporting_interval": "unresolved until dated financial context support"},
+      "reject": ["wrong-year attachment passes because digits match", "annual duration inferred from year label alone"],
+      "evidence": ["C04", "P03"]
+    },
+    {
+      "id": "AD13",
+      "kind": "synthetic",
+      "input": {"structured_items": [{"type": "picture", "child_text": "Debt due 2027"}], "markdown_traverse_pictures": false},
+      "expected": {"original_picture_and_child_text_retained": true, "presentation_omission_disposition": "omitted_from_requested_view", "missing_text_implies_no_disclosure": false},
+      "reject": ["Markdown output treated as complete acquired inventory"],
+      "evidence": ["C06"]
+    },
+    {
+      "id": "AD14",
+      "kind": "synthetic",
+      "input": {"reported_reference": "See Note 12 and subsidiary guarantee schedule", "targets": [{"id": "note12", "state": "located"}, {"id": "guarantee", "state": "unavailable"}], "max_expansions": 0},
+      "expected": {"all_reference_occurrences_retained": true, "located_target_expansion": "resource_exhausted", "unavailable_target_retained": true, "package_closure": false, "resume_frontier": ["note12"]},
+      "reject": ["successful page conversion proves reference closure", "budget exhaustion relabeled as target absence"],
+      "evidence": []
+    },
+    {
+      "id": "AD15",
+      "kind": "synthetic",
+      "input": {"reported_precision": "millions", "nearest_rounding_source_support": null, "amounts": [{"id": "a", "value": "100"}, {"id": "b", "value": "100.1"}]},
+      "expected": {"source_assertions_retained": 2, "alias_decision": null, "rounding_interval": "unresolved unless explicit supported convention or selected assumption", "probability_distribution": null},
+      "reject": ["overlapping inferred ranges establish assertion identity", "display precision establishes issuer tie convention"],
+      "evidence": ["A07", "A09"]
+    },
+    {
+      "id": "AD16",
+      "kind": "synthetic",
+      "input": {"original_bytes_ascii": "abcdef", "stream_initial_offset": 3},
+      "expected": {"immutable_source_hash_covers": "abcdef", "retained_docling_helper_hash_covers": "def", "stream_reinitialized_before_adapter_use": true},
+      "reject": ["hash of unread stream suffix replaces original full-byte SHA256", "cursor mutation silently changes subsequent parsing inputs"],
+      "evidence": ["D01"]
+    }
+  ]
+}

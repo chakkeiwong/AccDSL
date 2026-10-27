@@ -1,0 +1,49 @@
+APPENDIX A. PORTABLE OPERATION REFERENCE
+688
+The event must name an existing claim belonging to the stated customer. Its prior-term input
+must equal the claim’s current term. The new term identifier must be nonblank, unused and
+different from the sentinel none; the premise must also be nonblank. The new due date cannot
+precede the event’s effective date. Finally, the effective date must be strictly later than that of
+the selected prior term. Equal dates would make the prospective sequence ambiguous and are
+refused, even when the supplied snapshot is otherwise valid.
+A nested lookup is permitted only after the declaration establishes the presence of the parent
+claim and the selected child term. This is an ordering requirement on the checks, not an inference
+from a successful dictionary lookup. The following binding fragment names the prior term’s
+effective date; the two referenced stages must appear earlier and establish the corresponding
+memberships. The surrounding rule declares its inputs and comparison.
+binding "previous";
+kind nested_map_field;
+pointer "/claims";
+key_input "claim_id";
+parent_after_stage "claim_exists";
+child_pointer "/terms";
+child_key_input "prior_term";
+field "effective";
+after_stage "prior_exists";
+end;
+The selected eligibility engine checks those dependencies when compiling the rule. It then
+resolves the bound values against the actual book and event. The preserved guarded-predicate
+evaluator owns the comparisons. Adding nested membership and field lookup does not introduce
+a second arithmetic or date language.
+Construct the complete nested change.
+An eligible amendment constructs three ordered
+memory operations: insert the new term record, replace the claim’s current-term identifier,
+and replace its current due date. The inserted record states due date, effective date, event
+identifier, predecessor and premise. Each value comes from an explicitly typed parameter. The
+parameterized constructor builds the full method and typed transition request; it does not
+import a stored native method as the answer for the current event.
+An assessment has a different construction. For every supplied claim, it inserts a complete
+assessment record and replaces five summary fields: latest assessment, assessed flag, assessment
+date, assessed remaining amount and overdue amount. The record retains the applicable term
+identifier, so later amendments cannot change the basis of this assessment. A final operation
+advances the assessment cursor to the end of the checked window. In the retained one-claim
+case this produces seven writes. Two claims produce thirteen writes, with a single sequence of
+operation identifiers across both claims and the suffix.
+The previous ordered expander admitted only scalar fields in each row and scalar replacements.
+It could not represent an insertion into the nested assessment map. Its successor therefore
+checks a declared nested row schema and recursively checks complete write templates. A record
+path must name a declared field; a dynamic map key must be typed text. Insertions target
+map members and supply the entire declared record. Replacements target scalar leaves with
+the correct type. Both conditional branches are checked, including the branch not taken by the
+current claim.
+Validation precedes expansion even when the claim map is empty. An empty map then emits

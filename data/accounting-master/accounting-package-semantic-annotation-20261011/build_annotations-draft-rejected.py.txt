@@ -1,0 +1,131 @@
+"""Build bounded semantic annotations from retained JPMorgan filing text."""
+from datetime import datetime, timezone
+from pathlib import Path
+import hashlib
+import json
+import re
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = Path(__file__).resolve().parent
+sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+norm = lambda s: " ".join(s.split())
+
+
+def page_record(text, page_no):
+    pages = text.split("\f")
+    assert 1 <= page_no <= len(pages)
+    start = sum(len(x) + 1 for x in pages[: page_no - 1])
+    raw = pages[page_no - 1]
+    return raw, start
+
+
+def bounded_quote(raw, section):
+    clean = norm(raw)
+    if section == "item1":
+        marker = "Part I Item 1. Business."
+    elif section == "item1a":
+        marker = "Item 1A. Risk Factors."
+    elif section == "item15":
+        marker = "Item 15. Exhibits, Financial Statement Schedules."
+    else:
+        marker = "Signatures"
+    pos = clean.find(marker)
+    if pos < 0:
+        pos = 0
+    return clean[pos : pos + (850 if section == "item15" else 700)]
+
+
+def main():
+    ledger = json.loads((ROOT / "data/accounting-master/accounting-package-ledger-20261011/package-ledger.json").read_text())
+    configs = {
+        2022: {"item1": 3, "item1a": 11, "item15": [40, 41, 42, 43], "signatures": 306,
+               "item1a_printed": "9-32", "item15_printed": "38-41", "signature_printed": "304"},
+        2023: {"item1": 3, "item1a": 11, "item15": [42, 43, 44, 45], "signatures": 324,
+               "item1a_printed": "9-33", "item15_printed": "40-43", "signature_printed": "322"},
+        2024: {"item1": 3, "item1a": 12, "item15": [46, 47, 48, 49], "signatures": 336,
+               "item1a_printed": "10-37", "item15_printed": "44-47", "signature_printed": "334"},
+        2025: {"item1": 3, "item1a": 11, "item15": [41, 42, 43, 44], "signatures": 330,
+               "item1a_printed": "9-31", "item15_printed": "39-42", "signature_printed": "328"},
+    }
+    claims = {
+        "item1": "The opening Business section identifies the registrant, its incorporation and worldwide operations, reports year-end assets and stockholders’ equity, and introduces reportable business segments.",
+        "item1a": "The Risk Factors section says the listed factors are not a complete set and describes risks that could materially and adversely affect the firm’s business, results, financial condition or operations.",
+        "item15": "Item 15 identifies the consolidated financial statements and schedules and lists exhibits, including exhibits incorporated by reference to other filings.",
+        "signatures": "The signatures page states that the report is signed under Exchange Act Section 13 or 15(d), identifies JPMorgan Chase & Co., and records officer/director signatures and the signing date.",
+    }
+    dependencies = {
+        "item1": {"unresolved_incorporated_references": [], "notes": "The bounded opening page is self-contained for the recorded identity and overview claim; the complete Business section and related MD&A remain outside this row."},
+        "item1a": {"unresolved_incorporated_references": [], "notes": "The bounded risk-factor page expressly limits the list; no incorporated document is asserted from this page."},
+        "item15": {"unresolved_incorporated_references": ["Cited Form 8-K, prior Form 10-K, registration-statement and other exhibit documents are referenced but are not acquired or checked in this unit."], "notes": "The exhibit schedule is annotated as a dependency map, not as closure of the referenced documents."},
+        "signatures": {"unresolved_incorporated_references": [], "notes": "No incorporated document is asserted from the bounded signatures page."},
+    }
+    rows = []
+    for row in ledger["records"]:
+        year = row["period_year"]
+        cfg = configs[year]
+        text_path = ROOT / row["roles"]["complete_issuer_10k"]["path"].replace("sources/", "sources/").replace(".pdf", ".txt")
+        text = text_path.read_text(errors="replace")
+        pages = text.split("\f")
+        for section in ["item1", "item1a", "item15", "signatures"]:
+            pnos = cfg[section] if isinstance(cfg[section], list) else [cfg[section]]
+            primary = pnos[0]
+            raw, offset = page_record(text, primary)
+            quote = bounded_quote(raw, section)
+            assert quote and quote in norm(raw)
+            refs = sum(len(re.findall(r"incorporated\s+by\s+reference", norm(pages[p - 1]), flags=re.I)) for p in pnos)
+            if section == "item1":
+                printed = "1"
+                status = "opening substantive Business page; full Item 1 spans additional pages"
+            elif section == "item1a":
+                printed = cfg["item1a_printed"]
+                status = "first substantive Risk Factors page; full Item 1A spans the printed range"
+            elif section == "item15":
+                printed = cfg["item15_printed"]
+                status = "bounded Item 15 exhibit/schedule pages; cited external instruments remain unresolved"
+            else:
+                printed = cfg["signature_printed"]
+                status = "ending signatures page"
+            rows.append({
+                "annotation_id": f"jpmorgan-{year}-{section}",
+                "year": year,
+                "issuer": row["issuer_id"],
+                "section": section,
+                "selected_annual_path": row["roles"]["selected_annual"]["path"],
+                "selected_annual_sha256": row["roles"]["selected_annual"]["sha256"],
+                "complete_10k_path": row["roles"]["complete_issuer_10k"]["path"],
+                "complete_10k_sha256": row["roles"]["complete_issuer_10k"]["sha256"],
+                "regulator_event": {k: row["roles"]["regulator_event"][k] for k in ["accession_number", "form", "report_date", "filing_date", "acceptance_date_time", "primary_document"]},
+                "selected_omission_notice": row["roles"]["selected_annual"]["omission_notice"],
+                "source_text_path": str(text_path.relative_to(ROOT)),
+                "source_text_sha256": sha(text_path),
+                "form_feed_page_primary": primary,
+                "form_feed_pages_section": pnos,
+                "printed_filing_page": printed,
+                "page_char_start": offset,
+                "page_char_end": offset + len(raw),
+                "quote_normalized_whitespace": quote,
+                "quote_is_non_toc_context": True,
+                "claim": claims[section],
+                "dependency": dependencies[section],
+                "incorporated_by_reference_occurrences_in_bounded_pages": refs,
+                "semantic_status": "bounded_annotation; package-wide semantic closure open",
+                "source_boundary": status,
+            })
+    output = {
+        "schema_version": "accdsl.jpmorgan_semantic_annotation.v1",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "plan": "docs/plans/accounting-jpmorgan-semantic-annotation-20261011.md",
+        "prior_section_map_manifest": "data/accounting-master/accounting-package-section-map-20261011/run-manifest.json",
+        "scope": "Four omitted JPMorgan 2022–2025 filing ranges; bounded Item 1/1A, Item 15 and signatures annotations",
+        "roles_preserved": ["selected_annual_counterpart", "complete_issuer_10k_candidate", "regulator_filing_event"],
+        "clocks_preserved": ["filing", "retrieval", "publication", "semantic"],
+        "annotations": rows,
+    }
+    (OUT / "annotations.json").write_text(json.dumps(output, indent=2, ensure_ascii=False) + "\n")
+    extracts = {r["annotation_id"]: {k: r[k] for k in ["source_text_path", "source_text_sha256", "form_feed_page_primary", "form_feed_pages_section", "printed_filing_page", "quote_normalized_whitespace"]} for r in rows}
+    (OUT / "quote-extracts.json").write_text(json.dumps(extracts, indent=2, ensure_ascii=False) + "\n")
+    print(json.dumps({"annotations": len(rows), "years": sorted({r['year'] for r in rows}), "sections": sorted({r['section'] for r in rows})}))
+
+
+if __name__ == "__main__":
+    main()

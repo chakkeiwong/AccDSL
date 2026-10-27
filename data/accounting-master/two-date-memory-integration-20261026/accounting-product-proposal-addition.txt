@@ -1,0 +1,242 @@
+PAGE 144
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+122
+Even this small construction exposed a consequential implementation mistake. Solving the
+draw-liquidity equation using the interior formula I = 100r gives a root at r = 0.0625. That
+formula applies only below the cap at 0.06. The root is irrelevant to the capped region and
+must not be inserted as though the interior formula still governed there. A root finder must
+check the domain of the formula that generated its candidate boundary.
+Open regions also require careful treatment of extrema. On 0.055 < r < 0.06, cash after drawing
+and paying is 6.25 −100r, so
+inf C = 0.25,
+sup C = 0.75.
+(17.8)
+Neither endpoint is attained within that open region. The point r = 0.06 attains cash 0.25,
+while r = 0.055 belongs to the ordinary-payment region. Reporting an interval without its
+endpoint status loses a distinction needed for strict contractual conditions.
+17.11.3
+Information can prevent an otherwise affordable action
+For the moment retain only histories with a committed facility. Every detailed history admits
+one of the two orders. This does not imply that the manager can select a feasible order using
+the information available at the decision date.
+Under the coarse signal, high means only that r > 0.04. It includes floating rates with interest
+below 5.5, where payment is possible but drawing is forbidden, and rates above 0.055, where
+drawing is possible but ordinary payment fails. The manager must issue the same order at
+indistinguishable histories. Neither order works throughout this signal class.
+Now suppose a second, explicit pre-decision signal reveals whether interest exceeds 5.5. The
+manager can pay when the trigger is false and draw and pay when it is true. This rule is feasible
+throughout the committed-facility family. Its feasibility comes from the additional information,
+not from a better numerical approximation. If unavailable facilities are restored to the family,
+some high-rate floating histories admit neither order. Even complete information cannot create
+borrowing capacity.
+The exact condition is elementary in this finite action setting. Let H(o) contain all retained
+histories with observation o, and let A(h) be the actions feasible at history h. A deterministic
+policy feasible throughout the family exists exactly when
+\
+h∈H(o)
+A(h) ̸= ∅
+for every observed class H(o).
+(17.9)
+Necessity follows because one observation selects one action, which must work at every compatible
+history. For sufficiency, choose an action from each nonempty intersection. The finite collection
+of signals then defines a total policy. This argument depends on the supplied observation
+map, two atomic orders and robust feasibility across the family. It is not a conclusion about
+contingent instructions or a probability-weighted objective.
+17.11.4
+What remains safe when calculation is unfinished
+A computation budget can stop evaluation of individual regions without removing them from
+the family. In the reference, the partition is constructed first and transitions are evaluated when
+requested. If only one region has been evaluated, the others remain explicitly unresolved. The
+coupon still has the valid outer bound 3 ≤I ≤6, but that bound alone does not identify a
+feasible payment policy. Eager construction of the partition itself can become expensive when
+more continuous variables or contractual alternatives are added.
+
+
+PAGE 145
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+123
+Approximation needs a separate justification. Suppose an independently established bound
+gives |I −bI| ≤ε throughout a region. A strict trigger I > K is certainly true when bI −ε > K,
+and certainly false when bI + ε ≤K. In the remaining band the bound permits both answers, so
+the region must be refined or left unresolved. The conclusion follows by comparing the entire
+allowed interval with K; sampled errors do not supply its uniform premise.
+Observation thresholds need their own error bounds. Preserving the interest trigger while
+changing which rate signal the manager sees can still change the feasible-policy set. A reused
+calculation must therefore retain its rate domain, contract interpretation, clause version, horizon,
+query, observation map, action class and precision. Changing any of these requires reconsidering
+the grouping. The example provides an exact one-rate, one-date reference for that discipline.
+Persistent hidden terms across several dates, higher-dimensional regions, nonlinear guards and
+defensible approximation bounds remain further method problems.1
+17.12
+Repayment changes tomorrow’s feasible payments
+The previous payment calculation ends as soon as interest has been settled. A facility used to
+make that payment may have to be repaid before the next coupon. To see why the horizon
+matters, carry the same company forward for one more date. The fixed or floating coupon
+interpretation persists, as does the existence or absence of the facility. The two reference
+rates may vary independently within the earlier interval. This rectangular rate family is an
+assumption for the example, not a probability model.
+The facility permits one draw of 1 during the two-date horizon and charges the same immediate
+fee of 0.25. A first-date draw must be repaid on the second date, after an operating cash receipt
+and before the second coupon. Repayment extinguishes the facility debt but does not restore
+the right to draw. The original principal of 100 matures beyond the horizon. We omit tax
+and interest on the facility to isolate the timing of cash and the persistence of the drawing
+restriction.
+Let I1 and I2 denote the two coupons and R the operating cash receipt on the second date. In
+the fixed interpretation both coupons are 5. In the floating interpretation each is calculated
+from its own reference rate using the earlier floor and cap. Receiving one coupon of 5 does not
+by itself reveal the debt type: floating debt can produce the same amount. Nor does it reveal
+whether the facility exists.
+17.12.1
+The first order leaves a different second opening
+Ordinary payment on the first date leaves cash 5.5 −I1. Drawing and paying leaves 6.25 −I1
+and facility debt of 1. On the second date the operating receipt increases cash and income by
+R, after which any outstanding facility debt is repaid. Cash available before paying the second
+coupon is therefore
+C2 =
+(
+5.5 + R −I1,
+after ordinary first-date payment,
+5.25 + R −I1,
+after a first-date draw.
+(17.10)
+The second line follows by adding R to 6.25 −I1 and subtracting the repayment of 1. Although
+the facility improved first-date liquidity, its fee leaves less cash available over the complete
+two-date sequence.
+1The
+derivation
+and
+independently
+authored
+comparison
+are
+retained
+in
+data/accounting-master/
+continuous-guards-20261026/. The accepted result is in attempt-02/; the earlier failed partition and its repair
+remain available separately.
+
+
+PAGE 146
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+124
+Compare two supplied receipt amounts, R = 6 and R = 7. When both coupons are 6, the first
+payment requires a draw and leaves cash 0.25. The consequences at the second date are:
+Operating receipt
+Cash after repayment
+Coupon due
+Payment result
+6
+5.25
+6
+Refused; payable 6 remains
+7
+6.25
+6
+Paid; cash 0.25 remains
+The receipt of 6 cannot fund the second coupon. Omitting repayment would incorrectly show
+6.25 cash. Allowing another draw would also reverse the answer: the extra 1 less its 0.25 fee
+exactly fills the 0.75 shortfall. Both mistakes erase a consequence of the first decision.
+Before either payment order, the second coupon accrues as interest expense and interest payable.
+A refused order leaves that payable and the earlier receipt, repayment and fee entries intact.
+If a first-date order already refuses, this particular reference returns that incomplete prefix
+without inventing second-date states. Modeling later default, recovery or renegotiation requires
+additional events.
+17.12.2
+The relevant boundary now joins both rates
+Following a first-date draw, ordinary second payment requires C2 −I2 ≥0. Substituting the
+cash expression gives
+I1 + I2 ≤5.25 + R.
+(17.11)
+For a receipt of 6, the boundary is I1 + I2 = 11.25. Within the interior floating-coupon pieces it
+becomes a diagonal boundary in the two rates, 100r1 + 100r2 = 11.25. Separate bounds on the
+two marginal rates do not describe which joint histories cross it. Equality permits payment;
+larger coupon totals cause refusal.
+For a receipt of 7, the corresponding bound is 12.25. Each coupon is at most 6, so their sum is
+at most 12 and ordinary second payment is feasible throughout the first-draw region. After
+ordinary first payment, I1 ≤5.5; even the receipt of 6 then supplies at least 6 before the next
+coupon. The failure with the smaller receipt is thus concentrated in histories that needed an
+earlier draw and then face a sufficiently large combined coupon.
+The exact comparison first takes the products of the earlier point and open rate intervals. It
+then splits those regions at the later linear cash conditions. Every resulting balance and journal
+amount is affine in (r1, r2), while each action condition has a fixed truth value. The independent
+financial calculation uses the closed-form cash expressions above. It checks that accepted regions
+cover exactly the feasible domains, that refusals cover the remainder, and that both calculations
+produce the same complete journal and financial state.
+The geometric calculation also retains strict boundaries. On a bounded region described by
+rational linear inequalities, its closed relaxation is generated by finitely many vertices. The
+average of all those vertices satisfies a required strict inequality whenever at least one vertex
+satisfies it strictly: every other vertex has nonpositive slack, so their average remains strictly
+negative. If all vertices lie on its boundary, no point of the closed region can satisfy that inequality
+strictly. Applying this reasoning to every strict constraint decides whether the original region
+contains a point. Extremum attainment is checked by adding the optimizing equality and testing
+the resulting face in the same way. These arguments apply to the supplied bounded linear
+regions; a nonlinear or unbounded problem needs another method. The financial comparator
+shares these geometric primitives, so its agreement does not constitute an independent solver
+validation.
+
+
+PAGE 147
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+125
+17.12.3
+More cash does not reveal a hidden contract
+With a committed facility and a receipt of 7, the refined first-date signal supports the same
+initial rule as before: pay when the trigger is false and draw when it is true. On the second
+date the manager observes whether the coupon exceeds 5.5 and whether available cash covers
+it, together with the earlier signal and chosen order. Ordinary payment is feasible throughout
+this family.
+Some histories also permit a second-date draw: the first coupon was paid without drawing,
+the facility remains unused and the second coupon exceeds 5.5. There are two such reachable
+observation classes in this example, and either ordinary payment or drawing is feasible in each.
+Consequently four policies satisfy the stipulated feasibility conditions. This count does not rank
+their value. Optional borrowing incurs the fee and leaves debt beyond the current horizon.
+Under the coarse first-date signal, the manager still cannot distinguish histories requiring
+opposite first orders.
+Raising the later receipt does not repair that information problem.
+Retaining histories without a facility also leaves some first payments unfunded. A correct
+continuation therefore preserves contractual memory, cash timing and the information available
+to the actor together. Renewing the facility, redrawing the debt type or revealing an unobserved
+trigger would change the problem being solved.2
+2Complete symbolic states, accepted-domain checks, geometric diagnostics and the retained journal-identity
+repairs are in data/accounting-master/two-date-continuous-memory-20261026/. The accepted run is attempt-04/.
+This is an exact small reference; demand-driven two-date compression, checkpoint/resume guarantees, source
+revision invalidation and integration with the common typed executor remain separate work.
+
+
+PAGE 148
+Chapter 18
+Reference computations that
+distinguish a useful approximation
+from a wrong answer
+A method can be tested most clearly when a small version of its target is known exactly. This
+chapter constructs such targets for cash bounds, breach probabilities, policy comparison and
+residual minimization. The calculations are analytic reference cases. They are not a benchmark
+ranking and do not supply empirical evidence about a real company. Their role is to expose
+errors that a large simulation can conceal behind apparently stable averages.
+18.1
+An exact distribution from a declared prior
+Return to cash C = 90−2α, and now deliberately assume α is uniform on [0, 1]. This assumption
+is not inferred from the financial statements. It creates a transparent probabilistic reference.
+Cash is uniform on [88, 90], with mean 89 and variance 4/12 = 1/3.
+For a covenant requiring cash at least 89.4, breach occurs when α > 0.3. Its probability is 0.7.
+The expected cash conditional on breach is the mean of the interval [88, 89.4), namely 88.7.
+These quantities answer different questions: unconditional mean, breach frequency and severity
+conditional on breach.
+A simulation with the right mean but the wrong breach probability is not accurate for covenant
+analysis. For example, a two-point approximation placing equal mass at 88 and 90 has mean 89
+but breach probability one half. Matching the first moment does not preserve threshold events.
+The exact distribution also gives quantiles. Under the usual left-continuous generalized-inverse
+convention, the p-quantile is 88 + 2p for 0 < p < 1, with endpoint values defined by continuous
+extension. The convention should be explicit when discrete mass points are introduced, because
+quantile definitions can differ at jumps.
+18.2
+A discrete grid with known bias
+Approximate α by equally weighted midpoints (i −1/2)/n, for i = 1, . . . , n. The mean of the
+grid remains one half, so mean cash is exactly 89 for every n. Breach frequency is the fraction
+of midpoints above 0.3. For n = 4, midpoints are 0.125, 0.375, 0.625 and 0.875, giving breach
+probability 0.75.
+126

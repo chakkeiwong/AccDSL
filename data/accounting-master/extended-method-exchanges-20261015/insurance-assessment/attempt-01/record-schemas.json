@@ -1,0 +1,4002 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Context": {
+      "type": "object",
+      "properties": {
+        "entity_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "book_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "unit": {
+          "const": "illustrative_million"
+        },
+        "authority": {
+          "const": "historical_EU2023_IFRS17"
+        },
+        "actual_entity_admission": {
+          "const": "not_established"
+        }
+      },
+      "required": [
+        "entity_id",
+        "book_id",
+        "currency",
+        "unit",
+        "authority",
+        "actual_entity_admission"
+      ],
+      "additionalProperties": false
+    },
+    "SourceSupport": {
+      "type": "object",
+      "properties": {
+        "raw_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "text_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "method_blobs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "blob"
+              },
+              "algorithm": {
+                "const": "sha256"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "byte_length": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "kind",
+              "algorithm",
+              "digest",
+              "byte_length"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 1
+        },
+        "temporal_status": {
+          "const": "retained_historical"
+        }
+      },
+      "required": [
+        "raw_blob",
+        "text_blob",
+        "method_blobs",
+        "anchors",
+        "temporal_status"
+      ],
+      "additionalProperties": false
+    },
+    "SchemaLock": {
+      "type": "object",
+      "properties": {
+        "schema_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "semantic_contract_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_blob",
+        "semantic_contract_blob"
+      ],
+      "additionalProperties": false
+    },
+    "Profile": {
+      "type": "object",
+      "properties": {
+        "profile_id": {
+          "const": "InsuranceAssessment/1"
+        },
+        "operation": {
+          "const": "insurance.assessment.publish@1"
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "transition.route@1",
+              "transition.recovery@1",
+              "transition.opening@1",
+              "triangle.inspect@1",
+              "estimation.predict@1",
+              "backward.condition@1",
+              "reserve.error@1",
+              "cdr.one-year@1",
+              "dependence.stoploss@1"
+            ]
+          },
+          "minItems": 1
+        },
+        "schema_lock_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "SchemaLock"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.schemalock.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "accounting_effect": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "profile_id",
+        "operation",
+        "methods",
+        "schema_lock_ref",
+        "accounting_effect"
+      ],
+      "additionalProperties": false
+    },
+    "Evidence": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ingested_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "facts_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "context_ref",
+        "available_at",
+        "ingested_at",
+        "facts_blob"
+      ],
+      "additionalProperties": false
+    },
+    "View": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "decision_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "system_asof": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Evidence"
+              },
+              "schema": {
+                "const": "accdsl.insurance-assessment.evidence.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "context_ref",
+        "decision_at",
+        "system_asof",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "AccountingHead": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "owner_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "balances_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "context_ref",
+        "owner_id",
+        "generation",
+        "balances_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "ModelIdentity": {
+      "type": "object",
+      "properties": {
+        "group_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "triangle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "process_law_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "backward_law_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "conditioning": {
+          "enum": [
+            "not_applicable",
+            "full_triangle",
+            "latest_diagonal"
+          ]
+        },
+        "horizon": {
+          "enum": [
+            "not_applicable",
+            "lifetime_payments",
+            "one_year_reestimation"
+          ]
+        },
+        "calibration_status": {
+          "const": "not_evaluated"
+        }
+      },
+      "required": [
+        "group_id",
+        "triangle_id",
+        "process_law_id",
+        "backward_law_id",
+        "conditioning",
+        "horizon",
+        "calibration_status"
+      ],
+      "additionalProperties": false
+    },
+    "AssessmentInput": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "transition.route@1"
+            },
+            "initial_application": {
+              "type": "string",
+              "format": "date"
+            },
+            "adjusted_comparatives": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "date"
+              },
+              "minItems": 1
+            },
+            "object_type": {
+              "enum": [
+                "issued_group",
+                "acquisition_asset"
+              ]
+            },
+            "requested": {
+              "enum": [
+                "full",
+                "modified",
+                "fair"
+              ]
+            },
+            "impracticable": {
+              "enum": [
+                "yes",
+                "no",
+                "unknown"
+              ]
+            },
+            "reasonable_effort": {
+              "enum": [
+                "documented",
+                "not_documented"
+              ]
+            },
+            "historical_evidence": {
+              "enum": [
+                "contemporaneous",
+                "permitted_transition",
+                "hindsight",
+                "unknown"
+              ]
+            },
+            "modified_information": {
+              "enum": [
+                "available",
+                "unavailable",
+                "unknown"
+              ]
+            },
+            "direct_participation": {
+              "type": "boolean"
+            },
+            "prospective_mitigation": {
+              "type": "boolean"
+            },
+            "mitigation_used_before_transition": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "method_id",
+            "initial_application",
+            "adjusted_comparatives",
+            "object_type",
+            "requested",
+            "impracticable",
+            "reasonable_effort",
+            "historical_evidence",
+            "modified_information",
+            "direct_participation",
+            "prospective_mitigation",
+            "mitigation_used_before_transition"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "transition.recovery@1"
+            },
+            "underlying_recognition": {
+              "type": "string",
+              "format": "date"
+            },
+            "treaty_entry": {
+              "type": "string",
+              "format": "date"
+            },
+            "transition_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "mode": {
+              "enum": [
+                "transition",
+                "ordinary_initial"
+              ]
+            },
+            "remaining_coverage": {
+              "type": "boolean"
+            },
+            "recognition_admission": {
+              "enum": [
+                "admitted",
+                "unknown"
+              ]
+            },
+            "covered_group": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "coverage_allocation": {
+              "enum": [
+                "admitted",
+                "unknown"
+              ]
+            },
+            "group_loss": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "covered_loss": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "expected_share": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "measured_held_asset": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "method_id",
+            "underlying_recognition",
+            "treaty_entry",
+            "transition_date",
+            "mode",
+            "remaining_coverage",
+            "recognition_admission",
+            "covered_group",
+            "coverage_allocation",
+            "group_loss",
+            "covered_loss",
+            "expected_share",
+            "measured_held_asset"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "transition.opening@1"
+            },
+            "transition_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "group_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "fcf": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "fair_value": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "old_liability": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "group_id",
+                  "fcf",
+                  "fair_value",
+                  "old_liability"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            },
+            "other_assets": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "old_held_asset": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "new_held_asset": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "embedded_recovery": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "tax": {
+              "const": "uncomputed"
+            },
+            "fx": {
+              "const": "absent"
+            },
+            "accumulated_oci": {
+              "const": "excluded"
+            }
+          },
+          "required": [
+            "method_id",
+            "transition_date",
+            "groups",
+            "other_assets",
+            "old_held_asset",
+            "new_held_asset",
+            "embedded_recovery",
+            "tax",
+            "fx",
+            "accumulated_oci"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "triangle.inspect@1"
+            },
+            "triangle_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "valuation_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "origins": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "cumulative": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "structural_missing": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "boolean"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "development_unit": {
+              "const": "year"
+            },
+            "tail_factor": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "observation_model": {
+              "const": "volume_chainladder_no_tail"
+            }
+          },
+          "required": [
+            "method_id",
+            "triangle_id",
+            "valuation_date",
+            "origins",
+            "cumulative",
+            "structural_missing",
+            "development_unit",
+            "tail_factor",
+            "observation_model"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "estimation.predict@1"
+            },
+            "triangle_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "process_law_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "conditioning": {
+              "enum": [
+                "full_triangle",
+                "latest_diagonal"
+              ]
+            },
+            "horizon": {
+              "const": "lifetime_payments"
+            },
+            "fit_dependence": {
+              "const": "shared"
+            },
+            "failure_policy": {
+              "const": "retain_all_attempts"
+            },
+            "threshold": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "draws": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "draw_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "fit_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "probability": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "mean_per_cell": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "failure": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "FIT_DENOMINATOR_ZERO",
+                          "MODEL_SUPPORT_FAILURE",
+                          "PROCESS_FAILURE"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "outcomes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "probability": {
+                          "type": "object",
+                          "properties": {
+                            "n": {
+                              "type": "string",
+                              "pattern": "^(0|-?[1-9][0-9]*)$"
+                            },
+                            "d": {
+                              "type": "string",
+                              "pattern": "^[1-9][0-9]*$"
+                            }
+                          },
+                          "required": [
+                            "n",
+                            "d"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "cells": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "n": {
+                                "type": "string",
+                                "pattern": "^(0|-?[1-9][0-9]*)$"
+                              },
+                              "d": {
+                                "type": "string",
+                                "pattern": "^[1-9][0-9]*$"
+                              }
+                            },
+                            "required": [
+                              "n",
+                              "d"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "minItems": 1
+                        }
+                      },
+                      "required": [
+                        "probability",
+                        "cells"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0
+                  }
+                },
+                "required": [
+                  "draw_id",
+                  "fit_id",
+                  "probability",
+                  "mean_per_cell",
+                  "failure",
+                  "outcomes"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "method_id",
+            "triangle_id",
+            "process_law_id",
+            "conditioning",
+            "horizon",
+            "fit_dependence",
+            "failure_policy",
+            "threshold",
+            "draws"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "backward.condition@1"
+            },
+            "triangle_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "backward_law_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "observed_y": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "prior": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "probability": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "probability"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "forward": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "outcomes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "y": {
+                          "type": "object",
+                          "properties": {
+                            "n": {
+                              "type": "string",
+                              "pattern": "^(0|-?[1-9][0-9]*)$"
+                            },
+                            "d": {
+                              "type": "string",
+                              "pattern": "^[1-9][0-9]*$"
+                            }
+                          },
+                          "required": [
+                            "n",
+                            "d"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "probability": {
+                          "type": "object",
+                          "properties": {
+                            "n": {
+                              "type": "string",
+                              "pattern": "^(0|-?[1-9][0-9]*)$"
+                            },
+                            "d": {
+                              "type": "string",
+                              "pattern": "^[1-9][0-9]*$"
+                            }
+                          },
+                          "required": [
+                            "n",
+                            "d"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "y",
+                        "probability"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "x",
+                  "outcomes"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "method_id",
+            "triangle_id",
+            "backward_law_id",
+            "observed_y",
+            "prior",
+            "forward"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "reserve.error@1"
+            },
+            "triangle_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "conditioning": {
+              "enum": [
+                "full_triangle",
+                "latest_diagonal"
+              ]
+            },
+            "center_conditioning": {
+              "enum": [
+                "full_triangle",
+                "latest_diagonal"
+              ]
+            },
+            "paid": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            },
+            "simulated_ultimate": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            },
+            "fitted_ultimate": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            },
+            "center_kind": {
+              "enum": [
+                "reserve",
+                "ultimate"
+              ]
+            }
+          },
+          "required": [
+            "method_id",
+            "triangle_id",
+            "conditioning",
+            "center_conditioning",
+            "paid",
+            "simulated_ultimate",
+            "fitted_ultimate",
+            "center_kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "cdr.one-year@1"
+            },
+            "triangle_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "opening_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "closing_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "opening_reserve": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "payments": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "closing_reestimated_reserve": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "horizon": {
+              "const": "one_year_reestimation"
+            }
+          },
+          "required": [
+            "method_id",
+            "triangle_id",
+            "opening_date",
+            "closing_date",
+            "opening_reserve",
+            "payments",
+            "closing_reestimated_reserve",
+            "horizon"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "dependence.stoploss@1"
+            },
+            "triangle_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "family_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "parameter_min": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "parameter_max": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "selected_parameter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "claim_high": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "attachment": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "marginal_high_probability": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "law_uncertainty": {
+              "const": "unweighted_set"
+            }
+          },
+          "required": [
+            "method_id",
+            "triangle_id",
+            "family_id",
+            "parameter_min",
+            "parameter_max",
+            "selected_parameter",
+            "claim_high",
+            "attachment",
+            "marginal_high_probability",
+            "law_uncertainty"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "AssessmentBasis": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "source_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "SourceSupport"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.sourcesupport.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "model_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ModelIdentity"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.modelidentity.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "input_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AssessmentInput"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.assessmentinput.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "expected_head": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AccountingHead"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.accountinghead.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "method_anchor": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "prior_assessment_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "AssessmentResult"
+              },
+              "schema": {
+                "const": "accdsl.insurance-assessment.assessmentresult.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "context_ref",
+        "view_ref",
+        "evidence_ref",
+        "source_ref",
+        "model_ref",
+        "input_ref",
+        "expected_head",
+        "method_anchor",
+        "prior_assessment_refs"
+      ],
+      "additionalProperties": false
+    },
+    "AssessmentResult": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "transition.route@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "transition_date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "permitted_routes": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "full",
+                      "modified",
+                      "fair"
+                    ]
+                  },
+                  "minItems": 0
+                },
+                "selected_route": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "full",
+                        "modified",
+                        "fair"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "measurements_performed": {
+                  "const": false
+                }
+              },
+              "required": [
+                "transition_date",
+                "permitted_routes",
+                "selected_route",
+                "measurements_performed"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "transition.recovery@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "loss_recovery": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "measured_held_asset": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "held_asset_derived": {
+                  "const": false
+                },
+                "timing_exception": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "loss_recovery",
+                "measured_held_asset",
+                "held_asset_derived",
+                "timing_exception"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "transition.opening@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "group_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "csm": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "loss_component": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "liability": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "group_id",
+                      "csm",
+                      "loss_component",
+                      "liability"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                },
+                "old_equity": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "new_equity": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "opening_equity_change": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "liability": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "cash_change": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "current_profit": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "held_asset": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "groups",
+                "old_equity",
+                "new_equity",
+                "opening_equity_change",
+                "liability",
+                "cash_change",
+                "current_profit",
+                "held_asset"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "triangle.inspect@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "factors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "point_reserve": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "observed_cells": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "parameter_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "residual_degrees": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "raw_dispersion": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "predictive_status": {
+                  "enum": [
+                    "dispersion_unresolved",
+                    "law_not_evaluated"
+                  ]
+                },
+                "triangle_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "risk_adjustment": {
+                  "const": null
+                }
+              },
+              "required": [
+                "factors",
+                "point_reserve",
+                "observed_cells",
+                "parameter_count",
+                "residual_degrees",
+                "raw_dispersion",
+                "predictive_status",
+                "triangle_sha256",
+                "risk_adjustment"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "estimation.predict@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "attempted_draws": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "failed_draw_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "known_mass": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "unresolved_mass": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "known_mean_contribution": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "mean": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "variance": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "tail_probability": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "full_distribution": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "probability": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "probability"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "calibration": {
+                  "const": "not_evaluated"
+                }
+              },
+              "required": [
+                "attempted_draws",
+                "failed_draw_ids",
+                "known_mass",
+                "unresolved_mass",
+                "known_mean_contribution",
+                "mean",
+                "variance",
+                "tail_probability",
+                "full_distribution",
+                "calibration"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "backward.condition@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "condition_mass": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "posterior": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "probability": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "probability"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "mean": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "variance": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "backward_law_status": {
+                  "enum": [
+                    "derived_from_joint",
+                    "unidentified",
+                    "zero_condition_mass"
+                  ]
+                }
+              },
+              "required": [
+                "condition_mass",
+                "posterior",
+                "mean",
+                "variance",
+                "backward_law_status"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "reserve.error@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "simulated_reserve": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "fitted_reserve": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "reserve_error": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "simulated_reserve",
+                "fitted_reserve",
+                "reserve_error"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "cdr.one-year@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "cdr": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "opening_reserve": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "paid": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "closing_reserve": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "calibration": {
+                  "const": "not_evaluated"
+                }
+              },
+              "required": [
+                "cdr",
+                "opening_reserve",
+                "paid",
+                "closing_reserve",
+                "calibration"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "dependence.stoploss@1"
+            },
+            "basis_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentBasis"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unresolved"
+              ]
+            },
+            "diagnostics": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "minItems": 0
+            },
+            "detail": {
+              "type": "object",
+              "properties": {
+                "expectation_min": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "expectation_max": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "selected_expectation": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "independent_expectation": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "selected_joint_masses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "second_high_after_high": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "second_high_after_zero": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "distribution_over_parameters": {
+                  "const": null
+                }
+              },
+              "required": [
+                "expectation_min",
+                "expectation_max",
+                "selected_expectation",
+                "independent_expectation",
+                "selected_joint_masses",
+                "second_high_after_high",
+                "second_high_after_zero",
+                "distribution_over_parameters"
+              ],
+              "additionalProperties": false
+            },
+            "accounting_effect": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "method_id",
+            "basis_ref",
+            "status",
+            "diagnostics",
+            "detail",
+            "accounting_effect"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "OperationRequest": {
+      "type": "object",
+      "properties": {
+        "profile_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Profile"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.profile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "client_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "operation": {
+          "const": "insurance.assessment.publish@1"
+        },
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "require_current": {
+          "type": "boolean"
+        },
+        "expected_head": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AccountingHead"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.accountinghead.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "basis_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AssessmentBasis"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.assessmentbasis.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "profile_ref",
+        "client_id",
+        "request_id",
+        "operation",
+        "context_ref",
+        "view_ref",
+        "require_current",
+        "expected_head",
+        "basis_ref"
+      ],
+      "additionalProperties": false
+    },
+    "Submission": {
+      "type": "object",
+      "properties": {
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.operationrequest.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "wire_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "request_ref",
+        "wire_blob"
+      ],
+      "additionalProperties": false
+    },
+    "PublicationReceipt": {
+      "type": "object",
+      "properties": {
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.operationrequest.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "output_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AssessmentResult"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.assessmentresult.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "const": "query_published"
+        },
+        "accounting_head": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AccountingHead"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.accountinghead.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "accounting_effect": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "request_ref",
+        "output_ref",
+        "status",
+        "accounting_head",
+        "accounting_effect"
+      ],
+      "additionalProperties": false
+    },
+    "OperationResult": {
+      "type": "object",
+      "properties": {
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.operationrequest.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "submission_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Submission"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.submission.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "disposition": {
+          "enum": [
+            "completed",
+            "partial",
+            "replayed",
+            "rejected"
+          ]
+        },
+        "output_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AssessmentResult"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.assessmentresult.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "receipt_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "PublicationReceipt"
+                },
+                "schema": {
+                  "const": "accdsl.insurance-assessment.publicationreceipt.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 0
+        },
+        "published_digests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "minItems": 0
+        },
+        "additional_commit": {
+          "type": "boolean"
+        },
+        "accounting_effect": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "request_ref",
+        "submission_ref",
+        "disposition",
+        "output_ref",
+        "receipt_ref",
+        "diagnostics",
+        "published_digests",
+        "additional_commit",
+        "accounting_effect"
+      ],
+      "additionalProperties": false
+    },
+    "TransportObservation": {
+      "type": "object",
+      "properties": {
+        "submission_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Submission"
+            },
+            "schema": {
+              "const": "accdsl.insurance-assessment.submission.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "const": "acknowledgement_lost"
+        },
+        "commit_knowledge": {
+          "const": "unknown"
+        }
+      },
+      "required": [
+        "submission_ref",
+        "status",
+        "commit_knowledge"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "schema_ids": {
+    "Context": "accdsl.insurance-assessment.context.v1",
+    "SourceSupport": "accdsl.insurance-assessment.sourcesupport.v1",
+    "SchemaLock": "accdsl.insurance-assessment.schemalock.v1",
+    "Profile": "accdsl.insurance-assessment.profile.v1",
+    "Evidence": "accdsl.insurance-assessment.evidence.v1",
+    "View": "accdsl.insurance-assessment.view.v1",
+    "AccountingHead": "accdsl.insurance-assessment.accountinghead.v1",
+    "ModelIdentity": "accdsl.insurance-assessment.modelidentity.v1",
+    "AssessmentInput": "accdsl.insurance-assessment.assessmentinput.v1",
+    "AssessmentBasis": "accdsl.insurance-assessment.assessmentbasis.v1",
+    "AssessmentResult": "accdsl.insurance-assessment.assessmentresult.v1",
+    "OperationRequest": "accdsl.insurance-assessment.operationrequest.v1",
+    "Submission": "accdsl.insurance-assessment.submission.v1",
+    "PublicationReceipt": "accdsl.insurance-assessment.publicationreceipt.v1",
+    "OperationResult": "accdsl.insurance-assessment.operationresult.v1",
+    "TransportObservation": "accdsl.insurance-assessment.transportobservation.v1"
+  }
+}

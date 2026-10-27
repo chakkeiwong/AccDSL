@@ -1,0 +1,704 @@
+"""Evidence-preserving deterministic operations for the accounting master."""
+from __future__ import annotations
+
+import contextlib
+import hashlib
+import importlib.util
+import io
+import json
+import os
+from pathlib import Path
+import re
+import runpy
+import subprocess
+import sys
+import tempfile
+import unittest
+import uuid
+from unittest.mock import patch
+
+
+def digest(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            h.update(block)
+    return h.hexdigest()
+
+
+def atomic_json(path: Path, value) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix='.' + path.name + '-', suffix='.tmp', dir=path.parent)
+    tmp = Path(name)
+    try:
+        with os.fdopen(fd, 'w') as stream:
+            json.dump(value, stream, indent=2, ensure_ascii=False, allow_nan=False)
+            stream.write('\n')
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(tmp, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    except BaseException:
+        # Remove only the temporary file allocated by this publication. Keep
+        # the original exception even if cleanup itself fails.
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
+
+def atomic_bytes(path: Path, data: bytes, expected: str | None = None) -> None:
+    actual = hashlib.sha256(data).hexdigest()
+    if expected is not None and actual != expected:
+        raise ValueError('Input bytes changed before preservation')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix='.' + path.name + '-', dir=path.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(fd, 'wb') as stream:
+            stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if digest(temporary) != actual:
+            raise ValueError('Preserved temporary bytes failed verification')
+        os.replace(temporary, path)
+        parent_fd = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(parent_fd)
+        finally:
+            os.close(parent_fd)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def merge_hashes(*maps) -> dict:
+    merged = {}
+    for mapping in maps:
+        for name, value in mapping.items():
+            if name in merged and merged[name] != value:
+                raise ValueError(f'Conflicting protected hash expectations: {name}')
+            merged[name] = value
+    return merged
+
+
+def load_json(path: Path):
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError(f'Duplicate JSON key: {key}')
+            result[key] = value
+        return result
+    return json.loads(path.read_text(), object_pairs_hook=pairs,
+                      parse_constant=lambda x: (_ for _ in ()).throw(ValueError(x)))
+
+
+def local_path(root: Path, relative: str) -> Path:
+    if not isinstance(relative, str) or Path(relative).is_absolute():
+        raise ValueError('Expected a repository-relative path')
+    path = (root / relative).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError('Path escapes the repository')
+    return path
+
+
+def release_hashes(root: Path) -> dict:
+    base = root / 'data/financial-report-benchmark'
+    release = load_json(base / 'release-manifest.json')
+    expected = {k: v['sha256'] for k, v in release['files'].items()}
+    expected['data/financial-report-benchmark/release-manifest.json'] = digest(base / 'release-manifest.json')
+    integrity = load_json(base / 'integrity-manifest.json')
+    # The independent inventory has a mapping of repository-relative paths.
+    inventory = integrity['files']
+    additional = {}
+    if isinstance(inventory, dict):
+        for name, info in inventory.items():
+            additional[name] = info['sha256'] if isinstance(info, dict) else info
+    else:
+        for info in inventory:
+            additional[info['path']] = info['sha256']
+    return merge_hashes(expected, additional)
+
+
+def protected_hashes(root: Path) -> dict:
+    expected = release_hashes(root)
+    review = root / 'docs/design/review'
+    for prefix in ['pre-repair-*', 'pre-expert-preparation-*']:
+        for directory in review.glob(prefix):
+            for path in directory.rglob('*'):
+                if path.is_file() and not path.is_symlink():
+                    expected = merge_hashes(expected, {str(path.relative_to(root)): digest(path)})
+    # Existing research/filing PDFs are retained evidence. The current manuscript
+    # is editable; new research PDFs can be added without changing old bytes.
+    for path in (root / 'docs').rglob('*.pdf'):
+        if (path != root / 'docs/design/accounting-product-design.pdf'
+                and not path.is_relative_to(root / 'docs/design/proposal/manuscript') and not path.is_symlink()):
+            expected = merge_hashes(expected, {str(path.relative_to(root)): digest(path)})
+    return expected
+
+
+def verify_hashes(root: Path, expected: dict) -> list:
+    failures = []
+    for name, value in expected.items():
+        try:
+            path = local_path(root, name)
+            if not path.is_file() or digest(path) != value:
+                failures.append(name)
+        except (OSError, ValueError):
+            failures.append(name)
+    return failures
+
+
+def verification_input_errors(root: Path, checked: dict) -> list:
+    expected = checked.get('input_hashes', {})
+    if (not isinstance(expected, dict) or any(not isinstance(n, str) or not isinstance(sha, str)
+            or re.fullmatch(r'[0-9a-f]{64}', sha) is None for n, sha in expected.items())):
+        return ['Malformed verification input hashes']
+    return verify_hashes(root, expected)
+
+
+def baseline(root: Path, out: Path) -> dict:
+    """Rerun old checks, redirecting only their new reports into this run."""
+    out.mkdir(parents=True, exist_ok=True)
+    failures = verify_hashes(root, release_hashes(root))
+    if failures:
+        raise ValueError('Frozen baseline changed: ' + ', '.join(failures[:12]))
+    sys.path.insert(0, str(root))
+    sys.path.insert(0, str(root / 'scripts'))
+    spec = importlib.util.spec_from_file_location('accdsl_corpus_verifier', root / 'scripts/verify_financial_report_corpus.py')
+    verifier = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(verifier)
+    corpus = verifier.verify(root, root / 'data/financial-report-benchmark')
+    atomic_json(out / 'corpus-integrity.json', corpus)
+    if corpus['status'] != 'pass':
+        raise ValueError('Independent corpus integrity verification failed')
+    suites = [
+        ('check_design_examples.py', 'example-checks.json'),
+        ('check_repair_conformance.py', 'repair-conformance.json'),
+        ('check_core_contract.py', 'core-contract-checks.json'),
+        ('check_semantic_preparation.py', 'semantic-preparation-checks.json'),
+        ('check_accounting_dossiers.py', 'accounting-dossier-checks.json'),
+    ]
+    reports = []
+    for script, report in suites:
+        target = root / 'docs/design/review' / report
+        def redirected(path, data, *args, **kwargs):
+            if path.resolve() != target.resolve():
+                raise ValueError(f'Unexpected legacy-check write: {path}')
+            atomic_bytes(out / report, data.encode(kwargs.get('encoding') or 'utf-8'))
+            return len(data)
+        log = io.StringIO()
+        failure = None
+        try:
+            with patch.object(Path, 'write_text', redirected), contextlib.redirect_stdout(log), contextlib.redirect_stderr(log):
+                runpy.run_path(str(root / 'scripts' / script), run_name='__main__')
+        except BaseException as error:
+            failure = {'type': type(error).__name__, 'message': str(error)}
+            raise
+        finally:
+            atomic_bytes(out / (script + '.log'), log.getvalue().encode())
+            atomic_json(out / (script + '.outcome.json'), {'passed': failure is None, 'failure': failure})
+        result = load_json(out / report)
+        checks = result.get('checks', [])
+        if not checks or any(c.get('passed', c.get('ok', False)) is not True for c in checks):
+            raise ValueError(f'{script}: missing or failed checks')
+        reports.append({'script': script, 'checks': len(checks), 'report': str((out / report).relative_to(root)),
+                        'scope': result.get('scope', result.get('conclusion', result.get('target')))})
+    suite = unittest.TestLoader().discover(str(root / 'scripts'), pattern='test_financial_report_corpus.py')
+    stream = io.StringIO()
+    tested = unittest.TextTestRunner(stream=stream, verbosity=2).run(suite)
+    atomic_bytes(out / 'corpus-regressions.log', stream.getvalue().encode())
+    if not tested.wasSuccessful() or tested.testsRun < 20 or len(tested.skipped) == tested.testsRun:
+        raise ValueError('Corpus regressions failed or did not execute the expected existing suite')
+    result = {'status': 'passed', 'verified_reports': corpus['verified_slots'],
+              'reference_suites': reports, 'corpus_regression_tests': tested.testsRun,
+              'source_acceptance_only': True, 'mission_complete': False,
+              'residuals': ['All G1–G18 retain work; bounded reference checks do not establish accounting or forecast validity.']}
+    atomic_json(out / 'baseline.json', result)
+    return result
+
+
+def source_register(root: Path, out: Path) -> dict:
+    base = root / 'data/financial-report-benchmark'
+    coverage = load_json(base / 'coverage.json')
+    evidence = load_json(base / 'source-evidence.json')['documents']
+    records, identifiers = [], set()
+    for row in coverage['rows']:
+        identifier = row['document_id']
+        if identifier in identifiers or row['status'] != 'revalidated_verified':
+            raise ValueError(f'Duplicate/unaccepted corpus slot: {identifier}')
+        identifiers.add(identifier)
+        source = evidence[identifier]
+        original = local_path(root, row['local_path'])
+        extracted = local_path(root, row['extracted_text_path'])
+        if digest(original) != row['sha256']:
+            raise ValueError(f'Source hash mismatch: {identifier}')
+        extracted_hash = digest(extracted)
+        if extracted.name != f'extracted-{extracted_hash}.txt':
+            raise ValueError(f'Extraction hash mismatch: {identifier}')
+        if source.get('sha256') != row['sha256']:
+            raise ValueError(f'Selected version does not match evidence: {identifier}')
+        metadata = source.get('source_metadata', {})
+        records.append({
+            'document_id': identifier, 'issuer_id': row['issuer_id'],
+            'period_year': row['period_year'], 'report_class': row['report_class'],
+            'region': row['region'], 'industry': row['industry'],
+            'stated_basis_family': row['standard_family'],
+            'source_url': row['source_url'], 'original_path': row['local_path'],
+            'original_sha256': row['sha256'], 'extracted_path': row['extracted_text_path'],
+            'extracted_sha256': extracted_hash,
+            'basis_evidence': source['checks']['accounting_basis']['evidence'],
+            'publication_metadata': metadata,
+            'historical_byte_vintage': 'not_established_by_this_inventory',
+            'semantic_status': 'not_annotated', 'gold_label': False,
+            'package_closure': 'not_established',
+            'unresolved': ['report-specific entity/perimeter and jurisdiction interpretation',
+                           'cell and narrative meaning', 'incorporated source obligations',
+                           'revision/translation relationships', 'historical byte-vintage availability'],
+        })
+    if len(records) != coverage['verified_documents'] or len(records) != coverage['expected_documents']:
+        raise ValueError('Source-register coverage is incomplete')
+    result = {'schema_version': 'accdsl.source_work_register.v1', 'status': 'passed',
+              'record_count': len(records), 'input_hashes': {
+                  str((base / name).relative_to(root)): digest(base / name)
+                  for name in ['coverage.json', 'source-evidence.json']},
+              'records': records, 'mission_complete': False,
+              'residuals': ['Publication/version evidence, semantic annotation, incorporated packages and benchmark labels remain open.']}
+    out.mkdir(parents=True, exist_ok=True)
+    atomic_json(out / 'source-work-register.json', result)
+    return result
+
+
+def verify_builtin(root: Path, phase: dict, folder: Path, result: dict) -> dict:
+    """Independently inspect fixed-operation outputs; this is not model review."""
+    checks = []
+    def require(name, passed):
+        checks.append({'name': name, 'passed': passed is True})
+    primary = folder / {'P00': 'baseline.json', 'P01': 'source-work-register.json'}[phase['id']]
+    primary_hashes = {}
+    def finish():
+        require('checked primary bytes remain current', bool(primary_hashes) and not verify_hashes(root, primary_hashes))
+        checked = {'passed': bool(checks) and all(c['passed'] for c in checks), 'tests': len(checks), 'checks': checks,
+                   'input_hashes': primary_hashes,
+                   'review_kind': 'deterministic_fixed_operation_output_validation', 'mission_complete': False}
+        atomic_json(folder / 'checks.json', checked)
+        atomic_json(folder / 'result-review.json', {'verdict': 'PASS' if checked['passed'] else 'FAIL',
+                    'review_kind': checked['review_kind'], 'checks_sha256': digest(folder / 'checks.json'),
+                    'scope': 'Internal fixed-operation acceptance only; no independent model/accounting verdict.'})
+        return checked
+    try:
+        primary_hashes[str(primary.relative_to(root))] = digest(primary)
+        saved = load_json(primary)
+        same = (isinstance(saved, dict) and
+                json.dumps(saved, sort_keys=True, allow_nan=False) == json.dumps(result, sort_keys=True, allow_nan=False))
+    except (OSError, ValueError, TypeError):
+        same = False
+    require('saved primary equals returned result', same)
+    if not same:
+        return finish()
+    result = saved
+    require('explicit bounded acceptance', result.get('status') == 'passed' and result.get('mission_complete') is False)
+    for name in phase['deliverables']:
+        require('deliverable ' + name, (folder / name).is_file())
+    coverage = load_json(root / 'data/financial-report-benchmark/coverage.json')
+    rows = coverage['rows']
+    expected_ids = {r['document_id'] for r in rows}
+    if phase['id'] == 'P00':
+        corpus = load_json(folder / 'corpus-integrity.json')
+        require('corpus independent result', corpus.get('status') == 'pass' and corpus.get('issues') == [])
+        require('corpus count', result.get('verified_reports') == corpus.get('verified_slots') == len(expected_ids))
+        require('scope limitation', result.get('source_acceptance_only') is True)
+        suites = result.get('reference_suites', [])
+        expected_reports = {'example-checks.json', 'repair-conformance.json', 'core-contract-checks.json',
+                            'semantic-preparation-checks.json', 'accounting-dossier-checks.json'}
+        require('all reference suites', len(suites) == 5 and {Path(s['report']).name for s in suites} == expected_reports)
+        for suite in suites:
+            path = local_path(root, suite['report'])
+            require('report is in current run', path.parent == folder.resolve())
+            actual = load_json(path).get('checks', [])
+            require('reference assertions ' + suite['script'], len(actual) == suite['checks'] and len(actual) > 0
+                    and all(c.get('passed', c.get('ok', False)) is True for c in actual))
+        log = (folder / 'corpus-regressions.log').read_text()
+        count = re.search(r'Ran (\d+) tests? in', log)
+        require('executed corpus regressions', bool(count) and int(count[1]) == result.get('corpus_regression_tests')
+                and int(count[1]) >= 20 and re.search(r'^OK\s*$', log, re.M) is not None)
+    elif phase['id'] == 'P01':
+        records = result.get('records', [])
+        require('exact source IDs', len(records) == len(expected_ids) == result.get('record_count')
+                and {r['document_id'] for r in records} == expected_ids)
+        indexed = {r['document_id']: r for r in rows}
+        evidence = load_json(root / 'data/financial-report-benchmark/source-evidence.json')['documents']
+        require('register input hashes', bool(result.get('input_hashes')) and not verify_hashes(root, result['input_hashes']))
+        for record in records:
+            identifier = record['document_id']
+            row, source = indexed[identifier], evidence[identifier]
+            require(identifier + ' source binding', record['original_path'] == row['local_path']
+                    and record['original_sha256'] == row['sha256'] == digest(local_path(root, record['original_path']))
+                    and record['extracted_path'] == row['extracted_text_path']
+                    and record['extracted_sha256'] == digest(local_path(root, record['extracted_path'])))
+            require(identifier + ' source context', record['publication_metadata'] == source.get('source_metadata', {})
+                    and record['basis_evidence'] == source['checks']['accounting_basis']['evidence']
+                    and all(record[k] == row[k] for k in ['issuer_id', 'period_year', 'report_class', 'region', 'industry', 'source_url'])
+                    and record['stated_basis_family'] == row['standard_family'])
+            require(identifier + ' no semantic promotion', record.get('gold_label') is False
+                    and record.get('semantic_status') == 'not_annotated' and record.get('package_closure') == 'not_established'
+                    and record.get('historical_byte_vintage') == 'not_established_by_this_inventory' and bool(record.get('unresolved')))
+    else:
+        raise ValueError('Unknown builtin validation contract')
+    return finish()
+
+
+def validate_artifact_contract(root: Path, phase: dict) -> list:
+    """Check declared result references, including captured checker reports.
+
+    Declarations live in the reviewed phase contract, not in a worker's prose.
+    An empty diagnostic stderr is valid; an empty JSON result is never valid.
+    """
+    failures = []
+    for item in phase.get('evidence_artifacts', []):
+        try:
+            name = item['path']
+            path = local_path(root, name)
+            if not path.is_file() or path.stat().st_size == 0:
+                raise ValueError('missing or empty artifact')
+            value = load_json(path) if item.get('format') == 'json' else None
+            if item.get('format') == 'json' and not isinstance(value, dict):
+                raise ValueError('JSON artifact must be an object')
+            for key, expected in item.get('equals', {}).items():
+                if value.get(key) != expected or type(value.get(key)) is not type(expected):
+                    raise ValueError('inconsistent ' + key)
+            if item.get('kind') == 'checker_report':
+                if (value.get('passed') is not True or type(value.get('tests')) is not int
+                        or value['tests'] <= 0 or value.get('errors')):
+                    raise ValueError('checker report did not pass')
+            if item.get('sha256') and digest(path) != item['sha256']:
+                raise ValueError('artifact hash mismatch')
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            failures.append(str(item.get('path')) + ': ' + str(error))
+    return failures
+
+
+def run_phase_tests(root: Path, phase: dict, out: Path) -> bool:
+    destinations = [out, out.with_suffix('.checker.json'), out.with_suffix('.log')]
+    if any(p.exists() for p in destinations):
+        raise ValueError('Verification output destination is not fresh')
+    if phase.get('checker'):
+        # The outer supervisor owns process-group cleanup and the overall cap.
+        # Use literal argv and save stdout before decoding; never shell-evaluate it.
+        argv = [sys.executable, '-B', str(local_path(root, phase['checker'][0])), *phase['checker'][1:]]
+        raw = out.with_suffix('.checker.json')
+        with raw.open('w') as stdout, out.with_suffix('.log').open('w') as stderr:
+            result = subprocess.run(argv, cwd=root, stdout=stdout, stderr=stderr, check=False)
+        try:
+            report = load_json(raw)
+            if not isinstance(report, dict):
+                raise ValueError('Checker output must be an object')
+            passed = (result.returncode == 0 and report.get('passed') is True
+                      and type(report.get('tests')) is int and report['tests'] > 0)
+            if 'checks' in report:
+                checks = report['checks']
+                passed = passed and isinstance(checks, list) and bool(checks) and all(
+                    isinstance(c, dict) and c.get('passed') is True for c in checks)
+            passed = passed and not report.get('errors')
+            findings = validate_artifact_contract(root, phase)
+            passed = bool(passed and not findings)
+            report.update(passed=passed, checker=phase['checker'], checker_output=str(raw.relative_to(root)),
+                          checker_output_sha256=digest(raw), artifact_errors=findings,
+                          checker_source_sha256=digest(local_path(root, phase['checker'][0])))
+        except (ValueError, OSError) as error:
+            report = {'passed': False, 'tests': 0, 'error': 'Invalid checker output: ' + str(error)}
+            passed = False
+        atomic_json(out, report)
+        return passed
+    sys.path.insert(0, str(root))
+    if (root / 'src').exists():
+        sys.path.insert(0, str(root / 'src'))
+    path = local_path(root, phase['test_file'])
+    if not path.is_file():
+        atomic_json(out, {'passed': False, 'tests': 0, 'error': 'Required test file is absent'})
+        return False
+    suite = unittest.TestLoader().discover(str(path.parent), pattern=path.name)
+    log = io.StringIO()
+    result = unittest.TextTestRunner(stream=log, verbosity=2).run(suite)
+    atomic_bytes(out.with_suffix('.log'), log.getvalue().encode())
+    passed = result.wasSuccessful() and result.testsRun > 0 and len(result.skipped) < result.testsRun
+    findings = validate_artifact_contract(root, phase)
+    passed = passed and not findings
+    atomic_json(out, {'passed': passed, 'tests': result.testsRun, 'skipped': len(result.skipped),
+                      'failures': len(result.failures), 'errors': len(result.errors),
+                      'artifact_errors': findings,
+                      'test_file': phase['test_file'], 'test_sha256': digest(path),
+                      'scope': 'Engineering tests only; result review separately checks adequacy and claim limits.'})
+    return passed
+
+
+def editable_files(root: Path) -> dict:
+    """Inventory all file types in editable project scope, with explicit exclusions.
+
+    Source suffixes are not a write boundary. Git/config service state, caches,
+    frozen corpus/snapshots and supervisor records are outside worker edit scope.
+    Symlinks are rejected rather than silently omitting an editable input.
+    """
+    files = {}
+    excluded_dirs = {'.git', '.agents', '.aws', '.codex', '__pycache__', '.pytest_cache',
+                     '.mypy_cache', '.venv', 'node_modules'}
+    def unreadable(error):
+        raise error
+    for parent, directories, names in os.walk(root, followlinks=False, onerror=unreadable):
+        directory = Path(parent)
+        relative = directory.relative_to(root).as_posix()
+        kept = []
+        for name in directories:
+            child = directory / name
+            if name in excluded_dirs or name.startswith(('pre-repair-', 'pre-expert-preparation-')):
+                continue
+            if child == root / 'data/financial-report-benchmark':
+                continue
+            if relative == 'data/accounting-master' and name != 'deliverables':
+                continue
+            if child.is_symlink():
+                raise ValueError('Editable directory symlink requires explicit preservation: ' + str(child.relative_to(root)))
+            kept.append(name)
+        directories[:] = kept
+        if relative == 'data/accounting-master':
+            continue  # Only declared deliverables are worker-editable here.
+        for name in names:
+            path = directory / name
+            if path.is_symlink():
+                raise ValueError('Editable file symlink requires explicit preservation: ' + str(path.relative_to(root)))
+            if path.is_file():
+                files[str(path.relative_to(root))] = digest(path)
+    return files
+
+
+def worker_inventory(root: Path, generated=()) -> dict:
+    """Detect forbidden writes separately from the editable-byte backup.
+
+    Git internals are protected by the worker sandbox. Disposable language/tool
+    caches are excluded; persistent configuration and prior run records are not.
+    Symlinks are compared as links and never followed outside the workspace.
+    """
+    skipped = {'.git', '__pycache__', '.pytest_cache', '.mypy_cache'}
+    ignored = set(generated)
+    files = {}
+    def unreadable(error):
+        raise error
+    for parent, directories, names in os.walk(root, followlinks=False, onerror=unreadable):
+        directory = Path(parent)
+        for name in list(directories):
+            p = directory / name
+            relative = p.relative_to(root).as_posix()
+            if name in skipped:
+                directories.remove(name)
+            elif p.is_symlink():
+                files[relative] = 'symlink:' + os.readlink(p)
+                directories.remove(name)
+        for name in names:
+            p = directory / name
+            relative = p.relative_to(root).as_posix()
+            if relative in ignored:
+                continue
+            if p.is_symlink():
+                files[relative] = 'symlink:' + os.readlink(p)
+            elif p.is_file():
+                files[relative] = digest(p)
+    return files
+
+
+def preserve_editable(root: Path, store: Path) -> dict:
+    files = {name: value for name, value in editable_files(root).items()
+             if not (root / name).resolve().is_relative_to(store.resolve())}
+    store.mkdir(parents=True, exist_ok=True)
+    for name, value in files.items():
+        destination = store / value
+        if destination.exists() and digest(destination) == value:
+            continue
+        data = (root / name).read_bytes()
+        if hashlib.sha256(data).hexdigest() != value:
+            raise ValueError('Source changed during preservation; retain prior evidence and retry planning')
+        if destination.exists():
+            quarantine = store / 'incomplete' / (value + '-' + uuid.uuid4().hex)
+            quarantine.parent.mkdir(parents=True, exist_ok=True)
+            os.replace(destination, quarantine)
+        atomic_bytes(destination, data, value)
+    return files
+
+
+def changes_since(root: Path, previous: dict) -> dict:
+    current = editable_files(root)
+    return {'added': sorted(set(current) - set(previous)),
+            'changed': sorted(k for k in set(current) & set(previous) if current[k] != previous[k]),
+            'deleted': sorted(set(previous) - set(current))}
+
+
+def contributed_changes(root: Path, record: dict, entry: dict) -> dict:
+    """Current changes to files actually touched in this phase's work windows."""
+    current = editable_files(root)
+    owned = set(record['contributed_files'])
+    return {'added': sorted(owned & (set(current) - set(entry))),
+            'changed': sorted(k for k in owned & current.keys() & entry.keys()
+                              if current[k] != entry[k]),
+            'deleted': sorted(owned - set(current))}
+
+
+def recovery_excerpt(value, limit=1600) -> dict:
+    """A bounded navigation aid; full records remain authoritative."""
+    text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
+    return {'text': text[:limit], 'truncated': len(text) > limit}
+
+
+def compact_worker_packet(value):
+    """Summarise bulky machine evidence, not findings or acceptance records.
+
+    The caller saves the unmodified packet and supplies its path. This view is
+    only model navigation; acceptance always uses the original checked bytes.
+    """
+    if isinstance(value, dict):
+        result = {}
+        for key, child in value.items():
+            if key in {'input_hashes', 'evidence_hashes', 'controller_hashes',
+                       'current_input_hashes'} and isinstance(child, dict):
+                result[key] = {'count': len(child), 'detail': 'See full_packet_path; hashes omitted from prompt only.'}
+            elif key == 'checks' and isinstance(child, list) and child and all(
+                    isinstance(row, dict) and type(row.get('passed')) is bool for row in child):
+                result[key] = {'total': len(child), 'passed': sum(row['passed'] for row in child),
+                               'failures': [compact_worker_packet(row) for row in child if not row['passed']]}
+            elif key in {'added', 'changed', 'deleted', 'contributed_files', 'prior_attempts'} and isinstance(child, list):
+                result[key] = {'count': len(child), 'first_paths': child[:20],
+                               'truncated': len(child) > 20}
+            else:
+                result[key] = compact_worker_packet(child)
+        return result
+    if isinstance(value, list):
+        return [compact_worker_packet(child) for child in value]
+    return value
+
+
+def historical_resolution_checks(root: Path, name: str) -> dict:
+    """Replay declared historical input tuples against exact retained bytes.
+
+    Current deliverables keep their own current hashes. A historical report is
+    never rebased, and an unrelated same-content file cannot invent a tuple.
+    """
+    path = local_path(root, name)
+    rows = load_json(path)['entries']
+    if not isinstance(rows, list) or not rows:
+        raise ValueError('Historical resolutions require explicit nonempty entries')
+    pins, resolved, seen = {name: digest(path)}, [], set()
+    for row in rows:
+        report, original, expected = (row[k] for k in ('report', 'original_path', 'expected_sha256'))
+        identity = (report, original, expected)
+        if identity in seen or not re.fullmatch(r'[0-9a-f]{64}', expected):
+            raise ValueError('Duplicate or malformed historical input tuple')
+        seen.add(identity)
+        report_path = local_path(root, report)
+        if load_json(report_path).get('input_hashes', {}).get(original) != expected:
+            raise ValueError('Historical report does not declare this input tuple: ' + report)
+        # Validate the original path as well, but do not require today's bytes
+        # at that path to equal a superseded version.
+        local_path(root, original)
+        snapshot = row['resolved_path']
+        snapshot_path = local_path(root, snapshot)
+        if row.get('resolved_sha256') != expected or digest(snapshot_path) != expected:
+            raise ValueError('Historical input snapshot mismatch: ' + snapshot)
+        pins = merge_hashes(pins, {report: digest(report_path), snapshot: expected})
+        resolved.append({'report': report, 'original_path': original, 'resolved_path': snapshot,
+                         'expected_sha256': expected, 'passed': True})
+    return {'passed': True, 'resolutions': resolved, 'input_hashes': pins}
+
+
+def phase_recovery(root: Path, phase: dict, record: dict) -> dict:
+    """Recover current obligations from structured records, never worker logs."""
+    required = [str(Path(phase['output_dir']) / n) for n in phase['deliverables']]
+    required.append(phase['test_file'])
+    inventory = record.get('entry_inventory_path')
+    result = {
+        'phase': phase['id'],
+        'required_files': {n: local_path(root, n).is_file() for n in required},
+        'missing_files': [n for n in required if not local_path(root, n).is_file()],
+        'current_changes': (contributed_changes(root, record, load_json(local_path(root, inventory)))
+                            if inventory and 'contributed_files' in record else
+                            changes_since(root, load_json(local_path(root, inventory))) if inventory else None),
+        'change_scope': ('phase_contributions' if 'contributed_files' in record else
+                         'legacy_repository_delta_requires_attribution_before_execution'),
+        'entry_inventory_path': inventory,
+        'issues': recovery_excerpt(record.get('issues', [])),
+        'recent_records': {},
+        'scope': 'Recovery navigation only; file presence and partial work are not acceptance.',
+    }
+    if record.get('continuation'):
+        path = local_path(root, record['continuation'])
+        try:
+            if digest(path) != record.get('continuation_sha256'):
+                raise ValueError('continuation record changed')
+            value = load_json(path)
+            changed = sorted(set(verify_hashes(root, value['evidence_hashes'])) |
+                             set(value.get('changed_check_inputs', [])) | set(value.get('missing_files', [])))
+            result['continuation'] = {'path': record['continuation'],
+                'status': 'stale_recheck_required' if changed else 'checked_snapshot_not_acceptance',
+                'changed_inputs': changed, 'reason': value['reason'], 'check_path': value['check_path'],
+                'next_actions': value['next_actions']}
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            result['continuation'] = {'path': record['continuation'], 'status': 'invalid_recheck_required', 'error': str(error)}
+    patterns = {
+        'approved_plan': ['approved-plan.json', 'replan-*/approved-plan.json'],
+        'proposed_plan': ['plan-*.response.json', 'replan-*/plan-*.response.json'],
+        'work_process': ['execution-*/implement-*.process.json', 'execution-*/repair-*.process.json'],
+        'other_process': ['*.process.json'],
+        'work_response': ['execution-*/implement-*.response.json', 'execution-*/repair-*.response.json',
+                          'execution-*/resumed-work.response.json'],
+        'checks': ['execution-*/checks.json'],
+        'result_review': ['execution-*/review_result-*.response.json',
+                          'execution-*/review_result-retry-*/review_result-*.response.json'],
+        'plan_review': ['review_plan-*.response.json', 'review_plan-retry-*/review_plan-*.response.json',
+                        'replan-*/review_plan-*.response.json',
+                        'replan-*/review_plan-retry-*/review_plan-*.response.json'],
+    }
+    # The current invocation and two previous invocations suffice for navigation.
+    # The phase record preserves every older attempt; do not recursively embed it.
+    attempts = record.get('attempts', [])[-3:]
+    for kind, globs in patterns.items():
+        candidates = []
+        for index, name in enumerate(attempts):
+            folder = local_path(root, name)
+            for pattern in globs:
+                candidates.extend((index, p.stat().st_mtime_ns, str(p), p)
+                                  for p in folder.glob(pattern) if p.is_file())
+        if not candidates:
+            continue
+        path = max(candidates)[-1]
+        relative = str(path.relative_to(root))
+        item = {'path': relative}
+        if path.stat().st_size > 262144:
+            item['excerpt'] = {'text': 'Large structured record: inspect selected fields only.', 'truncated': True}
+        else:
+            try:
+                value = load_json(path)
+                if not isinstance(value, dict):
+                    raise ValueError('structured recovery record must be an object')
+                if kind.endswith('process'):
+                    value = {k: value.get(k) for k in ['exit_code', 'reason', 'wall_seconds', 'log']}
+                elif kind == 'approved_plan':
+                    if not isinstance(value.get('plan'), dict):
+                        raise ValueError('approved plan must contain a plan object')
+                    value = {k: value['plan'].get(k) for k in ['summary', 'steps', 'checks']}
+                elif kind.endswith('response') or kind.endswith('review'):
+                    value = {k: value.get(k) for k in ['verdict', 'issues', 'summary', 'next_actions', 'residuals']}
+                item['excerpt'] = recovery_excerpt(value)
+            except (ValueError, OSError, TypeError) as error:
+                item.update(status='invalid_recheck_required', excerpt=recovery_excerpt(str(error)),
+                            action='Retain invalid record; recheck current files and replan. Never use as acceptance.')
+        result['recent_records'][kind] = item
+    checkpoint = local_path(root, str(Path(phase['output_dir']) / 'progress.md'))
+    if checkpoint.is_file():
+        with checkpoint.open() as stream:
+            text = stream.read(2001)
+        result['worker_checkpoint'] = {'path': str(checkpoint.relative_to(root)),
+                                       'excerpt': recovery_excerpt(text, 2000),
+                                       'status': 'Worker-authored, unverified; check against current files.'}
+    return result

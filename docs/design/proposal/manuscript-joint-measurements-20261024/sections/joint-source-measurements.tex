@@ -1,0 +1,180 @@
+\section{One value for each retained measurement}
+\label{sec:joint-source-measurements}
+
+The current-assets total appears in more than one balance-sheet relation.
+Its components must add to it, and it must combine with noncurrent assets
+to give total assets. If these relations are tested separately, each test
+can choose a different unrounded current-assets amount. A company has one
+amount at that date, so the question is whether the same choice can satisfy
+all the selected relations. This section supplies that narrower joint test
+before attempting to construct an accounting history.
+
+Let \(d_i\) denote a retained displayed amount and \(x_i\) its proposed
+underlying amount, both expressed in millions of US dollars. The index
+identifies an observation, including its company, perimeter, reporting basis
+and measurement date. Two uses of that observation share \(x_i\); a
+different date or source identity does not acquire the same variable merely
+because its caption is similar. The retained balance example concerns
+Apple's consolidated amounts at 28 September and 28 December 2024. It
+preserves the two dates and does not equate their balances.
+
+To constrain an underlying amount from its display, the example proposes
+rounding to the nearest million, with exact half ties rounded away from
+zero. This is the named hypothesis introduced for the partial-state example,
+not a rounding rule established from the issuer's disclosures. In displayed
+million-dollar units, it implies
+\begin{equation}
+\label{eq:joint-source-signed-rounding}
+ I(d_i)=
+ \begin{cases}
+ [d_i-\tfrac12,\,d_i+\tfrac12), & d_i>0,\\
+ (d_i-\tfrac12,\,d_i+\tfrac12], & d_i<0,\\
+ (-\tfrac12,\,\tfrac12), & d_i=0.
+ \end{cases}
+\end{equation}
+For a positive display, its lower half tie rounds upward to that display,
+whereas its upper half tie rounds to the next larger integer. The endpoints
+reverse for a negative display. Neither half tie rounds to zero, which
+explains the open interval in the third line. If the hypothesis is absent,
+the source adapter supplies no interval and the joint question remains
+unresolved. A literal dash also remains nonnumeric; it is not converted into
+the third line.
+
+\subsection{A common assignment must satisfy every selected equation}
+
+Each selected relation supplies exact signed coefficients: components occur
+on the left and the reported target is moved to the left with a negative
+coefficient. A separate named hypothesis asserts that this displayed
+relation also describes the underlying unrounded quantities. With one row
+per selected relation and one column per distinct observation, these
+coefficients form a rational matrix \(A\). The conditional question is
+\begin{equation}
+\label{eq:joint-source-feasible-set}
+ \mathcal F(A,I)=
+ \left\{x\in\mathbb R^n:
+ x_i\in I(d_i)\ \text{for every }i,\quad Ax=0\right\}.
+\end{equation}
+An element of \(\mathcal F(A,I)\) uses the same value everywhere a
+measurement recurs. This is the difference from checking whether each
+individual residual interval contains zero. For example, the two equalities
+\(x=0\) and \(x=1\) are separately compatible with \(x\in[0,1]\),
+but jointly require \(0=1\). Their intersection is empty even though both
+local tests pass.
+
+In the retained annual current-assets relation, the displayed components are
+cash and cash equivalents 29,943; current marketable securities 35,228;
+accounts receivable 33,410; vendor non-trade receivables 32,833; inventories
+7,286; and other current assets 14,287. Their sum is
+\begin{equation}
+\label{eq:joint-source-current-assets}
+ 29{,}943+35{,}228+33{,}410+32{,}833+7{,}286+14{,}287
+ =152{,}987.
+\end{equation}
+Thus the displayed values themselves satisfy this selected equation and lie
+inside their proposed rounding intervals. The joint calculation also uses
+the same current-assets variable in the total-assets equation, and the same
+total-assets variable in the balance-sheet identity. It tests all these
+conditions together rather than supplying a new value to each equation.
+
+The reference implementation \path{JointMeasurementConstraints/1} accepts
+explicit rational coefficients and intervals, including endpoint inclusion.
+It uses the existing exact solver to seek an assignment and checks each
+returned rational value independently with exact fraction arithmetic.
+For every variable, that check applies the original interval inequalities;
+for every equation, it substitutes all values into the original terms and
+requires exact equality. A valid witness establishes nonemptiness of this
+declared set. When the solver reports infeasibility, its conflicting
+constraints are checked again by the same solver. That recheck is useful
+consistency evidence, but it is not an independently verified formal proof.
+
+The supplied computational budget is part of the request. An exhausted
+budget or an inconclusive solver response gives an unknown result, not
+infeasibility. Missing premises are reported before solving, after the
+structure and types have been checked. This prevents an unresolved
+assumption from concealing a malformed equation or a unit mismatch.
+
+\subsection{Preserve the observations when constructing the system}
+
+The finite source adapter \path{RetainedJointSourceRelations/1} receives
+the exact combined statement request, an explicit selection of supported
+relations and optional hypotheses. It recomputes the preserved statement
+description. Coefficients, observation identities, dates and units come from
+that description; the caller cannot replace them with a more convenient
+matrix or a fabricated source result. The currently supported selection is
+the nine current balance relations at each of the two retained dates.
+
+The observation's retained digest identifies its shared variable. Its
+consolidated perimeter, reporting basis, original period description,
+measurement kind and exact instant remain attached to its type. The source
+unit \emph{USD million} is represented as a US-dollar monetary dimension
+with scale \(10^6\). Coefficients and numerical interval endpoints remain
+in displayed million-dollar units, so the conversion does not multiply
+the amounts a second time. The complete original context is preserved
+alongside this typed representation.
+
+All 256 observations and all 143 original relation dispositions remain in
+the returned description, including relations outside this first joint
+selection. The six derived subtotals still lack independent observed targets,
+and the two calculations that depend on unresolved dashes remain unresolved.
+Cross-period comparisons, omitted classes of transaction and explanatory
+differences retain their original meanings. None becomes an asserted
+underlying identity simply because another part of the balance sheet has
+a feasible assignment.
+
+The earlier displayed-statement report therefore keeps its own annotation
+that joint underlying feasibility is uncomputed. A separate result identifies
+the selected conditional system, its hypotheses and its assessment. This
+separation lets a reader recover what the source description originally
+said while examining the additional mathematical question. An empty selection
+reports that no system has been asserted; an unasserted rounding or identity
+hypothesis leaves the selected question unresolved.
+
+\subsection{What the retained balance example establishes}
+
+With all 18 supported balance relations selected, the system contains
+54 distinct monetary observations, 27 at each date. Under the explicit
+rounding and identity hypotheses, it has an exact rational witness.
+Independent checks substitute that witness directly into the retained source
+terms and separately derived rounding bounds. The displayed values themselves
+also provide a checked witness for this selected example. These two checks
+establish compatibility of the selected measurement equations under the
+proposed assumptions; they do not identify the issuer's unrounded amounts.
+
+The local interval calculations are retained alongside the joint result
+using exactly the same premises. All 18 local residual intervals contain
+zero, and the joint witness resolves the further question of whether the
+same amounts can work throughout the selected network. The constructed
+\(x=0, x=1\) example remains necessary: agreement between the two kinds
+of check in this company example does not make the local test sufficient
+in general.
+
+Source changes, altered coefficients or dates, renamed hypotheses and
+changed hypothesis meanings are rejected. Result verification recomputes
+the deterministic source mapping and checks the mathematical evidence.
+It permits another valid witness because a feasible system can have many
+solutions. It does not require the solver to choose the same assignment,
+conflict ordering or elapsed time on every replay. Recorded checks also
+exercise missing hypotheses, empty selections and zero computational budgets.
+The executable definitions and complete case results are retained under
+\path{data/accounting-master/}:
+\begin{quote}\small
+\path{joint-measurement-constraints-20261024}\\
+\path{joint-source-relation-binding-20261024}
+\end{quote}
+
+\subsection{From compatible measurements to an executable company}
+
+A feasible balance-sheet assignment still leaves the simulator's main
+historical problem unresolved. Consolidated cash does not identify the
+available cash of a particular legal book; an inventory caption does not
+supply quantities, cohorts or cost layers; and aggregate liabilities do
+not specify contracts, maturities or payment conditions. Those distinctions
+affect which events can occur and how they change future statements.
+
+The selected equations constrain measurements at two dates without supplying
+the events between them. They assign neither probabilities to possible
+histories nor behavioral rules to future transactions. The next reconstruction
+step must retain these shared measurement constraints while representing
+the missing state and admissible event histories explicitly. Until that
+step has its own source, accounting and computational support, the actual
+history remains unknown and no executable company opening is produced.

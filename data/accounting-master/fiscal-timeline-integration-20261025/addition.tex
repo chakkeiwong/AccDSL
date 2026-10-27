@@ -1,0 +1,59 @@
+\paragraph{A measurement belongs to a particular book.}
+The optional \texttt{MixedEventTimeline/3} adds deferred assessment and an
+explicit terminal carry to the preceding timeline. Deferred assessment is
+dated by \code{measurement.at}; its supplied state digest must match the
+financial book when the operation is reached. The runner retains those
+measurement bytes. It does not replace the digest merely because an earlier
+action has changed the book.
+
+This matters even for a payment that creates no expense. Start with the
+sale-first example, now assessed through 31~December 2027. Cash is USD~467,
+profit before tax is USD~5 and current tax is USD~1.25. A deferred measurement
+prepared for that state cannot be reused after paying USD~1 of a carried tax
+liability: cash and payable have both changed. The original request stops at
+the stale measurement and retains the payment. An author can instead supply
+a distinct measurement for the resulting book, including its own identity,
+date, tax bases and recovery assumptions. That is a new request, not an
+automatic renewal of the old evidence.
+
+The constructed deferred calculation also tests a nonzero accounting effect.
+It begins with a deferred-tax asset and liability of USD~5 each. The supplied
+taxable temporary difference of USD~20 keeps the liability at USD~5 under
+the one-quarter rate. For the asset, the author now supplies only USD~12 of
+recognized deductions and matching recovery capacity, giving an asset of
+USD~3. Reducing the asset from USD~5 to USD~3 records USD~2 of deferred-tax
+expense without changing cash. After-tax profit is consequently
+USD~$5-1.25-2=1.75$. The recovery assumption is hypothetical; the example
+does not estimate a company's future taxable income.
+
+Carry occurs at the next period's start, which must equal the current period's
+exclusive end. It requires current assessment through the closing day and a
+fresh deferred assessment of the same book. In the case without the intervening
+payment, carry on 1~January 2028 preserves cash of USD~467, inventory of USD~70
+and current-tax payable of USD~11.50. It transfers profit of USD~1.75 to retained
+earnings, whose credit-signed balance changes from USD~$-11.75$ to
+USD~$-13.50$, and resets the new period's income and cash-flow movements.
+The old statements, tax vintages and assessment history remain in the period
+archive. The separately reported current-period profit is therefore zero
+immediately after carry; it does not replace the archived profit of USD~1.75.
+
+This bounded calendar permits one carry, as its last action. Later decisions
+use another request bound to the new opening. Applying the retained inventory
+rule on 2~January leaves its half-unit reserve intact: one unit remains before
+the decision, so only half a unit is sold. Proceeds are USD~7.50 and cost is
+USD~5, leaving cash of USD~474.50 and total inventory of USD~65. The preceding
+year's report and tax vintages remain unchanged.
+
+Thirteen focused tests and 61 regressions retain twelve complete exchanges:
+\begin{flushleft}\small
+\path{data/accounting-master/fiscal-timeline-20261025/}
+\end{flushleft}
+They compare entire native transitions, journals and archives, including an expressly renewed
+measurement and a payment after deferred assessment that prevents carry.
+An unknown deferred finding remains unresolved; an absent required entry is
+invalid, and a known false prerequisite is unsupported. Provisional carry
+retains its own unknown or false finding statuses without granting accounting
+admission. Exact clocks and valid prefixes are preserved under the existing
+32-native/64-total work limits. These examples specify timing and composition;
+complete fiscal activity, general multi-period calendars and actual-company
+tax findings remain separate obligations.

@@ -1,0 +1,121 @@
+\section{Commit each insurance event as a complete book transition}
+\label{sec:insurance-atomic}
+
+Separate group measurements still have to produce one dated company balance
+sheet. In the preceding example, R's loss-recovery component depends on B's
+loss component. Publishing B's financing while retaining R's opening
+measurement would combine amounts from different stages of the calculation.
+The proposed close operation therefore declares A, B and R as the required
+group set for each event in this example. Each group retains its own identity
+and measurement; the event publishes their consequences together in one
+entity, book and branch. This is a declared dependency for these facts, not a
+requirement to update every group in every insurance transaction.
+
+The year end contains four events, in order: finance, service, claim and
+recovery incurrence, then settlement. Each has its own business-event
+identifier and immutable opening state. Keeping those boundaries preserves
+the incurred balances and the distinction between earning income and moving
+cash. The following intermediate states follow from the preceding journals.
+Coverage columns show liabilities for A and B and an asset for R.
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+After event & Cash & A coverage & B coverage & R coverage & Equity\\
+\midrule
+Opening & 250 & 120 & 130 & 85 & 85\\
+Finance & 250 & 131 & 142 & 93 & 70\\
+Service & 250 & 65.5 & 71 & 46.5 & 160\\
+Incurrence & 250 & 65.5 & 71 & 46.5 & 83\\
+Settlement & 173 & 65.5 & 71 & 46.5 & 83\\
+\bottomrule
+\end{tabular}
+\end{center}
+Service releases the coverage amounts before the separate claim expenses
+and recovery income are recognised. Incurrence creates liabilities of 44
+and 66 and a recovery asset of 33. Those balances explain why equity is 83
+at that stage even though cash remains 250. Settlement clears them and
+moves cash by \(-44-66+33=-77\), leaving equity unchanged. Collapsing the
+four events into a single final balance would conceal this distinction.
+
+\subsection*{A valid component calculation is part of permission to post}
+
+The proposed operation uses the common
+\texttt{OperationRequest} for \texttt{accounting.commit@1}. Its four arguments
+remain references to the accounting basis, posting authorization, journal
+proposal and economic delta. The expected company head remains in the
+common request envelope. Each group measurement identifies the group,
+issued or held role, covered group where applicable, event phase, opening
+and proposed closing components, book, branch, time, information view,
+method and source. A complete measurement has actual component values;
+an unresolved one has no closing value and gives its reason.
+
+Before looking up a previous receipt, the operation validates the complete
+group set, common ownership and information view, admitted evidence,
+measurement calculation and posting authorization. If R is unresolved,
+the whole declared event lacks permission. A and B's completed proposals
+remain available for diagnosis, but they do not form a closing company
+state. A missing group, duplicate group, wrong branch or different method
+also prevents lookup. The existing receipt index cannot turn malformed
+historical input into an eligible request. This proposed profile admits
+only the authored synthetic case; submitting it to a real book fails that
+permission check.
+
+For an eligible new event, the journal and economic delta must then agree
+with the measurements. During finance, R's asset rises by 8 because its
+claim present value gains 6 and its cost CSM gains 2. Its loss-recovery
+component separately rises by \(18/13\), as a component within the asset.
+An extra debit to R's asset and credit to finance income for \(18/13\)
+would balance, yet overstate both the asset and income. The operation
+rejects that proposal. It also rejects a proposal whose journal is correct
+but whose economic delta leaves the recovery component at its old value.
+The monetary accounts and component memory must both be correct.
+
+Publication inserts the journal, complete component and account changes,
+closing company state, their dependency records and edges, and the immutable
+receipt, then advances the company head in the same transaction. The finite
+exchange examples list those published records separately from the global
+registry of proposed records. Merely retaining a rejected measurement for
+inspection therefore does not make it part of the book. A rejected request
+publishes none of its proposed transition. This requirement has one legal
+book as its owner; it supplies no transaction guarantee across different
+books or entities.
+
+\subsection*{Retry the event without repeating its accounting}
+
+The business-event lookup key remains the entity, book, branch and
+business-event identifier. After input validation, an equal request
+fingerprint returns the original receipt before testing the freshness of
+today's head. Suppose all four events have committed, advancing the head
+from generation zero to generation four. Retrying the original finance
+request returns its original receipt and closing state at generation one.
+The response separately reports the observed generation-four head and that
+this invocation made no additional commit. It does not apply finance again
+or replace today's state with the old closing state.
+
+Equality covers the complete request, including its request identifier,
+budget, original expected head and dependency identities. Changing any of
+those bytes while retaining the business-event key is a conflict, not an
+exact retry. A previously unseen event with an old head is stale. The
+transaction repeats both the key and head checks before publication: an
+identical request that has just won returns its receipt; different request
+bytes for that event conflict; a different event that advances the head
+makes this request stale. In each case the competing transaction's changes
+are distinguished from any changes made by the requester.
+
+If the acknowledgement disappears, the client cannot infer whether the
+transaction committed. The exchange therefore records a transport
+observation with unknown commit status, the original submission and its
+exact request bytes. It does not invent a received operation result. One
+possible storage state still has the opening head and no receipt; the other
+has the complete closing state and receipt. Resubmitting the exact request
+commits once in the first case and returns the old receipt in the second.
+A timeout supplies no reason to change the event identifier, opening head
+or economic facts.
+
+These finite examples check the equations, complete record bindings and
+required decisions for both storage states. They specify observable
+behavior; actual transaction isolation, crash recovery and durability need
+later implementation tests. Their completed coverage is a decision on one
+request, with no interpretation as probability mass over financial histories.
+The underlying source applicability and supplied actuarial assumptions of
+the connected-group example continue to govern its accounting meaning.

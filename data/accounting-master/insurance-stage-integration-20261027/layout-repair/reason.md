@@ -1,0 +1,1 @@
+Build 01 was mathematically intact but split the long heading and opening example across pages. Shorten only the heading and start the section on a fresh page; retain every equation, sentence and source limit. Preserve first-build checks. Build/verify 02 uses the explicit successor preservation manifest.

@@ -1,0 +1,2220 @@
+     Time (in)consistency of multistage distributionally
+     robust inventory models with moment constraints
+                                                     Linwei Xin
+                            Booth School of Business, University of Chicago, Chicago, IL 60637
+
+                                               David A. Goldberg
+                  Operations Research and Information Engineering, Cornell University, Ithaca, NY 14850
+
+
+        Recently, there has been a growing interest in developing inventory control policies which are robust
+     to model misspecification. One approach is to posit that nature selects a worst-case distribution for any
+     relevant stochastic primitives from some pre-specified family. Several communities have observed that a subtle
+     phenomena known as time inconsistency can arise in this framework. In particular, it becomes possible that
+     a policy which is optimal at time zero may not be optimal for the associated optimization problem in which
+     the decision-maker recomputes her policy at each point in time, which has implications for implementability.
+     If there exists a policy which is optimal for both formulations, we say that the policy is time consistent, and
+     the problem is weakly time consistent. If every optimal policy is time consistent, we say that the problem
+     is strongly time consistent. We study these phenomena in the context of managing an inventory over time,
+     when only the mean, variance, and support are known for the demand at each stage. We provide several
+     illustrative examples showing that here the question of time consistency can be quite subtle. We complement
+     these observations by providing simple sufficient conditions for weak and strong time consistency. Although a
+     similar phenomena was previously identified by Shapiro for the setting in which only the mean and support of
+     the demand are known, here our model is rich enough to exhibit a variety of additional interesting behaviors.
+
+     Key words : supply chain management, inventory, news vendor, multistage distributionally robust
+       optimization, rectangularity, moment constraints, time consistency, dynamic programming, base-stock
+       policy
+
+
+
+
+1.     Introduction
+The news vendor problem, used to analyze the trade-offs associated with stocking an inventory,
+has its origin in a seminal paper by Edgeworth (1888). In its classical formulation, the problem
+is stated as a minimization of the expected value of the relevant ordering, backorder, and holding
+costs. However, in applications knowledge of the exact distribution of the demand process is rarely
+available. This motivates the study of minimax type (i.e. distributionally robust) formulations,
+where minimization is performed with respect to a worst-case distribution from some family of
+potential distributions. In a pioneering paper Scarf (1958) gave an elegant solution for the minimax
+news vendor problem when only the first and second order moments of the demand distribution
+
+                                                            1
+                                         Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+2
+
+are known. His work has led to considerable follow-up work (cf. Gallego et al. (1993, 1994), Gallego
+(1998, 2001), Popescu (2005), Yue et al. (2006), Gallego et al. (2007), Perakis et al. (2008), Chen
+et al. (2009), See et al. (2010), Hanasusanto et al. (2015), Zhu et al. (2013)). For a more general
+overview of risk analysis for news vendor and inventory models we can refer, e.g., to Ahmed et al.
+(2007) and Choi et al. (2011). We also note that a distributionally robust minimax approach is not
+the only way to model such uncertainty, and that there is a considerable literature on alternative
+approaches such as the robust optimization paradigm (cf. Kasugai et al. (1961), Ben-Tal et al.
+(2005), Bertsimas et al. (2006), Ben-Tal et al. (2009), Bertsimas et al. (2010), Carrizosaa et al.
+(2016), Gabrel et al. (2014)) and Bayesian approach (cf. Scarf (1959, 1960), Lovejoy (1992), Levi
+et al. (2015), Klabjan et al. (2013)).
+    In practice an inventory must often be managed over some time horizon, and the classical
+news vendor problem was naturally extended to the multistage setting, for which there is also
+a considerable literature (cf. Zipkin (2000)). Recently, distributionally robust variants of such
+multistage problems have begun to receive attention in the literature (cf. Gallego (2001), Ahmed et
+al. (2007), Choi et al. (2008), See et al. (2010), Shapiro (2012), Klabjan et al. (2013)). It has been
+observed that such multistage distributionally robust optimization problems can exhibit a subtle
+phenomenon known as time inconsistency. Over the years various concepts of time consistency have
+been discussed in the economics literature, in the context of rational decision making. This can be
+traced back at least to the work of Strotz (1955) - for a more recent overview we refer the reader
+to the survey by Etner et al. (2012). Questions of time consistency have also attracted attention
+in the mathematical finance literature and the associated theory of coherent risk measures (cf.
+Wang (1999), Artzner et al. (2007), Roorda et al. (2007), Cheridito et al. (2009), Ruszczyński
+(2010)). These concepts have also been studied from the perspective of robust control across various
+academic communities (cf. Hansen et al. (2001), Iyengar (2005), Nilim et al. (2005), Grunwald et
+al. (2011), Carpentier et al. (2012), Osogami et al. (2012), Wiesemann et al. (2013), Pflug et al.
+(2014), Asamov et al. (2015), De Lara et al. (2016), Shapiro et al. (2016a,b), Bielecki et al. (2018),
+Gérard et al. (2019)). Recently, these concepts have also begun to receive attention in the setting
+of inventory control (cf. Chen et al. (2007, 2012), Yang (2013), Homem-de-Mello et al. (2016),
+Shapiro et al. (2019)).
+    In this work, we will consider questions of time (in)consistency in the context of managing an
+inventory over time. We will give several formal definitions of time consistency, which are naturally
+suited to our framework, in Section 4. At this point let us provide the following high-level intuition.
+A multi-stage distributionally robust optimization problem can be viewed in two ways. In one
+formulation, the policy maker is allowed to recompute her policy choice after each stage, thus taking
+prior realizations of demand into consideration when performing the relevant minimax calculations
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                     3
+
+at later stages. One natural way to model such a re-computation leads to a tractable dynamic
+programming (DP) formulation (we will refer to this as the distributionally robust DP formulation),
+for which a base-stock policy is known to be optimal. In the second formulation, the policy maker
+is not allowed to recompute her policy after each stage (we will refer to this as the multistage-static
+formulation), in which case far less is known. If these two formulations have a common optimal
+policy, i.e. the policy maker would be content with the given policy whether or not she has the power
+to recompute after each stage, we say that the policy is time consistent, and the problem is weakly
+time consistent. If every optimal policy for the multistage-static formulation is time consistent, i.e.
+it is impossible to devise a policy which is optimal at time zero yet suboptimal at a later time,
+we say that the problem is strongly time consistent. Such a property is desirable from a policy
+perspective, as it ensures that previously agreed upon policy decisions remain rational when the
+policy is actually implemented, possibly at a later time. We will also discuss an alternative notion of
+time consistency, in which we require that the optimal policy for the multistage-static formulation
+agrees with the sequence of decisions derived under a different notion of re-computation, in which
+the re-computed optimization problems are themselves (conditioned) versions of the multistage-
+static formulation (over the remaining time horizon).
+  Within the optimization and inventory control communities, much of the work on time consis-
+tency restricts its discussion of optimal policies to the setting in which the family of distributions
+from which nature can select satisfies a certain factorization property called rectangularity, which
+endows the associated minimax problem with a DP structure, and which we review in-depth in
+the supplemental appendix Section 7. Outside of this setting, most of the literature focuses on dis-
+cussing and demonstrating hardness of the underlying optimization problems (cf. Iyengar (2005),
+Nilim et al. (2005), Wiesemann et al. (2013)). We note that this is in spite of the fact that previous
+literature has discussed the importance and relevance of such non-decomposable formulations from
+a modeling perspective (cf. Iyengar (2005)).
+
+1.1.    Our contributions
+In this paper, we depart from much of the past literature by seeking both negative and positive
+results regarding time consistency when no such decomposition holds, i.e. the underlying family of
+distributions from which nature can select is non-rectangular. Our work is in the spirit of Grunwald
+et al. (2011), in which a definition of (weak) time consistency similar to ours was analyzed in the
+context of rectangularity and dynamic consistency (a concept defined in Epstein et al. (2003)),
+albeit in a substantially different context. Our work can also be viewed as providing a more in-
+depth and inventory-focused study of several notions of time-consistency studied in Shapiro (2009),
+Carpentier et al. (2012), Pflug et al. (2014), Homem-de-Mello et al. (2016), Shapiro et al. (2016a).
+                                       Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+4
+
+In contrast to many of these works in which all concepts are explained through the language of
+risk measures, here we explain all relevant concepts purely in the language of (robust) newsvendor
+models with moment constraints, a model popular in the operations management community, and
+hope that in doing so our work brings the concept of time-consistency to a broader audience.
+    We extend the work of Scarf (1958) (and followup work of Gallego (2001)) by considering the
+question of time consistency in multistage news vendor problems when the support and first two
+moments are known for the demand at each stage, and demand is stage-wise independent. In
+addition to refining multiple definitions related to time-consistency, we provide several illustrative
+examples showing that here the question of time consistency can be quite subtle. In particular: (i)
+the problem can fail to be weakly time consistent, (ii) the problem can be weakly but not strongly
+time consistent, and (iii) the problem can be strongly time consistent even if every associated
+optimal policy takes different values under the multistage-static and distributionally robust DP
+formulations. We also prove that, although the distributionally robust DP formulation always has
+an optimal policy of base-stock form, there may be no such optimal policy for the multistage-static
+formulation. We complement these observations by providing simple sufficient conditions for weak
+and strong time consistency.
+    Interestingly, in contrast to much of the related literature, our results show that time consistency
+may hold even when rectangularity does not. This stands in contrast to the analysis of Shapiro
+(2012) for the setting in which only the mean and support of the demand distribution are known,
+where the problem is always (weakly) time consistent, amenable to a simple DP solution, with both
+formulations having the same optimal value. Likewise, in the setting in which only the support
+is known, both formulations reduce to the so-called adjustable robust formulation described in
+Ben-Tal et al. (2004), where again (weak) time consistency always holds.
+
+1.2.    Outline of paper
+The structure of the rest of the paper is organized as follows. In Section 2, we review the single-stage
+classical and distributionally robust formulations and their properties. In Section 3, we discuss
+the extension to the multi-stage setting, formally defining the multistage-static formulation, the
+relevant notions of time-consistency, and the distributionally robust DP formulation. In Section
+4, we prove our sufficient conditions for weak and strong time consistency, and present several
+illustrative examples showing that here the question of time consistency can be quite subtle. In
+Section 5, we provide closing remarks and directions for future research. We also include a technical
+appendix in Section 6 containing proofs of several of our main results. Additional supplemental
+material and exposition, including a detailed discussion of rectangularity, and (for completeness)
+some additional results and proofs, are included in the supplemental appendix Section 7.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                     5
+
+2.     Single-stage formulation
+In this section we review both the classical and distributionally robust single-stage formulation.
+
+2.1.    Classical formulation
+Consider the following classical formulation of the news vendor problem: inf x≥0 E[Ψ(x, D)], where
+Ψ(x, d) := cx + b[d − x]+ + h[x − d]+ ; and c, b, h are the ordering, backorder penalty, and holding
+costs, per unit, respectively. Unless stated otherwise we assume that b > c > 0 and h ≥ 0. The
+expectation is taken with respect to the probability distribution of the demand D, which is modeled
+as a random variable having nonnegative support. It is well-known that here an optimal choice of
+         b−c
+x is the b+h quantile of demand.
+
+2.2.    Distributionally robust formulation
+Suppose now that the probability distribution of the demand D is not fully specified, but instead
+assumed to be a member of a family of distributions M. Then we consider the following distribu-
+tionally robust formulation:
+                                                       inf ψ(x),                                 (1)
+                                                       x≥0
+
+where ψ(x) := supQ∈M EQ [Ψ(x, D)], and the notation EQ emphasizes that the expectation is taken
+with respect to the distribution Q of the demand D.
+  We now introduce some additional notations to describe certain families of distributions. For
+a probability measure (distribution) Q, we let supp(Q) denote the support of the measure, i.e.
+the smallest closed set A ⊆ R such that Q(A) = 1. With a slight abuse of notation, for a random
+variable Z, we also let supp(Z) denote the support of the associated probability measure. For a
+given closed interval I ⊆ R, we let P(I ) denote the set of probability distributions Q such that
+supp(Q) ⊆ I , and let δa denote the probability measure of mass one at a ∈ R.
+ In this paper, we will study families of distributions satisfying moment constraints of the form
+     
+M := Q ∈ P(I ) : EQ [D] = µ, EQ [D2 ] = µ2 + σ 2 . Unless stated otherwise, it will be assumed that
+M is indeed of this form, and is nonempty (i.e. µ ∈ [α, β] and σ 2 ≤ (β − µ)(µ − α) for some α ≤ β,
+where α, β may equal ±∞). We refer to Chapter 10 of Schmüdgen (2017) for a further discussion
+of classical results about the problem of moments. One can identify conditions under which M is
+a singleton, as follows.
+
+Observation 1 If −∞ < α < β < +∞, µ ∈ [α, β], and σ 2 = (β − µ)(µ − α), then M consists of the
+                                    β−µ                     µ−α
+one measure assigning α probability β−α , and β probability β−α .
+
+  We now rephrase ψ(x) as the optimal value of a certain optimization problem. For use in later
+proofs, we define the following more general maximization problem, in terms of a general integrable
+objective function ζ:                      R
+                                    sup        ζ(τ )dQ(τ )
+                                  Q∈P(I) R                     R                                 (2)
+                                    s.t.       τ dQ(τ ) = µ,       τ 2 dQ(τ ) = µ2 + σ 2 .
+                                           Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+6
+
+Our definitions imply that for all x ∈ R, ψ(x) equals the optimal value of Problem (2) for the special
+case that ζ(τ ) = Ψ(x, τ ). We note that Problem (2) is a classical problem of moments (see, e.g.,
+Landau 1987), and by the the Richter-Rogosinski Theorem (e.g., Shapiro et al. 2009, Proposition
+6.40), or results in Bertsimas et al. (2005), has an optimal solution with support on at most three
+points (if it posesses an optimal solution).
+
+    2.2.1.       Scarf ’s solution. We note that the distributionally robust single-stage news vendor
+problem considered by Scarf (1958) is exactly Problem (1), when I = R+ . As it will be useful
+for later proofs, we briefly review Scarf’s explicit solution here, and show some additional related
+                                                                 1
+results in the technical appendix. Define f(z) := (z − µ)2 + σ 2 2 for all z ∈ R.
+
+Theorem 1 (Scarf (1958)) Suppose that b > c, c + h > 0, µ > 0, σ > 0, and I = R+ . Let κ :=
+b−h−2c
+  b+h
+       . Then for each x ∈ R,
+                                                        1 b−h−2c                          2   2
+                                   b+h
+                           cµ + 2 (x − µ) + σ
+                                                2     2 2
+                                                           − 2 (x − µ),          if x ≥ µ 2µ
+                                                                                          +σ
+                                                                                             ,
+                                    2        2                                                  2   2
+                    ψ(x) =   (h+c)σ   −(b−c)µ                                                                      (3)
+                                 µ2 +σ 2
+                                               x + bµ,                           if x ∈ [0, µ 2µ
+                                                                                              +σ
+                                                                                                 ),
+                             bµ − (b − c)x,
+                           
+                                                                                 otherwise.
+
+    As a consequence, a complete solution to the problem inf x∈R ψ(x) is as follows.
+         2
+             b−c
+(i) If σµ2 > h+c , then the unique optimal solution is x = 0, and the optimal value is µb.
+         2                                                                              1
+(ii) If σµ2 < h+c
+              b−c
+                  , then the unique optimal solution is x = µ + κσ(1 − κ2 )− 2 , and the optimal value
+                        1
+is cµ + (h + c)(b − c) 2 σ.
+             2                                           1
+               b−c
+(iii) If σµ2 = h+c , then all x ∈ [0, µ + κσ(1 − κ2 )− 2 ] are optimal, and the optimal value is µb.
+In all cases arg maxQ∈M EQ [Ψ(x, D)] is nonempty for every x ∈ R, and the optimal solution set and
+value of the problem inf x∈R ψ(x) is identical to that of Problem (1).
+
+3.     Multistage formulation
+3.1.    Classical formulation
+We begin by giving a quick review of the classical (i.e. non-robust) multistage news vendor problem.
+For a vector z = (z1 , ..., zn ) ∈ Rn and 1 ≤ i ≤ j ≤ n, denote z[i,j] := (zi , ..., zj ). In particular for i = 1
+we simply write z[j] for the vector consisting of the first j components of z, and set z[0] := ∅.
+    We suppose that there is a finite time horizon T , and a (random) vector of demands D =
+(D1 , . . . , DT ). By d = (d1 , . . . , dT ) we usually denote a particular realization of the random vector
+D. We assume that the components of random vector D are mutually independent, and refer to
+this as the stagewise independence condition. We now define the family of admissible policies Π by
+introducing two families of functions, {yt , t = 1, . . . , T } and {xt , t = 1, . . . , T }. Conceptually, yt will
+correspond to the inventory level at the start of stage t, and xt will correspond to the inventory
+level after having ordered in stage t, but before the demand in that stage is realized.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                                 7
+
+  We will consider policies which are nonanticipative, i.e. decisions do not depend on realizations
+of future demand. We assume that y1 , the initial inventory level, is a given constant. We also
+require that one can only order a nonnegative amount of inventory at each stage. Thus the set of
+admissible policies Π should consist of those vectors of (measurable) functions π = {xt (d[t−1] ), t =
+1, . . . , T }, such that xt : Rt−1                                                   t−1
+                                + → R satisfies xt (d[t−1] ) ≥ yt , for all d[t−1] ∈ R+   and t = 1, ..., T , where
+yt+1 = xt (d[t−1] ) − dt , t = 1, ..., T − 1.
+  To prevent notational confusion, it will at times be helpful to parametrize the relevant opti-
+mization problems by the initial condition y1 , and we let Π(y1 ) denote the relevant set of feasible
+policies for a given y1 . Sometimes we will explicitly express xt and yt as a function of the associated
+policy π and demands d[t] , with the notations xπt (d[t−1] ) and ytπ (d[t−1] ), where we note that under
+such a notation the fixed initial condition y1 is implicit. Combining the above, we can write the
+classical multistage news vendor problem (inventory problem) as follows:
+                               ( T                                                                    )
+                                X
+                                       ρt−1 ct xπt (D[t−1] ) − ytπ (D[t−1] ) + Ψt xπt (D[t−1] ), Dt
+                                                                                                  
+                  inf      E                                                                            .      (4)
+                π∈Π(y1 )
+                                t=1
+
+Here ρ ∈ (0, 1] is a discount factor, ct , bt , ht are the ordering, backorder penalty and holding costs
+per unit in stage t, respectively, and Ψt (xt , dt ) := bt [dt − xt ]+ + ht [xt − dt ]+ . Unless stated otherwise,
+we assume that bt > ct > 0 and ht ≥ 0 for all t = 1, ..., T .
+  Problem (4) can be viewed as an optimal control problem in discrete time with state variables
+yt , control variables xt and random parameters Dt . It is well known that Problem (4) can be solved
+using DP equations, which can be written as
+                                                                                                    
+                        Vt (yt ) = inf              ct (xt − yt ) + E Ψt (xt , Dt ) + ρVt+1 (xt − Dt ) ,       (5)
+                                       xt ≥yt
+
+
+t = 1, ..., T , with VT +1 (·) ≡ 0 (e.g., Zipkin (2000)). Note that the value functions Vt (·) are convex,
+and do not depend on the demand data because of the stagewise independence assumption. These
+equations naturally define a set of policies through the relation xt (yt ) ∈ Xt (yt ), where Xt (yt ), t =
+1, ..., T, is the set of optimal solutions of the problem
+                                         
+                                 inf      ct (xt − yt ) + E[Ψt (xt , Dt ) + ρVt+1 (xt − Dt )] ,                (6)
+                                xt ≥yt
+
+
+and the optimal value of Problem (4) is given by V1 (y1 ). Note that xt (yt ), t = 1, . . . , T , are functions
+of yt , i.e., it suffices to consider policies (measurable functions) of the form xt = πt (yt ); this fact is
+well known from optimal control theory (see, e.g., Bertsekas et al. (1978) for technical details). Of
+course, the assumption of stagewise independence is essential for this conclusion.
+  Under the specified conditions, the objective function of Problem (6) tends to +∞ as xt →
+±∞. It thus follows from convexity that this objective function possesses a (possibly non-unique)
+                                            Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+8
+
+unconstrained minimizer x∗t over x ∈ R, and x̄t := max{yt , x∗t } is an optimal solution of Problem
+(6). In particular, the so-called base-stock policy is optimal for the inventory Problem (4), where we
+note that such a result is classical in the inventory literature. Recall that a policy π ∈ Π is said to be
+                                                                                        
+a base-stock policy if there exist constants x∗t , t = 1, . . . , T, such that xπt = max ytπ , x∗t , t = 1, . . . , T.
+Without loss of generality, we suppose that in any base-stock policy x∗1 ≥ y1 . Problem (4) can be
+solved using the DP formulation (5) and associated policy (6) in the following sense.
+
+Lemma 3.1 The optimal value of Problem (4) equals V1 (y1 ). Any policy π such that xπt (d[t−1] ) ∈
+                                                         t−1
+                
+Xt ytπ (d[t−1] ) are for all t = 1, ..., T and d[t−1] ∈ R+   , is an optimal solution to Problem (4).
+Conversely, for any optimal policy π for Problem (4), and any t ∈ {1, ..., T }, there exists a set
+                                                                             
+A ⊆ R such that Pr ytπ (D[t−1] ) ∈ A = 1, and xπt (D[t−1] ) ∈ Xt ytπ (D[t−1] ) conditional on the event
+{ytπ (D[t−1] ) ∈ A}. Furthermore, it follows from the convexity of the relevant cost-to-go functions
+Vt (yt ) that any set of base-stock constants {x∗t , t = 1, . . . , T } such that x∗t ∈ Xt (0) for all t ∈ [1, T ]
+will yield an optimal policy for Problem (4).
+
+3.2.    Distributionally robust formulations
+Suppose now that the distribution of the demand process is not known, and we only have at our
+disposal information about the support and first and second order moments. In this case, it is
+natural to use the framework previously developed for the single-stage problem (see Section 2) to
+handle the distributional uncertainty at each stage. However, in the multistage setting, there is a
+nontrivial question of how to model the associated uncertainty in the joint distribution of demand.
+    We will consider two formulations, one corresponding to the modeling choices of a policy maker
+who does not recompute her policy choices after each stage and one corresponding to a policy-
+maker who does. These two formulations are analogous to the two optimization models discussed
+in Iyengar (2005) and Nilim et al. (2005) in the framework of robust MDP, and can also be
+interpreted through the lens of (non)rectangularity of the associated families of priors (cf. Epstein
+et al. (2003), Iyengar (2005), Nilim et al. (2005)). We refer to these formulations as multistage-static
+and distributionally robust DP, respectively. Questions regarding the interplay between the sets of
+optimal policies of these two formulations are important from an implementability perspective, as
+a policy deemed optimal at time 0, but which does not remain optimal if the relevant decisions
+are re-examined at a later time, may not be implemented by the relevant stake-holders. We note
+that the particular definitions and formulations we introduce here are by no means the only way to
+define the relevant notions of time consistency, and again refer the reader to the survey by Etner
+et al. (2012), and other recent papers in the optimization community (cf. Iyengar (2005), Boda et
+al. (2006), Carpentier et al. (2012), Iancu et al. (2015), Homem-de-Mello et al. (2016), Shapiro et
+al. (2019)) for alternative perspectives.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                            9
+
+  We suppose that we have been given a sequence of closed (possibly unbounded) intervals It =
+[αt , βt ] ⊂ R, means µt , and variances σt2 , t = 1, . . . , T .
+
+  3.2.1.     Multistage-static formulation. We first consider the following formulation, referred
+to as multistage-static, in which the policy maker does not recompute her policy choices. Let
+
+                   Mt := Qt ∈ P(It ) : EQt [Dt ] = µt , EQt [Dt2 ] = µ2t + σt2 , t = 1, ..., T ;
+                        
+                                                                                                           (7)
+
+                    M := {Q = Q1 × · · · × QT : Qt ∈ Mt , t = 1, ..., T }.                                 (8)
+
+That is, the set M consists of probability measures given by direct products of probability measures
+Qt ∈ Mt . This can be viewed as an extension of the stage-wise independence condition, employed in
+Section 3.1, to the considered distributionally robust case. In order for the sets Mt to be nonempty
+we assume that µt ∈ [αt , βt ] and σt2 ≤ (βt − µt )(µt − αt ), t = 1, ..., T. According to (8), the associ-
+ated minimax problem supposes that although the set of associated marginal distributions may be
+“worst-case”, the joint distribution will always be a product measure (i.e. the demand will be inde-
+pendent across stages). The multistage-static formulation for the distributionally robust inventory
+problem can then be formulated as follows.
+
+                                                          sup EQ Z π ,
+                                                                 
+                                                    inf                                                    (9)
+                                                  π∈Π(y1 ) Q∈M
+
+
+where Z π = Z π (D[T ] ) is a function of D[T ] = (D1 , ..., DT ) given by
+                                   T
+                                   X
+                 Z π (D[T ] ) :=         ρt−1 ct xπt (D[t−1] ) − ytπ (D[t−1] ) + Ψt xπt (D[t−1] ), Dt ,
+                                                                                                   
+                                                                                                          (10)
+                                   t=1
+
+and Π(y1 ) is the set of admissible policies defined previously in Section 3.1. We let OPT(y1 ) denote
+the set of optimal policies for Problem (9). Of course, if the set M = {Q} is a singleton, then
+formulation (9) coincides with formulation (4) taken with respect to the distribution Q = Q1 ×
+· · · × QT of the demand vector D[T ] . We note that the multistage-static formulation (9) is closely
+                                                                                
+related to optimization with risk measures. Indeed, the functional supQ∈M EQ Z is a coherent risk
+measure (cf. Shapiro et al. (2009)). Very little is known about OPT(y1 ), as this problem does not
+enjoy a DP formulation along the lines of (5).
+
+  3.2.2.     Time consistency and distributionally robust DP equations. As informally ref-
+erenced earlier, time inconsistency refers to the possibility that policy choices which seemed optimal
+from the perspective of time 0 no longer seem optimal if one re-performs one’s minimax calcu-
+lations at a later time. Although first addressed within the economics community, the issue of
+time (in)consistency has recently started to receive attention in the stochastic and robust opti-
+mization communities, in which closely related concepts such as Pareto robust optimality (Iancu
+                                       Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+10
+
+et al. (2014)) have also been studied. We note that related issues were addressed even in the
+seminal work of Bellman (1957) on DP. Here we will formalize two particular definitions of time-
+consistency in our setting, each of which has appeared in various forms throughout the literature.
+These two definitions will stem from two different ways to formalize the precise manner in which
+the decision maker “re-optimizes” at later time periods. We begin with Definition I, which leads
+to a tractable DP formulation, and reason as follows. Suppose we wished to know whether a
+policy π which was optimal for the multi-stage static formulation had the property that, should
+one re-perform one’s minimax calculation in the final period, one would make the same ordering
+decision. As she cannot change past decisions, the only policy decision she still has to make is
+the determination of the function xT . However, she now has knowledge of D[T −1] and yT , which
+she can incorporate into her minimax computations. We note that here we are faced with the
+modeling question of how to reconcile the use of D[T −1] and yT ’s realized values in performing
+one’s minimax computations with the previously assumed stagewise independence of demand. A
+natural approach, consistent with the economics literature on time consistency, is to reason as
+follows. As D[T −1] has already been realized, it is unreasonable to enforce independence of DT on
+this realization, as it is no longer undetermined. Instead, the relevant minimax computation is
+carried out with this knowledge of the realization of D[T −1] . At that time, such a policy-maker is
+                                       
+thus led to the optimization inf xT ≥yT cT (xT − yT ) + supQT ∈MT EQT [ΨT (xT , DT )] , with YT (yT ) :=
+              
+arg minxT ≥yT cT (xT − yT ) + supQT ∈MT EQT [ΨT (xT , DT )] the corresponding set of optimal policy
+choices. Here we note that (for example) the inner maximization supQT ∈MT EQT [ΨT (xT , DT )] is
+implicitly a function of D[T −1] , through the dependence on xT . Thus time-consistency of an optimal
+policy π for the multi-stage static formulation should (at least as regards policy decisions in this
+                                                                                
+final period) be equivalent to requiring that xπT (D[T −1] ) ∈ YT yTπ (D[T −1] ) . We note that there is a
+second subtlety here relating to in what precise sense (e.g. with probability 1 etc.) this inclusion
+must hold, which we explain by considering a special situation. Suppose (for discussion) that the
+moment and support constraints ensured that there is only one possible measure Q for demand,
+with finite support. Note that the optimality of a policy π is completely independent from π’s
+behavior on demand trajectories with zero probability under Q. Thus there will be optimal policies
+for the static formulation which behave arbitrarily on these zero probability trajectories, indepen-
+dent of the solution to any dynamic program. If we deemed such a policy inconsistent, it would : 1.
+stand against the fundamental notion that time-consistency assesses whether disagreement between
+a static and dynamic optimizer is possible (as disagreement would only occur on impossible tra-
+jectories); and 2. in many cases trivialize the question of whether all optimal policies for the static
+problem are consistent (our notion of strong consistency). Such questions become even more subtle
+when the uncertainty set contains measures with different supports, as one cannot simply refer to
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                               11
+
+something holding w.p.1 under a common reference measure (a way some past works implicitly
+deal with this issue). We note that many past works do not take this subtlety into account in
+their definitions, as the distinction was less important for the notions of time consistency studied
+there (typically not strong consistency). Here, we propose the natural and intuitive interpretation
+/ definition that one should require the inclusion hold w.p.1 for every measure in M, as these are
+exactly those measures one believes possible.
+  Distributionally robust DP formulation. Before proceeding with our formal definition of
+time consistency, let us expand on the distributionally robust DP formulation, which we have
+defined only in the final period. Carrying out the same logic using backwards induction, we conclude
+that if a policy is to be deemed time-consistent when the policy-maker is (possibly) given the choice
+to recompute her minimax calculations in an arbitrary set of time periods, her choices should be
+consistent with the following distributionally robust DP equations.
+
+                                                                                          
+                  Vt (yt ) = inf ct (xt − yt ) + sup EQt [Ψt (xt , Dt ) + ρVt+1 (xt − Dt )] ,                (11)
+                             xt ≥yt                   Qt ∈Mt
+
+t = 1, ..., T , with VT +1 (·) ≡ 0. The optimal value of DP formulation (11) is given by V1 (y1 ). Dynamic
+equations (11) naturally define a set of policies of the form xt = πt (yt ), t = 1, . . . , T , with xt = πt (yt )
+being measurable selections xt ∈ Yt (yt ) from sets
+                                                                                  
+     Yt (yt ) := arg min ct (xt − yt ) + sup EQt [Ψt (xt , Dt ) + ρVt+1 (xt − Dt )] , t = 1, ..., T.         (12)
+                    xt ≥yt                   Qt ∈Mt
+
+  We refer to (11) as the distributionally robust DP formulation and V1 (y1 ) as its optimal value.
+  We now observe that due to certain convexity properties, DP formulation (11) always possesses
+an optimal base-stock policy. We note that such results are generally well-known to hold in this
+setting (cf. Ahmed et al. (2007)).
+
+Observation 2 It follows from the convexity of the relevant cost-to-go functions Vt (yt ) that DP
+formulation (11) possesses an optimal base-stock policy. Furthermore, any set of base-stock con-
+stants {x∗t , t = 1, . . . , T } such that x∗t ∈ Yt (0) for all t ∈ [1, T ] yields an optimal policy. Namely, for
+any such {x∗t , t = 1, . . . , T }, max{y, x∗t } ∈ Yt (y) for all y ∈ R and t = 1, . . . , T .
+
+  We close our discussion of the distributionally robust DP formulation with a final definition,
+formalizing our earlier discussion of for which measures one should require optimality (of decisions)
+under the distributionally robust DP formulation.
+
+Definition 3.1 (Robust-w.p.1-optimal) Let us say that a policy π ∈ Π(y1 ) is robust-w.p.1-
+optimal for the distributionally robust DP formulation if for all Q ∈ M, w.p.1 xπt (D[t−1] ) ∈
+                
+Yt ytπ (D[t−1] ) for all t ∈ [1, T ].
+                                        Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+12
+
+     When Mt is the set of all probability measures supported on the interval [αt , βt ] (i.e., the pure
+robust formulation), Definition 3.1 requires that the optimality equations hold for all possible d[t−1]
+consistent with the given intervals, because each singleton measure Qt ∈ Mt determines a point
+dt ∈ [αt , βt ]. This remains true if one is also given first moment information, and under certain
+regularity conditions remains true for more general moment constraints (e.g., Schmüdgen 2017).
+
+     First formal definition of time consistency. We now provide our first formal definition of
+time consistency, in light of our earlier discussion. We note that given the motivation behind time
+consistency, i.e. implementation of policies, a further subtlety must be considered. Clearly, it is
+desirable for there to exist at least one policy which is optimal both initially, and if reconsidered
+at later times. However, it is similarly undesirable for there to exist even one policy which could
+potentially be selected (i.e. optimal) initially, but deemed sub-optimal (i.e. non-implementable) at
+a later time. Although such a notion is of course a stringent requirement (as noted informally in
+passing in Homem-de-Mello et al. (2016)), we believe that its conceptual importance none-the-less
+makes it worthy of further study. This motivates the following definition(s) of time consistency,
+where we note that similar definitions were presented in Grunwald et al. (2011) in a different
+context motivated by considerations in decision theory and artificial intelligence. Then our first
+definition of time consistency is as follows.
+
+Definition 3.2 (Time consistency: Definition I) If a policy π ∈ OPT(y1 ) is robust-w.p.1-
+optimal for the distributionally robust DP formulation, we say that π is type-I time consistent. If
+there exists at least one policy π ∈ OPT(y1 ) which is type-I time consistent, we say that Problem
+(9) is type-I weakly time consistent. If all π ∈ OPT(y1 ) are type-I time consistent, we say that
+Problem (9) is type-I strongly time consistent.
+
+     Of course the notion of strong time consistency makes sense only if OPT(y1 ) is non-empty. We
+note that our Definition I of time consistency is essentially identical to definitions given in Shapiro
+(2009), Shapiro et al. (2016a, 2019), and closely related to the notion of dynamic consistency given
+in Pflug et al. (2014).
+     Second formal definition of time consistency. We now formalize our second definition of
+time-consistency, and reason as follows. Suppose we wished to know whether a policy π which
+was optimal for the multi-stage static formulation had the property that, should one re-perform
+one’s minimax calculation in the second period, one would make the same ordering decision. From
+the perspective of the second period, one could reason as follows. With the demand in period 1
+already realized, and given the posited stage-wise independence of demands, at time two one faces
+the “remaining” static problem, which we now formally define after introducing some relevant
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                               13
+
+additional notations. For i ∈ [1, T − 1], let Mit := Mt+i (for t ∈ [1, T − i]); Mi := {Q = Q1 ×· · ·× QT −i :
+Qt ∈ Mit , t = 1, ..., T − i}; bit := bt+i , cit := ct+i , hit := ht+i (for t ∈ [1, T − i]). Here we note that for
+each i ∈ [1, T − 1], the cost parameters {bit , hit , cit , t ∈ [1, T − i]} and distributional uncertainty set
+Mi define a (T − i)-period multi-stage static problem, completely analogous to (9), which has its
+own set of feasible policies Πi (z) and optimal policies OPTi (z) for any given initial condition z.
+Then time-consistency of an optimal policy π ∈ OPT(y1 ) for the multi-stage static formulation
+should (at least as regards policy decisions in this second period) be equivalent to requiring that
+                                                                     1
+(w.p.1, under any Q ∈ M) there exists π 1 ∈ OPT1 y2π (D[1] ) s.t. xπ1 = xπ2 (D[1] ). Carrying out the
+                                                            
+
+same logic using forwards induction, we conclude that if a policy is to be deemed time-consistent
+when the policy-maker is (possibly) given the choice to recompute her minimax calculations in an
+arbitrary set of time periods, her choices should satisfy the following.
+
+Definition 3.3 (Time consistency: Definition II) If a policy π ∈ OPT(y1 ), and if for every
+                                                                            i
+i ∈ [1, T − 1] and Q ∈ M w.p.1 there exists π i ∈ OPTi yi+1
+                                                        π
+                                                                   
+                                                            (D[i] ) s.t. xπ1 = xπi+1 (D[i] ), we say that
+π is type-II time consistent. If there exists at least one policy π ∈ OPT(y1 ) which is type-II time
+consistent, we say that Problem (9) is type-II weakly time consistent. If all π ∈ OPT(y1 ) are type-II
+time consistent, we say that Problem (9) is type-II strongly time consistent.
+
+  Our Definition II of time consistency is related to definitions given in Carpentier et al. (2012),
+Osogami et al. (2012), Pflug et al. (2014), Homem-de-Mello et al. (2016), and is essentially a
+weakening of the notion of “inherited optimality” defined in Homem-de-Mello et al. (2016). Inter-
+estingly, our two definitions arise depending on whether one uses backwards inductive reasoning
+(in which the re-optimizer is implicitly using knowledge that she will later re-optimize), or forwards
+inductive reasoning (in which no such assumption is made). At this time no single consensus on a
+proper definition of time consistency (especially as it pertains to optimization) has been reached
+in the literature, although several recent works have begun to unify various definitions appearing
+in the literature (cf. De Lara et al. (2016), Shapiro et al. (2016a), Gérard et al. (2019)). Both our
+definitions can, in an appropriate sense, be viewed as special cases of the definition given in Shapiro
+et al. (2016a).
+  Comparison between type-I and type-II time consistency. Our two notions of time
+consistency each have pros and cons, and may be appropriate in different circumstances. One
+benefit of type-I time consistency is that it quantifies agreement with a policy which is tractable
+(by the associated DP equations), while the multi-stage static problems associated with type-II
+time consistency are generally intractable (cf. Lam et al. (2013)). However, we note that the formal
+problem of testing time consistency appears intractable under both definitions, as doing so seems
+to require characterizing the optimal policies of the static problem. We note that progress has been
+                                       Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+14
+
+made on related questions in Iancu et al. (2015), and that formulating simple sufficient conditions
+for time consistency (as we do in Section 4) can in some cases sidestep this challenge. We leave a
+deeper exploration of the computational nature of time consistency, and e.g. what definitions might
+be appropriate for a policy-maker with bounded computational resources, as an open question.
+     A potential downside of type-I time consistency is that it may be more conservative. Indeed, it
+is straightforward that our definitions imply the following.
+
+Observation 3 (Relationship of type-I and type-II time consistency)                           Suppose T = 2.
+Then a policy π ∈ OPT(y1 ) is type-II time consistent iff for all Q ∈ M, w.p.1 xπ2 (D[1] ) ∈
+              
+Y2 y2π (D[1] ) . It follows that for T = 2, the type-I time consistency of a policy π ∈ OPT(y1 ) also
+implies the type-II time consistency of π. Under the same assumptions, type-I weak (strong) time
+consistency thus implies type-II weak (strong) time consistency.
+
+     For T ≥ 3 the question of formal comparison becomes more subtle, and we leave developing a
+complete understanding as an interesting direction for future research.
+     Our definitions of time consistency can, in a certain sense, be viewed as an extension of the
+definition typically used in the theory of risk measures to an optimization context. In Section 4.3.3,
+we show that it is possible for the multistage-static problem to have an optimal solution and to
+be strongly time consistent, but with a different optimal value than the distributionally robust DP
+formulation. That is, it is possible for the multistage-static problem to possess an optimal solution
+and to be strongly time consistent even when the rectangularity property does not hold. This stands
+in contrast to the definition of consistency typically used in the theory of risk measures, i.e. the
+notion of dynamic consistency coming from Epstein et al. (2003) and based on a certain stability
+of preferences over time, which may result in a problem being deemed inconsistent based on the
+values that a given optimal policy takes under the different formulations, and even the values taken
+by suboptimal policies (cf. Ruszczyński (2010), Grunwald et al. (2011)). In an optimization setting
+one may be primarily concerned only with the implementability of optimal policies, irregardless
+of their values and the values of suboptimal policies, and this is the approach we take here. We
+note that such optimization-oriented formulations have been considered in several recent works,
+e.g. Carpentier et al. (2012) and Homem-de-Mello et al. (2016), and our definitions are largely
+consistent with those works. We also note that several other recent works have started to bridge
+these optimization-oriented definitions with definitions coming from the theory of risk measures
+(cf. De Lara et al. (2016), Gérard et al. (2019)).
+     Before further exploring some of the subtle and interesting features of time (in)consistency for
+our model, we briefly review some previously known results for related models. Note that if the
+set M is a singleton, then both the multistage-static and distributionally robust DP formulations
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                   15
+
+collapse to the classical formulation. Hence both formulations have the same optimal value and
+type-I and type-II strong time consistency follows. If one only has information about the support
+It , and hence takes Mt to be the set of all probability measures supported on the interval It ,
+t = 1, ..., T , then both the multistage-static and distributionally robust DP formulations collapse
+to the so-called adjustable robust formulation (cf. Ben-Tal et al. (2004), Shapiro (2011)), which is
+purely deterministic. As a consequence, both formulations have the same optimal value and type-I
+and type-II weak time consistency follows. However, the recent work of Shapiro et al. (2019) (itself
+inspired in part by an earlier version of this paper, Xin et al. (2013)), shows that even in that
+setting strong time consistency need not hold, and studies related phenomena in several particular
+problems with general moment constraints. We note that all inventory problems considered in
+Shapiro et al. (2019) are type-I weakly time consistent with both formulations having the same
+optimal value due to the rectangularity of the underlying set of measures. Shapiro et al. (2019)
+also shows that there are interesting connections between the notions of weak and strong time-
+consistency and the concept of “strict monotonicity” for risk measures (e.g., Shapiro (2017)), and
+we leave further investigations of this connection as an interesting direction for future research. We
+also note that the existence of optimal time inconsistent policies was investigated earlier in several
+purely robust (i.e. deterministic) settings. In particular, Bertsimas et al. (2010) demonstrated
+the optimality of so-called affine policies in certain settings, and Delage et al. (2015) explicitly
+constructed optimal time inconsistent policies in an inventory control setting.
+
+4.     Time consistency: sufficient conditions and (counter) examples
+4.1.    Sufficient conditions for weak time consistency
+In this section, we provide simple sufficient conditions for the type-I and type-II weak time consis-
+tency of Problem (9), which are a direct corollary of an earlier result of Jagannathan (1978). The
+condition is essentially equivalent to monotonicity of the associated base-stock constants. Intu-
+itively, in this case the inventory manager can always order up to the optimal inventory level with
+which to enter the next time period, irregardless of previously realized demand. Thus any potential
+for the adversary to take advantage of previously realized demand information in the distribution-
+ally robust DP formulation is “masked” by the fact that the actual attained inventory level will
+always be this idealized level, under both formulations. We note that several previous works have
+identified monotonicity of base-stock levels as a condition which causes various inventory problems
+to become tractable, in a variety of settings (cf. Veinott (1965), Ignall et al. (1969), Jagannathan
+(1978), Zipkin (2000)). In particular, Jagannathan (1978) studied a very similar distributionally
+robust inventory model with moment constraints and identified monotonicity of base-stock levels
+as a sufficient condition for a myopic base-stock policy to be optimal. We recall these results of
+                                              Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+16
+
+Jagannathan (1978), yielding a sufficient condition for weak time consistency, and for completeness
+include a proof in the supplemental appendix Section 7.
+     We begin by providing a different (but equivalent) formulation for Problem (9), in which all
+relevant instances of yt are rewritten in terms of the appropriate xt functions, as this will clarify
+the precise structure of the relevant cost-to-go functions. As a notational convenience, let cT +1 = 0,
+in which case we define Ψ̂t (xt , dt ) := (ct − ρct+1 )xt + bt [dt − xt ]+ + ht [xt − dt ]+ , t = 1, ..., T. Let us
+define the problem
+                                     " T                                      #               T −1
+                                      X                                                       X
+                                                 t−1
+                                                                                                     ρt ct+1 µt .
+                                                                          
+                       inf sup EQ            ρ         Ψ̂t xt (yt ), Dt           − c1 y1 +                                                (13)
+                       π∈Π Q∈M
+                                       t=1                                                    t=1
+
+Then, using straightforward substitution we can make the following observation.
+
+Observation 4 Problem (9) and Problem (13) are equivalent, i.e. each policy π ∈ Π(y1 ) has the
+same value under both formulations.
+
+     We now derive a lower bound for any policy by allowing the policy maker to reselect her inven-
+tory at the start of each stage, at no cost. This will both set up the notation for formally stating
+the sufficient condition implied by the results of Jagannathan (1978), and also prove useful in some
+of our later proofs. As it turns out, this bound is “attainable” when the set of base-stock levels is
+monotone increasing. For x ∈ R, let ηt (x) := sup EQt [Ψ̂t (x, Dt )]; Γxt := arg max EQt [Ψ̂t (x, Dt )]; η̂t :=
+                                                          Qt ∈Mt                                         Qt ∈Mt
+inf ηt (x) = inf sup EQt [Ψ̂t (x, Dt )]; Γ̂t := arg min ηt (x) = arg min sup EQt [Ψ̂t (x, Dt )]. For j ≥ 1,
+x∈R           x∈R Qt ∈Mt                                    x∈R                       x∈R      Qt ∈Mt
+and probability measures Q1 , . . . , Qj , let us define ⊗jt=1 Qt := Q1 × . . . × Qj , i.e. the associated prod-
+uct measure with the corresponding marginals. Then we have the following, whose proof follows
+from a straightforward induction (which we include for completeness in the supplemental appendix
+Section 7.5).
+
+Lemma 4.1 Suppose that the sets Γxt , Γ̂t are non-empty for all x ∈ R, t = 1, ..., T . Let us fix any
+π = (x1 , . . . , xT ) ∈ Π, and i ≥ 0. Then for any given Q1 ∈ M1 , . . . , Qi ∈ Mi , there exist Qi+1 ∈
+Mi+1 , . . . , QT ∈ MT such that
+                                                            
+                               E⊗T           Ψ̂t xt (yt ), Dt ≥ η̂t for all t ≥ i + 1.                                                     (14)
+                                   j=1 Qj
+
+                                                                                    PT        t−1
+                                                                                                                    PT −1
+Furthermore, the optimal value of Problem (9) is at least                             t=1 ρ         η̂t − c1 y1 +     t=1   ρt ct+1 µt .
+
+     We now show that the bound of Lemma 4.1 is “realizable” when the set of base-stock levels is
+monotone increasing, and that in this case the associated base-stock policy is optimal for both the
+multistage-static and distributionally robust DP formulations. In particular, in this setting, the
+associated base-stock policy is type-I time consistent. Furthermore, as this condition is inherited
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                                       17
+
+by all of the subproblems appearing in the definition of type-II time consistency, type-II time con-
+sistency follows as well. Although their results are not stated exactly in this manner, this sufficient
+condition is essentially equivalent to an earlier result of Jagannathan (1978). For completeness, we
+again include a proof in the supplemental appendix Section 7.6.
+
+
+Theorem 2 (Jagannathan (1978)) Suppose there exists a nondecreasing sequence x∗t , t =
+1, ..., T , such that y1 ≤ x∗1 , and x∗t ∈ Γ̂t , t = 1, ..., T . Also suppose It ⊂ R+ for all t = 1, ..., T . Then
+the base-stock policy π for which xt (y) = max{y, x∗t } for all y ∈ R, is an optimal policy for the
+multistage-static formulation, and a robust-w.p.1-optimal policy for the distributionally robust DP
+                                PT                    PT −1
+formulations, and attains value t=1 ρt−1 η̂t − c1 y1 + t=1 ρt ct+1 µt under both formulations. Con-
+sequently, this base-stock policy is type-I time consistent, and the multistage-static problem is type-I
+weakly time consistent.
+
+  We note that Theorem 2 implies that if the parameters µt , σt , ct , bt , ht and It are the same
+for all t = 1, ..., T , and hence the sets Mt are also the same for all t, then the multistage-static
+problem is type-I weakly time consistent, and the multistage-static and distributionally robust DP
+formulations have the same optimal value. For further related discussion, we refer the interested
+reader to Jagannathan (1978).
+  We now argue that the assumptions of Theorem 2 imply type-II time consistency as well. Indeed,
+note that in the definition of type-II time consistency, for the ith subproblem (on T − i periods) one
+may define Γ̂it , t = 1, . . . , T − i for the corresponding (T − i)-period multi-stage static problem, in
+analogy with the definition of Γ̂t , t = 1, . . . , T given above for the original T -period multi-stage static
+problem. It then follows from definitions that Γ̂it = Γ̂t+i for all i ∈ [1, T − 1] and t ∈ [1, T − i]. Thus as
+subsequences of monotonic sequences are themselves monotone, the assumption that there exists a
+nondecreasing sequence x∗t , t = 1, ..., T , such that y1 ≤ x∗1 , and x∗t ∈ Γ̂t , t = 1, ..., T implies that for
+all i ∈ [1, T − 1], the nondecreasing sequence x∗t+i , t = 1, . . . , T − i satisfies x∗t+i ∈ Γ̂it , t = 1, . . . , T − i.
+In addition, assuming y1 ≤ x∗1 , under the base-stock policy π (for the original multistage-static
+problem) for which xt (y) = max{y, x∗t } for all y ∈ R, t = 1, . . . , T , it holds (w.p.1, for all Q ∈ M) that
+                         π
+for all i ∈ [1, T − 1], yi+1 (D[i] ) = x∗i − Di ≤ x∗i+1 . Consequently, Theorem 2 implies that the base-
+stock policy π i for which xt (y) = max{y, x∗t+i } for all y ∈ R, t = 1, . . . , T − i, is optimal for the ith
+multistage-static subproblem in the definition of type-II time consistency, i.e. π i ∈ OPTi yi+1    π
+                                                                                                              
+                                                                                                       (D[i] ) .
+It follows that (supposing y1 ≤ x∗1 ), for the base-stock policy π, for all Q ∈ M, w.p.1 there exists π i ∈
+                            i
+OPTi yi+1
+                   
+         π
+            (D[i] ) s.t. xπ1 = xπi+1 (D[i] ) = x∗i+1 . Applying the definition of type-II time consistency,
+we conclude the following.
+                                       Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+18
+
+Corollary 4.1 Under the same assumptions as Theorem 2, the same base-stock policy described
+in Theorem 2 is also type-II time consistent, and the multistage-static problem is type-II weakly
+time consistent.
+
+     We end this section by briefly discussing an additional sufficient condition for type-I weak time
+consistency, which may shed further insight onto the relationship between type-I and type-II time
+consistency. Intuitively, this condition formalizes the fact that the essential property of Theorem
+2 is that the multistage-static problem has an optimal policy π under which (for all t) xπt (D[t−1] )
+is a constant independent of D[t−1] . Note that (barring degenerate situations such as the demand
+equalling zero w.p.1) this is equivalent to π being a base-stock policy with monotone increasing
+base-stock levels.
+
+Lemma 4.2 Suppose that there exists π ∈ OPT(y1 ) which is a base-stock policy with monotone
+increasing base-stock levels. Then the multistage-static problem is type-I weakly time consistent,
+and the multistage-static and distributionally robust DP formulations have the same optimal value.
+
+     We defer the proof of Lemma 4.2, and some further related discussion, to the supplemental
+appendix Section 7.7. We note that such an independence from the realized value of demand,
+although sufficient for type-I weak time consistency, is not strictly necessary, as we will later
+demonstrate through an example presented in Section 4.3.3. Although by Observation 3, Lemma
+4.2 extends to type-II time consistency for the case T = 2, for T ≥ 3 we leave the connection
+between such an independence from D[t−1] and type-II time consistency as an interesting direction
+for future research.
+
+4.2.     Sufficient conditions for strong time consistency
+In this section, we show that under additional assumptions, which ensure that the variance in each
+stage is sufficiently large, the multistage-static problem is strongly time consistent. As we will see,
+in this case there is a unique optimal base-stock policy, and in this policy all base-stock constants
+equal zero, the intuition being that when the variance is sufficiently large, it becomes undesirable
+to give nature any additional “wiggle room”. We further note that such a base-stock policy has
+been widely adopted in practice and the resulting inventory system is a so-called Make-To-Order
+(MTO) or “Pull” system. In such a system, no inventory is carried and the replenishment is based
+on actual demands instead of forecasts (cf. Williams (1984), Arreola-Risa et al. (1998), Federgruen
+et al. (1999), Rajagopalan (2002), Kaminsky et al. (2009)). We will later see in Section 4.3.2 that
+deviating slightly from this setting may lead to a lack of strong time consistency. In particular, our
+results demonstrate that strong time consistency is a very fragile property. Our sufficient conditions
+are as follows.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                               19
+
+Theorem 3 Suppose that b0t := bt − ct + ρct+1 > 0, h0t := ht + ct − ρct+1 > 0, σt , µt > 0, It = R+ , t =
+                           2     0
+1, . . . , T , y1 = 0, and σµt2 > hbt0 , t = 1, ..., T. Then the set of optimal policies for the multistage-static
+                              t      t
+                                                         
+problem is exactly the set of policies Π0 := π = (x1 , . . . , xT ) ∈ Π : x1 (y1 ) = 0, xt (z) = 0 for all z ≤
+0 and t ∈ [1, T ] , and the multistage-static problem is type-I strongly time consistent.
+
+We defer the proof to the technical appendix Section 6.2. By the same logic used to extend Theorem
+2 to type-II time consistency and derive Corollary 4.1, we may analogously derive the following
+corollary.
+
+Corollary 4.2 Under the same assumptions as Theorem 3, the multistage-static problem is type-II
+strongly time consistent.
+
+  We note that under certain rectangularity-related assumptions, necessary and sufficient condi-
+tions for the existence of time-inconsistent optimal policies in an inventory setting with moment
+constraints was very recently provided in Shapiro et al. (2019). However, those results are not
+applicable to the setting we consider, as the uncertainty sets we consider here are inherently
+non-rectangular, and thus (for example) our formulation allows for the non-existence of weak
+time-consistency, as well as the two formulations having different optimal values, and even the
+possibility that no policy of base-stock form is optimal for the multistage-static formulation (while
+the assumptions of Shapiro et al. (2019) do not allow for such behavior). Furthermore, Shapiro et
+al. (2019) considers only 2-period problems, while the sufficient conditions provided in this work
+hold in the general multi-period setting.
+
+4.3.    Further investigation of time (in)consistency
+We now demonstrate that the question of time (in)consistency becomes quite delicate for inventory
+models with moment constraints, by considering a series of examples in which our model exhibits
+interesting (and sometimes counterintuitive) behavior. We view our results as a step towards under-
+standing the subtleties which can arise when taking a policy-centric view of time consistency in
+an operations management setting. Throughout this section, we will let Πopt
+                                                                        s   denote the set of all
+optimal policies for the corresponding multistage-static problem, and Πopt
+                                                                       d   denote the set of all
+robust-w.p.1-optimal policies for the corresponding distributionally robust DP problem. We defer
+all proofs to the technical appendix, Sections 6.3 - 6.6.
+
+  4.3.1.     Example: a multistage-static problem that is not weakly time consistent.
+In this section, we explicitly provide an example for which the multistage-static problem is not
+weakly time consistent. Furthermore, for this example, the multistage-static and distributionally
+robust DP formulations have different optimal values. This stands in contradiction to the robust
+                                           Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+20
+
+optimization setting (cf. Ben-Tal et al. (2004)) and the first-moment-constraint setting (cf. Shapiro
+(2012)) where weak time consistency always holds and the two formulations always have the same
+optimal value. Let
+
+              y1 = 10 ,   ρ=1    ,    I1 = [1, 3],     µ1 = 2,     σ1 = 1,     c1 = 0,   b1 = 2,   h1 = 2,
+
+                          I2 = R+ ,   µ2 = 8,        σ2 = 2,     c2 = 0,   b2 = 1,   h2 = 1.
+
+Let Π̃s denote the set of policies π̃ = (x̃1 , x̃2 ) such that x̃1 (10) = 10, x̃2 (9) = 9, x̃2 (7) = 7, and Π̃d
+denote the set of policies π̃ = (x̃1 , x̃2 ) such that x̃1 (10) = 10, x̃2 (9) = 9, x̃2 (7) = 8. Note that here
+(and in later statements) we have defined a set of policies by specifying a required behavior at
+only a few values, and allow the behavior at all other values to be arbitrary (subject to the overall
+policy belonging to Π(y1 )).
+
+
+Observation 5 Πopt
+               s = Π̃s , and the optimal value of the multistage-static problem is 18. On the
+                                                                                                                 √
+other hand, Πopt                                                                                5
+             d ⊆ Π̃d , and the optimal value of the distributionally robust DP problem is 17 + 2 >
+
+18. Consequently, the multistage-static problem is not type-I or type-II weakly time consistent, and
+the multistage-static and distributionally robust DP problems have different optimal values.
+
+     4.3.2.    Example: a multistage-static problem that is weakly time consistent, but
+not strongly time consistent. In this section, we explicitly provide an example showing that
+it is possible for the multistage-static problem to be weakly time consistent, but not strongly time
+consistent. In particular, there is a base-stock policy π ∗ , with associated base-stock constants x∗1 , x∗2
+satisfying the conditions of Theorem 2, which is optimal for the multi-stage static formulation
+and robust-w.p.1-optimal for the distributionally robust DP formulation, yet the multistage-static
+problem has other non-trivial optimal policies which are not robust-w.p.1-optimal for the distri-
+butionally robust DP formulation. The intuitive explanation is as follows. In the multistage-static
+formulation, one can leverage the randomness in the realization of D1 to construct a policy π 0 such
+                                       0
+that with positive probability xπ2 (y2 ) is slightly below x∗2 , and with the remaining probability is
+slightly above x∗2 . Since in the multistage-static formulation nature cannot observe the realized
+inventory in stage 2 before selecting a worst-case distribution, it turns out that such a policy incurs
+the same cost as π 0 under the multistage-static formulation. However, under the distributionally
+robust DP formulation, such a perturbation leads to sub-optimality. We note that such a lack
+of strong time consistency can also be interpreted as resulting from the fact that optimality of
+a policy for the static formulation does not require optimality for every possible measure which
+nature can select, analogous to the ideas explored (in the robust optimization setting) in Iancu et
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                                 21
+
+al. (2014). We note that in this example, even though the multistage-static problem is not strongly
+time consistent, both formulations have the same optimal value, as dictated by Theorem 2. Let
+
+           y1 = 0 ,       ρ=1 ,        I1 = [1, 3],    µ1 = 2,    σ1 = 1,        c1 = 0,     b1 = 1,   h1 = 1,
+
+                          I2 = R+ ,     µ2 = 10,      σ2 = 1,    c2 = 0,    b2 = 1,        h2 = 1.
+
+Observation 6 The multistage-static problem is type-I and type-II weakly time consistent, but not
+type-I or type-II strongly time consistent.
+
+  4.3.3.     Example: a multistage-static problem that is strongly time consistent, but
+the two formulations have a different optimal value. In this section, we explicitly provide an
+example showing that it is possible for the multistage-static problem to be strongly time consistent,
+yet for the two formulations to have different optimal values. We note that, although it is expected
+that there will be settings where the two formulations have different optimal values, it is somewhat
+surprising that this is possible even when the two formulations have the same set of optimal policies.
+As discussed previously, we note that this possibility stands in contrast to several related works
+which consider alternative, less policy-focused definitions of time consistency, e.g. those definitions
+appearing in the literature on risk measures, and shows that consistency may hold even when
+rectangularity does not. Let
+
+           y1 = 0 ,       ρ=1 ,        I1 = [1, 3],    µ1 = 2,    σ1 = 1,        c1 = 0,     b1 = 0,   h1 = 0,
+
+                         I2 = R+ ,     µ2 = 100,      σ2 = 5,    c2 = 2,       b2 = 1,     h2 = 1.
+
+Let Π̃ denote the set of policies π̃ = (x̃1 , x̃2 ) such that x̃1 (0) = 102, x̃2 (101) = 101, x̃2 (99) = 99.
+
+Observation 7 Πopt
+               s   = Π̃, and the multistage-static problem is type-I and type-II strongly time
+consistent. However, the optimal value of the multistage-static problem equals 5, while the optimal
+                                                       √
+value of the distributionally robust DP problem equals 26 > 5.
+
+  4.3.4.     Example: a multistage-static problem that has no optimal policy of base-
+stock form. In this section, we explicitly provide an example showing that it is possible for the
+multistage-static problem to have no optimal base-stock policy, where we note that in all our
+previous examples the associated multistage-static problem did indeed have an optimal base-stock
+policy (possibly different from that of the associated distributionally robust DP problem). Note
+that this stands in contrast to the distributionally robust DP formulation, which always has an
+optimal base-stock policy by Observation 2. It remains an interesting open question to develop
+a deeper understanding of the set of optimal policies for the multistage-static problem, where
+                                        Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+22
+
+we again note that some preliminary investigations of such distributionally robust problems with
+independence constraints can be found in Lam et al. (2013). Both the results of Lam et al. (2013),
+and our own result, indicate that the structure of optimal policies for the multistage-static problem
+may be very complicated.
+  To prove the desired result, it will be useful to consider a family of problems parameterized by a
+                                           √      
+parameter . In particular, let  ∈ 0, 21 ( 6 − 2) be any sufficiently small strictly positive number.
+It may be easily verified that for any such , one has  ∈ (0, 14 ),
+
+                                               1
+                                                 − 2 − 2 > 0,                                               (15)
+                                               2
+
+      y1 = 10 −    ,   ρ=1 ,    I1 = [1 − , 3 + ],    µ1 = 2,    σ1 = 1,      c1 = 0,    b1 = 2,    h1 = 2,
+
+                         I2 = R+ ,   µ2 = 8,   σ2 = 3,    c2 = 0,    b2 = 1,    h2 = 1.
+
+Observation 8 Suppose  satisfies (15). Then any admissible policy π̃ = (x̃1 , x̃2 ) ∈ Π satisfying
+x̃1 (y1 ) = y1 , x̃2 (D1 ) = y1 − D1 + belongs to Πopt
+                                                    s , and the corresponding optimal value equals 19 − 2.
+
+Moreover, no base-stock policy belongs to Πopt
+                                           s .
+
+
+5.      Conclusion
+In this paper, we analyzed the notion of time consistency in the context of managing an inventory
+under distributional uncertainty. In particular, we studied the associated multistage distributionally
+robust optimization problem, when only the mean, variance and distribution support are known
+for the demand at each stage. Our contributions were three-fold. First, we gave two refined policy-
+centric definitions for time consistency in this setting, and put our definitions in the context of
+prior work. Second, we gave sufficient conditions for weak and strong time consistency. Third, we
+gave a series of examples of two-stage problems exhibiting interesting and counterintuitive time
+(in)consistency properties, showing that the question of time consistency can be quite subtle in
+this setting.
+     We departed from much of the past literature by demonstrating both negative and positive
+results regarding time consistency when the underlying family of distributions from which nature
+can select is non-rectangular, a setting in which most of the literature focuses on demonstrating
+hardness of the underlying optimization problems and other negative results. Furthermore, our
+example demonstrating that it is possible for the multistage-static problem to be strongly time
+consistent, but with a different optimal value than the distributionally robust DP formulation,
+stands in contrast to the definition of time consistency typically used in the theory of risk measures,
+i.e. the notion of dynamic consistency coming from Epstein et al. (2003), under which a problem
+may be deemed time inconsistent based on the values that a given optimal policy takes under the
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                             23
+
+different formulations, and even the values taken by suboptimal policies. Indeed, our definitions are
+motivated by the fact that in an optimization setting, one may be primarily concerned only with
+the implementability of optimal policies, irregardless of their values and the values of suboptimal
+policies, building on the more optimization-oriented definitions provided in Carpentier et al. (2012)
+and the recent work Homem-de-Mello et al. (2016).
+  Our work leaves many interesting directions for future research. The general question of time
+consistency, and how its many definitions appearing in the literature relate to one-another, remains
+poorly understood. It is also an intriguing question to understand the accuracy of time-consistent
+approximations for time-inconsistent problems, e.g. how much our two formulations can differ in
+optimal value and policy, even when time inconsistency occurs, along the lines of Huang et al.
+(2011), Asamov et al. (2015), and Iancu et al. (2015). On a related note, it is largely open to
+develop a broader understanding of the optimal solution to the multistage-static problem, or even
+approximately optimal solutions, as well as related algorithms, where we note that preliminary
+investigations along these lines were carried out in Lam et al. (2013).
+
+References
+Ahmed, S., U. Cakmak, A. Shapiro. 2007. Coherent risk measures in inventory problems. European Journal
+      of Operational Research. 182 226–238.
+
+Arreola-Risa, A., G.A. DeCroix. 1998. Make-to-order versus make-to-stock in a production-inventory system
+      with general production times. IIE Transactions. 30(8) 705-713.
+
+Artzner, P., F. Delbaen, J.M. Eber, D. Heath, H. Ku. 2007. Coherent multiperiod risk adjusted values and
+      Bellmans principle. Annals of Operations Research. 152 5–22.
+
+Asamov, T., A. Ruszczyński. 2015. Time-consistent approximations of risk-averse multistage stochastic opti-
+      mization problems. Mathematical Programming. 153(2) 459-493.
+
+Bellman, R.E. 1957. Dynamic Programming. Princeton University Press, Princeton, NJ.
+
+Ben-Tal, A., B. Golany, A. Nemirovski, J.P. Vial. 2005. Retailer-supplier flexible commitments contracts: a
+      robust optimization approach. Manufacturing & Service Operations Management 7 248–271.
+
+Ben-Tal, A., A. Goryashko, A. Guslitzer, A. Nemirovski. 2004. Adjustable robust solutions of uncertain linear
+      programs. Mathematical Programming. 99 351–376.
+
+Ben-Tal, A., G. Boaz, S. Shimrit. 2009. Robust multi-echelon multi-period inventory control. European
+      Journal of Operational Research. 199(3) 922–935.
+
+Bertsekas, D.P., S.E. Shreve. 1978. Stochastic Optimal Control: The Discrete Time Case. Academic Press,
+      NY.
+
+Bertsimas, D., D. A. Iancu, P.A. Parrilo. 2010. Optimality of affine policies in multistage robust optimization.
+      Mathematics of Operations Research. 35(2) 363-394.
+                                         Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+24
+
+Bertsimas, D., I. Popescu. 2005. Optimal inequalities in probability theory: A convex optimization approach.
+     SIAM Journal on Optimization. 15(3) 780-804.
+
+Bertsimas, D., A. Thiele. 2006. A robust optimization approach to inventory theory. Operations Research.
+     54(1) 150-168.
+
+Bielecki, T. R., I. Cialenco, M. Pitera. 2018. A unified approach to time consistency of dynamic risk measures
+     and dynamic performance measures in discrete time. Mathematics of Operations Research. 43(1) 204-
+     221.
+
+Boda, K., J.A. Filar. 2006. Time consistent dynamic risk measures. Mathematical Methods in Operations
+     Research. 63 169–186.
+
+Bonnans, J. F., A. Shapiro. 2000. Perturbation Analysis of Optimization Problems. Springer-Verlag, NY.
+
+Carpentier, P., J.P. Chancelier, G. Cohen, M. De Lara, P. Girardeau. 2012. Dynamic consistency for stochastic
+     optimal control problems. Annals of Operations Research. 200 247–263.
+
+Carrizosaa, E., A. Olivares-Nadal, P. Ramirez-Cobob. 2016. Robust newsvendor problem with autoregressive
+     demand. Computers & Operations Research. 68 123-133.
+
+Chen, Z., G. Li, J. Guo. 2013. Optimal investment policy in the time consistent mean-variance formulation.
+     Insurance: Mathematics and Economics. 52 145–156.
+
+Chen, X., M. Sim, D. Simchi-Levi, P. Sun. 2007. Risk aversion in inventory management. Operations Research.
+     55(5) 828-842.
+
+Chen, W., M. Sim. 2009. Goal-driven optimization. Operations Research. 57(2) 342-357.
+
+Chen, X., P. Sun. 2012. Optimal structural policies for ambiguity and risk averse inventory and pricing
+     models. SIAM Journal on Control and Optimization. 50(1) 133-146.
+
+Cheridito, P., M. Kupper. 2009. Recursiveness of indifference prices and translationinvariant preferences.
+     Mathematics and Financial Economics. 2 173–188.
+
+Choi, S., A. Ruszczynski. 2008. A risk-averse newsvendor with law invariant coherent measures of risk.
+     Operations Research Letters. 36(1) 77–82.
+
+Choi, S., A. Ruszczyński, Y. Zhao. 2011. A multiproduct risk-averse newswendor with law-invariant coherent
+     measures of risk. Operations Research. 59 346–354.
+
+De Lara, M., V. Leclère. 2016. Building up time-consistency for risk measures and dynamic optimization.
+     European Journal of Operational Research. 249(1) 177-187.
+
+Delage, E., D. Iancu. 2015. Robust Multistage Decision Making. INFORMS Tutorials in Operations Research.
+     http://dx.doi.org/10.1287/educ.2015.0139.
+
+Edgeworth, F. 1888. The mathematical theory of banking. Royal Statistical Society. 51 113–127.
+
+Epstein, L. G., M. Schneider. 2003. Recursive multiple-priors. Journal of Economic Theory. 113(1) 1-31.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                            25
+
+Etner, J., M. Jeleva, J.-M. Tallon. 2012. Decision theory under ambiguity. Journal of Economic Surveys.
+      26(2) 234-270.
+
+Federgruen, A., Z. Katalan. 1999. The impact of adding a maketo-order item to a make-to-stock production
+      system. Management Science. 45(7) 980-994.
+
+Gabrel, V., C. Murat, A. Thiele. 2014. Recent advances in robust optimization: an overview. European
+      Journal of Operational Research. 235(3) 471-483.
+
+Gallego, G. 1998. New bounds and heuristics for (Q, r) policies. Management Science. 44(2) 219–233.
+
+Gallego, G. 2001. Minimax analysis for finite-horizon inventory models. IIE Transactions. 33(10) 861–874.
+
+Gallego, G., K. Katircioglu, B. Ramachandran. 2007. Inventory management under highly uncertain demand.
+      Operations Research Letters. 35(3) 281-289.
+
+Gallego, G., I. Moon. 1993. The distribution free newsboy problem: review and extensions. Journal of the
+      Operational Research Society. 44(8) 825–834.
+
+Gallego, G., I. Moon. 1994. Distribution free procedures for some inventory models. Journal of the Operational
+      research Society. 651–658.
+
+Gérard, H., M. De Lara, Jean-Philippe Chancelier. 2019. Equivalence between time consistency and nested
+      formula. Annals of Operations Research. 1-21.
+
+Grunwald, P. D., J. Y. Halpern. 2011. Making decisions using sets of probabilities: updating, time consistency,
+      and calibration. Journal of Artificial Intelligence Research 42(1) 393-426.
+
+Hanasusanto, G., A. Grani, D. Kuhn, W. Wallace, S. Zymler. 2015. Distributionally robust multi-item
+      newsvendor problems with multimodal demand distributions. Mathematical Programming. 152(1) 1-32.
+
+Hansen, L. P., T. J. Sargent. 2001. Robust control and model uncertainty. American Economic Review. 91(2)
+      60-66.
+
+Homem-de-Mello, T., B. Pagnoncelli. 2016. Risk aversion in multistage stochastic programming: A modeling
+      and algorithmic perspective. European Journal of Operational Research. 249(1) 188-199.
+
+Huang, P., D. Iancu, M. Petrik, D. Subramanian. 2011. The Price of Dynamic Inconsistency for Distortion
+      Risk Measures. Technical Report.
+
+Iancu, D.A., M. Petrik, D. Subramanian. 2015. Tight Approximations of Dynamic Risk Measures. Mathe-
+      matics of Operations Research. 40(3) 655-682.
+
+Ignall, E., A. Veinott. 1969. Optimality of myopic inventory policies for several substitute products. Man-
+      agement Science. 15(5) 284-304.
+
+Iancu, D.A., N. Trichakis. 2014. Pareto Efficiency in Robust Optimization. Management Science. 60(1),
+      130–147.
+
+Isii, K., 1962. On sharpness of Tchebycheff-type inequalities. Ann. Inst. Stat. Math., 14 185–197.
+                                        Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+26
+
+Iyengar, G.N.. 2005. Robust Dynamic Programming. Mathematics of Operations Research. 30 257–280.
+
+Jagannathan, R. 1978. A minimax ordering policy for the infinite stage dynamic inventory problem. Man-
+     agement Science. 24 1138-1149.
+
+Kaminsky, P., O. Kaya. 2009. Combined make-to-order/make-to-stock supply chains. IIE Transactions. 41(2)
+     103-119.
+
+Kasugai, H., T. Kasegai. 1961. Note on minimax regret ordering policy-static and dynamic solutions and a
+     comparison to maximin policy. Journal of the Operations Research Society of Japan. 3(4) 155–169.
+
+Klabjan, D., D. Simchi-Levi, M. Song. 2013. Robust stochastic lot-sizing by means of histograms. Production
+     and Operations Management. 22 691-710.
+
+Lam, H., S. Ghosh. 2013. Iterative methods for robust estimation under bivariate distributional uncertainty.
+     Proceedings of the Winter Simulation Conference.
+
+Moments in mathematics, H.J. Landau (ed.), Proc. Sympos. Appl. Math., 37, Amer. Math. Soc., Providence,
+     RI, 1987.
+
+Levi, R., G. Perakis, J. Uichanco. 2015. The data-driven newsvendor problem: new bounds and insights.
+     Operations Research. 63(6) 1294-1306.
+
+Lovejoy, W. 1992. Stopped myopic policies for some inventory models with uncertain demand distributions.
+     Management Science. 38(5) 688-707.
+
+Natarajan, K., L. Zhou. 2007. A mean-variance bound for a three-piece linear function. Probability in the
+     Engineering and Informational Sciences. 21(4) 611-621.
+
+Nilim, A., L. El Ghaoui. 2005. Robust Control of Markov Decision Processes with Uncertain Transition
+     Matrices. Operations Research. 53 780–798.
+
+Osogami, T., T. Morimura. 2012. Time-consistency of optimization problems. Proceedings of the Twenty-
+     Sixth AAAI Conference on Artificial Intelligence.
+
+Perakis, G., G. Roels. 2008. Regret in the newsvendor model with partial information. Operations Research.
+     56(1) 188-203.
+
+Pflug, G. C., A. Pichler. 2014. Time Consistency, pp. 175-208, Chapter 5 in Multistage Stochastic Optimiza-
+     tion, Springer.
+
+Popescu, I., 2005. A Semidefinite Programming Approach to Optimal Moment Bounds for Convex Classes
+     of Distributions. Mathematics of Operations Research. 50(3) 632-657.
+
+Rajagopalan, S. 2002. Make-to-order or make-to-stock: model and application. Management Science. 48(2)
+     241-256.
+
+Riedel, F. 2004. Dynamic coherent risk measures. Stochastic Processes and their Applications. 112 185–200.
+
+Roorda, B., J.M. Schumacher. 2007. Time consistency conditions for acceptability measures, with an appli-
+     cations to Tail Value at Risk. Insurance: Mathematics and Economics. 40 209–230.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                           27
+
+Ruszczyński, A., A. Shapiro. 2006. Conditional risk mappings. Mathematics of Operations Research. 31
+      544–561.
+
+Ruszczyński, A. 2010. Risk-averse dynamic programming for Markov decision processes. Mathematical Pro-
+      gramming, Series B. 125 235–261.
+
+Scarf, H. 1958. A min-max solution of an inventory problem. K. Arrow, ed Studies in the Mathematical
+      Theory of Inventory and Production. Stanford University Press, Stanford, CA, 201–209.
+
+Scarf, H. 1959. Bayes solution of the statistical inventory problem. The Annals of Mathematical Statistics.
+      490–508.
+
+Scarf, H. 1960. Some remarks on Bayes solutions to the inventory problem. Naval Research Logistics Quar-
+      terly. 7(4) 591–596.
+
+Schmüdgen, K. 2017. The Moment Problem. Springer International Publishing AG, Switzerland.
+
+See, C. T., M. Sim. 2010. Robust approximation to multiperiod inventory management. Operations Research.
+      58(3) 583-594.
+
+Shapiro, A., D. Dentcheva, A. Ruszczyński. 2009. Lectures on Stochastic Programming: Modeling and Theory.
+      SIAM, Philadelphia.
+
+Shapiro, A. 2009. On a time consistency concept in risk averse multistage stochastic programming. Operations
+      Research Letters. 37 143–147.
+
+Shapiro, A. 2011. A dynamic programming approach to adjustable robust optimization. Operations Research
+      Letters. 39(2) 83-87.
+
+Shapiro, A. 2012. Minimax and risk averse multistage stochastic programming. European Journal of Opera-
+      tional Research. 219 719–726.
+
+Shapiro, A. 2016. Rectangular sets of probability measures. Operations Research. 64(2) 528-541.
+
+Shapiro, A. 2017. Interchangeability principle and dynamic equations in risk averse stochastic programming.
+      Operations Research Letters. 45(4) 377-381.
+
+Shapiro, A., A. Pichler. 2016a. Time and dynamic consistency of risk averse stochastic programs. Published
+      electronically in Optimization Online.
+
+Shapiro, A., K. Ugurlu. 2016b. Decomposability and time consistency of risk averse multistage programs.
+      Operations Research Letters. 44(5) 663-665.
+
+Shapiro, A., L. Xin. 2019. Time inconsistency of optimal policies of distributionally robust inventory models.
+      Operations Research. Forthcoming.
+
+Strotz, R. H.. 1955. Myopia and inconsistency in dynamic utility maximization. The Review of Economic
+      Studies. 23(3) 165-180.
+
+Veinott, Jr., A. F.. 1965. Optimal policy for a multi-product, dynamic, nonstationary inventory problem.
+      Management Science. 12(3) 206-222.
+                                           Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+28
+
+Wang, T. 1999. A class of dynamic risk measure. Working Paper. University of British Columbia.
+
+Wiesemann, W., D. Kuhn, B. Rustem. 2013. Robust Markov decision processes. Mathematics of Operations
+       Research. 38(1) 153-183.
+
+Williams, T.M. 1984. Special products and uncertainty in production/inventory systems. European Journal
+       of Operations Research. 15 46-54.
+
+Xin, L., D. Goldberg, A. Shapiro. Time (in) consistency of multistage distributionally robust inventory
+       models with moment constraints. arXiv preprint arXiv:1304.3074 (2013).
+
+Yang, J. 2013. Inventory and Price Control under Time-consistent Coherent and Markov Risk Measure.
+       Preprint.
+
+Yue, J., B. Chen, M. Wang. 2006. Expected value of distribution information for the newsvendor problem.
+       Operations Research. 54(6) 1128–1136.
+
+Zhu, Z., J. Zhang, Y. Ye. 2013. Newsvendor optimization with limited distribution information. Optimization
+       methods and software. 28(3) 640-667.
+
+Zipkin, P.H. 2000. Foundations of Inventory Management. McGraw-Hill, Boston.
+
+
+6.     Technical Appendix
+6.1.    Extensions of Scarf (1958)
+For use in later proofs, we now state two extensions of the results of Scarf (1958). First, consider
+a generalization of Problem (1) in which one can select any distribution D1 for x. Specifically, let
+us consider the following minimax problem:
+
+                                                    inf     φ(Q1 ),                                              (16)
+                                                 Q1 ∈P(I)
+
+                                           
+where φ(Q1 ) := supQ2 ∈M EQ1 ×Q2 Ψ(D1 , D2 ) , and the notation EQ1 ×Q2 indicates that for any
+choices for the marginal distributions Q1 , Q2 of D1 and D2 , the expectation is taken with respect to
+the associated product measure, under which D1 and D2 are independent. In this case, we have the
+following result, whose proof follows from Theorem 1 and a straightforward probabilistic argument,
+and which we include (for completeness) in the supplemental appendix Section 7.3.
+
+                                                                           2
+Proposition 6.1 Suppose that b > c, c + h > 0, µ > 0, σ > 0, σµ2 > h+c
+                                                                   b−c
+                                                                       , and I = R. Then Problem
+(16) has the unique optimal solution Q̄1 = δ0 .
+
+Next, we state a generalization presented in Natarajan et al. (2007) to certain piecewise affine
+functions with three pieces. For completeness, we provide a proof in the supplemental appendix
+Section 7.4.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                           29
+
+Theorem 4 (Natarajan et al. (2007)) Suppose that there exist c1 , c2 > 0 such that c1 < c2 , and
+ζ(d) = max{−d + c1 , 0, d − c2 } for all d ∈ R. Let η := 21 (c1 + c2 ), and recall that f(z) := (z − µ)2 +
+   1
+σ 2 2 . Further suppose that σ > 0, I = R+ , 41 (2µ − 3c1 + c2 )(3c2 − c1 − 2µ) ≤ σ 2 , and η − f(η) ≥ 0.
+Then the unique optimal solution to the primal Problem (2) is the probability measure Q having
+                                                                                           2 −1
+support at two points h1 = η − f(η) and h2 = η + f(η), with Q(h1 ) = σ 2 σ 2 + η − f(η) − µ        , and
+Q(h2 ) = 1 − Q(h1 ).
+
+6.2.    Proof of Theorem 3
+  Proof of Theorem 3 :            Let Πopt denote the set of optimal policies for the multistage-static prob-
+lem. It follows from Theorem 1.(i) and Theorem 2 that Π0 ⊆ Πopt , and every policy π ∈ Π0 is time
+consistent. Thus to prove the theorem, it suffices to demonstrate that Π0 = Πopt , and we begin by
+showing that π̄ = (x̄1 , . . . , x̄T ) ∈ Πopt implies x̄1 (y1 ) = 0. Indeed, it follows from Lemma 4.1 that
+                                                   
+π̄ ∈ Πopt implies supQ∈M1 EQ Ψ̂1 x̄1 (y1 ), D1 = η̂1 = b1 µ1 . That x̄1 (y1 ) must equal 0 then follows
+from Theorem 1.
+  We now show that π̄ ∈ Πopt implies x̄2 (z) = 0 for all z ≤ 0. We proceed by contradiction. Suppose
+that there exists z 0 ≤ 0 such that x̄2 (z 0 ) 6= 0. It is easily verified that there exists Q1 ∈ M1 such that
+Q1 (−z 0 ) > 0, and consequently for this choice of Q1 , x̄2 (y2 ) is not a.s. equal to 0. We conclude from
+                                                                                     
+Proposition 6.1 that there exists Q2 ∈ M2 such that EQ1 ×Q2 Ψ̂2 x̄2 (y2 ), D2 > η̂2 = b2 µ2 . As we
+                                                                                                       
+have already demonstrated that x̄1 (y1 ) = 0, and Q1 ∈ M1 , we conclude that EQ1 Ψ̂1 x̄1 (y1 , D1 =
+η̂1 = b1 µ1 . Combining with Lemma 4.1 then yields a contradiction. The proof that x̄t (z) = 0 for all
+z ≤ 0 and t ≥ 3 follows from a nearly identical argument, and we omit the details.                
+
+6.3.    Proof of Observation 5
+We first characterize the set of optimal policies for the multistage-static problem.
+
+Lemma 6.1 Πopt
+           s = Π̃s , and the multistage-static problem has optimal value 18.
+
+
+  Proof :      It follows from Observation 1 that M1 consists of the single probability measure Q1
+such that Q1 (1) = Q1 (3) = 12 . Let D1 denote a random variable distributed as Q1 . Note that for
+any policy π = (x1 , x2 ) ∈ Π, one has that x1 (y1 ) = x1 (10) ≥ 10. Consequently, Pr(x1 (y1 ) ≥ D1 ) = 1,
+and |x1 (y1 ) − D1 | = x1 (y1 ) − D1 w.p.1. It then follows from a straightforward calculation that the
+cost of any policy π = (x1 , x2 ) ∈ Π under the multistage-static formulation equals
+                                      h                                            i
+            2x1 (10) − 4 + sup EQ2 21 x2 x1 (10) − 1 − D2 + x2 x1 (10) − 3 − D2 .                        (17)
+                                 Q2 ∈M2
+
+Let π̄ = (x̄1 , x̄2 ) denote any optimal policy for the multistage-static problem, i.e. π̄ ∈ Πopt
+                                                                                              s . Then it
+
+follows from (17) and a straightforward contradiction argument that
+                                                                                                  
+            x̄1 (10) = 10    ,     x̄2 (9), x̄2 (7) ∈ arg min       sup EQ2 21 |x − D2 | + |y − D2 | .   (18)
+                                                    (x,y):x≥9,y≥7 Q2 ∈M2
+                                               Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+30
+
+Furthermore, it follows from Lemma 4.1 and Theorem 1 that
+                                                                                           
+                   inf       sup EQ2 21 |x − D2 | + |y − D2 |   ≥             sup EQ2 |8 − D2 | = 2.                   (19)
+               (x,y):x≥9,y≥7 Q2 ∈M2                                         Q2 ∈M2
+                                    
+Noting that 12 |9 − D2 | + |7 − D2 | = 1 + max(−D2 + 7, 0, D2 − 9), it then follows from a straight-
+forward calculation and Theorem 4 that
+                                                                      
+                                       sup EQ2 21 |9 − D2 | + |7 − D2 | = 2.                                           (20)
+                                      Q2 ∈M2
+
+
+Combining the above, we conclude that Π̃s ⊆ Πopt
+                                             s . Also, it then follows from a straightforward
+
+calculation that the multistage-static problem has optimal value 18.
+  We now prove that Π̃s = Πopt       s . Indeed, suppose for contradiction that there exists some optimal
+                                                                                             
+                         / Π̃s . In that case, it follows from (18) that 12 x̂2 (9) + x̂2 (7) > 8. However, it
+policy π̂ = (x̂1 , x̂2 ) ∈
+then follows from Jensen’s inequality, Theorem 1, and (19) that
+                                                                           1                         
+       sup EQ2 12 |x̂2 (9) − D2 | + |x̂2 (7) − D2 |   ≥           sup EQ2      2
+                                                                                   x̂2 (9) + x̂2 (7) − D2   > 2.
+      Q2 ∈M2                                                     Q2 ∈M2
+
+Combining with (19) and (20) yields a contradiction, completing the proof                         
+     We now (partially) characterize the set of robust-w.p.1-optimal policies for the distributionally
+robust DP problem.
+                                                                                                                   √
+Lemma 6.2 Πopt                                                                          5
+           d ⊆ Π̃d , and the distributionally robust DP problem has optimal value 17 + 2 .
+
+
+     Proof :     Let π̄ = (x̄1 , x̄2 ) denote any robust-w.p.1-optimal policy for the distributionally robust
+DP problem, i.e. π̄ ∈ Πopt
+                       d . Then it again follows from a straightforward contradiction argument that
+
+x̄1 (10) = 10. It then follows from (12) that x̄2 (9) ∈ arg minx≥9 supQ2 ∈M2 EQ2 [|x − D2 |], and x̄2 (7) ∈
+arg minx≥7 supQ2 ∈M2 EQ2 [|x − D2 |]. The lemma then follows from Theorem 1 and a straightforward
+calculation.        
+     Combining Lemmas 6.1 and 6.2 completes the proof of Observation 5.
+
+6.4.     Proof of Observation 6
+We first prove that the multistage-static problem is type-I and type-II weakly time consistent.
+
+Lemma 6.3 The multistage-static problem is type-I and type-II weakly time consistent, and both
+the multistage-static and distributionally robust DP problems have optimal value 2.
+
+     Proof :     Note that Ψ̂1 (x1 , d1 ) = |x1 − d1 | , and Ψ̂2 (x2 , d2 ) = |x2 − d2 |. It follows from Observation
+1 that M1 consists of the single probability measure Q1 such that Q1 (1) = Q1 (3) = 12 . It follows
+from Theorem 1 and a straightforward calculation that Γ̂1 = [1, 3] , Γ̂2 = 10 , η̂2 = 1. Combining
+the above with Theorem 2, we conclude that the base-stock policy π such that x1 (y) = max{3, y },
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                          31
+
+and x2 (y) = max{10, y } for all y ∈ R, is optimal for both the multistage-static formulation and
+robust-w.p.1-optimal for the distributionally robust DP formulation, which have common optimal
+value 2.     
+  We now prove that the multistage-static problem is not type-I or type-II strongly time consistent.
+
+Lemma 6.4 The multistage-static problem is not type-I or type-II strongly time consistent.
+
+  Proof :      Consider the policy π 0 = (x01 , x02 ) such that
+                                                             (
+                                                               9.9,           if y ≤ 0,
+                   x01 (y) = max{3, y }, and x02 (y) =                                                  (21)
+                                                               max{10.1, y }, otherwise.
+
+We first show that π 0 ∈ Πopt                                                                 0
+                          s . It follows from a straightforward calculation that the cost of π under
+
+the multistage-static formulation equals
+                                                         
+                        EQ1 |3 − D1 | + 0.1 + sup EQ2 max 9.9 − D2 , 0, D2 − 10.1 .                     (22)
+                                                Q2 ∈M2
+
+It is easily verified that the conditions of Theorem 4 are met, and we may apply Theorem 4 to
+                                       
+conclude that arg maxQ2 ∈M2 EQ2 max 9.9 − D2 , 0, D2 − 10.1 is the probability measure Q2 such
+that Q2 (9) = 12 , Q2 (11) = 12 . It follows that the value of (22) equals 2, and we conclude that π 0 ∈ Πopt
+                                                                                                          s ,
+
+completing the proof.
+  However, it follows from a straightforward calculation (and considering the measure Q1 ∈
+M1 such that Q1 (1) = Q1 (3) = 12 ) that type-II time consistency of π 0 would imply that 9.9 ∈
+arg minx≥0 supQ2 ∈M2 EQ2 [|x − D2 |]. But Theorem 1 implies that ths arg min must be the singleton
+{10}, reaching a contradiction and completing the proof.                  
+  Combining Lemmas 6.3 and 6.4 completes the proof of Observation 6.
+
+6.5.    Proof of Observation 7
+We first characterize the set of optimal policies for the multistage-static problem.
+
+Lemma 6.5 Πopt
+           s = Π̃, and the multistage-static problem has optimal value 5.
+
+
+  Proof :      It follows from Observation 1 that M1 consists of the single probability measure Q1
+such that Q1 (1) = Q1 (3) = 21 . In this case, the cost of any policy π = (x1 , x2 ) ∈ Π under the
+multistage-static formulation equals
+                        h                                                i
+                                                                   
+           sup EQ2 EQ1 2 x2 x1 (0) − D1 − x1 (0) − D1 + x2 x1 (0) − D1 − D2 .                           (23)
+            Q2 ∈M2
+
+
+We now prove that for any policy π̄ = (x̄1 , x̄2 ) ∈ Πopt
+                                                      s , one has that
+
+                                                                            
+                        x̄2 x̄1 (0) − 1 = x̄1 (0) − 1     and x̄2 x̄1 (0) − 3 = x̄1 (0) − 3.            (24)
+                                            Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+32
+
+Indeed, note that w.p.1, it follows from the triangle inequality that
+                                                
+     2 x2 x1 (0) − D1 − x1 (0) − D1 + x2 x1 (0) − D1 − D2
+                                                      
+      = 2 x2 x1 (0) − D1 − x1 (0) − D1 + x2 x1 (0) − D1 − x1 (0) − D1 ) + x1 (0) − D1 ) − D2
+                                                                         
+      ≥ 2 x2 x1 (0) − D1 − x1 (0) − D1 + x1 (0) − D1 ) − D2 − x2 x1 (0) − D1 − x1 (0) − D1 )
+                                     
+      = x2 x1 (0) − D1 − x1 (0) − D1 + x1 (0) − D1 − D2 .                                  (25)
+                                                                                          
+Now, suppose for contradiction that (24) does not hold. It follows that EQ1 x2 x1 (0) − D1 −
+            
+ x1 (0) − D1 > 0, and combining with (25), we conclude that (23) is strictly greater than
+                                          h                  i
+                              sup EQ2 EQ1 x1 (0) − D1 − D2 .                              (26)
+                                   Q2 ∈M2
+
+
+Noting that (26) is the cost incurred by some policy satisfying (24) completes the proof.
+     We now complete the proof of the lemma. It suffices from the above to prove that
+                                            1                                  
+                     arg min sup EQ2         2
+                                                 |x1 − 1 − D2 | + |x1 − 3 − D2 | = {102}.                         (27)
+                      x1 ∈R+   Q2 ∈M2
+
+
+It follows from a straightforward calculation that as long as x1 ≥ 3, (x1 − 100)(104 − x1 ) ≤ 25 and
+                              1
+x1 − 2 − (x1 − 2 − 100)2 + 25 2 ≥ 0, which holds for all x1 ∈ [100, 104], the conditions of Theorem
+4 are met. We may thus apply Theorem 4 to conclude that for all x1 ∈ [100, 104],
+                                                                          
+                                 sup EQ2 21 |x1 − 1 − D2 | + |x1 − 3 − D2 |                                       (28)
+                               Q2 ∈M2
+
+
+has the unique optimal solution Q̂2 such that
+                                      1                                      1      2 −1
+     Q̂2 x1 − 2 − (x1 − 2 − 100)2 + 25 2 = 25 25 + x1 − 2 − (x1 − 2 − 100)2 + 25 2 − 100       ,
+
+and
+                                  1                                          1       2 −1
+ Q̂2 x1 − 2 + (x1 − 2 − 100)2 + 25 2 = 1 − 25 25 + x1 − 2 − (x1 − 2 − 100)2 + 25 2 − 100        .
+
+It then follows from a straightforward calculation that for x1 ∈ [100, 104], (28) has the value g(x1 ) :=
+                    1
+ x21 − 204x1 + 10429 2 . It is easily verified that g is a strictly convex function on [100, 104], g has its
+unique minimum on that interval at the point 102, and g(102) = 5. The desired result then follows
+from the fact that (28) is a convex function of x1 on R.               
+     We now prove that the multistage-static problem is type-I and type-II strongly time consistent.
+
+Lemma 6.6 The multistage-static problem is type-I and type-II strongly time consistent, and the
+                                                              √
+optimal value of the distributionally robust DP problem equals 26.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                        33
+
+  Proof :      First, we note that as in the multistage-static setting, any policy π̄ = (x̄1 , x̄2 ) ∈ Πopt
+                                                                                                        d
+
+also satisfies (24). The proof is very similar to that used for the multistage-static case, and we omit
+the details. To prove the lemma, it thus suffices to prove that
+                                                                        
+                      1
+                                               1                     
+             arg min 2 sup EQ2 |x1 − 1 − D2 | + 2 sup EQ2 |x1 − 3 − D2 | = {102}.                     (29)
+               x1 ∈R+      Q2 ∈M2                              Q2 ∈M2
+
+
+It is easily verified that for all x1 ∈ [100, 104], we may apply Theorem 1 to conclude that
+                                          1                                        1
+ sup EQ2 |x1 − 1 − D2 | = (x1 − 101)2 + 25 2 ; sup EQ2 |x1 − 3 − D2 | = (x1 − 103)2 + 25 2 . We
+Q2 ∈M2                                                    Q2 ∈M2
+conclude that for all x1 ∈ [100, 104],
+
+                           1
+                                                                               
+                           2
+                                sup EQ2 |x1 − 1 − D2 | + 21 sup EQ2 |x1 − 3 − D2 |                    (30)
+                               Q2 ∈M2                           Q2 ∈M2
+
+equals
+                                                            1                   1 
+                          g(x1 ) := 12       (x1 − 101)2 + 25 2 + (x1 − 103)2 + 25 2 .                (31)
+
+It is easily verified that g(x) is a strictly convex function of x on [100, 104], g has its unique
+                                                          √
+minimum on that interval at the point 102, and g(102) = 26. The desired result then follows from
+the fact that (30) is a convex function of x1 on R.                
+  Combining Lemmas 6.5 and 6.6 completes the proof of Observation 7.
+
+6.6.     Proof of Observation 8
+Let Q̃2 denote the probability measure such that Q̃2 (5) = Q̃2 (11) = 12 . It may be easily verified that
+Q̃2 ∈ M2 . We begin by proving the following auxiliary lemma.
+
+Lemma 6.7
+                                                            h               i
+                                         sup         EQ1 ×Q2 |10 − D1 − D2 | = 3.
+                                   Q1 ∈M1 , Q2 ∈M2
+                              h               i       h     h                       ii
+                                                                                                     ∆
+  Proof : Note that EQ1 ×Q2 |10 − D1 − D2 | = EQ2 EQ1 |10 − D1 − D2 | D2 . Let φQ1 (d) =
+   h                        i
+                                        ∆           2
+EQ1 |10 − D1 − D2 | {D2 = d} , and q(d) = 16 (d − 8) + 23 = 73
+                                                             6
+                                                               − 83 d + 61 d2 . As Q̃2 ∈ M2 , to prove
+the lemma, it follows from the well-known duality theory for Problem (2) that it suffices to
+demonstrate that for all Q1 ∈ M1 , q(5) = φQ1 (5), q(11) = φQ1 (11), and q(d) ≥ φQ1 (d) for all d ∈ R,
+as in this case for any Q1 ∈ M1 , supQ2 ∈M2 EQ2 [φQ1 (D2 )] = EQ2 [q(D2 )] = 3. We now prove that
+q(d) ≥ φQ1 (d) for all d ∈ R. For any Q1 ∈ M1 , since 10 − D1 ∈ [7 − , 9 + ] w.p.1, it follows that
+φQ1 (d) = 10 − µ1 − d = 8 − d if d ∈ [0, 7 − ], and φQ1 (d) = d + µ1 − 10 = d − 8 if d ∈ [9 + , ∞).
+It is easily verified that q(d) − (8 − d) ≥ 0, and q(d) − (d − 8) ≥ 0, for all d ∈ R. It follows that
+                                        S
+q(d) ≥ φQ1 (d) for all d ∈ (−∞, 7 − ] [9 + , ∞). Noting that φQ1 (d) is a convex function of d
+                                                                       
+on (−∞, ∞), we conclude that φQ1 (d) ≤ max φQ1 (7 − ), φQ1 (9 + ) for all d ∈ [7 − , 9 + ]. As
+it is easily verified that inf d∈R q(d) = 32 , to prove that q(d) ≥ φQ1 (d) for d ∈ [7 − , 9 + ], it suf-
+                                                    
+fices to show that max φQ1 (7 − ), φQ1 (9 + ) ≤ 32 . As φQ1 (7 − ) = 8 − (7 − ) = 1 +  < 32 , and
+                                               Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+34
+
+φQ1 (9 + ) = (9 + ) − 8 = 1 +  < 32 , combining the above we conclude that q(d) ≥ φ(d) for all
+d ∈ R. As it is easily verified that q(5) = φQ1 (5) = 3 and q(11) = φQ1 (11) = 3, combining the above
+completes the proof.         
+     Proof of Observation 8 : Note that the cost under any policy π = (x1 , x2 ) ∈ Π under the
+                                                               h                                    
+multistage-static formulation equals supQ1 ∈M1 , Q2 ∈M2 EQ1 ×Q2 2|x1 (y1 ) − D1 | + |x2 (D1 ) − D2 | . As
+D1 ≤ 3 +  ≤ 10 −  w.p.1, and x1 (y1 ) ≥ y1 = 10 − , we conclude that w.p.1 |x1 (y1 ) − D1 | = x1 (y1 ) −
+                                                                                        h              
+D1 ≥ 10 −  − D1 . Combining with the fact that µ1 = 2, we conclude that EQ1 ×Q2 2|x1 (y1 ) − D1 | ≥
+                             σ2                            1
+                                    9
+2 10 −  − 2) = 2(8 − ). As µ22 = 64 < hb22 = 1, and h2 b2 2 σ2 = 3, it follows from Lemma 4.1 and The-
+                     h         2
+                                      
+orem 1 that EQ1 ×Q2 |x2 (D1 ) − D2 | ≥ 3. Combining the above, we conclude that the cost incurred
+under any policy π is at least 19 − 2.
+  We now show that the cost incurred under any such policy π̃ achieves this bound, and is thus
+                                                  h                                      
+optimal. In particular, supQ1 ∈M1 , Q2 ∈M2 EQ1 ×Q2 2|x̃1 (y1 ) − D1 | + |x̃2 (D1 ) − D2 | equals
+                                        h                                 
+                      sup       EQ1 ×Q2 2|10 −  − D1 | + |10 − D1 − D2 |
+                Q1 ∈M1 , Q2 ∈M2
+                                              h                                  
+                    =        sup       EQ1 ×Q2 2(10 −  − D1 ) + |10 − D1 − D2 |
+                       Q1 ∈M1 , Q2 ∈M2
+                                                               h                
+                    = 2(10 −  − µ1 ) +       sup       EQ1 ×Q2 |10 − D1 − D2 |    =                   19 − 2,
+                                           Q1 ∈M1 , Q2 ∈M2
+
+
+where the final equality follows from Lemma 6.7.
+     Next we show that there is no optimal base-stock policy, i.e. no base-stock policy belongs to
+Πopt
+ s . Indeed, let us suppose for contradiction that π̂ is a base-stock policy with constants x̂1 , x̂2 .
+
+The cost incurred under such a policy π̂ equals
+                                    h                                                            
+                sup          EQ1 ×Q2 2| max(x̂1 , y1 ) − D1 | + max max(x̂1 , y1 ) − D1 , x̂2 − D2 .
+           Q1 ∈M1 , Q2 ∈M2
+
+
+It follows from the fact that D1 ≤ 3 +  < 10 −  w.p.1 for all Q1 ∈ M1 , and a straightforward
+contradiction argument (the details of which we omit), that π̂ cannot be optimal unless x̂1 ≤ 10 − ,
+in which case repeating our earlier arguments, we conclude that max(x̂1 , y1 ) = 10 − , and for any
+                                                   
+Q1 ∈ M1 , Q2 ∈ M2 , EQ1 ×Q2 2| max(x̂1 , y1 ) − D1 | = 2(8 − ). Thus to prove the desired claim, it
+suffices to demonstrate that
+                                                         h                                  i
+                       inf         sup         EQ1 ×Q2       max{10 −  − D1 , x̂2 } − D2       > 3.                 (32)
+                      x̂2 ∈R Q ∈M ,Q ∈M
+                               1   1   2   2
+
+
+We treat two different cases: x̂2 ∈ (−∞, 7+ 21 ] and x̂2 ∈ [7+ 12 , ∞). If x̂2 ≤ 7+ 12 , let the probability
+measure Q̃1 be such that Q̃1 (1) = Q̃1 (3) = 12 , where it is easily verified that Q̃1 ∈ M1 . In this case,
+                                                         h                                  i
+                                   sup         EQ1 ×Q2       max{10 −  − D1 , x̂2 } − D2                            (33)
+                              Q1 ∈M1 ,Q2 ∈M2
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                                     35
+
+is at least
+                                             h                                      i
+                              sup EQ̃1 ×Q2       max{10 −  − D1 , x̂2 } − D2
+                            Q2 ∈M2
+                                             h1                                   1              i
+                              = sup EQ2              |max{7 − , x̂2 } − D2 | +     |9 −  − D2 | ,                (34)
+                                 Q2 ∈M2          2                                2
+where the final equality follows from the fact that x̂2 ≤ 7 + 21  implies max{9 − , x̂2 } = 9 − . It
+follows from convexity of the absolute value function that (34) is at least
+                                   h 1                    1              i
+                           sup EQ2      max{7 − , x̂2 } + (9 − ) − D2 .                                          (35)
+                         Q2 ∈M2       2                   2
+Note that
+                  1                        1              1          1
+                    max{7 − , x̂2 } + (9 − ) ≥            (7 − ) + (9 − ) = 8 − .                (36)
+                  2                        2              2          2           h
+          ∆                                                                                             
+Letting z = 21 max{7 − , x̂2 } + 21 (9 − ), note that (35) equals supQ2 ∈M2 EQ2 (z − D2 )+ + (D2 − z)+ .
+                                                                          µ2   2
+                                                                           2 +σ2
+Applying Theorem 1 with c = 0, b = h = 1, and noting that                  2µ2
+                                                                                 = 73
+                                                                                   16
+                                                                                      < 8 −  = z, we conclude that
+(35) equals
+                                                                         12
+                              1                      1             2
+                                max{7 − , x̂2 } + (9 − ) − 8 + 9 .                                      (37)
+                              2                      2
+Combining (36) with the fact that 21 max{7 − , x̂2 } + 21 (9 − ) ≤ 12 (7 + 12 ) + 12 (9 − ) = 8 − 14 , we
+conclude that (37) is strictly greater than 3, completing the proof of (32) for the case x̂2 ≤ 7 + 21 .
+                                                                                                               2
+                                                                                                 (1+)
+  Alternatively, if x̂2 ≥ 7 + 12 , let the probability measure Q̃1 be such that Q̃1 ( 1+2
+                                                                                        1+
+                                                                                            ) = (1+)2 +1 and
+
+Q̃1 (3 + ) = (1+)1 2 +1 . Again, it is easily verified that Q̃1 ∈ M1 . In this case, (33) is at least
+                                                        (1 + )2
+                                                                                                  
+                                1                                                 1 + 2
+            sup EQ2                     |x̂2 − D2 | +              max 10 −  −          , x̂2 − D2 .              (38)
+          Q2 ∈M2           (1 + )2 + 1               (1 + )2 + 1                 1+
+It follows from convexity of the absolute value function that (38) is at least
+                                                    (1 + )2
+                                                                                                      
+                                    1                                                1 + 2
+              sup EQ2                       x̂2 +                max 10 −  −               , x̂2 − D2 .            (39)
+             Q2 ∈M2           (1 + )2 + 1        (1 + )2 + 1                        1+
+                                              n                     o                                             h
+           ∆                    (1+)2
+Letting z = (1+)1 2 +1 x̂2 + (1+)2 +1 max     10 −  − 1+2
+                                                          1+
+                                                              , x̂2  , note     that (39) equals   sup Q2 ∈M2 Q2 (z −
+                                                                                                              E
+                     
+D2 )+ + (D2 − z)+ . Furthermore,
+                                  (1 + )2
+                                                                              
+                 1                                               1 + 2
+                          x̂2 +                max 10 −  −              , x̂2
+          (1 + )2 + 1          (1 + )2 + 1                      1+
+                                                                                                    1
+                                                   (1 + )2                                           − 2 − 2
+                                                                                   
+                         1              1                                      1 + 2               2
+              ≥                     7 +      +                   10 −   −              =     8 +              . (40)
+                  (1 + )2 + 1          2        (1 + )2 + 1                   1+                (1 + )2 + 1
+                                                                                             1      2
+                                                                           µ2   2
+                                                                            2 +σ2   73       2 −2−
+Applying Theorem 1 with c = 0, b = h = 1, and noting that                   2µ2
+                                                                                  = 16
+                                                                                       < 8 +      2
+                                                                                             (1+) +1
+                                                                                                       = z (having
+applied (15)), we conclude that (39) equals
+                                                                                   12
+                                      (1 + )2
+                                                                        
+                      1                                       1 + 2          2
+                              x̂2 +              max 10 −  −        , x̂2 − 8 + 9 .                               (41)
+                 (1 + )2 + 1       (1 + )2 + 1              1+
+Combining with (40) and (15), we conclude that (41) is strictly greater than 3, completing the
+proof of (32) for the case x̂2 ≤ 7 + 12 , which completes the proof.                   
+                                          Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+36
+
+7.     Supplemental Appendix
+7.1.   Review of rectangularity and connection to our definitions.
+To contextualize our definitions within the broader literature, we here briefly review the relevant
+notion of rectangularity. Our definitions will closely follow those given in Shapiro (2016), although
+we note that many closely related definitions have appeared previously throughout the literature
+(see e.g. Iyengar (2005)). Consider the cost Z π = Z π (D[T ] ) of a policy π, defined in (10). Let M
+                                                                                                    c be
+a set of probability distributions for the demand vector D[T ] , and let Q ∈ M.
+                                                                             c At the moment we
+do not assume that Q is of the product form Q = Q1 × · · · × QT . We can write
+
+                                         h     h                                  ii
+                           EQ [Z π ] = EQ EQ|D1 · · · EQ|D[T −2] EQ|D[T −1] [Z π ] ,
+                                                                
+                                                                                                                (42)
+
+where EQ|D[t] [Z π ] is the conditional expectation, given D[t] , with respect to the distribution Q of
+D[T ] . Of course, this conditional expectation is a function of D[t] . Consequently,
+                                            "                                     #
+                                                        h                       i
+                                π                                             π
+                      sup EQ [Z ] ≤ sup EQ sup EQ|D1 · · · sup EQ|D[T −1] [Z ] .                                (43)
+                     Q∈M
+                       c               Q∈M
+                                         c       Q∈M
+                                                   c                  Q∈M
+                                                                        c
+
+
+The right hand side of (43) leads to the nested formulation
+                          (         "                                    #)
+                                                h                      i
+                       inf sup EQ sup EQ|D1 · · · sup EQ|D[T −1] [Z π ]     .                                   (44)
+                           π∈Π
+                                 Q∈M
+                                   c      Q∈M
+                                            c                   Q∈M
+                                                                  c
+
+
+In particular, if the set M
+                          c is defined in the form (8), i.e., consists of products of probability measures
+(with the t-th measure drawn from Mt ), then formulation (44) simplifies to
+                                             h                          i
+                                                                        π
+                  inf   sup EQ1 sup EQ2 |D1 · · · sup EQT |D[T −1] [Z ]       .                                 (45)
+                     π∈Π    Q1 ∈M1      Q2 ∈M2                   QT ∈MT
+
+It follows from (43) that the optimal value of (44) is greater than or equal to the optimal value of
+the multistage-static Problem (9). Moreover, the optimal value of (44) can be strictly greater than
+the optimal value of (9). Let us demonstrate this through the following simple example.
+
+                                c be of the product form (8). Suppose further that I1 = [0, 1],
+Example 1 Let T = 2 and the set M
+µ1 = 1/2 and σ12 = 1/4. Then M1 = {Q1 } is a singleton with Q1 = p1 δ0 + p2 δ1 , p1 = p2 = 1/2,
+i.e., with probability 1/2 the demand D1 can be either zero or one. Let us fix some policy π ∈ Π
+and let Z π = Z π (D1 , D2 ) be the corresponding objective function. Then the associated cost under
+formulation (9) equals
+                                                                                                       
+              sup EQ1 ×Q2 [Z π (D1 , D2 )] = sup           p1 EQ2 [Z π (0, D2 )] + p2 EQ2 [Z π (1, D2 )] ,      (46)
+            Q2 ∈M2                            Q2 ∈M2
+
+while the associated cost under formulation (44) equals
+                                   
+     EQ1 sup EQ2 |D1 [Z (D1 , D2 )] = p1 sup EQ2 [Z π (0, D2 )] + p2 sup EQ2 [Z π (1, D2 )].
+                          π
+                                                                                                                (47)
+          Q2 ∈M2                                 Q2 ∈M2                            Q2 ∈M2
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                     37
+
+Note that the worst case distribution Q2 ∈ M2 in (46) has to be the same for all possible realizations
+of the demand D1 . In contrast, the worst case distribution Q2 ∈ M2 in (47) is allowed to depend
+on realized D1 . Hence the right hand side of (47) can be strictly greater than the right hand side of
+(46).
+
+  In line with the definition given in Shapiro (2016), we say that the set M
+                                                                           c of probability measures
+is rectangular if such strict inequality does not occur for any r.v. Z π , i.e. the two formulations are
+equivalent in their optimal values. More formally, we make the following definition.
+
+Definition 7.1 Consistent with the definition given in Shapiro (2016), we say that the set M
+                                                                                           c of
+probability measures is rectangular if for every measurable and non-negative function f ,
+                                           "                                             #
+                                                      h                                i
+               sup EQ [f (D[T ] )] = sup EQ sup EQ|D1 · · · sup EQ|D[T −1] [f (D[T ] )] .          (48)
+                  Q∈M
+                    c                    Q∈M
+                                           c        Q∈M
+                                                      c                Q∈M
+                                                                         c
+
+
+We note that under additional compactness assumptions on the support of D[T ] , Shapiro (2016)
+formally explores several related concepts and subtleties of this definition, e.g. proves that one can
+associate a rectangular set of probability measures to any given (possibly non-rectangular) set of
+probability measures, but as such a compactness condition does not hold in our setting we do not
+explore that further here.
+  For a rectangular set M
+                        c the static formulation
+
+                                                  inf sup EQ Z π ,
+                                                             
+                                                                                                   (49)
+                                                  π∈Π
+                                                        Q∈M
+                                                          c
+
+
+is equivalent (in an appropriate sense, see e.g. Shapiro (2016, 2017)) to the formulation (44).
+Furthermore, the natural generalization of the distributionally robust DP equations (11) can be
+applied to (49), with both formulations having a common optimal policy and the same optimal
+value.
+  We note that the concept of rectangularity has been central to the past literature on time
+consistency (cf. Epstein et al. (2003), Grunwald et al. (2011), Iancu et al. (2015)), especially
+as it relates to optimization (cf. Iyengar (2005), Nilim et al. (2005), Wiesemann et al. (2013)).
+In several of these works, connections were made between tractability of the associated robust
+MDP and various notions of rectangularity (e.g. (s,a)-rectangularity, s-rectangularity). We refer the
+interested reader to Wiesemann et al. (2013) and the references therein for details. Our definition of
+rectangularity is aimed directly at the decomposability property of the static formulation ensuring
+its equivalence to the corresponding dynamic formulation (see Shapiro (2016) for details).
+  In general the set of product measures M we consider in this work is not rectangular, as certified
+by the possible lack of weak time-consistency shown in our examples. We note that a rectangular
+                                                  Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+38
+
+analogue of the set of measures M defined in (7)-(8) would be the set of all joint distributions Q
+for D[T ] such that
+
+           Dt ∈ P(It )       ,       EQ [Dt |D[t−1] ] = µt   ,     EQ [Dt2 |D[t−1] ] = µ2t + σt2 ,   t = 1, . . . , T.   (50)
+
+     Non-rectangular (and intractable) formulations for robust MDP are described in both Iyengar
+(2005) and Nilim et al. (2005). In Iyengar (2005), it is referred to as the static formulation, while
+in Nilim et al. (2005), it is referred to as the stationary formulation. In both of these settings, these
+non-rectangular formulations essentially equate to requiring nature to select the same transition
+kernel every time a given state (and action, depending on the formulation) is encountered, as
+opposed to being able to select a different kernel every time a given state is visited in the robust
+MDP, and we refer the reader to Iyengar (2005), Nilim et al. (2005), and Wiesemann et al. (2013)
+for details. Although our multistage-static formulation could similarly be phrased in terms of a
+particular kind of dependency between the choices of nature in a robust MDP framework, and
+would be significantly different from either of the aforementioned non-rectangular formulations,
+we do not pursue such an investigation here, and leave the formalization of such connections as a
+direction for future research.
+
+7.2.     Supplemental Proof of Theorem 1
+     Proof of Theorem 1 :             We first compute the value of ψ(x) for all x ∈ R, and proceed by a case
+analysis. First, suppose x < 0. In this case, EQ [Ψ(x, D)] = cx + b(µ − x) for all Q ∈ M, and thus
+
+                                                    ψ(x) = cx + b(µ − x).                                                (51)
+
+Now, suppose x ≥ 0. Then it is easily verified that
+
+                                                (h − b)(x − µ) b + h
+                                 ψ(x) = cx +                  +      sup EQ [|x − D|] .                                  (52)
+                                                       2         2 Q∈M
+
+Hence to compute ψ(x), it suffices to solve supQ∈M EQ [|x − D|], and we proceed by a case analysis.
+                                  1
+Recall that f(z) := (z − µ)2 + σ 2 2 for all z ∈ R, and f−1 (z) denotes the reciprocal of f(z).
+
+                         2       2
+First, suppose x ≥ µ 2µ
+                     +σ
+                        . Let us define λ̄ = (λ̄0 , λ̄1 , λ̄2 ) such that
+
+                                     1 2 −1                                                  1
+                                                                 λ̄1 := −xf−1 (x),     λ̄2 := f−1 (x),
+                                                     
+                      λ̄0 :=           x f (x) + f(x) ,
+                                     2                                                       2
+
+and let ḡ(d) := λ̄0 + λ̄1 d + λ̄2 d2 for all d ∈ R. Then it follows from a straightforward calculation that
+ḡ(d) and |x − d| are tangent at d¯1 := x − f(x) and d¯2 := x + f(x), and consequently ḡ(d) ≥ |x − d| for
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                                    39
+
+                                                                                                       2       2
+all d ∈ R+ . Hence λ̄ is feasible for the dual of Problem (2). Also, as x ≥ µ 2µ
+                                                                              +σ
+                                                                                 implies d¯1 ≥ 0, it is
+easily verified that the probability measure Q̄ such that
+                                         2 −1                                    2 −1
+                                                                                 
+              ¯      2   2
+          Q̄(d1 ) = σ σ + x − f(x) − µ               ¯          2   2
+                                               , Q̄(d2 ) = 1 − σ σ + x − f(x) − µ
+
+is feasible for the primal Problem (2). It follows from standard duality results that Q̄ is an optimal
+primal solution. Combining the above and simplifying the relevant algebra, we conclude that in
+this case
+                                                          b+h        b − h − 2c
+                              ψ(x) = ψ1 (x) := cµ +           f(x) −            (x − µ).                           (53)
+                                                           2              2
+
+                                       2   2
+Alternatively, suppose x ∈ [0, µ 2µ
+                                 +σ
+                                    ). Let us define λ̂ = (λ̂0 , λ̂1 , λ̂2 ) such that
+                                                                                                         2
+                   λ̂0 := x    ,    λ̂1 := 1 − 4xµ(µ2 + σ 2 )−1              ,   λ̂2 := 2x µ(µ2 + σ 2 )−1 ,
+
+and let ĝ(d) := λ̂0 + λ̂1 d + λ̂2 d2 for all d ∈ R. Then it follows from a straightforward calculation
+that ĝ(d) and |x − d| are tangent at dˆ1 := µ−1 (µ2 + σ 2 ), and intersect at dˆ2 := 0, with ĝ 0 (0) ≥ −1.
+It follows that ĝ(d) ≥ |x − d| for all d ∈ R+ . Hence λ̂ is feasible for the dual of Problem (2). Also,
+it is easily verified that the probability measure Q̂ such that
+
+                              Q̂(dˆ1 ) = µ2 (µ2 + σ 2 )−1 ,   Q̂(dˆ2 ) = 1 − µ2 (µ2 + σ 2 )−1
+
+is feasible for the primal Problem (2). It follows from standard duality results that Q̂ is an optimal
+primal solution. Combining the above and simplifying the relevant algebra, we conclude that in
+this case
+                                                        (h + c)σ 2 − (b − c)µ2
+                                   ψ(x) = ψ2 (x) :=                            x + bµ.                             (54)
+                                                               µ2 + σ 2
+We now use the above to complete the proof of the theorem. Note that since by assumption b > c, it
+follows from (51) that arg minx∈R ψ(x) ⊆ R+ . Recall that κ = b−h−2c
+                                                                b+h
+                                                                     . Furthermore, our assumptions,
+                                                                                      1
+i.e. b > c, h + c > 0, imply that |κ| < 1. Let χ := µ + κσ(1 − κ2 )− 2 . It follows from a straightforward
+calculation that ψ1 is a strictly convex function on R, and ψ1 (χ) = 0, i.e. ψ1 is strictly decreasing
+on (−∞, χ), and strictly increasing on (χ, ∞). Furthermore, it follows from a similar calculation
+that
+                                   σ2 b − c                                        µ2 + σ 2
+                                     −              is the same sign as                     − χ.                   (55)
+                                   µ2 h + c                                          2µ
+                                                                     2
+We now proceed by a case analysis. First, suppose σµ2 > h+c
+                                                        b−c
+                                                            . In this case, ψ2 is a linear function
+with strictly positive slope, and thus arg minx∈[0, µ2 +σ2 ] ψ(x) = {0}. Furthermore, it follows from
+                                                                    2µ
+                   2   2                                                                           2       2
+(55) that χ < µ 2µ
+                +σ
+                   , which implies that ψ1 is strictly increasing on [ µ 2µ
+                                                                         +σ
+                                                                            , ∞). It follows from
+                                                                2        2
+the continuity of ψ that arg minx≥ µ2 +σ2 ψ(x) = { µ 2µ
+                                                     +σ
+                                                        }. Combining the above, we conclude that
+                                               2µ
+                                                        Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+40
+
+arg minx∈R ψ(x) = {0}.
+
+                         2
+Next, suppose σµ2 < h+c
+                    b−c
+                        . In this case, ψ2 is a linear function with strictly negative slope, and thus
+                                   2       2                                                                2   2
+arg minx∈[0, µ2 +σ2 ] ψ(x) = { µ 2µ
+                                 +σ
+                                    }. Furthermore, it follows from (55) that χ > µ 2µ
+                                                                                    +σ
+                                                                                       , which implies
+                    2µ
+that arg minx≥ µ2 +σ2 ψ(x) = {χ}. Combining the above, we conclude that arg minx∈R ψ(x) = {χ}.
+                         2µ
+
+
+
+                                 σ2      b−c
+Finally, suppose that            µ2
+                                       = h+c . In this case, ψ2 is a constant function, and thus
+                                       2       2                                                            2   2
+arg minx∈[0, µ2 +σ2 ] ψ(x) = [0, µ 2µ
+                                   +σ
+                                      ]. Furthermore, it follows from (55) that χ = µ 2µ
+                                                                                      +σ
+                                                                                         , which implies
+                    2µ
+                                           2       2
+that arg minx≥ µ2 +σ2 ψ(x) = { µ 2µ
+                                 +σ
+                                    }. Combining the above, we conclude that arg minx∈R ψ(x) =
+                         2µ
+      2    2
+[0, µ 2µ
+      +σ
+         ].
+
+
+Combining all of the above with another straightforward calculation completes the proof of the
+theorem.            
+
+7.3.       Supplemental Proof of Proposition 6.1
+                                                                 2         2   2
+     Proof of Proposition 6.1 :            Let δ := µ2σ+σ2 , τ := µ +σ
+                                                                    µ
+                                                                       . Let Q∗2 be the probability measure such
+that
+
+                                                       Q∗2 (0) = δ,   Q∗2 (τ ) = 1 − δ.
+
+Recall that b − c > 0, and (h + c)σ 2 > (b − c)µ2 , which we denote by assumption A1. Note that
+                                                                          h           i
+the value of any feasible solution Q1 to Problem (16) is at least EQ1 ×Q∗2 Ψ(D1 , D2 ) , which itself
+equals the sum of cµ and
+      h                                                                                                           
+                                                                                                                                    i
+EQ1        δ (b − c)[0 − D1 ]+ + (h + c)[D1 − 0]+ + (1 − δ) (b − c)[τ − D1 ]+ + (h + c)[D1 − τ ]+                           I(D1 > 0)
+                                                                                                                                  (56)
+          h                                                                                                           
+                                                                                                                                     i
++ EQ1          δ (b − c)[0 − D1 ]+ +(h+c)[D1 − 0]+ +(1 − δ) (b − c)[τ − D1 ]+ +(h+c)[D1 − τ ]+                               I(D1 < 0)
+                                                                                                                                  (57)
+          h                                                                                                           
+                                                                                                                                     i
++ EQ1          δ (b − c)[0 − D1 ]+ +(h+c)[D1 − 0]+ +(1 − δ) (b − c)[τ − D1 ]+ +(h+c)[D1 − τ ]+                               I(D1 = 0)
+                                                                                                                                  (58)
+Note that if P (D1 > 0) > 0, then (56) is at least
+                h  σ2                     µ2             µ2 + σ 2                   i
+               E          (h + c)D 1 +          (b − c)(          − D 1  ) D 1 >   0  P (D1 > 0)
+                 µ2 + σ 2              µ2 + σ 2             µ
+                      h µ2                       µ2             µ2 + σ 2                  i
+                > E 2           (b − c)D 1 +          (b −  c)(           − D  1 ) D 1 > 0  P (D1 > 0)                  by A1
+                       µ + σ2                µ2 + σ 2              µ
+                = (b − c)µP (D1 > 0).                                                                                             (59)
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                                 41
+
+Similarly, if P (D1 < 0) > 0, then (57) is at least
+                  h     σ2                   µ2              µ2 + σ 2                 i
+                 E − 2        (b − c)D 1 +          (b − c)(          − D 1 ) D 1 < 0   P (D1 < 0)
+                     µ + σ2                µ2 + σ 2             µ
+                        h                        i
+                  = E (b − c)(µ − D1 ) D1 < 0 P (D1 < 0) > (b − c)µP (D1 < 0).                                  (60)
+
+Furthermore, if P (D1 = 0) > 0, then (58) equals (b − c)µP (D1 = 0). Combining with (59), (60), and
+the fact that the measure δ0 attains value bµ (by Theorem 1), completes the proof.                          
+
+7.4.    Supplemental Proof of Theorem 4
+                                                                                          1
+  Proof of Theorem 4 :          Recall that η := 12 (c1 + c2 ), and f(z) := (z − µ)2 + σ 2 2 for all z ∈ R.
+Also, letting h1 (d) := −d + c1 , h2 (d) := d − c2 for all d ∈ R, we have that ζ(d) = max{h1 (d), 0, h2 (d)}
+for all d ∈ R. Let λ denote the vector in R3 s.t.
+                                                     c1 − c2
+              λ0 = 12 η 2 + (η − µ)2 + σ 2 f−1 (η) +                  λ1 = −ηf−1 (η),    λ2 = 12 f−1 (η).
+                                          
+                                                             ,
+                                                        2
+Let g(d) := λ0 + λ1 d + λ2 d2 . We now prove that g(d) ≥ ζ(d) for all d ∈ R. It follows from a straight-
+forward calculation that g(d) is tangent to h1 (d) at d1 := η − f(η), and g(d) is tangent to h2 (d) at
+                                              
+d2 := η + f(η). Thus g(d) ≥ max h1 (d), h2 (d) for all d ∈ R, and to prove the desired claim it suffices
+to demonstrate that g(d) ≥ 0 for all d ≥ 0. It is easily verified that for all d ∈ R,
+
+                                   g(d) = 12 f−1 (η)(d − η)2 + 12 f(η) + c1 − c2 .
+                                                                                
+                                                                                                                (61)
+
+Recall that
+                                      1
+                                        (2µ − 3c1 + c2 )(3c2 − c1 − 2µ) ≤ σ 2 ,
+                                      4
+which we denote by assumption A2. It follows from another straightforward calculation that
+                                                               
+assumption A2 is equivalent to requiring that 12 f(η) + c1 − c2 ≥ 0. Combining with (61), we con-
+clude that A2 implies g(d) ≥ 0 for all d ∈ R, completing the proof that g(d) ≥ ζ(d) for all d ∈ R.
+Hence λ is feasible for the dual of Problem (2). Also, it is easily verified that Q is feasible for the
+primal Problem (2). It follows from standard duality results that Q is an optimal primal solution,
+and λ is an optimal dual solution. That these optimal solutions are unique again follows from
+standard duality results and a straightforward contradiction argument. Combining the above and
+simplifying the relevant algebra completes the proof.                
+
+7.5.    Supplemental Proof of Lemma 4.1
+  Proof of Lemma 4.1 :           Suppose i ∈ {0, ..., T } and Q1 , . . . , Qi are fixed. As a notational conve-
+nience, for k ∈ [1, T ], let Ek [·] denote E⊗k            [·]. We now prove that (14) holds for all t ≥ i + 1, and
+                                                 j=1 Qj
+
+proceed by induction. Our particular induction hypothesis will be that there exist Qi+1 , . . . , Qi+n
+such that
+                                                   
+                               Ei+n Ψ̂t xt (yt ), Dt ≥ η̂t for all t ∈ [i + 1, i + n].                          (62)
+                                         Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+42
+
+We first treat the base case n = 1. It follows from Jensen’s inequality, and the independence
+structure of the measures in M, that for any Qi+1 ∈ Mi+1 ,
+                                                                                    
+                   Ei+1 Ψ̂i+1 xi+1 (yi+1 ), Di+1 ≥ EQi+1 Ψ̂i+1 Ei [xi+1 (yi+1 )], Di+1 ) .
+
+                                        E [x
+                                   i i+1 i+1       (y        )]    x (y )
+Taking Qi+1 to be any element of Γi+1        (Γ1 1 1 if i = 0) completes the proof for n = 1.
+     Now, suppose the induction holds for some n. It again follows from Jensen’s inequality, and the
+independence structure of the measures in M, that for any Qi+n+1 ∈ Mi+n+1 ,
+                                                                                             
+      Ei+n+1 Ψ̂i+n+1 xi+n+1 (yi+n+1 ), Di+n+1 ≥ EQi+n+1 Ψ̂i+n+1 Ei+n [xi+n+1 (yi+n+1 )], Di+n+1 ) .
+
+                                               E
+                                     i+n i+n+1 i+n+1    [x        (y        )]
+Taking Qi+n+1 to be any element of Γi+n+1            completes the induction, and the proof,
+where the second part of the lemma follows by letting i = 0.                            
+
+7.6.     Supplemental Proof of Theorem 2
+     Proof of Theorem 2 :    Note that under these assumptions, for any measure Q ∈ M (and in fact
+any non-negative joint distribution for demand), for any such base-stock policy π, w.p.1 xπt (yt ) = x∗t
+for all t = 1, ..., T . It then follows from a straightforward induction that π is a robust-w.p.1-optimal
+policy for the distributionally robust DP formulation, and furthermore for all t = 1, ..., T and y ≤ x∗t ,
+                                                                       T
+                                                                       X
+                         Vt (y) = η̂t − ct x∗t−1 + ct Dt−1 +                     ρs−t (η̂s + cs µs−1 ),
+                                                                       s=t+1
+
+and
+                                            T
+                                            X                               T
+                                                                            X −1
+                                 V1 (y) =          ρt−1 η̂t − c1 y +               ρt ct+1 µt .
+                                            t=1                              t=1
+
+Combining with Lemma 4.1 and Observation 2 completes the proof.                                   
+
+7.7.     Supplemental Proof of Lemma 4.2
+Before proving Lemma 4.2, it will be useful to review some facts surrounding the distributionally
+robust DP equations, and their connection to a certain minimax optimization problem over a
+rectangular set of probability measures. In particular, let us define M
+                                                                      c to be the set of all joint
+distributions Q for D[T ] such that
+
+            Dt ∈ P(It ) ,    EQ [Dt |D[t−1] ] = µt            ,    EQ [Dt2 |D[t−1] ] = µ2t + σt2 ,        t = 1, . . . , T.
+
+Then as discussed in Section 7.1, and as is generally well-known from the literature on rectangularity
+(see e.g. (Shapiro et al. 2009, section 6.7.3)) and Shapiro (2016), the connection between the
+minimax problem
+                                                             sup EQ Z π ,
+                                                                    
+                                               inf                                                                            (63)
+                                            π∈Π(y1 )
+                                                             Q∈M
+                                                               c
+
+and the distributionally robust DP formulation, is as follows.
+Xin and Goldberg: Time (in)consistency of multistage robust inventory models
+                                                                                                               43
+
+Observation 9 The optimal value of Problem (45) equals V1 (y1 ). Any policy π such that
+xπt (d[t−1] ) ∈ Yt ytπ (d[t−1] ) for all t = 1, ..., T and d[t−1] ∈ Rt−1
+                                
+                                                                     + , is an optimal solution to Prob-
+
+lem (63). Conversely, for any optimal policy π for Problem (63), and any measure Q ∈
+                π                        π                 π
+                                                                      
+         c EQ [Z ], it holds w.p.1 that xt (D[t−1] ) ∈ Yt yt (D[t−1] ) for all t = 1, ..., T .
+arg maxQ∈M
+
+We now complete the proof of Lemma 4.2.
+  Proof :     Let π ∈ OPT(y1 ) denote a base-stock policy with monotone increasing base-stock levels
+(with initial level at least y1 ) {ct , t ∈ [1, T ]}. For t ∈ [1, T ], let Q∗t denote any fixed measure in Γct t =
+arg max EQt [Ψ̂t (ct , Dt )], where non-emptiness follows from Theorem 1, and Q∗ := ⊗Tj=1 Q∗j . Then it
+ Qt ∈Mt
+follows from a straightforward proof by contradiction, the details of which we omit and the logic
+                                                                                             
+of which follows similarly to the proof of Theorem 2, that Q∗ belongs to both arg maxQ∈M EQ Z π
+                     
+and arg max c EQ Z π . Combined with the facts that π ∈ OPT(y1 ) and M ⊆ M,
+               Q∈M
+                                                                                  c we conclude
+that π is also an optimal solution to Problem (63), and that both Problems (9) and (63) have the
+same value. Combining with Observation 9 completes the proof.
+
+  7.7.1.     Additional discussion. It is natural to ask whether positing that the distributionally
+robust DP (as opposed to the static formulation) has an optimal policy with monotone increasing
+base-stock levels (but which themselves do not satisfy the conditions of Theorem 2) has any such
+implications for time consistency. We leave this as an interesting open question, as the approach
+we take to proving Lemma 4.2 seems unable to generalize in this way. Indeed, the key logic used in
+our proof of Lemma 4.2 is that: 1. the distributionally robust DP can be framed as an appropriate
+minimax optimization; 2. any monotone base-stock policy takes the same value under this minimax
+problem and the static formulation; 3. the value of the static formulation is upper-bounded by the
+value of this minimax problem; and thus 4. optimality for the static formulation implies optimality
+for this minimax problem (corresponding to the distributionally robust DP). If instead one posits
+that the monotone base-stock policy is optimal for the distributionally robust DP, the chain of
+inequalities breaks, and it seems that a fundamentally different approach is needed.
+
+7.8.      Acknowledgments
+The authors sincerely thank Alex Shapiro for initiating this research, and his continued support
+and insights throughout this project. Research of David A. Goldberg was partly supported by NSF
+award CMMI 1757394.
+

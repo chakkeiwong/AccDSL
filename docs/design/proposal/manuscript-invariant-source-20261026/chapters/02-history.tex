@@ -1,0 +1,282 @@
+\chapter{Representing a company's historical record}
+\label{ch:history}
+
+Northstar's corrected receivable, Apple's debt measurements and its deferred
+revenue show why the source record must retain more than a label and a number.
+Section~\ref{sec:apple-revenue} distinguishes a reported balance, a derived
+movement, a dated expectation and an unquantified obligation.
+Section~\ref{sec:apple-commitments} adds the contract and delivery facts needed
+to turn a commitment into a future payment. The procedures below determine
+which assertions enter a model and which remain unresolved.
+
+\section{The record is a collection of assertions}
+
+The original record includes financial statements, notes, accounting policies,
+auditor opinions, management discussion, segment tables, security terms,
+regulatory returns and subsequent announcements. A complete ingestion process
+accounts for every page and every extracted block. A complete financial model
+is a stronger claim: it would require economically relevant information that
+public reports may never disclose. AccDSL therefore reports document coverage,
+semantic coverage and simulation coverage separately.
+
+Each source span receives a disposition: structured observation, narrative
+assertion, relationship, policy evidence, contextual material, duplicate, or
+unresolved extraction. ``Unresolved'' remains visible. A commitment buried in a
+note is not discarded because it has no current balance-sheet line. An auditor's
+qualification is retained as evidence about the record; it does not become an
+automatic numerical haircut. Management's forecast is a dated assertion with
+an author and modality, not an observed future outcome.
+
+An observation is an immutable record with the fields below. Values inferred
+from observations are separate records, linked by a derivation. This avoids
+overwriting a company's statement with an analyst's preferred reconstruction.
+
+\begin{longtable}{L{35mm}L{101mm}}
+\toprule Field group & Minimum contents\\\midrule\endhead
+Identity and source & Observation ID; document hash; filing identifier;
+PDF page and bounding box or HTML/XBRL locator; literal text; extraction version.\\
+Reporting context & Legal entity; reported group perimeter; statement or note;
+instant or interval; standard and taxonomy versions; dimensions such as segment,
+product, geography, seniority or measurement category.\\
+Amount & Original string; parsed number; sign interpretation; unit; scale;
+currency; precision or rounding interval; missing-value category.\\
+Meaning & Source label; taxonomy QName when present; one or more proposed
+concept mappings; whether the assertion is reported, estimated or conditional.\\
+Timing & Economic validity when known; reporting period; publication and
+availability timestamps; ingestion timestamp; correction or supersession links.\\
+Reliability and review & Extraction confidence, reviewer decision, source
+status and known contradictions, all distinct from a probability over histories.\\
+\bottomrule
+\end{longtable}
+
+A narrative assertion adds actor, predicate, object, scope, quantifier and
+modality. For example, ``substantially all debt is fixed rate'' has a source
+span and a qualitative quantifier. It does not assert $\alpha=1$. A reviewed
+interpretation can introduce a numerical restriction such as
+$\alpha\geq a$, but the threshold $a$ remains an analyst assumption unless
+the source defines it. Boilerplate policy language also does not prove that a
+company holds a particular instrument.
+
+\section{Different names, different measurements}
+
+An accounting concept is more than a row label. ``Debt'' can refer to legal
+principal, amortised carrying amount, undiscounted contractual cash flows or a
+fair-value disclosure. These amounts can all be correct at the same date.
+Likewise, ``revenue'' may be reported gross or net, a segment measure may differ
+from the consolidated measure, and an alternative performance measure may
+exclude selected expenses. A mapping must state its relationship: equivalent
+meaning, component of, broader than, presentation reclassification, or
+measurement transformation.
+
+The common vocabulary will preserve source concepts as first-class identifiers.
+Company extensions may inherit a broad economic category without being declared
+identical to a standardised concept. For instance, an extension can be a
+component of borrowings while retaining an unresolved split between lease
+liabilities and other financing. Many-to-many mappings are allowed; each
+mapping has applicable dates, dimensions and evidence. An aggregation mapping
+does not silently become a measurement conversion.
+
+Standards differ in recognition, measurement, presentation and disclosure.
+Consequently, conversion between IFRS, US GAAP and Chinese Accounting Standards
+for Business Enterprises (ASBE) is not generally a dictionary lookup.
+The original basis remains preserved, and any comparison basis is a separate
+derived book. The same principle applies to tax and prudential capital. A tax
+loss carryforward, accounting deferred tax asset and regulatory capital
+deduction can concern the same economic loss while belonging to different
+measurement systems.
+
+\section{Time, revisions and information availability}
+
+At least four times matter. A machine may enter service in November; its cost
+appears in the accounts for the year ending December; the annual report is
+published in March; and AccDSL ingests the report in April. A later report may
+revise the December comparative. These times answer different questions and
+must remain distinct.
+
+The storage model uses validity intervals for economic assertions and
+transaction intervals for database versions, following the distinction in
+\citet{snodgrass1986}. Publication and availability timestamps are additional
+domain fields. Database transaction time records what AccDSL contained; it
+cannot substitute for what investors could have known. An ``as known on''
+query applies an explicit availability rule and does not include a later
+restatement simply because its economic period is earlier.
+
+AccDSL supports three named views: the original filing view; the latest
+restated view, with a stated information cutoff; and a harmonised research
+view, with explicit transformations. No view changes the stored source facts.
+Corrections have links to the replaced assertion and a reason. Where two
+sources conflict without a clear supersession relationship, both survive with
+a conflict record.
+
+Instant values and interval flows have different types. A balance at 30 June
+is not a six-month flow. Calendar intervals use half-open boundaries
+$[t_0,t_1)$ internally; a filing period ending 30 June maps to the next boundary
+at 1 July in its reporting calendar. Quarter-only earnings may be derived from
+year-to-date values only if the periods, basis, perimeter, units and revision
+vintage are compatible. The derivation retains both source observations and
+their correlated rounding uncertainty. Fifty-two/fifty-three-week calendars,
+stub periods and reporting-date changes require explicit calendar objects.
+
+Accounting-policy changes, estimate changes and error corrections also have
+different temporal effects. The applicable rule package decides whether a
+change is prospective, requires restatement, or adjusts opening balances.
+The engine never infers that effect from a generic ``revision'' flag.
+
+\section{The company boundary changes}
+
+Legal entity, reporting group and economic exposure are separate dimensions.
+Acquisitions, disposals, changes in control, joint arrangements, special-purpose
+vehicles and non-controlling interests can change the reporting perimeter.
+A group's increase in property need not be capital expenditure; it may reflect
+an acquisition, a currency translation or a revaluation. The bridge between
+opening and closing property must identify these movements before a scenario
+model can extrapolate investment.
+
+The company graph therefore stores dated ownership, control and counterparty
+relationships. Control is an accounting conclusion with supporting evidence,
+not a rule that blindly consolidates every majority-owned entity. Group
+reporting combines entity books with a separate adjustment and elimination
+book. Intragroup receivables and payables require matching counterparties,
+currencies and dates. Unmatched eliminations remain unresolved; a balancing
+``plug'' is not a recovered transaction.
+
+Acquired opening balances, goodwill, purchase-price allocation, divested
+operations and non-controlling interests each have their own event types.
+Analyses can preserve reported scope or define a constant perimeter, but the
+latter is a derived modelling assumption, not the original record.
+
+\section{Further problems that the representation must handle}
+
+Several difficulties extend beyond differences in standards, industries and
+company labels. Recognition and settlement occur on different dates: a sale,
+invoice, cash receipt and impairment can belong to four periods. Net balances
+hide gross flows: repeated borrowing and repayment can leave the same closing
+debt. Netting can conceal offsetting exposures and liquidity needs. Different
+contractual maturities and repricing dates can share the same current carrying
+amount. Guarantees, undrawn credit facilities, litigation and covenants can
+be economically important before an asset or liability is recognised.
+
+Foreign currency introduces transaction currency, functional currency and
+presentation currency, together with different translation conventions for
+stocks and flows. Currency translation effects must not be mistaken for cash
+receipts. Inventory and depreciation depend on vintages or lots; an aggregate
+stock and average age may be insufficient under a shock. Tax bases can evolve
+differently from carrying amounts. Deferred tax recognition requires assumptions
+about recoverability, rather than multiplication by a tax rate alone.
+
+Public information is selectively disclosed and rounded. Duplicate XBRL facts
+may agree, overlap within rounding bounds or contradict one another. A dash
+can mean zero, immaterial, unavailable or inapplicable. Tables can mix units,
+span pages and embed signs in parentheses. Text and table references can be
+wrong in the source itself. AccDSL retains these distinctions and gives an
+analyst a local repair path without pretending that extraction confidence
+settles economic interpretation.
+
+Finally, strategic behaviour matters. A firm may refinance, cut investment,
+raise equity, change prices, breach a covenant or fail. A bank may preserve a
+capital ratio by shrinking assets; an insurer may change reinsurance or asset
+allocation. Such responses cannot be deduced from the balance-sheet identity.
+They require explicitly calibrated or assumed policies, and alternative
+policies must remain separate when the available record does not distinguish
+them.
+
+\section{Account for a disclosure before translating it}
+
+The importer first freezes a filing package: documents, byte hashes, reporting
+dates, availability evidence and incorporated references. It compares the
+document's contents page and statement index with detected section and note
+headings. A missing heading, table continuation or referenced exhibit creates
+an obligation to resolve; successful text extraction cannot discharge it.
+Each PDF page and each HTML content unit then has a stable locator and a
+disposition. Child units such as a table or note belong to a parent page/section;
+the importer records overlap instead of counting the same content twice.
+
+Three denominators remain separate. Acquired-document coverage counts source
+units with a disposition, including unresolved units. Semantic coverage counts
+identified assertions whose meaning and context have been reviewed. Simulation
+coverage counts the operations and exposures required by a specified query
+that have supported state and rules. The first can be complete while the other
+two are partial. An assertion inventory can itself be incomplete; until the
+page/section reconciliation is reviewed, semantic coverage is a lower-bound
+inventory rather than a percentage of all financial meaning.
+
+Cross-reference traversal is a work-list algorithm. Start with the filing's
+statement and note references, resolve each target against the acquired
+manifest, add newly discovered targets, and stop when no unvisited target
+remains or a declared resource limit is reached. Document hash plus target
+locator prevents cycles from expanding forever. A target has one of four
+results: resolved, duplicate of a resolved source, unavailable, or ambiguous.
+The last two remain obligations. Apple's proxy and prior-filed agreements
+show why closure over acquired files is weaker than closure over incorporated
+disclosures. A manifest may declare a bounded acquisition scope, but must show
+these outstanding references beside its completeness status.
+
+A narrative translator records the actor, predicate, object, quantifier,
+modality, applicable entities/dates and qualifications before proposing any
+constraint. ``All notes are fixed-rate'' constrains contractual coupon type;
+it does not constrain the combined note-and-swap exposure. ``May repurchase''
+creates an authorised action with limits, not an obligatory payment.
+``Substantially all'' remains qualitative unless a separately reviewed
+assumption gives it a threshold. A conditional guarantee becomes an obligation
+with a trigger and exposure, not a present liability merely because its maximum
+amount is known. Unsupported predicates retain their literal text and links
+to affected balances. The reviewer accepts the translation separately from
+accepting that the text was extracted correctly.
+
+\section{Mappings must establish a financial relationship}
+
+A mapping record identifies source concepts, target concept, relationship,
+applicable entity/basis/period/dimensions, evidence, reviewer and any required
+transformation. Equivalence permits substitution only when all these contexts
+match. A component relationship permits inclusion in a sum only through a
+declared disjoint partition. A broader concept supplies containment, not an
+equality. Reclassification changes presentation while preserving the stated
+population and total; measurement transformation must supply an actual formula
+and inputs. These relationships cannot compose indiscriminately: component
+followed by equivalence remains component, while two measurement transforms
+compose only if their intermediate bases and information dates agree.
+
+For example, Northstar's product revenue might split into 180 domestic and
+80 overseas, while its customer channel split is 200 wholesale and 60 retail.
+Both classify the same 260. Adding all four numbers gives 520 and is invalid.
+The partition records therefore share a population ID but have different axes.
+To remove an axis, \code{sumOver} requires evidence that members are disjoint
+and exhaustive for that context. Where the source supplies only named
+segments, an explicit unallocated member carries the residual; it is not
+assumed zero. Geography-by-product cells cannot be recovered from the two
+marginals without further constraints or assumptions.
+
+Apple supplies another counterexample: its vendor non-trade receivables arise
+from component sales to manufacturing vendors, whose gains reduce product
+cost of sales when the final products are sold (annual Note 4, p.~38).
+They cannot be relabelled as ordinary revenue-generating trade receivables
+without changing meaning. Likewise gross derivative assets and liabilities
+cannot be silently netted. Company extensions can define these distinctions
+and dated presentation changes; they cannot override mandatory recognition
+rules in a selected standards package.
+
+\section{Selecting original and revised assertions}
+\enlargethispage{2\baselineskip}
+
+The query procedure first filters assertions by the declared availability
+cutoff, then by an optional database-time cutoff. A day-only filing timestamp
+is conservatively available at the next local midnight in its named timezone;
+any more precise rule needs evidence. Within the eligible set, explicit
+supersession removes only the targeted assertions in matching contexts.
+The superseding assertion must itself be eligible. Follow the acyclic graph
+transitively; retain all maximal assertions if two eligible corrections
+conflict. File order and ingestion recency never decide which is true.
+
+The original view selects the initial assertion chain in a named filing;
+the latest-available view selects eligible maximal versions; the harmonised
+view adds reviewed transformations to those selections. A revision to revenue
+does not automatically revise every note or change the company's accounting
+basis. An estimate change takes effect in future measurements from its
+specified date. An error correction may change a comparative and an opening
+balance bridge, each as a new assertion with its own lineage. Northstar's
+explicit query fixture in Chapter~\ref{ch:case} checks all these clocks without
+assuming that the most recently stored row is always the appropriate history.
+
+\input{sections/source-admission}
+
+\input{sections/sector-revision}

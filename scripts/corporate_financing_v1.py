@@ -16,8 +16,16 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTER = 'docs/design/research/p08-v1/authority-register.json'
-REQUIRED = ('recognition', 'classification', 'split', 'measurement', 'interest',
-            'redemption', 'conversion', 'note_carrying', 'note_interest')
+REQUIRED = ('recognition', 'fair_value', 'classification', 'split', 'residual_equity',
+            'measurement', 'amortised_cost', 'interest', 'redemption', 'conversion',
+            'note_carrying', 'note_interest')
+EVENT_CLAIMS = {
+    'issue': ('recognition', 'fair_value', 'classification', 'split', 'residual_equity', 'measurement'),
+    'accrue': ('measurement', 'amortised_cost', 'interest'),
+    'coupon': ('measurement', 'amortised_cost', 'redemption'),
+    'redeem': ('redemption', 'residual_equity'),
+    'convert': ('conversion', 'residual_equity'),
+}
 ACCOUNTS = ('cash', 'liability', 'conversion_equity', 'share_equity',
             'opening_equity', 'interest_expense')
 
@@ -89,13 +97,19 @@ class AuthorityBook:
                     raise Unsupported('missing source') from exc
                 if actual != s[key]['sha256']:
                     raise Unsupported('source hash mismatch')
-            iso(s['period_start_inclusive']); iso(s['period_start_exclusive'])
+            if iso(s['period_start_inclusive']) >= iso(s['period_start_exclusive']):
+                raise Unsupported('empty authority period interval')
         for c in self.claims.values():
+            if (not c.get('anchors') or not normal(c.get('supported_statement', ''))
+                    or c.get('status') != 'inspected_primary_conditional'):
+                raise Unsupported('empty or uninspected claim')
             s = self.sources.get(c['authority_id'])
             if not s or s['access_status'] != 'inspected_primary':
                 raise Unsupported('claim lacks inspected primary source')
             pages = (self.root / s['text']['path']).read_text().split('\f')
             for a in c['anchors']:
+                if not normal(a.get('quote', '')) or not normal(a.get('paragraph', '')):
+                    raise Unsupported('empty authority anchor')
                 if type(a['pdf_page']) is not int or not 1 <= a['pdf_page'] <= len(pages):
                     raise Unsupported('invalid anchor page')
                 page = normal(pages[a['pdf_page'] - 1])
@@ -110,6 +124,12 @@ class AuthorityBook:
                 raise Unsupported('unresolved note claim')
 
     def admit(self, contract):
+        if contract.basis == 'EU-endorsed IFRS':
+            from corporate_authority_eu_v1 import EUAuthorityPreparation, AuthorityDependencyError
+            try:
+                EUAuthorityPreparation(self.root).require_admitted(contract)
+            except AuthorityDependencyError as exc:
+                raise Unsupported(str(exc)) from exc
         # Revalidate so a caller cannot bypass source checks by mutating records.
         self.validate()
         for key in REQUIRED:
@@ -215,6 +235,7 @@ class BondBook:
         if day != expected_day or (kind != expected and not (expected == 'settle' and kind in ('redeem', 'convert'))):
             raise Unsupported('out-of-order or conflicting event')
         c = self.contract
+        self.authority.admit(c)
         ledger = deepcopy(self._ledger)
         shares, principal = self._shares, self._principal
         postings = {}
@@ -223,15 +244,15 @@ class BondBook:
             postings = {'cash': rational(c.proceeds), 'liability': -self.initial_liability,
                         'conversion_equity': -(rational(c.proceeds) - self.initial_liability)}
             principal = rational(c.principal)
-            claims = ['recognition', 'classification', 'split']
+            claims = list(EVENT_CLAIMS[kind])
         elif kind == 'accrue':
             interest = -ledger['liability'] * rational(c.comparable_yield)
             postings = {'interest_expense': interest, 'liability': -interest}
-            claims = ['measurement', 'interest']
+            claims = list(EVENT_CLAIMS[kind])
         elif kind == 'coupon':
             coupon = rational(c.annual_coupon)
             postings = {'liability': coupon, 'cash': -coupon}
-            claims = ['measurement', 'redemption']
+            claims = list(EVENT_CLAIMS[kind])
         elif kind in ('redeem', 'convert'):
             carrying = -ledger['liability']
             if carrying != rational(c.principal):
@@ -240,7 +261,7 @@ class BondBook:
             if kind == 'convert':
                 shares += c.conversion_shares
             principal = Fraction(0)
-            claims = ['redemption' if kind == 'redeem' else 'conversion']
+            claims = list(EVENT_CLAIMS[kind])
         else:
             raise Unsupported('unsupported event')
         for account, amount in postings.items():
@@ -258,6 +279,7 @@ class BondBook:
         return deepcopy(entry)
 
     def notes(self):
+        self.authority.admit(self.contract)
         periods = []
         opening_carrying = Fraction(0)
         for year in range(iso(self.contract.issue_date).year,
@@ -298,25 +320,50 @@ def run_case(contract=None, settlement='redeem', opening_cash='20', authority=No
                  'initial_liability': book.initial_liability, 'state': book.state, 'notes': book.notes()})
 
 
+def comparison_economics(contract, opening_cash='20'):
+    facts = wire(vars(contract))
+    economic = {k: v for k, v in facts.items()
+                if k not in ('basis', 'jurisdiction', 'tier', 'book', 'measurement')}
+    economic['opening_cash'] = str(rational(opening_cash))
+    economic['settlement_outcomes'] = ['redeem', 'convert']
+    return economic
+
+
+def economics_hash(economic):
+    return sha256(json.dumps(economic, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
+def comparison_cases(standard, economic, authority=None):
+    """Only registered, source-supported treatments may produce comparisons."""
+    if standard != 'AASB':
+        raise Unsupported('no fully admitted treatment for this reporting regime')
+    facts = {k: v for k, v in economic.items()
+             if k not in ('opening_cash', 'settlement_outcomes')}
+    c = Contract(**facts)
+    if economic['settlement_outcomes'] != ['redeem', 'convert']:
+        raise Unsupported('both maturity outcomes required')
+    return {settlement: run_case(c, settlement, economic['opening_cash'], authority)
+            for settlement in economic['settlement_outcomes']}
+
+
 def compare_same_facts(contract=None, authority=None):
     c = contract or Contract()
-    facts = wire(vars(c))
-    # Hash common economics without changing terms for an unavailable rule set.
-    economic = {k: v for k, v in facts.items() if k not in ('basis', 'jurisdiction', 'tier', 'entity_scope', 'book')}
-    digest = sha256(json.dumps(economic, sort_keys=True).encode()).hexdigest()
-    case = run_case(c, authority=authority)
+    economic = comparison_economics(c)
+    digest = economics_hash(economic)
+    cases = comparison_cases('AASB', economic, authority)
+    case = cases['redeem']
     rows = [{'standard': 'AASB', 'jurisdiction': 'AU', 'facts_sha256': digest,
              'status': 'supported_bounded', 'initial_liability': case['initial_liability'],
-             'initial_equity': str(rational(c.proceeds) - rational(case['initial_liability'])),
+             'initial_equity': case['notes']['conversion_equity'],
              'total_interest': case['state']['ledger']['interest_expense'],
-             'claims': list(REQUIRED)}]
+             'claims': list(REQUIRED), 'cases': cases}]
     for standard, jurisdiction, missing in [
-        ('US GAAP', 'US', 'Applicable ASC 470/815 and ASU 2020-06 text, adoption and exceptions uninspected; official PDF 403.'),
-        ('ASBE', 'CN', 'Official CAS 22/37 text, applicable edition and entity transition uninspected; MoF route 502.'),
-        ('EU-endorsed IFRS', 'EU', 'Applicable endorsed IAS 32/IFRS 9 text and amendments uninspected; EUR-Lex returned empty 202.')]:
+        ('US GAAP', 'US', 'ASU 2020-06 retained and selected amendment paragraphs inspected; full ASC 815-15/815-40 eligibility, general debt measurement/derecognition and subsequent amendment applicability remain uninspected.'),
+        ('ASBE', 'CN', 'Official CAS 22/37 text, applicable edition and entity transition uninspected; two official MoF candidate routes returned 502.'),
+        ('EU-endorsed IFRS', 'EU', 'Original EU IAS 32/IFRS 9/IFRS 7 provisions, Regulation 1606/2002 Article 4 and four amendment annexes inspected. Applicable 2024–2025 amendment/corrigendum chain and remaining eligibility cross-references unresolved; see p08-v3/authority-register.json. No EU lifecycle admitted.')]:
         rows.append({'standard': standard, 'jurisdiction': jurisdiction, 'facts_sha256': digest,
                      'status': 'unresolved', 'initial_liability': None, 'initial_equity': None,
-                     'total_interest': None, 'claims': [], 'missing': missing})
+                     'total_interest': None, 'claims': [], 'cases': None, 'missing': missing})
     return {'economic_facts': economic, 'rows': rows, 'supported_difference': None,
-            'criterion_status': 'incomplete: no second inspected applicable standard',
-            'interpretation': 'No numerical difference or equivalence is established; Australian adoption is not universal IFRS authority.'}
+            'criterion_status': 'incomplete: no second fully inspected applicable treatment',
+            'interpretation': 'No complete numerical cross-standard lifecycle is established. The inspected FASB amendment supplies a conditional classification difference; remaining eligibility and lifecycle authority must be inspected before admission.'}

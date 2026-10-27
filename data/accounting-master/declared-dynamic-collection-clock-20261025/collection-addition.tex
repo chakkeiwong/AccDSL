@@ -1,0 +1,52 @@
+\paragraph{Distinguish collecting a claim from assessing whether it is overdue.}
+The same receivable balance can imply different collection problems at different
+dates. Consider two explicitly assumed claims: USD~60 due on 31~January 2027
+and USD~40 due on 28~February. A receipt of USD~20 against the first claim on
+15~January leaves USD~40 against that claim. The selected synthetic policy treats
+a remaining amount as overdue only after its due date. Thus neither claim is
+overdue at the end of January. A further receipt of USD~10 against the second
+claim in February leaves aggregate receivables of USD~70. At 28~February, USD~40
+is overdue under this policy; the other USD~30 becomes overdue on the next day.
+These classifications describe the assumed payment terms. They do not measure
+an allowance or establish a right to write off either claim.
+
+\texttt{DeclaredCollectionClock/1} keeps a fixed declared population of claims,
+with separate memory for each due date, remaining amount and last assessed
+amount. The opening claims must sum exactly to the selected receivable account.
+A collection identifies one claim, cannot exceed its recorded remainder, and
+posts debit cash and credit receivables. It changes that claim's remainder while
+preserving the previous assessment. An assessment instead reads the remainders
+at its declared date, stores the resulting overdue amounts and makes no journal
+entry or cash movement. Unknown required event inputs retain their reasons and
+stop that command; an explicitly false applicability finding refuses the method.
+
+Assessment windows have an inclusive start and an exclusive end. The assessment
+occurs on the final included date, and the saved cursor must equal that window's
+start before it can advance to the end. Windows must be positive and contiguous.
+This makes a repeated, overlapping or skipped assessment detectable. Within one
+date, supplied event order is retained, but an assessment seals that date against
+a later collection: a payment intended to affect that observation must precede
+it. The journal engine also rejects events earlier than the current book date
+or outside the current fiscal period.
+
+A report can advance its observation date without supplying the missing
+assessment. It then identifies the last assessment as historical, or records
+that none exists. Provisional period carry preserves unpaid claims, due dates
+and assessment memory; it cannot reset the cursor or turn year-end into a new
+assessment. In the example, a December assessment records overdue amounts of
+USD~40 and USD~30. After carrying those balances, collecting the first USD~40
+in January 2028 leaves USD~30 outstanding. A declared January assessment then
+records overdue amounts of zero and USD~30. Cash has risen from USD~100 to
+USD~170, receivables have fallen from USD~100 to USD~30, and total assets and
+equity remain USD~200 throughout.
+
+The existing command language can author these events, reports and carries
+through its hashed definitions. The guarded execution compares exact method
+definitions, so renaming a registry entry does not change its meaning. A foreign
+method that writes claim memory or posts to the receivable account refuses,
+including offsetting postings with no net balance change. Only the successful
+prefix remains available after refusal. The checked fragment supports eight
+declared opening claims and sixteen assessment windows within the existing work
+limits. New claim insertion, revisions to payment terms, complete invoice
+coverage, impairment, tax and source admission remain distinct requirements.
+

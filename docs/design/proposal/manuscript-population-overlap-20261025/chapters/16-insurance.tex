@@ -1,0 +1,101 @@
+\chapter{Insurance service, finance and claims}
+\label{ch:insurance}
+
+An insurer receives cash before much of its service is delivered. Cash premium,
+service revenue and profit therefore follow different schedules. A short
+coverage example first connects gross insurance to reinsurance. The subsequent
+two-year cases introduce unearned profit, loss allocation and finance one
+change at a time.
+
+\section{Insurance: cohorts and future service}
+
+An insurer requires policy cohorts or groups with issue dates, coverage,
+premiums, benefits, expenses, lapses, claims development, guarantees and
+reinsurance relationships. Asset portfolios need their own contracts and
+valuations. The liability state must distinguish expected future cash flows,
+discounting, risk adjustments or margins, unearned profit measures where
+applicable, incurred claims and movements between opening and closing states.
+The IFRS 17 overview's distinction between measuring future cash flows and
+recognising profit as service is provided motivates this separation
+\citep{ifrs17}.
+
+The module API accepts policy/cohort state, economic assumptions, non-economic
+assumptions and information date. It returns a measurement vector, movement
+attribution and proposed recognition events. Experience differences, changes
+in assumptions, finance effects and service effects remain separately
+identifiable. Reinsurance held has its own record and measurement; it is not
+an automatic percentage offset to every insurance liability.
+
+Scenarios can alter discount curves, mortality, morbidity, lapse rates,
+inflation, catastrophe losses and policyholder behaviour. Their joint
+dependence and cohort exposure must be declared. A portfolio total can match
+history while hiding very different guarantee and duration profiles. This
+makes alternative economic histories especially valuable, but also limits
+what public-data reconstruction can identify. A full insurance package needs
+actuarial and accounting review beyond the core release.
+
+\clearpage
+\section{Insurance service and reinsurance in a complete cohort}
+
+The example uses one-year policies and a one-year proportionate treaty starting
+when those policies are recognised, with uniform service for each. Both groups
+qualify for premium allocation through the one-year conditions in paragraphs
+53(b) and 69(b); paragraphs 62--62A determine treaty recognition. Assume no
+acquisition cash flows, investment components, significant financing or onerous
+remaining coverage. Claims and recoveries are expected within a year of the
+claims being incurred. The inspected AASB~17 text incorporating IFRS~17 specifies
+the movements in paragraphs 53--59, allocation in B126 and separate reinsurance
+requirements in 63--70A \citep{aasb17}. Gross and ceded groups retain distinct
+identities.
+
+Begin with capital and cash of 20. Receive premium 120 and recognise a
+remaining-coverage liability of 120. Pay reinsurance premium 24 and recognise
+a coverage asset of 24. After half the uniform service, recognise revenue 60
+by releasing gross coverage and reinsurance expense 12 by releasing its
+coverage asset. Estimated incurred claims are 40, of which 30 is paid;
+the remaining-claim risk adjustment is assumed to be 2. Gross claims expense
+is therefore 42 and incurred-claims liability is 12. Assume the treaty
+reimburses half the gross expected claims, recovery cash of 15 has arrived,
+the risk transferred is valued at 1, and reinsurer non-performance has zero
+expected effect in this example. The reinsurance claims asset is
+$20+1-15=6$, and recovery income is 21.
+
+Cash is $20+120-24-30+15=101$. Assets are cash 101, remaining reinsurance
+coverage 12 and claims recovery 6, totalling 119. Liabilities are remaining
+gross coverage 60 plus incurred claims 12, totalling 72. Profit is
+$60-42-12+21=27$ and equity is $20+27=47$. These balances reconcile without
+netting reinsurance against the insurance liability. If counterparty credit
+risk changes, the recovery measurement changes through its own inputs; it
+does not mechanically halve every gross liability or risk adjustment.
+
+Longer-duration business adds a fulfilment-cash-flow vector, discount curve,
+risk adjustment, contractual service margin, loss component and coverage-unit
+schedule. Select portfolio and annual cohort, assess onerous grouping, project
+cash flows within contract boundaries, discount with the declared financial
+assumptions, measure non-financial risk separately, and attribute subsequent
+movements to new business, experience, assumptions, finance and service.
+Future-service changes adjust the supported service-margin operation subject
+to the loss rules; current/past-service effects enter their specified result
+components. Unsupported variable-fee, transition or loss-recovery operations
+must stop those dependencies explicitly. A PAA example does not implement
+these longer-duration methods by implication.
+
+\enlargethispage{3\baselineskip}
+An actuarial reserve adapter also needs a concrete estimation contract.
+For cumulative claims $C_{i,k}$ by origin year $i$ and development year $k$,
+the chain-ladder point method estimates each factor from matched observed
+cells, $\widehat f_k=\sum_i C_{i,k+1}/\sum_i C_{i,k}$, then projects the
+latest cumulative claim along the remaining factors. A triangular example
+with rows $(100,150,180)$, $(120,180)$ and $(140)$ gives factors 1.5 and
+1.2, outstanding amounts 36 and 112 for the unfinished rows, and total 148.
+\citet[Sections 2--3, equations (1)--(3)]{mack1993} makes explicit the
+conditional-mean and variance assumptions and independence across origin
+years; its aggregate-error discussion retains dependence from shared estimated
+factors. A single final-development observation cannot supply an empirical
+tail variance without an additional assumption. The adapter therefore returns
+the point projection and marks uncertainty estimation unavailable in this tiny
+example. It supplies neither a full predictive distribution nor an IFRS risk
+adjustment. Calendar effects, inflation, changing claims handling and tail
+selection require separate sensitivity and validation before real use.
+\input{sections/insurance-methods}
+

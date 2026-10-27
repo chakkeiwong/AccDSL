@@ -1,0 +1,123 @@
+\chapter[Learning and persistent uncertainty]{Learning, persistent uncertainty, and who knows what}
+\label{sim:learning}
+
+A future disclosure may resolve an uncertainty about today's company. It may also reveal nothing relevant. Simulation must allow both outcomes. It must distinguish a change in the company from a change in the analyst's knowledge, and distinguish the analyst's knowledge from information available to managers, lenders and investors. These distinctions determine which actions are possible and which apparent forecasting successes are merely uses of future information.
+
+\section{Four dates attached to one fact}
+A loan can be signed on 15 January, take economic effect on 1 February, appear in a report covering the quarter ending 31 March, and become public on 10 May. A system may ingest the report on 12 May. The signature, economic, reporting, publication and ingestion dates answer different questions. A forecast made on 30 April cannot use the 10 May disclosure simply because it describes a March balance.
+
+For a report-based forecast origin $t$, let $D_t$ contain assertions available by $t$ under the declared availability rule. If the analysis uses public information, publication time is relevant. If it models a lender with private contractual access, the information rule differs. Ingestion time controls reproducibility of the system's own operation; it need not equal the earliest public availability.
+
+A historical replay should therefore specify both the economic date and evidence cutoff. A corrected extraction performed today may accurately recover a number that was publicly available before the old cutoff. A new restatement published today was not available then. The first can repair a data-processing mistake in an old evidence view; the second changes the information set and must not be silently backfilled into the old forecast.
+
+\section{Persistent unknown facts}
+Let $\theta$ denote a contract characteristic fixed at inception, such as whether a loan is fixed or floating. Let $X_t$ denote changing economic state, including cash, accrued interest and remaining principal. A simple transition is
+\begin{equation}
+ X_{t+1}=T(X_t,\theta,a_t,\varepsilon_{t+1}),\qquad \theta_{t+1}=\theta_t.
+ \label{sim:persistent-theta}
+\end{equation}
+Here $a_t$ is a decision and $\varepsilon_{t+1}$ a future innovation under the specified scenario or stochastic process. The second equation is essential. Uncertainty about a fixed contract does not license redrawing it each period. Refinancing or amendment can change the terms, but those are dated events with their own permissions and cash consequences.
+
+Suppose a loan is either fixed at five per cent or floating at the market rate, and the market rate is seven per cent for each of two future years. The possible interest sequences are $(5,5)$ and $(7,7)$. Independent yearly resampling adds $(5,7)$ and $(7,5)$. Those additional paths describe contract changes that the model did not authorize. Their inclusion can alter liquidity minima, covenant duration and refinancing behavior.
+
+The same persistence issue affects customer identity, asset vintage, tax basis, priority and collateral. A compact state must retain persistent variables even if current totals do not depend on them. Eliminating a variable because it is irrelevant today is unsafe if it changes later observations or events.
+
+\section{Set-valued evidence updates}
+When no probability measure is justified, retain a feasible family $\mathcal H_t$. If a new compatible hard observation $y$ supplies condition $C_y$, updating the same historical scope gives
+\begin{equation}
+ \mathcal H_{t}^{+}=\{h\in\mathcal H_t:C_y(h)\}.
+ \label{sim:set-update}
+\end{equation}
+This operation narrows the old family. It does not advance the economic clock. Forward propagation then maps each remaining history into future possibilities under the transition relation. A smaller historical family can still produce a wider future range when the horizon lengthens or new shocks are admitted.
+
+An empty intersection calls for investigation. A source may conflict with another source, the observation mapping may be wrong, or a model assumption may be too narrow. Selecting one convenient history to restore nonemptiness would hide the contradiction. The result should identify the conflicting premises and preserve the previous view.
+
+A restatement is not always an additional constraint on the old asserted amount. It may replace that assertion in a current evidence view. The system should preserve the original source and link the correction to it. Historical replay can then reproduce the original view, while current reconstruction uses the revised one. Conjoining both as exact truths would manufacture infeasibility.
+
+\section{Probabilistic filtering requires a model}
+If a prior measure $\mu_t$ and likelihood $L(y\mid h)$ are admitted, Bayesian updating has the form
+\begin{equation}
+ \mu_t^+(dh)=\frac{L(y\mid h)\mu_t(dh)}{\int L(y\mid u)\mu_t(du)}.
+ \label{sim:bayes-update}
+\end{equation}
+The denominator must be finite and positive. Its role is normalization, not an opportunity to substitute an arbitrary fallback when the observation has zero modeled probability. A zero denominator can reveal a misspecified likelihood, an impossible observation under the model or inappropriate handling of a continuous conditioning event.
+
+For continuous exact observations, ordinary density multiplication must be understood relative to the declared dominating measure and conditional distribution. Adding a tiny Gaussian error can make a computation run, but it changes the observation model. Its scale should reflect a justified measurement or reporting process, or be explicitly treated as a sensitivity assumption. Numerical convenience does not establish the company's measurement error distribution.
+
+The POMDP formulation in \citet[Sections 3.1--3.4]{kaelbling1998} provides a formal treatment when transition and observation probabilities are known. Its belief state summarizes the history needed for control under those assumptions. An unweighted feasible family is not a probabilistic belief state merely because it is stored in the same data structure. Supporting both requires distinct semantics.
+
+\input{simulation/lit-03-learning-1}
+
+\section{An informative and an uninformative disclosure}
+Return to the fixed-versus-floating loan. Assume, only for this example, prior probabilities of one half each. A report can say ``floating'' or ``fixed.'' Suppose the report identifies the correct type with probability 0.9 and the wrong type with probability 0.1, independently of other modeled quantities conditional on the type. After a ``floating'' report, Bayes' rule gives
+\begin{equation}
+ \Pr(F\mid y=F)=\frac{0.9(0.5)}{0.9(0.5)+0.1(0.5)}=0.9.
+\end{equation}
+These probabilities are supplied assumptions, not estimates from the loan balance. The example isolates the mechanics of updating. If the report were equally likely under both types, its likelihood would cancel and the prior would remain unchanged. More pages of disclosure need not imply more information about the exposure of interest.
+
+In the set-valued version, an exact contract note may eliminate one type. An ambiguous phrase compatible with both eliminates neither. A probabilistic false-positive model is a different treatment from a set of possible interpretations. The analyst should choose the treatment supported by the evidence process and preserve its assumptions.
+
+\section{Why some ambiguity does not disappear}
+A long sequence of reports can remain uninformative about a parameter. In the rate example, if fixed and floating rates coincide throughout the observed period, additional interest totals may never distinguish the contract types. Sample size alone does not resolve an unidentified direction.
+
+The set-identification analysis of \citet[Sections 2.1--2.3]{giacomini2021} separates parameters identified by the observable law from aspects of the prior that data cannot revise. The accounting application is conditional: one must first establish which observations depend on which hidden quantities. It is not enough to invoke a general consistency slogan and expect all uncertainty to vanish.
+
+Persistent ambiguity can also become irrelevant to one query without being resolved. After final repayment, the old rate clause may no longer affect future cash. It may still matter for explaining historical interest, estimating management behavior or evaluating a counterfactual refinancing decision. Removing it from an active cash-flow state is different from asserting that the evidence identified it.
+
+\section{Managers need not share the analyst's ignorance}
+Public disclosures may leave $\theta$ unknown to an analyst even though management signed the contract. A management policy can legitimately depend on that private fact. If managers refinance only floating-rate debt after a rate shock, their actions differ across histories that the analyst cannot distinguish. That is not foresight; it is a specified information advantage.
+
+Let $I_t^a$ denote actor $a$'s information history and let $\pi_t^a$ map it to a decision. Then
+\begin{equation}
+ a_t^a=\pi_t^a(I_t^a).
+ \label{sim:actor-policy}
+\end{equation}
+Two simulated worlds with the same $I_t^a$ must receive the same action under a deterministic policy. For a randomized policy, they must receive the same conditional action distribution. The simulator's access to hidden state does not entitle the actor to use it.
+
+Different actors can have different information. A lender may observe covenant certificates before public investors. A subsidiary may know its operating cash before a parent receives a report. A regulator may receive nonpublic prudential data. The model should specify these information channels where they affect behavior; assuming universal knowledge can make financing appear available too early.
+
+\section{A simple foresight counterexample}
+A manager must choose at date zero between two production plans. Plan A yields 10 if next year's demand is high and zero if low. Plan B yields 6 in either state. Assume high and low demand are equally likely and the manager learns demand only after choosing. The expected values are 5 and 6, so the expected-value policy selects B.
+
+A simulator that first draws demand and then chooses the best plan in that realized world obtains 10 in the high state and 6 in the low state, averaging 8. It has valued perfect advance information. The arithmetic is correct for a different decision problem. The target problem permits an average of 6.
+
+The discrepancy is not repaired by drawing more scenarios. It is caused by an information violation. A nonanticipativity check must require the same date-zero action across worlds sharing date-zero information. In a tree formulation this often appears as equality constraints on decisions at indistinguishable nodes. In a symbolic representation it can be enforced by restricting the policy's inputs.
+
+\section{Signals can have economic value}
+Suppose the manager can pay 1 at date zero for a perfectly informative demand signal before selecting A or B. With the signal the gross expected payoff is 8 and the net payoff is 7. Without it the payoff is 6. The signal is worth 2 gross and 1 net in this example. These calculations use a declared distribution and feasible action set.
+
+The same logic applies to obtaining a debt schedule before committing liquidity, but real disclosures may be noisy, delayed or nonpublic. A signal's value depends on whether the actor can act after receiving it and whether the relevant action remains feasible. A maturity note arriving after repayment cannot improve that repayment decision, even if it improves a retrospective explanation.
+
+Without probabilities, one can compare worst-case payoffs or regret before and after a partition of the family. The result is not an expected value of information. An interface should name the criterion because different criteria can recommend different research priorities.
+
+\section{Simulated learning does not revise actual evidence}
+A scenario may include a hypothetical disclosure at a future date. Inside that run, an actor updates its information and changes its action. The hypothetical report must not enter the analyst's actual evidence store as a fact. Otherwise running a scenario can contaminate later reconstructions with imagined information.
+
+Separate identifiers should distinguish actual source assertions, simulated observations and analyst assumptions. A scenario observation can refer to the source model that generated it and to the hidden state of that run. It cannot acquire the authority of a filed report merely because its text looks like one.
+
+The distinction also matters for conversational systems. An explanation generated from a selected witness should say that it is one compatible history. If the explanation is later ingested as evidence without its conditional status, a possible event becomes a purported fact. Provenance and type checks should prevent that feedback.
+
+\section{Learning can change the appropriate compression}
+Two histories may have equal current cash and equal next-period payments, yet differ in the chance of a revealing report. If the report affects a later refinancing choice, their future decision values can differ. A merge based only on current accounting totals discards this difference.
+
+Suppose two contract states both pay 5 next year. In one state, a scheduled certificate will reveal a restrictive covenant before the next refinancing date; in the other, no such information arrives. If management or lenders condition their offers on that certificate, equal immediate cash does not imply equal future financing. The observation process belongs in the transition model used for compression.
+
+This is why exact aggregation later requires equality of the joint law of successor state, observations and requested outputs for each allowed action. Preserving a marginal cash distribution is too weak. A graph may share current arithmetic while retaining separate information states for future decisions.
+
+\input{simulation/lit-03-learning-2}
+
+\input{simulation/lit-03-learning-11}
+
+\section{A proposed information service}
+AccDSL should represent evidence views and actor information views separately. An evidence view selects actual assertions by availability, revision and scope. An actor view specifies observable state variables, private contractual facts and signal channels at each decision date. Policies receive only that view and permitted memory.
+
+Forward execution first applies events available at the current boundary, constructs observations, updates the relevant information state, and then permits decisions according to the stated timing. Alternative orderings are possible, but they must be explicit and tested. Moving a decision across an observation boundary changes the economic problem.
+
+The service should refuse ambiguous timing where it affects the answer. It can still return a conditional comparison of both orderings. Such a comparison is preferable to silently selecting whichever ordering makes the simulation easier. Exact timestamps, time zones and publication lags matter when events occur on the same calendar date.
+
+\section{Tests that discriminate information errors}
+A useful test duplicates a world, changes an unobserved future shock and confirms that the current action remains unchanged. Another changes a privately known contract term and confirms that an informed manager's policy may change while a public analyst's evidence view does not. A third inserts a later restatement and checks that an earlier frozen forecast remains reproducible.
+
+These are semantic tests. They do not require a fitted behavioral model. They establish that information restrictions are implemented as specified. Whether a particular manager actually follows the chosen policy is a separate empirical question. Keeping that distinction prevents a passing information test from being presented as behavioral validation.
+
+A final test removes all informative observations and confirms that persistent uncertainty remains. A system that gradually collapses to a single history merely because a particle filter resampled or an optimizer selected one witness has confused computational concentration with evidence. The retained family and the approximation used for calculation must remain distinguishable.

@@ -1,0 +1,6681 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "SchemaLock": {
+      "type": "object",
+      "properties": {
+        "schema_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "semantic_contract_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "format": {
+          "const": "jsonschema2020-12"
+        }
+      },
+      "required": [
+        "schema_blob",
+        "semantic_contract_blob",
+        "format"
+      ],
+      "additionalProperties": false
+    },
+    "OperationSignature": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "profile_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Profile"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment-exact-time.profile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "arguments_definition": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "payload_kinds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 1
+        },
+        "effects": {
+          "enum": [
+            "read",
+            "candidate",
+            "review_transaction",
+            "accounting_transaction",
+            "migration_transaction",
+            "import_transaction",
+            "candidate_or_checkpoint_transaction",
+            "checkpoint_transaction"
+          ]
+        }
+      },
+      "required": [
+        "operation",
+        "profile_ref",
+        "arguments_definition",
+        "payload_kinds",
+        "effects"
+      ],
+      "additionalProperties": false
+    },
+    "Environment": {
+      "type": "object",
+      "properties": {
+        "purpose": {
+          "const": "documentary_fixture"
+        },
+        "numerics": {
+          "const": "exact_rational"
+        },
+        "runtime_executed": {
+          "const": false
+        }
+      },
+      "required": [
+        "purpose",
+        "numerics",
+        "runtime_executed"
+      ],
+      "additionalProperties": false
+    },
+    "Decoder": {
+      "type": "object",
+      "properties": {
+        "media_type": {
+          "const": "application/json"
+        },
+        "canonical_encoding": {
+          "const": "accdsl.portable.v1"
+        }
+      },
+      "required": [
+        "media_type",
+        "canonical_encoding"
+      ],
+      "additionalProperties": false
+    },
+    "Submission": {
+      "type": "object",
+      "properties": {
+        "blob_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "media_type": {
+          "const": "application/json"
+        },
+        "transport": {
+          "const": "authored_fixture"
+        },
+        "decoder_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Decoder"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.decoder.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "blob_ref",
+        "media_type",
+        "transport",
+        "decoder_ref"
+      ],
+      "additionalProperties": false
+    },
+    "OperationResult": {
+      "type": "object",
+      "properties": {
+        "submission_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Submission"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.submission.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "request_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "OperationRequest"
+                },
+                "schema": {
+                  "const": "accdsl.bank-assessment-exact-time.operationrequest.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_view_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "View"
+                },
+                "schema": {
+                  "const": "accdsl.bank-assessment.view.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disposition": {
+          "enum": [
+            "completed",
+            "partial",
+            "rejected",
+            "unsupported",
+            "cancelled",
+            "replayed"
+          ]
+        },
+        "statuses": {
+          "type": "object",
+          "properties": {
+            "structural_validity": {
+              "enum": [
+                "valid",
+                "invalid"
+              ]
+            },
+            "mathematical_status": {
+              "enum": [
+                "defined",
+                "unresolved",
+                "undefined",
+                "infeasible",
+                "not_applicable"
+              ]
+            },
+            "computation_status": {
+              "enum": [
+                "complete",
+                "partial",
+                "not_computed",
+                "cancelled"
+              ]
+            },
+            "empirical_justification": {
+              "const": "not_established"
+            },
+            "capability_status": {
+              "const": "specified_only_no_runtime"
+            },
+            "accounting_validity": {
+              "const": "not_assessed"
+            },
+            "forecast_validity": {
+              "const": "not_assessed"
+            },
+            "product_readiness": {
+              "const": "not_implemented"
+            },
+            "human_acceptance": {
+              "const": "pending"
+            }
+          },
+          "required": [
+            "structural_validity",
+            "mathematical_status",
+            "computation_status",
+            "empirical_justification",
+            "capability_status",
+            "accounting_validity",
+            "forecast_validity",
+            "product_readiness",
+            "human_acceptance"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "result_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "additional_commit": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "tag",
+                "result_refs",
+                "additional_commit"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "stage": {
+                "type": "string",
+                "minLength": 1
+              },
+              "record_ref": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source_locator": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "field_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "affected_query_branch_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "minItems": 0
+              },
+              "dependency_path": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                    },
+                    "schema": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "schema",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0
+              },
+              "observed": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retry_advice": {
+                "type": "string",
+                "minLength": 1
+              },
+              "blocking_diagnostic_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "code",
+              "stage",
+              "record_ref",
+              "source_locator",
+              "field_path",
+              "affected_query_branch_ids",
+              "dependency_path",
+              "observed",
+              "expected_rule",
+              "retry_advice",
+              "blocking_diagnostic_ids"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "coverage": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "domain_ref": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "Domain"
+                    },
+                    "schema": {
+                      "const": "accdsl.bank-assessment-exact-time.domain.v1"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "schema",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                },
+                "completed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.bank-assessment-exact-time.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "unresolved": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.bank-assessment-exact-time.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "unsupported": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.bank-assessment-exact-time.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "infeasible": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.bank-assessment-exact-time.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "cancelled": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.bank-assessment-exact-time.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "relation": {
+                  "const": "disjoint_exhaustive"
+                }
+              },
+              "required": [
+                "domain_ref",
+                "completed",
+                "unresolved",
+                "unsupported",
+                "infeasible",
+                "cancelled",
+                "relation"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Obligation"
+              },
+              "schema": {
+                "const": "accdsl.bank-assessment.obligation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "continuation_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Checkpoint"
+                },
+                "schema": {
+                  "const": "accdsl.bank-assessment.checkpoint.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "commit_observation": {
+          "enum": [
+            "committed",
+            "not_committed",
+            "unknown"
+          ]
+        },
+        "receipt_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_mode": {
+          "const": "specification_example"
+        }
+      },
+      "required": [
+        "submission_ref",
+        "request_ref",
+        "operation",
+        "input_view_ref",
+        "disposition",
+        "statuses",
+        "payload",
+        "diagnostics",
+        "coverage",
+        "unresolved",
+        "continuation_ref",
+        "commit_observation",
+        "receipt_ref",
+        "evidence_mode"
+      ],
+      "additionalProperties": false
+    },
+    "TransportObservation": {
+      "type": "object",
+      "properties": {
+        "submission_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Submission"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.submission.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment-exact-time.operationrequest.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "observation": {
+          "const": "acknowledgement_timeout"
+        },
+        "commit_observation": {
+          "const": "unknown"
+        },
+        "receipt_ref": {
+          "type": "null"
+        },
+        "next_action": {
+          "const": "resubmit_exact_original_request"
+        }
+      },
+      "required": [
+        "submission_ref",
+        "request_ref",
+        "observation",
+        "commit_observation",
+        "receipt_ref",
+        "next_action"
+      ],
+      "additionalProperties": false
+    },
+    "Profile": {
+      "type": "object",
+      "properties": {
+        "profile_id": {
+          "const": "BankAssessmentExactTime/1"
+        },
+        "schema_lock_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "SchemaLock"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.schemalock.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "bank.regulatory.assess@1",
+              "bank.loss.query@1",
+              "bank.policy.describe@1"
+            ]
+          },
+          "minItems": 3
+        },
+        "execution_mode": {
+          "const": "specification_example"
+        },
+        "accounting_effect": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "profile_id",
+        "schema_lock_ref",
+        "operations",
+        "execution_mode",
+        "accounting_effect"
+      ],
+      "additionalProperties": false
+    },
+    "Context": {
+      "type": "object",
+      "properties": {
+        "bank_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "book_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "perimeter_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "unit": {
+          "const": "million"
+        },
+        "accounting_basis": {
+          "const": "US_GAAP_CECL_supplied"
+        },
+        "jurisdiction": {
+          "const": "US_national_bank"
+        }
+      },
+      "required": [
+        "bank_id",
+        "book_id",
+        "perimeter_id",
+        "currency",
+        "unit",
+        "accounting_basis",
+        "jurisdiction"
+      ],
+      "additionalProperties": false
+    },
+    "Evidence": {
+      "type": "object",
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ingested_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "measurement_asof": {
+          "type": "string",
+          "format": "date"
+        },
+        "content_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "provenance": {
+          "enum": [
+            "synthetic_supplied",
+            "historical_source"
+          ]
+        }
+      },
+      "required": [
+        "evidence_id",
+        "available_at",
+        "ingested_at",
+        "measurement_asof",
+        "content_blob",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    "View": {
+      "type": "object",
+      "properties": {
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Evidence"
+              },
+              "schema": {
+                "const": "accdsl.bank-assessment.evidence.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "decision_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "system_asof": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mode": {
+          "const": "historical_information"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "supersedes_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "View"
+                },
+                "schema": {
+                  "const": "accdsl.bank-assessment.view.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "evidence_refs",
+        "decision_at",
+        "system_asof",
+        "mode",
+        "revision",
+        "supersedes_ref"
+      ],
+      "additionalProperties": false
+    },
+    "SourceSupport": {
+      "type": "object",
+      "properties": {
+        "raw_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "text_blob": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "blob"
+                },
+                "algorithm": {
+                  "const": "sha256"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "byte_length": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "kind",
+                "algorithm",
+                "digest",
+                "byte_length"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "source_role": {
+          "enum": [
+            "historical_rule",
+            "older_ordering_crosscheck",
+            "method_semantics"
+          ]
+        },
+        "snapshot": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "raw_blob",
+        "text_blob",
+        "method_blob",
+        "anchors",
+        "source_role",
+        "snapshot"
+      ],
+      "additionalProperties": false
+    },
+    "RulePackage": {
+      "type": "object",
+      "properties": {
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "SourceSupport"
+              },
+              "schema": {
+                "const": "accdsl.bank-assessment.sourcesupport.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "snapshot": {
+          "const": "2026-01-01"
+        },
+        "law_mode": {
+          "const": "scenario_frozen_not_actual_applicability"
+        },
+        "method_version": {
+          "const": "US_restricted_ordinary_bank_v1"
+        }
+      },
+      "required": [
+        "source_refs",
+        "snapshot",
+        "law_mode",
+        "method_version"
+      ],
+      "additionalProperties": false
+    },
+    "Applicability": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "institution": {
+          "const": "ordinary_national_bank"
+        },
+        "exclusions": {
+          "type": "object",
+          "properties": {
+            "subsidiaries": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "advanced_approaches": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "category_iii": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "market_risk": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "cblr": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "supervisory_adjustment": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "cecl_transition": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "aoci": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "own_capital": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "financial_institution_capital": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "deferred_taxes": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "other_intangibles": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "pension_asset": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "securitization": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "atrr": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            },
+            "off_balance_credit": {
+              "enum": [
+                "absent",
+                "present",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "subsidiaries",
+            "advanced_approaches",
+            "category_iii",
+            "market_risk",
+            "cblr",
+            "supervisory_adjustment",
+            "cecl_transition",
+            "aoci",
+            "own_capital",
+            "financial_institution_capital",
+            "deferred_taxes",
+            "other_intangibles",
+            "pension_asset",
+            "securitization",
+            "atrr",
+            "off_balance_credit"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "institution",
+        "exclusions"
+      ],
+      "additionalProperties": false
+    },
+    "StockEligibility": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "conditions": {
+          "type": "object",
+          "properties": {
+            "condition_1": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_2": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_3": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_4": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_5": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_6": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_7": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_8": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_9": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_10": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_11": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_12": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            },
+            "condition_13": {
+              "enum": [
+                "satisfied",
+                "failed",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "condition_1",
+            "condition_2",
+            "condition_3",
+            "condition_4",
+            "condition_5",
+            "condition_6",
+            "condition_7",
+            "condition_8",
+            "condition_9",
+            "condition_10",
+            "condition_11",
+            "condition_12",
+            "condition_13"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "conditions"
+      ],
+      "additionalProperties": false
+    },
+    "ExposureClassification": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "reserve_venue": {
+          "enum": [
+            "federal_reserve",
+            "commercial_bank",
+            "unknown"
+          ]
+        },
+        "loan_class": {
+          "enum": [
+            "ordinary_performing_nonPCD_corporate",
+            "PCD",
+            "nonaccrual",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "reserve_venue",
+        "loan_class"
+      ],
+      "additionalProperties": false
+    },
+    "AllowanceAdmission": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "all_eligible_aacl": {
+          "enum": [
+            "yes",
+            "no",
+            "unknown"
+          ]
+        },
+        "measurement": {
+          "const": "supplied_not_estimated"
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "all_eligible_aacl",
+        "measurement"
+      ],
+      "additionalProperties": false
+    },
+    "DeductionAdmission": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "goodwill_without_dtl": {
+          "enum": [
+            "yes",
+            "no",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "goodwill_without_dtl"
+      ],
+      "additionalProperties": false
+    },
+    "AverageAssets": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "period_start": {
+          "type": "string",
+          "format": "date"
+        },
+        "period_end_exclusive": {
+          "type": "string",
+          "format": "date"
+        },
+        "measure_kind": {
+          "enum": [
+            "regulatory_average_total_assets",
+            "period_end_total_assets"
+          ]
+        },
+        "amount": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "period_start",
+        "period_end_exclusive",
+        "measure_kind",
+        "amount"
+      ],
+      "additionalProperties": false
+    },
+    "FundingFacility": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "limit": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "availability": {
+          "const": "supplied_available_not_estimated"
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "limit",
+        "availability"
+      ],
+      "additionalProperties": false
+    },
+    "AccountingEvent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "loan.originate"
+            },
+            "amount": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "method_id",
+            "amount",
+            "event_date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "loan.external"
+            },
+            "amount": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "method_id",
+            "amount",
+            "event_date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "income.receive"
+            },
+            "amount": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "method_id",
+            "amount",
+            "event_date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "deposits.interest"
+            },
+            "amount": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "method_id",
+            "amount",
+            "event_date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "allowance.measure"
+            },
+            "amount": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "method_id",
+            "amount",
+            "event_date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "income.close"
+            },
+            "amount": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "method_id",
+            "amount",
+            "event_date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "funding.draw"
+            },
+            "amount": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "method_id",
+            "amount",
+            "event_date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method_id": {
+              "const": "deposits.runoff"
+            },
+            "amount": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "method_id",
+            "amount",
+            "event_date"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "AccountingState": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "facility_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "FundingFacility"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.fundingfacility.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "opening_asof_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "as_of_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "opening_balances": {
+          "type": "object",
+          "properties": {
+            "cash": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "loans": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "goodwill": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "allowance": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "deposits": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "borrowing": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "stock": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "retained": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "interest_income": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "deposit_expense": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "loss_expense": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "cash",
+            "loans",
+            "goodwill",
+            "allowance",
+            "deposits",
+            "borrowing",
+            "stock",
+            "retained",
+            "interest_income",
+            "deposit_expense",
+            "loss_expense"
+          ],
+          "additionalProperties": false
+        },
+        "event_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "AccountingEvent"
+              },
+              "schema": {
+                "const": "accdsl.bank-assessment.accountingevent.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "posted_journals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event_ref": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "AccountingEvent"
+                  },
+                  "schema": {
+                    "const": "accdsl.bank-assessment.accountingevent.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "lines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "account": {
+                      "enum": [
+                        "cash",
+                        "loans",
+                        "goodwill",
+                        "allowance",
+                        "deposits",
+                        "borrowing",
+                        "stock",
+                        "retained",
+                        "interest_income",
+                        "deposit_expense",
+                        "loss_expense"
+                      ]
+                    },
+                    "signed_amount": {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "account",
+                    "signed_amount"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "event_ref",
+              "lines"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "balances": {
+          "type": "object",
+          "properties": {
+            "cash": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "loans": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "goodwill": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "allowance": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "deposits": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "borrowing": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "stock": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "retained": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "interest_income": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "deposit_expense": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            "loss_expense": {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "cash",
+            "loans",
+            "goodwill",
+            "allowance",
+            "deposits",
+            "borrowing",
+            "stock",
+            "retained",
+            "interest_income",
+            "deposit_expense",
+            "loss_expense"
+          ],
+          "additionalProperties": false
+        },
+        "unpaid_withdrawal": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "frozen_head_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "facility_ref",
+        "opening_asof_date",
+        "as_of_date",
+        "sequence",
+        "opening_balances",
+        "event_refs",
+        "posted_journals",
+        "balances",
+        "unpaid_withdrawal",
+        "frozen_head_id"
+      ],
+      "additionalProperties": false
+    },
+    "AssessmentBasis": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "state_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AccountingState"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.accountingstate.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "rule_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "RulePackage"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.rulepackage.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "applicability_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Applicability"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.applicability.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "eligibility_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "StockEligibility"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.stockeligibility.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "exposure_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ExposureClassification"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.exposureclassification.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "allowance_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AllowanceAdmission"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.allowanceadmission.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "deduction_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "DeductionAdmission"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.deductionadmission.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "average_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "AverageAssets"
+                },
+                "schema": {
+                  "const": "accdsl.bank-assessment.averageassets.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assessment_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "period_start": {
+          "type": "string",
+          "format": "date"
+        },
+        "period_end_exclusive": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "context_ref",
+        "state_ref",
+        "view_ref",
+        "rule_ref",
+        "applicability_ref",
+        "eligibility_ref",
+        "exposure_ref",
+        "allowance_ref",
+        "deduction_ref",
+        "average_ref",
+        "assessment_date",
+        "period_start",
+        "period_end_exclusive"
+      ],
+      "additionalProperties": false
+    },
+    "RegulatoryAssessment": {
+      "type": "object",
+      "properties": {
+        "basis_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AssessmentBasis"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.assessmentbasis.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "amounts": {
+          "type": "object",
+          "properties": {
+            "book_equity": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "gross_loans": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "allowance": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "goodwill": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "cap_base": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "cap": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "admitted_allowance": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "excess_allowance": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "rwa": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "cet1": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "tier1": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "tier2": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "total_capital": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "leverage_denominator": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "book_equity",
+            "gross_loans",
+            "allowance",
+            "goodwill",
+            "cap_base",
+            "cap",
+            "admitted_allowance",
+            "excess_allowance",
+            "rwa",
+            "cet1",
+            "tier1",
+            "tier2",
+            "total_capital",
+            "leverage_denominator"
+          ],
+          "additionalProperties": false
+        },
+        "ratios": {
+          "type": "object",
+          "properties": {
+            "cet1_ratio": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "numerator": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "denominator": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "numerator",
+                "denominator",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "tier1_ratio": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "numerator": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "denominator": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "numerator",
+                "denominator",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "total_ratio": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "numerator": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "denominator": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "numerator",
+                "denominator",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            },
+            "leverage_ratio": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "resolved",
+                    "unresolved",
+                    "undefined"
+                  ]
+                },
+                "numerator": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "denominator": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  "minItems": 0
+                },
+                "dependency_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "status",
+                "numerator",
+                "denominator",
+                "value",
+                "diagnostics",
+                "dependency_refs"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "cet1_ratio",
+            "tier1_ratio",
+            "total_ratio",
+            "leverage_ratio"
+          ],
+          "additionalProperties": false
+        },
+        "distribution_permission": {
+          "const": "unresolved_not_assessed"
+        },
+        "minimum_ratio_verdict": {
+          "const": "not_assessed"
+        },
+        "accounting_effect": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "basis_ref",
+        "amounts",
+        "ratios",
+        "distribution_permission",
+        "minimum_ratio_verdict",
+        "accounting_effect"
+      ],
+      "additionalProperties": false
+    },
+    "Vintage": {
+      "type": "object",
+      "properties": {
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "vintage_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "as_of_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "supersedes_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Vintage"
+                },
+                "schema": {
+                  "const": "accdsl.bank-assessment.vintage.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "evidence_ref",
+        "vintage_id",
+        "as_of_date",
+        "supersedes_ref"
+      ],
+      "additionalProperties": false
+    },
+    "JointLaw": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "vintage_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Vintage"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.vintage.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "origin_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "horizon_end_exclusive": {
+          "type": "string",
+          "format": "date"
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cell_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "default_date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ead": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              },
+              "lgd": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              },
+              "cash_shortfall": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              },
+              "discount_factor": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "cell_id",
+              "default_date",
+              "ead",
+              "lgd",
+              "cash_shortfall",
+              "discount_factor"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "support_status": {
+          "const": "complete_finite_synthetic"
+        },
+        "dependence": {
+          "const": "joint_cells_no_factorization"
+        },
+        "target": {
+          "const": "economic_discounted_cash_shortfall_not_accounting_allowance"
+        }
+      },
+      "required": [
+        "context_ref",
+        "evidence_ref",
+        "vintage_ref",
+        "origin_date",
+        "horizon_end_exclusive",
+        "cells",
+        "support_status",
+        "dependence",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "Measure": {
+      "type": "object",
+      "properties": {
+        "law_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "JointLaw"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.jointlaw.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "mode": {
+          "enum": [
+            "point_law",
+            "law_family",
+            "unweighted_histories"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "law_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "weights": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "law_id",
+              "weights"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "family_status": {
+          "const": "complete_declared_finite_family"
+        }
+      },
+      "required": [
+        "law_ref",
+        "mode",
+        "candidates",
+        "family_status"
+      ],
+      "additionalProperties": false
+    },
+    "Condition": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "all",
+            "survived_through"
+          ]
+        },
+        "survived_through": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Evidence"
+                },
+                "schema": {
+                  "const": "accdsl.bank-assessment.evidence.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "survived_through",
+        "evidence_ref"
+      ],
+      "additionalProperties": false
+    },
+    "LossQuery": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "measure_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Measure"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.measure.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "condition_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Condition"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.condition.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "origin_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "default_window_start": {
+          "type": "string",
+          "format": "date"
+        },
+        "default_window_end_exclusive": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "context_ref",
+        "view_ref",
+        "measure_ref",
+        "condition_ref",
+        "origin_date",
+        "default_window_start",
+        "default_window_end_exclusive"
+      ],
+      "additionalProperties": false
+    },
+    "LossQueryResult": {
+      "type": "object",
+      "properties": {
+        "query_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "LossQuery"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.lossquery.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "law_results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "law_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "status": {
+                "enum": [
+                  "resolved",
+                  "unresolved"
+                ]
+              },
+              "conditioning_mass": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              },
+              "conditional_weights": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0
+              },
+              "expected_loss": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "diagnostic": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "law_id",
+              "status",
+              "conditioning_mass",
+              "conditional_weights",
+              "expected_loss",
+              "diagnostic"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "possible_losses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "n": {
+                "type": "string",
+                "pattern": "^(0|-?[1-9][0-9]*)$"
+              },
+              "d": {
+                "type": "string",
+                "pattern": "^[1-9][0-9]*$"
+              }
+            },
+            "required": [
+              "n",
+              "d"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "expectation_status": {
+          "enum": [
+            "resolved",
+            "set_valued",
+            "unresolved"
+          ]
+        },
+        "expectation_values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "n": {
+                "type": "string",
+                "pattern": "^(0|-?[1-9][0-9]*)$"
+              },
+              "d": {
+                "type": "string",
+                "pattern": "^[1-9][0-9]*$"
+              }
+            },
+            "required": [
+              "n",
+              "d"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "lower": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "n": {
+                  "type": "string",
+                  "pattern": "^(0|-?[1-9][0-9]*)$"
+                },
+                "d": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "n",
+                "d"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bounds_target": {
+          "enum": [
+            "expectation_over_candidate_laws",
+            "possible_history_losses",
+            "undefined"
+          ]
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 0
+        },
+        "accounting_allowance_claim": {
+          "const": false
+        },
+        "dependency_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "schema": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "query_ref",
+        "law_results",
+        "possible_losses",
+        "expectation_status",
+        "expectation_values",
+        "lower",
+        "upper",
+        "bounds_target",
+        "diagnostics",
+        "accounting_allowance_claim",
+        "dependency_refs"
+      ],
+      "additionalProperties": false
+    },
+    "PolicySpecification": {
+      "type": "object",
+      "properties": {
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Evidence"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.evidence.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "loss_result_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "LossQueryResult"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.lossqueryresult.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "objective": {
+          "const": "maximize_cash_after_contractual_settlement"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "kind": {
+                "enum": [
+                  "fixed_book",
+                  "contractual_runoff",
+                  "secured_draw"
+                ]
+              },
+              "limit": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "action_id",
+              "kind",
+              "limit"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "actual_settlements_only": {
+              "const": true
+            },
+            "no_fabricated_investor": {
+              "const": true
+            },
+            "respect_facility_limit": {
+              "const": true
+            },
+            "distribution_permission": {
+              "enum": [
+                "unknown",
+                "supplied_separately"
+              ]
+            }
+          },
+          "required": [
+            "actual_settlements_only",
+            "no_fabricated_investor",
+            "respect_facility_limit",
+            "distribution_permission"
+          ],
+          "additionalProperties": false
+        },
+        "tie_break": {
+          "const": "lexicographic_action_id"
+        },
+        "failure_behavior": {
+          "const": "record_policy_failure_or_legal_default"
+        },
+        "calibration_status": {
+          "const": "not_calibrated"
+        }
+      },
+      "required": [
+        "context_ref",
+        "view_ref",
+        "evidence_ref",
+        "loss_result_ref",
+        "objective",
+        "actions",
+        "constraints",
+        "tie_break",
+        "failure_behavior",
+        "calibration_status"
+      ],
+      "additionalProperties": false
+    },
+    "PolicyQueryResult": {
+      "type": "object",
+      "properties": {
+        "policy_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "PolicySpecification"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.policyspecification.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "objective": {
+          "const": "maximize_cash_after_contractual_settlement"
+        },
+        "action_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 1
+        },
+        "tie_break": {
+          "const": "lexicographic_action_id"
+        },
+        "selected_action": {
+          "const": null
+        },
+        "feasibility_status": {
+          "const": "not_evaluated"
+        },
+        "distribution_permission": {
+          "const": "unresolved_not_assessed"
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 1
+        },
+        "accounting_effect": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "policy_ref",
+        "objective",
+        "action_ids",
+        "tie_break",
+        "selected_action",
+        "feasibility_status",
+        "distribution_permission",
+        "diagnostics",
+        "accounting_effect"
+      ],
+      "additionalProperties": false
+    },
+    "QueryPublicationReceipt": {
+      "type": "object",
+      "properties": {
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment-exact-time.operationrequest.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "output_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "const": "query_published"
+        },
+        "accounting_effect": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "request_ref",
+        "output_ref",
+        "status",
+        "accounting_effect"
+      ],
+      "additionalProperties": false
+    },
+    "Domain": {
+      "type": "object",
+      "properties": {
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment-exact-time.operationrequest.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "meaning": {
+          "const": "singleton_request_decision"
+        }
+      },
+      "required": [
+        "request_ref",
+        "meaning"
+      ],
+      "additionalProperties": false
+    },
+    "Region": {
+      "type": "object",
+      "properties": {
+        "domain_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Domain"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment-exact-time.domain.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "predicate": {
+          "const": "this_request"
+        }
+      },
+      "required": [
+        "domain_ref",
+        "predicate"
+      ],
+      "additionalProperties": false
+    },
+    "Obligation": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "required_input": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "code",
+        "required_input",
+        "query_ref"
+      ],
+      "additionalProperties": false
+    },
+    "OperationRequest": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "enum": [
+            "bank.regulatory.assess@1",
+            "bank.loss.query@1",
+            "bank.policy.describe@1"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "workspace_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "profile_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Profile"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment-exact-time.profile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "signature_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationSignature"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment-exact-time.operationsignature.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "arguments": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "bank.regulatory.assess@1"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "basis_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "AssessmentBasis"
+                        },
+                        "schema": {
+                          "const": "accdsl.bank-assessment.assessmentbasis.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "require_current": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "basis_ref",
+                    "require_current"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "bank.loss.query@1"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "query_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "LossQuery"
+                        },
+                        "schema": {
+                          "const": "accdsl.bank-assessment.lossquery.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "require_current": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "query_ref",
+                    "require_current"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "bank.policy.describe@1"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "policy_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "PolicySpecification"
+                        },
+                        "schema": {
+                          "const": "accdsl.bank-assessment.policyspecification.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "require_current": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "policy_ref",
+                    "require_current"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "execution": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "const": "specification_example"
+            },
+            "budget": {
+              "type": "object",
+              "properties": {
+                "operation_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "elapsed_seconds": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "operation_count",
+                "elapsed_seconds"
+              ],
+              "additionalProperties": false
+            },
+            "environment_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Environment"
+                },
+                "schema": {
+                  "const": "accdsl.bank-assessment.environment.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "mode",
+            "budget",
+            "environment_ref"
+          ],
+          "additionalProperties": false
+        },
+        "expected_head": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "owner_key": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "state_ref": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "AccountingState"
+                    },
+                    "schema": {
+                      "const": "accdsl.bank-assessment.accountingstate.v1"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "schema",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                },
+                "generation": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "owner_key",
+                "state_ref",
+                "generation"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "operation",
+        "request_id",
+        "workspace_key",
+        "profile_ref",
+        "signature_ref",
+        "view_ref",
+        "arguments",
+        "execution",
+        "expected_head"
+      ],
+      "additionalProperties": false
+    },
+    "Arguments.bank.regulatory.assess@1": {
+      "type": "object",
+      "properties": {
+        "basis_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "AssessmentBasis"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.assessmentbasis.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "require_current": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "basis_ref",
+        "require_current"
+      ],
+      "additionalProperties": false
+    },
+    "Arguments.bank.loss.query@1": {
+      "type": "object",
+      "properties": {
+        "query_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "LossQuery"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.lossquery.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "require_current": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_ref",
+        "require_current"
+      ],
+      "additionalProperties": false
+    },
+    "Arguments.bank.policy.describe@1": {
+      "type": "object",
+      "properties": {
+        "policy_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "PolicySpecification"
+            },
+            "schema": {
+              "const": "accdsl.bank-assessment.policyspecification.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "require_current": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "policy_ref",
+        "require_current"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "schema_ids": {
+    "SchemaLock": "accdsl.bank-assessment.schemalock.v1",
+    "OperationSignature": "accdsl.bank-assessment-exact-time.operationsignature.v1",
+    "Environment": "accdsl.bank-assessment.environment.v1",
+    "Decoder": "accdsl.bank-assessment.decoder.v1",
+    "Submission": "accdsl.bank-assessment.submission.v1",
+    "OperationResult": "accdsl.bank-assessment-exact-time.operationresult.v1",
+    "TransportObservation": "accdsl.bank-assessment-exact-time.transportobservation.v1",
+    "Profile": "accdsl.bank-assessment-exact-time.profile.v1",
+    "Context": "accdsl.bank-assessment.context.v1",
+    "Evidence": "accdsl.bank-assessment.evidence.v1",
+    "View": "accdsl.bank-assessment.view.v1",
+    "SourceSupport": "accdsl.bank-assessment.sourcesupport.v1",
+    "RulePackage": "accdsl.bank-assessment.rulepackage.v1",
+    "Applicability": "accdsl.bank-assessment.applicability.v1",
+    "StockEligibility": "accdsl.bank-assessment.stockeligibility.v1",
+    "ExposureClassification": "accdsl.bank-assessment.exposureclassification.v1",
+    "AllowanceAdmission": "accdsl.bank-assessment.allowanceadmission.v1",
+    "DeductionAdmission": "accdsl.bank-assessment.deductionadmission.v1",
+    "AverageAssets": "accdsl.bank-assessment.averageassets.v1",
+    "FundingFacility": "accdsl.bank-assessment.fundingfacility.v1",
+    "AccountingEvent": "accdsl.bank-assessment.accountingevent.v1",
+    "AccountingState": "accdsl.bank-assessment.accountingstate.v1",
+    "AssessmentBasis": "accdsl.bank-assessment.assessmentbasis.v1",
+    "RegulatoryAssessment": "accdsl.bank-assessment.regulatoryassessment.v1",
+    "Vintage": "accdsl.bank-assessment.vintage.v1",
+    "JointLaw": "accdsl.bank-assessment.jointlaw.v1",
+    "Measure": "accdsl.bank-assessment.measure.v1",
+    "Condition": "accdsl.bank-assessment.condition.v1",
+    "LossQuery": "accdsl.bank-assessment.lossquery.v1",
+    "LossQueryResult": "accdsl.bank-assessment.lossqueryresult.v1",
+    "PolicySpecification": "accdsl.bank-assessment.policyspecification.v1",
+    "PolicyQueryResult": "accdsl.bank-assessment.policyqueryresult.v1",
+    "QueryPublicationReceipt": "accdsl.bank-assessment-exact-time.querypublicationreceipt.v1",
+    "Domain": "accdsl.bank-assessment-exact-time.domain.v1",
+    "Region": "accdsl.bank-assessment-exact-time.region.v1",
+    "Obligation": "accdsl.bank-assessment.obligation.v1",
+    "OperationRequest": "accdsl.bank-assessment-exact-time.operationrequest.v1",
+    "Arguments.bank.regulatory.assess@1": "accdsl.bank-assessment.arguments.bank.regulatory.assess@1.v1",
+    "Arguments.bank.loss.query@1": "accdsl.bank-assessment.arguments.bank.loss.query@1.v1",
+    "Arguments.bank.policy.describe@1": "accdsl.bank-assessment.arguments.bank.policy.describe@1.v1"
+  }
+}

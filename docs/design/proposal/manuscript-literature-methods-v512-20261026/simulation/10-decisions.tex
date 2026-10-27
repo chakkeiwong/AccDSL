@@ -1,0 +1,114 @@
+\chapter[Decisions under ambiguity]{Decisions when probabilities and histories remain ambiguous}
+\label{sim:decisions}
+
+A simulator can describe possible consequences without selecting an action. A decision method needs an objective, a feasible policy class and a treatment of uncertainty. These are substantive choices. Worst-case liquidity, expected shareholder value and minimax regret answer different questions. No accounting identity selects among them. When uncertainty persists over time, the choice also determines how plans respond to new information.
+
+\section{Evaluation before optimization}
+For a fixed policy $\pi$, let $V(\pi,h,s)$ be a defined payoff or cost. It may be terminal cash, discounted owner distributions, service continuity or another quantity. Its units and horizon should be stated. Combining several objectives requires weights or constraints that should remain visible.
+
+Evaluating a supplied policy is often the safest first task. It separates economic mechanics from policy selection. Once those mechanics are checked, optimization can search over an admissible class. A numerical optimizer should not be allowed to choose actions outside contractual rights or use information unavailable to the actor.
+
+The distinction also helps interpret historical behavior. A policy that would maximize a modeled objective need not describe what management actually did. Simulation under that policy is a normative or counterfactual exercise unless behavioral evidence supports its use as a forecast.
+
+\section{Expected value under a declared measure}
+If a joint probability measure $P$ is admitted, a policy can be evaluated by $\mathbb E_P[V(\pi,H,S)]$. The distribution must preserve dependence between history, shocks and signals. A posterior over report-compatible histories is one possible input, but its prior and likelihood assumptions remain part of the result.
+
+If two histories have equal likelihood under all retained evidence, their posterior odds depend on prior odds. More observations of the same uninformative kind do not remove that dependence. The robust Bayesian analysis of \citet{giacomini2021} makes this issue explicit for set-identified models. Its application here motivates sensitivity to unresolved prior choices, not an automatic probability for each journal.
+
+A report can show policy rankings under several admitted priors. If every prior gives the same ranking, that conclusion is more robust to the specified ambiguity. If rankings differ, a single average conceals a material decision sensitivity. The next useful evidence may be the fact that distinguishes those priors' consequences.
+
+\section{Worst-case evaluation}
+For an unweighted feasible family $\mathcal U$, a robust payoff is
+\begin{equation}
+ W(\pi)=\inf_{u\in\mathcal U}V(\pi,u).
+\end{equation}
+A maximin policy maximizes $W$. This criterion protects against the worst admitted case. Its conservatism depends on the family and objective. If the family includes implausible combinations introduced by a loose relaxation, the policy may respond to a company that cannot exist.
+
+Robust feasibility is often more interpretable than robust optimization of a single scalar. For example, require every admitted history to maintain cash above zero, then compare expected or conditional costs among feasible policies. If no policy satisfies the requirement, the result should identify the conflicting cases or needed assumptions. It should not silently shrink the family until feasibility appears.
+
+A worst-case result does not need probabilities, but it does need a defensible scope. An unlimited shock set can make every policy fail. That may reveal a badly posed decision problem rather than an economic conclusion. Bounds on shocks and actions require provenance and sensitivity analysis.
+
+\section{Regret compares actions within the same world}
+Regret measures the loss relative to the best feasible action for the same realized world. For a one-time action $a$, define
+\begin{equation}
+ R(a,u)=\sup_{b\in A}V(b,u)-V(a,u).
+\end{equation}
+Minimax regret chooses the action with the smallest worst regret. The comparator uses the same $u$, so it should not combine an optimistic world for one action with a pessimistic world for another.
+
+Consider two actions and two states with payoffs $A=(10,0)$ and $B=(6,6)$. Maximin selects B because its minimum is 6 rather than zero. Statewise best payoffs are $(10,6)$, so regrets are $A=(0,6)$ and $B=(4,0)$; minimax regret also selects B here. Other payoff tables can separate the criteria. Agreement in one example does not establish equivalence.
+
+In sequential settings, the hindsight comparator may use information the actual actor did not have. That can be intentional in regret analysis, but it must be stated. A claim about implementable policy improvement should compare policies under the same information restrictions.
+
+\section{Multiple priors}
+A set $\mathcal P$ of probability measures can represent ambiguity about a stochastic model. A lower expected payoff is
+\begin{equation}
+ \underline V(\pi)=\inf_{P\in\mathcal P}\mathbb E_P[V(\pi)].
+\end{equation}
+This differs from an unweighted family of deterministic worlds. A prior set can retain restrictions on event probabilities, dependence and learning. Replacing it by all distributions over its support generally enlarges ambiguity and can change the decision.
+
+A singleton prior set reduces to ordinary expected value. A set containing every point mass over a finite family reduces lower expectation to the minimum payoff over that family. Intermediate sets express intermediate restrictions. The representation should preserve which restrictions came from evidence and which express preferences or modeling caution.
+
+Updating each prior by Bayes' rule requires positive conditioning probabilities or a declared extension for null events. Removing priors solely because they yield inconvenient decisions changes the ambiguity model. A likelihood-based restriction can be justified under a specified method, but should not be confused with an arbitrary pruning heuristic.
+
+\section{Why dynamic consistency matters}
+A policy selected today may cease to be preferred tomorrow after information arrives. Some changes are rational responses to information. Others arise because the decision criterion evaluates future uncertainty differently from the original plan. To model behavior, one must specify whether the actor commits to the original policy or reoptimizes.
+
+\citet[Definition 3.1 and Theorem 3.2]{epstein2002preprint} connects recursive multiple-priors preferences, dynamic consistency and rectangular prior sets under its stated axioms and information filtration. Rectangularity permits specified combinations of one-step marginals and conditional distributions. It is a substantive restriction on the prior family relative to information, not a harmless implementation trick.
+
+The source's theorem is not a statement that every economically natural uncertainty set is rectangular. Nor does it authorize changing a fixed unknown contract at each date. Applying a recursive worst-case operator without examining the allowed cross-time combinations can solve a different decision problem.
+
+\section{A concrete pasting counterexample}
+Consider two dates of losses and a hidden type $\theta$ that remains fixed. If $\theta=A$, losses are $(0,10)$. If $\theta=B$, they are $(10,0)$. The total loss is 10 in either type. Thus the worst total loss over the original two-world family is 10.
+
+If a stagewise procedure independently selects the larger loss at each date, it constructs $(10,10)$ and reports total loss 20. That path is absent from the original family. The procedure has allowed the adversary to switch type across dates. It computes a worst case over an enlarged family.
+
+Calling the enlarged result conservative does not make it equal to the original target. It may be useful as an outer bound, but the target must be labeled. Retaining $\theta$ in the state prevents the unintended switch. This simple example is the deterministic analogue of the dependence issues that rectangularity addresses for prior sets.
+
+\section{Rectangular enlargement changes the model}
+A rectangular hull can facilitate recursive evaluation by admitting combinations of conditionals that were not jointly present in the original prior set. The source explicitly discusses enlargement and its relation to the information structure. In an economic application, added combinations may represent an adversary whose choices adapt over time.
+
+If the original ambiguity concerns one fixed but unknown loan contract, allowing adaptive adversarial changes to that contract is usually a different physical model. One can retain the contract type as part of the state and formulate conditional uncertainty appropriately. If a robust policy intentionally protects against changing terms, those changes should be modeled as amendments, refinancing or legal events.
+
+AccDSL should therefore record whether a robust method uses the original joint ambiguity set, a rectangular enlargement or a commitment formulation. The result should compare the enlargement's effect on important outputs where feasible. A convenient Bellman recursion does not justify hiding that change.
+
+\section{Commitment and reoptimization}
+A commitment policy is selected at the initial date as a full rule for future information histories. A reoptimizing actor selects a new continuation policy at each date. These can differ under nonrectangular ambiguity or changing preferences. The simulator should not alternate between them silently.
+
+For a treasury policy approved by a board, some actions may be committed while others remain discretionary. A hedge may be binding after execution; a future dividend target may be revisable. The feasible policy class should represent these commitments. Reoptimizing an already executed hedge as though it never occurred gives the actor an unavailable option.
+
+A useful analysis can compare commitment and reoptimization explicitly. Differences then reveal the value or cost of flexibility under the chosen uncertainty model. They should not be attributed solely to forecasting skill.
+
+\section{Distributional ambiguity and historical ambiguity}
+Uncertainty about which debt contract exists differs from uncertainty about next year's demand distribution. Both can enter a decision, but they should retain separate origins. A contract family may be constrained by notes; a demand ambiguity set may be estimated from data or chosen for stress robustness.
+
+Combining them independently can be unjustified if financing structure and demand exposure are related. The joint ambiguity set should preserve known dependence. Conversely, imposing a relation merely because it makes optimization easier can exclude valid histories. The default should be explicit uncertainty, not an invented joint law.
+
+A layered result can report policy performance conditional on contract region and across demand models. This makes it possible to ask whether better contract evidence or better demand estimation would change the decision. A single blended uncertainty score obscures that distinction.
+
+\section{Risk constraints and probability thresholds}
+A chance constraint such as $P(C_t<0)\leq\epsilon$ requires a probability model and a specified time event. A bound on failure at each date differs from a bound on failure at any date. Summing marginal probabilities gives a union bound, not generally the exact path probability.
+
+If failure events are strongly dependent, treating them as independent can distort the probability of ever breaching. Persistent contract uncertainty is one source of this dependence. A company with a floating loan may remain vulnerable in every high-rate period; redrawing the type can alter duration and clustering.
+
+A robust chance constraint requires the probability bound under every measure in an admitted set. It is stronger than a constraint under an averaged measure. Numerical estimation must account for sampling error near the threshold. A point estimate just below the limit is not sufficient evidence of compliance.
+
+\section{Value of information under ambiguity}
+A proposed disclosure partitions the history family. Under a probability model, expected information value compares optimized expected payoffs before and after the signal, accounting for its cost and timing. Under maximin or regret, the criterion changes. Information can matter because it enables different feasible actions in different regions.
+
+A signal that arrives after a financing commitment may have little operational value even if it greatly narrows a posterior. A signal about an irrelevant parameter may reduce statistical uncertainty without changing decisions. The useful target is the decision consequence, not entropy reduction alone.
+
+Without defensible probabilities, one can report the range of improvements across possible signal outcomes and criteria. A guaranteed improvement may be zero even when some outcomes are valuable. This is a meaningful conclusion and avoids assigning probabilities merely to produce an expected number.
+
+\section{Selecting a method for a user question}
+For disclosure explanation, preserve possible and certain answers. For a supplied stress, evaluate conditional mechanics. For planning under an admitted distribution, estimate expected values and relevant risks. For a safety requirement across compatible histories, use robust feasibility and bounds. For competing actions without probabilities, consider dominance and explicitly chosen robust or regret criteria.
+
+Dominance is particularly useful: if one feasible policy performs at least as well in every admitted world and strictly better in some, it can be preferred under many monotone criteria. If policies cross, the choice depends on preferences or probability assumptions. The simulator should show that dependence rather than invent a universal ranking.
+
+A method-selection interface should ask for a criterion only when the user has requested a decision that the evidence alone cannot determine. It can still complete mechanical comparisons and identify dominant or infeasible options. This preserves progress while keeping value judgments explicit.
+
+\section{Implementation and validation}
+A decision record should specify actor, objective, information, feasible actions, uncertainty set or measure, commitment convention, horizon and terminal treatment. Terminal assumptions matter: liquidating assets at book value at the horizon can create an artificial reward and change earlier decisions.
+
+Small exact finite examples should compare direct policy enumeration with recursive methods. Include the fixed-type pasting counterexample, an information-revelation example, a capacity-constrained financing example and a case where expected value and robust choice disagree. These fixtures discriminate semantic errors before expensive numerical optimization.
+
+Passing them establishes the specified criterion and timing mechanics. It does not establish that the criterion describes management or that the uncertainty set is empirically adequate. Those remain separate assumptions or research questions. The system can support several methods without declaring one a universal default.

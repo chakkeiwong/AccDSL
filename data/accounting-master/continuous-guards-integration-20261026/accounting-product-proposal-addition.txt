@@ -1,0 +1,292 @@
+PAGE 141
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+119
+17.7
+Integer quantities and minimum lots
+Shares, bond lots and physical units may be discrete. If a company needs net cash 10 and
+shares sell for 3 with no fees, a continuous calculation requires 10/3 shares. If only whole shares
+can be issued, four shares raise 12. The excess cash and dilution are real consequences of the
+lot constraint.
+A minimum issuance size can make a small funding need expensive or infeasible. A fixed fee
+can make splitting one issue into two change net proceeds. These effects break the proportional
+invariance that holds for a simple linear loan.
+The model should specify whether quantities are continuous approximations or exact units. For
+large public share counts, a continuous approximation may be immaterial for some queries. For
+a closely held company or indivisible asset, it may dominate the decision. The approximation
+needs a bound tied to the question.
+17.8
+Branch-and-bound interpretation
+A mixed discrete-continuous family can be explored through bounds on regions. If a region’s
+best possible result cannot improve the incumbent for an optimization query, it can be pruned
+under the method’s correctness conditions. If a region is infeasible, it can be removed with
+evidence.
+Pruning for computational convenience is different. A low-probability region cannot be removed
+from a worst-case query merely because it is unlikely. A region far from current data may still
+be admissible if the observation model permits it. The pruning reason belongs in the result
+record.
+For a safety query, an outer lower cash bound above the requirement can close a region as safe.
+A feasible witness below it establishes possible failure. Regions whose bounds straddle the
+threshold remain unresolved and receive refinement priority. This approach can concentrate
+work where it changes the answer.
+The procedure may still face exponential growth. Resource exhaustion should preserve the
+incumbent witnesses, certified bounds and unresolved regions. Reporting only the best found
+point hides the remaining uncertainty and can reverse the meaning of a worst-case result.
+17.9
+Sensitivity of identified sets
+A small source revision can change a feasible family discontinuously when constraints meet at a
+boundary. Suppose exact observations require x = 1 and an interpretation requires x ≤1. The
+family is nonempty. Revising the observation to x = 1.001 makes it empty if no tolerance or
+other interpretation is admitted.
+This does not mean the company changed abruptly. It may reveal that exact equality was too
+strong for a rounded report. Observation precision and numerical tolerance should be audited
+before interpreting a discontinuity economically.
+Conversely, a small genuine change can cross a contractual threshold and have a large effect.
+Smoothing it away would hide a real mechanism. The analyst must distinguish measurement
+uncertainty from contractual discontinuity. Both can occur near the same number but require
+different treatment.
+A useful sensitivity report varies source precision, interpretation choices and economic shocks
+
+
+PAGE 142
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+120
+separately. It identifies whether a conclusion is driven by evidence, modeling assumptions or a
+threshold in the contract. This is more informative than a single generic tolerance parameter.
+17.10
+A bounded implementation profile
+An initial exact profile can support rational linear constraints, finite interpretation choices
+and piecewise affine event rules. It can return feasible witnesses, exact or certified bounds,
+and guarded outcome formulas. Nonlinear valuation and unsupported clauses remain explicit
+extensions.
+The profile should reject incompatible units, unbound variables and missing event premises before
+solving. It should preserve unknown amounts as variables with justified domains. Arbitrary
+large bounds inserted to make a solver finite should be labeled as computational assumptions
+and tested for sensitivity.
+A later nonlinear profile can use interval methods, constrained optimization or sampling, but
+must retain the original query target and distinguish local from global results. A local minimum
+of cash is not a global worst case. A successful solver exit code is not a proof of completeness.
+The practical advantage of a bounded profile is that its claims can be checked. It does not
+redefine the whole mission to exclude difficult contracts. Instead, it provides a reliable core and
+a precise account of which additional methods are needed for broader company simulation.
+17.11
+Sharing a rate family without sharing away a borrowing
+right
+Return to the capped floating coupon, but now ask whether the company can pay it. The
+company starts with cash of 5.5, other assets of 94.5 and debt of 100. Its equity is initially zero.
+One admissible history has a fixed coupon of 5; another has the floating coupon
+I(r) = 100 min{0.06, max{0.03, r}},
+r ∈[0.02, 0.08].
+(17.3)
+At the earlier observed rate of five per cent, both histories report interest of 5. A later rate of
+six per cent separates them: fixed interest stays at 5 while floating interest reaches 6. A journal
+history that retains only the earlier interest amount cannot answer the new payment question.
+Each history also has two possible contractual interpretations. A committed facility may be
+available, or no facility may be available. In this stipulated example the facility lends 1, charges
+an immediate fee of 0.25 and can be drawn only when interest exceeds 5.5. These terms define
+a small test case; they are not inferred from the earlier statements. The four combinations of
+coupon type and facility availability remain separate possibilities. No probability is attached to
+them.
+There is one decision date. Interest accrues before the decision, and the manager submits either
+a payment order or a combined draw-and-pay order. These are indivisible instructions. An
+instruction that fails a prerequisite is refused. Contingent instructions, such as draw only if the
+bank permits it, would enlarge the action set and require a fresh analysis.
+17.11.1
+The amount and the right determine different conditions
+A payment order requires enough existing cash. A draw-and-pay order requires the contractual
+right, the strict trigger and enough cash after the fee. Write b = 1 when the facility is committed
+
+
+PAGE 143
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+121
+and b = 0 otherwise. Feasibility is therefore
+pay:
+5.5 −I ≥0,
+(17.4)
+draw and pay:
+b = 1,
+I > 5.5,
+5.5 + 1 −0.25 −I ≥0.
+(17.5)
+Because interest never exceeds 6, an eligible draw leaves at least 0.25 cash. At interest exactly
+5.5, ordinary payment remains possible and the draw is forbidden. Replacing the strict trigger
+with a weak inequality would change the contract at that point. At interest 6, the two facility
+interpretations have identical interest amounts but different feasible actions: the committed
+company can draw, while the company without the facility can execute neither order.
+Accrual is independent of that execution result. The company first debits interest expense and
+credits interest payable by I. If payment refuses, cash remains 5.5 and interest payable remains
+I; equity has fallen to −I. A failed payment does not erase the expense or the creditor’s claim.
+If payment succeeds, it removes the payable and cash becomes 5.5 −I. If the draw succeeds,
+borrowing adds 1 of cash and debt, the fee reduces cash and equity by 0.25, and payment
+removes the payable. The resulting balance sheet satisfies
+(6.25 −I) + 94.5
+|
+{z
+}
+assets
+= 101
+|{z}
+debt
++ (−I −0.25)
+|
+{z
+}
+equity
+.
+(17.6)
+These journal rules are supplied premises for the example. They demonstrate how refusal and
+contractual memory enter the comparison; they do not determine a reporting treatment for an
+actual instrument.
+17.11.2
+A continuous comparison can be exhaustive
+For floating debt, the coupon changes formula at rates 0.03 and 0.06, and the payment trigger
+changes at 0.055. Suppose also that a coarse signal tells the manager whether the rate is at
+most 0.04. The six points
+0.02,
+0.03,
+0.04,
+0.055,
+0.06,
+0.08
+(17.7)
+then delimit every relevant change. Keep each point as a singleton and each interval between
+successive points as an open interval. The eleven resulting regions are disjoint and cover the
+entire closed rate domain. The fixed-coupon alternative can use fewer regions because it has no
+rate-dependent coupon or payment trigger.
+Within each open region, every financial amount is affine and every signal and eligibility condition
+is constant. Two implementations therefore agree throughout that region when their affine
+coefficients and discrete results agree. At singleton regions, compare their values directly. If one
+implementation uses a coarser partition, compare both on a common refinement and establish
+that each refined region lies entirely inside one region of each implementation. Sampling a
+midpoint can identify a known affine piece, but it cannot establish that the list of pieces is
+complete.
+The checked reference makes this comparison for the full journal, cash flows, balance sheet,
+payable, facility right, observations and action outcomes. Its independent comparator explicitly
+enumerates all coupon types, facility interpretations and the eleven rate regions. The smaller
+representation retains 32 mode-specific regions and shares 14 identical calculations. Every
+original mode and region still points to its calculation. These counts describe this example:
+sharing reduces duplicated results here, but supplies no general bound on memory use or
+runtime.
+
+
+PAGE 144
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+122
+Even this small construction exposed a consequential implementation mistake. Solving the
+draw-liquidity equation using the interior formula I = 100r gives a root at r = 0.0625. That
+formula applies only below the cap at 0.06. The root is irrelevant to the capped region and
+must not be inserted as though the interior formula still governed there. A root finder must
+check the domain of the formula that generated its candidate boundary.
+Open regions also require careful treatment of extrema. On 0.055 < r < 0.06, cash after drawing
+and paying is 6.25 −100r, so
+inf C = 0.25,
+sup C = 0.75.
+(17.8)
+Neither endpoint is attained within that open region. The point r = 0.06 attains cash 0.25,
+while r = 0.055 belongs to the ordinary-payment region. Reporting an interval without its
+endpoint status loses a distinction needed for strict contractual conditions.
+17.11.3
+Information can prevent an otherwise affordable action
+For the moment retain only histories with a committed facility. Every detailed history admits
+one of the two orders. This does not imply that the manager can select a feasible order using
+the information available at the decision date.
+Under the coarse signal, high means only that r > 0.04. It includes floating rates with interest
+below 5.5, where payment is possible but drawing is forbidden, and rates above 0.055, where
+drawing is possible but ordinary payment fails. The manager must issue the same order at
+indistinguishable histories. Neither order works throughout this signal class.
+Now suppose a second, explicit pre-decision signal reveals whether interest exceeds 5.5. The
+manager can pay when the trigger is false and draw and pay when it is true. This rule is feasible
+throughout the committed-facility family. Its feasibility comes from the additional information,
+not from a better numerical approximation. If unavailable facilities are restored to the family,
+some high-rate floating histories admit neither order. Even complete information cannot create
+borrowing capacity.
+The exact condition is elementary in this finite action setting. Let H(o) contain all retained
+histories with observation o, and let A(h) be the actions feasible at history h. A deterministic
+policy feasible throughout the family exists exactly when
+\
+h∈H(o)
+A(h) ̸= ∅
+for every observed class H(o).
+(17.9)
+Necessity follows because one observation selects one action, which must work at every compatible
+history. For sufficiency, choose an action from each nonempty intersection. The finite collection
+of signals then defines a total policy. This argument depends on the supplied observation
+map, two atomic orders and robust feasibility across the family. It is not a conclusion about
+contingent instructions or a probability-weighted objective.
+17.11.4
+What remains safe when calculation is unfinished
+A computation budget can stop evaluation of individual regions without removing them from
+the family. In the reference, the partition is constructed first and transitions are evaluated when
+requested. If only one region has been evaluated, the others remain explicitly unresolved. The
+coupon still has the valid outer bound 3 ≤I ≤6, but that bound alone does not identify a
+feasible payment policy. Eager construction of the partition itself can become expensive when
+more continuous variables or contractual alternatives are added.
+
+
+PAGE 145
+CHAPTER 17.
+CONTINUOUS FAMILIES AND EXACT BOUNDS
+123
+Approximation needs a separate justification. Suppose an independently established bound
+gives |I −bI| ≤ε throughout a region. A strict trigger I > K is certainly true when bI −ε > K,
+and certainly false when bI + ε ≤K. In the remaining band the bound permits both answers, so
+the region must be refined or left unresolved. The conclusion follows by comparing the entire
+allowed interval with K; sampled errors do not supply its uniform premise.
+Observation thresholds need their own error bounds. Preserving the interest trigger while
+changing which rate signal the manager sees can still change the feasible-policy set. A reused
+calculation must therefore retain its rate domain, contract interpretation, clause version, horizon,
+query, observation map, action class and precision. Changing any of these requires reconsidering
+the grouping. The example provides an exact one-rate, one-date reference for that discipline.
+Persistent hidden terms across several dates, higher-dimensional regions, nonlinear guards and
+defensible approximation bounds remain further method problems.1
+1The
+derivation
+and
+independently
+authored
+comparison
+are
+retained
+in
+data/accounting-master/
+continuous-guards-20261026/. The accepted result is in attempt-02/; the earlier failed partition and its repair
+remain available separately.
+
+
+PAGE 146
+Chapter 18
+Reference computations that
+distinguish a useful approximation
+from a wrong answer
+A method can be tested most clearly when a small version of its target is known exactly. This
+chapter constructs such targets for cash bounds, breach probabilities, policy comparison and
+residual minimization. The calculations are analytic reference cases. They are not a benchmark
+ranking and do not supply empirical evidence about a real company. Their role is to expose
+errors that a large simulation can conceal behind apparently stable averages.
+18.1
+An exact distribution from a declared prior
+Return to cash C = 90−2α, and now deliberately assume α is uniform on [0, 1]. This assumption
+is not inferred from the financial statements. It creates a transparent probabilistic reference.
+Cash is uniform on [88, 90], with mean 89 and variance 4/12 = 1/3.
+For a covenant requiring cash at least 89.4, breach occurs when α > 0.3. Its probability is 0.7.
+The expected cash conditional on breach is the mean of the interval [88, 89.4), namely 88.7.
+These quantities answer different questions: unconditional mean, breach frequency and severity
+conditional on breach.
+A simulation with the right mean but the wrong breach probability is not accurate for covenant
+analysis. For example, a two-point approximation placing equal mass at 88 and 90 has mean 89
+but breach probability one half. Matching the first moment does not preserve threshold events.
+The exact distribution also gives quantiles. Under the usual left-continuous generalized-inverse
+convention, the p-quantile is 88 + 2p for 0 < p < 1, with endpoint values defined by continuous
+extension. The convention should be explicit when discrete mass points are introduced, because
+quantile definitions can differ at jumps.
+18.2
+A discrete grid with known bias
+Approximate α by equally weighted midpoints (i −1/2)/n, for i = 1, . . . , n. The mean of the
+grid remains one half, so mean cash is exactly 89 for every n. Breach frequency is the fraction
+of midpoints above 0.3. For n = 4, midpoints are 0.125, 0.375, 0.625 and 0.875, giving breach
+probability 0.75.
+124

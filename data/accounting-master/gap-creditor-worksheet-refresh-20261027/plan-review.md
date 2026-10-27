@@ -1,0 +1,1 @@
+Skeptical audit: complete conditional separate-party accounts do not establish conversion-to-control acquisition methods. Integrate checked examples with exact source and assumption boundaries,then inspect consideration and pre-existing loan settlement. No global continuation veto; independent work preserved.

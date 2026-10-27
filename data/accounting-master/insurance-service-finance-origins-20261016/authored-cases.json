@@ -1,0 +1,793 @@
+{
+  "cases": [
+    {
+      "id": "loss-service-finance",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "loss_schedule",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "opening_date": "2025-01-01",
+          "cash": "200",
+          "liability": "100",
+          "loss_component": "20",
+          "findings": {
+            "proportional_allocation_supported": true,
+            "csm_zero": true,
+            "no_new_estimates": true,
+            "claim_ra_releases_supported": true,
+            "all_finance_in_profit": true,
+            "no_investment_or_acquisition_component": true
+          },
+          "periods": [
+            {
+              "date": "2026-01-01",
+              "information_date": "2026-01-01",
+              "finance_expense": "10",
+              "claim_release": "50",
+              "ra_release": "5",
+              "actual_claims": "50",
+              "coverage_end": false
+            },
+            {
+              "date": "2027-01-01",
+              "information_date": "2027-01-01",
+              "finance_expense": "-5",
+              "claim_release": "45",
+              "ra_release": "5",
+              "actual_claims": "45",
+              "coverage_end": true
+            }
+          ]
+        }
+      },
+      "expected": {
+        "total_service_profit": "10",
+        "total_finance_expense": "5",
+        "total_profit": "5",
+        "rows": [
+          {
+            "liability": "55",
+            "loss_component": "11",
+            "cash": "150",
+            "equity": "95",
+            "loss_finance": "2",
+            "claim_loss_release": "10",
+            "ra_loss_release": "1",
+            "loss_reversal": "11",
+            "revenue": "44",
+            "profit": "-5"
+          },
+          {
+            "liability": "0",
+            "loss_component": "0",
+            "cash": "105",
+            "equity": "105",
+            "loss_finance": "-1",
+            "claim_loss_release": "9",
+            "ra_loss_release": "1",
+            "loss_reversal": "10",
+            "revenue": "40",
+            "profit": "10"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zero-loss-boundary",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "loss_schedule",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "opening_date": "2025-01-01",
+          "cash": "200",
+          "liability": "100",
+          "loss_component": "0",
+          "findings": {
+            "proportional_allocation_supported": true,
+            "csm_zero": true,
+            "no_new_estimates": true,
+            "claim_ra_releases_supported": true,
+            "all_finance_in_profit": true,
+            "no_investment_or_acquisition_component": true
+          },
+          "periods": [
+            {
+              "date": "2026-01-01",
+              "information_date": "2026-01-01",
+              "finance_expense": "10",
+              "claim_release": "50",
+              "ra_release": "5",
+              "actual_claims": "50",
+              "coverage_end": false
+            },
+            {
+              "date": "2027-01-01",
+              "information_date": "2027-01-01",
+              "finance_expense": "-5",
+              "claim_release": "45",
+              "ra_release": "5",
+              "actual_claims": "45",
+              "coverage_end": true
+            }
+          ]
+        }
+      },
+      "expected": {
+        "total_profit": "5",
+        "rows": [
+          {
+            "loss_component": "0",
+            "loss_reversal": "0",
+            "revenue": "55",
+            "profit": "-5"
+          },
+          {
+            "loss_component": "0",
+            "loss_reversal": "0",
+            "revenue": "50",
+            "profit": "10"
+          }
+        ]
+      }
+    },
+    {
+      "id": "recovery-change-once",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "recovery_change",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "cash": "247/2",
+          "issued_claims": "118",
+          "issued_ra": "2",
+          "issued_loss": "20",
+          "covered_claims": "48",
+          "covered_loss": "8",
+          "quota": "1/2",
+          "held_ra": "1/2",
+          "held_cost_csm": "6",
+          "held_loss_recovery": "4",
+          "covered_claim_decrease": "4",
+          "findings": {
+            "timely_treaty": true,
+            "covered_loss_allocation_supported": true,
+            "zero_rates": true,
+            "no_other_changes": true,
+            "full_remaining_service": true,
+            "quota_terms_supported": true
+          }
+        }
+      },
+      "expected": {
+        "opening_equity": "34",
+        "total_profit": "-5/2",
+        "change": {
+          "issued_liability": "116",
+          "issued_loss": "16",
+          "held_asset": "57/2",
+          "held_cost_csm": "6",
+          "held_loss_recovery": "2",
+          "issued_loss_reversal": "4",
+          "held_profit": "-2",
+          "additional_component_expense": "0",
+          "equity": "36"
+        },
+        "issued_service": {
+          "revenue": "100",
+          "loss_reversal": "16",
+          "claim_expense": "114",
+          "profit": "2"
+        },
+        "held_service": {
+          "recovery": "22",
+          "premium_allocation": "53/2",
+          "loss_recovery_reversal": "2",
+          "profit": "-13/2"
+        },
+        "closing": {
+          "cash": "63/2",
+          "equity": "63/2",
+          "issued_liability": "0",
+          "held_asset": "0"
+        }
+      }
+    },
+    {
+      "id": "covered-loss-exhausted",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "recovery_change",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "cash": "247/2",
+          "issued_claims": "118",
+          "issued_ra": "2",
+          "issued_loss": "20",
+          "covered_claims": "48",
+          "covered_loss": "8",
+          "quota": "1/2",
+          "held_ra": "1/2",
+          "held_cost_csm": "6",
+          "held_loss_recovery": "4",
+          "covered_claim_decrease": "8",
+          "findings": {
+            "timely_treaty": true,
+            "covered_loss_allocation_supported": true,
+            "zero_rates": true,
+            "no_other_changes": true,
+            "full_remaining_service": true,
+            "quota_terms_supported": true
+          }
+        }
+      },
+      "expected": {
+        "total_profit": "-1/2",
+        "change": {
+          "issued_loss": "12",
+          "held_asset": "53/2",
+          "held_loss_recovery": "0",
+          "held_profit": "-4",
+          "additional_component_expense": "0",
+          "equity": "38"
+        },
+        "closing": {
+          "cash": "67/2",
+          "equity": "67/2"
+        }
+      }
+    },
+    {
+      "id": "matching-lower-current",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "policy_switch",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "date": "2025-01-01",
+          "old_policy": "88b",
+          "new_policy": "89b",
+          "terminal": "144",
+          "years": 2,
+          "old_current_rate": "1/10",
+          "old_allocation_rate": "1/5",
+          "old_allocation_carrying": "100",
+          "old_oci": "-2300/121",
+          "post_change_cash": "200",
+          "new_allocation_rate": null,
+          "periods": [
+            {
+              "date": "2026-01-01",
+              "information_date": "2026-01-01",
+              "current_liability": "130",
+              "asset_profit_income": "1440/121",
+              "asset_oci_income": "-10/11",
+              "actual_holdings": true,
+              "findings": {
+                "valuation_supported": true,
+                "all_changes_financial": true,
+                "no_interim_cash": true
+              }
+            },
+            {
+              "date": "2027-01-01",
+              "information_date": "2027-01-01",
+              "current_liability": "144",
+              "asset_profit_income": "1584/121",
+              "asset_oci_income": "10/11",
+              "actual_holdings": true,
+              "findings": {
+                "valuation_supported": true,
+                "all_changes_financial": true,
+                "no_interim_cash": true
+              }
+            }
+          ],
+          "findings": {
+            "direct_participation_at_origin": true,
+            "holding_change_supported": true,
+            "old_assumptions_supported": true,
+            "no_remaining_service_csm_ra": true,
+            "frozen_assumptions": true,
+            "comparatives_unchanged": true,
+            "post_change_cash_supported": true,
+            "underlying_measurement_supported": true
+          }
+        }
+      },
+      "expected": {
+        "initial_liability": "14400/121",
+        "total_profit": "-2300/121",
+        "total_oci": "2300/121",
+        "rows": [
+          {
+            "old_reclassification_expense": "980/121",
+            "old_oci": "-120/11",
+            "counterfactual_current": "1440/11",
+            "counterfactual_allocation": "120",
+            "current_profit_expense": "1440/121",
+            "current_oci": "10/11",
+            "profit": "-980/121"
+          },
+          {
+            "old_reclassification_expense": "120/11",
+            "old_oci": "0",
+            "new_oci": "0",
+            "asset_oci": "0",
+            "counterfactual_current": "144",
+            "counterfactual_allocation": "144",
+            "profit": "-120/11"
+          }
+        ],
+        "closing": {
+          "cash": "200",
+          "equity": "200",
+          "liability": "0",
+          "asset": "0"
+        }
+      }
+    },
+    {
+      "id": "matching-higher-current",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "policy_switch",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "date": "2025-01-01",
+          "old_policy": "88b",
+          "new_policy": "89b",
+          "terminal": "144",
+          "years": 2,
+          "old_current_rate": "1/10",
+          "old_allocation_rate": "1/5",
+          "old_allocation_carrying": "100",
+          "old_oci": "-2300/121",
+          "post_change_cash": "200",
+          "new_allocation_rate": null,
+          "periods": [
+            {
+              "date": "2026-01-01",
+              "information_date": "2026-01-01",
+              "current_liability": "132",
+              "asset_profit_income": "1440/121",
+              "asset_oci_income": "12/11",
+              "actual_holdings": true,
+              "findings": {
+                "valuation_supported": true,
+                "all_changes_financial": true,
+                "no_interim_cash": true
+              }
+            },
+            {
+              "date": "2027-01-01",
+              "information_date": "2027-01-01",
+              "current_liability": "144",
+              "asset_profit_income": "1584/121",
+              "asset_oci_income": "-12/11",
+              "actual_holdings": true,
+              "findings": {
+                "valuation_supported": true,
+                "all_changes_financial": true,
+                "no_interim_cash": true
+              }
+            }
+          ],
+          "findings": {
+            "direct_participation_at_origin": true,
+            "holding_change_supported": true,
+            "old_assumptions_supported": true,
+            "no_remaining_service_csm_ra": true,
+            "frozen_assumptions": true,
+            "comparatives_unchanged": true,
+            "post_change_cash_supported": true,
+            "underlying_measurement_supported": true
+          }
+        }
+      },
+      "expected": {
+        "initial_liability": "14400/121",
+        "total_profit": "-2300/121",
+        "total_oci": "2300/121",
+        "rows": [
+          {
+            "old_reclassification_expense": "980/121",
+            "old_oci": "-120/11",
+            "counterfactual_current": "1440/11",
+            "counterfactual_allocation": "120",
+            "current_profit_expense": "1440/121",
+            "current_oci": "-12/11",
+            "profit": "-980/121"
+          },
+          {
+            "old_reclassification_expense": "120/11",
+            "old_oci": "0",
+            "new_oci": "0",
+            "asset_oci": "0",
+            "counterfactual_current": "144",
+            "counterfactual_allocation": "144",
+            "profit": "-120/11"
+          }
+        ],
+        "closing": {
+          "cash": "200",
+          "equity": "200",
+          "liability": "0",
+          "asset": "0"
+        }
+      }
+    },
+    {
+      "id": "former-matching-runoff",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "policy_switch",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "date": "2025-01-01",
+          "old_policy": "89b",
+          "new_policy": "88b",
+          "terminal": "121",
+          "years": 2,
+          "old_current_rate": "0",
+          "old_allocation_rate": "1/10",
+          "old_allocation_carrying": "100",
+          "old_oci": "-21",
+          "post_change_cash": "200",
+          "new_allocation_rate": "0",
+          "periods": [
+            {
+              "date": "2026-01-01",
+              "information_date": "2026-01-01",
+              "current_liability": "130",
+              "asset_profit_income": "0",
+              "asset_oci_income": "0",
+              "actual_holdings": false,
+              "findings": {
+                "valuation_supported": true,
+                "all_changes_financial": true,
+                "no_interim_cash": true
+              }
+            },
+            {
+              "date": "2027-01-01",
+              "information_date": "2027-01-01",
+              "current_liability": "121",
+              "asset_profit_income": "0",
+              "asset_oci_income": "0",
+              "actual_holdings": false,
+              "findings": {
+                "valuation_supported": true,
+                "all_changes_financial": true,
+                "no_interim_cash": true
+              }
+            }
+          ],
+          "findings": {
+            "direct_participation_at_origin": true,
+            "holding_change_supported": true,
+            "old_assumptions_supported": true,
+            "no_remaining_service_csm_ra": true,
+            "frozen_assumptions": true,
+            "comparatives_unchanged": true,
+            "post_change_cash_supported": true,
+            "underlying_measurement_supported": true
+          }
+        }
+      },
+      "expected": {
+        "initial_liability": "121",
+        "total_profit": "-21",
+        "total_oci": "21",
+        "rows": [
+          {
+            "old_reclassification_expense": "10",
+            "old_oci": "-11",
+            "current_profit_expense": "0",
+            "current_oci": "-9",
+            "profit": "-10",
+            "oci": "1",
+            "equity": "70"
+          },
+          {
+            "old_reclassification_expense": "11",
+            "old_oci": "0",
+            "current_oci": "9",
+            "profit": "-11",
+            "oci": "20",
+            "equity": "79"
+          }
+        ],
+        "closing": {
+          "cash": "79",
+          "equity": "79",
+          "liability": "0"
+        }
+      }
+    },
+    {
+      "id": "derecognize-88b--1",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "derecognize",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "origin_policy": "88b",
+          "accumulated_oci": "-12",
+          "cash": "200",
+          "other_assets": "0",
+          "liability": "100",
+          "transfer_cash": "100",
+          "findings": {
+            "paragraph91_event": true,
+            "homogeneous_oci_origin": true,
+            "transfer_at_carrying": true,
+            "no_remaining_service_csm_ra": true,
+            "other_assets_unchanged": true,
+            "no_pending_policy_runoff": true
+          }
+        }
+      },
+      "expected": {
+        "profit_reclassification": "-12",
+        "oci_reclassification": "12",
+        "total_equity_change": "0",
+        "closing": {
+          "cash": "100",
+          "liability": "0",
+          "equity": "100",
+          "oci": "0"
+        }
+      }
+    },
+    {
+      "id": "derecognize-88b-1",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "derecognize",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "origin_policy": "88b",
+          "accumulated_oci": "12",
+          "cash": "200",
+          "other_assets": "0",
+          "liability": "100",
+          "transfer_cash": "100",
+          "findings": {
+            "paragraph91_event": true,
+            "homogeneous_oci_origin": true,
+            "transfer_at_carrying": true,
+            "no_remaining_service_csm_ra": true,
+            "other_assets_unchanged": true,
+            "no_pending_policy_runoff": true
+          }
+        }
+      },
+      "expected": {
+        "profit_reclassification": "12",
+        "oci_reclassification": "-12",
+        "total_equity_change": "0",
+        "closing": {
+          "cash": "100",
+          "liability": "0",
+          "equity": "100",
+          "oci": "0"
+        }
+      }
+    },
+    {
+      "id": "derecognize-89b--1",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "derecognize",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "origin_policy": "89b",
+          "accumulated_oci": "-12",
+          "cash": "200",
+          "other_assets": "0",
+          "liability": "100",
+          "transfer_cash": "100",
+          "findings": {
+            "paragraph91_event": true,
+            "homogeneous_oci_origin": true,
+            "transfer_at_carrying": true,
+            "no_remaining_service_csm_ra": true,
+            "other_assets_unchanged": true,
+            "no_pending_policy_runoff": true
+          }
+        }
+      },
+      "expected": {
+        "profit_reclassification": "0",
+        "oci_reclassification": "0",
+        "total_equity_change": "0",
+        "closing": {
+          "cash": "100",
+          "liability": "0",
+          "equity": "100",
+          "oci": "-12"
+        }
+      }
+    },
+    {
+      "id": "derecognize-89b-1",
+      "request": {
+        "wire": "InsuranceOrigins/1",
+        "operation": "derecognize",
+        "context": {
+          "entity": "Synthetic Insurer",
+          "group": "G1",
+          "currency": "CU",
+          "unit": "currency units",
+          "rule": "EU2023/1803-original-IFRS17"
+        },
+        "findings": {
+          "source_profile_applicable": true,
+          "opening_balances_supported": true,
+          "complete_events": true,
+          "information_view_valid": true,
+          "no_tax_fx_or_unrecorded_cash": true
+        },
+        "data": {
+          "origin_policy": "89b",
+          "accumulated_oci": "12",
+          "cash": "200",
+          "other_assets": "0",
+          "liability": "100",
+          "transfer_cash": "100",
+          "findings": {
+            "paragraph91_event": true,
+            "homogeneous_oci_origin": true,
+            "transfer_at_carrying": true,
+            "no_remaining_service_csm_ra": true,
+            "other_assets_unchanged": true,
+            "no_pending_policy_runoff": true
+          }
+        }
+      },
+      "expected": {
+        "profit_reclassification": "0",
+        "oci_reclassification": "0",
+        "total_equity_change": "0",
+        "closing": {
+          "cash": "100",
+          "liability": "0",
+          "equity": "100",
+          "oci": "12"
+        }
+      }
+    }
+  ]
+}

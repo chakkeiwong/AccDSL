@@ -1,0 +1,743 @@
+\chapter{IFRS Recognition and Measurement Mapping}
+\label{ch:ifrs}
+
+This chapter provides paragraph-level mapping between IFRS standards and AccDSL
+recognition, measurement, and presentation operations. It addresses the gap
+identified in v1.2 where only "orientation overviews" were used. Each mapping
+includes the standard paragraph reference, economic preconditions, accounting
+operation, state changes, and conformance tests.
+
+\section{Mapping methodology and authority}
+
+Every AccDSL accounting operation claimed to implement IFRS must provide:
+
+\begin{enumerate}
+\item \textbf{Standard reference:} IFRS/IAS number, paragraph(s), effective date,
+and any relevant amendments or interpretations (IFRIC/SIC).
+\item \textbf{Scope determination:} Which entity types, instruments, or transactions
+the operation applies to, with explicit out-of-scope cases.
+\item \textbf{Economic preconditions:} Contract terms, market conditions, or
+entity characteristics that must be verified before the rule applies.
+\item \textbf{Recognition criteria:} When an asset, liability, income, or expense
+is recognized, with timing and measurement basis.
+\item \textbf{Subsequent measurement:} Amortized cost, fair value through profit
+or loss (FVTPL), fair value through OCI (FVOCI), or other basis, with
+remeasurement triggers.
+\item \textbf{Presentation and disclosure:} Required line items, note schedules,
+and movement reconciliations.
+\item \textbf{Implementation contract:} AccDSL event types, rule signatures,
+state fields, and journal templates.
+\item \textbf{Conformance tests:} Worked examples with known inputs and expected
+outputs, including edge cases.
+\end{enumerate}
+
+\subsection{Authority and review status}
+
+The mappings in this chapter are based on:
+\begin{itemize}
+\item IFRS Standards consolidated text (Red Book 2024 edition) where accessible
+\item IFRS Foundation website official summaries and illustrative examples
+\item AASB texts incorporating IAS/IFRS with Australian-specific paragraphs noted
+\item Big Four firm technical guidance (PwC, Deloitte, EY, KPMG) for worked examples
+\end{itemize}
+
+\warn{Review status as of 5 October 2026:} This chapter provides design-level
+mapping. \textbf{Independent CPA/accounting-firm review is required} before any
+operation can be certified as IFRS-compliant. Current status is marked for each
+operation: \done{Reviewed}, \warn{Pending Review}, or \warn{Not Implemented}.
+
+\section{Financial instruments: IFRS 9}
+
+\subsection{Scope and classification (IFRS 9.2.1--9.4.3)}
+
+IFRS 9 applies to financial assets and financial liabilities, with specific scope
+exclusions for leases (IFRS 16), insurance contracts (IFRS 17), employee benefits
+(IAS 19), and equity instruments issued by the entity (IAS 32).
+
+\textbf{Classification decision tree:}
+
+\begin{enumerate}
+\item \textbf{Business model test (9.4.1):} How the entity manages financial assets:
+  \begin{itemize}
+  \item Hold to collect contractual cash flows $\Rightarrow$ amortized cost (if SPPI)
+  \item Hold to collect and sell $\Rightarrow$ FVOCI (if SPPI)
+  \item Other/trading $\Rightarrow$ FVTPL
+  \end{itemize}
+\item \textbf{Cash flow characteristics test (9.4.2, B4.1):} Solely payments of
+  principal and interest (SPPI):
+  \begin{itemize}
+  \item Plain vanilla loan/bond: SPPI satisfied
+  \item Equity-linked, commodity-linked, leveraged: SPPI fails $\Rightarrow$ FVTPL
+  \end{itemize}
+\item \textbf{Fair value option (9.4.4):} Entity may irrevocably designate as FVTPL
+  to eliminate accounting mismatch.
+\end{enumerate}
+
+\textbf{AccDSL implementation contract:}
+
+\begin{lstlisting}
+event ClassifyFinancialAsset(
+  instrument: Instrument,
+  business_model: Enum[HoldToCollect, HoldAndSell, Other],
+  sppi_test: Boolean,
+  fv_option_elected: Boolean
+) book EntityBook;
+
+rule ifrs9_classification for ClassifyFinancialAsset as e {
+  let category = match (e.business_model, e.sppi_test, e.fv_option_elected) {
+    (HoldToCollect, true, false) => AmortizedCost,
+    (HoldAndSell, true, false) => FVOCI,
+    (_, _, true) => FVTPL,
+    _ => FVTPL
+  };
+  update_instrument_measurement_category(e.instrument, category);
+  post { /* No immediate posting; affects subsequent measurement */ }
+}
+\end{lstlisting}
+
+\warn{Status: Pending Review.} Business-model assessment requires evidence of
+past sales, management intent, and performance evaluation. SPPI test for complex
+instruments (stepped interest, early-redemption features) requires detailed
+contractual analysis not fully implemented.
+
+\subsection{Initial recognition and measurement (IFRS 9.5.1.1)}
+
+Financial assets and liabilities are recognized when the entity becomes party to
+the contractual provisions. Initial measurement is at fair value plus (for assets
+not at FVTPL) transaction costs directly attributable to acquisition.
+
+\textbf{AccDSL implementation:}
+
+\begin{lstlisting}
+event AcquireFinancialAsset(
+  instrument: Instrument,
+  principal: Money<C>,
+  transaction_costs: Money<C>,
+  fair_value: Money<C>,
+  measurement_category: MeasurementCategory
+) book EntityBook;
+
+rule ifrs9_initial_recognition for AcquireFinancialAsset as e {
+  require e.principal > 0;
+  let initial_amount = match e.measurement_category {
+    AmortizedCost | FVOCI => e.fair_value + e.transaction_costs,
+    FVTPL => e.fair_value
+  };
+  post {
+    debit FinancialAsset[e.instrument] initial_amount;
+    credit Cash e.principal + e.transaction_costs;
+  }
+  // If e.principal != e.fair_value, recognize day-one gain/loss for FVTPL
+  if e.measurement_category == FVTPL && e.principal != e.fair_value {
+    let day_one_pnl = e.fair_value - e.principal;
+    post {
+      debit_or_credit PnL_FairValueGains day_one_pnl;
+    }
+  }
+}
+\end{lstlisting}
+
+\done{Status: Core logic reviewed.} Transaction-cost allocation for portfolios
+and embedded-derivative separation (9.4.3) require additional operations.
+
+\subsection{Effective interest method (IFRS 9.5.4.1, B5.4.1--B5.4.7)}
+
+For assets/liabilities at amortized cost or FVOCI, interest revenue/expense uses
+the effective interest rate (EIR) that discounts future cash flows to the initial
+carrying amount.
+
+\textbf{Mathematics:} For initial amount $A_0$ and cash flows $CF_t$ at times $t_i$,
+the EIR $r$ solves
+\begin{equation}
+A_0 = \sum_{i} \frac{CF_{t_i}}{(1+r)^{t_i}}.
+\end{equation}
+Interest revenue in period $[s,t)$ is $A_s \cdot r \cdot \Delta t$, where $\Delta t$
+is the accrual fraction. The carrying amount updates as $A_t = A_s(1+r)^{\Delta t} - CF_{[s,t)}$.
+
+\textbf{AccDSL implementation:}
+
+\begin{lstlisting}
+event AccrueInterest(
+  instrument: Instrument,
+  opening_carrying: Money<C>,
+  eir: Rate<effective>,
+  accrual_fraction: YearFraction
+) book EntityBook;
+
+rule ifrs9_effective_interest for AccrueInterest as e {
+  require e.eir > 0 per year;
+  let interest = e.opening_carrying * e.eir * e.accrual_fraction;
+  let rounded_interest = roundMoney(interest, currencyScale(C), "half_even");
+  post {
+    debit FinancialAsset[e.instrument] rounded_interest;
+    credit InterestRevenue rounded_interest;
+  }
+}
+\end{lstlisting}
+
+\done{Status: Reviewed.} Calculation correct for fixed cash flows. Variable-rate
+instruments require reset events. Credit-impaired assets (purchased or subsequent)
+use credit-adjusted EIR (9.5.4.1), which is a separate operation marked \warn{Not Implemented}.
+
+\subsection{Expected credit loss model (IFRS 9.5.5.1--9.5.5.20)}
+
+Impairment uses forward-looking expected credit losses (ECL). Three stages:
+
+\begin{enumerate}
+\item \textbf{Stage 1 (9.5.5.5):} 12-month ECL for assets without significant increase
+in credit risk since initial recognition.
+\item \textbf{Stage 2 (9.5.5.3):} Lifetime ECL for assets with significant credit
+deterioration but not credit-impaired.
+\item \textbf{Stage 3 (9.5.5.4):} Lifetime ECL for credit-impaired assets; interest
+on net carrying (gross less allowance).
+\end{enumerate}
+
+\textbf{Significant increase in credit risk (9.5.5.9--9.5.5.11):}
+\begin{itemize}
+\item Change in default risk over expected life (not merely incurred loss)
+\item Rebuttable presumption: $>30$ days past due
+\item Qualitative and quantitative factors
+\item Compare origination date and reporting date risk
+\end{itemize}
+
+\textbf{AccDSL implementation contract (simplified):}
+
+\begin{lstlisting}
+event MeasureECL(
+  cohort: LoanCohort,
+  stage: Enum[Stage1, Stage2, Stage3],
+  gross_carrying: Money<C>,
+  lifetime_pd: Real in [0,1],
+  twelve_month_pd: Real in [0,1],
+  lgd: Real in [0,1],
+  discount_rate: Rate<effective>
+) book EntityBook;
+
+rule ifrs9_ecl for MeasureECL as e {
+  let pd = if e.stage == Stage1 then e.twelve_month_pd else e.lifetime_pd;
+  let ead = e.gross_carrying; // Simplified; should include undrawn commitments
+  let expected_loss = ead * pd * e.lgd;
+  let discounted_loss = expected_loss / (1 + e.discount_rate);
+
+  let old_allowance = get_allowance(e.cohort);
+  let allowance_change = discounted_loss - old_allowance;
+
+  post {
+    debit CreditLossExpense allowance_change;
+    credit Allowance[e.cohort] allowance_change;
+  }
+}
+\end{lstlisting}
+
+\warn{Status: Not Implemented.} This is a simplified point estimate. Full implementation
+requires:
+\begin{itemize}
+\item Probability-weighted scenarios (9.5.5.18)
+\item Discounting to reporting date
+\item Forward-looking information incorporation (9.5.5.17)
+\item Staging transfers and their accounting effects
+\item Modified financial assets (9.5.4.3)
+\item Write-offs and subsequent recoveries (9.5.5.10)
+\end{itemize}
+
+\textbf{Conformance test needed:} IFRS 9 Implementation Guidance examples B5.5.40--B5.5.54,
+covering corporate bonds, trade receivables, and revolving facilities.
+
+\section{Financial instruments: IAS 32 presentation}
+
+\subsection{Liability vs. equity classification (IAS 32.11--32.23)}
+
+The issuer classifies an instrument as liability or equity based on substance,
+not legal form. A financial liability requires delivering cash or another financial
+asset, or exchanging under potentially unfavorable conditions. Equity is the
+residual after deducting liabilities.
+
+\textbf{Decision factors (IAS 32.16--32.20):}
+\begin{itemize}
+\item Contractual obligation to deliver cash: liability
+\item Settleable in entity's own equity at fixed number of shares for fixed cash: equity
+\item Settleable in variable number of shares to deliver fixed cash value: liability
+\item Discretionary dividends with no obligation: equity
+\item Contingent settlement provisions: assess whether within control
+\end{itemize}
+
+\textbf{Compound instruments (IAS 32.28--32.32, AG30--AG35):}
+
+An instrument with both liability and equity components (e.g., convertible bond)
+is split. The liability is measured first at present value of future cash flows;
+equity is the residual issue proceeds.
+
+\textbf{Example from Chapter 8 v1.2 (expanded):}
+
+Issue a 2-year bond for 100, paying annual coupons of 5, redeemable at 100 or
+convertible into 10 shares (holder's option). Comparable liability without
+conversion yields 10\%.
+
+\textbf{Calculation:}
+\begin{align}
+L_0 &= \frac{5}{1.1} + \frac{105}{1.1^2} = \frac{11050}{121} \approx 91.3223,\\
+E_0 &= 100 - L_0 \approx 8.6777.
+\end{align}
+
+\textbf{AccDSL implementation:}
+
+\begin{lstlisting}
+event IssueCompoundInstrument(
+  issue_proceeds: Money<C>,
+  coupon_schedule: CashFlowSchedule,
+  redemption_amount: Money<C>,
+  conversion_ratio: Quantity<shares>,
+  comparable_liability_rate: Rate<effective>
+) book EntityBook;
+
+rule ias32_compound_split for IssueCompoundInstrument as e {
+  let liability_pv = present_value(
+    e.coupon_schedule.append(e.redemption_amount),
+    e.comparable_liability_rate
+  );
+  require liability_pv <= e.issue_proceeds;
+
+  let equity_component = e.issue_proceeds - liability_pv;
+
+  post {
+    debit Cash e.issue_proceeds;
+    credit BondsPayable liability_pv;
+    credit EquityConversionOption equity_component;
+  }
+
+  record_conversion_terms(e.conversion_ratio, e.redemption_amount);
+}
+\end{lstlisting}
+
+\done{Status: Reviewed.} Covers vanilla convertible. More complex terms (adjustable
+conversion price, contingent conversion, embedded puts/calls) require additional
+analysis (AG31--AG35) marked \warn{Pending Review}.
+
+\subsection{Treasury shares (IAS 32.33--32.34)}
+
+If entity reacquires own equity instruments (treasury shares), the consideration
+paid reduces equity. No gain or loss in profit or loss.
+
+\textbf{AccDSL implementation:}
+
+\begin{lstlisting}
+event RepurchaseOwnShares(
+  quantity: Quantity<shares>,
+  cash_paid: Money<C>
+) book EntityBook;
+
+rule ias32_treasury for RepurchaseOwnShares as e {
+  require e.quantity > 0 shares;
+  post {
+    debit TreasuryStock e.cash_paid;
+    credit Cash e.cash_paid;
+  }
+  update_shares_outstanding(subtract: e.quantity);
+}
+\end{lstlisting}
+
+\done{Status: Reviewed.} Subsequent reissue (AG36) and cancellation (AG37) are
+separate operations marked \warn{Not Implemented}.
+
+\section{Revenue from contracts with customers: IFRS 15}
+
+IFRS 15 establishes a five-step model for revenue recognition.
+
+\subsection{The five steps (IFRS 15.9--15.72)}
+
+\begin{enumerate}
+\item \textbf{Identify the contract (15.9--15.21):} Approved, rights/obligations
+  identifiable, commercial substance, collectability probable.
+\item \textbf{Identify performance obligations (15.22--15.30):} Distinct goods/services
+  or series of distinct goods/services.
+\item \textbf{Determine transaction price (15.46--15.72):} Variable consideration,
+  significant financing, non-cash, consideration payable to customer.
+\item \textbf{Allocate price to performance obligations (15.73--15.90):} Relative
+  stand-alone selling prices, with adjustments for discounts and variable consideration.
+\item \textbf{Recognize revenue (15.31--15.45):} Over time (15.35--15.37) or at
+  a point in time (15.38).
+\end{enumerate}
+
+\subsection{Over-time recognition (IFRS 15.35--15.37, 15.39--15.45)}
+
+Revenue is recognized over time if one of:
+\begin{itemize}
+\item Customer simultaneously receives and consumes benefits (15.35(a))
+\item Entity's performance creates/enhances asset customer controls (15.35(b))
+\item Entity's performance creates asset with no alternative use and enforceable
+  right to payment for performance to date (15.35(c))
+\end{itemize}
+
+Progress measurement (15.39--15.45): output methods (surveys, units delivered)
+or input methods (costs incurred, labor hours).
+
+\textbf{AccDSL implementation (construction contract example):}
+
+\begin{lstlisting}
+event RecognizeRevenueOverTime(
+  contract: Contract,
+  performance_obligation: PerformanceObligation,
+  total_transaction_price: Money<C>,
+  progress_to_date: Real in [0,1],
+  costs_incurred_to_date: Money<C>,
+  contract_asset_opening: Money<C>,
+  billings_to_date: Money<C>
+) book EntityBook;
+
+rule ifrs15_over_time for RecognizeRevenueOverTime as e {
+  require e.progress_to_date >= 0 && e.progress_to_date <= 1;
+
+  let cumulative_revenue = e.total_transaction_price * e.progress_to_date;
+  let previously_recognized = get_cumulative_revenue(e.performance_obligation);
+  let current_period_revenue = cumulative_revenue - previously_recognized;
+
+  // Contract asset = cumulative revenue - cumulative billings
+  let contract_asset_closing = cumulative_revenue - e.billings_to_date;
+  let contract_asset_change = contract_asset_closing - e.contract_asset_opening;
+
+  post {
+    debit ContractAsset contract_asset_change;
+    credit Revenue current_period_revenue;
+  }
+
+  // Costs to fulfill (15.95--15.98) handled separately
+  post {
+    debit CostOfSales e.costs_incurred_to_date;
+    credit ConstructionInProgress e.costs_incurred_to_date;
+  }
+}
+\end{lstlisting}
+
+\warn{Status: Pending Review.} Simplified input-method example. Full implementation
+requires:
+\begin{itemize}
+\item Variable consideration constraints (15.56--15.58)
+\item Contract modifications (15.18--15.21)
+\item Onerous performance obligations (IAS 37)
+\item Contract costs capitalization (15.95--15.104)
+\item Principal vs. agent determination (15.B34--B38)
+\item Right-of-return estimation (15.B20--B27)
+\end{itemize}
+
+\section{Leases: IFRS 16}
+
+\subsection{Lease identification (IFRS 16.9--16.15)}
+
+A contract contains a lease if it conveys the right to control use of an identified
+asset for a period in exchange for consideration. Control requires:
+\begin{itemize}
+\item Right to obtain substantially all economic benefits (16.B21)
+\item Right to direct use of the asset (16.B24--B30)
+\end{itemize}
+
+\subsection{Lessee accounting: initial recognition (IFRS 16.22--16.28)}
+
+At commencement, recognize:
+\begin{itemize}
+\item \textbf{Right-of-use (ROU) asset:} Lease liability + initial direct costs +
+  prepayments - incentives (16.24)
+\item \textbf{Lease liability:} Present value of lease payments not yet paid,
+  discounted at implicit rate or incremental borrowing rate (16.26)
+\end{itemize}
+
+\textbf{AccDSL implementation:}
+
+\begin{lstlisting}
+event CommenceLease(
+  lease: Lease,
+  payment_schedule: PaymentSchedule,
+  discount_rate: Rate<effective>,
+  initial_direct_costs: Money<C>,
+  prepayments: Money<C>,
+  lease_incentives: Money<C>
+) book EntityBook;
+
+rule ifrs16_lessee_initial for CommenceLease as e {
+  let lease_liability = present_value(e.payment_schedule, e.discount_rate);
+  let rou_asset = lease_liability + e.initial_direct_costs +
+                  e.prepayments - e.lease_incentives;
+
+  post {
+    debit RightOfUseAsset[e.lease] rou_asset;
+    credit LeaseLiability[e.lease] lease_liability;
+    credit Cash e.initial_direct_costs + e.prepayments;
+    debit Cash e.lease_incentives;
+  }
+}
+\end{lstlisting}
+
+\subsection{Subsequent measurement (IFRS 16.29--16.35)}
+
+\textbf{Lease liability (16.36):}
+\begin{itemize}
+\item Increase by interest on liability (effective interest method)
+\item Decrease by lease payments
+\item Remeasure when payments change (16.39--16.43)
+\end{itemize}
+
+\textbf{ROU asset (16.30--16.35):}
+\begin{itemize}
+\item Cost model: depreciate over shorter of lease term and useful life
+\item Impairment per IAS 36
+\end{itemize}
+
+\begin{lstlisting}
+event AccrueLeaseInterest(
+  lease: Lease,
+  opening_liability: Money<C>,
+  discount_rate: Rate<effective>,
+  period: YearFraction
+) book EntityBook;
+
+rule ifrs16_interest for AccrueLeaseInterest as e {
+  let interest = e.opening_liability * e.discount_rate * e.period;
+  post {
+    debit InterestExpense_Lease interest;
+    credit LeaseLiability[e.lease] interest;
+  }
+}
+
+event MakeLeasePayment(
+  lease: Lease,
+  payment: Money<C>
+) book EntityBook;
+
+rule ifrs16_payment for MakeLeasePayment as e {
+  post {
+    debit LeaseLiability[e.lease] e.payment;
+    credit Cash e.payment;
+  }
+}
+
+event DepreciateROU(
+  lease: Lease,
+  rou_asset_opening: Money<C>,
+  depreciation_period: YearFraction,
+  total_lease_term: YearFraction
+) book EntityBook;
+
+rule ifrs16_depreciation for DepreciateROU as e {
+  let depreciation = (e.rou_asset_opening / e.total_lease_term) * e.depreciation_period;
+  post {
+    debit Depreciation_ROU depreciation;
+    credit AccumulatedDepreciation_ROU[e.lease] depreciation;
+  }
+}
+\end{lstlisting}
+
+\done{Status: Core reviewed.} Variable lease payments (16.38), lease modifications
+(16.44--16.46), and sale-leaseback (16.98--16.103) marked \warn{Not Implemented}.
+
+\section{Employee benefits: IAS 19}
+
+\subsection{Defined contribution plans (IAS 19.50--19.53)}
+
+Entity's obligation limited to contributions. Recognize expense when services
+rendered.
+
+\begin{lstlisting}
+event RecognizeDefinedContribution(
+  contribution: Money<C>,
+  period: Period
+) book EntityBook;
+
+rule ias19_dc for RecognizeDefinedContribution as e {
+  post {
+    debit EmployeeBenefitExpense e.contribution;
+    credit PensionPayable e.contribution;
+  }
+}
+\end{lstlisting}
+
+\done{Status: Reviewed.}
+
+\subsection{Defined benefit plans (IAS 19.54--19.152)}
+
+Entity bears actuarial and investment risk. Present value of obligation (DBO)
+and plan assets measured at each reporting date.
+
+\textbf{Components (IAS 19.120--19.130):}
+\begin{itemize}
+\item \textbf{Service cost:} Current service, past service, gains/losses on settlement
+  $\Rightarrow$ P\&L
+\item \textbf{Net interest:} Net defined benefit liability/asset $\times$ discount rate
+  $\Rightarrow$ P\&L
+\item \textbf{Remeasurements:} Actuarial gains/losses, return on assets (excl. interest),
+  asset ceiling changes $\Rightarrow$ OCI
+\end{itemize}
+
+\textbf{AccDSL implementation contract (simplified):}
+
+\begin{lstlisting}
+event MeasureDefinedBenefit(
+  plan: PensionPlan,
+  dbo_opening: Money<C>,
+  plan_assets_opening: Money<C>,
+  current_service_cost: Money<C>,
+  discount_rate: Rate<effective>,
+  benefits_paid: Money<C>,
+  actuarial_gain_loss_dbo: Money<C>, // From assumption changes
+  actual_return_on_assets: Money<C>,
+  contributions: Money<C>,
+  period: YearFraction
+) book EntityBook;
+
+rule ias19_db for MeasureDefinedBenefit as e {
+  // Service cost
+  post {
+    debit EmployeeBenefitExpense e.current_service_cost;
+    credit DefinedBenefitObligation[e.plan] e.current_service_cost;
+  }
+
+  // Net interest
+  let net_liability_opening = e.dbo_opening - e.plan_assets_opening;
+  let net_interest = net_liability_opening * e.discount_rate * e.period;
+  post {
+    debit InterestCost_Pension net_interest;
+    credit DefinedBenefitObligation[e.plan] (e.dbo_opening * e.discount_rate * e.period);
+    debit PlanAssets[e.plan] (e.plan_assets_opening * e.discount_rate * e.period);
+  }
+
+  // Benefits paid
+  post {
+    debit DefinedBenefitObligation[e.plan] e.benefits_paid;
+    credit PlanAssets[e.plan] e.benefits_paid;
+  }
+
+  // Contributions
+  post {
+    debit PlanAssets[e.plan] e.contributions;
+    credit Cash e.contributions;
+  }
+
+  // Remeasurements to OCI
+  let return_on_assets_excl_interest = e.actual_return_on_assets -
+    (e.plan_assets_opening * e.discount_rate * e.period);
+  post {
+    debit PlanAssets[e.plan] return_on_assets_excl_interest;
+    debit_or_credit OCI_Remeasurements_DB
+      (e.actuarial_gain_loss_dbo - return_on_assets_excl_interest);
+    credit DefinedBenefitObligation[e.plan] e.actuarial_gain_loss_dbo;
+  }
+}
+\end{lstlisting}
+
+\warn{Status: Not Implemented.} Simplified; missing:
+\begin{itemize}
+\item Actuarial assumption specification (mortality, turnover, salary growth)
+\item Past service cost from plan amendments (19.103--19.108)
+\item Asset ceiling (19.64)
+\item Multi-employer and group plans (19.32--19.39)
+\item Termination benefits (19.159--19.171)
+\end{itemize}
+
+\section{Income taxes: IAS 12}
+
+\subsection{Deferred tax: temporary differences (IAS 12.5, 12.15--12.45)}
+
+Deferred tax assets (DTA) and liabilities (DTL) arise from temporary differences
+between carrying amounts and tax bases.
+
+\textbf{Taxable temporary differences (12.15--12.31):} Future taxable amounts
+$\Rightarrow$ DTL.
+
+\textbf{Deductible temporary differences (12.24--12.33):} Future deductible amounts
+$\Rightarrow$ DTA (if probable taxable profit).
+
+\textbf{AccDSL implementation:}
+
+\begin{lstlisting}
+event RecognizeDeferredTax(
+  asset_account: Account,
+  carrying_amount: Money<C>,
+  tax_base: Money<C>,
+  tax_rate: Real in [0,1],
+  probable_future_profit: Boolean
+) book EntityBook;
+
+rule ias12_deferred for RecognizeDeferredTax as e {
+  let temporary_difference = e.carrying_amount - e.tax_base;
+  let deferred_tax = temporary_difference * e.tax_rate;
+
+  if temporary_difference > 0 { // Taxable temporary difference
+    post {
+      debit TaxExpense_Deferred deferred_tax;
+      credit DeferredTaxLiability deferred_tax;
+    }
+  } else if temporary_difference < 0 && e.probable_future_profit {
+    post {
+      debit DeferredTaxAsset abs(deferred_tax);
+      credit TaxExpense_Deferred abs(deferred_tax);
+    }
+  }
+  // No recognition if DTA not probable
+}
+\end{lstlisting}
+
+\warn{Status: Not Implemented.} Missing:
+\begin{itemize}
+\item Recognition exemptions (initial recognition, goodwill per 12.15, 12.21)
+\item Tax loss carryforwards and credits (12.34--12.36)
+\item Rate changes and their recognition (12.47--12.52)
+\item Business combinations (12.19, 12.66--12.68)
+\item Uncertain tax positions (IFRIC 23)
+\end{itemize}
+
+\section{Implementation roadmap and review protocol}
+
+\subsection{Priority standards for P2/P3}
+
+\begin{longtable}{L{35mm}L{55mm}L{46mm}}
+\toprule Standard & Operations needed & Review milestone\\\midrule\endhead
+IFRS 9 (instruments) & Full ECL staging, hedge accounting, embedded derivatives &
+P3: Accounting firm review + differential testing vs. vendor systems\\
+IFRS 15 (revenue) & Variable consideration, modifications, principal/agent,
+licenses & P3: Worked examples across industries\\
+IFRS 16 (leases) & Variable payments, modifications, sale-leaseback & P2: Common
+operating and finance leases\\
+IAS 19 (pensions) & Actuarial assumptions, plan amendments, multi-employer &
+P4: Actuarial consultant + accounting review\\
+IAS 12 (taxes) & Temporary differences, carryforwards, uncertain positions &
+P3: Tax specialist review\\
+IFRS 3 (combinations) & Purchase price allocation, goodwill, step acquisitions &
+P3: M\&A accounting specialist\\
+IAS 36 (impairment) & CGU identification, value-in-use, reversal & P3: Valuation
++ accounting review\\
+IAS 21 (FX) & Functional currency, translation, net investment hedges & P2:
+Multi-currency examples\\
+IFRS 2 (share-based) & Grant-date FV, vesting, modifications & P3: Compensation
+consultant\\\bottomrule
+\end{longtable}
+
+\subsection{Conformance test protocol}
+
+For each operation marked \done{Reviewed}:
+\begin{enumerate}
+\item \textbf{Paragraph mapping:} Explicit standard paragraph(s) cited
+\item \textbf{Worked example:} Known inputs, expected journals, balances, and disclosures
+\item \textbf{Edge cases:} Boundary conditions, optional treatments, judgment areas
+\item \textbf{Differential tests:} Compare with Big Four guidance or vendor implementations
+\item \textbf{Independent review:} CPA or equivalent confirms compliance interpretation
+\end{enumerate}
+
+Before promotion from \warn{Pending Review} to \done{Reviewed}, all five steps
+must complete. Operations marked \warn{Not Implemented} require design before testing.
+
+\subsection{Gap acknowledgment and residual risk}
+
+This chapter provides \textbf{design-level mapping} for a subset of IFRS. It does
+not constitute:
+\begin{itemize}
+\item Certified accounting advice
+\item A complete implementation of any standard
+\item Authority to apply IFRS without additional judgment and review
+\item Substitution for professional accounting support
+\end{itemize}
+
+Users relying on AccDSL for IFRS reporting must:
+\begin{itemize}
+\item Obtain independent accounting review for material transactions
+\item Validate that scope and elections match their fact pattern
+\item Document any departures or approximations
+\item Retain ultimate responsibility for financial statement preparation
+\end{itemize}

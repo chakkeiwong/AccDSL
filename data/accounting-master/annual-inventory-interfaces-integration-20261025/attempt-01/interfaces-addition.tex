@@ -1,0 +1,55 @@
+
+
+\subsection*{Author inventory alternatives on the same annual book}
+
+The optional annual inventory method can now be described in source text and
+compared across named scenarios.  These interfaces extend the checked execution
+above.  They retain its opening balances, tax liabilities and recognition
+assumptions, so a change in how a sale is written cannot silently change the
+company being simulated.
+
+\texttt{AnnualInventoryAuthoring/1} uses the annual declaration grammar with an
+explicit \texttt{partial\_inventory\_sale} operation.  Its header names the sale;
+the body supplies the sale profile, date, allocation method, lot, units sold and
+cash proceeds.  Each of the six inventory findings remains a separate
+known-or-unknown declaration.  A known finding carries the text explaining its
+provenance; an unknown finding carries a reason.  This inventory convention is
+preserved alongside the structured provenance used by the older tax
+operations.  Neither form is silently translated into the other.
+
+Compilation binds the declared opening request to its exact content digest and
+returns the same \texttt{AnnualInventoryProgram/1} request as the typed form.
+It does not execute a sale, assess tax or advance a period.  Consequently, a
+false divisibility finding or an unresolved homogeneity finding survives as
+explicit data until the financial evaluator refuses the operation.  Missing
+fields, duplicate declarations and malformed rational quantities fail earlier,
+when the source is read.  The compiled record retains the original text hash
+and the lines containing each operation and field.  Whitespace can change
+that text hash without changing the compiled financial request.
+
+\texttt{AnnualInventoryFamily/1} then gives each alternative its own name,
+assumptions and ordered operations, all starting from the same declared annual
+book.  Consider the earlier example with two recovered units costing 20 and
+cash of 452.  The first alternative sells one unit for 15, assesses current tax
+of 2, refreshes deferred measurement and carries the remaining unit into the
+following year.  Its first-year profit is 3 and closing cash is 467.  Selling the
+last unit for 15 in the next year gives that year's profit of 5 and closing cash
+of 482, while the carried tax payable remains \(49/4\).  The two annual statement
+vectors belong to this one history and are returned together with its name.
+
+A different alternative may fail before the carry because the homogeneous-lot
+finding is unknown, or may reach the second year and attempt to sell more units
+than remain.  The family retains the precise valid prefix and the operations
+that were not executed.  A report for a year that was never reached is
+unavailable; it is not a statement with zero balances.  An explicit budget can
+also leave members unvisited, while preserving their names and assumptions.
+Even a zero member budget checks the common opening request.  Equal financial
+results do not merge separately named alternatives.
+
+Joint reports recompute the saved family before returning the complete archived
+or current-prefix statements.  The reference checks cover inventory quantity,
+current-tax histories, residual-stock carry, source locations, rejected premises
+and retained alternatives.  These are authored, unweighted scenarios under the
+selected proportional inventory model.  They establish neither probabilities
+for those scenarios nor membership of an actual company's unknown history.
+General inventory policies and independent accounting acceptance remain open.

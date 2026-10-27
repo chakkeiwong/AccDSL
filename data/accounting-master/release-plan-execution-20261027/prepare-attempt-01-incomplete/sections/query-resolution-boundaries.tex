@@ -1,0 +1,100 @@
+\section{A query keeps its domain, endpoints and memory}
+\label{sec:query-resolution-boundaries}
+
+The same displayed amount can arise from different input domains, and the
+same ending cash can arise from different histories. A query therefore carries
+its domain, operation order, endpoint status and requested state. The examples
+below make those fields concrete before the implementation is asked to reuse a
+summary.
+
+\subsection*{Real amounts, rounded outputs and a cent grid are different models}
+
+Return to the debt family in which nonnegative fixed-rate principal \(F\) and
+floating-rate principal \(V\) satisfy
+\[
+ 99.5\le F+V<100.5,\qquad
+ 4.5\le .05(F+V)<5.5.
+\]
+The future interest query is \(I=.05F+.07V\). The lower endpoint is attained
+at \(F=99.5,V=0\), giving \(I=4.975\). The upper endpoint is the supremum
+\(.07(100.5)=7.035\), but it is excluded because the reported total is
+strictly below 100.5. The exact real image is
+\([4.975,7.035)\), with an attained lower endpoint and an unattained upper
+endpoint. A solver result must carry both facts; writing a closed interval
+would change the set. To establish that there are no gaps, hold the total at
+99.5 and vary \(V\) from zero to 99.5. Then
+\(I=4.975+.02V\) covers \([4.975,6.965]\). The all-floating histories
+with totals from 99.5 up to, but excluding, 100.5 cover
+\([6.965,7.035)\). Their union is the stated interval. Conversely,
+\(.05(F+V)\le I\le .07(F+V)\) excludes values outside those bounds.
+
+Now ask for a display rounded to cents, using nearest rounding with exact
+halfway values away from zero. Every displayed value from 4.98 through 7.03
+has a witness in the real family. The lower raw endpoint displays as 4.98.
+The excluded raw supremum would display as 7.04, but no admissible amount
+reaches it. Thus the rounded image has 206 values, 4.98--7.03. This is an
+image of the real family, not evidence that the underlying amounts are cents.
+For any cent amount \(x\) in the image with \(x\le6.965\), a witness is
+\(V=(x-4.975)/.02\) and \(F=99.5-V\). Above 6.965 choose
+\(F=0,V=x/.07\). These formulas also show why enumerating cent displays
+has not discretised the unknown principal.
+
+A different model restricts \(F\) and \(V\) to integer cents before computing
+interest. Its maximum is 7.0343 at \(V=100.49\), and its rounded display
+still runs from 4.98 to 7.03. Equal displays do not prove equal latent
+families: the real model admits values between 7.0343 and 7.035 that the
+cent-grid model excludes. A stored result must therefore retain the model
+identity and input quantum.
+
+Signed and tie cases expose the same boundary. Negating the real image gives
+\((-7.035,-4.975]\); its rounded outputs are the cents from \(-7.03\)
+through \(-4.98\). The lower endpoint remains excluded. The interval
+\([0,1)\) can round to 1.00 because 0.995 is an admitted value, even though
+1 itself is not. A certified enclosure \([1.0049,1.0051]\) crosses the 1.005
+tie and cannot select one posting without more information. Unknown tie rule,
+zero denominator, and an unproved nonzero denominator are separate failures.
+Rounding each of two 0.005 lines before adding gives 0.02, while adding first
+and rounding gives 0.01. Operation order belongs to the query method.
+
+\subsection*{A projection is not a reusable transition state}
+
+For a concrete counterexample, take two separately retained histories in which
+the timing of a reinsurance treaty changes when income is recognised. Both
+end with cash 88.3. Their initial and first-year equities are 85 and 83 for
+the timely treaty, but 70 and 74.75 for the late treaty. These are the supplied
+comparison values here; Section~\ref{sec:insurance-connected-groups} derives
+them from the separate issued and held contracts. The terminal-cash
+projection is therefore equal while the transition states and service results
+are different. A query requesting only terminal cash may project both histories
+to 88.3; a later query requesting first-year equity, loss recovery or treaty
+timing must revalidate the resolution and retain the full group states.
+
+The bank commitment supplies the same warning. Funded gross loan 100 does not
+contain the original commitment date, credit baseline or observed draw. The
+funded allowance 4 cannot be recomputed from that scalar alone. If the original
+records were preserved, refinement can recover the state. If they were never
+known, the result is \texttt{DETAIL\_UNAVAILABLE} or measurement unresolved,
+not a fabricated staging history. A source revision or changed query creates
+a new manifest; it does not silently resume an old result.
+
+\subsection*{Conditional mass remains attached to unresolved outcomes}
+
+For a small authored law, assign prior masses \(1/3,2/3\) to immutable timely
+and late histories and likelihoods \(3/4,1\) to a newly admitted observation.
+The evidence normaliser is \(11/12\), so posterior masses are \(3/11\) and
+\(8/11\). The invalid pooled treatment is not a third law atom: it was rejected
+as unsupported accounting treatment. If the late history's execution is
+unresolved, its mass remains \(8/11\); reporting the timely result with
+probability one silently conditions on successful execution. If both
+first-year equities are available under that law, their mean is
+\((3/11)83+(8/11)74.75=77\). With only the timely branch evaluated, the
+known weighted contribution is \((3/11)83\), not the complete mean.
+The same event IDs, measure provenance and unresolved mass must travel with
+the output.
+
+These examples do not add a general solver or a cent-based accounting policy.
+They specify the distinctions that a compatible implementation must preserve:
+input domain, output operation, endpoint attainment, event order, retained
+economic memory, conditional mass and failure status. A changed output,
+horizon, grouping rule or scenario therefore returns
+\texttt{RESOLUTION\_REVALIDATION\_REQUIRED} until sufficiency is checked again.

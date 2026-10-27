@@ -1,0 +1,156 @@
+\chapter{The product decision}
+\label{ch:purpose}
+
+A company's accounts describe the financial consequences of its activities,
+but they leave much of the activity itself unobserved. Revenue combines many
+sales, a borrowing balance combines contracts with different terms, and a
+provision combines estimates about uncertain future payments. Aggregation is
+necessary for reporting. It also makes the inverse task---recovering economic
+history from published reports---fundamentally different from entering known
+transactions into a ledger.
+
+AccDSL will preserve this distinction. Its first product is an evidence-backed
+representation of a company's historical record. Its second is a set of
+compatible histories and current economic states. Its third is a collection of
+conditional simulations, each explaining how a particular history, accounting
+treatment and business response produces future journals and reports. These
+products share identifiers and provenance, so an analyst can move from a
+forecast balance to the assumption or disclosure responsible for it.
+
+The recommended design is a small, typed accounting language over a shared
+intermediate representation, combined with an evidence database, contract
+calculators and replaceable inference engines. A language earns its place by
+making recurring accounting decisions explicit and checkable: which entity and
+period an amount belongs to, whether it is known or assumed, which rule applies,
+and how an event changes a balanced ledger. The language does not supply missing
+facts or determine a company's future behaviour.
+
+\section{Why journals are necessary but insufficient}
+
+Consider a company with a borrowing of 100 currency units and annual interest
+expense of 5. Assume that the entire principal was outstanding throughout the
+year, interest was paid at year-end, and there were no fees, defaults, hedges or
+foreign-exchange effects. Both a fixed-rate loan at 5\% and a floating-rate loan
+whose rate happened to be 5\% generate the same entries:
+\begin{center}
+\begin{tabular}{lrr}
+\toprule Account & Debit & Credit\\\midrule
+Cash, on initial borrowing &100&\\
+Borrowing liability &&100\\\midrule
+Interest expense, at year-end &5&\\
+Cash &&5\\\bottomrule
+\end{tabular}
+\end{center}
+Even the full historical journal would not distinguish these two contracts.
+Now impose a scenario in which the floating rate resets immediately to 7\%
+for the whole next year. The fixed loan produces interest of 5; the floating
+loan produces interest of 7. If the disclosure is also compatible with any
+fixed-rate fraction $\alpha\in[0,1]$, future interest is
+\begin{equation}\label{eq:running}
+ I(\alpha)=100[0.05\alpha+0.07(1-\alpha)]=7-2\alpha.
+\end{equation}
+Here $\alpha$ denotes the fixed share. In Chapter~\ref{sim:observations}
+the same letter denoted the floating share. These are complementary
+coordinates: the fixed share here equals one minus the floating share there.
+Substituting that relation in $7-2\alpha$ gives the earlier $5+2\alpha$
+when its $\alpha$ is read as the floating share. Both conventions describe
+interest of 5 for wholly fixed debt and 7 for wholly floating debt; a numerical
+share must be complemented when transferring it between these examples.
+
+The historical accounts are compatible with the whole interval $[5,7]$ of
+future interest. This is a range of feasible amounts. It becomes a probability
+distribution only when a distribution for $\alpha$ is supplied. Neither the
+number of generated interpretations nor a language model's confidence provides
+that distribution.
+
+Journals remain essential because simulated economic events must have coherent
+accounting consequences. However, the simulated state must also contain
+contract terms, maturities, customer or borrower cohorts, collateral,
+unrecognised commitments, and management decisions. These determine what the
+journals will be under a changed economy. Reconstructing every historical
+transaction is unnecessary when a smaller state preserves the responses needed
+for the intended scenarios. Establishing that smaller state is an explicit
+modelling task, examined in Chapter~\ref{ch:math}.
+
+The analogy with competing legal interpretations is useful at the level of
+representation. Several readings may survive the evidence and require separate
+reasoning. In accounting, some alternatives concern the meaning of a disclosure;
+others concern undisclosed facts or future behaviour. The system must identify
+which kind of uncertainty is involved. A known contractual term must not become
+an arbitrary interpretive choice merely because another choice is convenient
+for a simulation.
+
+\section{Users, questions and deliverables}
+
+An accounting analyst needs to inspect a number in its original table, verify
+its entity, currency and period, and see how it reconciles with the notes. A
+financial modeller needs to distinguish a reported balance from assumptions
+about its composition. A language engineer needs deterministic semantics and
+tests. A researcher needs to compare explanations under the same scenario,
+including explanations that fit history equally well.
+
+The first software release must answer the following complete workflow. An analyst
+loads a set of reports and specifies an information cutoff. AccDSL preserves
+the original documents and extracts source-linked observations. It identifies
+reconciliation failures and constructs an explicitly bounded family of
+compatible histories. The analyst declares additional assumptions where
+simulation requires them. The system executes each requested scenario and
+returns statements, journal traces, explanation-specific distributions or
+bounds, and unresolved limitations. When a later filing arrives, the analyst
+can compare the revised interpretation with the earlier information set.
+
+Acceptance of this design document is a separate milestone. It requires an
+implementable specification, adequate source and conformance evidence, and
+independent reader, implementation and domain review. It does not establish
+that the software workflow has been delivered or that forecasts are validated.
+The implementation sequence is described in Chapter~\ref{ch:validation}.
+
+\begin{longtable}{L{34mm}L{102mm}}
+\toprule Requirement & Required behaviour\\\midrule\endhead
+\req{R1 Evidence} & Every observed amount or narrative assertion retains its
+document version, location, extraction method and original representation.\\
+\req{R2 History} & Queries distinguish economic time, reporting period,
+publication time and database ingestion time; restatements remain recoverable.\\
+\req{R3 Meaning} & Entity, perimeter, dimensions, currency, measurement basis,
+standard version and accounting concept accompany values.\\
+\req{R4 Ambiguity} & Discrete alternatives and continuous unknowns retain their
+joint constraints across accounts and periods. Missing values never mean zero.\\
+\req{R5 Accounting} & All committed journals balance in the book's functional
+currency, and balances reconcile to explicitly classified movements.\\
+\req{R6 Economics} & Contracts, exposures and behavioural assumptions drive
+events. Accounting identities alone never determine scenario responses.\\
+\req{R7 Results} & Conditional results survive by interpretation and scenario.
+Weighted results require declared, normalised probability measures.\\
+\req{R8 Explanation} & A report cell can be traced to journals, events, rules,
+assumptions and evidence, including consolidation adjustments.\\
+\req{R9 Extensibility} & Standard, industry and company packages extend shared
+types through versioned interfaces, with explicit unsupported cases.\\
+\req{R10 Reproduction} & A saved run records source versions, model versions,
+parameters, calendars, seeds and numerical conventions.\\\bottomrule
+\end{longtable}
+
+These are acceptance requirements. Python, SQL storage, a particular parser,
+and a particular constraint solver are implementation choices. Initial support
+will cover a non-financial company with cash, receivables, payables, inventory,
+fixed assets, ordinary debt and ordinary equity. Banks and insurers must be
+representable in the core data model from the outset, but their executable
+measurement and behavioural packages follow dedicated milestones. Until a
+package supports an instrument, the result is explicitly incomplete.
+
+\clearpage
+\section{What constitutes a useful first implementation}
+
+The first demonstrator should reconstruct three reporting dates and the
+intervening annual and interim flows for one company, including at least one
+restatement or revised comparative. It must preserve a borrowing-composition
+ambiguity and execute the fixed/floating example through both journals and all
+affected statement lines. A synthetic company supplies known hidden history;
+a public company supplies realistic disclosure and extraction problems. Their
+roles differ: the synthetic case tests preservation and rejection of known
+alternatives, while the public case tests traceability and practical coverage.
+
+Success is a reproducible chain of evidence and computation, with identified
+gaps. A convincing-looking complete ledger reconstructed from incomplete
+disclosures would fail this product contract if its assumptions were hidden.
+Forecast accuracy requires a later evaluation with historical information
+cutoffs and suitable baselines; it is not established by the first demonstrator.

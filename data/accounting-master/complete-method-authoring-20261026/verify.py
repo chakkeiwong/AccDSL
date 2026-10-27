@@ -1,0 +1,150 @@
+from copy import deepcopy
+from hashlib import sha256
+from pathlib import Path
+from datetime import datetime,timezone
+from fractions import Fraction
+import json,sys,subprocess,time
+import frontend as f
+HERE=Path(__file__).resolve().parent;ROOT=HERE.parents[2];NL=chr(10)
+AUDIT=HERE.parent/'complete-method-authoring-audit-20261026'
+def dump(path,x):path.write_text(json.dumps(x,indent=2)+NL)
+def sha(path):return sha256(path.read_bytes()).hexdigest()
+def environment(data):
+    q=data['request'];e={'book':data['book'],'event':q['event'],'schemas':q['schemas']}
+    if 'memory_definition' in q:e['memory_definition']=q['memory_definition']
+    return deepcopy(e)
+def semantic(compilation):return {k:v for k,v in compilation.items() if k not in ['source_sha256','source_spans']}
+def main():
+    started=time.monotonic();lock_path=HERE/'source-lock.json'
+    inventory=json.loads((AUDIT/'inventory.json').read_text())
+    if not lock_path.exists():
+        files={**inventory['inputs'],str((AUDIT/'inventory.json').relative_to(ROOT)):sha(AUDIT/'inventory.json')}
+        files.update({str(p.relative_to(ROOT)):sha(p) for p in (AUDIT/'examples').glob('*.json')})
+        dump(lock_path,files)
+    lock=json.loads(lock_path.read_text())
+    for name,h in lock.items():assert sha(ROOT/name)==h,name
+    examples={};rows=[];out=HERE/'examples';out.mkdir(exist_ok=True)
+    for path in sorted((AUDIT/'examples').glob('*.json')):
+        data=json.loads(path.read_text());q=data['request'];env=environment(data);engine=f.ENGINES[q['profile']]
+        before=deepcopy(data);source=f.render(q['method'],q['profile'],env)
+        typed=f.compile_typed(q['method'],q['profile'],env);text=f.compile_text(source,env)
+        assert semantic(text)==semantic(typed) and text['request']==q
+        native=engine.propose(data['book'],q);actual=engine.propose(data['book'],text['request'])
+        assert native==actual and actual['status']=='proposed' and data==before
+        assert engine.apply(data['book'],text['request'],actual)['status']=='applied_provisional'
+        assert all(text[k] is False for k in f.FLAGS)
+        if path.stem.startswith('payment'):
+            m=q['method']['account_map'];assert actual['after']['balances'][m['cash']]=='193/2'
+            assert actual['after']['balances'][m['liability']]=='-53/2'
+            assert [x['amount'] for x in actual['flows']]==['-7/2']
+        else:
+            m=q['method']['account_map'];assert actual['journal'][m['receivables']]=='30/1'
+            assert actual['journal'][m['inventory']]=='-10/1'
+            assert actual['after']['memory']['claims']['invoice/a~1']['remaining']=='30/1'
+            assert actual['flows']==[]
+        assert sum(Fraction(v) for v in actual['journal'].values())==0
+        raw=source.encode()
+        for span in text['source_spans']:
+            assert sha256(raw[span['byte_start']:span['byte_end']]).hexdigest()==span['slice_sha256']
+        # Independent whitespace/order spelling preserves semantics, not source identity.
+        lines=source.splitlines();map_indices=[i for i,line in enumerate(lines) if line.startswith('account_map ')]
+        values=[lines[i] for i in map_indices][::-1]
+        for i,line in zip(map_indices,values):lines[i]=line
+        variant='  '+(chr(13)+NL+'  ').join(lines)+chr(13)+NL
+        alternative=f.compile_text(variant,env);assert semantic(alternative)==semantic(typed)
+        assert alternative['source_sha256']!=text['source_sha256']
+        rows.append({'id':path.stem,'profile':q['profile'],'method_sha256':text['method_sha256'],
+                     'source_lines':len(source.splitlines()),'full_native_match':True,'authored_variant_match':True})
+        (out/(path.stem+'.acc')).write_text(source);dump(out/(path.stem+'.compilation.json'),text)
+        dump(out/(path.stem+'.result.json'),actual);examples[path.stem]=(data,env,source)
+    data,env,source=examples['payment.alpha'];failures=[]
+    def refused(name,src,context=None,reason=None):
+        try:f.compile_text(src,env if context is None else context)
+        except (ValueError,TypeError,KeyError,RecursionError) as exc:
+            if reason is not None:assert reason in str(exc),(name,str(exc))
+            failures.append({'case':name,'reason':str(exc)[:300]});return
+        raise AssertionError('accepted:'+name)
+    refused('trailing-command',source+'residual "late";'+NL)
+    refused('unknown-declaration',source.replace('end_method;','mystery "x";'+NL+'end_method;'))
+    refused('duplicate-context',source.replace('end_method;',next(x for x in source.splitlines() if x.startswith('context '))+NL+'end_method;'))
+    refused('missing-memory',source[:source.index('begin_memory')]+source[source.index('end_memory;')+len('end_memory;'):])
+    refused('wrong-transition',source.replace('CompanyBookTransition/1','UnknownTransition/1',1))
+    refused('unknown-expression',source.replace('(sub ','(divide ',1))
+    refused('requirement-undeclared-input',source.replace('(ref "amount")','(ref "not_declared")',1),reason='undeclared_input')
+    calculation=next(x for x in source.splitlines() if x.startswith('calculation "outstanding_after"'))
+    forward=calculation.replace('["outstanding","amount"]','["outstanding","paid_after"]').replace('(ref "amount")','(ref "paid_after")')
+    refused('money-forward-reference',source.replace(calculation,forward),reason='undeclared_or_forward_reference')
+    refused('money-inexact-dependencies',source.replace(calculation,calculation.replace('["outstanding","amount"]','["outstanding"]')),reason='inexact_dependency_declaration')
+    refused('nested-values',source.replace('end_requirements_exchange;','bind "cash" known "1/1";'+NL+'end_requirements_exchange;',1))
+    refused('duplicate-binding',source.replace('end_method;',next(x for x in source.splitlines() if x.startswith('input_binding '))+NL+'end_method;'))
+    refused('duplicate-write',source.replace('end_memory;',next(x for x in source.splitlines() if x.startswith('write '))+NL+'end_memory;'))
+    refused('stale-selection',source.replace('select "','select "0',1))
+    refused('duplicate-json-field',source.replace('context {','context {"entity":"foreign",',1))
+    refused('missing-terminator',source.replace('end_method;','end_method'))
+    wrong=deepcopy(env);wrong['book']['context']['entity']='Other';refused('wrong-book-context',source,wrong)
+    wrong=deepcopy(env);wrong['schemas'].clear();refused('missing-schemas',source,wrong)
+    wrong=deepcopy(env);wrong['event']['inputs']['amount']['type']['dimensions']={'goods:unit':1};refused('wrong-input-units',source,wrong)
+    sale_data,sale_env,sale_source=examples['sale.alpha']
+    wrong=deepcopy(sale_env);wrong.pop('memory_definition');refused('v2-missing-memory-definition',sale_source,wrong)
+    scalar_only=deepcopy(sale_env);scalar_only.pop('memory_definition')
+    refused('insertion-through-v1',sale_source.replace('CompanyBookTransition/2','CompanyBookTransition/1',1),scalar_only)
+    # Author a consequential new algorithm in text, independently of rendering it.
+    # Pay half the supplied amount, consistently in calculations, postings and flow.
+    scalar={'kind':'rational','dimensions':{},'context':deepcopy(data['request']['method']['monetary']['definition']['inputs']['amount']['type']['context']),'scale':'1/1'}
+    half={'op':'mul','left':{'op':'ref','id':'amount'},'right':{'op':'const','type':scalar,'value':'1/2'}}
+    expression='(mul (ref "amount") (const '+json.dumps(scalar,sort_keys=True,separators=(',',':'))+' "1/2"))'
+    begin=source.index('begin_monetary ');end=source.index('end_monetary;')
+    authored=source[:begin]+source[begin:end].replace('(ref "amount")',expression)+source[end:]
+    changed_method=deepcopy(data['request']['method'])
+    def change(node):
+        if node=={'op':'ref','id':'amount'}:return deepcopy(half)
+        if isinstance(node,dict):return {key:change(value) for key,value in node.items()}
+        if isinstance(node,list):return [change(value) for value in node]
+        return node
+    changed_method['monetary']['definition']=change(changed_method['monetary']['definition'])
+    authored_compilation=f.compile_text(authored,env)
+    assert semantic(authored_compilation)==semantic(f.compile_typed(changed_method,f.v1.PROFILE,env))
+    assert authored_compilation['method_sha256']!=f.core.digest(data['request']['method'])
+    authored_result=f.v1.propose(env['book'],authored_compilation['request'])
+    m=changed_method['account_map'];assert authored_result['status']=='proposed'
+    assert authored_result['after']['balances'][m['cash']]=='393/4'
+    assert authored_result['after']['balances'][m['liability']]=='-113/4'
+    assert [x['amount'] for x in authored_result['flows']]==['-7/4']
+    assert authored_result['after']['memory']['loan']['outstanding']=='113/4'
+    assert f.v1.apply(env['book'],authored_compilation['request'],authored_result)['status']=='applied_provisional'
+    (out/'payment.half-authored.acc').write_text(authored)
+    dump(out/'payment.half-authored.compilation.json',authored_compilation)
+    dump(out/'payment.half-authored.result.json',authored_result)
+    # Compile checks structure; execution preserves distinct economic findings.
+    semantic_cases=[]
+    for name,(d,e,s) in examples.items():
+        key='amount' if name.startswith('payment') else 'consideration'
+        for variant,value,status in [('unknown',{'status':'unknown','reason':'unobserved'},'unresolved'),
+                                     ('negative',f.v1.known('-1/1'),'invalid')]:
+            changed=deepcopy(e);changed['event']['inputs'][key]['value']=value
+            compiled=f.compile_text(s,changed);actual=f.ENGINES[d['request']['profile']].propose(changed['book'],compiled['request'])
+            assert actual['status']==status and 'after' not in actual
+            semantic_cases.append({'method':name,'case':variant,'status':status})
+        changed=deepcopy(e);changed['event']['inputs']['approved']['value']=f.v1.known(False)
+        compiled=f.compile_text(s,changed);actual=f.ENGINES[d['request']['profile']].propose(changed['book'],compiled['request'])
+        assert actual['status']=='unsupported' and 'after' not in actual
+        semantic_cases.append({'method':name,'case':'false-approval','status':'unsupported'})
+    q=data['request'];compiled=f.compile_text(source,env);proposal=f.v1.propose(env['book'],compiled['request'])
+    proposal['after']['balances'][env['book']['cash_account']]='999/1'
+    assert f.v1.apply(env['book'],compiled['request'],proposal)['status']=='invalid'
+    for name,h in lock.items():assert sha(ROOT/name)==h,name
+    checks={'passed':True,'complete_methods':len(rows),'syntax_environment_refusals':len(failures),
+            'semantic_failure_cases':len(semantic_cases),'native_full_results_equal':True,
+            'consequential_authored_algorithm':True,'verified_monetary_forward_refusal':True,
+            'proposal_tampering_refused':True,'protected_files':len(lock),'execution_admission':False}
+    dump(HERE/'checks.json',checks);dump(HERE/'comparisons.json',rows);dump(HERE/'refusals.json',failures);dump(HERE/'semantic-cases.json',semantic_cases)
+    dump(HERE/'run-manifest.json',{'git_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        'command':'CUDA_VISIBLE_DEVICES=-1 python3 data/accounting-master/complete-method-authoring-20261026/verify.py',
+        'environment':sys.version,'cpu_gpu':'CPU; GPU intentionally hidden','random_seeds':'N/A deterministic',
+        'wall_seconds':time.monotonic()-started,'data_version':sha(AUDIT/'inventory.json'),
+        'plan_file':'docs/plans/accounting-complete-method-authoring-20261026.md','result_file':str((HERE/'result.md').relative_to(ROOT)),
+        'artifact_paths':['checks.json','comparisons.json','refusals.json','semantic-cases.json','examples/'],
+        'frontend_sha256':sha(HERE/'frontend.py'),'verifier_sha256':sha(Path(__file__)),
+        'timestamp_utc':datetime.now(timezone.utc).isoformat()})
+    print(json.dumps(checks))
+if __name__=='__main__':main()

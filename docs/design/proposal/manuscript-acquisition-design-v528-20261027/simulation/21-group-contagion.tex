@@ -1,0 +1,121 @@
+\chapter[Groups, counterparties, and contagion]{Groups, counterparties, and contagion across otherwise coherent statements}
+\label{sim:groups}
+
+A company group is not a single bank account. Consolidation can eliminate internal balances for reporting while cash remains held by particular entities, currencies and custodians. Stress can also propagate through guarantees, collateral and common counterparties. These mechanisms make group simulation a natural test of whether the model preserves economic rights beyond accounting totals. The examples here stipulate transfer and priority rules; actual legal applicability requires source-specific authority.
+
+\section{Consolidated cash and entity cash}
+Consider a parent P and subsidiary S. P holds cash 5 and owes external debt 20 tomorrow. S holds cash 30 and owes external suppliers 8 the following day. The consolidated cash balance is 35. It exceeds the parent's debt maturity, but that fact does not establish that P can pay.
+
+Suppose S may transfer at most 10 before tomorrow because the remainder is restricted or needed under a binding local rule. P can assemble 15 and has a shortfall of 5. A consolidated cash forecast that deducts 20 from 35 reports 15 remaining and misses the entity failure.
+
+If a transfer of 15 is permitted instead, P can pay but S's remaining cash must still cover its own obligations. The transfer is not free group liquidity: it changes where resources are held and can create an intercompany claim or distribution. The event should be represented in both entities before consolidation.
+
+\section{Intercompany loan mechanics}
+Suppose S lends 15 to P. S records an intercompany receivable and cash outflow; P records cash and an intercompany payable. P then repays external debt 20 using its original 5 plus the loan. Consolidated cash falls from 35 to 15 and external debt falls by 20. Internal claims eliminate in the consolidated statement under the stipulated perimeter.
+
+The internal loan nevertheless matters for future entity liquidity. P owes S according to its terms. If S later needs cash, it cannot spend a consolidated elimination entry. A model that deletes internal contracts after consolidation loses repayment dates and possible stress transmission.
+
+Interest on the internal loan can affect entity tax and distributable earnings even when consolidated interest eliminates. Currency differences can create further effects. The general engine should retain legal-entity records and produce consolidation as a reporting view rather than using the consolidated view as its only state.
+
+\section{A guarantee creates contingent support}
+Suppose P guarantees S's external supplier obligation of 8. The guarantee produces no cash payment while S pays normally. If S fails, P may be required to pay under the stipulated terms. The group's reported balance sheet may not reveal the same exposure as a direct loan.
+
+A scenario that stresses S can therefore affect P even when there is no planned intercompany transfer. The guarantee needs beneficiary, covered obligation, trigger, cap, expiry and settlement timing. A vague statement of support is not automatically an enforceable guarantee. Conversely, omitting a binding guarantee because it has no current principal balance understates contingent funding need.
+
+If P's payment gives it a recovery claim against S, that successor claim should be recorded. Paying the guarantee and also leaving the supplier fully paid by S would double settle the obligation unless the model includes reimbursement or another event. Counterparty identities make this check possible.
+
+\section{A common collateral pool}
+Two loans may claim the same collateral. A model that assigns the full collateral value independently to each overstates recovery. Let collateral realize 50, with secured claims 40 and 30. Under an assumed first-ranking claim of 40 and second-ranking claim of 30, recoveries are 40 and 10.
+
+If the claims rank equally and share proportionally, recoveries are $50(40/70)$ and $50(30/70)$. Both allocations conserve 50 but differ by creditor. Priority is an economic and legal fact, not an accounting balancing choice.
+
+The collateral record should link each asset to encumbrances and ranking. Unknown ranking creates alternative recovery histories. An aggregate secured-debt amount does not identify whether collateral is shared, separate or overpledged. A stress result should preserve that ambiguity when it affects pricing or liquidity.
+
+\section{Collateral value and borrowing capacity}
+A borrowing-base facility can limit drawn debt to a fraction of eligible collateral. Suppose eligible receivables are 100 and the advance rate is 0.8, giving capacity 80. Drawn debt is 70. A customer default removes 20 from eligibility, reducing capacity to 64 and creating a borrowing-base deficiency of 6.
+
+The credit loss has two effects: it reduces asset value and can trigger a cash repayment or collateral substitution requirement. A model that records only the impairment misses the liquidity consequence. A model that records a repayment without the contractual deficiency rule invents one.
+
+Eligibility can depend on age, concentration, jurisdiction and disputes. Two receivable pools with equal net carrying value can have different borrowing capacity. The reconstruction may need invoice cohorts or symbolic eligibility amounts even when the financial statement reports one total.
+
+\section{A margin call before cash income}
+A derivative can economically hedge a future exposure while requiring collateral today. Suppose a company has a fixed-rate asset whose economic value rises when rates fall and a derivative position that offsets that value movement but requires cash margin after an adverse mark. The ultimate hedge can reduce value risk while increasing short-term liquidity need.
+
+The cash call depends on collateral agreement, thresholds, minimum transfer amounts, eligible assets and settlement timing. It cannot be inferred from the derivative's year-end fair value alone. A scenario that nets the derivative and underlying value change may correctly describe net economic exposure while missing gross cash settlement.
+
+The simulator should track valuation, collateral posting and final payoff as distinct events. Posted collateral may remain an asset or claim under the applicable treatment; it is not necessarily an expense. Reusing the fair-value change as a cash flow can create double counting.
+
+\section{Currency trapped in the wrong account}
+Suppose P owes 10 foreign units and holds 100 domestic units. At an executable exchange rate of 8 domestic per foreign, conversion needs 80. Under a depreciation to 12, it needs 120. If conversion capacity is limited or markets close before payment, even a favorable reporting-currency total may not be usable.
+
+Now suppose S holds 10 foreign units but cannot transfer them to P in time. Consolidated foreign cash equals the payment, yet P still faces a shortfall. A model should retain both currency and entity location. Netting by currency across the group can be as misleading as netting all currencies into one reporting amount.
+
+A permitted currency swap or intercompany transfer can solve the problem, but it introduces counterparties, settlement risk and possible costs. The model should generate those transactions rather than assume frictionless conversion as an unnamed default.
+
+\section{Settlement risk}
+Two offsetting payments on the same date need not settle simultaneously. A company may pay one currency before receiving another. A counterparty failure between the legs can leave an exposure. A net daily cash amount does not describe the gross settlement sequence.
+
+For a bounded example, P pays 80 domestic units at noon and expects 10 foreign units at 15:00. Its foreign debt is due at 14:00. Even if both legs settle as promised, the receipt is too late. A settlement service with payment-versus-payment or a bridge can change the sequence, but must be represented.
+
+Exact intraday simulation is unnecessary for every query. It becomes necessary when ordering affects payment feasibility. The method should allow event resolution to increase around material boundaries without pretending that an annual model resolved them.
+
+\section{Cross-default and acceleration}
+A default on one obligation can trigger rights under another. The triggering event may be nonpayment, acceleration, insolvency or a threshold amount. A generic flag called default cannot substitute for the actual cross-default clause.
+
+Suppose S misses 8 and P has a loan of 50 whose clause triggers only for subsidiary defaults exceeding 10. The event does not meet that threshold. If the clause instead aggregates several defaults totaling 12, it may trigger. The scope, aggregation period and cure rights matter.
+
+Acceleration changes the payment calendar and can create a liquidity spiral. The model should record the trigger, exercise or automatic effect, new due date and notice requirements under the stipulated contract. It should not accelerate every group obligation whenever any branch is distressed.
+
+\section{A contagion sequence}
+Combine the borrowing-base example with a parent guarantee. A customer default reduces S's eligible receivables from 100 to 80. The facility demands repayment 6. S has cash 4 and cannot pay the full amount. Under the example's guarantee, P pays the remaining 2. P's cash falls from 5 to 3.
+
+If P has an independent payment of 4 later that day, the support creates a parent shortfall of 1. Consolidated asset loss alone does not show the sequence. The guarantee transfers liquidity pressure across entities.
+
+If the guarantee is capped at 1, S remains in arrears by 1 and P retains cash 4. The parent can meet its payment, but subsidiary distress persists. Different guarantee terms produce different locations and timing of default even when consolidated net assets are similar.
+
+\section{Behavioral contagion}
+Counterparties may react to distress before a contractual trigger. Suppliers can shorten terms, customers can delay orders, lenders can decline new credit and employees can leave. These responses are behavioral assumptions or estimated mechanisms. They should not be inferred automatically from a balance-sheet loss.
+
+A scenario can include a supplier-term tightening rule conditional on a public rating event. The rule needs the event's timing and actor information. If suppliers have not observed the distress, immediate tightening may give them unavailable knowledge. If they have private signals, those should be specified.
+
+Behavioral contagion can amplify losses, but an arbitrary amplification coefficient is not evidence. The model should expose sensitivity and distinguish contractual consequences from discretionary reactions. This separation makes the result more useful for identifying which mechanisms require empirical research.
+
+\section{Endogenous prices and fire sales}
+Selling assets to meet cash needs can depress their prices when the market is illiquid or several firms sell simultaneously. A fixed-price sale model may then overstate proceeds. An endogenous price rule creates feedback between liquidity need, quantity sold and realized value.
+
+For illustration, let sale price per unit be $p(q)=10-0.1q$ for $0\leq q\leq50$. Proceeds are $10q-0.1q^2$, which increase on this interval but at a decreasing rate. Raising 200 requires solving the quadratic rather than dividing by the initial price 10.
+
+The formula is a teaching assumption. It should not be treated as an estimated market impact curve. Its role is to expose how quantity and price can interact. Beyond the stated domain, the rule may be nonsensical. A solver should not extrapolate it to negative prices to force a solution.
+
+\section{Feedback across several sellers}
+If price depends on total sales by several entities, each policy affects the others' proceeds. Sequentially solving each entity at an unchanged price can be inconsistent. A simultaneous market-clearing or declared sequential mechanism is needed.
+
+The agent-based stock-flow literature provides examples of interacting counterparties and explicit event order \citep{caiani2016}. It does not imply that a specific market-impact function is valid for the company under study. The local mechanism must be stated and tested.
+
+Multiple equilibria or no feasible clearing outcome can arise. A numerical failure to find one should remain distinct from a proved absence. If the model selects one equilibrium by a behavioral adjustment rule, that rule is part of the scenario and should be retained in provenance.
+
+\section{Consolidation changes after distress}
+A restructuring can change control, ownership or the reporting perimeter. A subsidiary may be sold, placed into a process that changes control, or receive new capital. The group statements then require a perimeter transition under the applicable basis.
+
+The economic event should identify assets, liabilities, consideration and retained rights. The accounting layer determines derecognition, gains, losses and continuing interests. A generic default event that removes the entire subsidiary from consolidation without an authority-based control assessment is unsupported.
+
+The scenario can remain useful with conditional perimeter outcomes if facts are unresolved. The result should show which cash and obligations remain in each legal entity and how each accounting interpretation reports them. A single consolidated number can conceal materially different legal exposures.
+
+\section{A group-state proposal}
+The state should include legal entities, ownership and control assessments, currency accounts, external and internal contracts, collateral pools, guarantees and transfer permissions. It should also retain actor-specific information and event calendars. Consolidated reporting is a derived view.
+
+This does not require every query to load every field. Dependency-aware execution can select the relevant subgraph. A parent liquidity query follows transfers and guarantees; a consolidated revenue query follows perimeter and eliminations. The underlying representation preserves the links needed when the question changes.
+
+Unknown links can be represented as alternatives. A guarantee's existence, cap or trigger may be unresolved. The query can report outcomes conditional on those terms and identify the source that would resolve them. Inventing no guarantee as a default would systematically favor benign outcomes.
+
+\section{Tests for group coherence}
+A transfer test should show equal and opposite cash movements before fees and consistent internal claims. A consolidation test should eliminate internal balances without deleting entity state. A collateral test should prevent recovery exceeding the shared pool. A timing test should prevent late cash from funding an earlier obligation.
+
+A guarantee test should create the correct successor claim or loss under the stipulated rules and avoid double payment. A currency test should preserve native units through conversion and reporting. A cross-default test should distinguish threshold, cure and acceleration.
+
+These tests are stronger than a final consolidated balance-sheet equality. They examine the mechanisms that can make a group fail despite apparently sufficient aggregate resources. Passing them establishes the specified small cases, while actual legal and regulatory applicability remains tied to source evidence.
+
+\section{What cannot be compressed away}
+For group liquidity, entity location, currency, transfer rights and dates are often essential. For recovery, collateral and priority are essential. For behavior, information and contractual discretion are essential. A compression that removes them may still reproduce current totals while changing stress outcomes.
+
+The practical method is to retain a rich underlying state and derive query-specific summaries. A summary approved for one purpose can be refined for another. This avoids both extremes: duplicating the entire group for every possibility and collapsing the group into totals that cannot explain who can pay whom.

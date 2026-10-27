@@ -1,0 +1,1 @@
+The first build succeeded but verification rejected a 41pt overfull line in the new profile paragraph. The original PDF and log are preserved. Add optional TeX line breaks inside only the new code identifiers; predecessor text and identifier spelling remain unchanged. Rebuild before rendered acceptance.

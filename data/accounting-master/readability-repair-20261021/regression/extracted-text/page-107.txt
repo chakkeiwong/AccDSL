@@ -1,0 +1,51 @@
+CHAPTER 8.
+RECONSTRUCTION AND EXECUTION PROCEDURES
+98
+ordering is a model ambiguity or an error. The engine does not conceal it behind alphabetical
+event IDs.
+execute_event(operation_request):
+validate exact input closure, bindings and historical admission
+validate separate posting authorization, journal and delta
+lookup stable entity/book/branch/business-event key
+if exact committed fingerprint: return original receipt
+if different committed fingerprint: return event conflict
+compare expected opening state and head generation
+atomically recheck key/head and commit journal, delta, state, receipt
+return receipt, emitted dependent events and diagnostics
+The atomic unit includes the economic state and its accounting effects. If posting fails, neither
+state changes. A repeated event ID with identical inputs returns the existing result; the same
+ID with different inputs is a conflict. Here the inputs include the request identifier, expected
+head and execution settings, not only the financial payload. Section 8.5 defines the stable key
+and full fingerprint. Consolidation runs after entity books reach the required date and stores its
+adjustments separately. A failure in one scenario branch cannot mutate another branch’s state.
+8.4
+From an economic event to permission to post
+A delivery can change revenue, inventory and receivables at once. Before any book changes,
+the method needs to know which contract was performed, which opening state it consumes,
+which evidence supports that reading and which accounting profile applies. Balance alone
+cannot supply those facts. AccDSL therefore separates the economic basis, permission to use a
+treatment, proposed entries and the transaction that makes them durable.
+The event basis binds an immutable event to opening state, context, branch, time view, chart,
+authority, method, evidence, admissions, assumptions and view. Its business identity is the
+four-tuple of entity, book, branch and business event. The branch declares whether it is synthetic
+or real. A synthetic teaching profile can justify a teaching posting; it cannot authorize a real
+book merely because the resulting arithmetic is identical.
+The method first evaluates reporting framework, jurisdiction and dates; then entity and transac-
+tion scope; contract and recognition facts; elections; numerical capability; and account/context
+bindings. Every material finding survives. A false required fact is ineligible, an unknown
+required fact is unresolved, and an event outside the method is outside scope. A known false
+finding must not disappear behind a later unknown one. Missing operative authority never
+becomes source-supported permission.
+The native operation accounting.assess@1 remains read-only assessment. Its assess_only re-
+quest and false posting permission cannot be promoted by editing a flag.
+The separate
+accounting.authorize@1 operation produces a PostingAuthorization from the complete basis
+and a supported posting profile. It permits posting only when the treatment is eligible, the
+method is fully specified for the event and the branch mode matches the profile’s evidence scope.
+An unresolved or unsupported assessment is still a useful completed assessment, but it contains
+no permission to post.
+An authorized proposal contains both a journal and an independent economic delta, each bound
+to the same basis and authorization. Journal lines name account role, debit or credit, positive
+exact quantity, currency/context, entity, book, event and method. Zero lines are omitted; a
+negative effect reverses sides. The journal balances within each currency and book. The delta
+separately checks quantities and contractual memory: inventory movements consume available

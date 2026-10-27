@@ -1,0 +1,1 @@
+Exact5.39 comparator and additive source transformation checked;bounded author review supports provisional5.40 only. Two previously uncredited methods plus one integration;finance plan andall18 packages preserved.

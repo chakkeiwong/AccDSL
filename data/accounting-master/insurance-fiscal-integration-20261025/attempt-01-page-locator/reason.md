@@ -1,0 +1,1 @@
+The end locator also matched unrelated PDF477, causing excess image rendering. Content and preservation checks passed. The successor uses a unique local sentence; original verification and tool remain preserved. Only cover and the actual bounded passage/adjacent pages will count as viewed.

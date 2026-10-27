@@ -1,0 +1,66 @@
+\paragraph{New payment terms leave earlier assessments intact.}
+A prospective amendment answers a different question from a corrected source
+reading: what changes from the amendment date onward? Return to the earlier
+single-invoice example, before the illustrative second sale. The original
+invoice was due on 31~January 2027. Its remaining USD~20 was assessed as
+overdue on 28~February. Suppose the company and customer are now modeled as
+extending its due date on 10~March to 30~April. The February assessment remains
+USD~20 overdue under the original terms. A fresh assessment on 31~March records
+zero overdue under the extension. Replacing the old due date in place would
+lose the information needed to explain why both assessments are correct in
+their respective histories.
+
+The bounded \texttt{ReceivableTermHistory/1} reference supplies this separate
+prospective operation. Its migration starts from a valid legacy claim book
+and an explicit premise that no earlier amendment occurred. On that premise,
+it imports the existing due date as the initial term and preserves the last
+stored assessment. It does not reconstruct earlier assessments. The imported
+assessment's event identity is recorded as unknown because the old summary
+does not identify that event. The source book and its hash remain available;
+the migration leaves its balances, cash flows, claim identities and original
+scalar observations unchanged. Consequently, even a successful migration
+leaves completeness of the earlier term history unresolved.
+
+Each claim then has an append-only map of term versions and an append-only
+map of assessments. A term names its due date, effective date, originating
+event, predecessor and supplied premise. The current-term reference identifies
+the version used for a new assessment. Each assessment retains its own term
+reference, assessment date, remaining amount at that date and overdue amount.
+The validator checks the term applicable at that historical date; it does not
+recompute every old observation using the current due date or current balance.
+The familiar scalar assessment fields remain the summary of the latest
+assessment, while the current remaining balance can change independently.
+
+For example, a second extension on 10~April moves the due date to 31~May.
+A receipt of USD~5 on 15~April reduces the claim to USD~15, while the March
+assessment still records the USD~20 that remained when it was made. The
+30~April assessment records zero overdue; the 30~June assessment records
+USD~15 overdue. A 31~December assessment retains that amount. Year-end carry
+preserves the three term versions and all assessment records, and opens a new
+assessment window. Collection of the final USD~15 on 10~January 2028 clears
+the claim; the 31~January assessment records zero. Final cash is USD~130,
+receivables are zero and retained earnings are USD~20, as in the unamended
+single-invoice example: these date changes altered the assessment history,
+while the supplied sale and collection amounts determined the monetary result.
+
+The immediate amendment takes effect on its event date. It requires the
+current state hash, existing claim and customer identities, the expected
+current term, a new term identity and explicit typed inputs. It refuses
+backdating, a due date before effectiveness, duplicate identities and two
+terms with the same effective date. An assessment seals its day against later
+amendments or collections. An amendment followed by assessment on that same
+day is allowed, so the order is explicit. Unknown required input remains
+unresolved. The bounded maps admit at most 32~terms and 64~assessments per
+claim; this reference does not silently discard old records when those limits
+are reached.
+
+These constructed date-only amendments and assessments produce no journal
+entry. That is the declared scope of this method; an actual contract change
+may require a separately specified measurement and accounting treatment.
+Legal enforceability, modification gains or losses, interest and impairment
+remain outside this reference. The exact typed requests, historical states,
+receipts, carry and negative cases are retained for two account charts in
+\path{data/accounting-master/receivable-term-history-20261025/}. They connect
+the prospective operation to the preceding source-correction distinction
+without treating either operation as evidence for a real invoice population.
+

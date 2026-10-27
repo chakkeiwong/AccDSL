@@ -1,0 +1,155 @@
+\section{One lease total can conceal different rights}
+\label{sec:lease-allocation-family}
+
+The preceding lifecycle starts with a supplied asset of 30 for right B.
+Suppose that amount is unknown and only the combined right-of-use asset of 120
+is given. Even if the two rights and their liabilities of 100 and 50 are known,
+the total asset does not identify its allocation. Assigning 20 to B leaves 100
+for A; assigning 30 to B leaves 90 for A. Both allocations produce exactly the
+same opening signed account balances. Terminating B gives a gain of 30 in the
+first case and 20 in the second.
+
+Let $x$ be B's opening right-of-use asset, in the same exact USD units as the
+previous example. A's asset is then $120-x$. Nonnegative asset amounts imply
+\[
+  0\leq x\leq120,\qquad R_A=120-x,\qquad R_B=x.
+\]
+This is a family of supplied hypothetical openings. Exactly two identified
+rights, their liability allocation, the fixed 10 percent rate and the original
+method findings remain premises. Actual aggregate disclosures need not establish
+those premises. The family assigns no probabilities to its allocations.
+
+\subsection{Find where the supplied lifecycle can complete}
+
+Keep the original four events, including the annual payments and depreciation
+of 81. Only the unknown opening asset allocation and B's corresponding traced
+removal vary. Terminating B removes liability 50 and asset $x$, so its gain is
+$50-x$. A's payment of 121 gives liability 110 and adds 10 to its asset. After
+the first event, total ROU is therefore $130-x$.
+
+The second reduction removes asset 10 and liability 11 from A. Remeasuring its
+remaining payment of 99 gives liability 90, which is 9 below the intermediate
+liability of 99. Its asset becomes
+\[
+  R_A^{(2)}=(130-x)-10+(90-99)=111-x.
+\]
+The original method requires a nonnegative remaining asset. For $x>111$, this
+second reduction is outside its supported treatment. That refusal does not make
+the opening allocation impossible; it identifies a method limitation under the
+supplied event. The first completed event remains available.
+
+For $x\leq111$, the payment of 99 settles liability 90, records interest expense
+9 and leaves company cash 101. The final event then proposes depreciation of
+81. It can be applied only when that expense does not exceed the remaining
+asset:
+\[
+  81\leq111-x\quad\Longleftrightarrow\quad x\leq30.
+\]
+Thus the complete supplied sequence works on $[0,30]$. For $30<x\leq111$, it
+reaches payment but rejects the final depreciation. Replacing 81 with a smaller
+amount would change the supplied scenario; the reference keeps the refusal and
+its successful prefix instead.
+
+The three regions partition the original allocation interval:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Allocation of B's asset & Outcome & Completed events \\
+\midrule
+$[0,30]$ & Complete supplied lifecycle & Four \\
+$(30,111]$ & Depreciation amount rejected & Three \\
+$(111,120]$ & Second reduction unsupported & One \\
+\bottomrule
+\end{tabular}
+\end{center}
+The endpoints matter. At $x=30$, depreciation removes the remaining asset
+exactly. At $x=111$, the second reduction leaves zero ROU, so it succeeds, but
+the later depreciation of 81 does not. Each failed event leaves the last
+successful state unchanged. A response containing only the first region would
+lose valid declared openings and conceal why their subsequent paths stopped.
+
+\subsection{Keep financial outcomes on the same allocation}
+
+Within the complete region, depreciation leaves asset $30-x$. Pretax profit
+combines the first gain $50-x$, the second gain 1, interest 9 and depreciation
+81. Write $R_{\rm end}$ for final ROU and $\Pi$ for cumulative pretax profit:
+\[
+  R_{\rm end}=30-x,\qquad
+  \Pi=(50-x)+1-9-81=-39-x,\qquad 0\leq x\leq30.
+\]
+The possible asset amounts range from 0 to 30 and profits from $-69$ to $-39$.
+Both depend on the same opening allocation. Subtracting the two expressions
+eliminates $x$:
+\[
+  \Pi-R_{\rm end}=(-39-x)-(30-x)=-69.
+\]
+For example, $x=20$ produces asset 10 and profit $-59$; $x=30$ produces asset
+zero and profit $-69$. Asset 30 and profit $-69$ are individually feasible
+marginal endpoints, but they cannot occur together. The first requires $x=0$;
+the second requires $x=30$.
+
+A hypothetical additional observation of final ROU equal to 10 would select
+$x=20$ and profit $-59$, conditional on completion of the supplied lifecycle.
+The original unconditioned family still contains its rejected and unsupported
+regions. The query records the additional observation as a supplied premise;
+it does not present that number as a recovered issuer fact.
+
+The interrupted paths also retain dependent financial amounts. In the
+rejected-depreciation region, the last successful state has ROU $111-x$, profit
+$42-x$, cash 101 and zero lease liability. In the unsupported-reduction region,
+the first event leaves ROU $130-x$, profit $50-x$, cash 200 and signed lease
+liability $-110$. These are prefix states, not completed-year statements. Keeping
+their dates and failure positions prevents a partially executed path from being
+reported as a complete result.
+
+\subsection{Represent the family without dropping interrupted paths}
+
+\path{LeaseAllocationFamily/1} binds the original source lock, a finite
+allocation interval within $[0,120]$, explicit endpoint inclusion, an allocation
+premise, its source reference, a complete-membership finding and a
+\path{max_cells} budget. Amounts are canonical rational strings. The reference
+intersects the declared interval with all three regions. Empty intersections
+contribute no cell; every nonempty intersection remains visible. Missing
+membership or a missing allocation premise returns unresolved.
+
+For each checked cell, the response retains its domain, original outcome
+category, completed-prefix length, failure index and reason, affine financial
+expressions and a complete native replay. The replay contains opening state,
+events, proposals and the last successful state. It checks a representative
+allocation against the unchanged original methods. The inspected affine
+derivation establishes the within-cell relationship; a few replayed allocations
+alone would not prove a bound over a continuous interval.
+
+The cell budget limits those native replays. If it is exhausted, the remaining
+domains and categories stay present as unchecked cells. The response reports
+partial search, supplies no complete-family bounds and makes no assertion that
+all allocations complete. Once every retained cell is checked, any final-outcome
+bounds are explicitly conditional on complete execution. A family consisting
+entirely of interrupted paths has no such bounds.
+
+\path{LeaseAllocationQuery/1} requires the explicit condition
+\path{complete_execution}. Its outcome constraints intersect one shared
+allocation interval, preserving dependence between asset, profit, cash and
+liability. The response retains the unconditioned family alongside the selected
+interval and its conditional ranges. An impossible combination has an empty
+selection and no bounds. A separate \path{max_replays} budget controls the
+query witness: with zero budget, a nonempty candidate interval remains visible
+but its selection and bounds are not reported as verified.
+
+The source locks and full recomputation reject changed methods or forged saved
+results. Source admission, accounting admission, method eligibility, actual
+history identification and production commit remain false. The exact original
+dates, rates, schedules and depreciation are restrictions of this reference;
+unknown rates or liabilities, arbitrary membership and broader lease valuation
+require additional methods and cannot be handled by renaming this profile.
+
+The derivation and complete saved requests and responses are retained under
+\path{data/accounting-master/}:
+\begin{quote}\small
+\path{lease-allocation-family-audit-20261024}\\
+\path{lease-allocation-family-20261024}
+\end{quote}
+They show how aggregate-compatible openings can remain distinct through a
+supported accounting calculation, and how unsuccessful paths remain part of
+the answer. Connecting that family to actual disclosed rights, measurements
+and authority is still a separate source-reconstruction task.

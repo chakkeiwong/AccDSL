@@ -1,0 +1,167 @@
+\subsection{A payment before the bill must be applied only once}
+\label{sec:customer-advance}
+
+The preceding recurrence deliberately excludes an advance before billing.
+Suppose a customer pays 30 towards a service priced at 100. No service has yet
+been performed and no payment was already due. The company now has cash 30 and
+an obligation to provide the service, so it debits cash and credits a contract
+liability. Crediting revenue would balance the entry but recognise performance
+that has not occurred. Paragraphs 105--108 of the retained AASB 15 distinguish
+this payment from an unconditional receivable \citep{aasb15dated}.
+
+Now let the company earn 60 before issuing a bill. Recognition releases the
+liability of 30 and creates a contract asset of 30, with a credit to revenue
+of 60. The later invoice shows a gross amount of 80 and applies the customer's
+advance of 30, leaving a new unconditional right to 50. Its entry debits the
+receivable by 50, credits the contract asset by 30 and credits a contract
+liability by 20. Creating a receivable of 80 would count the prepaid 30 again.
+When the customer pays another 20, cash is 50, the receivable is 30 and the
+contract liability is 20. Their net contribution to assets is the earned 60.
+
+The method therefore keeps the invoice's gross amount separate from the right
+still owed. Let $G$ be cumulative gross billings, $A$ cash advances, $K$ the
+amount of those advances applied to bills, and $C$ later collections of
+receivables. Each application names both its advance and its invoice; the
+remaining unapplied credit is $A-K$. As before, $R$ is cumulative earned
+revenue. The consideration already paid or made unconditionally due, counted
+once, is $T=G+A-K$. For this one fixed-price contract,
+\[
+ \mathrm{AR}=G-K-C,\qquad
+ \mathrm{CA}=\max(R-T,0),\qquad
+ \mathrm{CL}=\max(T-R,0),\qquad
+ \text{cash received}=A+C.
+\]
+The minus $K$ prevents the applied advance from appearing both in the cash
+payment and in the bill. Since $\mathrm{CA}-\mathrm{CL}=R-T$, the control
+\[
+ (A+C)+(G-K-C)+\mathrm{CA}-\mathrm{CL}
+ =G+A-K+R-T=R
+\]
+recovers the earned amount. This derivation uses a single contract, with
+$0\leq K\leq\min(A,G)$, $0\leq C\leq G-K$ and $0\leq R,T\leq100$.
+It provides no authority to offset different contracts or to ignore impairment,
+financing, tax, cancellation or refund terms.
+
+Each event must carry its contract, identity, date, currency and admitted
+facts. In this restricted extension, advances precede all performance and
+billing; later payments settle identified receivables. A revenue increment
+first releases an existing contract liability and then creates a contract asset.
+For a new gross bill $g$ that applies unused advance credit $k$, only $g-k$
+creates a receivable. That amount releases the existing contract asset first;
+any remainder increases the contract liability. The invoice consumes its
+identified credit even if the advance has already been earned. A duplicate
+credit application, an overcollection or missing unconditional-right evidence
+cannot pass by adjusting a balancing account.
+
+Billing before performance gives the same final balances in the example but
+a different intermediate history. The invoice creates a receivable of 50 and
+adds 50 to the existing contract liability of 30; earning 60 then releases 60
+of that liability. After the later collection of 20, both paths have the
+balances above. Completing the service adds revenue 40, releasing the remaining
+liability of 20 and creating a contract asset of 20. A final bill for 20 and
+collection of the remaining 50 leave cash 100 and no contract or receivable
+balance. The actual sequence is retained even where endpoint amounts agree.
+
+A wholly prepaid invoice exposes another implementation requirement. If its
+gross amount and applied advance are both 30, it creates no new monetary right
+and needs no accounting lines. It still consumes an identified credit. The
+proposed authored method therefore declares a state-only journal proposal:
+empty lines, zero account changes and explicit changes to the invoice and
+advance allocations. Authorization checks that the net new right is zero;
+the same atomic commit and replay rules protect the allocation from reuse.
+An empty journal cannot carry a nonzero monetary effect. The native acquisition
+schema requires nonempty lines and does not implement this case; an unavailable
+authored schema returns an unsupported-operation result without changing state.
+
+These are revenue and cash contributions before service costs and tax. Their
+missing measurements remain inputs to the complete company statements. The
+next example retains a different obligation: cash already received may have
+to be returned even after the goods have been delivered.
+
+\subsection{A return right survives the sale}
+\label{sec:customer-returns}
+
+Consider 100 goods sold for 10 each, with a former inventory cost of 6 each.
+The buyer obtains control, pays cash and has a contractual right to a refund
+for returned non-defective goods. Assume an eligible Australian for-profit
+contract in 2024, within the retained AASB 15 compilation's application period.
+The contract, control, price-estimation and significant-reversal conditions
+are separately satisfied; immediate cash receipt alone would not establish
+them. The numbers are synthetic measurements, not estimates of Apple's returns.
+
+If the company initially expects 10 goods to be returned, it expects to retain
+900 of the 1,000 received. AASB 15 B20--B25 requires revenue for the expected
+entitlement, a refund liability and a separate asset for the right to recover
+the goods \citep{aasb15dated}. With no expected recovery costs or deterioration
+in this example, the refund liability is 100 and the recovery asset is 60.
+The company debits cash 1,000, credits revenue 900 and credits the refund
+liability 100. It removes inventory 600 by debiting cost of sales 540 and the
+recovery asset 60. Pretax profit is therefore 360. Recognising the full 1,000
+as revenue would omit a known refund obligation, although the entry balances.
+
+For a homogeneous cohort of $N$ units, unit price $p$, former unit cost $c$ and
+an admitted estimate $q$ of returns, the initial no-recovery-cost case gives
+\begin{align*}
+ \text{revenue}&=(N-q)p, & \text{refund liability}&=qp,\\
+ \text{cost of sales}&=(N-q)c, & \text{recovery asset}&=qc.
+\end{align*}
+The estimate and its measurement date are retained with the cohort. Paragraphs
+53--59 require an appropriate estimation method and the constraint on a
+significant reversal; $q$ is not a probability supplied by the accounting
+standard. Missing evidence for that measurement leaves the amount unresolved.
+After actual returns begin, the state separately records refunded units,
+remaining expected returns, remaining liability and recovery rights. A later
+outcome cannot be inserted into the original information view.
+
+Suppose the sale occurs in 2024 and new information at year end raises expected
+returns to 12. The liability increases by 20, reducing revenue by 20. The
+recovery asset increases by 12, reducing cost of sales by 12. Closing revenue
+is 880, cost of sales 528 and pretax profit 352. The change in expectations
+does not itself establish an error in the original estimate. If the opening
+inventory of 600 was financed entirely by opening equity of 600, the resulting
+pretax balance sheet has cash 1,000 and recovery asset 72, against refund
+liability 120 and equity 952.
+
+In 2025, assume the return period ends with eight accepted returns and no
+remaining legal right or unresolved claim. Before final settlement, remeasure
+the liability from 120 to 80 and the recovery asset from 72 to 48. The first
+change credits revenue by 40; the second debits cost of sales by 24. Refunding
+80 then debits the liability and credits cash. Receiving the eight goods
+debits inventory by 48 and credits the recovery asset by 48. Settlement does
+not recognise the sale or its cost a second time. The 2025 pretax profit
+contribution is 16, closing cash is 920 and inventory is 48. With no other
+movements, equity is 968: opening 600 plus cumulative profit 368.
+
+The cash and accrual statements can now be checked independently. Operating
+cash is 1,000 in 2024 and $-80$ in 2025. In the indirect method, the first
+year adds the inventory reduction and liability increase to profit while
+subtracting the recovery-asset increase. The second year reverses the relevant
+balance movements:
+\begin{align*}
+ \mathrm{CFO}_{2024}&=352+600-72+120=1{,}000,\\
+ \mathrm{CFO}_{2025}&=16-48+72-120=-80.
+\end{align*}
+There is no investing or financing cash flow, OCI or subsequent owner
+transaction in this slice. Tax has not been computed: these pretax
+contributions must enter the separate current/deferred-tax method before they
+can become complete after-tax company statements.
+
+Recovery costs change the asset without necessarily changing the refund. For
+the 12-unit estimate, expected recovery costs of 1 per unit and deterioration
+of 0.5 give a recovery asset of $12(6-1-0.5)=54$. Cost of sales becomes 546
+and pretax profit 334, while the refund liability remains 120. The cost inputs
+are measurements, not automatic zeros; estimating them does not pay cash early.
+Paragraph B25 also requires separate presentation of the asset and liability.
+Showing only their net 48 in the original no-cost case would conceal both
+the gross right to recover goods and the gross obligation to refund cash.
+
+Scope conditions matter as much as the arithmetic. Paragraph B26 treats an
+exchange for the same type, quality, condition and price differently from a
+return; B27 sends a defective-product replacement to warranty guidance.
+The refund method cannot accept those events simply because the goods move
+back to the seller. It also needs the contractual return window, accepted-unit
+identities, actual refund and recovery measurements, and evidence that any
+remaining rights have expired before clearing the balances. An unknown
+estimate yields unresolved, absent control makes recognition ineligible, and
+an event of a different kind remains outside this method. Inventory costing
+and the condition of recovered goods continue to have their own requirements.

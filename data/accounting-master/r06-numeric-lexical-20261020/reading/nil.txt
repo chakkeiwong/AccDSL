@@ -1,0 +1,89 @@
+3.3.4 Element Declaration Validation Rules
+Validation Rule:  Element Locally Valid (Element)
+For an element information item to be locally ·valid· with respect to an
+element declaration
+all of the following must be true:
+1 The declaration must not be ·absent·.
+2 Its
+{abstract} must be false.
+3 The appropriate case among the following
+must be true:
+3.1 If {nillable} is false, then there must be no attribute information item among the element
+information item's [attributes] whose [namespace name] is identical to http://www.w3.org/2001/XMLSchema-instance and whose [local name] is nil.
+3.2 If {nillable} is true and there is such an attribute
+information item and its ·actual value· is true
+, then
+all of the following must be true:
+3.2.1 The element information item must have no character or element information item
+[children].
+3.2.2 There must be no fixed {value constraint}.
+4 If there is an attribute information item among the element
+information item's [attributes] whose [namespace name] is identical to http://www.w3.org/2001/XMLSchema-instance and whose [local name] is type, then
+all of the following must be true:
+4.1 The ·normalized value· of that attribute information item must be
+·valid· with respect to the built-in QName simple type, as defined by String Valid (§3.14.4);
+4.2 The ·local name· and ·namespace name· (as defined in QName Interpretation (§3.15.3)), of the ·actual value· of that attribute information item must resolve to a type definition, as defined in QName resolution (Instance) (§3.15.4) -- [Definition:]  call this type definition the local type definition;
+4.3 The ·local type definition· must be
+validly derived from the {type definition} given the
+union of the {disallowed substitutions} and the {type definition}'s {prohibited substitutions}, as defined in Type Derivation OK (Complex) (§3.4.6) (if it is a complex type definition), or given {disallowed substitutions} as defined in Type Derivation OK (Simple) (§3.14.6) (if it is a simple type definition).
+[Definition:]  The phrase
+actual type definition occurs below.  If the above three clauses are satisfied, this
+should be understood as referring to the ·local type
+definition·, otherwise to the {type definition}.
+5 The appropriate case among the following
+must be true:
+5.1 If the declaration has a {value constraint}, the item has neither element nor character [children] and clause 3.2 has not applied, then
+all of the following must be true:
+5.1.1 If the ·actual type definition· is a ·local type
+definition· then the canonical lexical representation of the {value constraint} value must
+be a valid default for the ·actual
+type definition· as defined in Element Default Valid (Immediate) (§3.3.6).
+5.1.2 The element information item with the canonical lexical representation of the {value constraint} value used as its ·normalized value·
+must be ·valid· with respect to the ·actual type definition· as defined by Element Locally Valid (Type) (§3.3.4).
+5.2 If the declaration has no {value constraint} or the item has either element or character [children] or clause 3.2 has applied, then all of the following must be true:
+5.2.1 The element information item
+must be ·valid· with respect to the ·actual type definition· as defined by Element Locally Valid (Type) (§3.3.4).
+5.2.2 If there is a fixed {value constraint} and
+clause 3.2 has not applied,
+all of the following must be true:
+5.2.2.1 The element information item must have no element information
+item [children].
+5.2.2.2 The appropriate case among the following
+must be true:
+5.2.2.2.1 If the {content type} of the ·actual type definition· is mixed, then the ·initial value·
+of the item must match the canonical lexical representation of the {value constraint} value.
+5.2.2.2.2 If the {content type} of the ·actual type definition· is a simple type definition, then the ·actual value· of the item must match the canonical lexical representation of the {value constraint} value.
+6 The element information item must be ·valid· with respect to
+each of the {identity-constraint definitions} as per Identity-constraint Satisfied (§3.11.4).
+7 If the element information item is the ·validation root·, it must be ·valid· per Validation Root Valid (ID/IDREF) (§3.3.4).
+Validation Rule:  Element Locally Valid (Type)
+For an element information item to be locally ·valid· with respect to a type definition
+all of the following must be true:
+1 The type definition must not be ·absent·;
+2
+It must not have
+{abstract} with value true.
+3 The appropriate case among the following
+must be true:
+3.1 If the type definition is a simple type
+definition, then
+all of the following must be true:
+3.1.1 The element information item's [attributes] must be empty,
+excepting those whose [namespace name] is identical to http://www.w3.org/2001/XMLSchema-instance and whose [local name] is one of type, nil, schemaLocation or noNamespaceSchemaLocation.
+3.1.2 The element information item must have no element information item [children].
+3.1.3 If clause 3.2 of Element Locally Valid (Element) (§3.3.4) did not apply, then the ·normalized value· must be ·valid· with respect to the type definition as defined by String Valid (§3.14.4).
+3.2 If the type definition is a complex type definition, then the element information item must be ·valid· with respect to the type definition as per Element Locally Valid (Complex Type) (§3.4.4);
+Validation Rule:  Validation Root Valid (ID/IDREF)
+For an element information item which is the ·validation root· to be ·valid·
+all of the following must be true:
+1 There must be no ID/IDREF binding in the item's
+[ID/IDREF table] whose [binding] is the
+empty set.
+2 There must be no ID/IDREF binding in the item's [ID/IDREF table] whose [binding] has more
+than one member.
+See ID/IDREF Table (§3.15.5) for the definition of ID/IDREF binding.
+Note: The first clause above applies when there is a reference to an
+undefined ID.  The second applies when there is a multiply-defined ID.  They
+are separated out to ensure that distinct error codes (see Outcome Tabulations (normative) (§C)) are associated with these two cases.
+Note: Although this rule applies at the ·validation
+root·, in practice processors, particularly streaming processors, may

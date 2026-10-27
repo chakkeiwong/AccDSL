@@ -1,0 +1,734 @@
+{
+  "profile": "OrderedEligibilityText/1",
+  "status": "compiled_structural",
+  "template": {
+    "profile": "OrderedEventEligibility/1",
+    "operation": "collect",
+    "input_types": {
+      "approved": {
+        "context": {},
+        "kind": "boolean"
+      },
+      "amount": {
+        "context": {
+          "book": "legal-beta",
+          "case_id": "synthetic-cycle-beta",
+          "entity": "Operating-beta",
+          "mode": "synthetic"
+        },
+        "dimensions": {
+          "currency:USD": 1
+        },
+        "kind": "rational",
+        "scale": "1/1"
+      },
+      "claim_id": {
+        "context": {},
+        "kind": "text"
+      },
+      "customer": {
+        "context": {},
+        "kind": "text"
+      }
+    },
+    "stages": [
+      {
+        "id": "approval",
+        "reason": "applicability_not_selected",
+        "bindings": {
+          "approved": {
+            "kind": "event_input",
+            "name": "approved"
+          }
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "eligibility.approval",
+          "version": "1",
+          "inputs": {
+            "approved": {
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "role": "state",
+              "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+            }
+          },
+          "requirements": [
+            {
+              "id": "approval",
+              "on_false": "unsupported",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "approved"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "ref",
+                "id": "approved"
+              }
+            }
+          ],
+          "required_known": [],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Selected synthetic contract; lifecycle invariants and accounting admission remain separate"
+          ]
+        }
+      },
+      {
+        "id": "unsealed_day",
+        "reason": "assessment_day_sealed",
+        "bindings": {
+          "cursor": {
+            "kind": "memory_leaf",
+            "pointer": "/collection_clock/cursor"
+          },
+          "day": {
+            "kind": "event_metadata",
+            "field": "date"
+          }
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "eligibility.unsealed_day",
+          "version": "1",
+          "inputs": {
+            "cursor": {
+              "type": {
+                "context": {},
+                "kind": "date"
+              },
+              "role": "state",
+              "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+            },
+            "day": {
+              "type": {
+                "context": {},
+                "kind": "date"
+              },
+              "role": "state",
+              "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+            }
+          },
+          "requirements": [
+            {
+              "id": "unsealed_day",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "cursor",
+                "day"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "le",
+                "left": {
+                  "op": "ref",
+                  "id": "cursor"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "day"
+                }
+              }
+            }
+          ],
+          "required_known": [],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Selected synthetic contract; lifecycle invariants and accounting admission remain separate"
+          ]
+        }
+      },
+      {
+        "id": "claim_exists",
+        "reason": "unknown_claim",
+        "bindings": {
+          "exists": {
+            "kind": "map_contains",
+            "pointer": "/claims",
+            "key_input": "claim_id"
+          }
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "eligibility.claim_exists",
+          "version": "1",
+          "inputs": {
+            "exists": {
+              "type": {
+                "context": {},
+                "kind": "boolean"
+              },
+              "role": "state",
+              "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+            }
+          },
+          "requirements": [
+            {
+              "id": "claim_exists",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "exists"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "ref",
+                "id": "exists"
+              }
+            }
+          ],
+          "required_known": [],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Selected synthetic contract; lifecycle invariants and accounting admission remain separate"
+          ]
+        }
+      },
+      {
+        "id": "customer_matches",
+        "reason": "claim_customer_mismatch",
+        "bindings": {
+          "customer": {
+            "kind": "event_input",
+            "name": "customer"
+          },
+          "owner": {
+            "kind": "map_field",
+            "pointer": "/claims",
+            "key_input": "claim_id",
+            "field": "customer",
+            "after_stage": "claim_exists"
+          }
+        },
+        "manifest": {
+          "profile": "MethodRequirements/3",
+          "method_id": "eligibility.customer_matches",
+          "version": "1",
+          "inputs": {
+            "customer": {
+              "type": {
+                "context": {},
+                "kind": "text"
+              },
+              "role": "state",
+              "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+            },
+            "owner": {
+              "type": {
+                "context": {},
+                "kind": "text"
+              },
+              "role": "state",
+              "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+            }
+          },
+          "requirements": [
+            {
+              "id": "customer_matches",
+              "on_false": "invalid",
+              "on_unknown": "unresolved",
+              "guard_requires": [],
+              "requires": [
+                "customer",
+                "owner"
+              ],
+              "admission_refs": [],
+              "guard": {
+                "op": "const",
+                "type": {
+                  "context": {},
+                  "kind": "boolean"
+                },
+                "value": true
+              },
+              "predicate": {
+                "op": "eq",
+                "left": {
+                  "op": "ref",
+                  "id": "customer"
+                },
+                "right": {
+                  "op": "ref",
+                  "id": "owner"
+                }
+              }
+            }
+          ],
+          "required_known": [],
+          "capabilities": [],
+          "residual_prerequisites": [
+            "Selected synthetic contract; lifecycle invariants and accounting admission remain separate"
+          ]
+        }
+      }
+    ],
+    "residuals": [
+      "Finite declared lifecycle; full state invariants are separate prerequisites",
+      "No accounting, source or general language admission"
+    ],
+    "context": {
+      "book": "legal-beta",
+      "case_id": "synthetic-cycle-beta",
+      "currency": "USD",
+      "entity": "Operating-beta",
+      "mode": "synthetic"
+    }
+  },
+  "template_sha256": "cc74ff41225e4e6f9568089018eeb17557c7f0bee744d9d2b23b12363660585a",
+  "source_sha256": "d8d3a9f5ccba9007d146685d32bb6ebe773eea7ee8143197866cc6ea10dc5e7e",
+  "source_spans": [
+    {
+      "line": 1,
+      "byte_start": 0,
+      "byte_end": 85,
+      "granularity": "declaration",
+      "slice_sha256": "07e05ea68d98a8405ff72ec63e6b32788249e5ff16c518a1b29f17f2da1c1b98"
+    },
+    {
+      "line": 2,
+      "byte_start": 86,
+      "byte_end": 211,
+      "granularity": "declaration",
+      "slice_sha256": "fedc0b03f62b6145df1fd2ac883c3053bdc31d412aa26517b79379454aaceaa7"
+    },
+    {
+      "line": 3,
+      "byte_start": 212,
+      "byte_end": 266,
+      "granularity": "declaration",
+      "slice_sha256": "fe62efbdc3b59ea5df62a72b72e2fed25decc3fb46d2d595d909714f529ed8c4"
+    },
+    {
+      "line": 4,
+      "byte_start": 267,
+      "byte_end": 463,
+      "granularity": "declaration",
+      "slice_sha256": "136ee64ee9b044b6f7a21b065a02e6bcc34dac99fa84e971f16476d972e69029"
+    },
+    {
+      "line": 5,
+      "byte_start": 464,
+      "byte_end": 515,
+      "granularity": "declaration",
+      "slice_sha256": "37c640d0801466214cda0d8ca8ca2835c9a156fe81a67ed2cefeae273b87b2d6"
+    },
+    {
+      "line": 6,
+      "byte_start": 516,
+      "byte_end": 567,
+      "granularity": "declaration",
+      "slice_sha256": "dda32201be59a917acd6bb1d9112c488c441e8d055c0af83f55f10e23d00ce52"
+    },
+    {
+      "line": 7,
+      "byte_start": 568,
+      "byte_end": 655,
+      "granularity": "declaration",
+      "slice_sha256": "74b267f973b925786bc7986716ba62d9657437f8b198968434651b99f0a7f2dc"
+    },
+    {
+      "line": 8,
+      "byte_start": 656,
+      "byte_end": 719,
+      "granularity": "declaration",
+      "slice_sha256": "f40a4cd1a9c0b5b7c88ad2116f29882ed59d5a07678de2bdf6b4c2a5380630b3"
+    },
+    {
+      "line": 9,
+      "byte_start": 720,
+      "byte_end": 766,
+      "granularity": "declaration",
+      "slice_sha256": "5bfcbae9282556732b4df617f07b8da254f03a5681d3a06b06c897c09a50ac48"
+    },
+    {
+      "line": 10,
+      "byte_start": 767,
+      "byte_end": 808,
+      "granularity": "declaration",
+      "slice_sha256": "774fb3c471ac5769a0c42cf901f1fb5c5b87a32ef9393b484098cc7849910a3e"
+    },
+    {
+      "line": 11,
+      "byte_start": 809,
+      "byte_end": 871,
+      "granularity": "declaration",
+      "slice_sha256": "6ed9e3eca2d5ada7b4cdf9b0f73b97d69e94fd969c59fbe78abcff3123b281cc"
+    },
+    {
+      "line": 12,
+      "byte_start": 872,
+      "byte_end": 1003,
+      "granularity": "declaration",
+      "slice_sha256": "8ea557a3b0e516981c305590c9b79fab67f8fe3788dfdcb52034ce94f30c29bf"
+    },
+    {
+      "line": 13,
+      "byte_start": 1004,
+      "byte_end": 1127,
+      "granularity": "declaration",
+      "slice_sha256": "25c6392cd4e23c8ac2ee48c6dab67dc51f9d20001d212b1b58cc1208f0f0a846"
+    },
+    {
+      "line": 14,
+      "byte_start": 1128,
+      "byte_end": 1146,
+      "granularity": "declaration",
+      "slice_sha256": "12e02128f9a58ca4d907983f91387a18d463243ce5480f0e0cc044a93d47dd82"
+    },
+    {
+      "line": 15,
+      "byte_start": 1147,
+      "byte_end": 1249,
+      "granularity": "declaration",
+      "slice_sha256": "a3a36cbab709c7c333ee1f19e0f2b027dd6e2f50962ca8ab63dabfa9417a2733"
+    },
+    {
+      "line": 16,
+      "byte_start": 1250,
+      "byte_end": 1260,
+      "granularity": "declaration",
+      "slice_sha256": "d9bd2012b9ec971a9c66d1e5a70f9a9aa65989ed446326802e7ffc9458d330c7"
+    },
+    {
+      "line": 17,
+      "byte_start": 1261,
+      "byte_end": 1271,
+      "granularity": "declaration",
+      "slice_sha256": "02ac78fee15e87fb0c45c9a4bd3f440584bdb0ab692f346dc34e8e93c74d8fde"
+    },
+    {
+      "line": 18,
+      "byte_start": 1272,
+      "byte_end": 1317,
+      "granularity": "declaration",
+      "slice_sha256": "10958981c1b72ebaba54902d48b6073ec7a9b93348492c02fb832ffa7c4d3706"
+    },
+    {
+      "line": 19,
+      "byte_start": 1318,
+      "byte_end": 1373,
+      "granularity": "declaration",
+      "slice_sha256": "2d0ebbf95a42738e969a49a2ffa192cf5be2c32e85379b7a7637f4618f194109"
+    },
+    {
+      "line": 20,
+      "byte_start": 1374,
+      "byte_end": 1409,
+      "granularity": "declaration",
+      "slice_sha256": "ebce26608e560e38ef91ff0237c9bd08780e4483158f2a6b9c11fa416f58d78c"
+    },
+    {
+      "line": 21,
+      "byte_start": 1410,
+      "byte_end": 1476,
+      "granularity": "declaration",
+      "slice_sha256": "2d8fbb5fd3cf4ee388877baa904ad4efa1bc4090a541f5077ba6561223e9f016"
+    },
+    {
+      "line": 22,
+      "byte_start": 1477,
+      "byte_end": 1603,
+      "granularity": "declaration",
+      "slice_sha256": "dea39a04c92e9b0f8503a152faa6012da3d1ced1efb212ea524eee8412428aec"
+    },
+    {
+      "line": 23,
+      "byte_start": 1604,
+      "byte_end": 1727,
+      "granularity": "declaration",
+      "slice_sha256": "df96bcff01a60f135061cbe930d45e8441dddee9fba62aa16319d889e5416743"
+    },
+    {
+      "line": 24,
+      "byte_start": 1728,
+      "byte_end": 1870,
+      "granularity": "declaration",
+      "slice_sha256": "7727f64abcde12ed45269f34a288de61a842343aebbc74827cb6266a9c29d1fb"
+    },
+    {
+      "line": 25,
+      "byte_start": 1871,
+      "byte_end": 1889,
+      "granularity": "declaration",
+      "slice_sha256": "12e02128f9a58ca4d907983f91387a18d463243ce5480f0e0cc044a93d47dd82"
+    },
+    {
+      "line": 26,
+      "byte_start": 1890,
+      "byte_end": 1992,
+      "granularity": "declaration",
+      "slice_sha256": "a3a36cbab709c7c333ee1f19e0f2b027dd6e2f50962ca8ab63dabfa9417a2733"
+    },
+    {
+      "line": 27,
+      "byte_start": 1993,
+      "byte_end": 2003,
+      "granularity": "declaration",
+      "slice_sha256": "d9bd2012b9ec971a9c66d1e5a70f9a9aa65989ed446326802e7ffc9458d330c7"
+    },
+    {
+      "line": 28,
+      "byte_start": 2004,
+      "byte_end": 2014,
+      "granularity": "declaration",
+      "slice_sha256": "02ac78fee15e87fb0c45c9a4bd3f440584bdb0ab692f346dc34e8e93c74d8fde"
+    },
+    {
+      "line": 29,
+      "byte_start": 2015,
+      "byte_end": 2052,
+      "granularity": "declaration",
+      "slice_sha256": "5c35f27ced3f2867b30e45c88dc111b375b920600f9af83cfd14a0ee131c1d9b"
+    },
+    {
+      "line": 30,
+      "byte_start": 2053,
+      "byte_end": 2103,
+      "granularity": "declaration",
+      "slice_sha256": "d8aab45c0301897301bb070b899161df7574369d9281ce81d50b65a5aea13542"
+    },
+    {
+      "line": 31,
+      "byte_start": 2104,
+      "byte_end": 2170,
+      "granularity": "declaration",
+      "slice_sha256": "86995dc17c08991c7505bc3f1f92b4a0d200f2c1ad0a2ab4fbf03d0e12eec5de"
+    },
+    {
+      "line": 32,
+      "byte_start": 2171,
+      "byte_end": 2300,
+      "granularity": "declaration",
+      "slice_sha256": "3af0f7ffbee00dff53c6575aec9e94aecbfc3a3119dcaac3d2a1f4a22e874503"
+    },
+    {
+      "line": 33,
+      "byte_start": 2301,
+      "byte_end": 2420,
+      "granularity": "declaration",
+      "slice_sha256": "bad28fbee372b33a8b54b78ba393c40f37a12e5707ef0e9ec18da4c1a5a2fb55"
+    },
+    {
+      "line": 34,
+      "byte_start": 2421,
+      "byte_end": 2439,
+      "granularity": "declaration",
+      "slice_sha256": "12e02128f9a58ca4d907983f91387a18d463243ce5480f0e0cc044a93d47dd82"
+    },
+    {
+      "line": 35,
+      "byte_start": 2440,
+      "byte_end": 2542,
+      "granularity": "declaration",
+      "slice_sha256": "a3a36cbab709c7c333ee1f19e0f2b027dd6e2f50962ca8ab63dabfa9417a2733"
+    },
+    {
+      "line": 36,
+      "byte_start": 2543,
+      "byte_end": 2553,
+      "granularity": "declaration",
+      "slice_sha256": "d9bd2012b9ec971a9c66d1e5a70f9a9aa65989ed446326802e7ffc9458d330c7"
+    },
+    {
+      "line": 37,
+      "byte_start": 2554,
+      "byte_end": 2564,
+      "granularity": "declaration",
+      "slice_sha256": "02ac78fee15e87fb0c45c9a4bd3f440584bdb0ab692f346dc34e8e93c74d8fde"
+    },
+    {
+      "line": 38,
+      "byte_start": 2565,
+      "byte_end": 2616,
+      "granularity": "declaration",
+      "slice_sha256": "e4b9fef0c5e6172ad942cd6fea2a6f9c5178016fd56f94181befa360b87060e2"
+    },
+    {
+      "line": 39,
+      "byte_start": 2617,
+      "byte_end": 2658,
+      "granularity": "declaration",
+      "slice_sha256": "ad6f964d1661640af09fafc4c0789bf3cd604dbed9ec4749e21de6a4b2a5b514"
+    },
+    {
+      "line": 40,
+      "byte_start": 2659,
+      "byte_end": 2731,
+      "granularity": "declaration",
+      "slice_sha256": "6414af2876001f5c110803c30f233ec5200a0a49d68732bb795267e6f3da4de2"
+    },
+    {
+      "line": 41,
+      "byte_start": 2732,
+      "byte_end": 2802,
+      "granularity": "declaration",
+      "slice_sha256": "242d08cdf33887297355db64e3887774bb7b9e42bb4beaf6874e3bad14eff6ef"
+    },
+    {
+      "line": 42,
+      "byte_start": 2803,
+      "byte_end": 2931,
+      "granularity": "declaration",
+      "slice_sha256": "8473893ad7408345b80c3ff215602597d431a44387eeaf27245723f70273cbc6"
+    },
+    {
+      "line": 43,
+      "byte_start": 2932,
+      "byte_end": 3057,
+      "granularity": "declaration",
+      "slice_sha256": "d8986db803547f076c4d3a69217fd5725466d07d27819ed04a3797cabe44d8e5"
+    },
+    {
+      "line": 44,
+      "byte_start": 3058,
+      "byte_end": 3212,
+      "granularity": "declaration",
+      "slice_sha256": "927697ba12c92c26fd41c12a4802a7affae84379b9f6e11acc910536595eb1f8"
+    },
+    {
+      "line": 45,
+      "byte_start": 3213,
+      "byte_end": 3231,
+      "granularity": "declaration",
+      "slice_sha256": "12e02128f9a58ca4d907983f91387a18d463243ce5480f0e0cc044a93d47dd82"
+    },
+    {
+      "line": 46,
+      "byte_start": 3232,
+      "byte_end": 3334,
+      "granularity": "declaration",
+      "slice_sha256": "a3a36cbab709c7c333ee1f19e0f2b027dd6e2f50962ca8ab63dabfa9417a2733"
+    },
+    {
+      "line": 47,
+      "byte_start": 3335,
+      "byte_end": 3345,
+      "granularity": "declaration",
+      "slice_sha256": "d9bd2012b9ec971a9c66d1e5a70f9a9aa65989ed446326802e7ffc9458d330c7"
+    },
+    {
+      "line": 48,
+      "byte_start": 3346,
+      "byte_end": 3356,
+      "granularity": "declaration",
+      "slice_sha256": "02ac78fee15e87fb0c45c9a4bd3f440584bdb0ab692f346dc34e8e93c74d8fde"
+    },
+    {
+      "line": 49,
+      "byte_start": 3357,
+      "byte_end": 3373,
+      "granularity": "declaration",
+      "slice_sha256": "f9af4e86084fb613593bb8160ae39ca9f0678440b7143bba99c5d9280c67dae1"
+    }
+  ],
+  "stage_spans": [
+    {
+      "line": 9,
+      "byte_start": 720,
+      "byte_end": 1271,
+      "granularity": "stage",
+      "slice_sha256": "ee8896814371574a0d9e0574b67c007d72ae57e8deef80b120f3e792a6930018"
+    },
+    {
+      "line": 18,
+      "byte_start": 1272,
+      "byte_end": 2014,
+      "granularity": "stage",
+      "slice_sha256": "0d5348ff0625de76a7ecd1d69af9438bdeed783ed4826dff7c62b9f019a4ef59"
+    },
+    {
+      "line": 29,
+      "byte_start": 2015,
+      "byte_end": 2564,
+      "granularity": "stage",
+      "slice_sha256": "db8ec258d77dfd323a65fc992c19ab4d4afab5604c671d7f9f7b06387ac405b9"
+    },
+    {
+      "line": 38,
+      "byte_start": 2565,
+      "byte_end": 3356,
+      "granularity": "stage",
+      "slice_sha256": "234b51888431aaf22a7ae4b4bdbb240e7c269fef4c691fc3c01b838b0fa0a34c"
+    }
+  ],
+  "field_spans": {
+    "header": {
+      "line": 1,
+      "byte_start": 0,
+      "byte_end": 85,
+      "granularity": "declaration",
+      "slice_sha256": "07e05ea68d98a8405ff72ec63e6b32788249e5ff16c518a1b29f17f2da1c1b98"
+    },
+    "context": {
+      "line": 2,
+      "byte_start": 86,
+      "byte_end": 211,
+      "granularity": "declaration",
+      "slice_sha256": "fedc0b03f62b6145df1fd2ac883c3053bdc31d412aa26517b79379454aaceaa7"
+    },
+    "input:approved": {
+      "line": 3,
+      "byte_start": 212,
+      "byte_end": 266,
+      "granularity": "declaration",
+      "slice_sha256": "fe62efbdc3b59ea5df62a72b72e2fed25decc3fb46d2d595d909714f529ed8c4"
+    },
+    "input:amount": {
+      "line": 4,
+      "byte_start": 267,
+      "byte_end": 463,
+      "granularity": "declaration",
+      "slice_sha256": "136ee64ee9b044b6f7a21b065a02e6bcc34dac99fa84e971f16476d972e69029"
+    },
+    "input:claim_id": {
+      "line": 5,
+      "byte_start": 464,
+      "byte_end": 515,
+      "granularity": "declaration",
+      "slice_sha256": "37c640d0801466214cda0d8ca8ca2835c9a156fe81a67ed2cefeae273b87b2d6"
+    },
+    "input:customer": {
+      "line": 6,
+      "byte_start": 516,
+      "byte_end": 567,
+      "granularity": "declaration",
+      "slice_sha256": "dda32201be59a917acd6bb1d9112c488c441e8d055c0af83f55f10e23d00ce52"
+    }
+  },
+  "executed": false,
+  "source_admission": false,
+  "accounting_admission": false,
+  "state_sha256": "daf7212d15c5f87ba6b8a4b6f1d35dd947882c0defe913dbe628db4ca71756ba",
+  "definition_sha256": "8f068d5a9db6b08c6300ad826fdbe73ef98968c69bebd61d054997634376110a"
+}

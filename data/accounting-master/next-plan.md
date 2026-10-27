@@ -1,31 +1,64 @@
-# Accounting proposal — direct next plan
+# Current AccDSL master program
 
-16 October 2026. Version **3.14**, 349 pages; **not_ready**.
-PDF: `docs/design/proposal/manuscript-company-composition-20261016/accounting-product-proposal.pdf`
-SHA256: `2d9d1c2bf2eeaa17ea5eb4b1ba5e8c0c95dd33104b4e6a3bcbd7f1211980d94e`.
-Runtime implementation, empirical campaigns and the historical controller remain held.
+## Eight-hour effort concluded — 27 October 2026
 
-P5 CompanyComposition/1 attempt 03 passes 681 documentary checks, zero failures:
-9 methods, 13 transitions, 54 exchanges, 3 reports and 2 closed migrations.
-All 204 original inputs, 10,610 predecessor files, HEAD and 100 staged entries
-are preserved. The joined company's annual profit is 102, cash 644 and equity
-724. This is the supplied corporate/financing/group case; it does not cover
-bank/insurance composition or every financing method. Results and manuscript
-evidence are in `data/accounting-master/company-composition-20261016/`.
-P2 retains its 5,608-check result and P3a2 its 19,815-check result.
+Selected candidate **5.55-R1** remains **not_ready**: 837 main pages and
+265 total / 244 body simulation pages. All four PDF/TeX links select the same
+protected package. The former Version 1.2 archive retains all 32 declared files.
+Main SHA256: 76c36e5af3b22ace09dd1cff8188d19410c4af36defed5ac4b932debaf5bd1f5.
+Simulation SHA256: 71dccb1e354c3ad3befbb8110cdff2a2889f73bfa5fd4f661a92576e163bdf8e.
 
-1. R04/R06 reconciliation is delivered in
-   `data/accounting-master/candidate-reconciliation-20261016/`; retain the
-   scoped claim/source result and official XBRL route repair.
-2. R07 has no technical/render veto after the all-349-page scan, eight contact sheets, unique labels, clean build and targeted inspection.
-3. R08 contains all 53 current rows, six interaction decisions and a staged first implementation slice.
-4. R03 residual audits are delivered for admitted financing (69 checks), bank (53 checks), group (194-check diagnostics) and insurance (2,705 checks); preserve their wider residuals and continue any source-backed repair.
-5. Preserve all 13 corporate, 5 financing, 7 bank, 3 group and 8 insurance original-row promises; keep human/domain review pending.
-6. Assemble the exact independent technical review packet from Version 3.14, R03–R08.
+The authorized window ended at 15:19:56 UTC (23:19:56 Hong Kong) on
+27 October 2026. The release objective remains unmet; no extension or autonomous
+background campaign is started.
 
-Audit each next work unit before execution. A failed candidate triggers repair;
-an absent required source/input blocks its dependent claim. Continue other
-ready work. Original requirements, frozen catalog/controller/corpus records,
-historical next-plan JSON and unrelated staged work remain unchanged. No
-installation, publication, outreach, paid review or runtime launch is included.
-No continuation veto has fired. Full route: `docs/plans/accounting-master-current.md`.
+Current release decision: data/accounting-master/release-pursuit-20261027/final-reconciliation/release-decision.md.
+Concrete remaining program: data/accounting-master/release-pursuit-20261027/final-reconciliation/remaining-program.md.
+Master sequence: docs/plans/accounting-release-closure-20261027.md.
+Timed plan: docs/plans/accounting-release-eight-hour-20261027.md.
+Final reconciliation plan: docs/plans/accounting-release-final-reconciliation-20261027.md.
+Verified snapshot: data/accounting-master/release-pursuit-20261027/final-reconciliation/snapshot-deadline/verification.json.
+
+The current 452-file package includes seven bounded companions. Both volumes
+reproduce all normalized page text from a separate copy in the recorded
+environment; no original-worktree TeX inputs were observed. Coupling assumptions,
+particle ancestor weights, continuous financing amounts/settlement prefixes and
+midpoint convergence are repaired. The latter includes a proof rather than a
+monotonic-grid claim. Earlier 460 source/build checks and 12 rendered-page
+bindings retain their local meanings. No clean installation is claimed.
+
+The dated PAA roll-forward now reaches the common book/interim-report interface;
+the bank map distinguishes AU/US profiles and the retained book-to-capital case.
+Their former manuscript-integration tasks are delivered. Broader compatibility,
+source applicability and independent acceptance remain. Separate source-construction
+and intragroup replay archives are checked evidence outside the manuscript package.
+All 27 mapped literature claims have bounded dispositions; the wider survey and
+source population are unfinished. Actual issuer history/opening remains unknown.
+
+Original 35 MC provisions, 114 acceptance rows and 156 authored clauses retain
+their exact bytes. Sixty-nine later supplemental records bind 43 distinct facets;
+they are evidence, not new acceptance counts. All 53 obligations, six interactions,
+46 operations and 18 closure packages remain open. The 201 failure rows include
+unexecuted tasks. S1–S5 partial; S6 held; E3 deferred.
+
+The live ordered review of protected 5.52-R2 reaches physical page 252 of
+831; resume at 253. Separate simulation and node/equation review remains
+incomplete. Local successor review does not establish whole-document coverage.
+Finish compatible specification, full source/case/failure dispositions,
+consequential dependencies and sources, whole-document review, then distinct
+reader/domain/implementation acceptance. Complete feasible internal preparation
+before focused referral. No outreach, fees, publication, installation, GPU work,
+subagents or legacy controller are authorized by this update.
+
+Historical assessments below are preserved.
+
+## Release-readiness audit — 27 October 2026
+
+The [whole-program audit](release-readiness-audit-20261027/result.md) identifies nine release gaps at the 5.50
+cutoff: current acceptance decisions, manuscript consistency, a reproducible
+bundle, compatible interfaces, accounting joins, real-company and adverse cases,
+claim-level literature support, computational scope and independent acceptance.
+The [closure plan](../../docs/plans/accounting-release-closure-20261027.md) orders the work against the original requirements.
+This is an audit annotation, not a successor manuscript or a broad requirement
+closure. Active technical plans remain selected; reconcile later evidence before
+executing the closure sequence. S6 and E3 are not promoted.

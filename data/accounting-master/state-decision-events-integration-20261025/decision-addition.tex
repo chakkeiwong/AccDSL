@@ -1,0 +1,75 @@
+\paragraph{Let the next sale depend on the stock that remains.}
+A reusable calculation becomes a company decision when it reads the current
+book and proposes an economic event. Consider a hypothetical company holding
+two units of a homogeneous, divisible inventory lot. The lot has a carrying
+amount and tax base of USD~20, and cash is USD~452. Management's authored rule
+keeps half a unit in reserve and sells the lesser of declared demand and stock
+above that reserve. Demand, the reserve and the price are scenario assumptions;
+the example constructor requires them to be nonnegative. The rule applies only
+when its separate Boolean switch is enabled.
+
+With demand of one unit on each of three successive decision dates and a price
+of USD~15 per unit, the first decision sells one unit. The second reads the
+remaining unit and sells only half. The third reads the remaining half unit
+and proposes no sale. Total proceeds are USD~22.50, released inventory cost is
+USD~15 and profit before any subsequent tax assessment is USD~7.50. Cash becomes
+USD~474.50, while the retained half unit carries USD~5. Reusing the opening stock
+for all three decisions would give the wrong quantities. These exact fractions
+provide an independent check on the state read at each decision.
+
+The bounded reference \texttt{StateDecisionEvent/1} separates this choice from
+accounting for its consequences. It receives the complete conditional annual
+book, its content hash, a decision date, a typed function program and explicit
+input bindings. A binding can read the selected lot's current quantity or the
+book's cash balance, or supply a scenario value with provenance and an
+availability date. Quantity, currency and company context must agree with the
+program's declared types. Every program input starts as an unknown placeholder;
+the binding determines which value the rule may read.
+
+A value dated after the decision, or with unknown availability, stays unknown
+for evaluation while its original record remains inspectable. The model itself
+also needs a declared availability date. These dates express the authored
+scenario; they do not establish when a real company knew a fact. The caller
+must further state that no intervening economic event is omitted between the
+snapshot and the decision. The reference neither verifies that premise against
+disclosures nor discovers event dates. Decision and sale share one calendar
+date within the current fiscal period; explicit order distinguishes decisions
+on the same day.
+
+The program supplies three outputs: whether to act, the units sold and the
+proceeds. The compiler checks the entire program before evaluation. A false
+decision guard leaves the book exactly unchanged and need not read an unused
+future price. An unknown guard leaves the decision unresolved. Only a true
+guard requires the units and proceeds; unknown values remain unresolved, while
+invalid arithmetic refuses the proposal. This distinction prevents missing
+information from silently becoming a zero sale.
+
+A known proposal still needs the existing sale method's six findings:
+proportional allocation selected, homogeneous units, divisible units, unchanged
+measurement basis, completed performance, and tax base equal to carrying amount.
+The decision rule supplies none of these findings by itself. Application
+recomputes the complete proposal against the same state and request, then
+dispatches it to the unchanged native sale transition. A stale snapshot or an
+altered proposal refuses even if the caller updates its hash. Unknown findings
+remain unresolved, false findings remain unsupported, and a refused proposal
+is retained separately from its accounting outcome.
+
+In the checked single and repeated cases, the proposed operations, complete
+native transitions and financial statement fields equal those produced by
+manually authored sales. The report describes the recorded decision prefix and
+retains the annual interface's unresolved questions. A sequence stops at its
+first refusal, preserving earlier successful decisions, no-actions and remaining
+requests. Its decision cursor can advance through a no-action even though the
+book's last event date does not change; a later request cannot move behind that
+cursor. The reference accepts at most 64 decisions and 32 input bindings per
+decision. These are engineering limits, not a capacity claim.
+
+Twenty-eight focused test methods, 14 native-accounting regression methods,
+23 function regression methods and 64 exact comparisons across eight cases are
+retained in \path{data/accounting-master/state-decision-events-20261025/}.
+They check this composition of an authored rule and a conditional accounting
+method. The example leaves demand estimation, general financing decisions,
+simultaneous choices, event scheduling and actual historical execution open.
+No database commit, complete fiscal event population or forecast accuracy
+follows from the successful sequence.
+

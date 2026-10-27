@@ -1,0 +1,2 @@
+Attempt01 compiled and preserved all content, but the new question split across pages404–405. A strong page-break hint before the additive paragraph keeps its opening together; the failed layout, source and logs are retained in attempt-01-split-opening. No prior manuscript source was changed.
+Attempt02 strong page-break hint did not move the heading. Replace the hint with an explicit new page inside the additive passage; keep both earlier rendered attempts. This is a local section boundary, not a change to prior prose.

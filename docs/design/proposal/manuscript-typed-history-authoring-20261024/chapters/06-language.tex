@@ -1,0 +1,355 @@
+\chapter{The accounting language}
+\label{ch:language}
+
+\section{Scope of the first language}
+
+The historical AccDSL Core 0 proposal describes entities and books, accounts, observations, shared
+unknowns, constraints, alternative interpretations, contract instances,
+accounting rules and reporting mappings. It has pure expressions and a
+restricted posting effect. Economic forecasting algorithms can live in typed
+plugins; unrestricted numerical code does not need to be reimplemented in
+the DSL. The historical grammar in Appendix~\ref{app:contracts} fixes the preserved
+teaching examples. The proposed portable records and first company profile
+below define the new authoring boundary; the first matched text frontend
+supports the declared debt fragment.
+
+A subsequent documentary subset authors the funded-year extension of that
+company profile: identified claim allocations, explicit credit terms and a
+dated event sequence. Text and typed records lower to the same body, which
+drives the conditional reference calculation in
+Section~\ref{sec:funded-year-authoring}. The imported annual projection still
+supplies the other operating and accounting rules. This extends the matched
+example without establishing a complete whole-company text grammar.
+
+The next subset makes the operating inputs explicit as well.
+Section~\ref{sec:company-input-authoring} starts from the historical opening,
+then derives purchases, sales, claims, expenses and closing statements from
+authored quantities, prices, asset cohorts and contract terms. It imports no
+forecast journals. This makes a price or service-date change traceable through
+the accounts, while retaining the example's stated method restrictions.
+
+Identified operations can then repeat within a year and carry their unpaid
+claims and asset cohorts into the next year. The conditional path in
+Section~\ref{sec:company-operation-paths} follows Northstar through three
+annual periods, including revised assumptions and an interrupted year.
+Its typed records specify this composition. The bounded text frontend in
+Section~\ref{sec:company-path-authoring} preserves those records exactly,
+including named settlement allocations and incomplete paths.
+Section~\ref{sec:company-family-language} adds named unweighted scenarios and
+pure typed expressions for the declared collection policy.
+Section~\ref{sec:company-module-language} preserves their portable identities
+and specifies the additional state needed by a shared-book return method.
+Section~\ref{sec:company-return-reference} gives its matched authoring
+and finite shared-book execution reference. Section~\ref{sec:company-source-state}
+connects explicit company method selection to source-constrained partial state.
+Section~\ref{sec:statement-context-relations} extends the retained source
+representation to all statement observations and their distinct relation roles.
+Section~\ref{sec:joint-source-measurements} then tests selected balance relations
+jointly under explicit rounding and identity hypotheses.
+Section~\ref{sec:temporal-statement-network} preserves opening, movement and
+closing times while extending the selected system across the statements.
+Section~\ref{sec:conditional-history-families} gives a finite conditional
+history family with symbolic openings and explicit measurement attachment.
+Section~\ref{sec:typed-economic-history} adds typed economic quantities,
+constraints at every event and matched declarations for conditional families.
+Section~\ref{sec:method-requirement-language} makes selected method prerequisites
+reusable across these profiles, with matched typed and text declarations.
+Section~\ref{sec:requirement-successors} connects exact input binding to
+dimensional products and guarded applicability, with explicit version selection.
+Section~\ref{sec:collection-state-requirements} adds explicit collection coverage,
+identity order, signed totals and state-domain findings before monetary effects.
+Section~\ref{sec:typed-return-transitions} carries the same example through
+typed calculations, atomic state updates and exact source-bound replay.
+General functions,
+endogenous decisions, source admission and broader accounting profiles remain
+language tasks.
+
+The historical Core 0 compiler has six ordered stages: parsing with source locations; name and
+module resolution; type and temporal-context checking; lowering to the IR;
+constraint and rule-applicability analysis; and execution-plan construction.
+The compiler never silently supplies an economic assumption to make a program
+compile. A program can be valid as a historical representation while requiring
+additional assumptions before a particular simulation can run.
+The proposed portable compilation sequence is specified separately in
+Section~\ref{sec:portable-authoring}.
+
+The language's meaning is defined by its IR and evaluator, rather than by the
+surface spelling alone. Formatting changes cannot change a model's semantic
+hash. A changed source span or reviewer decision changes evidence provenance
+even if the numerical model remains the same. The system therefore maintains
+separate evidence, semantic-model and execution identifiers.
+
+For the preserved Core 0 examples, the complete grammar is supplied as
+\code{spec/core-0.lark}; the original design directory retains
+\code{spec/core-ir.schema.json} and \code{spec/core-contract.md}. They define reference resolution, expression arity,
+type/context checks, operations, failures and identity. Structural schema
+validation alone does not establish those semantic properties. ASCII
+identifiers and UTF-8 strings are used in this revision; currency suffixes,
+dates and decimal literals have explicit lexical rules. The grammar is checked
+by parsing the complete demonstration file, not by claiming that its parser
+also implements a compiler or solver.
+
+\section{Types that protect meaning}
+
+The following table uses the preserved Core 0 type vocabulary. Its distinctions
+motivate the more precise portable types introduced below.
+
+\begin{longtable}{L{40mm}L{96mm}}
+\toprule Type & Meaning and checks\\\midrule\endhead
+\code{Money<C>} & Exact amount in currency C. Addition requires identical
+currency; conversion requires a dated rate and policy.\\
+\code{Quantity<U>} & Units of shares, goods or other commodities. Quantities
+cannot be added to money or used as a functional-currency posting.\\
+\code{Rate<B>} and \code{YearFraction} & Rate with basis B, plus a separately
+computed accrual fraction. Simple and compound accrual functions are distinct.\\
+\code{Instant}, \code{Period}, \code{Calendar} & Instant observations and
+flows over intervals; interval operations preserve calendar conventions.\\
+\code{Account<K,Book>} & Account role K and owning book. Cross-book effects
+require separate balanced batches linked by an economic event.\\
+\code{Observation<T>} & Source assertion with contextual and precision
+metadata; accessing its value retains its constraint and provenance.\\
+\code{Symbol<T,D>} & Shared unknown with domain D; repeated references denote
+the same value in a history.\\
+\code{Choice<E>} & A finite structural choice over enumeration E. No probability
+is implied.\\
+\code{Distribution<T>} & Explicit probability measure with parameter,
+conditioning and measure metadata. It is not a Symbol or a Choice.\\
+\code{SourceRef}, \code{RuleRef}, \code{ModelRef} & Versioned evidence or
+implementation references; unresolved references prevent concrete execution.\\
+\code{Measurement<T>} & Value plus valuation date, basis, method, assumptions
+and numerical status. Recognition remains a rule decision.\\
+\bottomrule
+\end{longtable}
+
+The portable profile spells the rate type \code{Rate<convention>} and makes
+both calendar and accrual convention explicit in
+\code{YearFraction<calendar, convention>}. \code{InstantValue<T>} and
+\code{Flow<T, [start,end)>} distinguish dated stocks from interval flows;
+their context carries the calendar. An approximate numerical component of a
+historical \code{Measurement<T>} uses \code{Approximation} with its method,
+error description and environment references. An exact measurement remains
+exact; valuation context and recognition authority are separate in either case.
+
+Core expressions use exact integers and rationals, Boolean logic, enumerations,
+dates, records, lists, comparisons and registered pure functions. A decimal
+literal is parsed exactly, not first converted through binary floating point.
+Numerical plugins can return approximate measurements, but must declare their
+error or numerical status and the rounding used when posting money.
+
+Missingness is a tagged type with distinct values: \code{notDisclosed},
+\code{notApplicable}, \code{unreadable}, \code{withheld}, and
+\code{unresolvedMeaning}. Zero is an ordinary known number. A missing datum can
+be replaced by a declared Symbol or assumption in a model branch; the source
+observation stays missing. An unknown is not necessarily random, and an
+estimate is not necessarily missing.
+On portable import, \code{notDisclosed}, \code{unreadable}, \code{withheld} and
+\code{unresolvedMeaning} become \code{Unknown} with the corresponding reason
+and obligation references. \code{notApplicable} becomes the explicit
+\code{NotApplicable} variant, never an unknown or zero.
+
+Addition of monetary observations also requires compatible entity, perimeter,
+time, dimensions and basis. These checks operate on contextual expressions in
+addition to the currency type. An analyst can deliberately aggregate dimensions
+or transform a basis using an explicit function. For example,
+\code{sumOver(segment, ...)} records the dimension being removed and requires
+the segment partition to be declared; it does not assume every disclosed
+segment total is additive.
+
+\input{sections/portable-values}
+\section{A small model with a continuous interpretation family}
+
+The following source uses a synthetic observation whose full context is stored
+in the evidence registry. The example imports the demonstration debt package,
+which uses one-year simple accrual, no fees and immediate rate resets. It is
+not an IFRS rule package.
+
+All dependencies are instantiated in
+\code{fixtures/demo-debt-package.json}: the source reading, balanced opening
+state, currency precision, contract state and dates, reset and interest
+operations, closing and report mappings, request and expected outputs.
+\code{fixtures/borrowing.acc} is the complete source, including the retained
+earnings account and an \code{opening} declaration. The shorter listings below
+explain its declarations in stages. They do not replace that full source.
+
+\begin{lstlisting}
+module BorrowingExample version "1";
+use DemoDebt version "1";
+source note7 = external("synthetic-note-7");
+entity Acme functional USD;
+book Local entity Acme basis DemoDebt version "1";
+account Cash : Asset book Local;
+account Debt : Liability book Local;
+account InterestExpense : Expense book Local;
+
+observation debt : Money<USD> instant @2025-12-31
+  = 100 USD from note7;
+symbol alpha : Real in [0, 1]
+  because "The fixed-rate proportion is not disclosed";
+\end{lstlisting}
+
+The remaining declarations use this same unknown fraction in both loan
+components. A change to the fraction therefore changes the whole debt mix
+consistently.
+
+\begin{lstlisting}
+let fixedPrincipal = alpha * value(debt);
+let floatingPrincipal = (1 - alpha) * value(debt);
+constraint split:
+  fixedPrincipal + floatingPrincipal == value(debt);
+
+contract loans : DebtMix book Local {
+  principal = value(debt);
+  fixed_fraction = alpha;
+  fixed_rate = 0.05 per year;
+  initial_floating_rate = 0.05 per year;
+}
+alternative allFixed { assume alpha == 1; }
+alternative allFloating { assume alpha == 0; }
+scenario rateShock {
+  set market_rate = constant(0.07 per year);
+}
+\end{lstlisting}
+
+The parent model retains every $\alpha\in[0,1]$. The two named alternatives
+are useful conditional views of that family, not a declaration that the
+endpoints exhaust it. Requesting the parent family's exact bounds produces
+$[5,7]$ for the next year's expense under \code{rateShock}. Requesting a
+conditional run of \code{allFixed} supplies $\alpha=1$. Requesting a weighted
+mixture requires a separate weight model; the two labels do not create equal
+weights.
+
+An observation declaration is a reference to evidence plus a proposed typed
+reading. The compiler checks that the registry context agrees with the declared
+period and type. If the evidence is rounded, \code{value(debt)} denotes a
+shared constrained value rather than a silently exact 100. This synthetic
+registry explicitly declares an exact value, which keeps the illustration
+deterministic.
+
+\begin{minipage}{\linewidth}
+\section{Posting rules and explicit exceptions}
+
+An event type declares the information needed by a rule. The example below
+assumes an event representing interest accrued and paid on the same date.
+Separate accrual and settlement events are needed when those dates differ.
+
+\begin{lstlisting}
+event InterestPaid(principal: Money<USD>,
+                   rate: Rate<annual_simple>,
+                   fraction: YearFraction) book Local;
+
+rule recogniseInterest for InterestPaid as e
+when e.principal >= 0 USD {
+  let charge = roundMoney(simpleInterest(e.principal, e.rate, e.fraction),
+                         currencyScale(USD), "half_even");
+  require charge >= 0 USD;
+  post {
+    debit InterestExpense charge;
+    credit Cash charge;
+  }
+}
+\end{lstlisting}
+\end{minipage}
+
+The rule cannot perform file I/O, mutate another entity or sample a random
+number. It returns a proposed batch. The runtime verifies balance and all
+preconditions before committing state. Negative interest requires an explicit
+supported rule; it is not mishandled by this intentionally restricted example.
+Rounding is a declared demonstration convention, not a universal accounting
+default.
+
+Rules can declare \code{overrides ruleName}. The resulting override graph
+must be acyclic. For a concrete event, the evaluator determines all applicable
+rules and removes any that are overridden by another applicable rule. Exactly
+one maximal rule must remain for a required recognition operation. An empty
+set of applicable rules produces \code{UnsupportedTreatment}; more than one
+maximal rule produces
+\code{RuleConflict}. File order and a hidden numeric priority never break ties.
+
+If a guard depends on a symbolic value, the solver partitions the current
+feasible family into the guard and its negation, subject to the existing
+constraints. This is a logical partition, not a random draw. An incomplete
+solver returns \code{UnknownApplicability}, not a guessed rule. Statically
+provable disjointness or total coverage can be cached; otherwise the runtime
+performs the same checks on every concrete event.
+
+\section{Alternative readings, assumptions and updates}
+
+An alternative adds constraints and possibly a supported semantic mapping to
+its parent model. Its record contains a rationale, supporting spans, opposing
+evidence, author, creation time and scope. Child alternatives inherit all
+parent constraints; they cannot quietly discard an inconvenient disclosure.
+A deliberate source rejection is a separate review decision with an explicit
+reason and a new evidence view.
+
+Two independent alternatives may coexist, while two mutually exclusive readings
+of the same text require an explicit choice group. The representation stores
+these relationships in a constraint graph. It does not take a Cartesian
+product blindly. For example, interpreting an instrument as a liability affects
+both its balance-sheet account and the treatment of its periodic payments;
+those choices must be linked through one shared treatment variable.
+
+New evidence narrows an existing family by conjunction when it concerns the
+same definitions and reporting basis. If it changes the basis or corrects an
+earlier assertion, the system creates a revised evidence view and records the
+relationship. Posterior reweighting, when enabled, is a separate operation
+with likelihood provenance. A branch that becomes inconsistent is retained
+as historically considered and rejected, with the evidence that rejected it.
+
+\section{Modules and stable intermediate representation}
+
+A package identifies its namespace, semantic version, dependencies, effective
+dates, jurisdiction, supported entity classes, recognition operations and
+measurement policies. Standard packages define allowable treatments; industry
+packages add economic objects and specialised rules; company packages map
+source concepts and declare evidenced elections. A company extension cannot
+override a mandatory standard rule merely because its package is loaded last.
+An override is valid only at a declared extension point and within the selected
+standard's policy domain.
+
+The IR has separate node classes for evidence, contextual observations,
+expressions, domains, constraints, alternatives, contracts, economic events,
+measurement results, rules, journal batches, report mappings and runs.
+Each node has a stable identifier and explicit input references. No expression
+stores executable host-language text. Plugins are referenced by versioned
+identifiers with typed signatures. This permits a second implementation to
+execute the same supported program without evaluating arbitrary embedded code.
+
+The IR serialisation version is independent of the DSL version and of any
+accounting-standard edition. Migrations preserve the original payload and
+record changed meanings. A syntax migration can be automatic when semantics
+are unchanged. A changed recognition policy requires a new model version,
+even if the source file still parses.
+
+\begin{minipage}{\linewidth}
+\section{Errors are part of the interface}
+
+The compiler and runtime return typed diagnostics with a source span,
+affected entity and period, dependency chain and suggested local action.
+The principal diagnostic categories have distinct recovery paths:
+
+\begin{center}
+\begin{tabular}{L{61mm}L{75mm}}
+\toprule Diagnostic & Meaning and next action\\\midrule
+\code{TypeMismatch}, \code{ContextMismatch} & Resolve incompatible units,
+periods, entities or measurement bases; do not coerce implicitly.\\
+\code{MissingEvidence} & Supply a source or label a model input as an assumption.\\
+\code{InfeasibleHistory} & Inspect the conflicting evidence and model
+constraints; preserve the rejected candidate.\\
+\code{RuleConflict}, \code{UnknownApplicability} & Resolve rule scope or
+preserve a justified conditional partition.\\
+\code{UnsupportedTreatment} & Add a reviewed capability or leave the affected
+output incomplete.\\
+\code{UnbalancedBatch} & Reject the atomic update and diagnose the posting rule.\\
+\code{SolverIncomplete}, \code{NumericalFailure} & Preserve the target and
+inputs; repair or change the computational method.\\
+\code{InsufficientSimulationState} & Add declared conditional assumptions or
+request a family of results.\\\bottomrule
+\end{tabular}
+\end{center}
+
+Warnings can describe low extraction confidence or an approximate economic
+model, but they do not replace these errors. A required unknown input prevents
+a concrete unconditional result. The analyst can add a declared conditional
+assumption, request bounds, or leave that output incomplete. Every path has a
+different, explicit result type; there is no generic fallback to zero.
+\end{minipage}\par

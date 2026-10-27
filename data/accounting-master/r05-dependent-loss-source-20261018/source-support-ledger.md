@@ -1,0 +1,20 @@
+# Source support ledger
+
+Access date: 18 October 2026. Paths below are relative to this evidence unit.
+Acquisition commands, HTTP responses and hashes are preserved separately.
+Classification concerns this inquiry; it is not a ranking of the papers.
+
+| ID / classification | Identity and publication | Local evidence / full-text status | Notice/version check and technical coverage | Allowed support / forbidden use |
+|---|---|---|---|---|
+| F26 / DIRECT_METHOD, IMPLEMENTATION_OR_SOFTWARE | Minchul Shin and Nathan Schor (2026), ForeComp: An R Package for Comparing Predictive Accuracy Using Fixed-Smoothing Asymptotics, arXiv:2603.07458v1; preprint | sources/forecomp-arxiv-v1.body and .txt; matching 45-page primary PDF | Landing page shows v1 submitted 8 March; cover 10 March; no notice observed on that page, not comprehensive clearance. Physical 1–23, equations 1–17, Appendix A 24–26, Appendix B captions 27–45 and full extracted 27/28/29/31/34/38/43; rendered 3/29. Exact limits in source-reading.md | What this paper defines, implements, assumes and reports; not proof that cited original theorems apply here, not project statistical validation |
+| DM95 / FOUNDATIONAL, SOURCE_BLOCKED | Francis X. Diebold and Roberto S. Mariano (1995), Comparing Predictive Accuracy, JBES 13(3):253–263; DOI 10.1080/07350015.1995.10524599 | sources/dm1995-crossref.body, dm1995-openalex.body; author routes 1/2 both 403; no matching full text obtained | Exact DOI metadata checked; Crossref empty relations/no update fields; OpenAlex is_retracted=false. Publisher notice text unavailable; no technical sections inspected | Bibliographic identity and bounded metadata only; no original theorem, assumptions or proof support |
+| HLN97 / DIRECT_METHOD, SOURCE_BLOCKED | David Harvey, Stephen Leybourne and Paul Newbold (1997), Testing the equality of prediction mean squared errors, IJF 13(2):281–291; DOI 10.1016/S0169-2070(96)00719-4 | sources/hln1997-crossref.body, hln1997-openalex.body; publisher routes 403/406; no usable full text | Same bounded DOI metadata check; no original method/proof read | Metadata only; ForeComp's account of a correction is not inspection of HLN or evidence of exactness |
+| D15 / SURVEY_OR_TUTORIAL, SOURCE_BLOCKED | Francis X. Diebold (2015), Comparing Predictive Accuracy, Twenty Years Later: A Personal Perspective on the Use and Abuse of Diebold–Mariano Tests, JBES; DOI 10.1080/07350015.2014.983236 | sources/dm2015-crossref.body, dm2015-openalex.body; author route 403; no matching full text | Metadata indicates 2015 publication despite 2014 in DOI. OpenAlex is_retracted=false; Crossref relations empty/no update fields. Full notice/technical coverage unavailable | Identity only; no claims about the retrospective's detailed argument |
+| W12 / wrong-source acquisition, excluded | Omer San and Anne E. Staples, A coarse-grid projection method for accelerating incompressible flow computations, arXiv:1212.0922 | Misleading original filename sources/dm2015-arxiv-route2.body/.txt retained; 39,054,566 bytes, 41 pages | Cover/identity establishes mismatch; forecasting content was not read or used. This is not a retraction judgment | Rejected acquisition identity only; no forecast-comparison support |
+| FC1 / IMPLEMENTATION_OR_SOFTWARE | ForeComp 1.0.0, CRAN mirror cran/ForeComp, archive short revision 6354aea; DESCRIPTION links original authors' mcmcs/ForeComp | sources/forecomp-cran-archive.body and forecomp-cran-source/cran-ForeComp-6354aea/ | Safe static extraction; DESCRIPTION complete; selected R spans in source-reading.md. Archive/file hashes pin bytes; full commit and exact paper replication revision unavailable | Static behavior in inspected spans only; no runtime/test results, dependency closure, rights clearance or adoption |
+
+The two Taylor & Francis Crossref records expose the same unrelated PDF DOI
+10.1080/10256018808623883. Those links were excluded without treating them as
+versions of either intended source. Google discovery bodies were unusable
+redirect pages. No source-blocked paper is treated as retracted; incomplete
+notice access is an explicit support limit.

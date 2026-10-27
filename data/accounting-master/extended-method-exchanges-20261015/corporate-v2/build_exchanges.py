@@ -1,0 +1,396 @@
+"""Author exact documentary exchanges; never invoke an accounting service."""
+from copy import deepcopy
+from fractions import Fraction as F
+from pathlib import Path
+import hashlib
+import json
+from schema_design import schemas, sid, COMPONENTS, EVENTS, ACCOUNTS, ASSETS, LIABILITIES, PROFIT, OCI, CASH
+from authored_cases import CASES
+
+OUT = Path(__file__).resolve().parent
+ROOT = OUT.parents[3]
+REG, ALIASES, BLOBS, EX, STEPS = {}, {}, {}, [], []
+
+def enc(v): return json.dumps(v, sort_keys=True, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode()
+def q(v):
+    f = F(v)
+    return {'n': str(f.numerator), 'd': str(f.denominator)}
+def num(v): return F(int(v['n']), int(v['d']))
+def refs(v):
+    if isinstance(v, dict):
+        if set(v) == {'kind', 'schema', 'digest'}: yield v
+        else:
+            for x in v.values(): yield from refs(x)
+    elif isinstance(v, list):
+        for x in v: yield from refs(x)
+def add(kind, key, body):
+    deps = {enc(r): r for r in refs(body)}
+    r = {'kind': kind, 'schema': sid(kind), 'key': key, 'revision': 0, 'body': body,
+         'dependencies': [deps[k] for k in sorted(deps)]}
+    d = hashlib.sha256(('accdsl.portable.v1/' + sid(kind)).encode() + b'\0' + enc(r)).hexdigest()
+    REG[d] = r
+    ALIASES[key] = {'kind': kind, 'schema': sid(kind), 'digest': d}
+    return ALIASES[key]
+def body(r): return REG[r['digest']]['body']
+def blob(p):
+    b = p.read_bytes(); d = hashlib.sha256(b).hexdigest()
+    BLOBS[d] = {'path': str(p.relative_to(ROOT)), 'byte_length': len(b)}
+    return {'kind': 'blob', 'algorithm': 'sha256', 'digest': d, 'byte_length': len(b)}
+def typed(s, v):
+    if v is None: return None
+    if s.get('type') == 'object':
+        if set(s['properties']) == {'n', 'd'}: return q(v)
+        return {k: typed(z, v[k]) for k, z in s['properties'].items()}
+    if s.get('type') == 'array': return [typed(s['items'], z) for z in v]
+    if 'anyOf' in s: return typed(s['anyOf'][0], v)
+    return v
+def closure(roots):
+    seen = set()
+    def visit(r):
+        if r['digest'] in seen: return
+        seen.add(r['digest'])
+        for dep in REG[r['digest']]['dependencies']: visit(dep)
+    for r in roots: visit(r)
+    return sorted(seen)
+def owner(st):
+    c = body(body(st)['context_ref'])
+    return '/'.join(c[k] for k in ['entity_id', 'book_id', 'branch_key'])
+def head(st): return {'owner_key': owner(st), 'state_ref': st, 'generation': body(st)['sequence']}
+def world(st):
+    return {'head': head(st), 'event_receipts': {}, 'journals': [], 'deltas': [], 'receipts': [],
+            'published_records': closure([st]), 'current_view_ref': body(st)['view_ref'],
+            'unaffected_owners': {'Other/Legal': {'generation': 7, 'balance_digest': '0' * 64}}}
+def event_key(b): return enc([b['identity'][k] for k in ['entity_id', 'book_id', 'branch_key', 'business_event_id']]).decode()
+
+def main():
+    schema = schemas()
+    (OUT / 'record-schemas.json').write_text(json.dumps(schema, indent=2) + '\n')
+    contract = OUT / 'semantic-contract.md'
+    lock = add('SchemaLock', 'lock', {'schema_blob': blob(OUT / 'record-schemas.json'),
+        'semantic_contract_blob': blob(contract), 'format': 'jsonschema2020-12'})
+    ops = ['accounting.authorize@1', 'accounting.propose@1', 'accounting.commit@1', 'report.build@1']
+    profile = add('Profile', 'profile', {'profile_id': 'CorporateComponents/2', 'schema_lock_ref': lock,
+        'operations': ops, 'book_mode': 'synthetic', 'execution_mode': 'specification_example',
+        'interest_cash_policy': 'historical_IAS7_operating_election'})
+    signatures = {op: add('OperationSignature', 'signature.' + op, {'operation': op,
+        'profile_ref': profile,
+        'arguments_definition': 'Arguments.' + op, 'payload_kinds': {
+            'accounting.authorize@1': ['PostingAuthorization'], 'accounting.propose@1': ['JournalProposal', 'EconomicDelta'],
+            'accounting.commit@1': ['StateTransitionReceipt'], 'report.build@1': ['Report']}[op],
+        'effects': 'accounting_transaction' if op == 'accounting.commit@1' else 'read'}) for op in ops}
+    env = add('Environment', 'environment', {'purpose': 'documentary_fixture', 'numerics': 'exact_rational', 'runtime_executed': False})
+    decoder = add('Decoder', 'decoder', {'media_type': 'application/json', 'canonical_encoding': 'accdsl.portable.v1'})
+    method_texts = {
+        'production': ('corporate-cohorts-funding-20261015.tex', ['IAS2.10-16,23-27,34']),
+        'inspection': ('corporate-event-repairs-20261015.md', ['IAS16.12-14,43-55']),
+        'lease': ('corporate-event-repairs-20261015.md', ['IFRS16.38-50', 'IAS7.31-34']),
+        'benefit': ('corporate-event-repairs-20261015.md', ['IAS19.99-112,120-126']),
+        'funding': ('corporate-cohorts-funding-20261015.tex', ['IFRIC14.23-24', 'IAS19.120(c)']),
+        'restoration': ('corporate-residuals-20261015.md', ['IFRIC1.1-8', 'IAS36.59-64']),
+        'impairment': ('impairment-floors-20261014.md', ['IAS36.104-108']),
+        'tax': ('impairment-tax-repairs-20261015.md', ['IAS36.60-64', 'IAS12.61A']),
+        'advance': (None, ['IFRS15.105-109; local fully-prepaid allocation deduction']),
+    }
+    method_texts.update({
+        'returns': ('customer-contract-extensions-20261014.md', ['AASB15.47-59,105-109,B20-B27']),
+        'assurance': ('corporate-residuals-20261015.md', ['AASB137.14,24,36-62']),
+        'service': ('customer-obligations-20261014.md', ['AASB15.22-45,73-86,B28-B33']),
+        'distinct': ('customer-obligations-20261014.md', ['AASB15.18-21(a)']),
+        'integrated': ('customer-obligations-20261014.md', ['AASB15.18-21(b),35(b),39-45']),
+        'mixed': ('corporate-residuals-20261015.md', ['AASB15.18-21(c),39-45,63,73-86']),
+        'agency': ('customer-obligations-20261014.md', ['AASB15.B34-B38']),
+        'joint': ('corporate-residuals-20261015.md', ['IAS2.14,34']),
+        'byproduct': ('corporate-residuals-20261015.md', ['IAS2.14,34']),
+        'supplier': ('corporate-residuals-20261015.md', ['IAS2.18', 'IAS7.31-34']),
+        'aasb15_support': ('corporate-residuals-20261015.md', ['AASB15.B28-B33']),
+        'aasb107_support': ('customer-obligations-20261014.md', ['AASB107.14(a)-(d)']),
+    })
+    au_families = {'returns', 'assurance', 'service', 'distinct', 'integrated', 'mixed', 'agency', 'aasb15_support', 'aasb107_support'}
+    sources, methods = {}, {}
+    for family, (filename, anchors) in method_texts.items():
+        mp = ROOT / 'docs/design/proposal/methods' / filename if filename else contract
+        pdf = 'docs/design/research/p08-v3-preparation/eu-2023-1803-original.pdf'
+        lower, upper = None, None
+        if family in au_families:
+            pdf = 'docs/design/proposal/methods/sources/aasb15-compiled-dec2022.pdf'
+            lower, upper = '2023-01-01', '2026-07-01'
+        if family == 'assurance': pdf = 'data/accounting-master/finite-method-decisions-20261015/corporate/sources/aasb137-dec2022.pdf'
+        if family == 'aasb107_support':
+            pdf = 'docs/design/proposal/methods/preparation-20261005-v1/01-accounting/sources/aasb107-compiled-jun2023.pdf'
+            lower, upper = '2024-01-01', None
+        sources[family] = add('SourceSupport', 'source.' + family, {
+            'source_pdf': blob(ROOT / pdf),
+            'method_text': blob(mp), 'inspection_note': blob(OUT / 'source-reading.md'), 'anchors': anchors,
+            'authority_scope': 'historical_not_current_admission', 'family': 'AU_AASB' if family in au_families else 'EU_IFRS',
+            'period_start_inclusive': lower, 'period_start_exclusive': upper})
+    for method, (tag, _) in EVENTS.items():
+        family = method.split('.')[0]
+        supporting = [sources['aasb107_support']] if family in au_families else []
+        if family == 'assurance': supporting = [sources['aasb15_support'], *supporting]
+        methods[method] = add('MethodDefinition', 'method.' + method, {'method_id': method, 'component_kind': tag,
+            'source_ref': sources[family], 'supporting_source_refs': supporting, 'contract_blob': blob(contract), 'profile_ref': profile})
+    view = add('View', 'view', {'source_refs': list(sources.values()), 'revision': 0, 'supersedes_ref': None,
+                              'information_mode': 'archival_synthetic'})
+
+    def request(key, op, args, st=None, v=view, prof=profile, budget=1000):
+        r = add('OperationRequest', 'request.' + key, {'operation': op, 'request_id': key,
+            'workspace_key': 'CorporateComponents-specification', 'profile_ref': prof, 'signature_ref': signatures[op],
+            'view_ref': v, 'arguments': {'tag': op, 'value': args}, 'execution': {'mode': 'specification_example',
+            'budget': {'operation_count': budget, 'elapsed_seconds': 60}, 'environment_ref': env},
+            'expected_head': head(st) if st else None})
+        p = OUT / 'bytes' / (key + '.json'); p.parent.mkdir(exist_ok=True); p.write_bytes(enc(REG[r['digest']]))
+        sub = add('Submission', 'submission.' + key, {'blob_ref': blob(p), 'media_type': 'application/json',
+                  'transport': 'authored_fixture', 'decoder_ref': decoder})
+        return r, sub
+
+    def response(key, rq, sub, disposition='completed', outputs=(), receipt=None, code=None, valid=True, basis=None):
+        domain = add('Domain', 'domain.' + key, {'request_ref': rq, 'meaning': 'singleton_request_decision'}) if valid else None
+        region = add('Region', 'region.' + key, {'domain_ref': domain, 'predicate': 'this_request'}) if valid else None
+        partial = disposition == 'partial'
+        obligations = [add('Obligation', 'obligation.' + key, {'code': code, 'required_input': code, 'basis_ref': basis})] if partial else []
+        coverage = None if not valid else {'domain_ref': domain, 'completed': [] if partial or disposition == 'unsupported' else [region],
+            'unresolved': [region] if partial else [], 'unsupported': [region] if disposition == 'unsupported' else [],
+            'infeasible': [], 'cancelled': [], 'relation': 'disjoint_exhaustive'}
+        return add('OperationResult', 'result.' + key, {'submission_ref': sub, 'request_ref': rq if valid else None,
+            'operation': body(rq)['operation'] if valid else None, 'input_view_ref': body(rq)['view_ref'] if valid else None,
+            'disposition': disposition, 'statuses': {'structural_validity': 'valid' if valid else 'invalid',
+                'mathematical_status': 'unresolved' if partial else 'defined',
+                'computation_status': 'partial' if partial else 'not_computed' if disposition in ['rejected', 'unsupported'] else 'complete',
+                'empirical_justification': 'not_established', 'capability_status': 'specified_only_no_runtime',
+                'accounting_validity': 'not_assessed', 'forecast_validity': 'not_assessed',
+                'product_readiness': 'not_implemented', 'human_acceptance': 'pending'},
+            'payload': None if not valid else {'tag': body(rq)['operation'], 'result_refs': list(outputs),
+                'additional_commit': disposition == 'completed' and receipt is not None},
+            'diagnostics': [] if not code else [{'code': code, 'stage': 'binding_financial_or_owner_validation',
+                'record_ref': None, 'source_locator': None, 'field_path': 'arguments', 'affected_query_branch_ids': [],
+                'dependency_path': [], 'observed': code, 'expected_rule': 'CorporateComponents/2',
+                'retry_advice': 'repair_named_input_or_resubmit_exact_request', 'blocking_diagnostic_ids': []}],
+            'coverage': coverage, 'unresolved': obligations, 'continuation_ref': None,
+            'commit_observation': 'committed' if receipt else 'not_committed', 'receipt_ref': receipt,
+            'evidence_mode': 'specification_example'})
+
+    def exchange(key, rq, sub, res, before, after):
+        EX.append({'id': key, 'request_ref': rq, 'submission_ref': sub, 'response_ref': res,
+                   'world_before': deepcopy(before), 'world_after': deepcopy(after)})
+
+    def report_exchange(label, opening_ref, closing_ref, w):
+        s0, s1 = body(opening_ref), body(closing_ref)
+        v0, v1 = {a:num(v) for a,v in s0['balances'].items()}, {a:num(v) for a,v in s1['balances'].items()}
+        report = add('Report', label, {'opening_ref': opening_ref, 'state_ref': closing_ref, 'view_ref': view,
+            'values': {'cash':q(v1['cash']), 'assets':q(sum(v1[a] for a in ASSETS)),
+                'liabilities':q(-sum(v1[a] for a in LIABILITIES)),
+                'equity':q(-sum(v1[a] for a in ['capital','retained',*PROFIT,*OCI])),
+                'profit':q(-sum(v1[a]-v0[a] for a in PROFIT)), 'oci':q(-sum(v1[a]-v0[a] for a in OCI)),
+                **{k:q(num(s1['cash_movements'][k])-num(s0['cash_movements'][k])) for k in CASH}},
+            'income_statement': income_statement(v0,v1),
+            'tax_status':s1['tax_status'],'complete_company_after_tax':False,
+            'cash_classification_complete':num(s1['cash_movements']['unclassified']) == num(s0['cash_movements']['unclassified']),
+            'cash_classification_status':s1['cash_classification_status']})
+        rq, sub = request(label, 'report.build@1', {'opening_ref':opening_ref,'state_ref':closing_ref,'view_ref':view,'require_current':False})
+        rr = response(label,rq,sub,outputs=[report]);exchange(label,rq,sub,rr,w,w)
+
+    def income_statement(v0,v1):
+        fields={k:q(-(v1[k]-v0[k])) for k in ['product_revenue','service_revenue','commission_revenue','reimbursement_income']}
+        fields['other_gains']=q(-sum(v1[k]-v0[k] for k in ['income','provision_gain']))
+        fields.update({k:q(v1[k]-v0[k]) for k in ['cost_of_sales','service_expense','assurance_expense','finance_expense','tax_expense']})
+        fields['other_expense']=q(v1['expense']-v0['expense'])
+        return fields
+
+    successes = {}
+    for case in CASES:
+        name, tag = case['id'], case['tag']
+        context = add('Context', name + '.context', {'entity_id': 'ExampleCorp', 'book_id': 'Legal', 'branch_key': name,
+            'currency': 'USD', 'basis': 'historical_AU_AASB_conditional' if case.get('source_family') == 'AU_AASB' else 'historical_EU_IFRS_conditional',
+            'issuer_class': 'for_profit', 'calendar': 'relative_synthetic'})
+        comp = add('ComponentState', name + '.component.0', {'tag': tag, 'value': typed(COMPONENTS[tag], case['opening_component'])})
+        opening = add('CompanyState', name + '.state.0', {'context_ref': context, 'view_ref': view, 'sequence': 0,
+            'instant': 0, 'component_ref': comp, 'balances': {a: q(case['opening_balances'].get(a, 0)) for a in ACCOUNTS},
+            'cash_movements': {k: q(0) for k in CASH}, 'tax_status': case['tax_status'],
+            'cash_classification_status': 'specified_historical_policy'})
+        case_opening = opening
+        period_opening = opening
+        w = world(opening)
+        for i, st in enumerate(case['steps'], 1):
+            key = name + '.' + str(i); mid = st['method']; source = body(methods[mid])['source_ref']
+            australian = case.get('source_family') == 'AU_AASB'
+            date = st.get('event_date'); year = int(date[:4]) if australian else None
+            ev = add('EconomicEvent', key + '.event', {'method_id': mid, 'context_ref': context, 'instant': i,
+                'event_date': date,
+                'reporting_period_start': f'{year}-01-01' if australian else None,
+                'reporting_period_end_exclusive': f'{year+1}-01-01' if australian else None,
+                'parameters': typed(EVENTS[mid][1], st['parameters'])})
+            authority = add('Authority', key + '.authority', {'source_ref': source, 'context_ref': context,
+                'supporting_source_refs': body(methods[mid])['supporting_source_refs'],
+                'start_inclusive': 0, 'end_exclusive': 20, 'evidence_class': 'synthetic_conditional_admission'})
+            basis = add('AccountingEventBasis', key + '.basis', {'identity': {**{k: body(context)[k] for k in
+                ['entity_id', 'book_id', 'branch_key']}, 'business_event_id': key}, 'opening_ref': opening,
+                'event_ref': ev, 'method_ref': methods[mid], 'authority_ref': authority, 'view_ref': view, 'context_ref': context})
+            admission = add('Admission', key + '.admission', {'basis_ref': basis, 'source_ref': source,
+                'context_ref': context, 'instant': i, 'status': 'eligible', 'fact_basis': 'authored_synthetic',
+                'findings': [{'name': 'declared_finite_method_premises', 'status': 'satisfied', 'support_ref': ev}]})
+            auth = add('PostingAuthorization', key + '.authorization', {'basis_ref': basis, 'admission_ref': admission,
+                'view_ref': view, 'posting_permitted': True})
+            cp = add('ComponentState', key + '.component', {'tag': tag, 'value': typed(COMPONENTS[tag], st['after'])})
+            balances = {a: q(num(body(opening)['balances'][a]) + F(st['journal'].get(a, '0'))) for a in ACCOUNTS}
+            cash_change = {k: q(st['cash_change'].get(k, '0')) for k in CASH}
+            closing = add('CompanyState', key + '.state', {**body(opening), 'component_ref': cp, 'sequence': i, 'instant': i,
+                'balances': balances, 'cash_movements': {k: q(num(body(opening)['cash_movements'][k]) + num(cash_change[k])) for k in CASH},
+                'cash_classification_status': st['parameters']['classification_status'] if mid == 'restoration.pay' else body(opening)['cash_classification_status']})
+            journal = add('JournalProposal', key + '.journal', {'basis_ref': basis, 'mode': 'monetary' if st['journal'] else 'state_only',
+                'currency': 'USD', 'lines': [{'account': a, 'signed_amount': q(v)} for a, v in st['journal'].items() if F(v)]})
+            delta = add('EconomicDelta', key + '.delta', {'basis_ref': basis, 'opening_ref': opening, 'closing_ref': closing,
+                'cash_change': cash_change})
+            args = {'basis_ref': basis, 'authorization_ref': auth, 'journal_ref': journal, 'delta_ref': delta}
+            for op, ar, output in [('accounting.authorize@1', {'basis_ref': basis}, [auth]),
+                ('accounting.propose@1', {'basis_ref': basis, 'authorization_ref': auth}, [journal, delta])]:
+                label = key + '.' + op.split('.')[1].split('@')[0]
+                rq, sub = request(label, op, ar)
+                rr = response(label, rq, sub, outputs=output)
+                exchange(label, rq, sub, rr, w, w)
+            rq, sub = request(key, 'accounting.commit@1', args, opening)
+            receipt = add('StateTransitionReceipt', key + '.receipt', {'request_ref': rq, **args,
+                'opening_ref': opening, 'closing_ref': closing, 'generation': i, 'status': 'committed'})
+            after = deepcopy(w); after['head'] = head(closing)
+            after['event_receipts'][event_key(body(basis))] = {'request_ref': rq, 'receipt_ref': receipt}
+            for dst, rr in [('journals', journal), ('deltas', delta), ('receipts', receipt)]: after[dst].append(rr)
+            after['published_records'] = sorted(set(w['published_records']) | set(closure([receipt])))
+            rr = response(key, rq, sub, outputs=[receipt], receipt=receipt)
+            exchange(key, rq, sub, rr, w, after)
+            successes[key] = (args, rq, sub, receipt, deepcopy(w), deepcopy(after))
+            STEPS.append({'id': key, 'method': mid, 'opening_ref': opening, 'event_ref': ev,
+                          'closing_ref': closing, 'journal_ref': journal, 'delta_ref': delta})
+            opening, w = closing, after
+            if australian:
+                next_date = case['steps'][i].get('event_date') if i < len(case['steps']) else None
+                if next_date is None or next_date[:4] != date[:4]:
+                    report_exchange(name + '.period-' + date[:4], period_opening, opening, w)
+                    period_opening = opening
+        b = body(opening); vals = {a: num(v) for a, v in b['balances'].items()}
+        start_vals = {a: num(v) for a, v in body(case_opening)['balances'].items()}
+        profit = -sum(vals[a] - start_vals[a] for a in PROFIT)
+        oci = -sum(vals[a] - start_vals[a] for a in OCI)
+        report = add('Report', name + '.report', {'opening_ref': case_opening, 'state_ref': opening, 'view_ref': view, 'values': {
+            'cash': q(vals['cash']), 'assets': q(sum(vals[a] for a in ASSETS)),
+            'liabilities': q(-sum(vals[a] for a in LIABILITIES)), 'equity': q(-sum(vals[a] for a in ['capital', 'retained', *PROFIT, *OCI])),
+            'profit': q(profit), 'oci': q(oci), **b['cash_movements']}, 'income_statement':income_statement(start_vals,vals),
+            'tax_status': b['tax_status'],
+            'complete_company_after_tax': False, 'cash_classification_complete': num(b['cash_movements']['unclassified']) == 0,
+            'cash_classification_status': b['cash_classification_status']})
+        label = name + '.report'; rq, sub = request(label, 'report.build@1', {'opening_ref': case_opening,
+            'state_ref': opening, 'view_ref': view, 'require_current': False})
+        rr = response(label, rq, sub, outputs=[report]); exchange(label, rq, sub, rr, w, w)
+
+    # Full request and store worlds are preserved for replay, conflicts and adverse transitions.
+    args, rq, sub, receipt, before, after = successes['production-fifo.2']
+    rr = response('exact-replay', rq, sub, 'replayed', [receipt], receipt)
+    exchange('exact-replay', rq, sub, rr, after, after)
+    observation = add('TransportObservation', 'lost-ack', {'submission_ref': sub, 'request_ref': rq,
+        'observation': 'acknowledgement_timeout', 'commit_observation': 'unknown', 'receipt_ref': None,
+        'next_action': 'resubmit_exact_original_request'})
+    lost = {'observation_ref': observation, 'before_publication': before, 'after_publication': after,
+            'retry_before_exchange': 'production-fifo.2', 'retry_after_exchange': 'exact-replay'}
+    for label, budget in [('changed-request', 1000), ('changed-budget', 999)]:
+        r, su = request(label, 'accounting.commit@1', args, body(args['basis_ref'])['opening_ref'], budget=budget)
+        rr = response(label, r, su, 'rejected', code='idempotency_conflict')
+        exchange(label, r, su, rr, after, after)
+
+    def mutated(label, original, code, event_changes=None, parameter_changes=None, journal_lines=None,
+                authority_changes=None, basis_changes=None, start_after=False, disposition='rejected', consumed=False):
+        ar, _, _, _, wb, wa = successes[original]
+        ar = deepcopy(ar); old_basis = body(ar['basis_ref']); evbody = deepcopy(body(old_basis['event_ref']))
+        if consumed: evbody['instant'] += 1
+        if event_changes: evbody.update(event_changes)
+        if parameter_changes: evbody['parameters'].update(parameter_changes)
+        evr = add('EconomicEvent', label + '.event', evbody)
+        au = add('Authority', label + '.authority', {**body(old_basis['authority_ref']), **(authority_changes or {})})
+        bb = {**deepcopy(old_basis), 'event_ref': evr, 'authority_ref': au,
+              'identity': {**old_basis['identity'], 'business_event_id': label}, **(basis_changes or {})}
+        if consumed: bb['opening_ref'] = wa['head']['state_ref']
+        br = add('AccountingEventBasis', label + '.basis', bb)
+        ad = body(body(ar['authorization_ref'])['admission_ref'])
+        adr = add('Admission', label + '.admission', {**ad, 'basis_ref': br, 'instant': evbody['instant'],
+            'findings': [{'name': 'declared_finite_method_premises', 'status': 'satisfied', 'support_ref': evr}]})
+        ar['basis_ref'] = br
+        ar['authorization_ref'] = add('PostingAuthorization', label + '.authorization', {
+            **body(ar['authorization_ref']), 'basis_ref': br, 'admission_ref': adr})
+        jb = {**body(ar['journal_ref']), 'basis_ref': br}
+        if journal_lines is not None: jb['lines'] = [{'account': a, 'signed_amount': q(v)} for a, v in journal_lines.items()]
+        ar['journal_ref'] = add('JournalProposal', label + '.journal', jb)
+        ar['delta_ref'] = add('EconomicDelta', label + '.delta', {**body(ar['delta_ref']), 'basis_ref': br})
+        r, su = request(label, 'accounting.commit@1', ar, bb['opening_ref'])
+        rr = response(label, r, su, disposition, code=code, basis=br)
+        w = wa if start_after or consumed else wb
+        exchange(label, r, su, rr, w, w)
+
+    mutated('balanced-wrong-production', 'production-fifo.2', 'wrong_financial_transition',
+        journal_lines={'wip': '-1290', 'finished_goods': '1290'})
+    mutated('invalid-unit-balance', 'production-fifo.2', 'physical_units_mismatch', parameter_changes={'closing_units': q(21)})
+    mutated('cent-policy-unadmitted', 'production-fifo.2', 'rounding_profile_unsupported', parameter_changes={'rounding': 'cents'}, disposition='unsupported')
+    mutated('inspection-old-cost-unknown', 'inspection.1', 'old_component_measurement_unresolved', parameter_changes={'old_allocation_known': False}, disposition='partial')
+    mutated('heterogeneous-lease', 'lease.1', 'rights_allocation_unsupported', parameter_changes={'same_remaining_term': False}, disposition='unsupported')
+    mutated('benefit-no-discharge', 'benefits.3', 'legal_discharge_failed', parameter_changes={'legal_discharge': False})
+    mutated('wrong-tax-origin', 'revalued-tax.1', 'wrong_financial_transition', journal_lines={
+        'ppe': '-50', 'expense': '50', 'dtl': '10', 'dta': '5/2', 'tax_expense': '-25/2'})
+    mutated('missing-recoverable', 'impairment-floor.1', 'measurement_unresolved', parameter_changes={'unit_recoverable': None}, disposition='partial')
+    mutated('wrong-effective-date', 'inspection.1', 'authority_interval_mismatch', authority_changes={'end_exclusive': 1})
+    mutated('wrong-source', 'inspection.1', 'source_method_mismatch', authority_changes={'source_ref': sources['tax']})
+    mutated('wrong-au-period', 'assurance-population.1', 'source_period_mismatch', event_changes={
+        'event_date': '2026-07-02', 'reporting_period_start': '2026-07-01', 'reporting_period_end_exclusive': '2027-07-01'})
+    mutated('missing-assurance-classification-source', 'assurance-population.1', 'source_method_mismatch',
+        authority_changes={'supporting_source_refs': [sources['aasb107_support']]})
+    mutated('netted-reimbursement', 'assurance-population.1', 'wrong_financial_transition', journal_lines={
+        'cash': '2000', 'product_revenue': '-2000', 'inventory': '-600', 'cost_of_sales':'600',
+        'assurance_expense': '300', 'provision': '-300'})
+    mutated('distinct-earlier-revenue-erased', 'distinct-amendment.3', 'wrong_financial_transition', journal_lines={
+        'cash': '48', 'contract_liability': '-51', 'product_revenue': '3'})
+    mutated('service-progress-unmeasured', 'service-warranty.3', 'progress_measurement_unresolved',
+        parameter_changes={'faithful_measure_admitted': False}, disposition='partial')
+    mutated('service-released-before-earned', 'service-warranty.3', 'future_service_not_performed',
+        event_changes={'event_date':'2024-08-01'})
+    mutated('supplier-interest-capitalized', 'supplier-finance.2', 'wrong_financial_transition',
+        journal_lines={'inventory': '10', 'payable': '-10'})
+    mutated('new-event-stale-head', 'production-fifo.2', 'stale_head', start_after=True)
+    mutated('advance-duplicate-economic-effect', 'prepaid-bill.1', 'advance_already_allocated', consumed=True)
+    mutated('cross-book-component', 'inspection.1', 'owner_binding_mismatch',
+        basis_changes={'context_ref': ALIASES['benefits.context']})
+    revised = add('View', 'view.superseding-selection', {**body(view), 'revision': 1, 'supersedes_ref': view})
+    revised_world = deepcopy(after); revised_world['current_view_ref'] = revised
+    revised_world['published_records'] = sorted(set(revised_world['published_records']) | set(closure([revised])))
+    rr = response('replay-after-view-change', rq, sub, 'replayed', [receipt], receipt)
+    exchange('replay-after-view-change', rq, sub, rr, revised_world, revised_world)
+    for label, current in [('current-report-stale', True), ('frozen-report-after-view-change', False)]:
+        state_ref = ALIASES['production-fifo.2.state']
+        r, su = request(label, 'report.build@1', {'opening_ref': ALIASES['production-fifo.state.0'],
+            'state_ref': state_ref, 'view_ref': view, 'require_current': current})
+        rr = response(label, r, su, 'rejected' if current else 'completed',
+            outputs=[] if current else [ALIASES['production-fifo.report']], code='stale_dependency_view' if current else None)
+        exchange(label, r, su, rr, revised_world, revised_world)
+    # The old profile's exact valid request remains an invalid request for this lock.
+    legacy_path = ROOT / 'data/accounting-master/corporate-portable-20261015/portable-exchanges.json'
+    legacy = json.loads(legacy_path.read_text())
+    old_request = next(r for r in legacy['record_registry'].values() if r['kind'] == 'OperationRequest')
+    p = OUT / 'bytes/legacy-profile-request.json'; p.write_bytes(enc(old_request))
+    old_sub = add('Submission', 'submission.legacy-profile', {'blob_ref': blob(p), 'media_type': 'application/json',
+        'transport': 'authored_fixture', 'decoder_ref': decoder})
+    old_result = response('legacy-profile', rq, old_sub, 'rejected', code='profile_mismatch', valid=False)
+    legacy_rejection = {'id': 'legacy-profile-rejected', 'submission_ref': old_sub, 'response_ref': old_result,
+        'source_bundle_blob': blob(legacy_path), 'world_before': before, 'world_after': deepcopy(before)}
+    predecessor_path = OUT.parent/'corporate/portable-exchanges.json'
+    predecessor=json.loads(predecessor_path.read_text())
+    v1_request=next(r for r in predecessor['record_registry'].values() if r['kind']=='OperationRequest')
+    p=OUT/'bytes/components-v1-request.json';p.write_bytes(enc(v1_request))
+    v1_sub=add('Submission','submission.components-v1',{'blob_ref':blob(p),'media_type':'application/json',
+        'transport':'authored_fixture','decoder_ref':decoder})
+    v1_result=response('components-v1',rq,v1_sub,'rejected',code='profile_mismatch',valid=False)
+    v1_rejection={'id':'components-v1-rejected','submission_ref':v1_sub,'response_ref':v1_result,
+        'source_bundle_blob':blob(predecessor_path),'world_before':before,'world_after':deepcopy(before)}
+    partial_world = deepcopy(before)
+    partial_world['event_receipts'] = deepcopy(after['event_receipts'])
+    packet = {'evidence_mode': 'specification_example', 'product_implemented': False,
+        'schema_lock_ref': lock, 'profile_ref': profile, 'record_registry': REG, 'aliases': ALIASES,
+        'blobs': BLOBS, 'exchanges': EX, 'financial_steps': STEPS, 'lost_acknowledgement': lost,
+        'invalid_partial_publication': partial_world, 'unbound_submissions': [legacy_rejection,v1_rejection], 'source_pins': []}
+    (OUT / 'portable-exchanges.json').write_text(json.dumps(packet, indent=2) + '\n')
+    print(json.dumps({'methods': len(methods), 'financial_steps': len(STEPS), 'records': len(REG), 'exchanges': len(EX), 'blobs': len(BLOBS)}))
+
+if __name__ == '__main__': main()

@@ -1,0 +1,33 @@
+{
+  "gate": {
+    "source": "/home/chakwong/python/AccDSL/data/accounting-master/ordered-event-eligibility-20261026/gate.py",
+    "before": "570bfbe5b419926acf54661b46a5e1754c6ca9d3139a643b7f0f1333aac58319",
+    "after": "da1a3b051ec342b600eb15a1a23137f4be2077a72fc82b4b2beb89b5cb2fc9c6",
+    "edits": [
+      {
+        "before": "PROFILE = 'OrderedEventEligibility/1'",
+        "after": "PROFILE = 'OrderedNestedEventEligibility/1'"
+      },
+      {
+        "before": "CALL = 'OrderedEligibilityCall/1'",
+        "after": "CALL = 'OrderedNestedEligibilityCall/1'"
+      },
+      {
+        "before": "        if kind == 'calendar_adjacent':",
+        "after": "        if kind == 'text_nonblank':\n            c.closed(source,['kind','value'],'text_nonblank_source')\n            c.need(infer(source['value'],depth+1)==TEXT,'text_nonblank_type');return BOOL\n        if kind in ('nested_map_contains','nested_map_field'):\n            keys=['kind','pointer','key_input','parent_after_stage','child_pointer','child_key_input']\n            if kind=='nested_map_field':keys+=['field','after_stage']\n            c.closed(source,keys,'nested_map_source')\n            c.need(template['input_types'].get(source['key_input'])==TEXT and template['input_types'].get(source['child_key_input'])==TEXT,'nested_key_type')\n            c.need(proofs.get(source['parent_after_stage'])==(source['pointer'],source['key_input']),'unproved_parent_presence')\n            node=schema_node(definition,source['pointer'])\n            c.need(node['node']=='map' and node['values']['node']=='record','nested_parent_map')\n            child=node['values']\n            for part in base.binding.pointer_parts(source['child_pointer']):\n                c.need(child['node']=='record' and part in child['fields'],'nested_child_path');child=child['fields'][part]\n            c.need(child['node']=='map' and child['values']['node']=='record','nested_child_map')\n            if kind=='nested_map_contains':return BOOL\n            identity=(source['pointer'],source['key_input'],source['child_pointer'],source['child_key_input'])\n            c.need(proofs.get(source['after_stage'])==identity,'unproved_child_presence')\n            fields=child['values']['fields']\n            c.need(source['field'] in fields and fields[source['field']]['node']=='scalar','nested_scalar_field')\n            return fields[source['field']]['type']\n        if kind == 'calendar_adjacent':"
+      },
+      {
+        "before": "            if source['kind'] == 'map_contains':\n                proofs[name] = (source['pointer'], source['key_input'])",
+        "after": "            if source['kind'] == 'map_contains':\n                proofs[name] = (source['pointer'], source['key_input'])\n            elif source['kind']=='nested_map_contains':\n                proofs[name]=(source['pointer'],source['key_input'],source['child_pointer'],source['child_key_input'])"
+      },
+      {
+        "resolve_addition": "    if kind=='text_nonblank':\n        value=resolve(source['value'],book,event)\n        if value['status']=='unknown':return value\n        try:base.text(value['value'],'nonblank_text');valid=True\n        except ValueError:valid=False\n        return base.known(valid)\n    if kind in ('nested_map_contains','nested_map_field'):\n        parent_key=event['inputs'][source['key_input']]['value']\n        child_key=event['inputs'][source['child_key_input']]['value']\n        if parent_key['status']=='unknown':return deepcopy(parent_key)\n        if child_key['status']=='unknown':return deepcopy(child_key)\n        found,parents=base.binding.located(book['memory'],source['pointer'])\n        c.need(found and parent_key['value'] in parents,'parent_presence_prerequisite_failed')\n        found,children=base.binding.located(parents[parent_key['value']],source['child_pointer'])\n        c.need(found and type(children) is dict,'nested_map_population')\n        if kind=='nested_map_contains':return base.known(child_key['value'] in children)\n        c.need(child_key['value'] in children,'child_presence_prerequisite_failed')\n        return base.known(deepcopy(children[child_key['value']][source['field']]))\n"
+      }
+    ]
+  },
+  "composition": {
+    "source": "/home/chakwong/python/AccDSL/data/accounting-master/term-event-carry-binding-20261026/composition.py",
+    "before": "5edb90e5a28a6dc14715c599742ba8ae28bf43444a079cebf12110d62c0f1d92",
+    "after": "55e02a513262ab9d8baf531c5550c8bbefe67d762e8bf216c4948ed5f5f75fa8"
+  }
+}

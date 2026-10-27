@@ -1,0 +1,61 @@
+\paragraph{Locate each declaration in the source that was supplied.}
+The matched text extension now expresses these same bounded functions. For
+example, the ordinary collection fraction is written as follows:
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,breaklines=true]
+function complement;
+parameter discount '{"context":null,"dimensions":{},"kind":"number"}';
+returns '{"context":null,"dimensions":{},"kind":"number"}';
+param_ref d discount;
+literal one '{"context":null,"dimensions":{},"kind":"number"}' 1/1;
+node r sub one d;
+result r;
+end_function;
+\end{lstlisting}
+The quoted JSON type denotes a number with no dimensions and no company
+context. The parameter reference binds the local name \code{d} to the declared
+discount; \code{r} subtracts it from one. The result declaration identifies
+the returned node, and \code{end\_function} closes the function. In the
+surrounding program, \code{call regular complement discount;} supplies the
+main program's discount node and names the resulting call \code{regular}.
+Input declarations and the other functions remain necessary for the full
+collection policy. The displayed wrapping does not introduce extra source
+lines: each declaration occupies one physical line and ends in a semicolon.
+
+Function parameters precede the return type and body; a result ends the body.
+Blocks cannot nest, but a call can name a function declared later. Main inputs,
+nodes and outputs use the earlier expression notation, within a
+\code{CompanyFunctions/1} program ending in \code{end\_program}.
+The parser rejects duplicate names and JSON keys, incomplete blocks, unsupported
+declarations and semantic errors reported by the pinned typed compiler.
+Quoted command-looking characters are text: parsing performs no shell
+expansion, arithmetic evaluation or event generation. A validly typed division
+by zero can therefore compile and later fail when its value is requested.
+
+Each accepted declaration records its path within the typed request, physical
+line and exact original UTF-8 byte interval. Byte offsets are zero-based and
+end-exclusive; line and Unicode-codepoint columns are one-based, with the ending
+column exclusive. The slice includes the terminal semicolon and excludes
+surrounding spaces, tabs and the line ending. Its hash and the complete source
+hash bind these locations to the supplied bytes. This distinction matters when
+non-ASCII names use several bytes per character, or a source uses CRLF rather
+than LF. Both line-ending forms are accepted without Unicode normalization.
+
+Canonical rendering uses LF and deterministic quoting. It reproduces the same
+typed request but can have a different source hash and different locations.
+Consequently, original locations are never assigned to re-rendered text.
+The generated expression's function and node origins can be joined to these
+declarations; token-level debugging and runtime exception locations remain
+separate work. Source locations also supply no evidence of when a policy was
+written, published or used.
+
+The text frontend bounds source size to 524,288 bytes, each physical line to
+16,384 bytes and accepted declarations to 12,000 before the typed compiler's
+own limits apply. These are scoped engineering limits. Eighteen focused test
+methods, 23 typed-function regression methods, 79 expression checks and 285
+source/financial comparisons cover six policy cases, preserving complete
+three-year results where available and unresolved or rejected paths elsewhere.
+The exact examples, declaration slices and financial comparisons are retained
+in \path{data/accounting-master/company-function-text-20261025/}. The checked
+extension still does not supply dates, polymorphism, module dispatch or
+endogenous economic decisions.
+

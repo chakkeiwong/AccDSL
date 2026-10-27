@@ -1,0 +1,1 @@
+Skeptical audit: one-year upstream attribution does not establish upstream retained/NCI carry or actual continuing schedules/control. Explicit tax assumptions remain conditional. Integrate checked upstream,then compare two-year opening and margin release; no global continuation veto. Preserve independent prospective-policy work.

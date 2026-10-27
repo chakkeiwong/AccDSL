@@ -1,0 +1,307 @@
+{
+  "plan": {
+    "profile": "MethodInputBinding/2",
+    "manifest_digest": "b75d5761a117a37d012d911c4a91c53435a27e3f205ea288a9e02be6f1271e60",
+    "records": {
+      "basis": {
+        "raw_sha256": "dfe899ec47e38ebb3a05d06be12f6363d3fe853f94b7009f98fd7f51f7085970",
+        "schema_digest": "f63cd090872d18c2f28a95a4c6dcd44c02033451a0e637f2d251baa276f7d9f7"
+      },
+      "state": {
+        "raw_sha256": "2f6dbd10c04e2dbc3414432345b62d80c6bb39cf8def96ea847457287715cebf",
+        "schema_digest": "36520508f329f78286f960c0f06ca3e0daca5f5d7c8ccad828f1ae701bd3214e"
+      }
+    },
+    "bindings": [
+      {
+        "input": "assessment_date",
+        "record": "basis",
+        "pointer": "/body/assessment_date"
+      },
+      {
+        "input": "period_start",
+        "record": "basis",
+        "pointer": "/body/period_start"
+      },
+      {
+        "input": "period_end",
+        "record": "basis",
+        "pointer": "/body/period_end_exclusive"
+      },
+      {
+        "input": "state_date",
+        "record": "state",
+        "pointer": "/body/as_of_date"
+      }
+    ]
+  },
+  "manifests": {
+    "b75d5761a117a37d012d911c4a91c53435a27e3f205ea288a9e02be6f1271e60": {
+      "profile": "MethodRequirements/1",
+      "method_id": "bank.regulatory.selected-dates",
+      "version": "1",
+      "inputs": {
+        "assessment_date": {
+          "type": {
+            "kind": "date",
+            "context": {
+              "bank_id": "Synthetic-US-Bank",
+              "book_id": "Legal",
+              "perimeter_id": "Solo",
+              "currency": "USD",
+              "unit": "million",
+              "accounting_basis": "US_GAAP_CECL_supplied",
+              "jurisdiction": "US_national_bank",
+              "native_context_ref": "{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"}"
+            }
+          },
+          "role": "state",
+          "source_ref": "sha256:dfe899ec47e38ebb3a05d06be12f6363d3fe853f94b7009f98fd7f51f7085970#/body/assessment_date"
+        },
+        "period_start": {
+          "type": {
+            "kind": "date",
+            "context": {
+              "bank_id": "Synthetic-US-Bank",
+              "book_id": "Legal",
+              "perimeter_id": "Solo",
+              "currency": "USD",
+              "unit": "million",
+              "accounting_basis": "US_GAAP_CECL_supplied",
+              "jurisdiction": "US_national_bank",
+              "native_context_ref": "{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"}"
+            }
+          },
+          "role": "state",
+          "source_ref": "sha256:dfe899ec47e38ebb3a05d06be12f6363d3fe853f94b7009f98fd7f51f7085970#/body/period_start"
+        },
+        "period_end": {
+          "type": {
+            "kind": "date",
+            "context": {
+              "bank_id": "Synthetic-US-Bank",
+              "book_id": "Legal",
+              "perimeter_id": "Solo",
+              "currency": "USD",
+              "unit": "million",
+              "accounting_basis": "US_GAAP_CECL_supplied",
+              "jurisdiction": "US_national_bank",
+              "native_context_ref": "{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"}"
+            }
+          },
+          "role": "state",
+          "source_ref": "sha256:dfe899ec47e38ebb3a05d06be12f6363d3fe853f94b7009f98fd7f51f7085970#/body/period_end_exclusive"
+        },
+        "state_date": {
+          "type": {
+            "kind": "date",
+            "context": {
+              "bank_id": "Synthetic-US-Bank",
+              "book_id": "Legal",
+              "perimeter_id": "Solo",
+              "currency": "USD",
+              "unit": "million",
+              "accounting_basis": "US_GAAP_CECL_supplied",
+              "jurisdiction": "US_national_bank",
+              "native_context_ref": "{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"}"
+            }
+          },
+          "role": "state",
+          "source_ref": "sha256:2f6dbd10c04e2dbc3414432345b62d80c6bb39cf8def96ea847457287715cebf#/body/as_of_date"
+        }
+      },
+      "requirements": [
+        {
+          "id": "nonempty-period",
+          "predicate": {
+            "op": "lt",
+            "left": {
+              "op": "ref",
+              "id": "period_start"
+            },
+            "right": {
+              "op": "ref",
+              "id": "period_end"
+            }
+          },
+          "requires": [
+            "period_end",
+            "period_start"
+          ],
+          "admission_refs": [],
+          "on_false": "invalid",
+          "on_unknown": "unresolved"
+        },
+        {
+          "id": "assessment-in-period-start",
+          "predicate": {
+            "op": "le",
+            "left": {
+              "op": "ref",
+              "id": "period_start"
+            },
+            "right": {
+              "op": "ref",
+              "id": "assessment_date"
+            }
+          },
+          "requires": [
+            "assessment_date",
+            "period_start"
+          ],
+          "admission_refs": [],
+          "on_false": "invalid",
+          "on_unknown": "unresolved"
+        },
+        {
+          "id": "assessment-in-period-end",
+          "predicate": {
+            "op": "lt",
+            "left": {
+              "op": "ref",
+              "id": "assessment_date"
+            },
+            "right": {
+              "op": "ref",
+              "id": "period_end"
+            }
+          },
+          "requires": [
+            "assessment_date",
+            "period_end"
+          ],
+          "admission_refs": [],
+          "on_false": "invalid",
+          "on_unknown": "unresolved"
+        },
+        {
+          "id": "state-date-agrees",
+          "predicate": {
+            "op": "eq",
+            "left": {
+              "op": "ref",
+              "id": "assessment_date"
+            },
+            "right": {
+              "op": "ref",
+              "id": "state_date"
+            }
+          },
+          "requires": [
+            "assessment_date",
+            "state_date"
+          ],
+          "admission_refs": [],
+          "on_false": "invalid",
+          "on_unknown": "unresolved"
+        }
+      ],
+      "capabilities": [
+        "selected-date-requirements"
+      ],
+      "residual_prerequisites": [
+        "Native schema and complete semantic input closure",
+        "Last-day condition, scenario window and evidence timing",
+        "Accounting and regulatory source applicability and eligibility",
+        "Current view and accounting head at invocation time",
+        "Environment, resource budgets and runtime capability",
+        "Request identity, replay and publication/acknowledgement semantics"
+      ]
+    }
+  },
+  "schemas": {
+    "f63cd090872d18c2f28a95a4c6dcd44c02033451a0e637f2d251baa276f7d9f7": {
+      "profile": "RequirementInputSchema/2",
+      "requirements_profile": "MethodRequirements/1",
+      "schema_id": "native-selected-dates.basis",
+      "fields": {
+        "/body/assessment_date": {
+          "type": {
+            "kind": "date",
+            "context": {
+              "bank_id": "Synthetic-US-Bank",
+              "book_id": "Legal",
+              "perimeter_id": "Solo",
+              "currency": "USD",
+              "unit": "million",
+              "accounting_basis": "US_GAAP_CECL_supplied",
+              "jurisdiction": "US_national_bank",
+              "native_context_ref": "{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"}"
+            }
+          },
+          "role": "state",
+          "encoding": "scalar",
+          "missing": "unresolved"
+        },
+        "/body/period_start": {
+          "type": {
+            "kind": "date",
+            "context": {
+              "bank_id": "Synthetic-US-Bank",
+              "book_id": "Legal",
+              "perimeter_id": "Solo",
+              "currency": "USD",
+              "unit": "million",
+              "accounting_basis": "US_GAAP_CECL_supplied",
+              "jurisdiction": "US_national_bank",
+              "native_context_ref": "{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"}"
+            }
+          },
+          "role": "state",
+          "encoding": "scalar",
+          "missing": "unresolved"
+        },
+        "/body/period_end_exclusive": {
+          "type": {
+            "kind": "date",
+            "context": {
+              "bank_id": "Synthetic-US-Bank",
+              "book_id": "Legal",
+              "perimeter_id": "Solo",
+              "currency": "USD",
+              "unit": "million",
+              "accounting_basis": "US_GAAP_CECL_supplied",
+              "jurisdiction": "US_national_bank",
+              "native_context_ref": "{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"}"
+            }
+          },
+          "role": "state",
+          "encoding": "scalar",
+          "missing": "unresolved"
+        }
+      }
+    },
+    "36520508f329f78286f960c0f06ca3e0daca5f5d7c8ccad828f1ae701bd3214e": {
+      "profile": "RequirementInputSchema/2",
+      "requirements_profile": "MethodRequirements/1",
+      "schema_id": "native-selected-dates.state",
+      "fields": {
+        "/body/as_of_date": {
+          "type": {
+            "kind": "date",
+            "context": {
+              "bank_id": "Synthetic-US-Bank",
+              "book_id": "Legal",
+              "perimeter_id": "Solo",
+              "currency": "USD",
+              "unit": "million",
+              "accounting_basis": "US_GAAP_CECL_supplied",
+              "jurisdiction": "US_national_bank",
+              "native_context_ref": "{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"}"
+            }
+          },
+          "role": "state",
+          "encoding": "scalar",
+          "missing": "unresolved"
+        }
+      }
+    }
+  },
+  "blobs": {
+    "dfe899ec47e38ebb3a05d06be12f6363d3fe853f94b7009f98fd7f51f7085970": "{\"body\":{\"allowance_ref\":{\"digest\":\"c006fb78c69c6619bb948c3631249f47fa9d662308b84b32eb340c4504813a78\",\"kind\":\"AllowanceAdmission\",\"schema\":\"accdsl.bank-assessment.allowanceadmission.v1\"},\"applicability_ref\":{\"digest\":\"4e577110ed7a3be96a6898d4b4a68457dd7107c5d83eb45683e6222d0d116afc\",\"kind\":\"Applicability\",\"schema\":\"accdsl.bank-assessment.applicability.v1\"},\"assessment_date\":\"2026-03-31\",\"average_ref\":{\"digest\":\"1b0c37e2f6794e42c2f8dfbdc3e9e7612ec9dc67b4ccdea437107ee1308e5de3\",\"kind\":\"AverageAssets\",\"schema\":\"accdsl.bank-assessment.averageassets.v1\"},\"context_ref\":{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"},\"deduction_ref\":{\"digest\":\"59d8f55126c8a065e8faf54f72f0b1031212892c9fb39dfee175ab140fcb11a8\",\"kind\":\"DeductionAdmission\",\"schema\":\"accdsl.bank-assessment.deductionadmission.v1\"},\"eligibility_ref\":{\"digest\":\"b2b54e15bda655a354320e19c76b6c879a0ce787ec27a6ee7a17f10b5b5d96e6\",\"kind\":\"StockEligibility\",\"schema\":\"accdsl.bank-assessment.stockeligibility.v1\"},\"exposure_ref\":{\"digest\":\"117fe9ea7f4203e5fd7b9bc5a2b85e2228d5bb86ebe1f349f8d6e5e281efe28f\",\"kind\":\"ExposureClassification\",\"schema\":\"accdsl.bank-assessment.exposureclassification.v1\"},\"period_end_exclusive\":\"2026-04-01\",\"period_start\":\"2026-01-01\",\"rule_ref\":{\"digest\":\"e0ece39a3611ae5a92f7987e706461ee5e73b75f4aec761f8cda18e727c792f0\",\"kind\":\"RulePackage\",\"schema\":\"accdsl.bank-assessment.rulepackage.v1\"},\"state_ref\":{\"digest\":\"8cc197154ce9e9aa198fac4a3092d453c5b5fbd1f9eb88ee7dd29f4a9db678d5\",\"kind\":\"AccountingState\",\"schema\":\"accdsl.bank-assessment.accountingstate.v1\"},\"view_ref\":{\"digest\":\"981b311caabb0ea9b015346cfe59a8844b3852a9ea0362f60ef3c2c95ccc5fb0\",\"kind\":\"View\",\"schema\":\"accdsl.bank-assessment.view.v1\"}},\"dependencies\":[{\"digest\":\"117fe9ea7f4203e5fd7b9bc5a2b85e2228d5bb86ebe1f349f8d6e5e281efe28f\",\"kind\":\"ExposureClassification\",\"schema\":\"accdsl.bank-assessment.exposureclassification.v1\"},{\"digest\":\"1b0c37e2f6794e42c2f8dfbdc3e9e7612ec9dc67b4ccdea437107ee1308e5de3\",\"kind\":\"AverageAssets\",\"schema\":\"accdsl.bank-assessment.averageassets.v1\"},{\"digest\":\"4e577110ed7a3be96a6898d4b4a68457dd7107c5d83eb45683e6222d0d116afc\",\"kind\":\"Applicability\",\"schema\":\"accdsl.bank-assessment.applicability.v1\"},{\"digest\":\"59d8f55126c8a065e8faf54f72f0b1031212892c9fb39dfee175ab140fcb11a8\",\"kind\":\"DeductionAdmission\",\"schema\":\"accdsl.bank-assessment.deductionadmission.v1\"},{\"digest\":\"8cc197154ce9e9aa198fac4a3092d453c5b5fbd1f9eb88ee7dd29f4a9db678d5\",\"kind\":\"AccountingState\",\"schema\":\"accdsl.bank-assessment.accountingstate.v1\"},{\"digest\":\"981b311caabb0ea9b015346cfe59a8844b3852a9ea0362f60ef3c2c95ccc5fb0\",\"kind\":\"View\",\"schema\":\"accdsl.bank-assessment.view.v1\"},{\"digest\":\"b2b54e15bda655a354320e19c76b6c879a0ce787ec27a6ee7a17f10b5b5d96e6\",\"kind\":\"StockEligibility\",\"schema\":\"accdsl.bank-assessment.stockeligibility.v1\"},{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"},{\"digest\":\"c006fb78c69c6619bb948c3631249f47fa9d662308b84b32eb340c4504813a78\",\"kind\":\"AllowanceAdmission\",\"schema\":\"accdsl.bank-assessment.allowanceadmission.v1\"},{\"digest\":\"e0ece39a3611ae5a92f7987e706461ee5e73b75f4aec761f8cda18e727c792f0\",\"kind\":\"RulePackage\",\"schema\":\"accdsl.bank-assessment.rulepackage.v1\"}],\"key\":\"capital.unknown-applicability.basis\",\"kind\":\"AssessmentBasis\",\"revision\":0,\"schema\":\"accdsl.bank-assessment.assessmentbasis.v1\"}",
+    "2f6dbd10c04e2dbc3414432345b62d80c6bb39cf8def96ea847457287715cebf": "{\"body\":{\"as_of_date\":\"2026-03-31\",\"balances\":{\"allowance\":{\"d\":\"5\",\"n\":\"-12\"},\"borrowing\":{\"d\":\"1\",\"n\":\"0\"},\"cash\":{\"d\":\"1\",\"n\":\"21\"},\"deposit_expense\":{\"d\":\"1\",\"n\":\"0\"},\"deposits\":{\"d\":\"1\",\"n\":\"-117\"},\"goodwill\":{\"d\":\"1\",\"n\":\"2\"},\"interest_income\":{\"d\":\"1\",\"n\":\"0\"},\"loans\":{\"d\":\"1\",\"n\":\"120\"},\"loss_expense\":{\"d\":\"1\",\"n\":\"0\"},\"retained\":{\"d\":\"5\",\"n\":\"-18\"},\"stock\":{\"d\":\"1\",\"n\":\"-20\"}},\"context_ref\":{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"},\"event_refs\":[{\"digest\":\"ceb1f30157de441ecc7d69e7765b2277a8f59fd4e18878226d11c8eb9931fdb1\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"53be0097d9a1a4dcbe5fa4d5ebd045592156eba3ce2672d50e3f00f331a5e9f9\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"0dab20ac80aae9d0758f556feb25276e71eaa2f9209ec9810a45afaf765fbd0c\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"9c9a728ee97d929ef26b2557aa8c891163ee256423131cb03abb5ca9e5acb6f5\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"f0a8163f4ea785f98054381e0ac3efb0576fc6eec429de28ce2ea74a8f8c694e\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"3ca2d67f99279e3580fe83f79d1f3288d41a4e844291a1a5b55c08b7f9604c7f\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"}],\"evidence_ref\":{\"digest\":\"0b0f464a132f026e3e5bbabef9da1d38515e9513e1d36ef5024914c463ba4490\",\"kind\":\"Evidence\",\"schema\":\"accdsl.bank-assessment.evidence.v1\"},\"facility_ref\":{\"digest\":\"e7108d65ef784a67215976134856409767a121972fcc570cc8add5df605f4ebb\",\"kind\":\"FundingFacility\",\"schema\":\"accdsl.bank-assessment.fundingfacility.v1\"},\"frozen_head_id\":\"frozen-final\",\"opening_asof_date\":\"2026-01-01\",\"opening_balances\":{\"allowance\":{\"d\":\"5\",\"n\":\"-4\"},\"borrowing\":{\"d\":\"1\",\"n\":\"0\"},\"cash\":{\"d\":\"1\",\"n\":\"30\"},\"deposit_expense\":{\"d\":\"1\",\"n\":\"0\"},\"deposits\":{\"d\":\"1\",\"n\":\"-110\"},\"goodwill\":{\"d\":\"1\",\"n\":\"2\"},\"interest_income\":{\"d\":\"1\",\"n\":\"0\"},\"loans\":{\"d\":\"1\",\"n\":\"100\"},\"loss_expense\":{\"d\":\"1\",\"n\":\"0\"},\"retained\":{\"d\":\"5\",\"n\":\"-6\"},\"stock\":{\"d\":\"1\",\"n\":\"-20\"}},\"posted_journals\":[{\"event_ref\":{\"digest\":\"ceb1f30157de441ecc7d69e7765b2277a8f59fd4e18878226d11c8eb9931fdb1\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},\"lines\":[{\"account\":\"deposits\",\"signed_amount\":{\"d\":\"1\",\"n\":\"-20\"}},{\"account\":\"loans\",\"signed_amount\":{\"d\":\"1\",\"n\":\"20\"}}]},{\"event_ref\":{\"digest\":\"53be0097d9a1a4dcbe5fa4d5ebd045592156eba3ce2672d50e3f00f331a5e9f9\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},\"lines\":[{\"account\":\"cash\",\"signed_amount\":{\"d\":\"1\",\"n\":\"-15\"}},{\"account\":\"deposits\",\"signed_amount\":{\"d\":\"1\",\"n\":\"15\"}}]},{\"event_ref\":{\"digest\":\"0dab20ac80aae9d0758f556feb25276e71eaa2f9209ec9810a45afaf765fbd0c\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},\"lines\":[{\"account\":\"cash\",\"signed_amount\":{\"d\":\"1\",\"n\":\"6\"}},{\"account\":\"interest_income\",\"signed_amount\":{\"d\":\"1\",\"n\":\"-6\"}}]},{\"event_ref\":{\"digest\":\"9c9a728ee97d929ef26b2557aa8c891163ee256423131cb03abb5ca9e5acb6f5\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},\"lines\":[{\"account\":\"deposit_expense\",\"signed_amount\":{\"d\":\"1\",\"n\":\"2\"}},{\"account\":\"deposits\",\"signed_amount\":{\"d\":\"1\",\"n\":\"-2\"}}]},{\"event_ref\":{\"digest\":\"f0a8163f4ea785f98054381e0ac3efb0576fc6eec429de28ce2ea74a8f8c694e\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},\"lines\":[{\"account\":\"allowance\",\"signed_amount\":{\"d\":\"5\",\"n\":\"-8\"}},{\"account\":\"loss_expense\",\"signed_amount\":{\"d\":\"5\",\"n\":\"8\"}}]},{\"event_ref\":{\"digest\":\"3ca2d67f99279e3580fe83f79d1f3288d41a4e844291a1a5b55c08b7f9604c7f\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},\"lines\":[{\"account\":\"deposit_expense\",\"signed_amount\":{\"d\":\"1\",\"n\":\"-2\"}},{\"account\":\"interest_income\",\"signed_amount\":{\"d\":\"1\",\"n\":\"6\"}},{\"account\":\"loss_expense\",\"signed_amount\":{\"d\":\"5\",\"n\":\"-8\"}},{\"account\":\"retained\",\"signed_amount\":{\"d\":\"5\",\"n\":\"-12\"}}]}],\"sequence\":6,\"unpaid_withdrawal\":{\"d\":\"1\",\"n\":\"0\"}},\"dependencies\":[{\"digest\":\"0b0f464a132f026e3e5bbabef9da1d38515e9513e1d36ef5024914c463ba4490\",\"kind\":\"Evidence\",\"schema\":\"accdsl.bank-assessment.evidence.v1\"},{\"digest\":\"0dab20ac80aae9d0758f556feb25276e71eaa2f9209ec9810a45afaf765fbd0c\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"3ca2d67f99279e3580fe83f79d1f3288d41a4e844291a1a5b55c08b7f9604c7f\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"53be0097d9a1a4dcbe5fa4d5ebd045592156eba3ce2672d50e3f00f331a5e9f9\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"9c9a728ee97d929ef26b2557aa8c891163ee256423131cb03abb5ca9e5acb6f5\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"b3252b3d5f3eb30a1111e7985de05a18da31baa9ce447eb70408808760d10ed8\",\"kind\":\"Context\",\"schema\":\"accdsl.bank-assessment.context.v1\"},{\"digest\":\"ceb1f30157de441ecc7d69e7765b2277a8f59fd4e18878226d11c8eb9931fdb1\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"},{\"digest\":\"e7108d65ef784a67215976134856409767a121972fcc570cc8add5df605f4ebb\",\"kind\":\"FundingFacility\",\"schema\":\"accdsl.bank-assessment.fundingfacility.v1\"},{\"digest\":\"f0a8163f4ea785f98054381e0ac3efb0576fc6eec429de28ce2ea74a8f8c694e\",\"kind\":\"AccountingEvent\",\"schema\":\"accdsl.bank-assessment.accountingevent.v1\"}],\"key\":\"state.final\",\"kind\":\"AccountingState\",\"revision\":0,\"schema\":\"accdsl.bank-assessment.accountingstate.v1\"}"
+  },
+  "available_capabilities": [
+    "selected-date-requirements"
+  ]
+}

@@ -1,0 +1,1 @@
+Rendered page 404 exposed a tab followed by imes where the type-product equation required a multiplication sign. Repaired the source escape, retained attempt-01 build metadata/log, and rebuilt before recording verification. No predecessor source was changed.

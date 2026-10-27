@@ -38,8 +38,9 @@ used to request fresh permission for work already authorised by the user.
   than treating the current list as exhaustive.
 - Follow the applicable policies under
   `/home/chakwong/python/claudecodex/policies`. Preserve unrelated work and the
-  original paper collection. The existing `.git` marker is not a usable
-  repository; do not initialise or commit merely to create provenance.
+  original paper collection. Git was verified usable on 28 October 2026; use
+  the existing repository and configured remote when committing authorised work.
+  Do not initialise a replacement repository or rewrite historical provenance.
 - Keep operational mission/checklist material out of the reader-facing
   scholarly narrative unless it serves a real implementation-reference purpose.
 - Apply MC35, the user's internal-preparation-before-paid-review requirement.

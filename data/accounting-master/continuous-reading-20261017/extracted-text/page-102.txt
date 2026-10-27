@@ -1,0 +1,50 @@
+CHAPTER 7.
+THE ACCOUNTING LANGUAGE
+93
+7.6
+Posting rules and explicit exceptions
+An event type declares the information needed by a rule. The example below assumes an event
+representing interest accrued and paid on the same date. Separate accrual and settlement events
+are needed when those dates differ.
+event InterestPaid(principal: Money<USD>,
+rate: Rate<annual_simple>,
+fraction: YearFraction) book Local;
+rule recogniseInterest for InterestPaid as e
+when e.principal >= 0 USD {
+let charge = roundMoney(simpleInterest(e.principal, e.rate, e.fraction),
+currencyScale(USD), "half_even");
+require charge >= 0 USD;
+post {
+debit InterestExpense charge;
+credit Cash charge;
+}
+}
+The rule cannot perform file I/O, mutate another entity or sample a random number. It returns
+a proposed batch. The runtime verifies balance and all preconditions before committing state.
+Negative interest requires an explicit supported rule; it is not mishandled by this intentionally
+restricted example. Rounding is a declared demonstration convention, not a universal accounting
+default.
+Rules can declare overrides ruleName. The resulting override graph must be acyclic. For a
+concrete event, the evaluator determines all applicable rules and removes any that are overridden
+by another applicable rule. Exactly one maximal rule must remain for a required recognition
+operation. An empty set of applicable rules produces UnsupportedTreatment; more than one
+maximal rule produces RuleConflict. File order and a hidden numeric priority never break ties.
+If a guard depends on a symbolic value, the solver partitions the current feasible family into
+the guard and its negation, subject to the existing constraints. This is a logical partition, not a
+random draw. An incomplete solver returns UnknownApplicability, not a guessed rule. Statically
+provable disjointness or total coverage can be cached; otherwise the runtime performs the same
+checks on every concrete event.
+7.7
+Alternative readings, assumptions and updates
+An alternative adds constraints and possibly a supported semantic mapping to its parent model.
+Its record contains a rationale, supporting spans, opposing evidence, author, creation time
+and scope. Child alternatives inherit all parent constraints; they cannot quietly discard an
+inconvenient disclosure. A deliberate source rejection is a separate review decision with an
+explicit reason and a new evidence view.
+Two independent alternatives may coexist, while two mutually exclusive readings of the same
+text require an explicit choice group. The representation stores these relationships in a constraint
+graph. It does not take a Cartesian product blindly. For example, interpreting an instrument
+as a liability affects both its balance-sheet account and the treatment of its periodic payments;
+those choices must be linked through one shared treatment variable.
+New evidence narrows an existing family by conjunction when it concerns the same definitions
+and reporting basis. If it changes the basis or corrects an earlier assertion, the system creates a

@@ -1,0 +1,276 @@
+\chapter{A complete company and a real disclosure}
+\label{ch:case}
+
+\section{What a balance must remember}
+
+Northstar Components is a synthetic seller of one homogeneous good. Its
+disclosures, transactions and contract terms are specified together, so we can
+check whether reconstruction preserves a known possible history. All amounts
+in this example are currency units, not thousands. The company has no foreign
+currency, subsidiaries, leases, returns or other comprehensive income. These
+are declared features of the example, not assumptions to impose on an imported
+company. Its source package and expected results are supplied in
+\code{fixtures/northstar.json}.
+
+At the beginning of 2024, Northstar holds cash of 60, receivables of 20,
+inventory of 30 and plant costing 100 with accumulated depreciation of 20.
+It owes suppliers 20 and lenders 100. Share capital is 50 and retained earnings
+are 20. Thus assets of 190 equal liabilities of 120 plus equity of 70.
+Inventory consists of six units costing 5 each. The existing plant depreciates
+by 10 a year, with no residual value. The loan remains outstanding throughout
+2024; both possible contract types charge 5\% during that year.
+
+The six months ending June and December provide two successive observation
+periods. Here the chosen accrual convention assigns one half-year to each.
+Cash-flow dates within a half-year are not recovered from a period aggregate;
+the synthetic history supplies a feasible ordering in which inventory is
+purchased before delivery and customer receipts precede the payments they fund.
+More detailed liquidity questions require more detailed dates.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule Movement & First half & Second half\\\midrule
+Delivered sales on credit &110&150\\
+Customer collections &110&135\\
+Inventory purchases on credit &70&85\\
+Supplier payments &65&80\\
+Cost of goods delivered &75&90\\
+Payroll paid &20&22\\
+Plant purchased at period end &10&12\\
+Depreciation &5&6\\
+Interest accrued and paid &2.5&2.5\\
+Tax expense &1.5&5.9\\
+Tax paid &3.5&3.9\\
+Dividends paid &4&5\\\bottomrule
+\end{tabular}
+\end{center}
+
+Each row has an economic meaning before it has a posting. Delivery of the
+good transfers control and creates an unconditional receivable; invoicing is
+assumed simultaneous in this example. Collection settles that receivable.
+Purchases increase inventory and trade payables; paying the supplier settles
+the payable. Delivery separately removes inventory at cost. Plant purchases
+are capital expenditure, while depreciation consumes its service potential.
+The addition of 10 enters service after June and has a five-year life, producing
+one unit of second-half depreciation. The addition of 12 enters service after
+December and has a twelve-year life.
+
+Tax is deliberately simple: 20\% of positive profit before tax, with all these
+expenses deductible and no deferred tax. The first-half payment exceeds its
+tax expense by 2, leaving prepaid tax; that prepayment is used in the second
+half. A genuine corporate tax package would need jurisdiction, tax basis,
+losses, timing differences and payment schedules. The example's tax rule
+governs its own numbers only.
+
+\section{Recovering movements without inventing invoices}
+
+Suppose the annual report discloses sales of 260, cost of sales of 165 and the
+opening and closing working-capital balances, while the collection and purchase
+totals are hidden. Under Northstar's explicit no-write-off, no-acquisition and
+no-currency-effect scope, the three bridges are
+\begin{align}
+35&=20+260-C,\label{eq:ns-ar}\\
+20&=30+P-165,\\
+30&=20+P-S.
+\end{align}
+Here $C$ denotes collections, $P$ purchases and $S$ supplier payments, all in
+currency units over the same year. Substitution gives $C=245$, $P=155$ and
+$S=145$. These are identifiable aggregate movements within this model. They do
+not identify which invoice was paid on which day. If acquisitions or write-offs
+are admitted, their movement variables enter the same bridges and these totals
+may cease to be unique.
+
+The loan remains different. Write $F$ and $V$ for fixed and floating principal.
+The source imposes $F+V=100$, $F,V\geq0$ and
+$0.05F+0.05V=5$. The last equality adds no information about the split.
+Both endpoints and every intermediate allocation survive. Northstar therefore
+has identified working-capital totals and an unidentified financing exposure
+in the same joint historical family. A solver must not turn its convenient
+witness $F=0$ into the company's recovered contract.
+
+The model's historical slots are one delivery, collection, purchase, supplier
+settlement, payroll, plant addition, depreciation, interest, tax payment and
+dividend per half-year. Each slot represents a classified aggregate event.
+The template for collection contributes $+C$ to cash and $-C$ to receivables;
+its state effect reduces the unpaid receivable pool by $C$. The purchase
+template adds inventory quantity $P/5$, inventory cost $P$ and a payable $P$.
+A cash-balance identity by itself cannot substitute for either template.
+
+\section{The complete historical statements}
+
+The corrected statements follow from those movements. Temporary income and
+expense accounts close to retained earnings at each half-year boundary;
+annual income is the sum of the two periods' classified movements, excluding
+closing entries.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule Balance & Opening & June & December\\\midrule
+Cash &60&65&74.6\\
+Receivables &20&20&35\\
+Inventory &30&25&20\\
+Plant, net &80&85&91\\
+Prepaid tax &0&2&0\\
+Total assets &190&197&220.6\\\midrule
+Trade payables &20&25&30\\
+Debt &100&100&100\\
+Share capital &50&50&50\\
+Retained earnings &20&22&40.6\\
+Liabilities and equity &190&197&220.6\\\bottomrule
+\end{tabular}
+\end{center}
+
+Annual revenue of 260 less cost of sales 165, payroll 42, depreciation 11 and
+interest 5 gives profit before tax of 37. Tax expense is 7.4 and profit is 29.6.
+Other comprehensive income is zero under the declared scope, so total
+comprehensive income is also 29.6. Equity moves from 70 to
+$70+29.6-9=90.6$ after dividends.
+
+The cash-flow statement supplies an independent reconciliation. Collections
+245 less supplier payments 145, payroll 42, interest 5 and tax payments 7.4
+produce operating cash of 45.6. Investing cash is $-22$ and financing cash
+is $-9$, giving a cash increase of 14.6. The indirect route gives the same
+operating cash: profit 29.6 plus depreciation 11, minus the receivables
+increase 15, plus the inventory decrease 10 and the payables increase 10.
+The prepaid-tax balance is zero at both annual endpoints. The two cash routes
+use different information and therefore provide a useful check on classification.
+
+\section{A correction changes what was knowable}
+
+The original interim filing reported revenue of 120 and receivables of 30.
+Ten units of revenue had been recorded before delivery. Its tax expense was
+3.5, profit 14 and equity 80. The annual filing subsequently corrected the
+interim revenue and receivable by 10 and recognised the excess tax payment as
+prepaid tax of 2. Corrected interim profit is 6 and equity is 72, as above.
+The original statement remains an accurate record of what was published, even
+though its revenue recognition was wrong under the stated delivery rule.
+
+For the temporal fixture, the original report becomes available on 1 August
+2024 and is ingested on 3 August. The correction and annual report become
+available on 2 March 2025 and are ingested on 5 March. An investor-information
+query as of September 2024 returns 120. The same query as of 3 March 2025
+returns 110 when evaluated using the subsequently acquired archive. A query
+that additionally asks what the database contained on 4 March still returns
+120. Publication and ingestion answer different questions.
+
+The annual total 260 and corrected interim total 110 share revision group
+\code{v2}, so second-half revenue is $260-110=150$. Subtracting the original
+120 would yield 140, but that result mixes incompatible revisions. The query
+must reject the subtraction unless a reviewed compatibility relationship
+supports it. A later date alone does not establish such a relationship.
+
+\section{One economic scenario, several complete futures}
+
+For 2025, assume demand for 30 units at price 10, unit purchase cost 5 and a
+target closing inventory of eight units. Opening inventory is four units, so
+the purchase decision is $30+8-4=34$ units, costing 170. Deliveries cost 150,
+leaving inventory of 40. Collect 90\% of current sales and 10 of old
+receivables: $270+10=280$, leaving receivables of 55. Pay old suppliers 30
+and 130 of the new purchases, leaving payables of 40. Payroll is 50, capital
+expenditure of 20 occurs at year-end and dividends are 8.
+
+These decisions are inputs to a conditional forecast. They are not estimates
+of demand or optimal management responses. No new borrowing is available.
+Under the existing asset schedules, depreciation is $10+10/5+12/12=13$.
+The new year-end asset begins depreciation in the next period. Let
+$\alpha=F/100$. With the floating rate resetting to 7\%, interest is
+$I=7-2\alpha$. Profit before tax is
+$300-150-50-13-I=80+2\alpha$, giving tax $16+0.4\alpha$ and profit
+$64+1.6\alpha$.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule 2025 statement amount & All fixed & All floating\\\midrule
+Revenue &300&300\\
+Interest expense &5&7\\
+Tax expense &16.4&16\\
+Profit and comprehensive income &65.6&64\\
+Operating cash flow &48.6&47\\
+Investing cash flow &$-20$&$-20$\\
+Financing cash flow &$-8$&$-8$\\\midrule
+Closing cash &95.2&93.6\\
+Receivables / inventory / net plant &55 / 40 / 98&55 / 40 / 98\\
+Assets &288.2&286.6\\
+Payables / debt &40 / 100&40 / 100\\
+Equity &148.2&146.6\\\bottomrule
+\end{tabular}
+\end{center}
+
+The joint symbolic result is cash $93.6+1.6\alpha$, profit
+$64+1.6\alpha$ and equity $146.6+1.6\alpha$, with the same
+$\alpha\in[0,1]$ throughout. Selecting the smallest cash and largest equity
+independently would describe no feasible company. A requested distribution
+requires a measure over that same historical family; the accounting equations
+do not supply one.
+
+The later method schedules use the floating share $x$ rather than the fixed
+share $\alpha$ used here: $x=1-\alpha$. Both parameterisations describe the
+same joint family. Its 2025 opening cash is 74.6 and equity is 90.6; the
+forecast spends 20 on period-end capital expenditure, distributes 8 and settles
+its stipulated tax in the same year. These teaching assumptions are retained
+when the later lease example introduces a different tax-payment schedule.
+
+\section{Apple: source labels do not identify exposure}
+\label{sec:apple}
+
+The real reference package is Apple's 2024 Form 10-K and first-quarter 2025
+Form 10-Q, for fiscal dates 28 September and 28 December 2024 respectively
+\citep{apple2024,apple2025q1}. The annual balance sheet also supplies
+30 September 2023. The annual filing is archived as the company's PDF from
+AnnualReports; the interim filing is archived from SEC EDGAR with its inline
+XBRL. Apple's Note 1 describes a 52/53-week year ending on the last Saturday
+of September. Calendar-year assumptions would therefore misstate the periods.
+
+The package inventory preserves every annual PDF page and every interim
+top-level section, all thirteen annual notes and all ten interim notes.
+It records internal cross-references and externally incorporated material,
+including the proxy statement, as distinct obligations. Statement and debt
+facts below are structured; policies, other notes and exhibits retain their
+source locations and specific modelling obligations. This is complete
+inventory coverage of the acquired files, with partial semantic formalisation.
+It does not claim to reconstruct every Apple contract or to have acquired
+every incorporated external document.
+
+Apple's annual balance sheet reports assets 364,980, liabilities 308,030 and
+equity 56,950, in millions of US dollars. Note 9 reports term-debt principal
+97,341, unamortised discount/premium and issuance costs of $-321$, and hedge
+accounting adjustments of $-358$. Thus its carrying amount is
+$97{,}341-321-358=96{,}662$, split into current 10,912 and non-current
+85,750. Fair value is separately disclosed as 88.4 billion. None of these
+three measurements may replace another merely because a table calls it debt.
+
+Note 9 identifies the notes as fixed-rate, then states that interest-rate
+swaps effectively convert a portion to floating rates. Note 4 reports
+interest-rate contract notional of 14,575 at the annual date. A notional is
+neither a liability carrying amount nor sufficient information for an exact
+interest sensitivity: reset timing, remaining periods, curve conventions and
+hedge coverage still matter. The cross-reference connects the derivative to
+the borrowing without erasing either contract.
+
+At the interim date, total term-debt carrying amount is
+$10{,}848+83{,}956=94{,}804$. Cash is 30,299, total assets 344,085,
+liabilities 277,327 and equity 66,758. The interim debt note's rounded
+``94.8 billion'' and the statement's 94,804 million can coexist; their
+precision differs. Treating them as conflicting exact numbers would create
+an artificial infeasibility.
+
+To demonstrate a source-to-forecast calculation, freeze the interim balance
+sheet and apply a \emph{marginal} financing stress for a following 13-week
+period: a 200-basis-point rate increase, no principal change, no offsetting
+hedge beyond the explicitly selected exposure, immediate cash settlement and
+no tax effect. An assumed effective floating exposure $E=14{,}575$ million
+produces $0.02\times(13/52)E=72.875$ million additional interest. This exposure
+uses the annual notional as a conditional input; it is not asserted to be the
+interim net sensitivity. Under that condition, debit interest expense and
+credit cash by 72.875. The resulting marginal statements have cash 30,226.125,
+assets 344,012.125, liabilities 277,327, equity 66,685.125, profit and comprehensive
+income of $-72.875$, and operating cash flow of $-72.875$ relative to the frozen
+baseline. The balance-sheet difference equals the equity difference exactly.
+
+If exposure is instead only restricted to $0\leq E\leq14{,}575$, the
+conditional added interest lies in $[0,72.875]$ before monetary rounding. That
+restriction is a stress assumption and is not claimed to bound every real
+Apple exposure. This real case verifies evidence, context, mappings and a
+coherent marginal propagation. Northstar supplies the complete-company
+forecast; a complete Apple forecast remains dependent on its unmodelled
+operations and undisclosed terms.

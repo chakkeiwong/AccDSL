@@ -1,0 +1,46 @@
+\section{Dated settlement annotations}
+\label{sec:settlement-schedule-draft}
+
+Northstar's annual projection supplies amounts and an event sequence. The
+proposed \code{SettlementScheduleDraft/1} annotation adds dates and explicit
+funding knowledge without changing those amounts or the frozen company
+profile. It is a bounded documentary proposal; claim-level generation,
+behavioural-policy records and whole-company textual authoring remain further
+work. The existing \code{scenario.project@1} and accounting operations retain
+their distinct responsibilities.
+
+The body has exactly five fields: \code{profile}, \code{projection\_ref},
+\code{horizon}, \code{funding\_knowledge} and \code{events}. The projection
+reference identifies the existing immutable projection. The horizon has a
+start and exclusive end, at midnight UTC on the retained projection's fiscal
+boundary dates. Each event names one projection
+event, its instant and any required predecessors. An unknown instant carries
+a reason and named outstanding obligations. Each original event occurs once;
+neither an omitted event nor an invented payment is admissible.
+
+Validate structure, the referenced projection and complete event coverage
+before considering execution. Dependencies must be acyclic and compatible
+with dates. Purchase precedes delivery and supplier settlement; delivery
+precedes collection; the income and tax events precede closing. A date outside
+the half-open horizon rejects. Two events at the same instant need an explicit
+order when their order matters. The bounded annotation conservatively retains
+an unresolved result for an unordered pair; it does not use event names or
+input-array position to decide who receives cash first.
+
+The initial funding alternatives are an explicit scenario assumption that
+there is no eligible facility, or unknown facility access with its outstanding
+obligations. A committed facility needs a fuller contract describing limits,
+eligibility and draw timing. When cash suffices, payment can proceed without
+one. When cash is short and no facility is eligible, return an economic
+funding failure and leave the proposed payment unapplied. When access is
+unknown, retain unresolved funding instead. Subsequent bankruptcy or
+restructuring requires its own method; it is not inferred from this refusal.
+
+The reference schema and fifteen complete schedules are retained in
+\path{data/accounting-master/simulator-timing-20261023/}. The cases distinguish
+collection-before-payment, payment-before-collection, unknown collection timing
+and unknown funding. They also exercise omitted or duplicated events, cycles,
+contradictory dates, invalid calendar dates, unresolved references and explicit
+same-instant ordering. The original accounting comparison retains both
+interest-rate scenarios at floating shares zero, one half and one. These
+checks establish the stated documentary examples, not a deployed scheduler.

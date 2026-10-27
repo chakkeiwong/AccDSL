@@ -1,0 +1,38 @@
+{
+  "assumptions": [
+    "All mutating entrypoints acquire the exclusive writer lock and reload persisted state under that lock before refreshing or scheduling; those callers are not supplied.",
+    "Acceptance creation binds all required checker inputs, outputs and review evidence into evidence_hashes. The supplied refresh code verifies recorded hashes but cannot establish whether that inventory is complete.",
+    "proposal_gate independently validates current readiness evidence, and consumers reject mismatched derived-view generations or rebuild them from canonical state.",
+    "Trusted workers remain in their initial process group, as specified."
+  ],
+  "checks": [
+    "Accepted evidence with missing hashes, changed bytes, changed phase contracts or changed prerequisite evidence becomes stale.",
+    "The second invalidation pass follows the validated topological catalog order, propagating stale prerequisite status through accepted descendants.",
+    "Eligibility excludes held implementation work, requires accepted prerequisites and suppresses unchanged external blocks and deferred inputs.",
+    "Observed checkpoint disappearance vetoes reload and save rather than recreating cached state.",
+    "Refresh commits canonical state before publishing derived views and includes current outcomes, issues, residuals and next actions.",
+    "State validation requires mission_complete=false and every original gap to remain open."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_catalog.json",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md",
+    "docs/plans/accounting-master-controller-repair-20261005.md"
+  ],
+  "issues": [],
+  "next_actions": [],
+  "residuals": [
+    "Lock acquisition, acceptance inventory construction, atomic-write implementation, proposal_gate and derived-view consumers are supplied as interfaces rather than executable bodies. Their guarantees remain interface assumptions for this bounded review.",
+    "The derived files are published separately. Handled interruption can leave mixed generations until refresh rebuilds them; downstream consumers must enforce the stated freshness assumption.",
+    "Directory retry fingerprints exclude symlink files. The packet does not specify whether such files are forbidden as retry inputs or have their resolved targets bound elsewhere.",
+    "The reported 210 passing tests and listed test names are supporting control-plane evidence; their bodies were not supplied or executed.",
+    "This review establishes no accounting correctness, scientific completeness or human acceptance for the 192-report source panel or proposal."
+  ],
+  "steps": [
+    "Reviewed only the supplied state validation, persistence, invalidation, fingerprinting and refresh code against the stated interfaces.",
+    "Traced checkpoint loss, upstream evidence changes, phase-contract changes and interruption between canonical and derived publication without using tools."
+  ],
+  "summary": "AGREE for the bounded state-refresh packet: no concrete blocking defect is established in the supplied code under the explicitly stated interface assumptions. This verdict does not extend to omitted controller implementations.",
+  "verdict": "AGREE"
+}

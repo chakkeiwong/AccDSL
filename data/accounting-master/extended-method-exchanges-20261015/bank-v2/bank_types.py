@@ -1,0 +1,85 @@
+"""Closed BankComponents/2 types; historical conditional illustrations only."""
+def obj(fields): return {'type':'object','properties':fields,'required':list(fields),'additionalProperties':False}
+def arr(item,n=0): return {'type':'array','items':item,'minItems':n}
+def enum(*v): return {'enum':list(v)}
+def maybe(v): return {'anyOf':[v,{'type':'null'}]}
+ID={'type':'string','pattern':'^[A-Za-z0-9_.:@/-]+$'}
+DATE={'type':'string','format':'date'}
+BOOL={'type':'boolean'}
+INT={'type':'integer','minimum':0}
+Q=obj({'n':{'type':'string','pattern':'^(0|-?[1-9][0-9]*)$'},'d':{'type':'string','pattern':'^[1-9][0-9]*$'}})
+def qs(*names): return {k:Q for k in names}
+ASSETS=['cash','transferred_asset','loss_allowance','derivative_asset']
+LIABILITIES=['transfer_liability','derivative_liability']
+PROFIT=['asset_interest_income','liability_interest_expense','fair_value_gain','fair_value_expense',
+        'impairment_expense','guarantee_income','disposal_gain','other_gains']
+OCI=['fair_value_reserve']
+EQUITY=['capital','retained']
+ACCOUNTS=ASSETS+LIABILITIES+PROFIT+OCI+EQUITY
+CASH=['operating','investing','financing','unclassified']
+OCI_MOVEMENTS=['fair_value']
+EQUITY_MOVEMENTS=['issue','reserve_transfer','retained_transfer']
+FINDING={'finding_supported':maybe(BOOL),'finding_evidence':maybe(ID)}
+MEASUREMENT={'measurement_available':BOOL,'measurement_evidence':maybe(ID)}
+NO_EXTRAS={'fees':Q,'servicing':BOOL,'prior_oci':Q}
+COMPONENTS={
+ 'transfer':obj({'contract_id':ID,'phase':enum('unassessed','partial','funded','settled'),
+   **qs('initial_asset','asset','liability','principal_funding','sold_fv','retained_fv','asset_rate','liability_rate'),
+   'accrual_date':DATE,'asset_accrued':BOOL,'liability_accrued':BOOL,'finding_evidence':maybe(ID)}),
+ 'guarantee':obj({'contract_id':ID,'phase':enum('unassessed','active','expired'),
+   **qs('initial_asset','asset','liability','allowance','cap','initial_fee','service_fraction'),
+   'expiry_date':DATE,'finding_evidence':maybe(ID)}),
+ 'option':obj({'contract_id':ID,'kind':enum('call','put','collar'),
+   'phase':enum('unassessed','active','expired','exercised'),
+   **qs('initial_asset','asset','liability','spot','call_strike','put_strike','call_time','put_time'),
+   'expiry_date':DATE,'finding_evidence':maybe(ID)}),
+ 'ac_option':obj({'contract_id':ID,'phase':enum('unassessed','active','exercised'),
+   **qs('asset','liability','asset_terminal','liability_terminal','asset_rate','liability_rate','strike'),
+   'accrual_date':DATE,'asset_accrued':BOOL,'liability_accrued':BOOL,
+   'zero_allowance_isolation':BOOL,'finding_evidence':maybe(ID)}),
+ 'asset':obj({'contract_id':ID,'instrument':enum('debt','equity'),
+   'phase':enum('unassessed','classified','held','disposed'),
+   'classification':enum('pending','AC','debt_FVOCI','FVTPL','equity_FVOCI'),
+   'business_model':enum('unknown','collect','collect_sell','other'),
+   'sppi':enum('unknown','pass','fail','not_applicable'),
+   'fvtpl_designated':BOOL,'equity_elected':BOOL,'assessment_evidence':maybe(ID),
+   **qs('asset','allowance','ecl','reserve','probe_contractual','probe_benchmark'),
+   'probe_status':enum('not_run','explanatory_only'),'reserve_transferred':BOOL}),
+}
+OPTION_VALUE={**qs('spot','call_time','put_time'),**MEASUREMENT}
+EVENTS={
+ 'transfer.partial':('transfer',obj({**FINDING,**NO_EXTRAS,**qs('sold_fv','retained_fv','proceeds'),
+   'eligible_part':BOOL,'derecognition_supported':BOOL,'nontrading_investment':BOOL,'cash_evidence':maybe(ID)})),
+ 'transfer.retain_risks':('transfer',obj({**FINDING,**NO_EXTRAS,'proceeds':Q,'cash_evidence':maybe(ID)})),
+ 'transfer.asset_income':('transfer',obj({'original_eir_supported':BOOL})),
+ 'transfer.liability_expense':('transfer',obj({'separate_eir_supported':BOOL})),
+ 'transfer.repay':('transfer',obj({'amount':Q,'interest_component':maybe(Q),
+   'contractual_interest_allocation_supported':BOOL,'discharge_supported':BOOL,'cash_evidence':maybe(ID)})),
+ 'guarantee.start':('guarantee',obj({**FINDING,**NO_EXTRAS,**qs('proceeds','cap','guarantee_fv'),**MEASUREMENT,
+   'continuing_involvement_supported':BOOL,'cash_evidence':maybe(ID)})),
+ 'guarantee.service':('guarantee',obj({'cumulative_fraction':Q,'equal_service_performed':BOOL,
+   'revenue_method_admitted':BOOL,'service_evidence':maybe(ID)})),
+ 'guarantee.measure_loss':('guarantee',obj({'expected_loss':maybe(Q),**MEASUREMENT})),
+ 'guarantee.expire':('guarantee',obj({'no_claim_supported':BOOL,'rights_expired':BOOL,'expiry_evidence':maybe(ID)})),
+ 'option.start':('option',obj({**FINDING,**NO_EXTRAS,**OPTION_VALUE,'proceeds':Q,
+   'continuing_involvement_supported':BOOL,'zero_day_one_gain_supported':BOOL,'cash_evidence':maybe(ID)})),
+ 'option.remeasure':('option',obj(OPTION_VALUE)),
+ 'option.expire':('option',obj({**OPTION_VALUE,'rights_expired':BOOL,'expiry_evidence':maybe(ID)})),
+ 'option.exercise':('option',obj({'side':enum('call','put'),'amount':Q,'physical_settlement_supported':BOOL,'cash_evidence':maybe(ID)})),
+ 'ac_option.start':('ac_option',obj({**FINDING,**NO_EXTRAS,'proceeds':Q,
+   'zero_allowance_isolation_supported':BOOL,'cash_evidence':maybe(ID)})),
+ 'ac_option.accrue_asset':('ac_option',obj({'original_eir_supported':BOOL,'zero_allowance_isolation_supported':BOOL})),
+ 'ac_option.accrue_liability':('ac_option',obj({'separate_eir_supported':BOOL})),
+ 'ac_option.exercise':('ac_option',obj({'amount':Q,'physical_settlement_supported':BOOL,'cash_evidence':maybe(ID)})),
+ 'asset.classify':('asset',obj({'business_model':enum('unknown','collect','collect_sell','other'),
+   'sppi':enum('unknown','pass','fail','not_applicable'),'assessment_evidence':maybe(ID),
+   'equity_election':BOOL,'held_for_trading':BOOL,'initial_recognition':BOOL,
+   'fvtpl_designation':BOOL,'mismatch_eligible':maybe(BOOL)})),
+ 'asset.acquire':('asset',obj({'cost':Q,'fees':Q,'nontrading_investment':BOOL,'cash_evidence':maybe(ID)})),
+ 'asset.remeasure':('asset',obj({'fair_value':Q,**MEASUREMENT})),
+ 'asset.impair':('asset',obj({'expected_loss':maybe(Q),**MEASUREMENT})),
+ 'asset.dispose':('asset',obj({'proceeds':Q,'rights_transferred':BOOL,'cash_evidence':maybe(ID)})),
+ 'asset.transfer_reserve':('asset',obj({'within_equity_elected':BOOL})),
+ 'asset.time_value_probe':('asset',obj({**qs('principal','contract_rate','benchmark_rate'),'months':INT,
+   'matched_benchmark_supported':BOOL,'scenario_evidence':maybe(ID)})),
+}

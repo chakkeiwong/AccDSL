@@ -1,0 +1,13 @@
+EVIDENCE={'reassessment':'shared-tax-reassessment-20261024','manuscript':'tax-reassessment-integration-20261024'}
+UPDATES={}
+def add(ids,advance,residual,next_action):
+    for key in ids.split():UPDATES[key]={'evidence':['reassessment','manuscript'],'advance':advance,'residual':residual,'next_action':next_action,'full_requirement_closed':False,'acceptance':'not_promoted'}
+add('MC05','Later cumulative assessment has exact start/end and retains superseded interval.','Period carry and actual fiscal completeness remain open.','Require assessed endpoint and loss cursor at carry boundary;preserve unknown completeness.')
+add('MC11 MC13 I05','Reassessment binds complete actual state and full prior result without removing tax accounts.','Following-period execution and repeated assessment chains remain absent.','Define provisional carry with exact predecessor and archived period memory.')
+add('MC16 G4 P17-04.10','Incremental expense/payable preserves prior payments;loss replacement uses original opening.','Deferred recognition,independent periods,refunds and actual law remain open.','Preserve unresolved tax findings and unpaid balances through provisional carry.')
+add('MC24 G2','Closed cumulative model,information and exact apply reject mismatched identities.','General language and multiyear authoring incomplete.','Specify explicit provisional carry mode and unsupported annual promotion.')
+add('MC26','221 checks over28 cases and34 methods include original loss-kernel comparison and exact statement ties.','Deterministic checks do not prove statutory or scientific validity.','Check profit transfer and new-opening report arithmetic without repeating old flows.')
+add('MC28','Total21/4 posts only19/4;unpaid reversal and paid refund boundary are distinguished.','Synthetic cumulative model is not a complete company year.','Carry exact recorded balances and unknowns into a conditional next-period example.')
+add('MC32','Version3.83 preserves174 sources and282 displays;actual pages1,8,99,437-439 reviewed.','Dense navigation and whole-document/domain/human acceptance remain open.','Explain provisional carry and remaining close requirements plainly.')
+add('MC33 MC34 MC35','Reassessment dependency repaired and limits remain explicit.','No whole requirement/phase closes;S6 held,S7 deferred.','Continue provisional carry and unresolved deferred/source preparations.')
+add('P17-04.11','Cumulative current assessment can reach endpoint without promoting annual completeness.','Full deferred/coverage findings absent;annual carry remains unaccepted.','Preserve provisional status and unresolved obligations in distinct carry profile.')

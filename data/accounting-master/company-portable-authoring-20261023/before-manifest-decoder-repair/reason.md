@@ -1,0 +1,1 @@
+The 62-check record passed. Read-only replay incorrectly applied exact financial JSON decoding to the operational manifest, whose measured wall_seconds is a float. Preserve strict financial packet decoding; use ordinary JSON only for this locally written, hash-bearing run metadata. No financial values or protected predecessors change.

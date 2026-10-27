@@ -1,0 +1,371 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "case_id",
+    "evidence_class",
+    "request",
+    "expected"
+  ],
+  "properties": {
+    "schema": {
+      "const": "DocumentaryAdapterExchange/1"
+    },
+    "case_id": {
+      "type": "string"
+    },
+    "evidence_class": {
+      "const": "authored_expected_not_runtime"
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "selection_sha256",
+        "resources",
+        "required_uris",
+        "contexts",
+        "units",
+        "transforms",
+        "facts",
+        "control"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "selection_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "uri",
+              "body",
+              "sha256"
+            ],
+            "properties": {
+              "uri": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "required_uris": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contexts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "entity",
+              "perimeter",
+              "period_kind",
+              "start",
+              "end_exclusive",
+              "dimensions"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "entity": {
+                "type": "string"
+              },
+              "perimeter": {
+                "type": "string"
+              },
+              "period_kind": {
+                "const": "duration"
+              },
+              "start": {
+                "type": "string"
+              },
+              "end_exclusive": {
+                "type": "string"
+              },
+              "dimensions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "axis",
+                    "kind",
+                    "value"
+                  ],
+                  "properties": {
+                    "axis": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "enum": [
+                        "typed",
+                        "explicit"
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "measure"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "measure": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "transforms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "occurrence",
+              "source_uri",
+              "source_span",
+              "concept",
+              "raw",
+              "transform",
+              "scale",
+              "precision",
+              "context_id",
+              "unit_id",
+              "nil"
+            ],
+            "properties": {
+              "occurrence": {
+                "type": "string"
+              },
+              "source_uri": {
+                "type": "string"
+              },
+              "source_span": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "concept": {
+                "type": "string"
+              },
+              "raw": {
+                "type": "string"
+              },
+              "transform": {
+                "type": "string"
+              },
+              "scale": {
+                "type": "integer"
+              },
+              "precision": {
+                "type": "integer"
+              },
+              "context_id": {
+                "type": "string"
+              },
+              "unit_id": {
+                "type": "string"
+              },
+              "nil": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "control": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cancel_after",
+            "prior_request_digest",
+            "prior_receipt"
+          ],
+          "properties": {
+            "cancel_after": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "prior_request_digest": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "prior_receipt": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "records",
+        "unresolved",
+        "diagnostics",
+        "accounting_committed",
+        "package_complete"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "proposed",
+            "unresolved",
+            "partial",
+            "conflict"
+          ]
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "occurrence",
+              "context_id",
+              "unit_id",
+              "raw",
+              "nil",
+              "source_uri",
+              "source_span",
+              "concept",
+              "transform",
+              "scale",
+              "precision",
+              "value",
+              "review"
+            ],
+            "properties": {
+              "occurrence": {
+                "type": "string"
+              },
+              "context_id": {
+                "type": "string"
+              },
+              "unit_id": {
+                "type": "string"
+              },
+              "raw": {
+                "type": "string"
+              },
+              "nil": {
+                "type": "boolean"
+              },
+              "source_uri": {
+                "type": "string"
+              },
+              "source_span": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "concept": {
+                "type": "string"
+              },
+              "transform": {
+                "type": "string"
+              },
+              "scale": {
+                "type": "integer"
+              },
+              "precision": {
+                "type": "integer"
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "review": {
+                "const": "proposed"
+              }
+            }
+          }
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "accounting_committed": {
+          "const": false
+        },
+        "package_complete": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DocumentaryAdapterExchange/1"
+}

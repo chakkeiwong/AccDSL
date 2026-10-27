@@ -1,0 +1,3 @@
+# Refresh review
+
+The audited plan is docs/plans/accounting-gap-refresh-20261026.md. Frozen gap files are copied into a successor rather than regenerated. All original row records, literature entries and failure entries are retained exactly; only current next actions and explicit successor deltas change. The 5.17 sources are checked against 5.16 and all 121 protected evidence files before updating aliases. Carry /2 and /3 are explicitly distinct. Legacy controller state and phase bindings are unchanged. Page/check counts remain descriptive. No broad closure or independent acceptance is inferred.

@@ -1,0 +1,78 @@
+
+
+\paragraph{Begin another period with recorded balances and unresolved findings.}
+A conditional simulation can need another period before all the preceding
+period's accounting questions have been resolved. For example, the scenario
+above has cash, an unpaid current-tax liability, lease rights and a recorded
+profit, but its deferred-tax assessment and the completeness of its historical
+inputs remain open. Those recorded quantities are sufficient to construct a
+provisional opening for selected subsequent transactions. They are insufficient
+to declare that the preceding annual financial statements are complete.
+
+The explicit model \texttt{provisional\_recorded\_balance\_carry\_v1} makes
+that distinction part of execution. The request identifies the complete prior
+reassessment, a unique carry event and the next period's start and exclusive
+end. The prior current-tax assessment and loss history must reach the preceding
+financial endpoint, and the next period must start at that endpoint. The prior
+closing date must be its last included day. No calendar year or assessment of
+missing transactions is inferred from those dates. Separate findings describe
+event coverage, deferred-tax assessment, source admission and accounting
+admission. Unknown and negative findings remain visible in the resulting state;
+affirmative caller assumptions also leave annual readiness unestablished.
+
+The transfer follows the book's debit-positive convention. Let $P$ denote the
+recorded profit, $R$ the signed retained-earnings balance, and $b_k$ each
+signed account balance immediately before the boundary. Let $\mathcal I$
+contain the temporary income and expense accounts. The new opening satisfies
+\[
+ P=-\sum_{k\in\mathcal I}b_k,\qquad
+ R^{\mathrm{open}}=R-P,\qquad
+ b_k^{\mathrm{open}}=0\quad(k\in\mathcal I).
+\]
+Every other account keeps its recorded amount. A profit therefore increases the
+credit balance in retained earnings; a loss reduces it. The transfer journal
+sums to zero without a balancing plug. In the mixed scenario, recorded profit
+is $-1/4$ and retained earnings is $-12$, so the opening signed balance is
+$-12-(-1/4)=-47/4$. Cash stays $721/2$ and the unpaid tax liability stays
+$19/4$. Positive-profit and zero-profit cases separately check the same sign
+convention.
+
+The boundary changes period accumulators without discarding economic memory.
+Return components, recovered lots including disposed identities, lease rights,
+measurement dates, loss quantities and lifetime event identifiers survive
+exactly. The prior result retains its cash flows and tax adjustments together
+with hashes of the closing book and report. The next period begins with empty
+cash-flow and tax-adjustment lists, so an old receipt or deduction cannot be
+counted again. Opening deferred-tax allocations copy the recorded asset and
+liability; that copying does not assess their recognition or measurement. The
+new period's assessment cursor denotes an empty interval and its current tax is
+explicitly unassessed.
+
+Subsequent statements use the actual carried opening. Paying the opening tax
+liability of $19/4$ reduces cash from $721/2$ to $1423/4$, eliminates that
+liability and leaves current-period tax expense at zero. In the indirect cash
+calculation, the reduction in the opening payable explains the operating cash
+outflow. It must not be charged to profit again. If depreciation of 10 follows,
+recorded profit is $-10$, assets are $2743/4$, liabilities are 104 and equity is
+$2327/4$. Depreciation is added back in the indirect bridge, leaving operating
+cash flow at $-19/4$. The balance sheet, equity movement and direct and indirect
+cash calculations reconcile to the same opening and closing state.
+
+A second example carries an unsettled return component instead. Settlement
+pays 48, releases a refund liability of 40 and a recovery asset of 16, and
+recognizes recovered inventory of 20. Its cost-of-sales credit of 4 and selling
+expense of 8 reduce profit by 4. Selling that inventory for 30 then earns 10,
+so the two transactions together earn 6 and reduce cash by 18. Starting from
+cash of 500, the following-period cash is 482. The indirect calculation gives
+$6+16-40=-18$. The new return tax adjustment of $-24$ is retained for a later
+assessment; it is not absorbed into an asserted tax-complete closing balance.
+
+Ordered execution retains the completed prefix if a later event fails. A
+payment still needs both an unpaid liability and actual shared cash; a reused
+identity or an event outside the next period is refused. Applying a result
+recomputes the entire predecessor and subsequent prefix and compares the
+complete result, including unresolved findings and archived history. The
+checked implementation covers this provisional boundary and selected return,
+lease and tax-payment operations. New-period tax assessment, repeated carry,
+complete event coverage and deferred-tax recognition require their own methods
+and evidence before the scenario can support a complete annual close.

@@ -1,0 +1,38 @@
+{
+  "assumptions": [
+    "A legitimate PARTIAL result may create some phase deliverables while others remain absent; partial acceptance is not full phase acceptance.",
+    "The supplied process, locking, authorization and protection interfaces are assumed to hold. Their implementations were not included in this review scope.",
+    "Workers are trusted and remain in the initial process group, as specified."
+  ],
+  "checks": [
+    "Traced planning, plan rejection, editable repair, verification, result review and bounded continuation paths.",
+    "Checked pending-review creation and resumption against incomplete deliverables and evidence preservation.",
+    "Inspected acceptance guards: positive integer test counts, explicit registered-checker criteria and independent AGREE remain necessary.",
+    "Treated the reported 197 passing tests and supplied test names as supporting evidence only; no commands were run or test bodies inspected."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "P2 — Bounded partial review incorrectly requires every final deliverable to exist. In execute_phase, a non-scoped PARTIAL result with a positive test count enters bounded_partial_work review even when checks report missing deliverables. However, save_pending_review unconditionally adds every phase deliverable and phase['test_file'] to names, then calls evidence_hashes, which raises on any missing file. Consequently, legitimate incomplete work never reaches its bounded result reviewer or durable pending-review checkpoint; the outer exception handler instead sends it through another editable repair cycle with only the missing-evidence error. save_continuation already recognizes missing files, so these two persistence paths impose inconsistent requirements. Repair save_pending_review to distinguish bounded-partial checkpoints from full-acceptance checkpoints: require the actual work/check/approved-plan records, hash existing declared evidence, and explicitly record absent final deliverables. Validate that recorded presence/absence on resume, invalidating and rechecking when it changes. Keep the complete-file requirement for full acceptance."
+  ],
+  "next_actions": [
+    "Add a regression in tests/test_accounting_master.py where a non-scoped phase returns PARTIAL, checks execute a positive number of tests, and a final deliverable remains missing. Verify that bounded review executes without an additional editable attempt caused solely by the missing deliverable.",
+    "Cover review unavailability and subsequent read-only resume for that incomplete checkpoint, plus invalidation when a previously absent deliverable appears.",
+    "Rerun the relevant controller checks and obtain a fresh review of the repair."
+  ],
+  "residuals": [
+    "The exact catalog contracts and test bodies were not supplied; whether a current phase already encounters this defect is not established.",
+    "The packet does not define the required input-hash coverage for every checker. verification_input_errors accepts an absent or empty mapping, so freshness depends on checker contracts identifying all material inputs.",
+    "Process containment, exclusive ownership and reusable narrow command approval were assessed only through the stated interfaces, not independently verified.",
+    "The accepted 192-report source panel and scoped internal phase acceptance do not close accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Performed the requested packet-only static review without tools, file access or project-history retrieval."
+  ],
+  "summary": "Bounded partial review can be prevented by missing final deliverables, causing unnecessary editable repair instead of resumable read-only review.",
+  "verdict": "REVISE"
+}

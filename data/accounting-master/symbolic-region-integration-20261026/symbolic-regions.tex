@@ -1,0 +1,71 @@
+\section{Proving a result for an entire rate region}
+\label{sim:certified-rate-regions}
+
+The second coupon gives a useful test of what a simulation has actually established. Suppose the company drew its once-only facility at the first date. After the operating receipt and repayment, cash available for the second coupon is $5.25+R-I_1$. A payment succeeds exactly when
+\begin{equation}
+ I_1+I_2\leq 5.25+R.
+ \label{eq:certified-second-payment}
+\end{equation}
+At $I_1=I_2=6$, a receipt of 6 leaves only 5.25 before the payment, so the coupon remains unpaid. A receipt of 7 leaves 6.25 and permits payment, with 0.25 left over. A simulator that happens to test only the latter case has learned nothing about the former. Even a large set of successful sample executions does not exclude an omitted boundary or an incorrect condition between the samples.
+
+The selected example now has a stronger, exact connection to the declared accounting methods. It proceeds in three stages: establish each method's equations, substitute those equations through the dated sequence, and divide the rate domain wherever a condition changes. This division concerns computational work. It does not assert that a company, a manager or an observer learns which historical explanation is true.
+
+\subsection{Compare the method with an equation, not another sample}
+
+An affine monetary expression is a constant plus a weighted sum of quantities. For this example, those quantities include account balances, accrued and paid coupons, event amounts and the supplied parameters $I_1,I_2,R$. Write an expression as
+\begin{equation}
+ f(x)=c+\sum_j a_jx_j,
+ \label{eq:certified-affine-form}
+\end{equation}
+where each coefficient and the constant are exact rationals. The accounting language expresses these calculations through constants, references, addition and subtraction. A constant contributes to $c$; a reference contributes one coefficient; addition and subtraction combine the coefficient lists. Induction on these four constructions shows that the resulting list represents precisely the original expression. Two identical lists therefore give the same amount for every known typed valuation, rather than merely for the values tested in a run.
+
+For instance, the combined borrowing and payment changes cash by $3/4-I_t$. The corresponding coefficient of the due coupon is $-1$ and the constant is $3/4$. Doubling both interest expense and the credit to interest payable would still balance the journal. It would change these independently specified account relations and fail the comparison. Balance is a necessary accounting constraint, but it cannot establish that the right transaction was recorded.
+
+The comparison also preserves the conditions on the transaction. A numerical comparison is represented by its exact left-minus-right affine expression and its comparison sign. The facility trigger $I_t>11/2$ retains a strict sign; replacing it by $I_t\geq11/2$ fails even if a chosen set of sample rates misses equality. Boolean conditions retain their operands, and memory assignments retain their source and destination. The same check covers cash-flow origins: a borrowing receipt, fee and interest payment cannot be replaced by one net cash movement.
+
+Parameters enter through a separate selected template. Its coupon and receipt amounts, contract mode and facility right become ordinary typed literals before execution by the common runtime. Exact placement checks bind the parameters to the opening state, event inputs and selected-amount conditions. The surrounding method records retain their account maps, units, dates, schemas, declared dependencies and refusal policies. This is a certificate for the inspected selected profile. It does not extend the runtime to arbitrary symbolic programs or prove an unrestricted compiler correct.
+
+\subsection{A correct event still needs a correct predecessor}
+
+Local agreement leaves a temporal question. When a method reads the payable or the facility balance, does it receive the state produced by the preceding accepted event? Substitution answers that question for the selected sequence. Every posting and memory assignment reads the same pre-event state; the resulting changes become visible together. The next event receives the complete new state, including accrued and paid coupon history.
+
+After a first-date draw and payment, cash is $25/4-I_1$. The receipt adds $R$, and repayment subtracts the borrowed unit. Substituting successively gives
+\begin{align}
+ C_{1+}&=\frac{25}{4}-I_1,\\
+ C_{\mathrm{receipt}}&=\frac{25}{4}-I_1+R,\\
+ C_{2-}&=\frac{21}{4}-I_1+R.
+\end{align}
+The second accrual changes expense and the payable, leaving this cash unchanged. Substituting $C_{2-}$ into the payment condition $I_2\leq C_{2-}$ yields equation~\eqref{eq:certified-second-payment}. Repayment removes the facility liability while leaving the used-facility flag true. Omitting that memory would admit a second draw which the contract in this example forbids.
+
+The checked substitution compares all signed accounts, memory fields, gross flows and conditions with independent complete formulas. It includes both refusal positions. A first refusal leaves the first coupon accrued; a second refusal retains the accepted first-date events, receipt, repayment and second accrual. It does not replace the final payable by zero merely because the proposed payment appeared in the command sequence.
+
+At this stage a branch can be written down even when no rate makes it feasible. For example, the formal second-draw branch can be constructed after a first draw, but its unused-facility condition is false. Distinguishing an algebraically described branch from a possible history is the task of the next stage.
+
+\subsection{Why an empty branch needs a proof}
+
+Within each rate atom the capped coupon is constant or linear in the corresponding rate. A point atom uses its exact constant coupon. Substituting those pieces into the conditions gives inequalities in two variables, $r_1$ and $r_2$. Each comparison divides the current region into the points satisfying it and the points satisfying its exact negation. For $f\leq0$, the other child is $-f<0$; for $f<0$, it is $-f\leq0$. Equality belongs to one child, never to both and never to neither.
+
+A discarded child carries a short arithmetic reason why its inequalities cannot hold together. Suppose the child requires
+\begin{equation}
+ a_i^{\mathsf T}r+c_i\leq0,\qquad i=1,\ldots,m,
+ \label{eq:certified-region-constraints}
+\end{equation}
+with some signs possibly strict. Choose rational weights $\lambda_i\geq0$ that cancel both variable coefficients:
+\begin{equation}
+ \sum_i\lambda_i a_i=0.
+\end{equation}
+Adding the weighted inequalities then requires $\sum_i\lambda_i c_i\leq0$. If that constant is positive, the requirement is impossible. A zero constant also proves impossibility when at least one strict inequality receives positive weight: the sum would require $0<0$. These implications follow directly by multiplying and adding the original inequalities. The verifier checks the weights against those original rows rather than trusting a solver's declaration that a branch is empty.
+
+The distinction matters even in one dimension. The pair $x<0$ and $-x\leq0$ has no solution: equal unit weights produce $0<0$. Weakening the first inequality to $x\leq0$ admits $x=0$. A certificate that discards the strictness would incorrectly remove that boundary point.
+
+The reference producer eliminates the two variables with exact rational arithmetic and retains the weighted combinations it uses. A separate checker verifies each proposed contradiction. A retained leaf instead carries a point satisfying every inequality, including every strict sign. That point proves the leaf is nonempty. The affine method and sequence argument, together with the predicates along the branch, establishes the financial relation throughout the leaf; the witness alone does not.
+
+\subsection{What can now leave the unfinished-work list}
+
+For the declared two-date model, all $3{,}872$ rate-region and instruction obligations have a checked partition. The partition contains 918 nonempty accepted leaves and 2,960 nonempty refusal leaves; 4,772 additional children are discarded with checked contradiction certificates. These are computational counts, not probabilities. They depend on the selected atom refinement and cannot be interpreted as the likelihood of repayment or default.
+
+The saved proof archive is re-read before its jobs enter a new certified queue. Each entry binds the source revision, clause, method and sequence certificates, domain, query and horizon. A pending job leaves the queue only with the corresponding verified proof. Zero-budget and interrupted JSON continuations retain the same final partition as uninterrupted processing. Checking the saved proof registry costs work in addition to the budget for newly completed jobs.
+
+The earlier concrete checkpoint correctly kept these regions unresolved under its own evidence. The new result supplies separate whole-region certificates; it does not reinterpret the earlier witness as a proof. The distinction is useful beyond this example: completing a computation should mean satisfying the evidence obligation attached to that job, not merely reaching its last instruction.
+
+This result concerns known exact values, the supplied coupon and once-only facility terms, two bounded rates and the selected event sequence. It leaves a further decision problem. An actor can choose differently only when the actor's information distinguishes the relevant histories. Consequently, a list of financially feasible region-specific actions is not yet an admissible policy. Binding the certified leaves to the observation map and checking decisions that must agree across indistinguishable histories remains the next step. Higher-dimensional and nonlinear relations, unknown-value semantics, actual accounting authority, numerical quantisation and crash-durable recovery require additional evidence.\footnote{The local derivations and immutable comparisons are retained under \path{data/accounting-master/symbolic-method-certificate-20261026/}, \path{symbolic-path-composition-20261026/} and \path{exact-region-certificates-20261026/}. The last directory includes failed diagnostics, the exact partition archive, an independent weighted-sum checker and separate saved-archive/queue validation. No new literature proposition is asserted by these local calculations.}

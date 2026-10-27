@@ -1,0 +1,1 @@
+Cover review found the inherited26 October date inconsistent with this27 October successor. Both root dates now say27 October2026. Only existing named root edits change; prior successful builds and verification remain preserved.

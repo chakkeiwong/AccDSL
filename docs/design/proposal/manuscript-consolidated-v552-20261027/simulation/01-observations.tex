@@ -1,0 +1,83 @@
+\chapter[Different companies, identical statements]{The same statements can describe different companies}
+\label{sim:observations}
+
+A financial statement describes selected consequences of a company's activities. A simulation must explain how those consequences can change. These are different tasks. A balance of borrowing tells us how much debt is reported under a particular measurement basis and date. It does not, by itself, tell us when debt resets, who may demand repayment, which assets secure it, or whether management can replace it. Two companies can report the same debt and interest expense and respond very differently to the same increase in market rates. Recovering one plausible journal does not solve this problem. Even a complete journal may omit the contractual fact that determines the response.
+
+This part develops a representation of companies for which evidence is incomplete. Its purpose is useful conditional simulation without concealing what the evidence leaves unresolved. The numerical examples are synthetic teaching cases, not estimates of actual company exposures. They make a distinction visible: a calculation can be internally exact while its interpretation remains conditional on an unverified assumption.
+
+\section{A rate shock exposes the missing information}
+Consider a company with cash of 95 and debt of 100 at the forecast origin. Its recent annual interest expense was 5. Suppose debt was outstanding throughout that year, interest was paid when accrued, there were no fees or derivatives, and carrying amount equalled principal. A five per cent fixed-rate loan fits these observations. So does a floating-rate loan whose reference rate plus spread happened to equal five per cent. A mixture fits as well.
+
+Let $\alpha$ be the floating fraction of principal. Assume a two-percentage-point increase applies to that portion for the entire next year, with no cap, floor, maturity or hedge. Next year's interest payment is
+\begin{align}
+ I(\alpha)&=100(0.05)(1-\alpha)+100(0.07)\alpha\\
+ &=5+2\alpha,\qquad 0\leq\alpha\leq1.\label{sim:interest-family}
+\end{align}
+The two terms are payments on fixed and floating portions. Historical observations admit every value of $\alpha$ in the interval. They imply interest between 5 and 7 under the shock, but supply no frequency distribution within that range. Uniform weights would be an additional judgment.
+
+If interest is the only cash payment, closing cash is
+\begin{equation}
+ C(\alpha)=95-I(\alpha)=90-2\alpha.\label{sim:cash-family}
+\end{equation}
+Every result satisfies $C+I=95$. The marginal intervals $I\in[5,7]$ and $C\in[88,90]$ do not retain this relationship by themselves. The pair $(I,C)=(7,90)$ lies in the rectangle formed by these intervals but is impossible in the company described. An interface may display intervals; the calculation must retain their common dependence.
+
+Suppose a later note establishes $\alpha\in[0.2,0.4]$. Then
+\begin{equation}
+ I\in[5.4,5.8],\qquad C\in[89.2,89.6],\qquad C+I=95.
+\end{equation}
+The family has narrowed because evidence changed. This is not an economic event changing the contract. A reproducible historical forecast needs the earlier evidence family, while a current analysis may use the narrower one.
+
+\section{Journals and economic histories}
+For a simple interest payment of 5, a journal debits interest expense and credits cash by 5. Both fixed and floating histories can contain that posting. Storing alternative journals while omitting contracts can therefore collapse economically relevant uncertainty. The journal is essential for accounting consequences, but is not a complete description of rights, obligations and exposure.
+
+Depreciation of 10 may arise from one asset or several vintages with different remaining lives. Equal inventory totals may conceal different expiry dates and replacement costs. Receivables of 50 may consist of five customers owing 10 each or one owing 50. A customer-specific disruption distinguishes these histories even when their published totals agree.
+
+Write an economic history as $h$, its journal under accounting interpretation $b$ as $J_b(h)$, and its report as $R_b(J_b(h),h)$. The second argument permits notes to reveal facts absent from the journal. Compatibility with report $y$ means
+\begin{equation}
+ R_b(J_b(h),h)\in\mathcal O(y),\label{sim:compatibility-intro}
+\end{equation}
+where $\mathcal O(y)$ includes precision and context. A representation should preserve a joint family of histories, contracts, journals and interpretations. Independently choosing from lists of possible cash, debt and policies can create a company no coherent history supports. Shared evidence need not be copied for each alternative.
+
+\section{Agreement depends on the question}
+Two histories can agree with retained reports, agree under one simulation, or agree for every permitted future decision. These are progressively stronger requirements. Equal next-year cash under one rate path does not establish equal cash after refinancing or early redemption.
+
+For query $q$, scenario $s$ and policy $\pi$, write the requested result as $F_{q,s,\pi}(h)$. Equality
+\begin{equation}
+ F_{q,s,\pi}(h_1)=F_{q,s,\pi}(h_2)
+\end{equation}
+permits shared calculation for that question if provenance remains distinct. It does not authorize reuse for a different horizon, shock or policy. When learning changes decisions, agreement for fixed action sequences may itself be insufficient. Later chapters include observation laws in the equivalence condition.
+
+The inverse-problem treatment in \citet{stuart2010} explains why inference requires an observation relation and, for Bayesian conclusions, prior assumptions. We do not transfer its function-space theory wholesale to accounting. The relevant lesson is that a forward relation need not have a unique inverse. Possible-worlds approaches to incomplete data in \citet{libkin2014,libkin2016certain} provide language for answers holding across compatible interpretations. Neither identifies a company's actual transactions from totals alone.
+
+\section{Model completeness is a separate question}
+A model containing only fixed and floating unsecured loans may enumerate every feasible assignment while omitting convertible debt, leases and guarantees. Completeness within its variables does not establish completeness of the company description. An omitted instrument may dominate the stress response.
+
+A family therefore needs a declared domain: entities, dates, instruments, bases, documents and event types. Its computational status must distinguish an exact characterization, a sampled subset and an unfinished search. Ten witnesses establish ten compatible cases, not that only ten cases exist.
+
+Finite report compatibility also differs from statistical identification. \citet[Sections 2.1--2.3]{giacomini2021} studies observational equivalence of probability laws and set-identified parameters. Two loan histories fitting supplied reports need not induce the same law of every possible disclosure. Calling them globally observationally equivalent would overstate the evidence. Here they are report-compatible.
+
+\section{Selecting a convenient history}
+A fit criterion may choose the smoothest transaction path or the fewest contracts among equally accurate reconstructions. Such a selection can be useful for illustration. It does not turn smoothness or sparsity into an observed fact. It can erase the maturity concentration that makes a stress consequential.
+
+If $\alpha=0$ and $\alpha=1$ both fit interest expense 5, a preference for fewer reset clauses may choose zero. It then predicts interest 5 under the shock; the omitted compatible case predicts 7. No historical residual selects the correct response. Repeating the fit does not resolve the missing information.
+
+Bayesian model averaging gives a probabilistic alternative after models, priors and likelihoods are declared \citep{hoeting1999}. Its weights are not counts of reconstruction rows. Duplicating a fixed-rate record ten times must not increase its probability. This invariance under representational duplication is a useful implementation test.
+
+\section{Mechanics and management responses}
+The rate illustration holds financing decisions fixed. A company may repay, refinance, hedge, sell assets or issue equity. Every response needs resources, counterparties and information. Automatically increasing debt to pay all obligations assumes financing capacity. Refusing all adjustment is also a policy choice, even when it is useful for stress analysis.
+
+\citet{shahnazarian2004} separates financial identities from behavioral relationships. \citet{caiani2016} specifies action sequences and financial counterparts in an agent-based economy. These approaches motivate separate accounting and behavior, but do not supply a universally transferable issuer policy. Responses must be estimated, supplied, bounded or left unresolved.
+
+An output can distinguish historical explanations from future policies. One result may assume a floating share between 20 and 40 per cent and existing facilities only; another admits a stated refinancing offer. Averaging these without justified weights erases the question being answered. Conditional results remain informative even when an unconditional forecast is unavailable.
+
+\section{Trees are explanations, not compulsory storage}
+A tree displays mutually exclusive events, information arrival and subsequent decisions. It is useful for a small example. The continuum $\alpha\in[0,1]$ already contains infinitely many compatible companies, so a finite selection of branches is generally an approximation. An interval and symbolic formula can represent the same uncertainty more faithfully and compactly.
+
+Branches must not imply that a signed contract is redrawn each year. Fixed versus floating may be a persistent unknown fact. Future demand may instead generate fresh realizations under a declared stochastic process. A model must preserve the distinction.
+
+Sometimes a formula suffices; sometimes a split at a covenant threshold is needed; sometimes filtering a probability distribution is justified. In difficult cases the result must retain an unresolved region or bounded approximation. None of these choices requires a separate stored company for every imaginable world.
+
+\section{A useful simulation explains its dependence}
+For each result a reader should be able to identify its evidence, remaining histories, contractual and behavioral assumptions, and computational status. Balancing a projected balance sheet is weaker than this requirement. The model must explain why cash is available, why a payment occurs and what changes the answer.
+
+The remainder of this part develops reconstruction, learning, scenarios, financing, accounting transitions and tractable computation. Failure cases accompany the mechanisms they test. Their purpose is to expose a specific mistaken inference and its repair, not to imply that a finite catalogue anticipates every future error.

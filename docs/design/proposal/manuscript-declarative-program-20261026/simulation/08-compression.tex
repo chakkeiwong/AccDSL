@@ -1,0 +1,119 @@
+\chapter[Compact uncertainty]{Keeping uncertainty without enumerating every world}
+\label{sim:compression}
+
+Twenty binary unknowns have more than a million assignments. A company can have thousands of contracts, continuous unknown amounts and decades of possible events. Explicit enumeration is therefore an unsuitable default. The alternative is to represent the family and compute the answer demanded by a question. This can save enormous work, but cannot guarantee that every problem has a small exact solution.
+
+\section{Representation size and answer size}
+A formula containing twenty Boolean variables can describe all $2^{20}$ assignments without listing them. A solver may answer whether any assignment violates a cash constraint without printing every world. If the user asks for all distinct journals, the output itself can be enormous. No representation can print an exponentially large answer in fixed small space.
+
+Continuous uncertainty sharpens the distinction. The family $0\leq\alpha\leq1$ has infinitely many members, but interest $5+2\alpha$ is a finite exact answer. Useful computations include symbolic propagation, optimization over a region and classification of regions by behavior. Enumeration is one method, not the definition of correctness.
+
+\citet{darwiche2002} compares knowledge-compilation languages by succinctness and supported queries and transformations. Its definitions of directed acyclic representations, decomposability and determinism explain why sharing and structural restrictions help. Its tradeoffs also warn against assuming that a compact formula makes every query cheap. Compilation can itself be expensive.
+
+\section{Three different graphs}
+An evidence graph links assertions to sources and interpretations. A constraint graph links variables through relations. An execution graph links states through dated events. Their edges have different meanings. Source support is not causation; a constraint edge is not a probabilistic independence statement.
+
+An expression DAG can share a repeated discount factor or subtotal. An immutable history graph can share common event prefixes. A transition graph can merge states only when relevant future behavior is equivalent. Confusing these forms of sharing can turn an engineering optimization into an unjustified economic assumption.
+
+Economic feedback may remain cyclic while expression storage is acyclic. Debt price and investment policy can be simultaneous unknowns. An acyclic residual evaluator does not eliminate the fixed-point problem. The representation and solution method answer different questions.
+
+\section{Share common structure without merging worlds}
+If a thousand histories differ only in one loan's reset clause, their source reports, asset register and most events can be shared. Each alternative stores its clause condition and local differences. This reduces storage without identifying the alternatives economically.
+
+A common event prefix can be executed once when every history has the same relevant state and rule up to a boundary. Execution separates at the first differing reset or decision. Persistent data structures retain ancestors and changed fields for explanation and replay.
+
+Sharing must not allow mutation of one branch to alter another. Refinancing in one history cannot rewrite the common original loan. Immutable contract versions and branch-local successor records prevent that failure. Cache identities must include all relevant inputs and rule versions, not merely a displayed company name.
+
+\section{Elimination must preserve consequences}
+If a query uses variables $x$ and the full family is $C(x,z)$, exact elimination of $z$ means
+\begin{equation}
+ C_Q(x)\Longleftrightarrow \exists z C(x,z).
+ \label{sim:projection}
+\end{equation}
+Dropping every constraint containing $z$ is generally not this projection. Constraints $x=z+1$ and $0\leq z\leq2$ imply $1\leq x\leq3$. Removing both constraints leaves $x$ unrestricted. Correct elimination retains the implied interval.
+
+Projection can create dense relationships among remaining variables. A small original representation does not guarantee a small projected one. A dependency slice must include outputs, event guards, feasible actions and observation rules over the horizon. A variable absent from today's report can affect tomorrow's signal or covenant.
+
+An asset identifier irrelevant to interest expense may matter to collateral eligibility. A customer identifier irrelevant to total receivables may matter to concentration. Query-driven elimination therefore follows economic dependencies rather than simply selecting columns present in the requested output.
+
+\section{Split where behavior changes}
+If every member of a region follows the same affine transition, propagate it symbolically. When a guard changes the event rule, partition the region or retain a piecewise expression. For cash $90-2\alpha$ and requirement 89.4, the split is $\alpha\leq0.3$ versus $\alpha>0.3$. The equality belongs to compliance under the inclusive rule.
+
+If breach has no effect on the requested output, its consequences may be deferred while the condition is retained. If it changes funding eligibility, it matters immediately. Repeated guards can still create exponentially many distinct behaviors. Guard-based execution avoids unnecessary expansion; it does not prove universal tractability.
+
+A partition should carry its logical coverage: regions are disjoint where intended and their union covers the admitted parent. A missing equality boundary can silently lose a possible company. An overlapping boundary can double probability mass or duplicate an event. Exact rational threshold fixtures are especially useful here.
+
+\section{Equal totals are insufficient}
+Two states with cash 50 and debt 100 can differ in tomorrow's maturity. Two states with equal tomorrow payments can differ in a disclosure that changes the next decision. Neither pair can automatically be merged for the corresponding query.
+
+\citet[Section 3.1]{givan2003} shows why equality under fixed action sequences is too weak for general policy equivalence in an MDP: policies react to intermediate states. Section 3.3 develops stochastic bisimulation through equal rewards and transition probabilities to equivalent blocks for each action. The accounting application below adds observation and requested-output preservation; this extension is a local sufficiency argument.
+
+\section{A sufficient probabilistic condition}
+Consider a finite horizon. Let $x$ be full state, $a$ an action and $s$ a scenario control. Let $K_t(dx',do,dy\mid x,a,s)$ be the joint law of next state, observation and requested output. Let $\phi_t(x)$ be the compressed state. States sharing a compressed state must have equal feasible actions and current outputs. For every allowed $a,s$ and measurable set $B$, also require
+\begin{align}
+ &K_t(\{(x',o,y):(\phi_{t+1}(x'),o,y)\in B\}\mid x_1,a,s)\nonumber\\
+ &\quad=K_t(\{(x',o,y):(\phi_{t+1}(x'),o,y)\in B\}\mid x_2,a,s).
+ \label{sim:aggregation-kernel}
+\end{align}
+Initial distribution and information must be mapped consistently. Policies use only the retained information history and permitted memory. Under these conditions, the compressed model preserves the requested joint output and observation law. Equal means, or equal marginal laws separately, are weaker. Dependence between observation and successor state matters for learning.
+
+\section{Finite-horizon proof}
+At the final date, equality of current outputs establishes the result. Suppose the compressed model reproduces continuation laws from date $t+1$. At date $t$, an admissible policy selects the same action distribution for identical retained information histories. Equal feasible actions make this choice meaningful in either state.
+
+Equation \eqref{sim:aggregation-kernel} gives the same joint law of next compressed state, observation and immediate output. At each successor, the induction hypothesis supplies the same continuation law. Integrating equal continuation laws against the equal successor law gives equality of the remaining path law. Backward induction reaches the initial date.
+
+This condition is sufficient, not necessary. The finite helper described next checks explicitly supplied finite models; it is not a general checker for arbitrary company-state representations. If managers privately observe a hidden variable removed by $\phi$, their policy may not be expressible in the compressed model. The information condition must be strengthened or the state refined. Incorrect kernels cannot be repaired by an otherwise correct aggregation proof.
+
+\input{simulation/08a-finite-quotient}
+
+\section{Unweighted families require relational memory}
+For an unweighted family, replace probabilities with a relation of feasible successors, observations and outputs. Exact aggregation must preserve joint possibilities and persistent cross-time constraints. One-step marginal sets alone are insufficient.
+
+A fixed-or-floating loan with two-year interest paths $(5,5)$ and $(7,7)$ has one-step marginal set $\{5,7\}$ at each date. Recombining those sets creates $(5,7)$ and $(7,5)$, which require unmodeled contract changes. Retaining the latent type or equivalent memory prevents these paths.
+
+An enlarged family can sometimes provide an outer bound for a worst-case query. It is not an exact family of possible companies. A harmful witness from the enlarged set must be validated against original constraints before being described as economically possible. Conservatism does not excuse mislabeling the target.
+
+\section{Approximation needs a query-specific error}
+A cash error of 0.1 may be harmless for a chart and decisive at a covenant. For a smooth output, state error can imply an output bound under regularity. For a default indicator, an arbitrarily small change near a threshold can reverse the classification.
+
+If computed cash lies in $[19.95,20.05]$ and payment required is 20, a midpoint cannot establish feasibility for the whole region. The correct classification is unresolved unless a stronger method determines the sign. Refinement should focus on this boundary rather than indiscriminately increasing precision.
+
+If $f$ is Lipschitz with known constant $L$ in a stated norm and $\|x-\hat x\|\leq\epsilon$, then $|f(x)-f(\hat x)|\leq L\epsilon$. This follows from the definition. It requires a justified constant and domain. An unknown or very large $L$ can make the bound unhelpful. No such smoothness claim is made for a discontinuous breach indicator.
+
+\section{Inner and outer approximations}
+Let $\overline{\mathcal H}$ contain the true modeled family and let $\underline{\mathcal H}$ be contained in it. Then
+\begin{equation}
+ \inf_{h\in\overline{\mathcal H}}C(h)\leq\inf_{h\in\mathcal H}C(h)\leq\inf_{h\in\underline{\mathcal H}}C(h).
+ \label{sim:inner-outer}
+\end{equation}
+The outer minimum is a lower bound on the true minimum; the inner minimum is an upper bound. A low cash value from relaxation can be spurious. A high minimum over sampled witnesses does not prove safety.
+
+If the outer lower bound exceeds the payment requirement, the original family is safe for this query under its assumptions. If an inner feasible witness falls below it, failure is possible. Otherwise the status remains unresolved. This three-way answer is more informative than presenting every approximate extremum as exact.
+
+\section{Counterexample-guided refinement}
+Begin with a coarse outer model. If it proves the desired bound, the query may finish. If it returns a harmful candidate, validate that candidate against full constraints. A feasible candidate is a genuine witness; an infeasible one identifies a lost dependence and motivates refinement.
+
+The marginal interest-cash rectangle admits $(7,90)$, but $C+I=95$ rejects it. Adding that relation removes the spurious combination without enumeration. Other refinements can restore currency-maturity dependence, collateral ownership or persistent contract identity.
+
+This is a proposed reasoning method, not a universal termination result. Refinement may exhaust resources. The returned bounds and unresolved region should remain available, together with the dependencies still preventing a definitive answer. A resource limit is not an economic default or a proof that the region is empty.
+
+\section{Caching has an economic scope}
+A cached answer depends on evidence, assumptions, contracts, policy, observation model, horizon, requested outputs and numerical method. A change in any relevant component invalidates it. Company name and scenario label are insufficient cache keys.
+
+An aggregation checked for one-year interest may fail for three-year refinancing. Adding a new observed covenant can invalidate an information summary. The system should record the query class covered by an abstraction and require revalidation before broader reuse.
+
+Provenance remains separate even when computations are shared. Two sources supporting one fact need not duplicate arithmetic, but their independent support matters if one is withdrawn. Execution identity must not replace source identity.
+
+\section{Trees as selected explanations}
+A small tree is useful for showing information arrival, choices and counterexamples. It can be generated from the symbolic family for a question. Nodes should identify whether they are exact worlds, samples, regions or hypothetical observations.
+
+A representative tree is not exhaustive unless the finite model and coverage establish that claim. Branch probabilities require a measure. Pruning a display branch must not silently delete it from the calculation or renormalize remaining probabilities. A region can instead remain visible as an unresolved aggregate.
+
+A hybrid interface can show important branches, formulas and bounds together. Users expand regions affecting their decisions. This preserves explanation while avoiding compulsory exhaustive materialization. The underlying family remains authoritative when a new question requires a different partition.
+
+\section{Budgeted computation}
+A query should state resources and acceptable result types. Exact values, certified bounds, feasible witnesses and statistical estimates are distinct deliverables. If exact work exceeds budget, return partial bounds and unresolved regions. Do not substitute an unsupported point merely because the interface expects a number.
+
+Priority can go to liquidity, covenant, default and decision boundaries. This is a query-specific strategy and must not remove rare regions from a tail-risk calculation. The next chapter develops sampling and other approximations while preserving the distinction between retained possibilities and sampled evidence.
+
+The layered proposal is symbolic constraints, shared immutable records, dependency-aware elimination, guard-based splitting, justified aggregation and controlled approximation. Each layer has a correctness condition. Choosing a graph instead of a tree is useful engineering, but the mathematical and economic obligations remain.

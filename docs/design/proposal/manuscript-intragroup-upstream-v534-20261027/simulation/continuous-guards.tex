@@ -1,0 +1,74 @@
+\section{Sharing a rate family without sharing away a borrowing right}
+\label{sim:continuous-guard-reference}
+
+Return to the capped floating coupon, but now ask whether the company can pay it. The company starts with cash of 5.5, other assets of 94.5 and debt of 100. Its equity is initially zero. One admissible history has a fixed coupon of 5; another has the floating coupon
+\begin{equation}
+ I(r)=100\min\{0.06,\max\{0.03,r\}\},
+ \qquad r\in[0.02,0.08].
+\end{equation}
+At the earlier observed rate of five per cent, both histories report interest of 5. A later rate of six per cent separates them: fixed interest stays at 5 while floating interest reaches 6. A journal history that retains only the earlier interest amount cannot answer the new payment question.
+
+Each history also has two possible contractual interpretations. A committed facility may be available, or no facility may be available. In this stipulated example the facility lends 1, charges an immediate fee of 0.25 and can be drawn only when interest exceeds 5.5. These terms define a small test case; they are not inferred from the earlier statements. The four combinations of coupon type and facility availability remain separate possibilities. No probability is attached to them.
+
+There is one decision date. Interest accrues before the decision, and the manager submits either a payment order or a combined draw-and-pay order. These are indivisible instructions. An instruction that fails a prerequisite is refused. Contingent instructions, such as \emph{draw only if the bank permits it}, would enlarge the action set and require a fresh analysis.
+
+\subsection{The amount and the right determine different conditions}
+
+A payment order requires enough existing cash. A draw-and-pay order requires the contractual right, the strict trigger and enough cash after the fee. Write $b=1$ when the facility is committed and $b=0$ otherwise. Feasibility is therefore
+\begin{align}
+ \text{pay:}\quad &5.5-I\geq0,\\
+ \text{draw and pay:}\quad &b=1,\quad I>5.5,
+                    \quad 5.5+1-0.25-I\geq0.
+\end{align}
+Because interest never exceeds 6, an eligible draw leaves at least 0.25 cash. At interest exactly 5.5, ordinary payment remains possible and the draw is forbidden. Replacing the strict trigger with a weak inequality would change the contract at that point. At interest 6, the two facility interpretations have identical interest amounts but different feasible actions: the committed company can draw, while the company without the facility can execute neither order.
+
+Accrual is independent of that execution result. The company first debits interest expense and credits interest payable by $I$. If payment refuses, cash remains 5.5 and interest payable remains $I$; equity has fallen to $-I$. A failed payment does not erase the expense or the creditor's claim. If payment succeeds, it removes the payable and cash becomes $5.5-I$. If the draw succeeds, borrowing adds 1 of cash and debt, the fee reduces cash and equity by 0.25, and payment removes the payable. The resulting balance sheet satisfies
+\begin{equation}
+ \underbrace{(6.25-I)+94.5}_{\text{assets}}
+ =\underbrace{101}_{\text{debt}}
+  +\underbrace{(-I-0.25)}_{\text{equity}}.
+\end{equation}
+These journal rules are supplied premises for the example. They demonstrate how refusal and contractual memory enter the comparison; they do not determine a reporting treatment for an actual instrument.
+
+\subsection{A continuous comparison can be exhaustive}
+
+For floating debt, the coupon changes formula at rates 0.03 and 0.06, and the payment trigger changes at 0.055. Suppose also that a coarse signal tells the manager whether the rate is at most 0.04. The six points
+\begin{equation}
+ 0.02,\quad0.03,\quad0.04,\quad0.055,\quad0.06,\quad0.08
+\end{equation}
+then delimit every relevant change. Keep each point as a singleton and each interval between successive points as an open interval. The eleven resulting regions are disjoint and cover the entire closed rate domain. The fixed-coupon alternative can use fewer regions because it has no rate-dependent coupon or payment trigger.
+
+Within each open region, every financial amount is affine and every signal and eligibility condition is constant. Two implementations therefore agree throughout that region when their affine coefficients and discrete results agree. At singleton regions, compare their values directly. If one implementation uses a coarser partition, compare both on a common refinement and establish that each refined region lies entirely inside one region of each implementation. Sampling a midpoint can identify a known affine piece, but it cannot establish that the list of pieces is complete.
+
+The checked reference makes this comparison for the full journal, cash flows, balance sheet, payable, facility right, observations and action outcomes. Its independent comparator explicitly enumerates all coupon types, facility interpretations and the eleven rate regions. The smaller representation retains 32 mode-specific regions and shares 14 identical calculations. Every original mode and region still points to its calculation. These counts describe this example: sharing reduces duplicated results here, but supplies no general bound on memory use or runtime.
+
+Even this small construction exposed a consequential implementation mistake. Solving the draw-liquidity equation using the interior formula $I=100r$ gives a root at $r=0.0625$. That formula applies only below the cap at 0.06. The root is irrelevant to the capped region and must not be inserted as though the interior formula still governed there. A root finder must check the domain of the formula that generated its candidate boundary.
+
+Open regions also require careful treatment of extrema. On $0.055<r<0.06$, cash after drawing and paying is $6.25-100r$, so
+\begin{equation}
+ \inf C=0.25,\qquad \sup C=0.75.
+\end{equation}
+Neither endpoint is attained within that open region. The point $r=0.06$ attains cash 0.25, while $r=0.055$ belongs to the ordinary-payment region. Reporting an interval without its endpoint status loses a distinction needed for strict contractual conditions.
+
+\subsection{Information can prevent an otherwise affordable action}
+
+For the moment retain only histories with a committed facility. Every detailed history admits one of the two orders. This does not imply that the manager can select a feasible order using the information available at the decision date.
+
+Under the coarse signal, \emph{high} means only that $r>0.04$. It includes floating rates with interest below 5.5, where payment is possible but drawing is forbidden, and rates above 0.055, where drawing is possible but ordinary payment fails. The manager must issue the same order at indistinguishable histories. Neither order works throughout this signal class.
+
+Now suppose a second, explicit pre-decision signal reveals whether interest exceeds 5.5. The manager can pay when the trigger is false and draw and pay when it is true. This rule is feasible throughout the committed-facility family. Its feasibility comes from the additional information, not from a better numerical approximation. If unavailable facilities are restored to the family, some high-rate floating histories admit neither order. Even complete information cannot create borrowing capacity.
+
+The exact condition is elementary in this finite action setting. Let $H(o)$ contain all retained histories with observation $o$, and let $A(h)$ be the actions feasible at history $h$. A deterministic policy feasible throughout the family exists exactly when
+\begin{equation}
+ \bigcap_{h\in H(o)}A(h)\ne\varnothing
+ \quad\text{for every observed class }H(o).
+\end{equation}
+Necessity follows because one observation selects one action, which must work at every compatible history. For sufficiency, choose an action from each nonempty intersection. The finite collection of signals then defines a total policy. This argument depends on the supplied observation map, two atomic orders and robust feasibility across the family. It is not a conclusion about contingent instructions or a probability-weighted objective.
+
+\subsection{What remains safe when calculation is unfinished}
+
+A computation budget can stop evaluation of individual regions without removing them from the family. In the reference, the partition is constructed first and transitions are evaluated when requested. If only one region has been evaluated, the others remain explicitly unresolved. The coupon still has the valid outer bound $3\leq I\leq6$, but that bound alone does not identify a feasible payment policy. Eager construction of the partition itself can become expensive when more continuous variables or contractual alternatives are added.
+
+Approximation needs a separate justification. Suppose an independently established bound gives $|I-\widehat I|\leq\varepsilon$ throughout a region. A strict trigger $I>K$ is certainly true when $\widehat I-\varepsilon>K$, and certainly false when $\widehat I+\varepsilon\leq K$. In the remaining band the bound permits both answers, so the region must be refined or left unresolved. The conclusion follows by comparing the entire allowed interval with $K$; sampled errors do not supply its uniform premise.
+
+Observation thresholds need their own error bounds. Preserving the interest trigger while changing which rate signal the manager sees can still change the feasible-policy set. A reused calculation must therefore retain its rate domain, contract interpretation, clause version, horizon, query, observation map, action class and precision. Changing any of these requires reconsidering the grouping. The example provides an exact one-rate, one-date reference for that discipline. Persistent hidden terms across several dates, higher-dimensional regions, nonlinear guards and defensible approximation bounds remain further method problems.\footnote{The derivation and independently authored comparison are retained in \path{data/accounting-master/continuous-guards-20261026/}. The accepted result is in \path{attempt-02/}; the earlier failed partition and its repair remain available separately.}

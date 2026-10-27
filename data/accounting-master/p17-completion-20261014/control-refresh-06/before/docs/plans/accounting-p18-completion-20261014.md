@@ -1,0 +1,242 @@
+# P18 — Complete the governing manuscript
+
+14 October 2026. Detailed continuation of the
+[remaining-phase plan](accounting-remaining-phases-20261014.md).
+P18 owns MC32 and integrates the evidence for MC01–MC31/33–35 and G1–G18.
+Substantial integrations already exist. The remaining task is a coherent,
+technically complete proposal whose explanations and implementation contracts
+agree throughout the document.
+
+## Baseline, reader and evidence contract
+
+Continue from Version 2.77, 234 pages:
+`docs/design/proposal/manuscript-state-only-allocation-20261014/accounting-product-proposal.pdf`,
+SHA256 `678881a3c000433207ab5875a82c4f482a5519706c12e8390fe502ea3c8bd69d`.
+Version 2.72 remains the full-program preservation/assessment baseline; the
+2.73–2.77 source, chronology, customer-contract and interface integrations are scoped
+supplements. P18-01/02/04 and local rendering are delivered for those changes;
+whole-candidate integration, contract consistency and final rendering stay open.
+Its source tree includes transitive inputs; the top-level directory alone is
+not a complete preservation boundary. Preserve that candidate and older
+baselines. Version 1.2 remains historical evidence, not the current edit base.
+
+The reader is a financial modeller or accounting/software researcher who knows
+bookkeeping, basic probability and elementary linear algebra, but not AccDSL's
+records, uncertainty distinctions or interfaces. The proposal must let that
+reader reconstruct how a disclosure becomes a reviewed reading, how jointly
+compatible histories survive it, how a scenario separates those histories,
+and how accounting methods turn their events into coherent statements. An
+implementer must find exact arguments, state transitions and failure behavior.
+
+Apply the
+[linear scholarly narrative skill](/home/chakwong/.codex/skills/write-linear-scholarly-narrative/SKILL.md)
+and its teaching contract. Keep phase administration and review checklists in
+companion records. Teach necessary mathematics where the reader needs it;
+preserve the detailed reference material and link it from the argument. Voice
+and comprehension remain provisional until ordinary human feedback is available.
+
+The question is whether one candidate explains and specifies the promised
+product consistently. Compare it with the original acceptance obligations,
+the protected 2.72 content and the completed P17 method/source dispositions.
+The primary internal criterion is a reconstructible connected argument with
+complete supported contracts, preserved technical content and an inspected
+final rendering. Missing premises, conflicting contracts, lost mathematics,
+unsupported source transfers or materially incorrect examples veto the affected
+passage and trigger repair. Build success, page count, hashes and citation
+counts are engineering diagnostics; they do not establish comprehension,
+accounting validity or readiness. Independent review belongs to P19.
+
+## Work units
+
+### P18-01 — Decide how each finding changes the manuscript
+
+MC29/30/32/34/35; G8/G10, plus the requirements of each incoming P17 unit.
+Begin with P17-01's SQL result when its technical closeout is complete. Other
+completed source results can receive dispositions independently.
+
+For each finding, locate the current sentence, equation, example or interface
+it supports or contradicts. Record one decision: retain with exact support,
+repair, extend, remove an unsupported assertion, or make no edit with a located
+reason. Distinguish a missing citation from a changed mathematical claim.
+For SQL, check the soundness/completeness distinction and the meaning of an
+approximation's unknown result before accepting the preliminary no-edit view.
+
+Identify the affected chapter, dependent definitions and required case changes.
+If a source cannot justify a general claim, qualify that claim and preserve the
+source limitation; do not leave the overclaim beside a new disclaimer. Avoid
+repeating each source dossier in the main text. No new citation is needed when
+it supplies neither support nor a relevant alternative.
+
+Output: an edit-disposition record linked to exact source/method results and
+the proposed passages. Done when every consequential P17 finding has an
+actionable destination or a defensible no-edit decision. Unsupported required
+content remains an explicit P17/P19 blocker.
+
+### P18-02 — Integrate complete cases into the argument
+
+MC01–22/28/32; G1/G4–7/G11–16.
+Depends on the relevant completed portions of P17-02–08; work incrementally.
+
+Retain the complete synthetic Northstar case and use the real Apple package
+to expose the additional source, chronology and uncertainty problems. Connect
+representative notes through admitted readings, joint histories, scenario
+assumptions, journals/state changes and every affected statement. Incorporate
+the delivered JPMorgan conflict and bank examples and the insurance examples
+within their evidenced scopes. Do not turn a conditional calculation into an
+identified company history or imply that separate examples form one company.
+
+Organize corporate and sector methods around the economic sequence that makes
+their inputs and state necessary: delivery and payment; inventory and assets;
+leases and tax; financing and ownership; group/FX; bank credit and funding;
+insurance service, finance and reinsurance. Explain the operative authority,
+facts and assumptions before deriving the calculation. Include non-immediate
+substitutions and explain how entries and non-journal state affect reports.
+
+For each mechanism, stage its actors, dates, units, known facts and unknowns
+before the equation or formal record. Interpret the result and one useful
+limiting/adverse case. Put exact interface details near their first substantive
+use or link to a complete reference definition. Preserve a natural argument;
+do not force every section into the same visible teaching template.
+
+Output: revised connected chapters and examples, with source anchors and a
+trace from each case to its methods. Done when a reader can follow the case
+without supplying omitted premises or hunting through unrelated appendices.
+This is an author reconstruction check, not evidence of human comprehension.
+
+### P18-03 — Reconcile definitions and contracts across chapters
+
+MC02/04–14/18/23–27/31/32/34; G1–3/G6/G9/G12–18.
+Start from P17-08/10 and the P16 initial profile; finalize after P17-11.
+
+Check that terms, symbols, units, signs, time views and authority selections
+have one compatible meaning wherever used. Resolve old/new interface
+conflicts at the definition and all callers. Preserve historical Core 0
+examples as explicitly scoped teaching material where appropriate; identify
+which typed profile and exchanges govern the proposed implementation.
+
+Trace one chain across source identity, review authorization, joint histories,
+scenario information, EventBasis, journal/delta, atomic commit, reporting,
+query results and revision/replay. Include stale views, duplicate events,
+infeasibility, partial search, unsupported operations and numerical failure.
+Check certainty versus observed variation, approximation versus exact results,
+scenario conditioning versus intervention, and unsupported probability weights.
+Verify that aggregation retains the state required by each query and horizon.
+
+Audit corporate, financing/group, bank and insurance extensions against that
+same chain. A sector method may require a core-contract repair; do not conceal
+it in a local exception. Reconcile the proposed adapters' version, loss and
+failure behavior with storage, identity and recovery descriptions.
+
+Output: a compact definition/interface consistency record and actual repairs
+in the manuscript. Done when no known consequential contradiction or missing
+cross-contract premise remains. Passing an isolated example is insufficient.
+
+### P18-04 — Preserve the technical content and build the candidate
+
+MC24/25/29/30/32/33; G2/G8/G10/G18.
+Run targeted checks after a substantive integration; perform final preservation
+against 2.72 after the complete edit set. Do not rebuild unchanged candidates
+solely to accumulate check counts.
+
+Create a distinct candidate source directory at execution time, such as
+`docs/design/proposal/manuscript-completion-20261014/`. Enumerate all transitive
+TeX, bibliography, figure, listing and fixture inputs before editing. Bind
+inherited external sections as well as local files; do not mutate an older
+candidate through a shared input. Record any deliberate dependency relocation.
+
+Compare every removed or changed equation, derivation, citation, assumption,
+finding, source boundary and substantive qualification with the baseline.
+Record its preserved destination or justified replacement. Resolve repeated or
+contradictory passages without losing their mathematical obligations. Check
+worked amounts against the reviewed calculations and update all dependent
+tables and explanations together. A smaller PDF is not the success criterion.
+
+Use the installed LuaLaTeX/natbib toolchain after a bounded availability check.
+Expected command from the candidate directory:
+
+```sh
+latexmk -lualatex -interaction=nonstopmode -halt-on-error -file-line-error -recorder accounting-product-proposal.tex
+```
+
+Save full build output on disk and report a bounded summary. Bind the actual
+command, tool versions, exit status, PDF hash and recorder inputs; distinguish
+project inputs from environment files. Resolve undefined references/citations,
+missing inputs and material layout problems. Use existing scoped validators
+where applicable; document their scope instead of changing historical records
+or weakening a checker to accept a new path.
+
+Output: source/input map, preservation dispositions, build log/manifest and the
+candidate PDF. Done when the exact candidate builds and every substantive
+baseline change is accounted for. This does not establish scientific validity.
+
+### P18-05 — Inspect the whole final rendering and argument
+
+MC28/32/33/35; G5/G10, with all substantive chapters in scope.
+Depends on the built final candidate; local render checks can occur earlier.
+
+Render every final PDF page using the installed CPU renderer, bind those
+images to the PDF and inspect them. Use contact sheets for navigation, then
+read dense equations, tables, captions, cross-page transitions and visually
+problematic pages at legible resolution. Inspect body prose as well as headings
+and appendices. A prior inspection of nine changed pages does not cover a new
+whole-document candidate.
+
+Read the argument in order for missing prerequisites, unexplained equations,
+notation drift, source overclaims, administrative prose and unnecessary repeated
+warnings. Reconstruct the source-to-statements cases and failure examples from
+the document alone. Repair confirmed findings in the source, then rebuild and
+inspect affected pages and any pagination changes. Retain actual findings and
+their dispositions; do not create a claim of human approval from a checklist.
+
+Output: a page-bound inspection and author reconstruction record. Done when
+confirmed internal findings are repaired or remain explicitly blocking. Pending
+ordinary reader feedback prevents human acceptance, not further drafting.
+
+### P18-06 — Assemble one reviewable candidate for P19
+
+MC01–MC35/G1–G18, especially MC32–35.
+Depends on P17-11 and P18-01–05. Prepare the record earlier, but assess its final
+contents only after the relevant source and manuscript changes are integrated.
+
+Bind one source/input tree, PDF, version, build/render record, method/case
+results, preservation decisions and remaining questions. Map changed MC/G
+evidence to that candidate and identify unchanged support carried by exact
+bytes. Distinguish source access limitations, unresolved design choices,
+later runtime work and independent/human acceptance. State whether P18 has
+completed its internal integration obligations; a reviewable negative candidate
+must not be labelled design-complete merely because its files are assembled.
+
+Output: a concise result and manifest under
+`data/accounting-master/p18-completion-20261014/`, linking the substantive
+records above. Done when P19 can inspect the exact candidate without
+reconstructing conversation history. Refresh live controls without rewriting
+the frozen controller, original requirements or historical assessments.
+
+## Dependencies, assumptions and skeptical audit
+
+P18-01 and the inventory for P18-03 can advance while P17 continues. Integrate
+completed methods in P18-02–04, then do the complete P18-05 pass. P18-06 and
+the final P19 decision depend on P17's substantive dispositions. A P19 finding
+returns to the responsible unit; unrelated work continues.
+
+| Material choice | Provenance and status | Failure mode and early check |
+|---|---|---|
+| Version 2.72 | Current protected baseline | Accidentally edit a stale or shared source; enumerate transitive inputs first |
+| Existing chapter order and examples | Useful baseline, open to justified repair | Accumulated inserts lose the argument; trace the connected case before moving prose |
+| LuaLaTeX/natbib and CPU rendering | Existing convenience toolchain | Missing input/font or environment mismatch; check tools and one early build |
+| Worked methods and amounts | P17's scoped source/calculation evidence | Copy an unsupported treatment or inconsistent value; compare premises and outputs at integration |
+| Author/model readability checks | Diagnostic only | Fluent prose is mistaken for human comprehension; retain a separate human-acceptance record |
+
+The skeptical audit identifies the wrong original baseline, hidden transitive
+inputs, local-example overclaims and build/readability substitution as material
+risks. This plan corrects them and passes for internal integration. No method
+superiority, accounting compliance or empirical forecast claim is made by a
+successful document build. No benchmark or new training default is proposed.
+
+Stop dependent work for corrupted/protected inputs, conflicting writers, unsafe
+build side effects or a required mathematical premise that cannot be supported.
+Repair local content failures and continue independent units. Historical campaign
+deadlines are preserved history, not fresh limits on authorized direct work.
+No reviewer, publication, installation or runtime campaign is launched by this
+planning document. A later unavailable source or reader response must be scoped
+to the claim or acceptance it actually blocks.

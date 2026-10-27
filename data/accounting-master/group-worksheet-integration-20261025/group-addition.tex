@@ -1,0 +1,80 @@
+\paragraph{A member's balances can depend on state held by the group.}
+The corporate group introduces a different reason to preserve the native
+representation. Its parent and subsidiary have separate balances, but their
+state also includes shared inventory lots, returns, a compound instrument,
+tax calculations and ownership changes. Copying each balance dictionary into
+an independent company book would leave those dependencies behind. A later
+event could then use a valid-looking opening balance without the facts needed
+to determine its accounting consequences.
+
+The reference adapter therefore selects a member within the complete group
+state. A selector names the exact state record and the path
+\code{/books/P} or \code{/books/S}; its identity differs from the identity of
+the group record itself. The common company's reference points to that
+selector. The result retains the selected balances, the whole native state
+and its information view together. Record schemas, dependency references and
+source bytes are checked before a selection is returned. The selector gives
+access to a member's balances without asserting that they form a separately
+executable book.
+
+The two retained snapshots also show why time belongs in the relationship.
+On 1 January 2025, the supplied parent ownership fraction is four-fifths and
+the parent and subsidiary cash balances are 500 and 100. On 31 December 2025,
+ownership is nine-tenths and cash is 491.5 and 152.5. Binding either fraction
+to the entire supplied control interval would erase an ownership change.
+The adapter instead attaches it to the selected snapshot day. It preserves
+the supplied control premise and the archival, synthetic information view;
+it does not determine control, recalculate consolidation or admit current
+source evidence.
+
+\paragraph{An elimination worksheet leaves the legal books intact.}
+Separately valid company books permit a different operation. Consider a new
+constructed example in USD units at 31 December 2025. Parent P holds cash 80,
+an investment in subsidiary S of 100 and a receivable from S of 20; its equity
+is 200. S holds cash 70 and equipment 50, owes P 20 and has capital of 100.
+Both books balance. Assume that P controls and fully owns S, the books use
+compatible accounting policies and measurement bases, the reciprocal balances
+refer to the same obligation, and the investment equals the subsidiary's
+capital with no acquisition difference. These are supplied facts of the
+illustration. They do not describe the earlier four-fifths or nine-tenths
+ownership case.
+
+Adding the legal books gives assets of 320, liabilities of 20 and equity of
+300. The worksheet then records two explicit adjustments. First, it credits
+the investment by 100 and debits the subsidiary capital by 100. Second, it
+credits the receivable by 20 and debits the payable by 20. Under the declared
+signed-balance convention, each adjustment sums to zero. The resulting assets
+are cash 150 and equipment 50; liabilities are zero and equity is 200. Cash
+does not change. Neither legal book receives an entry: the adjustments belong
+to the separate worksheet, alongside the unadjusted contributions.
+
+The implementation requires a complete map from each local account to the
+declared common chart. It checks the legal owners, case, currency, period,
+snapshot date and classifications, and preserves each book's memory and cash
+flow history. Every paired adjustment names its source accounts, expected
+full balances and economic premise. A source account can be used only once;
+the pair must come from different books and contain exactly opposite,
+nonzero balances. This first operation supports the two declared pair roles,
+receivable--payable and investment--equity. It refuses cash elimination,
+partial allocations, unmatched balances, unresolved components and unsupported
+sector books rather than supplying a balancing amount. A worksheet with no
+declared adjustments remains an unadjusted combination.
+
+Two versions of the illustration use different local account names and the
+same explicit common-chart meanings. Both reproduce the complete signed
+unadjusted balances, elimination deltas and adjusted balances; replay also
+checks that the legal books remain unchanged. These checks establish the
+finite worksheet calculation. The truth of the supplied economic premises
+still requires evidence, and classification equality does not prove policy
+equivalence. Noncontrolling interests, goodwill, tax, foreign exchange,
+intragroup profit and period cash-flow eliminations require additional methods.
+The result therefore remains a snapshot worksheet, not a complete consolidated
+statement package or an executable group book.
+
+The reference selections and worksheet cases are retained in two directories
+under \path{data/accounting-master/}:
+\begin{flushleft}\small
+\path{native-group-binding-20261025}\\
+\path{compatible-book-composition-20261025}
+\end{flushleft}
+

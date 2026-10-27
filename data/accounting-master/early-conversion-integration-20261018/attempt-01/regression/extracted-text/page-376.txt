@@ -1,0 +1,40 @@
+APPENDIX B. CORE GRAMMAR, RECORDS AND EXECUTION DETAILS
+367
+?comparison: sum [COMPARE sum]
+?sum: product (ADD product)*
+?product: unary (MUL unary)*
+?unary: UNARY unary | postfix
+?postfix: atom ("." NAME)*
+?atom: number | STRING | DATE | BOOL | call | NAME | "(" expr ")" | array | record
+call: NAME "(" [expr ("," expr)*] ")"
+number: NUMBER [NAME | "per" "year"]
+array: "[" [expr ("," expr)*] "]"
+record: "{" [record_field ("," record_field)*] "}"
+record_field: NAME ":" expr
+SIDE: "debit" | "credit"
+OR: "or"
+AND: "and"
+UNARY: "-" | "not"
+COMPARE: "==" | "!=" | "<=" | ">=" | "<" | ">"
+ADD: "+" | "-"
+MUL: "*" | "/"
+BOOL.2: "true" | "false"
+DATE: /@[0-9]{4}-[0-9]{2}-[0-9]{2}/
+NAME: /[A-Za-z_][A-Za-z0-9_]*/
+NUMBER: /(?:0|[1-9][0-9]*)(?:\.[0-9]+)?/
+STRING: /"(?:[^"\\\x00-\x1f]|\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4}))*"/
+%import common.WS
+%ignore WS
+%ignore /\/\/[^\n]*/
+B.2
+Required core record definitions
+The historical closed machine-readable definitions remain in the original design directory at
+spec/core-ir.schema.json. They define contexts, source spans, observations, narratives, cov-
+erage units, mappings, partitions, entity/control records, books, accounts, symbols, choices,
+expressions, constraints, assumptions, alternatives, contracts, events, rules, packages, measure-
+ments, states, journals, scenarios, information views, review decisions, evidence views, model
+scopes, historical families, probability models, report mappings, result cells, branches, runs and
+diagnostics. For those historical records the schema fixes field spelling and structural shape,
+and its companion contract fixes reference resolution and operations. New portable records
+instead obey the exact versioned contracts introduced in Chapters 7, 8 and 13. No historical
+field list grants new posting authority.

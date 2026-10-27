@@ -1,0 +1,13 @@
+EVIDENCE={'losses':'conditional-tax-losses-20261024','manuscript':'tax-loss-integration-20261024'}
+UPDATES={}
+def add(ids,advance,residual,next_action):
+    for key in ids.split():UPDATES[key]={'evidence':['losses','manuscript'],'advance':advance,'residual':residual,'next_action':next_action,'full_requirement_closed':False,'acceptance':'not_promoted'}
+add('MC05','Explicit contiguous loss intervals and exclusive expiry preserve dates.','Native financial-state carry and fiscal completion remain open.','Separate accrual day from exclusive assessment endpoint.')
+add('MC11 MC13 I05','Pure loss apply recomputes complete results and binds exact financial calculation.','Loss-ledger continuity is not shared financial-state continuity.','Bind an explicit tax successor to the complete native closing state.')
+add('MC16 G4 P17-04.10','Explicit hypothetical loss generation, cap, allocation and expiry conserve quantities.','Legal eligibility, credits, refund, deferred recognition, payable and settlement remain open.','Design a separate current-tax accrual and cash settlement profile.')
+add('MC24 G2','Closed loss-state types preserve provenance, unknown eligibility, identities and full apply comparison.','Broader text authoring, general tax rules and independent implementation remain open.','Specify successor types and rejected prior-posting scopes before coding.')
+add('MC26','269 checks over32 cases include fractional use, expiry boundaries and cross-history conservation.','These deterministic checks do not establish general numerical or tax validity.','Check exact journals and statement identities with independent expected arithmetic.')
+add('MC28','Generation19 and later use19 against21 give taxable2 and conditional tax1/2.','Second financial opening is hypothetical and separately declared.','Use explicit same-book accrual examples without claiming financial-year carry.')
+add('MC32','Version3.80 preserves174 sources and279 displays; rendered pages1,8,99,433-436 checked.','Dense navigation, whole-document and independent/domain/human review remain pending.','Integrate checked financial tax semantics in context after implementation.')
+add('MC33 MC34 MC35','Frozen evidence and bounded local review advance internal preparation.','No whole requirement or phase closes;S6 held,S7 deferred.','Continue checked state repair and preserve all other queues.')
+add('P17-04.11','Tax losses remain a separate conditional ledger with no annual authorisation.','Accrual, cash settlement and native period carry are absent.','Explicitly classify tax payable and distinguish assessment from annual closing.')

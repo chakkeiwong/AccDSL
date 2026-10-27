@@ -1,0 +1,2681 @@
+          A Tutorial on Particle Filtering and Smoothing:
+                        Fifteen years later
+
+
+             Arnaud Doucet                           Adam M. Johansen
+The Institute of Statistical Mathematics,         Department of Statistics,
+   4-6-7 Minami-Azabu, Minato-ku,                  University of Warwick,
+        Tokyo 106-8569, Japan.                    Coventry, CV4 7AL, UK
+      Email: Arnaud@ism.ac.jp               Email: A.M.Johansen@warwick.ac.uk
+
+
+              First Version 1.0 – April 2008
+              This Version 1.1 – December 2008 with typographical
+                                  corrections March 2012
+                                                Abstract
+
+
+Optimal estimation problems for non-linear non-Gaussian state-space models do not typically admit analytic
+solutions. Since their introduction in 1993, particle filtering methods have become a very popular class of
+algorithms to solve these estimation problems numerically in an online manner, i.e. recursively as obser-
+vations become available, and are now routinely used in fields as diverse as computer vision, econometrics,
+robotics and navigation. The objective of this tutorial is to provide a complete, up-to-date survey of this
+field as of 2008. Basic and advanced particle methods for filtering as well as smoothing are presented.
+
+Keywords: Central Limit Theorem, Filtering, Hidden Markov Models, Markov chain Monte Carlo, Particle
+methods, Resampling, Sequential Monte Carlo, Smoothing, State-Space models.
+1     Introduction
+
+The general state space hidden Markov models, which are summarised in section 2.1, provide an extremely
+flexible framework for modelling time series. The great descriptive power of these models comes at the
+expense of intractability: it is impossible to obtain analytic solutions to the inference problems of interest
+with the exception of a small number of particularly simple cases. The “particle” methods described by this
+tutorial are a broad and popular class of Monte Carlo algorithms which have been developed over the past
+fifteen years to provide approximate solutions to these intractable inference problems.
+
+
+1.1    Preliminary remarks
+
+Since their introduction in 1993 [22], particle filters have become a very popular class of numerical methods
+for the solution of optimal estimation problems in non-linear non-Gaussian scenarios. In comparison with
+standard approximation methods, such as the popular Extended Kalman Filter, the principal advantage
+of particle methods is that they do not rely on any local linearisation technique or any crude functional
+approximation. The price that must be paid for this flexibility is computational: these methods are com-
+putationally expensive. However, thanks to the availability of ever-increasing computational power, these
+methods are already used in real-time applications appearing in fields as diverse as chemical engineering,
+computer vision, financial econometrics, target tracking and robotics. Moreover, even in scenarios in which
+there are no real-time constraints, these methods can be a powerful alternative to Markov chain Monte Carlo
+(MCMC) algorithms — alternatively, they can be used to design very efficient MCMC schemes.
+
+As a result of the popularity of particle methods, a few tutorials have already been published on the subject
+[3, 8, 18, 29]. The most popular, [3], dates back to 2002 and, like the edited volume [16] from 2001, it is
+now somewhat outdated. This tutorial differs from previously published tutorials in two ways. First, the
+obvious: it is, as of December 2008, the most recent tutorial on the subject and so it has been possible to
+include some very recent material on advanced particle methods for filtering and smoothing. Second, more
+importantly, this tutorial was not intended to resemble a cookbook. To this end, all of the algorithms are
+presented within a simple, unified framework. In particular, we show that essentially all basic and advanced
+methods for particle filtering can be reinterpreted as some special instances of a single generic Sequential
+Monte Carlo (SMC) algorithm. In our opinion, this framework is not only elegant but allows the development
+of a better intuitive and theoretical understanding of particle methods. It also shows that essentially any
+particle filter can be implemented using a simple computational framework such as that provided by [24].
+Absolute beginners might benefit from reading [17], which provides an elementary introduction to the field,
+before the present tutorial.
+
+
+1.2    Organisation of the tutorial
+
+The rest of this paper is organised as follows. In Section 2, we present hidden Markov models and the
+associated Bayesian recursions for the filtering and smoothing distributions. In Section 3, we introduce a
+generic SMC algorithm which provides weighted samples from any sequence of probability distributions. In
+Section 4, we show how all the (basic and advanced) particle filtering methods developed in the literature
+can be interpreted as special instances of the generic SMC algorithm presented in Section 3. Section 5 is
+devoted to particle smoothing and we mention some open problems in Section 6.
+
+
+
+
+                                                      1
+2     Bayesian Inference in Hidden Markov Models
+
+2.1    Hidden Markov Models and Inference Aims
+
+Consider an X −valued discrete-time Markov process {Xn }n≥1 such that
+
+                            X1 ∼ µ (x1 ) and Xn | (Xn−1 = xn−1 ) ∼ f ( xn | xn−1 )                           (1)
+
+where “∼” means distributed according to, µ (x) is a probability density function and f ( x| x0 ) denotes the
+probability density associated with moving from x0 to x. All the densities are with respect to a dominating
+measure that we will denote, with abuse of notation, dx. We are interested in estimating {Xn }n≥1 but only
+have access to the Y−valued process {Yn }n≥1 . We assume that, given {Xn }n≥1 , the observations {Yn }n≥1
+are statistically independent and their marginal densities (with respect to a dominating measure dyn ) are
+given by
+                                        Yn | (Xn = xn ) ∼ g ( yn | xn ) .                                 (2)
+For the sake of simplicity, we have considered only the homogeneous case here; that is, the transition and
+observation densities are independent of the time index n. The extension to the inhomogeneous case is
+straightforward. It is assumed throughout that any model parameters are known.
+
+Models compatible with (1)-(2) are known as hidden Markov models (HMM) or general state-space models
+(SSM). This class includes many models of interest. The following examples provide an illustration of several
+simple problems which can be dealt with within this framework. More complicated scenarios can also be
+considered.
+
+
+
+Example 1 - Finite State-Space HMM. In this case, we have X = {1, ..., K} so
+
+                           Pr (X1 = k) = µ (k) , Pr ( Xn = k| Xn−1 = l) = f ( k| l) .
+
+The observations follow an arbitrary model of the form (2). This type of model is extremely general and
+examples can be found in areas such as genetics in which they can describe imperfectly observed genetic
+sequences, signal processing, and computer science in which they can describe, amongst many other things,
+arbitrary finite-state machines.
+
+Example 2 - Linear Gaussian model. Here, X = Rnx , Y = Rny , X1 ∼ N (0, Σ) and
+
+                                             Xn = AXn−1 + BVn ,
+                                             Yn = CXn + DWn
+
+          i.i.d.               i.i.d.
+where Vn ∼ N (0, Inv ), Wn ∼ N (0, Inw ) and A, B, C, D are matrices of appropriate dimensions. Note
+that N (m, Σ) denotes a Gaussian distribution of mean m and variance-covariance matrix Σ, whereas
+N (x; m, Σ) denotes the Gaussian  density of argument x and similar statistics. In this case µ (x) = N (x; 0, Σ),
+f ( x0 | x) = N x0 ; Ax, BB T and g ( y| x) = N y; Cx, DDT . As inference is analytically tractable for this
+                                                           
+
+model, it has been extremely widely used for problems such as target tracking and signal processing.
+
+Example 3 - Switching Linear Gaussian model. We have X = U × Z with U = {1, ..., K} and Z = Rnz .
+Here Xn = (Un , Zn ) where {Un } is a finite state-space Markov chain such that Pr (U1 = k) = µU (k) ,
+Pr ( Un = k| Un−1 = l) = fU ( k| l) and conditional upon {Un } we have a linear Gaussian model with Z1 | U1 ∼
+N (0, ΣU1 ) and
+
+                                           Zn = AUn Zn−1 + BUn Vn ,
+                                           Yn = CUn Zn + DUn Wn
+
+
+                                                       2
+                                                  Simulated Volatility Sequence
+             15
+                                                                                                    Volatility
+                                                                                                    Observations
+             10
+
+
+
+
+              5
+
+
+
+
+              0
+
+
+
+
+            −5
+
+
+
+
+           −10
+
+
+
+
+           −15
+              0        50      100       150      200           250        300          350   400     450          500
+
+
+
+
+               Figure 1: A simulation of the stochastic volatility model described in example 4.
+
+          i.i.d.                i.i.d.
+where Vn ∼ N (0, Inv ), Wn ∼ N (0, Inw ) and {Ak , Bk , Ck , Dk ; k = 1, ..., K} are matrices of appropriate
+dimensions. In this case we have µ (x) = µ (u, z) = µU (u) N (z; 0, Σu ), f( x0 | x) = f ( (u0 , z 0 )| (u, z)) =
+fU ( u0 | u) N z 0 ; Au0 z, Bu0 BuT0 and g ( y| x) = g ( y| (u, z)) = N y; Cu z, Du DuT . This type of model provides
+a generalisation of that described in example 2 with only a slight increase in complexity.
+                                                                                            
+                                                                                        σ2
+Example 4 - Stochastic Volatility model. We have X = Y = R, X1 ∼ N 0, 1−α                  2   and
+
+                                               Xn = αXn−1 + σVn ,
+                                               Yn = β exp (Xn /2) Wn
+                                                                                                 
+            i.i.d.                 i.i.d.                                                    σ2
+where Vn ∼ N (0, 1) and Wn ∼ N (0, 1). In this case we have µ (x) = N x; 0, 1−α                 2   , f ( x0 | x) =
+N x0 ; αx, σ 2 and g ( y| x) = N y; 0, β 2 exp (x) . Note that this choice of initial distribution ensures that
+                                                 
+
+the marginal distribution of Xn is also µ (x) for all n. This type of model, and its generalisations, have been
+very widely used in various areas of economics and mathematical finance: inferring and predicting underlying
+volatility from observed price or rate data is an important problem. Figure 1 shows a short section of data
+simulated from such a model with parameter values α = 0.91, σ = 1.0 and β = 0.5 which will be used below
+to illustrate the behaviour of some simple algorithms.
+
+
+
+Equations (1)-(2) define a Bayesian model in which (1) defines the prior distribution of the process of interest
+{Xn }n≥1 and (2) defines the likelihood function; that is:
+                                                                n
+                                                                Y
+                                         p (x1:n ) = µ (x1 )          f ( xk | xk−1 )                                    (3)
+                                                               k=2
+
+
+
+
+                                                            3
+and
+                                                                   n
+                                                                   Y
+                                            p ( y1:n | x1:n ) =          g ( yk | xk ) ,                           (4)
+                                                                   k=1
+
+where, for any sequence {zn }n≥1 , and any i ≤ j, zi:j := (zi , zi+1 , ..., zj ).
+
+In such a Bayesian context, inference about X1:n given a realisation of the observations Y1:n = y1:n relies
+upon the posterior distribution
+                                                           p (x1:n , y1:n )
+                                       p ( x1:n | y1:n ) =                  ,                          (5)
+                                                              p (y1:n )
+where
+
+                                        p (x1:n , y1:n ) = p (x1:n ) p ( y1:n | x1:n ) ,                           (6)
+                                                           Z
+                                        and p (y1:n ) = p (x1:n , y1:n ) dx1:n .                                   (7)
+
+For the finite state-space HMM model discussed in Example 1, the integrals correspond to finite sums
+and all these (discrete) probability distributions can be computed exactly. For the linear Gaussian model
+discussed in Example 2, it is easy to check that p ( x1:n | y1:n ) is a Gaussian distribution whose mean and
+covariance can be computed using Kalman techniques; see [1], for example. However, for most non-linear
+non-Gaussian models, it is not possible to compute these distributions in closed-form and we need to employ
+numerical methods. Particle methods are a set of flexible and powerful simulation-based methods which
+provide samples approximately distributed according to posterior distributions of the form p ( x1:n | y1:n ) and
+facilitate the approximate calculation of p (y1:n ). Such methods are a subset of the class of methods known
+as Sequential Monte Carlo (SMC) methods.
+
+In this tutorial, we will review various particle methods to address the following problems:
+
+• Filtering and Marginal likelihood computation: Assume that we are interested in the sequential approx-
+imation of the distributions {p ( x1:n | y1:n )}n≥1 and marginal likelihoods {p (y1:n )}n≥1 . That is, we wish
+to approximate p ( x1 | y1 ) and p (y1 ) at the first time instance, p ( x1:2 | y1:2 ) and p (y1:2 ) at the second time
+instance and so on. We will refer to this problem as the optimal filtering problem. This is slightly at vari-
+ance with the usage in much of the literature which reserves the term for the estimation of the marginal
+distributions {p ( xn | y1:n )}n≥1 rather than the joint distributions {p ( x1:n | y1:n )}n≥1 .
+
+We will describe basic and advanced particle filtering methods to address this problem including auxiliary
+particle filtering, particle filtering with MCMC moves, block sampling strategies and Rao-Blackwellised
+particle filters.
+
+• Smoothing: Consider attempting to sample from a joint distribution p ( x1:T | y1:T ) and approximating the
+associated marginals {p ( xn | y1:T )} where n = 1, ..., T . Particle filtering techniques can be used to solve
+this problem but perform poorly when T is large for reasons detailed in this tutorial. We will describe
+several particle smoothing methods to address this problem. Essentially, these methods rely on the particle
+implementation of the forward filtering-backward smoothing formula or of a generalised version of the two-
+filter smoothing formula.
+
+
+2.2     Filtering and Marginal Likelihood
+
+The first area of interest, and that to which the vast majority of the literature on particle methods has
+been dedicated from the outset, is the problem of filtering: characterising the distribution of the state of
+the hidden Markov model at the present time, given the information provided by all of the observations
+received up to the present time. This can be thought of as a “tracking” problem: keeping track of the
+current “location” of the system given noisy observations — and, indeed, this is an extremely popular area
+
+
+                                                               4
+of application for these methods. The term is sometimes also used to refer to the practice of estimating the
+full trajectory of the state sequence up to the present time given the observations received up to this time.
+
+We recall that, following (1)-(2), the posterior distribution p ( x1:n | y1:n ) is defined by (5) — the prior is
+defined in (3) and the likelihood in (4). The unnormalised posterior distribution p (x1:n , y1:n ) given in (5)
+satisfies
+                          p (x1:n , y1:n ) = p (x1:n−1 , y1:n−1 ) f ( xn | xn−1 ) g ( yn | xn ) .            (8)
+Consequently, the posterior p ( x1:n | y1:n ) satisfies the following recursion
+
+                                                                           f ( xn | xn−1 ) g ( yn | xn )
+                            p ( x1:n | y1:n ) = p ( x1:n−1 | y1:n−1 )                                    ,          (9)
+                                                                                p ( yn | y1:n−1 )
+where                                        Z
+                       p ( yn | y1:n−1 ) =       p ( xn−1 | y1:n−1 ) f ( xn | xn−1 ) g ( yn | xn ) dxn−1:n         (10)
+
+In the literature, the recursion satisfied by the marginal distribution p ( xn | y1:n ) is often presented. It is
+straightforward to check (by integrating out x1:n−1 in (9)) that we have
+
+                                                           g ( yn | xn ) p ( xn | y1:n−1 )
+                                       p ( xn | y1:n ) =                                   ,                       (11)
+                                                                  p ( yn | y1:n−1 )
+where                                               Z
+                             p ( xn | y1:n−1 ) =        f ( xn | xn−1 ) p ( xn−1 | y1:n−1 ) dxn−1 .                (12)
+
+Equation (12) is known as the prediction step and (11) is known as the updating step. However, most
+particle filtering methods rely on a numerical approximation of recursion (9) and not of (11)-(12).
+
+If we can compute {p ( x1:n | y1:n )} and thus {p ( xn | y1:n )} sequentially, then the quantity p (y1:n ), which is
+known as the marginal likelihood, can also clearly be evaluated recursively using
+                                                                   n
+                                                                   Y
+                                             p (y1:n ) = p (y1 )         p ( yk | y1:k−1 )                         (13)
+                                                                   k=2
+
+where p ( yk | y1:k−1 ) is of the form (10).
+
+
+2.3     Smoothing
+
+One problem, which is closely related to filtering, but computationally more challenging for reasons which will
+become apparent later, is known as smoothing. Whereas filtering corresponds to estimating the distribution
+of the current state of an HMM based upon the observations received up until the current time, smoothing
+corresponds to estimating the distribution of the state at a particular time given all of the observations
+up to some later time. The trajectory estimates obtained by such methods, as a result of the additional
+information available, tend to be smoother than those obtained by filtering. It is intuitive that if estimates
+of the state at time n are not required instantly, then better estimation performance is likely to be obtained
+by taking advantage of a few later observations. Designing efficient sequential algorithms for the solution of
+this problem is not quite as straightforward as it might seem, but a number of effective strategies have been
+developed and are described below.
+
+More formally: assume that we have access to the data y1:T , and wish to compute the marginal distributions
+{p ( xn | y1:T )} where n = 1, ..., T or to sample from p ( x1:T | y1:T ). In principle, the marginals {p ( xn | y1:T )}
+could be obtained directly by considering the joint distribution p ( x1:T | y1:T ) and integrating out the variables
+(x1:n−1 , xn+1:TR ). Extending this reasoning in the context of particle methods, one can simply use the identity
+p(xn |y1:T ) = p(x1:T |y1:T )dx1:n−1 dxn+1:T and take the same approach which is used in particle filtering:
+
+
+                                                                   5
+use Monte Carlo algorithms to obtain an approximate characterisation of the joint distribution and then
+use the associated marginal distribution to approximate the distributions of interest. Unfortunately, as is
+detailed below, when n  T this strategy is doomed to failure: the marginal distribution p(xn |y1:n ) occupies
+a privileged role within the particle filter framework as it is, in some sense, better characterised than any of
+the other marginal distributions.
+
+For this reason, it is necessary to develop more sophisticated strategies in order to obtain good smoothing
+algorithms. There has been much progress in this direction over the past decade. Below, we present two
+alternative recursions that will prove useful when numerical approximations are required. The key to the
+success of these recursions is that they rely upon only the marginal filtering distributions {p ( xn | y1:n )}.
+
+
+2.3.1    Forward-Backward Recursions
+
+The following decomposition of the joint distribution p ( x1:T | y1:T )
+                                                                           −1
+                                                                          TY
+                                   p ( x1:T | y1:T ) = p ( xT | y1:T )          p ( xn | xn+1 , y1:T )
+                                                                          n=1
+                                                                           −1
+                                                                          TY
+                                                    = p ( xT | y1:T )           p ( xn | xn+1 , y1:n ) ,         (14)
+                                                                          n=1
+
+shows that, conditional on y1:T , {Xn } is an inhomogeneous Markov process.
+
+Eq. (14) suggests the following algorithm to sample from p ( x1:T | y1:T ). First compute and store the marginal
+distributions {p ( xn | y1:n )} for n = 1, ..., T . Then sample XT ∼ p ( xT | y1:T ) and for n = T − 1, T − 2, ..., 1,
+sample Xn ∼ p ( xn | Xn+1 , y1:n ) where
+                                                                    f ( xn+1 | xn ) p ( xn | y1:n )
+                                      p ( xn | xn+1 , y1:n ) =
+                                                                          p ( xn+1 | y1:n )
+It also follows, by integrating out (x1:n−1 , xn+1:T ) in Eq. (14), that
+                                                            f ( xn+1 | xn )
+                                                          Z
+                        p ( xn | y1:T ) = p ( xn | y1:n )                     p ( xn+1 | y1:T ) dxn+1 .          (15)
+                                                            p ( xn+1 | y1:n )
+So to compute {p ( xn | y1:T )}, we simply modify the backward pass and, instead of sampling from p ( xn | xn+1 , y1:n ),
+we compute p ( xn | y1:T ) using (15).
+
+
+2.3.2    Generalised Two-Filter Formula
+
+The two-filter formula is a well-established alternative to the forward-filtering backward-smoothing technique
+to compute the marginal distributions {p ( xn | y1:T )} [4]. It relies on the following identity
+                                                               p ( xn | y1:n−1 ) p ( yn:T | xn )
+                                        p ( xn | y1:T ) =                                        ,
+                                                                     p ( yn:T | y1:n−1 )
+where the so-called backward information filter is initialised at time n = T by p ( yT | xT ) = g ( yT | xT ) and
+satisfies
+                                          T
+                                        Z Y                  T
+                                                             Y
+                      p ( yn:T | xn ) =      f ( xk | xk−1 )    g ( yk | xk ) dxn+1:T                         (16)
+                                                k=n+1                       k=n
+                                                           Z
+                                         = g ( yn | xn )        f ( xn+1 | xn ) p ( yn+1:T | xn+1 ) dxn+1 .
+
+
+                                                                     6
+The
+R     backward information filter is not a probability density in argument xn and it is even possible that
+  p ( yn:T | xn ) dxn = ∞. Although this is not an issue when p ( yn:T | xn ) can be computed exactly, it does
+preclude the direct use of SMC methods to estimate this integral. To address this problem, a generalised
+version of the two-filter formula was proposed in [5]. It relies on the introduction of a set of artificial
+probability distributions {epn (xn )} and the joint distributions
+                                                               T
+                                                               Y                       T
+                                                                                       Y
+                           pen ( xn:T | yn:T ) ∝ pen (xn )           f ( xk | xk−1 )         g ( yk | xk ) ,      (17)
+                                                             k=n+1                     k=n
+
+which are constructed such that their marginal distributions, pen ( xn | yn:T ) ∝ pen (xn ) p ( yn:T | xn ), are simply
+“integrable versions” of the backward information filter. It is easy to establish the generalised two-filter
+formula
+                                   µ (x1 ) pe(x1 |y1:T )                  p(xn |y1:n−1 )ep(xn |yn:T )
+                    p(x1 |y1:T ) ∝                       , p(xn |y1:T ) ∝                                          (18)
+                                        pe1 (x1 )                                  pen (xn )
+which is valid whenever the support of pen (xn ) includes the support of the prior pn (xn ); that is
+                                     Z             n
+                                                   Y
+                        pn (xn ) =       µ (x1 )         f ( xk | xk−1 ) dx1:n−1 > 0 ⇒ pen (xn ) > 0.
+                                                   k=2
+
+The generalised two-filter smoother for {p(xn |yn:T )} proceeds as follows. Using the standard forward recur-
+sion, we can compute and store the marginal distributions {p ( xn | y1:n−1 )}. Using a backward recursion, we
+compute and store {e p(xn |yn:T )}. Then for any n = 1, ..., T we can combine p ( xn | y1:n−1 ) and pe(xn |yn:T ) to
+obtain p(xn |y1:T ).
+
+In [4], this identity is discussed in the particular case where pen (xn ) = pn (xn ). However, when computing
+{ep(xn |yn:T )} using SMC, it is necessary to be able to compute pen (xn ) exactly hence this rules out the choice
+pen (xn ) = pn (xn ) for most non-linear non-Gaussian models. In practice, we should select a heavy-tailed
+approximation of pn (xn ) for pen (xn ) in such settings. It is also possible to use the generalised-two filter
+formula to sample from p(x1:T |y1:T ); see [5] for details.
+
+
+2.4    Summary
+
+Bayesian inference in non-linear non-Gaussian dynamic models relies on the sequence of posterior distri-
+butions {p ( x1:n | y1:n )} and its marginals. Except in simple problems such as Examples 1 and 2, it is not
+possible to compute these distributions in closed-form. In some scenarios, it might be possible to obtain
+reasonable performance by employing functional approximations of these distributions. Here, we will discuss
+only Monte Carlo approximations of these distributions; that is numerical schemes in which the distribu-
+tions of interest are approximated by a large collection of N random samples termed particles. The main
+advantage of such methods is that under weak assumptions they provide asymptotically (i.e. as N → ∞)
+consistent estimates of the target distributions of interest. It is also noteworthy that these techniques can
+be applied to problems of moderately-high dimension in which traditional numerical integration might be
+expected to perform poorly.
+
+
+
+3     Sequential Monte Carlo Methods
+
+Over the past fifteen years, particle methods for filtering and smoothing have been the most common
+examples of SMC algorithms. Indeed, it has become traditional to present particle filtering and SMC as
+being the same thing in much of the literature. Here, we wish to emphasise that SMC actually encompasses a
+broader range of algorithms — and by doing so we are able to show that many more advanced techniques for
+
+
+                                                                 7
+approximate filtering and smoothing can be described using precisely the same framework and terminology
+as the basic algorithm.
+
+SMC methods are a general class of Monte Carlo methods that sample sequentially from a sequence of target
+probability densities {πn (x1:n )} of increasing dimension where each distribution πn (x1:n ) is defined on the
+product space X n . Writing
+                                                           γn (x1:n )
+                                              πn (x1:n ) =                                                 (19)
+                                                              Zn
+we require only that γn : X n → R+ is known pointwise; the normalising constant
+                                              Z
+                                         Zn = γn (x1:n ) dx1:n                                                                 (20)
+
+might be unknown. SMC provide an approximation of π1 (x1 ) and an estimate of Z1 at time 1 then an
+approximation of π2 (x1:2 ) and an estimate of Z2 at time 2 and so on.
+
+For example, in the context of filtering, we could have γn (x1:n ) = p (x1:n , y1:n ) , Zn = p (y1:n ) so πn (x1:n ) =
+p ( x1:n | y1:n ). However, we emphasise that this is just one particular choice of target distributions. Not
+only can SMC methods be used outside the filtering context but, more importantly for this tutorial, some
+advanced particle filtering and smoothing methods discussed below do not rely on this sequence of target
+distributions. Consequently, we believe that understanding the main principles behind generic SMC methods
+is essential to the development of a proper understanding of particle filtering and smoothing methods.
+
+We start this section with a very basic review of Monte Carlo methods and Importance Sampling (IS). We
+then present the Sequential Importance Sampling (SIS) method, point out the limitations of this method
+and show how resampling techniques can be used to partially mitigate them. Having introduced the basic
+particle filter as an SMC method, we show how various advanced techniques which have been developed
+over the past fifteen years can themselves be interpreted within the same formalism as SMC algorithms
+associated with sequences of distributions which may not coincide with the filtering distributions. These
+alternative sequences of target distributions are either constructed such that they admit the distributions
+{p ( x1:n | y1:n )} as marginal distributions, or an importance sampling correction is necessary to ensure the
+consistency of estimates.
+
+
+3.1     Basics of Monte Carlo Methods
+
+Initially, consider approximating a generic probability density πn (x1:n ) for some fixed n. If we sample N
+                                  i
+independent random variables, X1:n   ∼ πn (x1:n ) for i = 1, ..., N , then the Monte Carlo method approximates
+πn (x1:n ) by the empirical measure1
+                                                                  N
+                                                              1 X
+                                               π
+                                               bn (x1:n ) =        δ i (x1:n ) ,
+                                                              N i=1 X1:n
+
+where δx0 (x) denotes the Dirac delta mass located at x0 . Based on this approximation, it is possible to
+approximate any marginal, say πn (xk ), easily using
+                                                                     N
+                                                              1 X
+                                                 π
+                                                 bn (xk ) =        δ i (xk ) ,
+                                                              N i=1 Xk
+
+and the expectation of any test function ϕn : X n → R given by
+                                              Z
+                                   In (ϕn ) := ϕn (x1:n ) πn (x1:n ) dx1:n ,
+
+   1 We persist with the abusive use of density notation in the interests of simplicity and accessibility; the alternations required
+
+to obtain a rigorous formulation are obvious.
+
+
+                                                                 8
+is estimated by
+                                          Z                                              N
+                                                                                      1 X
+                          InMC (ϕn ) :=                                                         i
+                                                                                                    
+                                               ϕn (x1:n ) π
+                                                          bn (x1:n ) dx1:n =                ϕn X1:n   .
+                                                                                      N i=1
+It is easy to check that this estimate is unbiased and that its variance is given by
+                                             Z                                        
+                            MC           1       2                            2
+                         V In (ϕn ) =            ϕn (x1:n ) πn (x1:n ) dx1:n − In (ϕn ) .
+                                           N
+The main advantage of Monte Carlo methods over standard approximation techniques is that the variance of
+the approximation error decreases at a rate of O(1/N ) regardless of the dimension of the space X n . However,
+there are at least two main problems with this basic Monte Carlo approach:
+
+• Problem 1 : If πn (x1:n ) is a complex high-dimensional probability distribution, then we cannot sample
+from it.
+
+• Problem 2 : Even if we knew how to sample exactly from πn (x1:n ), the computational complexity of such
+a sampling scheme is typically at least linear in the number of variables n. So an algorithm sampling exactly
+from πn (x1:n ), sequentially for each value of n, would have a computational complexity increasing at least
+linearly with n.
+
+
+3.2     Importance Sampling
+
+We are going to address Problem 1 using the IS method. This is a fundamental Monte Carlo method and
+the basis of all the algorithms developed later on. IS relies on the introduction of an importance density 2
+qn (x1:n ) such that
+                                       πn (x1:n ) > 0 ⇒ qn (x1:n ) > 0.
+In this case, we have from (19)-(20) the following IS identities
+                                                             wn (x1:n ) qn (x1:n )
+                                              πn (x1:n ) =                         ,                      (21)
+                                                                     Zn
+                                                   Z
+                                          Zn =         wn (x1:n ) qn (x1:n ) dx1:n                        (22)
+
+where wn (x1:n ) is the unnormalised weight function
+                                                                       γn (x1:n )
+                                                  wn (x1:n ) =                    .
+                                                                       qn (x1:n )
+In particular, we can select an importance density qn (x1:n ) from which it is easy to draw samples; e.g.
+                                                                       i
+a multivariate Gaussian. Assume we draw N independent samples X1:n          ∼ qn (x1:n ) then by inserting the
+                                                                                           i
+Monte Carlo approximation of qn (x1:n ) — that is the empirical measure of the samples X1:n  — into (21)–(22)
+we obtain
+                                                             N
+                                                             X
+                                              π
+                                              bn (x1:n ) =         Wni δX1:n
+                                                                         i   (x1:n ) ,                    (23)
+                                                             i=1
+                                                            N
+                                                         1 X       i
+                                                                       
+                                                    Zn =
+                                                    b          wn X1:n                                    (24)
+                                                         N i=1
+
+where                                                                  
+                                                                   i
+                                                         wn       X1:n
+                                                 Wni = P                 .                              (25)
+                                                        N               j
+                                                             j=1 wn X1:n
+
+  2 Some authors use the terms proposal density or instrumental density interchangeably.
+
+
+
+
+                                                                   9
+Compared to standard Monte Carlo, IS provides an (unbiased) estimate of the normalising constant with
+relative variance                h i
+                             VIS Z bn
+                                          1
+                                            Z 2
+                                                 πn (x1:n )
+                                                                     
+                                       =                    dx1:n − 1 .                          (26)
+                                Zn2       N      qn (x1:n )
+If we are interested in computing In (ϕn ), we can also use the estimate
+                                          Z                                   N
+                                                                              X
+                           InIS (ϕn ) =                                             Wni ϕn X1:n
+                                                                                            i
+                                                                                                
+                                              ϕn (x1:n ) π
+                                                         bn (x1:n ) dx1:n =                       .
+                                                                              i=1
+
+Unlike InMC (ϕn ), this estimate is biased for finite N . However, it is consistent and it is easy to check that
+its asymptotic bias is given by
+                                                      Z 2
+                                                          πn (x1:n )
+                    lim N InIS (ϕn ) − In (ϕn ) = −
+                                               
+                                                                     (ϕn (x1:n ) − In (ϕn )) dx1:n .
+                  N →∞                                    qn (x1:n )
+When the normalising constant is known analytically, we can calculate an unbiased importance sampling
+estimate — however, this generally has higher variance and this is not typically the case in the situations in
+which we are interested.
+
+Furthermore, InIS (ϕ) satisfies a Central Limit Theorem (CLT) with asymptotic variance
+                                     Z 2
+                                   1    πn (x1:n )                        2
+                                                   (ϕn (x1:n ) − In (ϕn )) dx1:n .                                (27)
+                                   N    qn (x1:n )
+The bias being O(1/N ) and the variance O(1/N ), the mean-squared error given by the squared bias plus
+the variance is asymptotically dominated by the variance term.
+
+For a given test function, ϕn (x1:n ), it is easy to establish the importance distribution minimising the asymp-
+totic variance of InIS (ϕn ). However, such a result is of minimal interest in a filtering context as this distribution
+depends on ϕn (x1:n ) and we are typically interested in the expectations of several test functions. Moreover,
+even if we were interested in a single test function, say ϕn (x1:n ) = xn , then selecting the optimal importance
+distribution at time n would have detrimental effects when we will try to obtain a sequential version of the
+algorithms (the optimal distribution for estimating ϕn−1 (x1:n−1 ) will almost certainly not be — even similar
+to — the marginal distribution of x1:n−1 in the optimal distribution for estimating ϕn (x1:n ) and this will
+prove to be problematic).
+
+A more appropriate approach in this context is to attempt to select the qn (x1:n ) which minimises the
+variance of the importance weights (or, equivalently, the variance of Z   bn ). Clearly, this variance is minimised
+for qn (x1:n ) = πn (x1:n ). We cannot select qn (x1:n ) = πn (x1:n ) as this is the reason we used IS in the first
+place. However, this simple result indicates that we should aim at selecting an IS distribution which is close
+as possible to the target. Also, although it is possible to construct samplers for which the variance is finite
+without satisfying this condition, it is advisable to select qn (x1:n ) so that wn (x1:n ) < Cn < ∞.
+
+
+3.3    Sequential Importance Sampling
+
+We are now going to present an algorithm that admits a fixed computational complexity at each time
+step in important scenarios and thus addresses Problem 2. This solution involves selecting an importance
+distribution which has the following structure
+
+                                     qn (x1:n ) = qn−1 (x1:n−1 ) qn ( xn | x1:n−1 )
+                                                           n
+                                                           Y
+                                                = q1 (x1 )   qk ( xk | x1:k−1 ) .                                 (28)
+                                                             k=2
+
+
+
+                                                             10
+                                                  i                                     i
+        i            i
+                           to obtain particles X1:n ∼ qn (x1:n ) at time n, we sample X1 ∼ q1 (x1 ) at time 1
+Practically, this means that
+then Xk ∼ qk xk | X1:k−1 at time k for k = 2, ..., n. The associated unnormalised weights can be computed
+recursively using the decomposition
+                                          γn (x1:n )
+                            wn (x1:n ) =
+                                          qn (x1:n )
+                                          γn−1 (x1:n−1 )           γn (x1:n )
+                                        =                                                                       (29)
+                                          qn−1 (x1:n−1 ) γn−1 (x1:n−1 ) qn ( xn | x1:n−1 )
+which can be written in the form
+
+                                       wn (x1:n ) = wn−1 (x1:n−1 ) · αn (x1:n )
+                                                             n
+                                                             Y
+                                                  = w1 (x1 )   αk (x1:k )
+                                                                 k=2
+
+where the incremental importance weight function αn (x1:n ) is given by
+
+                                                              γn (x1:n )
+                                     αn (x1:n ) =                                     .                         (30)
+                                                    γn−1 (x1:n−1 ) qn ( xn | x1:n−1 )
+
+The SIS algorithm proceeds as follows, with each step carried out for i = 1, . . . , N :
+
+
+
+
+                                       Sequential Importance Sampling
+
+
+At time n = 1
+
+• Sample X1i ∼ q1 (x1 ).
+                                            
+• Compute the weights w1 X1i and W1i ∝ w1 X1i .
+
+At time n ≥ 2
+                          i
+• Sample Xni ∼ qn ( xn | X1:n−1 ).
+
+• Compute the weights
+                                         i              i            i
+                                                                       
+                                     wn X1:n   = wn−1 X1:n−1   · αn X1:n   ,
+                                             i        i
+                                                        
+                                         Wn ∝ wn X1:n .
+
+
+
+
+At any time, n, we obtain the estimates π
+                                        bn (x1:n ) (Eq. 23) and Zbn (Eq. 24) of πn (x1:n ) and Zn , respectively.
+It is straightforward to check that a consistent estimate of Zn /Zn−1 is also provided by the same set of
+samples:
+                                                   N
+                                       \ Zn      X
+                                                        i         i
+                                                                    
+                                              =       Wn−1 αn X1:n    .
+                                        Zn−1      i=1
+
+This estimator is motivated by the fact that
+                                                          γn (x1:n )πn−1 (x1:n−1 )qn (xn |x1:n−1 )
+   Z                                                    Z
+                                                                                                            Zn
+      αn (x1:n ) πn−1 (x1:n−1 ) qn (xn |x1:n−1 )dx1:n =                                            dx1:n =      .
+                                                               γn−1 (x1:n−1 )qn (xn |x1:n−1 )              Zn−1
+
+                                                            11
+In this sequential framework, it would seem that the only freedom the user has at time n is the choice of
+qn ( xn | x1:n−1 )3 . A sensible strategy consists of selecting it so as to minimise the variance of wn (x1:n ). It is
+straightforward to check that this is achieved by selecting
+
+                                            qnopt ( xn | x1:n−1 ) = πn ( xn | x1:n−1 )
+
+as in this case the variance of wn (x1:n ) conditional upon x1:n−1 is zero and the associated incremental weight
+is given by                                                       R
+                                                  γn (x1:n−1 )      γn (x1:n ) dxn
+                                 αnopt (x1:n ) =                =                  .
+                                                 γn−1 (x1:n−1 )    γn−1 (x1:n−1 )
+Note that it is not always possible to sample from πn ( xn | x1:n−1 ). Nor is it always possible to compute
+αnopt (x1:n ). In these cases, one should employ an approximation of qnopt ( xn | x1:n−1 ) for qn ( xn | x1:n−1 ).
+
+In those scenarios in which the time required to sample from qn ( xn | x1:n−1 ) and to compute αn (x1:n ) is
+independent of n (and this is, indeed, the case if qn is chosen sensibly and one is concerned with a problem
+such as filtering), it appears that we have provided a solution for Problem 2. However, it is important to
+be aware that the methodology presented here suffers from severe drawbacks. Even for standard IS, the
+variance of the resulting estimates increases exponentially with n (as is illustrated below; see also [28]). As
+SIS is nothing but a special version of IS in which we restrict ourselves to an importance distribution of the
+form (28) it suffers from the same problem. We demonstrate this using a very simple toy example.
+
+Example. Consider the case where X = R and
+                                                      n
+                                                      Y                    n
+                                                                           Y
+                                       πn (x1:n ) =         πn (xk ) =              N (xk ; 0, 1) ,                         (31)
+                                                      k=1                  k=1
+                                                       n
+                                                                 x2
+                                                      Y                   
+                                       γn (x1:n ) =         exp − k             ,
+                                                                  2
+                                                      k=1
+                                                             n/2
+                                              Zn = (2π)            .
+
+We select an importance distribution
+                                                      n
+                                                      Y                   n
+                                                                          Y
+                                                                                N xk ; 0, σ 2 .
+                                                                                             
+                                       qn (x1:n ) =         qk (xk ) =
+                                                      k=1                 k=1
+                              h   i
+                          bn < ∞ only for σ 2 > 1 and
+In this case, we have VIS Z                     2
+
+                                              h i             "                             #
+                                           VIS Zbn      1                σ4
+                                                                                n/2
+                                                      =                                  −1 .
+                                             Zn2        N                2
+                                                                       2σ − 1
+                                       4
+It can easily be checked that 2σσ2 −1 > 1 for any 21 < σ 2 6= 1: the variance increases exponentially with n
+even in this simple case. For example, if we select σ 2 = 1.2 then we have a reasonably good importance
+                                         VIS [Z
+                                              bn ]        n/2
+distribution as qk (xk ) ≈ πn (xk ) but N Z 2 ≈ (1.103)       which is approximately equal to 1.9 × 1021 for
+                                              n
+                                                                                       VIS [Z
+                                                                                            bn ]
+n = 1000! We would need to use N ≈ 2 × 1023 particles to obtain a relative variance Z 2 = 0.01. This is
+                                                                                            n
+clearly impracticable.
+  3 However, as we will see later, the key to many advanced SMC methods is the introduction of a sequence of target distributions
+
+which differ from the original target distributions.
+
+
+
+
+                                                                   12
+3.4    Resampling
+
+We have seen that IS — and thus SIS — provides estimates whose variance increases, typically exponentially,
+with n. Resampling techniques are a key ingredient of SMC methods which (partially) solve this problem in
+some important scenarios.
+
+Resampling is a very intuitive idea which has major practical and theoretical benefits. Consider first an
+IS approximation π bn (x1:n ) of the target distribution πn (x1:n ). This approximation is based on weighted
+samples from qn (x1:n ) and does not provide samples approximately distributed according to πn (x1:n ) . To
+obtain approximate samples from πn (x1:n ), we can simply sample from its IS approximation π       bn (x1:n ); that
+               i
+is we select X1:n with probability Wni . This operation is called resampling as it corresponds to sampling
+from an approximation π  bn (x1:n ) which was itself obtained by sampling. If we are interested in obtaining
+N samples from π  bn (x1:n ), then we can simply resample N times from π      bn (x1:n ). This is equivalent      to
+associating a number of offspring Nni with each particle X1:n
+                                                            i
+                                                               in
+                                                                  such a way that N 1:N
+                                                                                     n    = N n
+                                                                                               1
+                                                                                                 , ..., N N
+                                                                                                          n   follow
+a multinomial distribution with parameter vector N, Wn1:N and associating a weight of 1/N with each
+offspring. We approximate π  bn (x1:n ) by the resampled empirical measure
+                                                          N
+                                                          X Ni  n
+                                          π n (x1:n ) =             δX1:n
+                                                                      i   (x1:n )                               (32)
+                                                          i=1
+                                                              N
+                
+where E Nni Wn1:N = N Wni . Hence π n (x1:n ) is an unbiased approximation of π
+                                                                              bn (x1:n ).
+
+Improved unbiased resampling schemes have been proposed in the literature.  These are methods of selecting
+Nni such that the unbiasedness property is preserved, and such that V Nni Wn1:N is smaller than that
+obtained via the multinomial resampling scheme described above. To summarize, the three most popular
+algorithms found in the literature are, in descending order of popularity/efficiency:
+
+
+             Resampling Sample U1 ∼ U 0,oN1 and define Ui = U1 + i−1
+                                                
+Systematic n                                                              N for i = 2, ..., N , then set
+       i
+                   Pi−1 k             Pi       k
+                                                                     P0
+     Nn = Uj : k=1 Wn ≤ Uj ≤ k=1 Wn              with the convention k=1 := 0. It is straightforward to
+     establish that this approach is unbiased.
+                                                                                                       
+                              eni = N Wni , sample N 1:N                                            1:N
+                                          
+Residual Resampling Set N                             n   from a  multinomial of parameters    N, W n
+               i
+    where W n ∝ Wni − N −1 N                     eni + N in . This is very closely related to breaking the
+                              eni then set Nni = N
+    empirical CDF up into N components and then sampling once from each of those components: the
+    stratified resampling approach of [7].
+                                                                                       
+Multinomial Resampling Sample Nn1:N from a multinomial of parameters N, Wn1:N .
+
+
+Note that it is possible to sample efficiently from a multinomial distribution in O (N ) operations. However,
+the systematic resampling algorithm introduced in [25] is the most widely-used algorithm in the literature
+as it is extremely easy to implement and outperforms other resampling schemes in most scenarios (although
+this is not guaranteed in general [13]).
+
+Resampling allows us to obtain samples distributed approximately according to πn (x1:n ), but it should be
+clear that if we are interested in estimating In (ϕn ) then we will obtain an estimate with lower variance
+using πbn (x1:n ) than that which we would have obtained by using π n (x1:n ). By resampling we indeed add
+some extra “noise”— as shown by [9]. However, an important advantage of resampling is that it allows us
+to remove of particles with low weights with a high probability. In the sequential framework in which we
+are interested, this is extremely useful as we do not want to carry forward particles with low weights and
+we want to focus our computational efforts on regions of high probability mass. Clearly, there is always
+the possibility than a particle having a low weight at time n could have an high weight at time n + 1, in
+which case resampling could be wasteful. It is straightforward to consider artificial problems for which this
+
+
+                                                           13
+is the case. However, we will show that in the estimation problems we are looking at the resampling step is
+provably beneficial. Intuitively, resampling can be seen to provide stability in the future at the cost of an
+increase in the immediate Monte Carlo variance. This concept will be made more precise in section 3.6.
+
+
+3.5    A Generic Sequential Monte Carlo Algorithm
+
+SMC methods are a combination of SIS and resampling.    At time 1, we compute the IS approximation π   b1 (x1 )
+of π1 (x1 ) which is a weighted collection of particles W1i , X1i . Then we use a resampling step to eliminate
+(with
+n      high
+         o probability) those particles with low weights and multiply those with high weights. We denote by
+ 1    i
+ N , X1   the collection of equally-weighted resampled particles. Remember that each original particle X1i has
+                                                                                      j1      j2            jN i
+N1i offspring so there exist N1i distinct indexes j1 6= j2 6= · · · 6= jN1i such that X 1 = X 1 = · · · = X 1 1 = X1i .
+                                                                                             i
+                                                                                                          i     
+After the resampling step, we follow the SIS strategy and sample X2i ∼ q2 ( x2 | X 1 ). Thus X 1 , X2i is
+approximately distributed according to π1 (x1 ) q2 ( x2 | x1 ). Hence the corresponding importance weights in
+this case are simply equal to the incremental weights α2 (x1:2 ). We then resample the particles with respect
+to these normalised weights and so on. To summarise, the algorithm proceeds as follows (this algorithm is
+sometimes referred to as Sequential Importance Resampling (SIR) or Sequential Importance Sampling and
+Resampling (SIS/R)).
+
+
+
+
+                                            Sequential Monte Carlo
+
+
+At time n = 1
+
+• Sample X1i ∼ q1 (x1 ).
+                                            
+• Compute the weights w1 X1i and W1i ∝ w1 X1i .
+                                                           n       i
+                                                                     o
+• Resample W1i , X1i to obtain N equally-weighted particles N1 , X 1 .
+          
+
+
+At time n ≥ 2
+                           i
+                                                  i           
+• Sample Xni ∼ qn ( xn | X 1:n−1 ) and set X1:n
+                                            i
+                                                ← X 1:n−1 , Xni .
+
+                          i
+                                                 
+• Compute the weights αn X1:n   and Wni ∝ αn X1:n
+                                              i
+                                                    .
+                                                                n       i
+                                                                           o
+                      to obtain N new equally-weighted particles N1 , X 1:n .
+          
+• Resample Wni , X1:n
+                  i
+
+
+
+
+At any time n, this algorithm provides two approximations of πn (x1:n ) . We obtain
+                                                           N
+                                                           X
+                                          π
+                                          bn (x1:n ) =           Wni δX1:n
+                                                                       i   (x1:n )                                 (33)
+                                                           i=1
+
+after the sampling step and
+                                                                 N
+                                                           1 X
+                                           π n (x1:n ) =        δ i (x1:n )                                        (34)
+                                                           N i=1 X 1:n
+
+
+
+                                                            14
+after the resampling step. The approximation (33) is to be preferred to (34). We also obtain an approximation
+of Zn /Zn−1 through
+                                                      N
+                                        \Zn       1 X           i
+                                                                   
+                                               =         αn X1:n     .
+                                        Zn−1     N i=1
+
+As we have already mentioned, resampling has the effect of removing particles with low weights and multi-
+plying particles with high weights. However, this is at the cost of immediately introducing some additional
+variance. If particles have unnormalised weights with a small variance then the resampling step might be
+unnecessary. Consequently, in practice, it is more sensible to resample only when the variance of the unnor-
+malised weights is superior to a pre-specified threshold. This is often assessed by looking at the variability
+of the weights using the so-called Effective Sample Size (ESS) criterion [30, pp. 35-36], which is given (at
+time n) by
+                                                     N
+                                                                !−1
+                                                            i 2
+                                                    X        
+                                          ESS =          Wn         .
+                                                      i=1
+
+Its interpretation is that in a simple IS setting, inference based on the N weighted samples is approximately
+equivalent (in terms of estimator variance) to inference based on ESS perfect samples from the target
+distribution. The ESS takes values between 1 and N and we resample only when it is belowa threshold
+NT ; typically NT = N/2. Alternative criteria can be used such as the entropy of the weights Wni which
+achieves its maximum value when Wni = N1 . In this case, we resample when the entropy is below a given
+threshold.
+
+
+
+
+                           Sequential Monte Carlo with Adaptive Resampling
+
+
+At time n = 1
+
+• Sample X1i ∼ q1 (x1 ).
+                                            
+• Compute the weights w1 X1i and W1i ∝ w1 X1i .
+                                                                                                  n       i
+                                                                                                            o
+• If resampling criterion satisfied then resample W1i , X1i to obtain N equally weighted particles N1 , X 1 and
+                                                 
+    n i      i
+               o    n      i
+                             o                n i   i
+                                                      o
+set W 1 , X 1 ← N1 , X 1 , otherwise set W 1 , X 1 ← W1i , X1i .
+                                                            
+
+
+At time n ≥ 2
+                           i
+                                                  i           
+• Sample Xni ∼ qn ( xn | X 1:n−1 ) and set X1:n
+                                            i
+                                                ← X 1:n−1 , Xni .
+
+                          i
+                                           i           
+• Compute the weights αn X1:n                       i
+                                and Wni ∝ W n−1 αn X1:n   .
+                                                                                                     n       i
+                                                                                                                 o
+                                                               to obtain N equally weighted particles N1 , X 1:n
+                                                  
+• If resampling criterion satisfied, then resample Wni , X1:n
+                                                          i
+         n i     i
+                   o     n       i
+                                   o              n i      i
+                                                             o
+and set W n , X n ← N1 , X n , otherwise set W n , X n ← Wni , Xni .
+                                                                 
+
+
+
+
+                                                       15
+In this context too we have two approximations of πn (x1:n )
+                                                            N
+                                                            X
+                                            π
+                                            bn (x1:n ) =          Wni δX1:n
+                                                                        i   (x1:n ) ,                                   (35)
+                                                            i=1
+                                                            N
+                                                            X        i
+                                            π n (x1:n ) =         W n δX i (x1:n )
+                                                                         1:n
+                                                            i=1
+
+which are equal if no resampling step is used at time n. We may also estimate Zn /Zn−1 through
+                                                     N
+                                             \Zn    X     i       i
+                                                                      
+                                                  =     W n−1 αn X1:n   .                                               (36)
+                                             Zn−1   i=1
+
+SMC methods involve systems of particles which interact (via the resampling mechanism) and, consequently,
+obtaining convergence results is a much more difficult task than it is for SIS where standard results (iid
+asymptotics) apply. However, there are numerous sharp convergence results available for SMC; see [10] for
+an introduction to the subject and the monograph of Del Moral [11] for a complete treatment of the subject.
+An explicit treatment of the case in which resampling is performed adaptively is provided by [12].
+
+The presence or absence of degeneracy is the factor which most often determines whether an SMC algorithm
+works in practice. However strong the convergence results available for limitingly large samples may be,
+we cannot expect good performance if the finite sample which is actually used is degenerate. Indeed, some
+degree of degeneracy is inevitable in all but trivial cases: if SMC algorithms are used for sufficiently many
+time steps every resampling step reduces the number of unique values representing X1 , for example. For this
+reason, any SMC algorithm which relies upon the distribution of full paths x1:n will fail for large enough
+n for any finite sample size, N , in spite of the asymptotic justification. It is intuitive that one should
+endeavour to employ algorithms which do not depend upon the full path of the samples, but only upon
+the distribution of some finite component xn−L:n for some fixed L which is independent of n. Furthermore,
+ergodicity (a tendency for the future to be essentially independent of the distant past) of the underlying
+system will prevent the accumulation of errors over time. These concepts are precisely characterised by
+existing convergence results, some of the most important of which are summarised and interpreted in section
+3.6.
+
+Although sample degeneracy emerges as a consequence of resampling, it is really a manifestation of a deeper
+problem — one which resampling actually mitigates. It is inherently impossible to accurately represent a
+distribution on a space of arbitrarily high dimension with a sample of fixed, finite size. Sample impover-
+ishment is a term which is often used to describe the situation in which very few different particles have
+significant weight. This problem has much the same effect as sample degeneracy and occurs, in the absence
+of resampling, as the inevitable consequence of multiplying together incremental importance weights from
+a large number of time steps. It is, of course, not possible to circumvent either problem by increasing the
+number of samples at every iteration to maintain a constant effective sample size as this would lead to an
+exponential growth in the number of samples required. This sheds some light on the resampling mechanism:
+it “resets the system” in such a way that its representation of final time marginals remains well behaved at
+the expense of further diminishing the quality of the path-samples. By focusing on the fixed-dimensional
+final time marginals in this way, it allows us to circumvent the problem of increasing dimensionality.
+
+
+3.6     Convergence Results for Sequential Monte Carlo Methods
+
+Here, we briefly discuss selected convergence results for SMC. We focus on the CLT as it allows us to clearly
+understand the benefits of the resampling step and why it “works”. If multinomial resampling is used at
+every iteration4 , then the associated SMC estimates of Zbn /Zn and In (ϕn ) satisfy a CLT and their respective
+  4 Similar expressions can be established when a lower variance resampling strategy such as residual resampling is used
+
+and when resampling is performed adaptively [12]. The results presented here are sufficient to guide the design of particular
+
+
+                                                              16
+asymptotic variances are given by
+                                                   n
+                                                                                                             !
+                              πn2 (x1 )                                πn2 (x1:k )
+                          Z                              Z
+                      1                           X
+                                        dx1 − 1 +                                              dxk−1:k − 1                (37)
+                      N       q1 (x1 )                       πk−1 (x1:k−1 ) qk ( xk | x1:k−1 )
+                                                   k=2
+
+and
+      R πn2 (x1 ) R                                              2
+       q1 (x1 )  ϕn (x1:n ) πn ( x2:n | x1 ) dx2:n − In (ϕn ) dx1
+                             2                                                                        2
+       Pn−1 R              πn  (x1:k )            R
+      + k=2 πk−1 (x1:k−1       )qk ( xk |x1:k−1 )   ϕn (x1:n ) πn ( xk+1:n | x1:k ) dxk+1:n − In (ϕn ) dx1:k              (38)
+                   2
+       R          πn (x1:n )                                     2
+      + πn−1 (x1:n−1 )qn ( xn |x1:n−1 ) (ϕn (x1:n ) − In (ϕn )) dx1:n .
+
+A short and elegant proof of this result is given in [11, Chapter 9]; see also [9]. These expression are very
+informative. They show that the resampling step has the effect of “resetting” the particle system whenever
+it is applied. Comparing (26) to (37), we see that the SMC variance expression has replaced the importance
+distribution qn (x1:n ) in the SIS variance with the importance distributions πk−1 (x1:k−1 ) qk ( xk | x1:k−1 )
+obtained after the resampling step at time k − 1. Moreover, we will show that in important scenarios the
+variances of SMC estimates are orders of magnitude smaller than the variances of SIS estimates.
+
+Let us first revisit the toy example discussed in section 3.3.
+
+Example (continued). In this case, it follows from (37) that the asymptotic variance is finite only when
+σ 2 > 12 and
+                        h i          "Z                                             #
+                  VSMC Z                                       n Z
+                                          πn2 (x1 )                πn2 (xk )
+                          bn
+                                  1                           X
+                              ≈                     dx1 − 1 +                dxk − 1
+                      Zn2        N        q1 (x1 )                 qk (xk )
+                                                              k=2
+                                     "            1/2     #
+                                  n         σ4
+                              =                         −1
+                                 N       2σ 2 − 1
+
+compared to                                 h i                "                           #
+                                         VIS Zbn         1             σ4
+                                                                              n/2
+                                                       =                              −1 .
+                                             Zn2         N             2
+                                                                     2σ − 1
+The asymptotic variance of the SMC estimate increases linearly with n in contrast to the exponential growth
+of the IS variance. For example, if we select σ 2 = 1.2 then we have a reasonably good importance distribution
+as qk (xk ) ≈ πn (xk ). In this case, we saw that it is necessary to employ N ≈ 2 × 1023 particles in order
+                 bn ]
+            VIS [Z                                                                      VSMC [Z
+                                                                                              bn ]
+to obtain Z 2 = 10−2 for n = 1000. Whereas to obtain the same performance,                  2
+                                                                                           Zn      = 10−2 , SMC
+                 n
+requires the use of just N ≈ 104 particles: an improvement by 19 orders of magnitude.
+
+This scenario is overly favourable to SMC as the target (31) factorises. However, generally speaking, the
+major advantage of SMC over IS is that it allows us to exploit the forgetting properties of the model under
+study as illustrated by the following example.
+
+Example. Consider the following more realistic scenario where
+                                                             n
+                                                             Y                        n
+                                                                                      Y
+                                   γn (x1:n ) = µ (x1 )            Mk ( xk | xk−1 )         Gk (xk )
+                                                             k=2                      k=1
+
+with µ a probability distribution, Mk a Markov transition kernel and Gk a positive “potential” function.
+Essentially, filtering corresponds to this model with Mk ( xk | xk−1 ) = f ( xk | xk−1 ) and the time inhomoge-
+neous potential function Gk (xk ) = g ( yk | xk ). In this case, πk ( xk | x1:k−1 ) = πk ( xk | xk−1 ) and we would
+algorithms and the additional complexity involved in considering more general scenarios serves largely to produce substantially
+more complex expressions which obscure the important points.
+
+
+                                                                   17
+typically select an importance distribution qk ( xk | x1:k−1 ) with the same Markov property qk ( xk | x1:k−1 ) =
+qk ( xk | xk−1 ). It follows that (37) is equal to
+                            Z 2                    n Z
+                                                                                                !
+                        1      π1 (x1 )           X           πn2 (xk−1:k )
+                                        dx1 − 1 +                                    dxk−1:k − 1
+                       N       q1 (x1 )                πk−1 (xk−1 ) qk ( xk | xk−1 )
+                                                 k=2
+
+and (38), for ϕn (x1:n ) = ϕ (xn ), equals:
+              R π12 (x1 ) R                                         2
+               q1 (x1 )  ϕ (xn ) πn ( xn | x1 ) dx2:n − In (ϕ) dx1
+                                   2                                                         2
+               Pn−1 R            πn  (xk−1:k )          R
+              + k=2 πk−1 (xk−1         )qk ( xk |xk−1 )   ϕ (xn ) πn ( xn | xk ) dxk − In (ϕ) dxk−1:k
+                         2
+               R        πn (xn−1:n )                               2
+              + πn−1 (xn−1   )qn ( xn |xn−1 ) (ϕ (xn ) − In (ϕ)) dxn−1:n ,
+
+where we use the notation In (ϕ) for In (ϕn ). In many realistic scenarios, the model associated with πn (x1:n )
+has some sort of ergodic properties; i.e. ∀xk , x0k ∈ X πn ( xn | xk ) ≈ πn ( xn | x0k ) for large enough n − k. In
+layman’s terms, at time n what happened at time k is irrelevant if n − k is large enough. Moreover, this
+often happens exponentially fast; that is for any (xk , x0k )
+                                   Z
+                                1
+                                      |πn ( xn | xk ) − πn ( xn | x0k )| dxn ≤ β n−k
+                                2
+
+for some β < 1. This property can be used to establish that for bounded functions ϕ ≤ kϕk
+                              Z
+                                 ϕ (xn ) πn ( xn | xk ) dxn − I (ϕ) ≤ β n−k kϕk
+
+and under weak additional assumptions we have
+
+                                                  πn2 (xk−1:k )
+                                                                         ≤A
+                                           πk−1 (xk−1 ) qk ( xk | xk−1 )
+
+for a finite constant A. Hence it follows that
+                                                     h i
+                                                 VSMC Zbn             C ·n
+                                                                  ≤        ,
+                                                       Zn2             N
+                                                 h      i D
+                                           VSMC Ibn (ϕ) ≤ .
+                                                            N
+for some finite constants C, D that are independent of n. These constants typically increase polynomi-
+ally/exponentially with the dimension of the state-space X and decrease as β → 0.
+
+
+3.7    Summary
+
+We have presented a generic SMC algorithm which approximates {πn (x1:n )} and {Zn } sequentially in time.
+
+
+   • Wherever it is possible to sample from qn ( xn | x1:n−1 ) and evaluate αn (x1:n ) in a time independent of
+     n, this leads to an algorithm whose computational complexity does not increase with n.
+
+   • For any k, there exists n > k such that the SMC approximation of πn (x1:k ) consists of a single particle
+     because of the successive resampling steps. It is thus impossible to get a “good” SMC approximation
+     of the joint distributions {πn (x1:n )} when n is too large. This can easily be seen in practice, by
+     monitoring the number of distinct particles approximating πn (x1 ).
+
+
+                                                             18
+    • However, under mixing conditions, this SMC algorithm is able to provide estimates of marginal distri-
+      butions of the form πn (xn−L+1:n ) and estimates of Zn /Zn−1 whose asymptotic variance is uniformly
+      bounded with n. This property is crucial and explains why SMC methods “work” in many realistic
+      scenarios.
+
+    • Practically, one should keep in mind that the variance of SMC estimates can only expected to be
+      reasonable if the variance of the incremental weights is small. In particular, this requires that we
+      can only expect to obtain good performance if πn (x1:n−1 ) ≈ πn−1 (x1:n−1 ) and qn ( xn | x1:n−1 ) ≈
+      πn ( xn | x1:n−1 ); that is if the successive distributions we want to approximate do not differ much
+      one from each other and the importance distribution is a reasonable approximation of the “optimal”
+      importance distribution. However, if successive distributions differ significantly, it is often possible to
+      design an artificial sequence of distributions to “bridge” this transition [21, 31].
+
+
+
+4     Particle Filtering
+
+Remember that in the filtering context, we want to be able to compute a numerical approximation of
+the distribution {p ( x1:n | y1:n )}n≥1 sequentially in time. A direct application of the SMC methods described
+earlier to the sequence of target distributions πn (x1:n ) = p ( x1:n | y1:n ) yields a popular class of particle filters.
+More elaborate sequences of target and proposal distributions yield various more advanced algorithms. For
+ease of presentation, we present algorithms in which we resample at each time step. However, in practice we
+recommend only resampling when the ESS is below a threshold and employing the systematic resampling
+scheme.
+
+
+
+
+                                                           19
+4.1     SMC for Filtering
+
+First, consider the simplest case in which γn (x1:n ) = p (x1:n , y1:n ) is chosen, yielding πn (x1:n ) = p ( x1:n | y1:n )
+and Zn = p (y1:n ). Practically, it is only necessary to select the importance distribution qn ( xn | x1:n−1 ). We
+have seen that in order to minimise the variance of the importance weights at time n, we should select
+qnopt ( xn | x1:n−1 ) = πn ( xn | x1:n−1 ) where
+
+                                     πn ( xn | x1:n−1 ) = p ( xn | yn , xn−1 )
+                                                                g ( yn | xn ) f ( xn | xn−1 )
+                                                         =                                    ,                       (39)
+                                                                       p ( yn | xn−1 )
+
+and the associated incremental importance weight is αn (x1:n ) = p ( yn | xn−1 ) . In many scenarios, it is not
+possible to sample from this distribution but we should aim to approximate it. In any case, it shows that
+we should use an importance distribution of the form
+
+                                          qn ( xn | x1:n−1 ) = q ( xn | yn , xn−1 )                                   (40)
+
+and that there is nothing to be gained from building importance distributions depending also upon (y1:n−1 , x1:n−2 )
+— although, at least in principle, in some settings there may be advantages to using information from sub-
+sequent observations if they are available. Combining (29), (30) and (40), the incremental weight is given
+by
+                                                          g ( yn | xn ) f ( xn | xn−1 )
+                              αn (x1:n ) = αn (xn−1:n ) =                               .
+                                                               q ( xn | yn , xn−1 )
+
+The algorithm can thus be summarised as follows.
+
+
+
+
+                                              SIR/SMC for Filtering
+
+
+At time n = 1
+
+• Sample X1i ∼ q( x1 | y1 ).
+                              µ(X1i )g( y1 |X1i )                 
+• Compute the weights w1 X1i =     q( X1i |y1 )
+                                                   and W1i ∝ w1 X1i .
+                                                              n     i
+                                                                      o
+• Resample W1i , X1i to obtain N equally-weighted particles N1 , X 1 .
+          
+
+
+At time n ≥ 2
+                              i
+                                                   i           
+                                             i
+• Sample Xni ∼ q( xn | yn , X n−1 ) and set X1:n ← X 1:n−1 , Xni .
+
+                            i
+                                  g( yn |Xni )f ( Xni |Xn−1
+                                                         i
+                                                             )       i          i
+                                                                                     
+• Compute the weights αn Xn−1:n   =     q ( Xn |yn ,Xn−1 )
+                                             i        i        and W n ∝ αn   Xn−1:n   .
+                                                                      n     i
+                                                                                o
+                       to obtain N new equally-weighted particles N1 , X 1:n .
+          
+• Resample Wni , X1:n
+                  i
+
+
+
+
+We obtain at time n
+                                                                N
+                                                                X
+                                         pb ( x1:n | y1:n ) =         Wni δX1:n
+                                                                            i   (x1:n ) ,
+                                                                i=1
+
+
+                                                                 20
+                                                SV Model: SIS Filtering Estimates
+             6
+
+                                                                                              True Volatility
+                                                                                              Filter Mean
+             4                                                                                +/− 1 S.D.
+
+
+
+
+             2
+
+
+
+
+             0
+
+
+
+
+            −2
+
+
+
+
+            −4
+
+
+
+
+            −6
+              0       10       20       30         40            50       60        70   80       90            100
+
+
+
+
+Figure 2: Filtering estimates obtained for the stochastic volatility model using SIS. At each time the mean
+and standard deviation of xn conditional upon y1:n is estimated using the particle set. It initially performs
+reasonably, but the approximation eventually collapses: the estimated mean begins to diverge from the truth
+and the estimate of the standard deviation is inaccurately low.
+
+                                                           N
+                                                           X
+                                                                  i       i
+                                                                                
+                                    pb ( yn | y1:n−1 ) =         Wn−1 αn Xn−1:n   .
+                                                           i=1
+
+However, if we are interested only in approximating the marginal
+                                                         i      distributions {p ( xn | y1:n )} and {p (y1:n )}
+then we need to store only the terminal-value particles Xn−1:n    to be able to compute the weights: the
+algorithm’s storage requirements do not increase over time.
+
+Many techniques have been proposed to design “efficient” importance distributions q ( xn | yn , xn−1 ) which
+approximate p ( xn | yn , xn−1 ). In particular the use of standard suboptimal filtering techniques such as the
+Extended Kalman Filter or the Unscented Kalman Filter to obtain importance distributions is very popular
+in the literature [14, 37]. The use of local optimisation techniques to design q ( xn | yn , xn−1 ) centred around
+the mode of p ( xn | yn , xn−1 ) has also been advocated [33, 34].
+
+
+4.1.1   Example: Stochastic Volatility
+
+Returning to example 4 and the simulated data shown in figure 1, we are able to illustrate the performance
+of SMC algorithms with and without resampling steps in a filtering context.
+
+An SIS algorithm (corresponding to the above SMC algorithm without a resampling step) with N = 1000
+particles, in which the conditional prior is employed as a proposal distribution (leading to an algorithm in
+which the particle weights are proportional to the likelihood function) produces the output shown in figure
+2. Specifically, at each iteration, n, of the algorithm the conditional expectation and standard deviation of
+xn , given y1:n is obtained. It can be seen that the performance is initially good, but after a few iterations
+the estimate of the mean becomes inaccurate, and the estimated standard deviation shrinks to a very small
+
+
+                                                             21
+                                       n=2                               n=10                          n=50
+                          500                               1000                          1000
+
+
+                          450                               900                           900
+
+
+                          400                               800                           800
+
+
+                          350                               700                           700
+
+
+                          300                               600                           600
+         Particle Count
+
+
+
+
+                          250                               500                           500
+
+
+                          200                               400                           400
+
+
+                          150                               300                           300
+
+
+                          100                               200                           200
+
+
+                          50                                100                           100
+
+
+                           0                                  0                             0
+                            0   1   2      3     4      5      0       0.05         0.1      0           0.5          1
+                                Normalised Weights x 10−3          Normalised Weights            Normalised Weights
+
+
+
+
+Figure 3: Empirical distributions of the particle weights obtained with the SIS algorithm for the stochastic
+volatility model at iterations 2, 10 and 50. Although the algorithm is reasonably initialised, by iteration 10
+only a few tens of particles have significant weight and by iteration 50 a single particle is dominant.
+
+
+value. This standard deviation is an estimate of the standard deviation of the conditional posterior obtained
+via the particle filter: it is not a measure of the standard deviation of the estimator. Such an estimate can
+be obtained by considering several independent particle filters run on the same data and would illustrate
+the high variability of estimates obtained by a poorly-designed algorithm such as this one. In practice,
+approximations such as the effective sample size are often used as surrogates to characterise the uncertainty
+of the filter estimates but these perform well only if the filter is providing a reasonable approximation of the
+conditional distributions of interest. Figure 3 supports the theory that the failure of the algorithm after a
+few iterations is due to weight degeneracy, showing that the number of particles with significant weight falls
+rapidly.
+
+The SIR algorithm described above was also applied to this problem with the same proposal distribution and
+number of particles as were employed in the SIS case. For simplicity, multinomial resampling was applied
+at every iteration. Qualitatively, the same features would be observed if a more sophisticated algorithm
+were employed, or adaptive resampling were used although these approaches would lessen the severity of
+the path-degeneracy problem. Figure 4 shows the distribution of particle weights for this algorithm. Notice
+that unlike the SIS algorithm shown previously, there are many particles with significant weight at all three
+time points. It is important to note that while this is encouraging it is not evidence that the algorithm
+is performing well: it provides no information about the path-space distribution and, in fact, it is easy to
+construct poorly-performing algorithms which appear to have a good distribution of particle weights (for
+instance, consider a scenario in which the target is relatively flat in its tails but sharply concentrated about
+a mode; if the proposal has very little mass in the vicinity of the mode then it is likely that a collection of
+very similar importance weights will be obtained — but the sample thus obtained does not characterise the
+distribution of interest well). Figure 5 shows that the algorithm does indeed produce a reasonable estimate
+and plausible credible interval. And, as we expect, a problem does arise when we consider the smoothing
+distributions p(xn |y1:500 ) as shown in figure 6: the estimate and credible interval is unreliable for n  500.
+This is due to the degeneracy caused at the beginning of the path by repeated resampling. In contrast the
+
+
+                                                                        22
+                                       n=2                              n=10                              n=50
+                          400                               600                               400
+
+
+                          350                                                                 350
+                                                            500
+
+                          300                                                                 300
+
+                                                            400
+                          250                                                                 250
+         Particle Count
+
+
+
+
+                          200                               300                               200
+
+
+                          150                                                                 150
+                                                            200
+
+                          100                                                                 100
+
+                                                            100
+                          50                                                                  50
+
+
+                           0                                 0                                 0
+                            0      2         4          6     0      2         4          6     0    2      4      6        8
+                                Normalised Weights x 10−3         Normalised Weights x 10−3         Normalised Weights x 10−3
+
+
+
+
+Figure 4: Empirical distribution of particle weights for an SIR algorithm applied to the stochastic volatility
+model. Notice that there is no evidence of weight degeneracy in contrast to the SIS case. This comes at the
+cost of reducing the quality of the path-space representation.
+
+
+smoothed estimate for n ≈ 500 (not shown) is reasonable.
+
+
+4.2    Auxiliary Particle Filtering
+
+As was discussed above, the optimal proposal distribution (in the sense of minimising the variance of im-
+portance weights) when performing standard particle filtering is q ( xn | yn , xn−1 ) = p ( xn | yn , xn−1 ). Indeed,
+αn (xn−1:n ) is independent of xn in this case so it is possible to interchange the order of the sampling and
+resampling steps. Intuitively, this yields a better approximation of the distribution as it provides a greater
+number of distinct particles to approximate the target. This is an example of a general principle: resampling,
+if it is to be applied in a particular iteration, should be performed before, rather than after, any operation
+that doesn’t influence the importance weights in order to minimise the loss of information.
+
+It is clear that if importance weights are independent of the new state and the proposal distribution corre-
+sponds to the marginal distribution of the proposed states then weighting, resampling and then sampling
+corresponds to a reweighting to correct for the discrepancy between the old and new marginal distribution
+of the earlier states, resampling to produce an unweighted sample and then generation of the new state from
+its conditional distribution. This intuition can easily be formalised.
+
+However, in general, the incremental importance weights do depend upon the new states and this straightfor-
+ward change of order becomes impossible. In a sense, this interchange of sampling and resampling produces
+an algorithm in which information from the next observation is used to determine which particles should
+survive resampling at a given time (to see this, consider weighting and resampling occurring as the very last
+step of the iteration before the current one, rather than as the first step of that iteration). It is desirable to
+find methods for making use of this future information in a more general setting, so that we can obtain the
+same advantage in situations in which it is not possible to make use of the optimal proposal distribution.
+
+
+                                                                       23
+                            SV Model: SIR Filtering Estimates
+ 6
+                                                                                True Volatility
+                                                                                Filter Mean
+                                                                                +/− 1 S.D.
+ 4
+
+
+
+
+ 2
+
+
+
+
+ 0
+
+
+
+
+−2
+
+
+
+
+−4
+
+
+
+
+−6
+  0   10     20       30       40          50         60        70   80          90          100
+
+
+
+
+            Figure 5: SIR Filtering estimates for the SV model.
+
+
+
+
+                           SV Model: SIR Smoothing Estimates
+ 6
+
+                                                                          True Volatility
+                                                                          Smoother Mean
+ 4                                                                        +/− 1 S.D.
+
+
+
+ 2
+
+
+
+
+ 0
+
+
+
+
+−2
+
+
+
+
+−4
+
+
+
+
+−6
+  0   10     20       30       40          50         60        70   80          90          100
+
+
+
+
+           Figure 6: SIR Smoothing estimates for the SV model.
+
+
+
+
+                                        24
+The Auxiliary Particle Filter (APF) is an alternative algorithm which does essentially this. It was originally
+introduced in [33] using auxiliary variables — hence its name. Several improvements were proposed to
+reduce its variance [7, 34]. We present here the version of the APF presented in [7] which only includes one
+resampling step at each time instance. It has long been realised that, experimentally, this version outperforms
+the original two stage resampling algorithm proposed in [33] and is widely used; see [7] for a comparison of
+both approaches. The APF is a look ahead method where at time n we try to predict which samples will be
+in regions of high probability masses at time n + 1.
+
+It was shown in [23] that the APF can be reinterpreted as a standard SMC algorithm applied to the following
+sequence of target distributions
+
+                                          γn (x1:n ) = p (x1:n , y1:n ) pe ( yn+1 | xn )                            (41)
+
+with pe ( yn+1 | xn ) chosen as an approximation of the predictive likelihood p ( yn+1 | xn ) if it is not known
+analytically. It follows that πn (x1:n ) is an approximation of p ( x1:n | y1:n+1 ) denoted pe ( x1:n | y1:n+1 ) given by
+
+                               πn (x1:n ) = pe ( x1:n | y1:n+1 ) ∝ p ( x1:n | y1:n ) pe ( yn+1 | xn )               (42)
+
+In the APF we also use an importance distribution qn ( xn | x1:n−1 ) of the form (40) which is typically
+an approximation of (39). Note that (39) is different from πn ( xn | x1:n−1 ) in this scenario. Even if we
+could sample from πn ( xn | x1:n−1 ), one should remember that in this case the object of inference is not
+πn (x1:n ) = pe ( x1:n | y1:n+1 ) but p ( x1:n | y1:n ). The associated incremental weight is given by
+
+                                                                  γn (x1:n )
+                                 αn (xn−1:n ) =
+                                                   γn−1 (x1:n−1 ) qn ( xn | x1:n−1 )
+                                                   g ( yn | xn ) f ( xn | xn−1 ) pe ( yn+1 | xn )
+                                                 =                                                .
+                                                        pe ( yn | xn−1 ) q ( xn | yn , xn−1 )
+
+To summarize, the APF proceeds as follows.
+
+
+
+
+                                             Auxiliary Particle Filtering
+
+
+At time n = 1
+
+• Sample X1i ∼ q( x1 | y1 ).
+                              µ(X1i )g( y1 |X1i )pe( y2 |X1i )                   
+• Compute the weights w1 X1i =          q( X1 |y1 )
+                                             i                  and W i
+                                                                      1 ∝ w 1 X1
+                                                                                i
+                                                                                    .
+                                                                    n     i
+                                                                            o
+• Resample W1i , X1i to obtain N equally-weighted particles N1 , X 1 .
+          
+
+
+At time n ≥ 2
+                              i
+                                                   i           
+• Sample Xni ∼ q( xn | yn , X n−1 ) and set X1:n
+                                             i
+                                                 ← X 1:n−1 , Xni .
+
+                            i
+                                  g( yn |Xni )f ( Xni |Xn−1
+                                                         i
+                                                             )pe( yn+1 |Xni )                     
+• Compute the weights αn Xn−1:n   =     e( yn |Xn−1 )q ( Xn |yn ,Xn−1
+                                                                              and Wni ∝ αn Xn−1:n
+                                                                                            i
+                                                                                                    .
+                                        p        i         i       i
+                                                                       )
+                                                                          n       i
+                                                                                    o
+                       to obtain N new equally-weighted particles N1 , X 1:n .
+          
+• Resample Wni , X1:n
+                  i
+
+
+
+
+                                                                25
+Keeping in mind that this algorithm does not approximate the distributions {p ( x1:n | y1:n )} but the distri-
+butions {e
+         p ( x1:n | y1:n+1 )}, we use IS to obtain an approximation of p ( x1:n | y1:n ) with
+
+                           πn−1 (x1:n−1 ) qn ( xn | x1:n−1 ) = pe ( x1:n−1 | y1:n ) q ( xn | yn , xn−1 )
+
+as the importance distribution. A Monte Carlo approximation of this importance distribution is obtained
+after the sampling step in the APF and the associated unnormalised importance weights are given by
+
+                                               p (x1:n , y1:n )                 g ( yn | xn ) f ( xn | xn−1 )
+                   w
+                   en (xn−1:n ) =                                        =                                       .          (43)
+                                       γn−1 (x1:n−1 ) qn ( xn | x1:n−1 )   pe ( yn | xn−1 ) q ( xn | yn , xn−1 )
+
+It follows that we obtain
+                                                 N
+                                                 X
+                        pb ( x1:n | y1:n )   =         fni δX i (x1:n ) ,
+                                                       W     1:n
+                                                 i=1
+                                                         N
+                                                                            !   N
+                                                                                                               !
+                                                   1 X       i
+                                                                               X
+                                                                                        i           i
+                                                                                                           
+                       pb ( yn | y1:n−1 )    =           w
+                                                         en Xn−1:n                    W
+                                                                                      fn−1 pe yn | Xn−1
+                                                   N i=1                        i=1
+                                                                   
+where Wfni ∝ w       i
+               en Xn−1:n       fni ∝ W i w
+                            or W                     i
+                                         n−1 en Xn−1:n if resampling was not performed at the end of the
+previous iteration. Selecting qn ( xn | x1:n−1 ) = p ( xn | yn , xn−1 ) and pe ( yn | xn−1 ) = p ( yn | xn−1 ), when it
+is possible to do so, leads to the so-called “perfect adaptation” case [33]. In this case, the APF takes a
+particularly simple form as αn (xn−1:n ) = p ( yn | xn−1 ) and w  en (xn−1:n ) = 1. This is similar to the algorithm
+discussed in the previous subsection where the order of the sampling and resampling steps is interchanged.
+
+This simple reinterpretation of the APF shows us several things:
+
+
+    • We should select a distribution pe ( x1:n | y1:n ) with thicker tails than p ( x1:n | y1:n ).
+    • Setting pe ( yn | xn−1 ) = g ( yn | µ (xn−1 )) where µ denotes some point estimate is perhaps unwise as this
+      will not generally satisfy that requirement.
+    • We should use an approximation of the predictive likelihood which is compatible with the model we
+      are using in the sense that it encodes at least the same degree of uncertainty as the exact model.
+
+
+These observations follows from the fact that pe ( x1:n | y1:n ) is used as an importance distribution to esti-
+mate p ( x1:n | y1:n ) and this is the usual method to ensure that the estimator variance remains finite. Thus
+pe ( yn | xn−1 ) should be more diffuse than p ( yn | xn−1 ).
+
+It has been suggested in the literature to set pe ( yn | xn−1 ) = g ( yn | µ (xn−1 )) where µ (xn−1 ) corresponds
+to the mode, mean or median of f ( xn | xn−1 ). However, this simple approximation will often yield an
+importance weight function (43) which is not upper bounded on X × X and could lead to estimates with a
+large/infinite variance.
+
+An alternative approach, selecting an approximation pe ( yn , xn | xn−1 ) = pe ( yn | xn−1 ) q ( xn | yn , xn−1 ) of the
+distribution p ( yn , xn | xn−1 ) = p ( yn | xn−1 ) p ( xn | yn , xn−1 ) = g ( yn | xn ) f ( xn | xn−1 ) such that the ratio (43)
+is upper bounded on X × X and such that it is possible to compute pe ( yn | xn−1 ) pointwise and to sample
+from q ( xn | yn , xn−1 ), should be preferred.
+
+
+4.3     Limitations of Particle Filters
+
+The algorithms described earlier suffer from several limitations. It is important to emphasise at this point
+that, even if the optimal importance distribution p ( xn | yn , xn−1 ) can be used, this does not guarantee that
+
+
+                                                                  26
+the SMC algorithms will be efficient. Indeed, if the variance of p ( yn | xn−1 ) is high, then the variance of the
+resulting approximation will be high. Consequently, it will be necessary to resample very frequently and the
+particle approximation pb ( x1:n | y1:n ) of the joint distribution p ( x1:n | y1:n ) will be unreliable. In particular,
+for k  n the marginal distribution pb ( x1:k | y1:n ) will only be approximated by a few if not a single unique
+particle because the algorithm will have resampled many times between    i       times k and n. One major problem
+with the  approaches
+         i            discussed   above   is that only  the variables   X n     are  sampled at time n but the path
+values X1:n−1     remain fixed. An obvious way to improve upon these algorithms would                involve not only
+sampling Xni at time n, but also modifying the values of the paths over a fixed lag Xn−L+1:n−1          i
+                                                                                                                     for
+L > 1 in light of the new observation yn ; L being fixed or upper bounded to ensure that we have a sequential
+algorithm (i.e. one whose computational cost and storage requirements are uniformly bounded over time).
+The following two sections describe two approaches to limit this degeneracy problem.
+
+
+4.4    Resample-Move
+
+This degeneracy problem has historically been addressed most often using the Resample-Move algorithm
+[20]. Like Markov Chain Monte Carlo (MCMC), it relies upon Markov kernels with appropriate invariant
+distributions. Whilst MCMC uses such kernels to generate collections of correlated samples, the Resample-
+Move algorithm uses them within an SMC algorithm as a principled way to “jitter” the particle locations
+and thus to reduce degeneracy. A Markov kernel Kn ( x01:n | x1:n ) of invariant distribution p ( x1:n | y1:n ) is a
+Markov transition kernel with the property that
+                           Z
+                              p ( x1:n | y1:n ) Kn ( x01:n | x1:n ) dx1:n = p ( x01:n | y1:n ) .
+                                                        0                                   0
+For such a kernel, if X1:n ∼ p ( x1:n | y1:n ) and X1:n    | X1:n ∼ K ( x1:n | X1:n ) then X1:n is still marginally
+distributed according to p ( x1:n | y1:n ). Even if X1:n is not distributed according to p ( x1:n | y1:n ) then, after
+                                             0
+an application of the MCMC kernel, X1:n         can only have a distribution closer than that of X1:n (in total
+variation norm) to p ( x1:n | y1:n ). A Markov kernel is said to be ergodic if iterative application of that kernel
+generates samples whose distribution converges towards p ( x1:n | y1:n ) irrespective of the distribution of the
+initial state.
+
+It is easy to construct a Markov kernel with a specified invariant distribution. Indeed, this is the basis of
+MCMC — for details see [35] and references therein. For example, we could consider the following kernel, 
+based upon the Gibbs sampler: set x01:n−L = x1:n−L then sample x0n−L+1 from p xn−L+1 | y1:n , x01:n−L , xn−L+2:n ,
+sample x0n−L+2 from p xn−L+2 | y1:n , x01:n−L+1 , xn−L+3:n and so on until we sample x0n from p xn | y1:n , x01:n−1 ;
+that is
+                                                            n
+                                                           Y
+                    Kn ( x01:n | x1:n ) = δx1:n−L x01:n−L       p x0k | y1:n , x01:k−1 , xk+1:n
+                                                                                                
+
+                                                           k=n−L+1
+
+and we write, with a slight abuse of notation, the non-degenerate component of the MCMC kernel Kn x0n−L+1:n x1:n .
+                                                                                                                           
+
+It is straightforward to verify that this kernel is p ( x1:n | y1:n )-invariant.
+
+If it is not possible to sample from p x0k | y1:n , x01:k−1 , xk+1:n = p x0k | yk , x0k−1 , xk+1 , we can instead employ
+                                                                                                        
+
+a Metropolis-Hastings (MH) strategy and sample a candidate according to some proposal q x0k | yk , x0k−1 , xk:k+1
+                                                                                                                         
+
+and accept it with the usual MH acceptance probability
+                                                                                        !
+                             p ( x01:k , xk+1:n | y1:n ) q xk | yk , x0k−1 , x0k , xk+1
+                    min 1,
+                            p x01:k−1 , xk+1:n y1:n q x0k | yk , x0k−1 , xk:k+1
+                                                                                       
+                                                                                                             !
+                                g ( yk | x0k ) f ( xk+1 | x0k ) f x0k | x0k−1 q xk | yk , x0k−1 , x0k , xk+1
+                                                                             
+                    = min 1,                                                                                .
+                                 g ( yk | xk ) f ( xk+1 | xk ) f xk | x0k−1 q x0k | yk , x0k−1 , xk:k+1
+                                                                              
+
+
+It is clear that these kernels can be ergodic only if L = n and all of the components of x1:n are updated.
+However, in our context we will typically not use ergodic kernels as this would require sampling an increasing
+
+
+                                                          27
+number of variables at each time step. In order to obtain truly online algorithms, we restrict ourselves to
+updating the variables Xn−L+1:n for some fixed or bounded L.
+
+The algorithm proceeds as follows, with Kn denoting a Markov kernel of invariant distribution p(x1:n |y1:n ).
+
+
+
+
+                                       SMC Filtering with MCMC Moves
+
+
+At time n = 1
+
+• Sample X1i ∼ q( x1 | y1 ).
+                              µ(X1i )g( y1 |X1i )                 
+• Compute the weights w1 X1i =     q( X1i |y1 )
+                                                   and W1i ∝ w1 X1i .
+                                                              n     i
+                                                                      o
+• Resample W1i , X1i to obtain N equally-weighted particles N1 , X 1 .
+          
+
+
+                               i
+• Sample X10i ∼ K1 ( x1 | X 1 ).
+
+At time 1 < n < L
+                             0i                    0i
+                                                              
+• Sample Xni ∼ q( xn | yn , Xn−1            i
+                                 ) and set X1:n ← X1:n−1 , Xni .
+
+                            i
+                                  g( yn |Xni )f ( Xni |Xn−1
+                                                         i
+                                                             )                     
+• Compute the weights αn Xn−1:n   =     q ( Xn
+                                                               and Wni ∝ αn Xn−1:n
+                                                                             i
+                                                                                     .
+                                                     n−1 )
+                                             i |y ,X i
+                                                 n
+
+                                                                 n      i
+                                                                          o
+                       to obtain N equally-weighted particles N1 , X 1:n .
+                 i
+• Resample Wni , X1:n
+
+          0i                       i
+• Sample X1:n ∼ Kn ( x1:n | X 1:n ).
+
+At time n ≥ L
+                             0i                    0i
+                                                              
+• Sample Xni ∼ q( xn | yn , Xn−1            i
+                                 ) and set X1:n ← X1:n−1 , Xni .
+
+                            i
+                                  g( yn |Xni )f ( Xni |Xn−1
+                                                         i
+                                                             )                     
+• Compute the weights αn Xn−1:n   =     q ( Xn |yn ,Xn−1 )
+                                             i        i
+                                                                              i
+                                                               and Wni ∝ αn Xn−1:n   .
+                                                                      n     i
+                                                                              o
+                       to obtain N new equally-weighted particles N1 , X 1:n .
+                 i
+• Resample Wni , X1:n
+
+                                      i
+                                                           i                 
+          0i                                         0i               0i
+• Sample Xn−L+1:n ∼ Kn ( xn−L+1:n | X 1:n ) and set X1:n ← X 1:n−L , Xn−L+1:n   .
+
+
+
+The following premise, which [35] describes as “generalised importance sampling”, could be used to justify
+inserting MCMC transitions into an SMC algorithm after the sampling step. Given a target distribution π,
+an instrumental distribution µ and a π-invariant Markov kernel, K, the following generalisation of the IS
+identity holds:
+                        Z                   ZZ
+                                                             π(y)L( x| y)
+                           π(y)ϕ(y)dy =         µ(x)K( y| x)              ϕ(y)dxdy
+                                                             µ(x)K( y| x)
+for any Markov kernel L. This approach corresponds to importance sampling on an enlarged space using
+µ(x)K( y| x) as the proposal distribution for a target π(y)L( x| y) and then estimating a function ϕ0 (x, y) =
+
+
+                                                      28
+ϕ(y). In particular, for the time-reversal kernel associated with K
+
+                                                             π(x)K( y| x)
+                                                L( x| y) =                ,
+                                                                π (y)
+
+we have the importance weight
+                                                 π(y)L( x| y)   π (x)
+                                                              =       .
+                                                 µ(x)K( y| x)   µ(x)
+This interpretation of such an approach illustrates its deficiency: the importance weights depend only upon
+the location before the MCMC move while the sample depends upon the location after the move. Even if the
+kernel was perfectly mixing, leading to a collection of iid samples from the target distribution, some of these
+samples would be eliminated and some replicated in the resampling step. Resampling before an MCMC step
+will always lead to greater sample diversity than performing the steps in the other order (and this algorithm
+can be justified directly by the invariance property).
+
+Based on this reinterpretation of MCMC moves within IS, it is possible to reformulate this algorithm as
+a specific application of the generic SMC algorithm discussed in Section 3. To simply notation we write
+qn ( xn | xn−1 ) for q ( xn | yn , xn−1 ). To clarify our argument, it is necessary to add a superscript to the
+variables; e.g. Xkp corresponds to the pth time the random variable Xk is sampled; in this and the following
+section, this superscript does not denote the particle index. Using such notation, this algorithm is the generic
+SMC algorithm associated to the following sequence of target distributions
+
+           πn x1:L+1    , . . . , x1:L+1     1:L         1:2
+                                                             
+                   1                n−L+1 , xn−L , ..., xn
+            = p xL+1     , . . . ., xL+1       L           2         1    2           L      2    3           L+1
+                                                                                                                   
+                     1               n−L+1 , xn−L , ..., xn y1:n Ln xn , xn−1 , ..., xn−L+1 xn , xn−1 , ..., xn−L+1
+            × · · · × L2 x21 , x12 x31 , x22 L1 x11 x21
+                                                            
+
+
+where Ln is the time-reversal kernel associated with Kn whereas, if no resampling is used5 , a path up to
+time n is sampled according to
+
+             qn x1:L+1    , . . . , x1:L+1    1:L         1:2
+                                                              
+                   1                 n−L+1 , xn−L , ..., xn
+              = q1 x11 K1 x21 x11 q2 x12 x21 K2 x31 , x22 x21 , x12
+                                                                              
+
+                                                  L+1
+             × · · · × qn x1n x2n−1 Kn xn−L+1             , . . . , x3n−1 , x2n xL+1      L                2      1
+                                                                                                                   
+                                                                                 1:n−L , xn−L+1 , . . . , xn−1 , xn .
+
+This sequence of target distributions admits the filtering distributions of interest as marginals. The clear
+theoretical advantage of using MCMC moves is that the use of even non-ergodic MCMC kernels {Kn } can
+only improve the mixing properties of {πn } compared to the “natural” sequence of filtering distributions;
+this explains why these algorithms outperform a standard particle filter for a given number of particles.
+
+Finally, we note that the incorporation of MCMC moves to improve sample diversity is an idea which is
+appealing in its simplicity and which can easily be incorporated into any of the algorithms described here.
+
+
+4.5    Block Sampling
+
+The Resample-Move method discussed in the previously section suffers from a major drawback. Although
+it does allow us to reintroduce some diversity among the set of particles after the resampling step over a
+lag of length L, the importance weights have the same expression as for the standard particle filter. So this
+strategy does not significantly decrease the number of resampling steps compared to a standard approach.
+It can partially mitigate the problem associated with resampling, but it does not prevent these resampling
+steps in the first place.
+  5 Once again, similar expressions can be obtained in the presence of resampling and the technique remains valid.
+
+
+
+
+                                                             29
+An alternative block sampling approach has recently been proposed in [15]. This approach goes further than
+the Resample-Move method, which aims to sample only the component xn at time n in regions of high
+probability mass and then to uses MCMC moves to rejuvenate xn−L+1:n after a resampling step. The block
+sampling algorithm attempts to directly sample the components xn−L+1:n at time n; the previously-sampled
+values of the components xn−L+1:n−1 sampled are simply discarded. In this case, it can easily be shown that
+the optimal importance distribution (that which minimises the variance of the importance weights at time
+n) is:
+                                                              p (xn−L:n , yn−L+1:n )
+                           p ( xn−L+1:n | yn−L+1:n , xn−L ) =                                          (44)
+                                                               p ( yn−L+1:n | xn−L )
+where                                             Z        n
+                                                           Y
+                        p ( yn−L+1:n | xn−L ) =                 f ( xk | xk−1 ) · g ( yk | xk ) dxn−L+1:n .    (45)
+                                                      k=n−L+1
+
+As in the standard case (corresponding to L = 1), it is typically impossible to sample from (44) and/or to
+compute (45). So in practice we need to design an importance distribution q ( xn−L+1:n | yn−L+1:n , xn−L )
+approximating p ( xn−L+1:n | yn−L+1:n , xn−L ). Henceforth, we consider the case where L > 1.
+
+The algorithm proceeds as follows.
+
+
+
+
+                                          SMC Block Sampling for Filtering
+
+
+At time n = 1
+
+• Sample X1i ∼ q( x1 | y1 ).
+                              µ(X1i )g( y1 |X1i )                 
+• Compute the weights w1 X1i =     q( X1i |y1 )
+                                                   and W1i ∝ w1 X1i .
+                                                              n     i
+                                                                      o
+• Resample W1i , X1i to obtain N equally-weighted particles N1 , X 1 .
+          
+
+
+At time 1 < n < L
+          i
+• Sample X1:n ∼ q( x1:n | y1:n ).
+                                p(X1:ni
+                            i             ,y1:n )                      
+• Compute the weights αn X1:n    = q( X i y ) and Wni ∝ αn Xn−1:n
+                                                                i
+                                                                         .
+                                       1:n | 1:n
+
+                                                             n       i
+                                                                         o
+                       to obtain N equally-weighted particles N1 , X 1:n .
+          
+• Resample Wni , X1:n
+                  i
+
+
+At time n ≥ L
+          i                                            i
+• Sample Xn−L+1:n ∼ q(xn−L+1:n |yn−L+1:n , X 1:n−1 ).
+
+• Compute the weights
+                                              i                            i                         i
+                                                         i
+                i
+                                           p X 1:n−L , Xn−L+1:n  , y1:n q(X n−L+1:n−1 |yn−L+1:n−1 , X n−L )
+                            i
+      wn       X n−L:n−1 , Xn−L+1:n       =          i                                        i
+                                                                                                               (46)
+                                                                           i
+                                                  p X 1:n−1 , y1:n−1 q(Xn−L+1:n   |yn−L+1:n , X n−L )
+
+             i                   
+and Wni ∝ wn X n−L:n−1 , Xn−L+1:n
+                          i
+                                    .
+
+
+                                                               30
+             n        i
+                                       o                                           n       i
+                                                                                              o
+• Resample    Wni , X 1:n−L , Xn−L+1:n
+                               i
+                                         to obtain N new equally weighted particles N1 , X 1:n .
+
+
+
+When the optimal IS distribution is used q ( xn−L+1:n | yn−L+1:n , xn−L ) = p ( xn−L+1:n | yn−L+1:n , xn−L ), we
+obtain
+                                      p (x1:n−L , xn−L+1:n , y1:n ) p(xn−L+1:n−1 |yn−L+1:n−1 , xn−L )
+         wn (x1:n−1 , xn−L+1:n ) =
+                                             p (x1:n−1 , y1:n−1 ) p ( xn−L+1:n | yn−L+1:n , xn−L )
+                                 = p ( yn | yn−L+1:n , xn−L ) .
+This optimal weight has a variance which typically decreases exponentially fast with L (under mixing as-
+sumptions). Hence, in the context of adaptive resampling, this strategy dramatically reduces the number
+of resampling steps. In practice, we cannot generally compute this optimal weight and thus use (46) with
+an approximation of p ( xn−L+1:n | yn−L+1:n , xn−L ) for q ( xn−L+1:n | yn−L+1:n , xn−L ). When a good approx-
+imation is available, the variance of (46) can be reduced significantly compared to the standard case where
+L = 1.
+
+Again, this algorithm is a specific application of the generic SMC algorithm discussed in Section 3. To simply
+notation we write qn ( xn−L+1:n | xn−L ) for q ( xn−L+1:n | yn−L+1:n , xn−L ). To clarify our argument, it is again
+necessary to add a superscript to the variables; e.g. Xkp corresponds to the pth time the random variable
+Xk is sampled; remember that in the present section, this superscript does not denote the particle index.
+Using this notation, the algorithm corresponds to the generic SMC algorithm associated with the following
+sequence of target distributions
+                                                 1:L−1
+                    πn x1:L             1:L                       1
+                                                                    
+                           1 , . . . , xn−L+1 , xn−L+2 , . . . , xn
+                                            L−1                       L−1
+                    = p xL                               1                             1    L
+                                                                                               
+                             1:n−L+1 , xn−L+2 , . . . , xn y1:n qn−1 xn−L+1 , . . . , xn−1 xn−L
+                    × · · · q2 x21 , x12 q1 x11 .
+                                               
+
+where, if no resampling is used, a path is sampled according to
+                                                      1:L−1
+                           qn x1:L           1:L                    1
+                                                                      
+                                1 , . . . , xn−L+1 , xn−L+2 , ..., xn
+
+                            = q1 x11 q2 x21 , x12 × · · · × qn xL                 1  L
+                                                                                      
+                                                                    n−L+1 , ..., xn xn−L .
+
+The sequence of distributions admits the filtering distributions of interest as marginals. The mixing properties
+of {πn } are also improved compared to the ‘natural’ sequence of filtering distributions; this is the theoretical
+explanation of the better performance obtained by these algorithms for a given number of particles.
+
+
+4.6    Rao-Blackwellised Particle Filtering
+
+Let us start by quoting Trotter [36]: “A good Monte Carlo is a dead Monte Carlo”. Trotter specialised in
+Monte Carlo methods and did not advocate that we should not use them, but that we should avoid them
+whenever possible. In particular, whenever an integral can be calculated analytically doing so should be
+preferred to the use of Monte Carlo techniques.
+
+Assume, for example, that one is interested in sampling from π (x) with x = (u, z) ∈ U × Z and
+                                                    γ (u, z)
+                                          π (x) =            = π (u) π ( z| u)
+                                                       Z
+where π (u) = Z −1 γ (u) and
+                                                      γ (u, z)
+                                                 π ( z| u) =
+                                                       γ (u)
+admits a closed-form expression; e.g. a multivariate Gaussian. Then if we are interested
+                                                                                     R    in approximating
+π (x) and computing Z, we only need to perform a MC approximation π (u) and Z = γ (u) du on the space
+U instead of U × Z. We give two classes of important models where this simple idea can be used successfully.
+
+
+                                                           31
+4.6.1    Conditionally linear Gaussian models
+
+Consider X = U × Z with Z = Rnz . Here Xn = (Un , Zn ) where {Un } is a unobserved Markov process such
+that U1 ∼ µU (u1 ) , Un | Un−1 ∼ fU ( un | Un−1 ) and conditional upon {Un } we have a linear Gaussian model
+with Z1 | U1 ∼ N (0, ΣU1 ) and
+
+                                                    Zn = AUn Zn−1 + BUn Vn ,
+                                                     Yn = CUn Zn + DUn Wn
+
+           i.i.d.                   i.i.d.
+where Vn ∼ N (0, Inv ), Wn ∼ N (0, Inw ) and for any u ∈ U {Au , Bu , Cu , Du } are matrices of appropriate
+dimensions. In this case we have µ (x) = µ (u, z) = µU (u) N (x; 0, Σz ), f (x0 | x) = f ( (u0 , z 0 )| (u, z)) =
+fU ( u0 | u) N z 0 ; Au0 z, Bu0 BuT0 and g ( y| x) = g ( y| (u, z)) = N y; Cu z, Du DuT . The switching state-space
+model discussed in Example 3 corresponds to the case where {Un } is a finite state-space Markov process.
+
+We are interested in estimating
+
+                                   p ( u1:n , z1:n | y1:n ) = p ( u1:n | y1:n ) p ( z1:n | y1:n , u1:n ) .
+
+Conditional upon {Un }, we have a standard linear Gaussian model {Zn }, {Yn }. Hence p ( z1:n | y1:n , u1:n )
+is a Gaussian distribution whose statistics can be computed using Kalman techniques; e.g. the marginal
+p ( zn | y1:n , u1:n ) is a Gaussian distribution whose mean and covariance can be computed using the Kalman
+filter. It follows that we only need to use particle methods to approximate
+
+                                                γn (u1:n ) = p (u1:n , y1:n )
+                                                             = p (u1:n ) p ( y1:n | u1:n )
+
+where p (u1:n ) follows from the Markov assumption on {Un } and p ( y1:n | u1:n ) is a marginal likelihood which
+can be computed through the Kalman filter. In this case, we have
+
+                               q opt ( un | y1:n , u1:n−1 ) = p ( un | y1:n , u1:n−1 )
+                                                                p ( yn | y1:n−1 , u1:n ) fU ( un | un−1 )
+                                                            =                                             .
+                                                                        p ( yn | y1:n−1 , u1:n−1 )
+
+The standard SMC algorithm associated with γn (u1:n ) and the sequence of IS distributions q ( un | y1:n , u1:n−1 )
+proceeds as follows.
+
+
+
+
+                      SMC for Filtering in Conditionally Linear Gaussian Models
+
+
+At time n = 1
+
+• Sample U1i ∼ q( u1 | y1 ).
+                              µU (U1i )p( y1 |U1i )                 
+• Compute the weights w1 U1i =      q( U1i |y1 )
+                                                     and W1i ∝ w1 U1i .
+                                                               n     i
+                                                                       o
+• Resample W1i , U1i to obtain N equally-weighted particles N1 , U 1 .
+          
+
+
+At time n ≥ 2
+                              i
+                                                   i           
+• Sample Uni ∼ q un | y1:n , U 1:n−1 and set U1:n
+                                              i
+                                                  ← U 1:n−1 , Uni .
+
+
+
+                                                                    32
+                            i
+                                                  i
+                                p( yn |y1:n−1 ,U1:n  )fU ( Uni |Un−1
+                                                                  i
+                                                                      )                   
+• Compute the weights αn U1:n    =       q ( Un |y1:n ,U1:n−1 )
+                                              i         i               and Wni ∝ αn U1:n
+                                                                                      i
+                                                                                            .
+                                                                          n     i
+                                                                                   o
+                       to obtain N new equally-weighted particles N1 , U 1:n .
+          
+• Resample Wni , U1:n
+                  i
+
+
+
+
+This algorithm provides also two approximations of p ( u1:n | y1:n ) given by
+                                                                  N
+                                                                  X
+                                           pb ( u1:n | y1:n ) =         Wni δU1:n
+                                                                              i   (u1:n ) ,
+                                                                  i=1
+                                                                        N
+                                                                  1 X
+                                           p ( u1:n | y1:n ) =         δ i (u1:n )
+                                                                  N i=1 U 1:n
+
+and
+                                                                         N
+                                                                   1 X       i
+                                                                                 
+                                            pb ( yn | y1:n−1 ) =         αn U1:n   .
+                                                                   N i=1
+                                                                                                              i
+At first glance, it seems that this algorithm cannot be implemented as it requires storing paths U1:n                of in-
+creasing dimension so as to allow the computation of p ( yn | y1:n−1 , u1:n ) and sampling from q ( un | y1:n , u1:n−1 ).
+The key is to realise that p ( yn | y1:n−1 , u1:n ) is a Gaussian distribution of mean y n|n−1 (u1:n ) and covari-
+ance S n|n−1 (u1:n ) which can be computed using the Kalman filter. Similarly, given that the optimal IS
+distribution only depends on the path u1:n through p ( yn | y1:n−1 , u1:n ), it is sensible to build an importance
+distribution q ( un | y1:n
+                         , ui 1:n−1 ) which only depends on u1:n through p ( yn | y1:n−1 , u1:n ). Hence inpractice, we
+                                                 i                                                              i
+do not need to store U1:n          but only Un−1:n     and the Kalman filter statistics associated with U1:n        . The
+resulting particle filter is a bank of interacting Kalman filters where each Kalman filter is used to compute
+the marginal likelihood term p ( y1:n | u1:n ).
+
+
+4.6.2    Partially observed linear Gaussian models
+
+The same idea can be applied to the class of partially observed linear Gaussian models [2]. Consider
+X = U × Z with Z = Rnz . Here Xn = (Un , Zn ) with Z1 ∼ N (0, Σ1 )
+
+                                                     Zn = AZn−1 + BVn ,
+                                                     Un = CZn + DWn
+
+           i.i.d.                i.i.d.
+where Vn ∼ N (0, Inv ), Wn ∼ N (0, Inw ) ; see [2] for generalisations. We make the additional assumption
+that
+                             g ( yn | xn ) = g ( yn | (un , zn )) = g ( yn | un ) .
+In this case, we are interested in estimating
+
+                              p ( u1:n , z1:n | y1:n )   =   p ( u1:n | y1:n ) p ( z1:n | y1:n , u1:n )
+                                                         =   p ( u1:n | y1:n ) p ( z1:n | u1:n )
+
+where p ( z1:n | u1:n ) is a multivariate Gaussian distribution whose statistics can be computed using a Kalman
+filter associated with the linear model {Un , Zn }. It follows that we only need to use particle methods to
+approximate
+
+                                             γn (u1:n ) = p (u1:n , y1:n )
+                                                         = p (u1:n ) p ( y1:n | u1:n )
+
+
+
+                                                                  33
+                            n
+                            Q
+where p ( y1:n | u1:n ) =         g ( yk | uk ) and p (u1:n ) is the marginal Gaussian prior of {Un } which corresponds
+                            k=1
+to the ‘marginal’ likelihood term which can be computed using the Kalman filter associated with {Un , Zn } .
+The resulting particle filter is also an interacting bank of Kalman filters but the Kalman filters are here used
+to compute the marginal prior p (u1:n ).
+
+
+
+5     Particle Smoothing
+
+We have seen previously that SMC methods can provide an approximation of the sequence of distribu-
+tions {p ( x1:n | y1:n )}. Consequently, sampling from a joint distribution p ( x1:T | y1:T ) and approximating the
+marginals {p ( xn | y1:T )} for n = 1, ..., T is straightforward. We just run an SMC algorithm up to time T and
+sample from/marginalise our SMC approximation pb ( x1:T | y1:T ). However, we have seen that this approach
+is bound to be inefficient when T is large as the successive resampling steps lead to particle degeneracy:
+pb ( x1:n | y1:T ) is approximated by a single unique particle for n  T. In this section, we discuss various
+alternative schemes which do not suffer from these problems. The first method relies on an simple fixed-lag
+approximation whereas the other algorithms rely on the forward-backward recursions presented in Section
+2.3.
+
+
+5.1     Fixed-lag Approximation
+
+The fixed-lag approximation is the simplest approach. It was proposed in [26]. It relies on the fact that, for
+hidden Markov models with “good” forgetting properties, we have
+                                                                               
+                                   p ( x1:n | y1:T ) ≈ p x1:n | y1:min(n+∆,T )                           (47)
+
+for ∆ large enough; that is observations collected at times k > n + ∆ do not bring any additional information
+about x1:n . This suggests a very simple scheme — simply don’t update the estimate at time k after time
+                                                                                   i                      i
+k = n + ∆. Indeed, in practice we just do not resample the components X1:n             of the particles X1:k at times
+k > n + ∆. This algorithm is trivial to implement but the main practical problem is that we typically do
+not know ∆. Hence we need to replace ∆ with an estimate of it denoted L. If we select L < ∆, then
+p x1:n | y1:min(n+L,T ) is a poor approximation of p ( x1:n | y1:T ). If we select a large values of L to ensure that
+L ≥ ∆ then the degeneracy problem remains substantial. Unfortunately automatic selection of L is difficult
+(and, of course, for some poorly-mixing models ∆ is so large that this approach is impractical). Experiments
+on various models have shown that good performance were achieved with L ≈ 20 − 50. Note that such fixed-
+lag SMC schemes do not converge asymptotically (i.e. as N → ∞) towards the true smoothing distributions
+because we do not have p ( x1:n | y1:T ) = p x1:n | y1:min(n+L,T ) . However, the bias might be negligible and
+can be upper bounded under mixing conditions [8]. It should also be noted that this method does not provide
+an approximation of the joint p ( x1:T | y1:T ) — it approximates only the marginal distributions.
+
+
+5.2     Forward Filtering-Backward Smoothing
+
+We have seen previously that it is possible to sample from p ( x1:T | y1:T ) and compute the marginals {p ( xn | y1:T )}
+using forward-backward formulæ. It is possible to obtain an SMC approximation of the forward filtering-
+backward sampling procedure directly by noting that for
+                                                                    N
+                                                                    X
+                                               pb ( xn | y1:n ) =         Wni δXni (xn )
+                                                                    i=1
+
+
+
+
+                                                                    34
+we have
+                                                             f ( Xn+1 | xn ) pb ( xn | y1:n )
+                               pb ( xn | Xn+1 , y1:n ) = R
+                                                           f ( Xn+1 | xn ) pb ( xn | y1:n ) dxn
+                                                          N                       
+                                                         X    Wni f Xn+1 |Xni δXni (xn )
+                                                       =       PN                           .
+                                                                         j                j
+                                                         i=1      j=1 W n  f   X  n+1  |X n
+
+
+Consequently, the following algorithm generates a sample approximately distributed according to p ( x1:T | y1:T ):
+first sample XT ∼ pb ( xT | y1:T ) and for n = T − 1, T − 2, ..., 1, sample Xn ∼ pb ( xn | Xn+1 , y1:n ).
+
+Similarly, we can also provide an SMC approximation of the forward filtering-backward smoothing procedure
+by direct means. If we denote by
+                                                      N
+                                                      X
+                                                         i
+                                      pb(xn |y1:T ) =   Wn|T δXni (xn )                              (48)
+                                                                i=1
+
+the particle approximation of p(xn |y1:T ) then, by inserting (48) into (15), we obtain
+                                                                                   
+                                                                    j
+                                   XN       X N              f Xn+1     |Xni
+                                                  j
+                   pb(xn |y1:T ) =     Wni      Wn+1|T hP                        i  δXni (xn )          (49)
+                                                           N     l f Xj          l
+                                   i=1       j=1           l=1 W n       n+1  |Xn
+                                      N
+                                      X
+                                             i
+                                 :=         Wn|T δXni (xn ).
+                                      i=1
+
+
+
+The forward filtering-backward sampling approach requires O (N T ) operations to sample one path approx-
+                  according to p ( x1:T | y1:T ) whereas the forward filtering-backward smoothing algorithm
+imately distributed
+requires O N 2 T operations to approximate {p ( xn | y1:T )}. Consequently, these algorithms are only useful
+for very long time series in which sample degeneracy prevents computationally-cheaper, crude methods from
+working.
+
+
+5.3    Generalised Two-filter Formula
+
+To obtain an SMC approximation of the generalised two-filter formula (18), we need to approximate the
+backward filter {e  p(xn |yn:T )} and to combine the forward filter and the backward filter in a sensible way. To
+obtain an approximation of {e      p(xn |yn:T )}, we simply use an SMC algorithm which targets the sequence of
+distributions {ep(xn:T |yn:T )} defined in (17). We run the SMC algorithm “backward in time” to approximate
+pe(xT |yT ) then pe(xT −1:T |yT −1:T ) and so on. We obtain an SMC approximation denoted
+                                                                N
+                                                                X
+                                        pe(xn:T |yn:T ) =
+                                        b                             f i δX i (xn:T ) .
+                                                                      W n   n:T
+                                                                i=1
+
+To combine the forward filter and the backward filter, we obviously cannot multiply the SMC approximations
+of both p(xn |y1:n−1 ) and pe(xn:T |yn:T ) directly, so we first rewrite Eq. (18) as
+                                          R
+                                            f ( xn | xn−1 ) p ( xn−1 | y1:n−1 ) dxn−1 · pe(xn |yn:T )
+                        p ( xn | y1:T ) ∝                                                             .
+                                                                   pen (xn )
+
+By plugging the SMC approximations of p ( xn−1 | y1:n−1 ) and pe(xn |yn:T ) in this equation, we obtain
+                                                                N
+                                                                X
+                                                                       i
+                                              pb(xn |y1:T ) =         Wn|T δXe i (xn )
+                                                                               n
+                                                                i=1
+
+
+                                                                 35
+where                                                                   
+                                                      N    f X enj |X i
+                                         j
+                                                      X              n−1
+                                        Wn|T  fnj
+                                             ∝W        i
+                                                      Wn−1         .                                                 (50)
+                                                                     j
+                                                  i=1        pen X  en
+
+
+Like the SMC implementation of the forward-backward smoothing algorithm, this approach has a compu-
+tational complexity O(N 2 T ). However fast computational methods have been developed to address this
+problem [27]. Moreover it is possible to reduce this computational complexity to O(N T ) by using rejection
+sampling to sample from p ( xn | y1:T ) using p ( xn−1 | y1:n−1 ) and pe(xn |yn:T ) as proposal distributions. More
+recently, an importance sampling type approach has also been proposed in [19] to reduce the computational
+complexity to O (N T ); see [6] for a related idea developed in the context of belief propagation. Compared to
+the forward-backward formula, it might be expected to substantially outperform that algorithm in any situ-
+ation in which the support of the smoothed estimate differs substantially from that of the filtering estimate.
+That is, in those situations in which observations obtained at time k > n provide a significant amount of
+information about the state at time n6 . The improvement arises from the fact that the SMC implementation
+of the forward-backward smoother simply reweights a sample set which targets p(x1:n |y1:n ) to account for
+the information provided by yn+1:k whereas the two filter approach uses a different sample set with locations
+appropriate to the smoothing distributions.
+
+
+
+6     Summary
+
+We have provided a review of particle methods for filtering, marginal likelihood computation and smooth-
+ing. Having introduced a simple SMC algorithm, we have shown how essentially all of the particle-based
+methods introduced in the literature to solve these problems can be interpreted as a combination of two op-
+erations: sampling and resampling. By considering an appropriate sequence of target distributions, defined
+on appropriate spaces, it is possible to interpret all of these algorithms as particular cases of the general
+algorithm.
+
+This interpretation has two primary advantages:
+
+
+    1. The standard algorithm may be viewed as a particle interpretation of a Feynman-Kac model (see
+       [11]) and hence strong, sharp theoretical results can be applied to all algorithms within this common
+       formulation.
+    2. By considering all algorithms within the same framework is is possible to develop a common un-
+       derstanding and intuition allowing meaningful comparisons to be drawn and sensible implementation
+       decisions to be made.
+
+
+Although much progress has been made over the past fifteen years, and the algorithms described above
+provide good estimates in many complex, realistic settings, there remain a number of limitations and open
+problems:
+
+
+    • As with any scheme for numerical integration, be it deterministic or stochastic, there exist problems
+      which exist on sufficiently high-dimensional spaces and involving sufficiently complex distributions that
+      it is not possible to obtain an accurate characterisation in a reasonable amount of time.
+   6 This situation occurs, for example, whenever observations are only weakly informative and the state evolution involves
+
+relatively little stochastic variability. An illustrative example provided in [5] shows that this technique can dramatically
+outperform all of the other approaches detailed above.
+
+
+
+
+                                                            36
+   • In many settings of interest the likelihood and state transition density are only known up to a vector
+     of unknown parameters. It is typically of interest to estimate this vector of parameters at the same
+     time as (or in preference to) the vector of states. Formally, such situations can be described as directly
+     as a state space model with a degenerate transition kernel. However, this degeneracy prevents the
+     algorithms described above from working in practice.
+   • Several algorithms intended specifically for parameter estimation have been developed in recent years.
+     Unfortunately, space constraints prevent us from discussing these methods within the current tutorial.
+     Although progress has been made, this is a difficult problem and it cannot be considered to have been
+     solved in full generality. These issues will be discussed in further depth in an extended version of this
+     tutorial which is currently in preparation.
+
+
+It should also be mentioned that the SMC algorithm presented in this tutorial can be adapted to perform
+much more general Monte Carlo simulation: it is not restricted to problems of the filtering type, or even
+to problems with a sequential character. It has recently been established that it is also possible to employ
+SMC within MCMC and to obtain a variety of related algorithms.
+
+
+
+References
+ [1] Anderson, B. D. O. and Moore, J. B. (1979) Optimal Filtering, Prentice Hall, Englewood Cliffs, New Jersey.
+ [2] Andrieu, C. and Doucet, A. (2002) Particle filtering for partially observed Gaussian state space models. Journal
+     of the Royal Statistical Society B, 64(4), 827-836.
+
+ [3] Arulampalam, S., Maskell, S., Gordon, N. and Clapp, T. (2002) A tutorial on particle filters for on-line
+     nonlinear/non-Gaussian Bayesian tracking. IEEE Transactions on Signal Processing, 50(2):174–188.
+
+ [4] Bresler, Y. (1986) Two-filter formula for discrete-time non-linear Bayesian smoothing. International Journal of
+     Control, 43(2), 629–641.
+
+ [5] Briers, M., Doucet, A. and Maskell, S. (2008) Smoothing algorithms for state-space models, Annals of the
+     Institute of Statistical Mathematics, to appear.
+
+ [6] Briers, M., Doucet, A. and Singh, S.S. (2005) Sequential auxiliary particle belief propagation, Proceedings
+     Conference Fusion.
+
+ [7] Carpenter, J., Clifford, P. and Fearnhead, P. (1999) An improved particle filter for non-linear problems. IEE
+     proceedings — Radar, Sonar and Navigation, 146, 2–7.
+
+ [8] Cappé, O. , Godsill, S. J. and Moulines, E. (2007) An overview of existing methods and recent advances in
+     sequential Monte Carlo. IEEE Proceedings, 95(5):899–924.
+
+ [9] Chopin, N. (2004) Central limit theorem for sequential Monte Carlo and its application to Bayesian inference.
+     Ann. Statist., 32, 2385-2411.
+
+[10] Crisan, D. and Doucet, A. (2002) A survey of convergence results on particle filtering for practitioners. IEEE
+     Transactions on Signal Processing, 50(3), 736–746.
+
+[11] Del Moral, P. (2004) Feynman-Kac Formulae: Genealogical and Interacting Particle Systems with Applications.
+     Series: Probability and Applications, Springer-Verlag, New York.
+
+[12] Del Moral, P., Doucet, A. and Jasra, A. (2008) On adaptive resampling procedures for sequential Monte Carlo
+     methods. Technical report. INRIA.
+
+[13] Douc, R., Cappé, O. and Moulines, E. (2005) Comparison of resampling schemes for particle filtering. In 4th
+     International Symposium on Image and Signal Processing and Analysis (ISPA).
+
+
+                                                           37
+[14] Doucet, A., Godsill, S. J. and Andrieu, C. (2000) On sequential Monte Carlo sampling methods for Bayesian
+     filtering. Statistics and Computing, 10, 197–208.
+
+[15] Doucet, A., Briers, M. and Senecal, S. (2006) Efficient block sampling strategies for sequential Monte Carlo.
+     Journal of Computational and Graphical Statistics, 15(3), 693–711.
+
+[16] Doucet, A., de Freitas, N. and Gordon, N.J. (eds.) (2001) Sequential Monte Carlo Methods in Practice. Springer-
+     Verlag, New York.
+
+[17] Doucet, A., de Freitas, N. and Gordon, N.J. (2001) An introduction to sequential Monte Carlo methods. in [16],
+     3–13.
+
+[18] Fearnhead, P. (2008) Computational methods for complex stochastic systems: A review of some alternatives to
+     MCMC. Statistics and Computing, 18, 151–171.
+
+[19] Fearnhead, P., Wyncoll, D. and Tawn, J. (2008) A sequential smoothing algorithm with linear computational
+     cost. Technical report, Department of Mathematics and Statistics, Lancaster University.
+
+[20] Gilks, W.R. and Berzuini, C. (2001). Following a moving target - Monte Carlo inference for dynamic Bayesian
+     models. Journal of the Royal Statistical Society B, 63, 127–146.
+
+[21] Godsill, S.J. and Clapp, T. (2001) Improvement strategies for Monte Carlo particle filters, in [16], 139-158.
+[22] Gordon N.J., Salmond D.J. and Smith A.F.M. (1993) Novel approach to nonlinear/non-Gaussian Bayesian state
+     estimation. IEE-Proceedings-F, 140, 107–113.
+
+[23] Johansen, A.M. and Doucet, A. (2008) A note on auxiliary particle filters. Statistics and Probability Letters,
+     78(12), 1498–1504.
+
+[24] Johansen, A.M. (2008) SMCTC: Sequential Monte Carlo in C++. Technical Report 08-16. University of Bristol,
+     Department of Statistics.
+
+[25] Kitagawa, G. (1996). Monte Carlo filter and smoother for non-Gaussian non-linear state space models. Journal
+     of Computational and Graphical Statistics, 5, 1-25.
+
+[26] Kitagawa, G. and Sato, S. (2001) Monte Carlo smoothing and self-organizing state-space model, in [16], 177–195.
+[27] Klaas, M. et al. (2005) Fast particle smoothing: if I had a million particles, in Proceedings International Con-
+     ference on Machine Learning.
+
+[28] Kong, A, Liu, J.S. and Wong, W. H. (1994) Sequential imputations and Bayesian missing data problems. Journal
+     of the American Statistical Association, 89, 1032–1044.
+
+[29] Künsch, H. R. (2001) State-space and hidden Markov models. in Complex Stochastic Systems (eds. O. E.
+     Barndorff-Nielsen, D. R. Cox and C. Kluppelberg), CRC Press, 109–173.
+
+[30] Liu, J. S. (2001) Monte Carlo Strategies in Scientific Computing. Springer-Verlag, New York.
+[31] Neal, R. M. (2001) Annealed importance sampling. Statistics and Computing, 11, 125–139.
+[32] Olsson, J., Cappé, O., Douc., R. and Moulines, E. (2008) Sequential Monte Carlo smoothing with application
+     to parameter estimation in non-linear state space models. Bernoulli, 14(1):155-179.
+
+[33] Pitt, M. K. and Shephard, N. (1999) Filtering via simulation: auxiliary particle filter. Journal of the American
+     Statistical Association, 94, 590–599.
+
+[34] Pitt, M. K. and Shephard, N. (2001) Auxiliary variable based particle filters, in [16], 271–293.
+[35] Robert, C. P. and Casella, G. (2004) Monte Carlo Statistical Methods. 2nd edn., Springer-Verlag, New York.
+[36] Trotter, H. F., and Tukey, J. W. (1956) Conditional Monte Carlo for normal samples, in Symposium on Monte
+     Carlo Methods (ed. H. A. Meyer) Wiley, New York, 64–79.
+
+
+                                                           38
+[37] van der Merwe, R., Doucet, A., De Freitas, N. and Wan, E. (2000) The unscented particle filter. in Proceedings
+     of Neural and Information Processing Systems.
+
+
+
+
+                                                        39
+

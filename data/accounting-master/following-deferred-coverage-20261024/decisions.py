@@ -1,0 +1,13 @@
+EVIDENCE={'deferred':'following-deferred-assessment-20261024','manuscript':'following-deferred-integration-20261024'}
+UPDATES={}
+def add(ids,advance,residual,next_action):
+    for key in ids.split():UPDATES[key]={'evidence':['deferred','manuscript'],'advance':advance,'residual':residual,'next_action':next_action,'full_requirement_closed':False,'acceptance':'not_promoted'}
+add('MC05','Fresh deferred measurement binds the post-current-journal date and exact state.','Second provisional boundary and subsequent events remain incomplete.','Separate old settlement history from next-period cash movements.')
+add('MC11 MC13 I05','Full predecessor,vintages,losses and historical recognition remain attached to fresh deferred results.','General annual state interfaces remain absent.','Preserve all histories across a compatible second provisional carry.')
+add('MC16 G4 P17-04.10','Fresh complete bases,recognition support and shared capacity determine only the change in deferred balances.','Actual law,recovery,other allocation routes and annual admission remain open.','Carry actual assessed balances without renewing new-period premises.')
+add('MC24 G2','Closed measurement input repairs old predecessor/timing mismatch;full apply compares all state and premises.','General authoring and repeated annual execution incomplete.','Specify explicit archived versus current-period tax settlement state.')
+add('MC26','452 checks across45 cases,11 focused and25 regression methods validate fresh deferred assessment.','Synthetic checks do not establish actual company/accounting admission.','Independently check second-boundary retained earnings and all history partitions.')
+add('MC28','DTA8/DTL10 to5/5 gives deferred expense-2,profit-17 and unchanged cash715/2/current payable35/4.','Selected hypothetical book is not a complete historical company.','Transfer actual profit and liabilities into a new provisional opening.')
+add('MC32','Version3.90 preserves174 sources,287 displays and739 citations;bounded actual rendered review recorded.','Dense navigation and whole-document/domain/human acceptance remain open.','Preserve predecessors while explaining next-period history semantics.')
+add('MC33 MC34 MC35','Post-current-tax deferred measurement repaired and all prior coverage retained.','No whole phase closes;S6 held,S7 deferred.','Continue second-boundary and source-completeness work internally.')
+add('P17-04.11','Following-period current and fresh deferred assessments now compose with exact cash and liability history.','Second carry,subsequent events and annual acceptance remain open.','Carry the full result with explicit period settlement partition.')

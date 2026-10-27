@@ -1,0 +1,19 @@
+# Current recovery pointer
+
+## Current governing candidate — Version 5.8 — 26 October 2026
+
+Version 5.8 is the 723-page governing design candidate, not_ready. Four full
+programs preserve 44 complete command payloads, reports and carry results;
+26 adverse programs and 11 controls preserve failures and stopped prefixes.
+Native lifecycle functions are disabled during execution; opening admission
+remains separate. All 218 predecessor sources are protected under three named
+changes; all simulation chapters remain exact. The standalone remains verified
+Version 5.5, 171 pages, 26 chapters and 155 body pages. No new warnings.
+Cover/pages 685–688 inspected. All 53 obligations, six interactions and 46
+operations remain; no whole requirement closes. S1–S5 partial, S6 held, E3 deferred.
+PDF: docs/design/proposal/manuscript-declarative-program-20261026/accounting-product-proposal.pdf
+SHA256: c8ed77cdbcd92b9d0081b2708840b73d2c404cc01efbca446b1fd433000db017.
+Result: data/accounting-master/declarative-program-integration-20261026/result.md.
+Next plan: docs/plans/accounting-declared-opening-admission-20261026.md.
+
+Full program composition and Version 5.8 integration are complete. Opening audit completed: 58 probes, ten groups, six delayed command checks. Next: declared opening admission. Main links select 5.8; standalone remains verified 5.5. Do not rerun completed preparation/advancement writers. No background process running.

@@ -1,0 +1,216 @@
+[
+  {
+    "id": "empty",
+    "input": "",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "",
+    "expected_tags": {}
+  },
+  {
+    "id": "plain",
+    "input": "Plain text",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "Plain text"
+  },
+  {
+    "id": "mixed_roots",
+    "input": "a<div>b</div>c<span>d</span>e",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "abcde",
+    "expected_tags": {
+      "div": 1,
+      "span": 1
+    },
+    "expected_counts": {
+      "elements": 2,
+      "nonempty_tail_slots": 2
+    }
+  },
+  {
+    "id": "nested_tail",
+    "input": "<p>a<b>b</b>c<i>d</i>e</p>f",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "abcdef",
+    "expected_counts": {
+      "elements": 3,
+      "nonempty_tail_slots": 3
+    }
+  },
+  {
+    "id": "nested_escape",
+    "input": "<p>&amp;lt;b&amp;gt;literal&amp;lt;/b&amp;gt;</p>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "&lt;b&gt;literal&lt;/b&gt;",
+    "expected_tags": {
+      "p": 1
+    }
+  },
+  {
+    "id": "escaped_markup",
+    "input": "<p>&lt;b&gt;literal&lt;/b&gt;</p>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "<b>literal</b>",
+    "expected_tags": {
+      "p": 1
+    }
+  },
+  {
+    "id": "ampersand",
+    "input": "<p>A &amp; B</p>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "A & B"
+  },
+  {
+    "id": "line_endings",
+    "input": "<p>a\r\nb\rc&#13;d</p>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "a\nb\nc\rd"
+  },
+  {
+    "id": "attribute_whitespace",
+    "input": "<p a=\"x\t y&#9;z&#13;w\nq\"/>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "",
+    "expected_attrs": [
+      [
+        "a",
+        "x  y\tz\rw q"
+      ]
+    ]
+  },
+  {
+    "id": "comments_pi",
+    "input": "a<!--keep--><?target value?>b<p>c</p>d",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "abcd",
+    "expected_counts": {
+      "comments": 1,
+      "processing_instructions": 1,
+      "elements": 1
+    }
+  },
+  {
+    "id": "cdata",
+    "input": "<p><![CDATA[<b>&raw</b>]]></p>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "<b>&raw</b>",
+    "expected_tags": {
+      "p": 1
+    }
+  },
+  {
+    "id": "default_namespace",
+    "input": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><span>x</span></div>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "x",
+    "expected_tags": {
+      "{http://www.w3.org/1999/xhtml}div": 1,
+      "{http://www.w3.org/1999/xhtml}span": 1
+    }
+  },
+  {
+    "id": "prefix_scope",
+    "input": "<p:x xmlns:p=\"urn:test\" p:a=\"1\"><p:y xmlns:p=\"urn:other\"/></p:x>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "",
+    "expected_tags": {
+      "{urn:test}x": 1,
+      "{urn:other}y": 1
+    },
+    "expected_attrs": [
+      [
+        "{urn:test}a",
+        "1"
+      ]
+    ]
+  },
+  {
+    "id": "numeric_reference",
+    "input": "<p>&#160;&#x1F600;</p>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "\u00a0\ud83d\ude00"
+  },
+  {
+    "id": "non_xhtml_tag",
+    "input": "<financialMystery a='1'>x</financialMystery>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "x",
+    "expected_tags": {
+      "financialMystery": 1
+    }
+  },
+  {
+    "id": "xml_stylesheet_pi",
+    "input": "<?xml-stylesheet href=\"not-fetched\"?>",
+    "expected_status": "accepted_local_XML",
+    "expected_text": "",
+    "expected_counts": {
+      "processing_instructions": 1
+    }
+  },
+  {
+    "id": "mismatched",
+    "input": "<p>x</div>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "overlap",
+    "input": "<p><b>x</p></b>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "bare_ampersand",
+    "input": "<p>A & B</p>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "undeclared_html_entity",
+    "input": "<p>&nbsp;</p>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "unbound_prefix",
+    "input": "<h:p>x</h:p>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "duplicate_attribute",
+    "input": "<p a=\"1\" a=\"2\"/>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "illegal_character",
+    "input": "<p>&#0;</p>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "unquoted_attribute",
+    "input": "<p a=1/>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "wrapper_breakout",
+    "input": "</_accdsl_fragment><p/>",
+    "expected_status": "rejected_local_XML"
+  },
+  {
+    "id": "doctype",
+    "input": "<!DOCTYPE p><p/>",
+    "expected_status": "outside_local_profile"
+  },
+  {
+    "id": "external_entity",
+    "input": "<!DOCTYPE p [<!ENTITY e SYSTEM \"file:///no-read\">]><p>&e;</p>",
+    "expected_status": "outside_local_profile"
+  },
+  {
+    "id": "xml_declaration",
+    "input": "<?xml version=\"1.0\"?><p/>",
+    "expected_status": "outside_local_profile"
+  },
+  {
+    "id": "conservative_comment_refusal",
+    "input": "<!-- <!DOCTYPE p> --><p/>",
+    "expected_status": "outside_local_profile"
+  }
+]

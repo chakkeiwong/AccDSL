@@ -1,0 +1,1620 @@
+# Current accounting proposal master program
+
+## Native return authoring checked — 24 October 2026
+
+The closed typed/text component profile passes 107 checks and read-only
+replay, with 23 protected inputs unchanged and six legacy round trips.
+Known contradictions no longer hide behind unknown inputs; original
+failed evidence is preserved. Static eligibility is not execution.
+Result: data/accounting-master/company-return-schema-20261023/result.md.
+
+Next: docs/plans/accounting-company-return-execution-20261024.md.
+Execute the shared-book reference return, tax, annual report and carry
+against the complete retained P trace. Version 3.55 remains 419 pages,
+not_ready and unchanged; this increment awaits integration. S1–S5
+partial, S6 held, S7 deferred; no whole requirement closes.
+
+## Current candidate Version 3.55 — portable and module design integrated
+
+Version 3.55 is 419 pages, not_ready. PDF: docs/design/proposal/manuscript-company-modules-20261023/accounting-product-proposal.pdf.
+SHA256: bdb2c9ed668870b7be45c4e09c1faece284543df5522b999c1b1acd132fa6f01.
+All 150 predecessor sources and its PDF remain protected; 308 labels,
+95 references, 729 citations and 219 exact displays are retained.
+Build/preservation and bounded rendered author review pass. Full
+successor, independent, domain and human acceptance remain pending.
+Result: data/accounting-master/company-module-integration-20261023/result.md.
+
+The candidate integrates portable legacy identity (62 checks), a finite
+shared-book return boundary (43), and native return-state design with
+the retained legal-book/tax/cash trace (93), all replayed. The indirect
+cash bridge explicitly includes 10 of opening interest paid. Native
+return parser/schema/execution remains unfinished; no whole row closes.
+
+Next: docs/plans/accounting-company-return-schema-20261023.md.
+Specify closed component/lot/tax records and matched typed/text
+authoring, preserving legacy scenarios. S1–S5 partial; S6 held;
+S7 deferred. Earlier entries below are historical checkpoints.
+
+## Shared-book module boundary checked
+
+The retained return-state method passes 43 exact checks and read-only
+replay; 22 protected files are unchanged. Original owner/context/view,
+shared cash and complete after-state are retained. Proposals are
+uncommitted; Northstar lacks seven explicit native return capabilities.
+Result: data/accounting-master/company-module-boundary-20261023/result.md.
+
+Next: docs/plans/accounting-company-native-return-design-20261023.md.
+Design recovered-stock lots, refund/recovery memory, source findings,
+current/deferred tax, reports and annual carry before adding an
+operation. Preserve the existing homogeneous inventory and all legacy
+scenarios. Version 3.54 stays 415 pages, not_ready and unchanged.
+Portable authoring and this boundary await manuscript integration.
+S1–S5 partial; S6 held; S7 deferred; no whole requirement closes.
+Earlier entries are historical checkpoints.
+
+## Portable company authoring checked after session recovery
+
+The corrected record and read-only replay pass 62 checks; 558 protected
+files remain unchanged. The typed closure has 168 records and 67 blobs.
+Original bytes, legacy draft identity and portable content/import identity
+remain separate. All six scenarios and both partial outcomes replay;
+rehashed false cash passes binding but fails trusted execution.
+Result: data/accounting-master/company-portable-authoring-20261023/result.md.
+
+Next: docs/plans/accounting-company-module-boundary-20261023.md.
+Reuse the retained return-state migration to define the shared-book module
+boundary, then address native company state/authoring gaps. Existing
+corporate and sector methods remain distinct; no owner renaming or
+unearned generality. Version 3.54 stays 415 pages, not_ready, unchanged.
+S1–S5 partial; S6 held; S7 deferred; no whole requirement closes.
+Earlier entries are historical checkpoints.
+
+## 23 October 2026 — current candidate Version 3.54
+
+Version 3.54 is 415 pages, not_ready, at docs/design/proposal/manuscript-company-language-20261023/accounting-product-proposal.pdf.
+SHA256: 8ca29eb2f2f2fbce11c2b02245e599e75493545f964782e1c450bf6690b84f6e.
+Version 3.53 and 149 predecessor sources remain protected; all 307 labels,
+92 references, 729 citations and 219 displays are retained. Corrected build
+and bounded author reading of twelve pages pass; full successor reading and
+independent/domain/human acceptance remain pending.
+Result: data/accounting-master/company-language-integration-20261023/result.md.
+
+The candidate integrates policy information (93 checks), authored families
+(96), typed policy expressions (79) and member-boundary recovery (57), all
+replayed. Scope review preserves 53 obligations, six interactions and 46
+operations. General language, richer modules, actual source admission and
+physical durability remain open; no whole requirement closes.
+
+Next: docs/plans/accounting-company-portable-authoring-20261023.md.
+Preserve draft identity while connecting explicit typed portable references,
+dependencies and replay. S1–S5 remain partial, S6 held, S7 deferred. Older
+entries below are historical checkpoints.
+
+## 23 October 2026 — company-family recovery checked
+
+Company-family checkpoint and publication exchanges pass 57 checks and
+read-only replay; 372 protected files remain unchanged. Every budget split
+preserves the full family; partial accounting is finished work, exact retries
+retain immutable decisions, and both lost-acknowledgement worlds are explicit.
+This is a member-boundary reference, not physical durability evidence.
+Result: data/accounting-master/company-recovery-20261023/result.md.
+
+Next: docs/plans/accounting-company-language-integration-20261023.md.
+Integrate the coherent timing/family/expression/recovery design into a
+protected successor. Version 3.53 stays 413 pages, not_ready and unchanged
+until verified integration. S1–S5 partial; S6 held; S7 deferred. No whole
+requirement closes. Earlier entries are historical checkpoints.
+
+## 23 October 2026 — typed policy expressions checked
+
+CompanyExpressionsDraft/1 passes 79 checks and read-only replay; 339 protected
+files are unchanged. Exact typed/text expressions feed the protected policy
+and reproduce its whole path/result. Conditional 4/5 collection changes cash
+by -38.4 and receivables by +38.4 without changing profit. Unknown inputs,
+unit/context mismatches and unsupported structure remain explicit.
+Result: data/accounting-master/company-expressions-20261023/result.md.
+
+Next: docs/plans/accounting-company-recovery-20261023.md.
+Version 3.53 stays 413 pages, not_ready and unchanged. Policy information,
+families and expressions await coherent integration. S1–S5 partial, S6 held,
+S7 deferred; no whole requirement closes. Older entries are historical.
+
+## 23 October 2026 — authored scenario families checked
+
+CompanyScenarioFamilyDraft/1 passes 96 checks and read-only replay; all 311
+protected files are unchanged. Six named paths retain four complete and two
+partial outcomes, matched text/typed input, common opening and joint reports.
+The preserved first Unicode identity defect is repaired. No weights,
+historical-family admission or general portable/runtime claim is made.
+Result: data/accounting-master/company-family-20261023/result.md.
+
+Next: docs/plans/accounting-company-expressions-20261023.md.
+Version 3.53 remains 413 pages, not_ready and unchanged. This increment and
+policy-information await integration. S1–S5 partial; S6 held; S7 deferred.
+No whole requirement closes. Earlier entries are historical checkpoints.
+
+## 23 October 2026 — whole-language scope reviewed
+
+All 53 obligations, six interactions and 46 operations have distinct syntax,
+semantics, connected-execution and acceptance assessments. Recorded and
+read-only review checks pass (359); 59 prior operation-evidence files retain
+their recorded hashes. The 14-kind company frontend supports bounded paths;
+general expressions, family authoring, richer module joins and durable
+recovery remain. See `data/accounting-master/language-scope-review-20261023/review.md` and `inventory.json`.
+
+Next: `docs/plans/accounting-company-family-20261023.md` — matched text/typed unweighted
+scenario families retaining every joint path and failure outcome. This is
+explicit scenario authoring, not historical-family reconstruction.
+Version 3.53 remains 413 pages, not_ready, unchanged. S1–S5 stay partial,
+S6 held and S7 deferred; no whole requirement closes. Earlier entries below
+are historical checkpoints.
+
+## 23 October 2026 — policy-information extension checked
+
+The recorded run and read-only replay pass 93 checks; all 276 protected
+files are unchanged. Exact policy and materializer availability is separate
+from parent information and historical execution. Eligible inputs may still
+produce partial accounting; no child clock or real forecast admission is
+invented. Result: `data/accounting-master/company-policy-information-20261023/result.md`.
+
+Next: execute `docs/plans/accounting-language-scope-review-20261023.md`. Review all 53 obligations,
+6 interactions and 46 operations against actual company authoring, then
+continue the next consequential design repair. Version 3.53 remains
+413 pages, not_ready and unchanged; this increment awaits integration.
+S1–S5 remain partial, S6 held, S7 deferred. No whole requirement closes.
+Earlier entries below are historical checkpoints.
+
+## 23 October 2026 — current candidate Version 3.53
+
+Version 3.53 is 413 pages, not_ready, at
+`docs/design/proposal/manuscript-company-authoring-20261023/accounting-product-proposal.pdf`.
+SHA256: 5bf364ae6c78bddcf833331d408c447ddd5f540aba1e47d4d28bc7e648c09893.
+Protected Version 3.52 remains unchanged. All 148 predecessor sources, 306 labels,
+89 references, 729 citations and 219 exact displays are preserved. The corrected
+LuaLaTeX build and bounded visual review of twelve pages pass; full successor
+reading and independent/domain/human acceptance remain pending. Result:
+`data/accounting-master/company-authoring-integration-20261023/result.md`.
+
+The candidate integrates 119 exchange, 103 assumption-information, 99 explicit
+policy and 78 text checks. It explains partial-year memory, repair revisions,
+binding versus replay, four policy allocations with a 28.8 cash/receivable effect,
+matched repeated-operation text and synthetic availability clocks. These checks
+do not close the whole-company, real-source or general-language requirements.
+
+Next: execute `docs/plans/accounting-policy-information-20261023.md`, then audit
+the full language scope against all 53 obligations, 6 interactions and 46 operations.
+General expressions/branching, broader accounting/sector methods and recovery
+remain; S1 source gaps continue only on new consequential leads. S1–S5 stay
+partial, S6 held and S7 deferred. No whole-row closure or global continuation veto.
+Older sections below are historical checkpoints.
+
+## 23 October 2026 — assumption timing and explicit settlement policy
+
+CompanyInformationDraft/1 passes 103 synthetic timing checks, including exact
+path-component coverage, revisions, source/assumption conjunction and day/instant
+boundaries. SettlementPolicyDraft/1 passes 99 checks: four allocations across two
+collection operations change, cash rises 28.8, receivables fall equally, and
+profit is unchanged. The fixed path is preserved. Policy timing remains
+unadmitted; all dates and collection behavior remain synthetic examples.
+Results: data/accounting-master/company-information-20261023/result.md and
+data/accounting-master/company-policy-20261023/result.md.
+
+Next: execute docs/plans/accounting-company-text-20261023.md, then integrate the
+coherent exchange/information/policy/text design into a protected manuscript
+successor. Current Version 3.52 stays 411 pages, not_ready and unchanged.
+S1–S5 remain partial; S6 held; S7 deferred. No whole requirement closes.
+Older sections below are historical checkpoints.
+
+
+## 23 October 2026 — partial-path exchange completed
+
+CompanyPathExchangeDraft/1 passes 119 deterministic checks: five paths, five
+revision relations and 13 available annual outcomes. Interrupted years retain
+known opening balances but provide no closing memory or completed annual totals.
+All 42 preceding admission records remain unchanged. A fully rehashed forged
+report passes content binding and fails trusted semantic replay; the verification
+level is explicit. Evidence: data/accounting-master/company-path-exchanges-20261023/result.md.
+
+Next: execute docs/plans/accounting-company-information-20261023.md, then explicit
+policy authoring. This extension awaits manuscript integration. Version 3.52
+remains 411 pages, not_ready, with unchanged PDF hash. S1–S5 remain partial; S6
+is held and S7 predictive evaluation remains deferred. No whole requirement
+closes. Prior sections are historical checkpoints.
+
+
+## 23 October2026 — current candidate Version3.52
+
+Current manuscript:Version3.52,411 pages,not_ready.
+PDF:docs/design/proposal/manuscript-company-paths-20261023/accounting-product-proposal.pdf
+SHA256:c41cf55ce23c7ede15799080a9193bdc398bef92683038b930d7cebf7324dea8.
+Version3.51 and all earlier protected candidates remain unchanged. All147
+predecessor sources,305 labels,86 references,729 citations and219 exact displays
+are retained. Four files change; one section is added. LuaLaTeX builds cleanly.
+Actual bounded visual review covers1,98–99,108–109,375–379. Full411-page successor
+reading and independent/domain/human acceptance remain pending. Result:
+data/accounting-master/company-path-integration-20261023/result.md.
+
+The candidate now integrates112 annual-path,174 repeated-operation and164
+joined-path checks, including63 operations across three years,14 claim IDs,
+revisions and incomplete-year blocking. A42-record/35-blob evidence packet adds
+14 local method bindings and three conditional closings/reports;65 admission
+checks and trusted local replay pass. Full source closure is synthetic-only.
+Pre2025 information fails because seven source dates are2 March2025. Passing a
+later source cutoff still does not admit future assumption/decision information.
+No real historical, accounting-compliance or predictive claim follows.
+
+Next ready S3/S4 work:portable partial-path and revision exchanges; then explicit
+assumption-information and policy authoring, keeping fixed settlements distinct
+from regenerated policies. General text frontend, broader methods and sector
+obligations remain. S1 continues only with new consequential primary-source
+leads: Gentry derivation/version, Francis/Rowell technical text and matched ACTUS
+release. S1–S5 remain partial; S6 held; S7 deferred. No whole row closes.
+
+All recorded semantic diagnostics replay. Preserve original failure witnesses
+and manifests. Do not rerun one-time build/copy/control writers or launch the
+historical controller. No commit or global continuation veto. Earlier sections
+below are historical checkpoints, not the current candidate or next action.
+
+
+## 23 October2026 — repeated operations joined across years
+
+CompanyOperationsDraft/1 passes174 checks against18 original annual paths and
+four proportional split examples. CompanyOperationPathDraft/1 then passes164
+checks for63 operations across2025–2027,14 retained claim IDs, all29 annual
+report lines, branch revisions and incomplete-year blocking. Both complete
+recorded results reproduce in read-only replay. Result:
+data/accounting-master/company-operation-path-20261023/result.md.
+
+The source remains a pinned synthetic historical opening. The internal
+continuation adapter and documentary method IDs are not yet admitted portable
+source/method/view records. That is the next S3/S4 work. Different explicit
+settlement rules explain different price-revision cash effects; no collection
+policy is inferred. Existing sector and full-language obligations remain.
+
+The earlier annual path now passes112 checks after a tuple/list diagnostic
+serialization repair; original111-check evidence is preserved. The repeated-
+operation draft retains its initial incorrect half-receipt failure expectation
+and the corrected half-receipt success/40%-receipt failure witnesses. These are
+local repairs, not research-direction rejections.
+
+All new design increments remain outside manuscript3.51:408 pages,not_ready,
+unchanged SHA. S1–S5 remain partial; S6 held; S7 deferred. No whole row closes,
+no controller campaign or commit, and no global continuation veto.
+
+
+## 23 October 2026 — consecutive company years checked
+
+CompanyPathInputsDraft/1 adds112 passing deterministic checks to the existing
+company-input evidence. Three authored annual periods retain claims, inventory,
+asset service memory and conditional predecessor identities. All29 second-year
+report lines match independent arithmetic. Revisions replay from the historical
+root: changing2026 preserves2025; changing2025 recomputes the suffix. Failed or
+unknown years do not open later periods. Result:
+data/accounting-master/company-path-20261023/result.md.
+
+The internal annual opening adapter is not a fully admitted portable exchange.
+There is still one operation of each kind per year. Next: repeated within-year
+operations, then source/method admission and information views using the same
+company path. Broader group/bank/insurance obligations remain. This increment
+is not yet in the manuscript: Version3.51 remains408 pages, not_ready, with
+unchanged PDF/source hashes. S1–S5 remain partial; S6 held; S7 deferred.
+
+S1 continuation visually checked Gentry's PDF pp.45–52: references, blank
+reverse/endpapers and cover, without an appendix in those pages. Exact Francis
+DOI metadata and the failed candidate response are archived. The derivation,
+version and Francis technical-method gaps remain; no library adoption follows.
+No whole requirement closes, no global continuation veto fired, and no commit
+or historical-controller campaign was made.
+
+
+## 23 October 2026 — active priority: simulator survey and design
+
+The simulator/financial-statement DSL design remains ahead of predictive
+assessment. Execute S1–S7 in docs/plans/accounting-master-program.md. S1–S5
+are partial, S6 is held pending governing design, and S7/E3 is deferred.
+
+Current manuscript: **Version 3.51, 408 pages, not_ready** at
+docs/design/proposal/manuscript-company-inputs-20261023/accounting-product-proposal.pdf.
+SHA256: 6e6d495e6f7964bcce43b3c6282c88e43bcb68047df6f32f4a5c349b98d6c5e6.
+Protected Versions3.48/3.49/3.50 remain intact. The latest source/build review
+preserves all146 predecessor files,304 labels,84 references,729 citations and
+219 exact displays. Changed rendered passages were reviewed; full successor
+reading and independent/domain/human acceptance remain pending. Result:
+data/accounting-master/company-integration-20261023/result.md.
+
+### Completed increments and their limits
+
+- S1 comparison retains recovered Caiani primary text/selected code and
+  Gentry's1974 antecedent. Gentry version/derivation and Francis/Rowell technical
+  access remain unresolved. No completed-survey or library-adoption claim.
+- Timing evidence:63 exact accounting checks and21 schedule checks. An
+  hour-shifted fiscal-boundary defect was repaired with prior evidence retained.
+  Supplier-before-collection creates an85.4 shortfall despite unchanged annual
+  totals. SettlementDecisionDraft/1 adds28 cases and74 claim/facility checks.
+- Full funded year:18 conditional paths and192 checks connect claims, draw,
+  interest, principal, tax and linked statements. FundedYearInputsDraft/1 has
+  24 authoring checks and113 execution checks; its annual projection import is
+  an explicit limitation of that earlier subset.
+- New CompanyYearInputsDraft/1 derives operating journals from authored
+  quantities, prices, cohort memory and terms plus the historical opening.
+  It imports no projected journals.254 checks cover18 exact paths, all29
+  report lines, gross financing/equity/cash bridges and23 adverse/mutation
+  witnesses. Removing all Projection records leaves computation unchanged.
+  Failed paths retain a dated prefix while annual outputs stay unresolved.
+  Result: data/accounting-master/company-inputs-20261023/result.md.
+- ACTUS comparison now pins19 dictionary/mirror blobs and passes46 identity
+  and formula-deduction checks. The mirror is1.0-beta, distinct from the
+  service's requested1.1.0; the dictionary identifies1.4. Actual event-order,
+  day-count and maturity discrepancies prevent substitution. The local46-hour
+  interval gives one complete day under the mirror formula but two calendar
+  dates under the authored loan convention. Exact terms/versions blobs fail
+  JSON parsing. No downloaded code was run. Source note:
+  docs/design/research/actus-core-correspondence-20261023.md.
+
+The latest additive coverage delta retains53 obligations,6 interactions and
+46 operation IDs with zero whole-row closures:
+data/accounting-master/company-integration-20261023/coverage-delta.json.
+
+### Next substantive work
+
+Continue the full S3 coverage residuals: connect repeated operations and
+multi-period/revision state to portable source/method admission and information
+views; generalize reporting only with explicit timing/method support. Preserve
+existing group, bank and insurance method obligations. Do not add an unrelated
+small example and call the whole language complete. Read the company-input
+plan and architecture note before extending its single-cycle restrictions.
+
+Independent S1 work remains Gentry's derivation/version, Francis/Rowell's method
+and a matched ACTUS spec/dictionary/core release. Do not substitute the inspected
+mirror or repeat completed failed routes. Full implementability/manuscript review
+follows the remaining design work. No global continuation veto has fired.
+
+MC13–18/23–26/28–35 receive bounded evidence; no whole requirement closes.
+No product runtime, empirical forecast, paid review, outreach, publication or
+new commit was produced. Historical controller fields below remain historical.
+
+## Retained E3 work — deferred behind simulator survey and design
+
+Current E3 question: expected future OCF predictive accuracy for the same nine
+named companies, next complete fiscal year with a pre-start cutoff, equal 1/9
+company contributions, research comparison, historical development followed by
+prospective confirmation. The primary score is paired asset-scaled CRPS against
+a locked fixed interpretation. The future joint law and starting conditioning
+set remain unspecified.
+
+The interrupted consistency repair is complete at
+`data/accounting-master/r05-consistency-recovery-20261023/result.md`.
+Read-only replay reproduces seven weight checks, five invalid-input refusals,
+nine explicit-filtration identities, and the retained archive byte checks.
+November's archive payload matches its CDX digest but is incomplete; December's
+358-page payload is a complete exact byte match. Historical snapshots pass;
+old stored outputs and changed-file completion hashes are historical.
+Unknown historical drafting runtimes remain unknown. No infrastructure or
+permission blocker has been established.
+
+The changing-family diagnostic is complete at
+`data/accounting-master/r05-changing-family-weights-20261023/result.md`.
+Twelve exact checks and four invalid-input refusals reproduce. Adding distinct
+histories with the same OCF law changes ordinary per-member mixture mass.
+Feature-level allocation repairs this case but depends on the feature partition.
+Grouping identical target laws is another candidate; richer joint histories
+remain intact. The inverse-loss score rule does not optimize mixture CRPS.
+No fitting or inference method is adopted.
+
+When E3 resumes: specify a direct mixture-CRPS fitting procedure with stable target-law
+features and a matched locked selector; assess it against the cardinality
+counterexample before fitting company data. Resolve future origins, time
+weights, service/fallback, Q/starting information, inference, confidence and
+multiplicity, horizon and resources before empirical confirmation. Historical
+timing eligibility remains a separate unresolved dependency. These gaps block
+empirical claims, not independent design/source work. Do not repeat completed
+archive acquisition or synthetic recording stages.
+
+MC04/05/08/10/12/14/18/26/33–35 preparation only. All 192 historical admissions
+remain false. The retained E3 record used Version 3.48 (401 pages); the current
+Version 3.51 remains `not_ready`. 53 obligations, six
+interactions and 46 operations remain, with zero whole-row closures. No
+empirical forecast, ranking, runtime/controller campaign, commit or acceptance
+was produced. Continue internal design/source work; no global continuation veto
+has fired.
+
+## 22 October 2026 — Version 3.48 theta prerequisite repaired
+
+Historical candidate: **Version 3.48, 401 pages; not_ready**.
+Current successor: Version 3.50, recorded at the top of this checkpoint.
+PDF: docs/design/proposal/manuscript-readability-20261022-theta/accounting-product-proposal.pdf
+SHA256: 6a2acd8e3e01e6127eb89112a168216ee12b3244b3e56c814f1d2d1c56b90f0e
+
+R347-D01 is locally repaired: theta is defined before the policy and event
+generator as the declared behavioural/event-generation parameters, with values
+specified by the chosen history, scenario and model assumptions. No calibration,
+parameter values or probability model was added. The title and one passage are
+the only source changes. All 144 source files, 219 exact displays and 727
+citation occurrences remain. Labels and references are unchanged. One clean
+build produced no critical warnings or out-of-page text. Extracted text and
+word positions change only on pages 1, 88 and 89; six actual rendered pages
+(1, 2, 87–90) received local inspection.
+
+The frozen repair and additive R08 assessments are at
+data/accounting-master/readability-repair-20261022-theta/.
+Safe replay: verify.py without flags. Never rerun completed preparation,
+build, render, recording or control-refresh actions. All 9,211 predecessor
+bindings and 36 tracked dirty paths were preserved; HEAD/index are unchanged.
+
+Version 3.47's full diagnosis remains immutable at
+data/accounting-master/readability-repair-20261022/regression/: all 401 pages,
+676 nodes, 98 ordered segments, 17 chapter/appendix syntheses, eight cumulative
+prefixes and the document synthesis. Its sole confirmed defect is the one
+repaired here. This predecessor reading supplies no full Version 3.48 reading
+credit. Full successor chapter/cumulative/document author regression is recorded
+below; independent acceptance remains pending.
+Independent reader, implementability, domain and human acceptance remain
+pending. All 53 obligations, six interactions and 46 operations remain;
+zero whole rows close, and no global continuation veto has fired.
+
+The bounded EPS guidance inquiry is complete at
+data/accounting-master/r03-eps-guidance-20261022/: three retained requests,
+no usable technical text. Search responses were unusable and the public article
+returned403. No absence-of-literature conclusion or new selection method
+follows. Safe replay: verify.py without flags; do not repeat these routes.
+
+The exact EPS additivity boundary is complete at
+data/accounting-master/r03-eps-additivity-boundary-20261022/: a two-direction
+proof, 21 exact fixtures, 10 rejected outside-domain controls and a predeclared
+4,320-model diagnostic pass. The four conditions include the single-positive-
+saving exception and both threshold equalities. Pair checks alone can miss a
+triple interaction. P80/P90 and both strict three-series witnesses remain
+nonadditive; general final selection remains not_evaluated. One draft example
+expectation failed and was repaired transparently. No runtime, source authority
+or whole-row closure follows. Safe replay: verify.py without flags.
+
+Full Version 3.48 author diagnosis is complete: all 401 physical pages,
+676 nodes and 144 source files are bound in 127 ordered reading segments,
+17 chapter/appendix syntheses, eight cumulative prefixes and a document synthesis.
+No confirmed new manuscript defect was found. The theta prerequisite repair
+passes the complete author regression; no further manuscript revision is
+justified by this diagnosis. No global continuation veto has fired.
+Independent reader, implementability, domain and human acceptance remain pending.
+
+The bounded official Calculations 1.1 inquiry is complete at
+data/accounting-master/r06-calc11-conformance-source-20261022/: three public
+documents and 18 anchors preserve a members-only suite listing (no suite was
+requested or read). The complete 2022 requirements support same-context
+alignment, without correcting Recommendation 5.1. Their most-precise duplicate
+instruction differs from the final interval-intersection rule; exact source
+examples expose the difference. Section 5.4 remains unresolved. The title/URL
+date25May2022 differs from the indexes'22May. No policy or manuscript changes.
+Read-only replay: verify.py without flags. No whole row closes.
+
+The bounded Calculations 2.0 requirements inquiry is complete at
+data/accounting-master/r06-calc20-requirements-20261022/: three official
+documents, 20 actually viewed examples, 36 anchors and ten prerequisite
+mappings. The 2019 text proposes dimensional/period relations, completeness
+sections and inferred subtotals; it supplies no adopted algorithm or economic-
+history identification. Its early duplicate rule differs from final 1.1.
+Underlying example filings remain unverified. No policy or manuscript change
+and no whole-row closure. Read-only replay: verify.py without flags.
+
+The exact 2018 duplicate-facts guidance inquiry is complete at
+data/accounting-master/r06-duplicates-guidance-20261023/: one official note,
+one actually viewed diagram, 32 anchors and 12 definition comparisons.
+Closed intervals require the same-accuracy safeguard. Historical multi-language
+duplicates differ from OIM alternatives; highest-accuracy reduction differs
+from final1.1 interval intersection. Sections5.1/5.4 remain unresolved;
+processor claims remain attributed. No policy, manuscript or whole-row change.
+Read-only replay: verify.py without flags; completed one-time stages are frozen.
+
+The Inline duplicate-processing comparison is complete at
+data/accounting-master/r06-inline-duplicates-20261023/: six official documents,
+42 anchors, 14 obligation rows and nine selected edition comparisons. Optional
+item reduction remains subject to every input mapping obligation; the note's
+complete-duplicate class is insufficient as a merging predicate. The added
+language paragraph is a non-normative clarification; Primer tension remains.
+No schema, suite, processor, policy or manuscript promotion follows. No whole
+row closes. Read-only replay: verify.py without flags; one-time stages frozen.
+
+The Formula duplicate-binding inquiry is complete at
+data/accounting-master/r06-formula-binding-20261023/: thirteen documents,
+44 anchors, 18 claim/rule rows and five symbolic cases. Four possible singleton
+data sets follow under explicit assumptions; Validation's MAY does not establish
+mandatory processor calls. Conditional sequence/matches, filters, preconditions
+and identity rules remain distinct. No installed, policy, manuscript or whole-row
+promotion follows. Read-only replay: verify.py without flags; one-time stages
+are frozen.
+
+The native occurrence/consumer audit is complete at
+data/accounting-master/r06-native-duplicate-contract-20261023/: twelve boundary
+comparisons, nineteen local anchors, twenty-three reused source anchors and
+seven conditional examples. Both retained packets preserve every fact's own
+occurrence/context links; the full file retains 1,127 facts and all 69 repeated
+source-signature groups. Eight scoped corruptions are rejected. An additive
+proposed note clarifies that assertion aliases preserve source occurrences
+afterward; the older R4 “until” wording did not establish an actual deletion.
+Formula stays disabled in the selected importer. No manuscript, schema or
+runtime change and no whole-row closure follows. Read-only replay: verify.py
+without flags; completed one-time stages are frozen.
+
+The zero-weight CGU limiting argument is complete at
+data/accounting-master/r03-zero-weight-limit-20261023/: the positive-weight
+capped allocator can approach every cap-and-total feasible vector as starting
+balances approach zero, under fixed ceilings and final total. With at least
+two eligible assets and a strict interior total there is no unique continuous
+extension. Fourteen rational fixtures, six constructive path points and eight
+outside-domain refusals pass. This rejects a limit-only fallback; accounting
+authority at zero remains unresolved. No manuscript/default/runtime change
+or whole-row closure follows. Read-only replay: verify.py without flags.
+
+The user has now selected E3 expected performance at future dates for the same
+named companies (repeated_origins). This direction supersedes the earlier
+unanswered target question. The predecessor record did not choose the forecast
+interval or issuer weights; the successor protocol records both new answers.
+Origin law, improvement margin, confidence, sample size and inference remain
+unselected, and no empirical execution is authorised.
+
+The E3 repeated-origins decision is recorded at
+data/accounting-master/r05-repeated-origins-20261023/: the user's exact answer,
+the nine named companies, unchanged E3 scores/comparators and eleven ordered
+prerequisites. Fixed company identities retain future common and serial shocks;
+two complete 64-world examples and an eight-world overlap example check the
+conditional covariance derivation. They provide no inference procedure or
+sample-size estimate. Forecast-period and company-weight objectives were pending
+in that predecessor; the successor protocol records the answers. All192 vintage
+admissions stay false. Read-only replay:
+verify.py without flags; completed one-time stages are frozen.
+
+The E3 forecast-accountability proposal is complete at
+data/accounting-master/r05-forecast-accountability-20261023/: separate timing,
+exposure, attempt, outcome and scale statuses; first-release/retry rules; and
+exact original-weight denominators. Twelve time cases, four invalid-bound
+refusals, six fictional cells, ten corruptions and two aggregation boundaries
+pass. A score on a late forecast remains retrospective; an observed contribution
+cannot replace a full-service effect. No weights, fallback or empirical design
+are selected. Safe replay: verify.py without flags; one-time stages are frozen.
+
+The bounded conditional predictive-ability inquiry is complete at
+data/accounting-master/r05-conditional-predictive-source-20261023/: the full
+38-page April2003 Giacomini–White draft, both appendices, six actual page images,
+25 anchors and six research ledgers. Its conditional-equality test and finite
+estimation-window assumptions do not directly supply E3's one-sided margin
+bound. Three literal draft details and unverified2006-edition equality remain.
+Eight public requests are retained; publisher access failed. No inference,
+empirical, manuscript or whole-row promotion. Read-only replay: verify.py.
+
+The UCL edition follow-up is complete as bounded access evidence at
+data/accounting-master/r05-conditional-predictive-edition-20261023/: one
+public institutional request returned403 challenge HTML and no technical text.
+No follow-up PDF links were disclosed. The2003/2006 comparison remains
+unverified; do not repeat this route without a distinct new lead. Read-only
+replay: verify.py without flags; one-time stages are frozen.
+
+The E3 full-year/equal-company protocol is recorded at
+data/accounting-master/r05-fiscal-year-protocol-20261023/: the user's exact
+answers select the next complete fiscal year with a named information cutoff
+strictly before its start, and equal contribution from each of the nine named
+companies after the same as-of asset scaling. Retained 2025 reports supply
+calendar anchors: Apple uses a 52/53-week year ending on September's last
+Saturday; the other eight report calendar years. These anchors do not admit
+future calendars, accounting mappings or exact historical byte availability.
+The protocol preserves full denominator weights, asynchronous intervals,
+first-release outcomes, pre-start forecast locks and target-specific refit
+requirements. Ten invalid-input refusals and deterministic calendar/weight
+checks pass; no forecast, probability law, inference or runtime is admitted.
+Future origin law, within-company time weights, source-vintage admissions,
+financial scope, refit/service policy, margin, confidence, inference and
+sample design remain unresolved. The predecessor repeated-origins choice and
+all 192 false vintage admissions remain unchanged. Read-only replay:
+verify.py without flags; completed one-time stages are frozen.
+
+The source-timing feasibility matrix is complete at
+data/accounting-master/r05-source-timing-feasibility-20261023/: 27 historical
+input candidates (older annual, latest interim and immediately preceding
+annual for each issuer). Seven date-role events precede the hypothetical
+FY2026 cutoff and five follow it; fifteen reports have no retained date role.
+None has admitted selected-byte availability or prospective forecast status.
+The conditional calendar and conservative date bounds are explicit proposals.
+The unit also reconciles four predecessor snapshots edited after completion,
+preserving reconstructed initial and observed corrected versions with exact
+hashes; a passing content replay had not established immutable history.
+
+The E3 OCF measurement and target repair is complete at
+data/accounting-master/r05-ocf-measurement-20261023/: nine FY2025 reported
+consolidated OCF mapping candidates, 39 LF source anchors and one actually
+viewed source page. Parent/subgroup alternatives, signs, units and reporting
+basis are explicit. These are not first-release outcomes or independent gold.
+IFRS18/IAS7 disclosures create a dated transition dependency for 2027 onward.
+
+The successor preserves and corrects the completed predictive-accuracy unit:
+Delta is expected future loss difference; D is the finite realised estimator;
+actual named issuers replace fixture aliases; the old seven-refusal count was
+wrong (five were executed). Ten exact cases and twelve refusals now cover
+finite-law CRPS, unit scaling, unequal-origin equal-company aggregation,
+unweighted sets, invalid weights, duplicate origins and undefined zero-weight
+cells. These checks establish no forecast ranking or inference.
+
+The release-aware temporal/refit inquiry is complete at
+data/accounting-master/r05-temporal-refit-20261023/: the 72 annual reports
+supply eight labels per company. At a strict pre-start cutoff the adjacent
+preceding full year is unfinished. Six optimistic same-issuer sensitivity
+designs leave zero to six outer years per company; three training labels and
+two inner origins leave only 2025, and five plus two leave none. Sixteen exact
+cases and six refusals pass. The proposed start-year cohort convention exposes
+Apple's offset and an additional endpoint loss; it is not a selected design.
+
+The annual fitting proposal retains timing-aware nested validation, matched
+baseline information/resources, fixed original weights and explicit failures.
+No window, future law, confidence, sample adequacy or inference is admitted.
+
+The cash-flow transition technical inquiry is complete at
+data/accounting-master/r05-cashflow-transition-20261023/: two official AASB
+sources, 12 anchors and two actually viewed redline pages. New107.33A/34A-D
+can change reported OCF through interest/dividend classification while total
+cash stays fixed; a changed indirect-reconciliation starting point alone
+establishes no net-OCF change. Specified-business and group-level assessments
+are preserved. Five exact synthetic examples pass. The Australian technical
+text and attributed IFRS correspondence establish no EU/UK or issuer admission.
+
+The IFRS18 adoption inquiry is complete at
+data/accounting-master/r05-ifrs18-adoption-20261023/: twelve requests,
+16 official anchors, eight issuer anchors and two viewed redline pages.
+The UK decision adopts IFRS18 and IAS7 amendments on10December2025, with
+publication12December and required application from1January2027, earlier
+permitted. Selected adopted technical paragraphs are inspected directly.
+EFRAG reports EU endorsement13February2026/publication16February; the actual
+EU regulation remains unread after an empty EUR-Lex search. No failed route
+was repeated. Henkel/HSBC/Munich Re current policies do not determine all
+future elections or transition effects.
+
+The total-assets scale inquiry is complete at
+data/accounting-master/r05-asset-scale-candidates-20261023/: nine FY2025
+annual consolidated totals,24 anchors and one actually viewed source page.
+Parent/group, reporting date, units and comparative revisions are distinct.
+Seven exact cases check unit/currency cancellation and supplied-date selection.
+The initial cross-company currency prerequisite was wrong and repaired before
+calculation: compatible loss/asset ratios are dimensionless. Future reporting-
+currency changes still require an explicit transformation. No actual cutoff
+scale or historical-byte admission follows.
+
+The interim asset inquiry is complete at
+data/accounting-master/r05-interim-assets-20261023/: nine consolidated totals,
+19 anchors, four existing dated roles and one actually viewed balance sheet.
+Henkel's third-period column, Midea's group/parent columns and Munich Re's
+adjusted comparative are preserved. These are candidate mappings only; later
+public interim reports outside the retained corpus remain possible.
+
+The EU source inquiry is complete at
+data/accounting-master/r05-eu-ifrs18-20261023/: nine distinct requests recovered
+the official105-page regulation through the Publications Office metadata/item
+chain. Articles1-3, IFRS18 B30-B41/C1-C6 and IAS7 amendments were inspected;
+23 source anchors retain the selected text. Publication16February2026,
+entry8March2026 and required first-year start1January2027 are distinct.
+IAS7.34B-D still requires issuer facts and elections. Full-annex equivalence
+and issuer cash-flow effects are not established.
+
+The evidence-route and current-possession unit is complete at
+data/accounting-master/r05-prospective-inputs-20261023/: the user's exact fifth
+choice selects historical development then prospective confirmation. All 192
+coverage-selected originals matched their hashes during a recorded 23 October
+2026 UTC observation. This proves local possession within the stated clock
+assumption, not earlier public release. Historical admission remains false;
+prospective information policy and forecast issuance are also unadmitted.
+The stage proposal distinguishes exposed development, historical simulation,
+prospective locks, sequential refitting and later uncertainty analysis.
+
+The matched-comparison inquiry is complete at
+data/accounting-master/r05-matched-comparison-20261023/: a conditional CDF
+derivation, twelve exact cases, twenty independent score calculations and four
+invalid-weight refusals. The mixture's advantage over averaged component scores
+does not order it against the locked fixed law. Conserved mass survives duplicate
+encodings; equal encoding weights change the law. The proposal separates strict
+shared-state ablation from comparison of separately fitted procedures.
+
+Next E3 dependency: investigate distinct exact-version archival leads while
+developing justified history weights, a fixed selector and matched fitting.
+Then specify future Q/grid, time weights, service/fallback, inference,
+confidence/multiplicity and sample/resources. No actual forecast law or empirical
+ranking is admitted. Safe replay:
+data/accounting-master/r05-matched-comparison-20261023/verify.py. Completed
+records remain immutable; no global continuation veto or pending user question.
+
+Completed review evidence:
+data/accounting-master/readability-repair-20261022-theta/regression/.
+Safe replay: complete_diagnosis.py without arguments. Never rerun completed
+initialization, rendering, segment/synthesis recording, frontier refresh or
+completion. Frozen candidate and predecessor evidence are preserved. All
+53 obligations, six interactions and 46 operations remain, zero whole rows
+close, and not_ready persists. This author diagnosis grants no source authority,
+runtime, empirical, independent-reader or human acceptance.
+
+General hedge
+attribution, zero-weight CGU reversal, insurance91/B135 interaction and
+build/validation correspondence remain open. The reserve-originals inquiry is
+bounded access evidence only; do not repeat rejected routes without a new lead.
+
+E3 selects future predictive accuracy for the nine named companies,
+next full fiscal years and equal company weights. A reported-basis OCF mapping
+is proposed, with target/scale/source admissions and reporting transitions
+still open. Future law, temporal grouping, refit/service and inference remain
+to specify. Zero is the proposed directional research boundary; material
+economic improvement is a separate conditional claim. All 192 historical-byte
+admissions remain false. These gaps block dependent empirical work while
+internal preparation continues. Runtime/controller, installations, empirical
+runs, acquired-code execution, commits, outreach, publication and fees remain
+held. Earlier dated records below retain their historical scope.
+
+## 20 October 2026 — current source frontier
+
+R04 PubTabNet/EDD/TEDS inquiry is complete at
+data/accounting-master/r04-pubtabnet-20261019/: six official acquisitions,
+11-page arXiv v5 technical read, pinned official metric source, 24 passage
+anchors, four exact illustrative witnesses and seven rejected controls. The
+paper's split population wording and metric definition remain distinct from
+static code observations. A perfect table-only score can coexist with a wrong
+external unit; no financial correctness or model ranking is admitted. Current
+3.44 extraction qualifications remain supported; no manuscript change follows.
+Six additive literature ledgers and a separate R08 supplement preserve all
+53 obligations, six interactions and 46 operations; zero whole-row closures.
+Safe replay: verify.py without flags; never rerun completed one-time stages.
+
+The successor identity repair is complete at
+ data/accounting-master/r04-edd-edition-20261019/: both recalled routes verified,
+six acquisitions, four pinned EDD code files, seven scoped reading spans,
+27 source anchors and21 AST default checks. Model code is available; the old
+PubTabNet nonrelease statement cannot establish current global absence. The
+17-page published main paper retains the questioned split/metric wording.
+Selected source reveals state-dependent resume, recipe/default differences,
+forced decoding termination and zero-score/error conflation. No model ran.
+
+The dependency/supplement successor is complete at
+data/accounting-master/r04-edd-dependencies-20261019/: six acquisitions,
+25 anchors,92 assertions and six rejected altered controls. Actual preparation
+and loading both use .hdf5; README .h5 is documentary drift. CustomConfig AST
+agrees with the prior metric, while wrappers differ. Supplement C's five
+thresholds differ from the pinned eight-threshold default; actual published
+settings remain unknown. Table S2 measures metric evaluation, not inference;
+Table S3 scores remain descriptive. No upstream code executed. Six additive
+ledgers and a separate R08 supplement close no row.
+
+The POTATR forward lead is now technically read at
+data/accounting-master/r04-potatr-20261019/: verified arXiv2606.09788v1,
+16 pages including appendices, four rendered pages, five acquisitions,
+34 anchors,108 checks,nine exact descriptive arithmetic relations and31
+references triaged. Page-level graph prediction still uses external PDF/OCR
+text; trained/zero-shot, domain, timing and continuation-model differences remain
+explicit. Publisher identity matches, but its PDF route returns HTML and its
+actual author-code link404. No global code-absence or superiority claim follows.
+Six additive ledgers/R08 supplement close no row; no manuscript change.
+
+The PubTables-v2 dependency inquiry is complete at
+data/accounting-master/r04-pubtablesv2-20261019/: verified v3,28 pages,
+including eight actually rendered pages omitted by text extraction; six
+acquisitions,two pinned complete source-file reads,45 anchors,134 checks and36
+reference dispositions. Exact fictional grids distinguish summed normalised
+pair scores from the current raw-cell matching objective, and macro from
+cell-micro aggregation. Eight altered controls rejected. Expanded source reports
+continuation precision/failure counts; exact split IDs and failed-parse scoring
+remain unestablished. The two papers report different dots.ocr merging scores
+(0.6844/0.7495); cause unresolved. No manuscript change or whole-row closure.
+
+Completed 20 October: the bounded official dataset metadata inquiry at
+data/accounting-master/r04-pubtablesv2-metadata-20261019/ binds three acquisitions,
+19 anchors,62 assertions and seven rejected controls. The pinned card blob
+matches the tree; all48 file names match API siblings, with no pagination Link.
+Declared counts imply129,774 public cropped samples and424,253 public pages;
+archive memberships are unverified. The card announces evaluation scripts as
+forthcoming and differs from the paper on multi-page versus multi-part document
+selection. No actual data contradiction, split safety or experiment identity is
+established. The April revision predates paper v3. Six additive ledgers/R08
+supplement close no row; no manuscript change.
+
+The original GriTS inquiry is complete at
+data/accounting-master/r04-grits-theory-20261020/: arXiv2203.12555v3,15 pages,
+three rendered technical pages, six acquisitions, two pinned author files,
+32 anchors and78 assertions. Full metric/source reading and selected caller
+spans distinguish the exact objective from the reported heuristic lower bound.
+A2x2 witness gives lower0 versus exact/upper1/2; all256 binary2x2 pairs satisfy
+the bounds and the current shortcuts' finite checks. Original SequenceMatcher
+rewards differ from LCS: aaa/abaa gives4/7 versus6/7; argument-order and autojunk
+witnesses also differ. These are source-specific exact findings, not historical
+benchmark reconstruction. Four string witnesses, six rejected controls and18
+reference dispositions are bound. Six additive ledgers/R08 supplement close
+no row; manuscript3.44 remains unchanged.
+
+The GriTS geometry inquiry is complete at
+data/accounting-master/r04-grits-geometry-20261020/: six acquisitions,29 anchors,
+four verified source blobs,85 assertions,nine exact rectangle cases and six
+rejected controls. Original environment pins PyMuPDF1.21.1; its exact-tag API
+documentation defines include_rect as enclosure, not set union. Under that
+contract the original formula gives1/9 instead of IoU1/7 for offset squares,
+and1/9 instead of1/5 for valid relative-span boxes. Current helper/formula is
+set-union IoU on finite ordered boxes; nonfinite validation and installed
+correspondence remain open. Historical benchmark impact is unestablished.
+Six additive ledgers/R08 supplement preserve3.44/396/not_ready and close no row.
+
+The pylcs source inquiry is complete at
+data/accounting-master/r04-pylcs-source-20261020/: six acquisitions,three pinned
+source blobs,24 anchors,78 assertions,six exact string pairs,15 scalar-boundary
+strings and six rejected controls. Selected C++ source computes exact token LCS
+with quadratic DP storage; valid UTF8 groups correspond to codepoints, with no
+normalization or grapheme segmentation. PyPI/setup both say0.1.1, but release/
+head/installed equivalence is unverified. pybind11 conversion remains unchecked.
+Six additive ledgers/R08 supplement preserve3.44/396/not_ready and close no row.
+
+The version-bounded pybind11 inquiry is complete at
+data/accounting-master/r04-pybind-strings-20261020/: fourteen acquisitions,
+eight pinned blobs,26 anchors,205 assertions,fifteen input examples and eleven
+wrapper pairs. Both selected releases preserve NUL and accept raw bytes;
+2.11.1 additionally accepts bytearray. Their universal str-to-UTF8 statement
+is wrong for surrogate-containing strings under strict encoding. The wrapper's
+equality shortcut can bypass conversion; non-ASCII byte inputs mix token and
+byte length units outside its annotated str domain. Actual binary build identity
+and final dispatcher exception class remain unverified. Ten altered-claim
+controls rejected; six additive ledgers/R08 supplement close no row.
+Restart recovery preserved all2,534 protected files and36 tracked dirty paths.
+
+The metric input-contract inquiry is complete at
+data/accounting-master/r04-grits-input-contract-20261020/: twenty retained-source
+anchors,98 assertions,nine arithmetic cases,fourteen input fixtures and a bytes
+check. Ragged/parser checks exist; cell text,occupancy and numeric-range validity
+remain caller obligations. Four finite identical-box examples produce NaN/zero
+in the local float expression versus exact IoU1. An optional adapter contract
+preserves missingness,invalid-input statuses and per-sample commit semantics;
+normalization,budgets and deployment remain unselected. Ten altered controls
+rejected; zero downloads/upstream execution and zero whole-row closures.
+
+The assignment-bound inquiry is complete at
+data/accounting-master/r04-grits-assignment-bounds-20261020/: ten source anchors,
+63 assertions and18,496 exact synthetic collection pairs. No unique lower-
+assignment failure was found;668 cases permit an insufficient tied choice.
+A two-order binary-grid witness leaves the lower matrix unchanged but swaps
+which assignment needs upper4. A deterministic solver using only that matrix
+returns upper3 for one order although global exact score is4. The returned
+field therefore has fixed-assignment scope; a global upper requires separate
+upper-matrix optimization and numerical safeguards. Nine altered claims rejected;
+zero acquisitions/upstream execution and zero whole-row closures.
+
+The binary32 bound-direction inquiry is complete at
+data/accounting-master/r04-grits-float-bounds-20261020/: four source anchors,
+35 assertions,five one-cell examples and5,476 rational triples(357 distinct).
+Nearest binary32 rounds2/3 upward and7/10 downward,so mathematical lower/upper
+directions are not automatically preserved. Exact local outward enclosures
+are illustrative primitives,not whole-program certification. Native conversion,
+summation and solver behavior remain unexecuted; no historical impact claim.
+Eight altered controls rejected; zero acquisitions and zero whole-row closures.
+
+The E1/E3 profile reconciliation is complete at
+data/accounting-master/r05-extraction-profile-20261020/: ten source findings,
+sixteen input bindings,five anchors,60 assertions and17 rejected controls.
+Four fictional packages retain40 required units,17 exact context/value tuples,
+one wrong admitted assertion and22 unresolved; conditional table mean9/10 on
+two packages cannot override the wrong-fact veto or missing coverage. E1 table
+scores remain diagnostic; E3's three target alternatives and six null scientific
+choices remain unchanged. All192 byte-vintage admissions remain false. A user
+question about the E3 target is pending; no selection inferred from silence.
+No empirical/runtime admission or whole-row closure.
+
+The R06 numeric lexical inquiry is complete at
+data/accounting-master/r06-numeric-lexical-20261020/: six specification anchors,
+eleven input bindings,263 concept paths,13 type nodes and963 observations.
+All961 numeric candidates(958 decimal and three integer terminals) agree exactly
+with their frozen rational Values. Two empty nil facts remain distinct Nil
+records. 1,184 assertions,87 grammar fixtures and nine altered controls pass;
+no custom numeric value facet was omitted in the selected paths. Full schema/
+XBRL validation remains not_run; source Values,precision metadata and financial
+admission are unchanged. Six additive ledgers/R08 supplement close no row.
+Restart preservation passed for2,740 protected files and36 tracked dirty paths.
+
+The R06 Text interpretation inquiry is complete at
+data/accounting-master/r06-text-semantics-20261020/: nineteen specification
+anchors,thirteen input bindings,112 concepts and35 type nodes,including14
+custom restricted nodes. All157 Text occurrences support the separate bounded
+boolean/duration/calendar/string/facet interpretations. 529 assertions,71 base
+fixtures,32 pattern fixtures and13 altered controls pass. Original packet
+UnvalidatedText and portable Text records remain unchanged. Fifty-six text
+blocks retain XML/XHTML content duties; sixteen enumeration sets retain domain/
+set duties. Those are separate from lexical membership. Full validation remains
+not_run; the additive R08 supplement closes no row. The seven Unknown facts,
+963 numeric/nil observations and157 Text observations now each have distinct
+scoped documentary accounts; this is not a complete filing-validation result.
+
+The R06 enumeration-domain inquiry is complete at
+data/accounting-master/r06-enumeration-domain-20261020/: three primary documents,
+twelve anchors,49 bindings and182 assertions. All16 facts/20 member occurrences
+pass retained-domain,uniqueness and lexicographic-order rules. Four domains
+contain14/5/4/9 usable members;718 arcs across27 retained resources have the
+checked simple effective profile. Twelve member occurrences require issuer
+extension arcs. Six altered facts,five unsupported network profiles and12 set
+fixtures distinguish these rules. Original Text records/full-validation flags
+remain unchanged; installed DTS correspondence is unverified. R08 closes no row.
+The56 XML/XHTML text-block duties were advanced by the structural inquiry below;
+full content acceptance remains separate.
+
+The R06 text-block structure inquiry is complete at
+data/accounting-master/r06-textblock-fragments-20261020/: two primary documents,
+sixteen anchors,seventeen bindings and297 assertions. All56 retained fragments
+(941,509 UTF-8 bytes) pass the local XML profile:9,884 elements,12,518 attributes
+and53 nonempty tail slots agree between tree/event extraction paths. Seventeen
+fragments begin with plain text; f-684 preserves the actual nested ampersand
+example. Twenty-nine fixtures,four rejected source corruptions and six altered
+fragments distinguish decoding/order/namespace boundaries. Both paths use Expat;
+full XHTML/DTR/schema validity,display meaning and installed correspondence
+remain unadmitted. Source Values stay unchanged. R08 closes no row. The56
+structural duties now have finite evidence; broader content acceptance stays open.
+
+The R06 period-boundary inquiry is complete at
+data/accounting-master/r06-context-periods-20261020/:193 contexts,382 declarations
+and1,127 fact joins support the finite date-only interpretation and declared-form
+compatibility. All1,224 counted assertions pass,with30 fixtures,three source
+corruptions,four altered periods and1,127 opposite-periodType rejections.
+Actual c-114 has equal date tokens but a valid one-day implied interval;
+observed spans also include91/364/371 days. No timezone or financial-time mapping
+is inferred. Nine source anchors,seventeen bindings and a separate R08 supplement
+preserve the retained evidence. Full validation stays not_run;zero rows close.
+
+The R06 typed-domain date inquiry is complete at
+data/accounting-master/r06-typed-domain-dates-20261020/:four typed values and eight
+fact-context joins match one unique abstract axis and its nonabstract xs:date
+domain. All85 counted assertions pass,with18 fixtures and ten rejected declaration
+changes. Seven source anchors and37 bindings preserve exact subtrees and the
+27-resource search. Typed dates receive no XBRL period-end shift; member QName
+and financial-time Unknowns stay unchanged. Full schema/hypercube validity and
+installed DTS membership remain unverified. The additive R08 supplement closes
+no row;3.44/396/not_ready and53/6/46 remain.
+
+The R06 unit-measure inquiry is complete at
+data/accounting-master/r06-unit-measures-20261020/:seven exact unit structures
+and1,127 type/unit joins pass the scoped checks. All963 numeric/nil facts have
+units;164 nonnumeric facts have none. All1,207 counted assertions,23 fixtures
+and1,127 unit-presence mutation rejections pass. Monetary843,shares54,per-share30,
+pure33 and general-numeric3 remain distinct. Historical currency-code validity
+is explicitly pending for873 monetary/per-share facts;no shape pass promotes it.
+Eight anchors,nineteen bindings and a separate R08 supplement preserve all Values,
+product multiplicities and the unchanged3.44/396/not_ready;zero rows close.
+
+The R06 numeric-accuracy inquiry is complete at
+data/accounting-master/r06-numeric-accuracy-20261020/:all1,127 facts pass scoped
+accuracy-attribute rules. The961 non-nil numeric facts have decimals;two nil and
+164 nonnumeric facts have neither accuracy attribute. All945 finite values are
+grid-aligned;16 assertINF. Conditional ties-even inverses have514 closed and431
+open endpoint pairs. All1,210 counted assertions,17 metadata/13 rounding fixtures,
+1,127 metadata mutation rejections and6,678 exact rational/Decimal comparison
+points pass. Eight anchors/eleven bindings preserve source values;actual issuer
+rounding and financial intervals remain unadmitted. R08 closes no whole row.
+
+The R06 dimensional-network inquiry is complete at
+data/accounting-master/r06-dimensional-network-20261020/: 1,253 retained arcs,
+52 definition links, 156 base sets and 16 resolved targetRole transitions.
+All equivalence classes are singleton before attributes; priority suppresses
+no retained relationship. The 36 consecutive sets have no directed cycle;
+27 global defaults have no conflicting member. All 90 counted assertions and
+25 rule fixtures pass, with 13 source anchors and 34 input bindings.
+Full schema/installed DTS and whole-fact dimensional validity remain unadmitted.
+R08 closes no row; 3.44/396/not_ready and 53/6/46 remain.
+
+The R06 dimensional-fact inquiry is complete at
+data/accounting-master/r06-dimensional-facts-20261020/: 193 contexts, 231 explicit
+and four typed occurrences, and all 1,127 fact joins are bound. The 706 facts
+with applicable cubes pass scoped rules; 421 have no applicable retained cube
+and no context dimensions. All 965 cube joins are inherited. The 182 failed
+alternative roles are retained; every applicable fact has a passing role.
+Both closure readings agree for the actual all-segment contexts; a fixture
+preserves their general difference. All 86 counted assertions and 23 fixtures
+pass, with nine source anchors and 40 input bindings. Full schema/installed
+DTS and financial admission remain open. R08 closes no row; 3.44/396/not_ready
+and 53/6/46 remain.
+
+The R06 duplicate-fact inquiry is complete at
+data/accounting-master/r06-duplicate-facts-20261020/: 1,127 facts form 1,043
+identity classes; 70 repeated classes contain 154 numeric facts and 101 pairs.
+All 193 necessary context signatures and seven unit signatures are distinct.
+Two classes differ in reported values/decimals; each finer amount rounds to its
+coarser report under the defined conditional map. All occurrences remain.
+All 41 counted assertions and 13 fixtures pass, with five anchors/16 bindings.
+Generic V-Equals remains unimplemented; its retained wording tension is explicit.
+Duplicate items must remain excluded from XBRL2.1 calculation bindings.
+R08 closes no row; 3.44/396/not_ready and 53/6/46 remain.
+
+The R06 XBRL2.1 calculation inquiry is complete at
+data/accounting-master/r06-calculation-bindings-20261020/: all209 arcs across23
+roles yield274 summation/role candidates. All110 binding calculations agree
+under exact Fraction and Decimal arithmetic;164 candidates do not bind.
+Duplicate-contributor49, duplicate-summation89 and no-contributor58 reason
+counts overlap. All196 two-balance sign constraints pass;13 are unconstrained.
+All75 counted assertions and22 fixtures pass, with seven anchors/37 bindings.
+No duplicates are removed; no full schema/installed/financial admission follows.
+R08 closes no row;3.44/396/not_ready and53/6/46 remain.
+
+The R06 Calculations1.1 source inquiry is complete at
+data/accounting-master/r06-calculations11-source-20261020/: five official
+documents retained across seven attempts; normative-schema acquisition timed
+out. All122 counted assertions and37 exact examples pass, with19 anchors and31
+bindings. The5.4 duplicate-definition link mismatch is recorded; the OIM6.2
+contextual reading is explicit, not an authoritative correction. Sixteen OIM/
+source prerequisites remain separately tracked. No actual1.1 report calculation
+or rounding-policy selection occurs. R08 closes no row;3.44/396/not_ready remains.
+
+The R06 finite OIM mapping inquiry is complete at
+data/accounting-master/r06-oim-mapping-20261020/: all twelve xBRL-XML structural
+constraints are supported for this retained profile. All1,127 occurrences form
+the same1,043 classes/70 duplicate groups as the frozen XML partition. Language
+applies to112 text facts;33 pure-unit facts omit the unit dimension. No actual
+footnote or roleRef/arcroleRef cases occur. All2,347 assertions and39 fixtures
+pass, with24 anchors and41 bindings. Full value/schema/DTS/installed validity
+remains unadmitted; no actual1.1 calculation or rounding policy is selected.
+The additive R08 supplement closes no row;3.44/396/not_ready is preserved.
+
+The R06 alignment sensitivity inquiry is complete at
+data/accounting-master/r06-calc11-alignment-20261020/: §5.1 omits the converse
+in its dimension-alignment definition. Across5,085 exact pair comparisons,
+equality yields528 joins/172 potential bindings; contributor-subset yields
+801/204 and total-subset1,001/180. All746 strict-subset witnesses and the
+274-occurrence-to223-total-point bridge are preserved. All74 checks,13 fixtures,
+five anchors and43 bindings pass. No arithmetic or alignment policy is selected.
+R08 closes no row; this source ambiguity blocks only unqualified calculation.
+
+The R06 pinned processor inquiry is complete at
+data/accounting-master/r06-calc11-processor-20261020/: three exact-commit
+helper acquisitions,20 anchors,24 bindings,107 checks,14 authored witnesses
+and18 static checks. Binding uses exact keys with a context hash; this supports
+a contextual equality reading but supplies no normative correction. Inspected
+calculation branches overwrite same-precision disagreement and mishandle
+selected open-endpoint/weight/overlap cases; excess-digit guards/order have
+separate finite counterexamples. Upstream code and actual filing impact remain
+unexecuted. The manuscript's separate duplicate-module claim remains supported.
+R08 closes no row and3.44/396/not_ready stays unchanged.
+
+The R06 conditional interval inquiry is complete at
+data/accounting-master/r06-calc11-conditional-20261020/:223 total data-point
+candidates,172 interval-consistent bindings and51 nonbindings in each mode.
+All110 old bound passes remain. Independent Fraction/Decimal agrees for2,204
+point/binding cases;20 fixtures and50 wrapper checks pass. Truncation rejects
+one duplicate point(f-802/f-805/f-824),but it enters no bound calculation.
+Two bound totals have an unreported component edge; no zero is invented.
+Equal alignment and contextual OIM6.2 remain explicit hypotheses,not normative
+conformance or issuer policy. R08 closes no row;3.44/396/not_ready is unchanged.
+
+The R06 text-block policy inquiry is complete at
+data/accounting-master/r06-textblock-policy-20261020/: four acquisitions,
+101 checks, 30 static findings, ten witnesses, 14 duties, 15 anchors and
+22 bindings. The linked DTR document is CR2018; the pinned validator applies
+a filing profile. Its validation projection changes entity content, so the
+original disclosure must remain separate. Actual caller/value correspondence,
+three DTD entity sources and full XHTML validity remain open. No issuer
+invalidity or generic conformance follows. Recovery corrected a copied
+acquisition-manifest template with the original records archived. R08 closes
+no row; 3.44/396/not_ready remains unchanged.
+
+The R06 caller/entity inquiry is complete at
+data/accounting-master/r06-textblock-dependencies-20261020/: twelve HTTP200
+acquisitions,27 anchors,48 bindings,176 checks and17 exact Git blob identities.
+One concrete FERC caller is profile-guarded; base legacy profiles are commented.
+The six DTD/entity edges retain253 declarations. Equal checker/declaration
+counts conceal &there; versus &there4;,neither present literally in the frozen
+56 fragments. The source treats inline document sets differently in caller
+and DTD selector. Actual Apple profile/runtime impact remains unestablished.
+No expansion or upstream execution occurred; R08 closes no row and3.44 stays
+396 pages/not_ready. Safe replay is verify.py without flags only.
+
+The R06 currency-source inquiry is complete at
+data/accounting-master/r06-currency-history-20261020/: eight official sources,
+13 anchors,48 bindings and989 checks bind873 facts,143 contexts and ten period
+forms. Two EUR facts reach30August2016. Current lists lack inception fields;
+the historical EUR withdrawal is territory-specific. Amendment94 distinguishes
+1997 code issuance from1999 adoption;158 removesUSS,notUSD;160 changes country
+names. The index reaches179 while the page names180. All873 historical results
+remain partial; no currency invalidity,full validation or whole-row closure.
+Four rendered pages and complete five-page text reads support the source account.
+
+The Calculations1.1 publication-schema recovery is complete at
+data/accounting-master/r06-calc11-schema-recovery-20261020/: exact publication
+URL HTTP200/no redirect,1,343 bytes,three source anchors,13 bindings and36
+checks. The namespace-aware declaration/text profile matches AppendixA's
+explicitly non-normative copy; exact bytes differ. No imports/includes/redefines
+occur. DTS/runtime/report adoption and rounding policy remain unselected; the
+Section5.4 duplicate-reference qualification is separate and open. R08 closes
+no row;3.44/396/not_ready and53/6/46 remain.
+
+The insurance91/B135 source follow-up is complete at
+ data/accounting-master/r06-insurance-bc-20261020/: eight official acquisitions,
+21 anchors,37 bindings and three inspected rendered pages. The four-page AASB
+Basis is Australian-specific; its separate IASB-support route is geographically
+restricted. Complete12-page AP2C reading identifies a staff transition discussion,
+not a ruling on interrupted B135 runoff. Both original-origin readings remain
+unresolved. No new accounting treatment,manuscript change or whole-row closure.
+
+The pylcs0.1.1 source-release inquiry is complete at
+ data/accounting-master/r06-pylcs-release-20261020/: the exact11,274-byte PyPI
+archive matches its metadata digest;20 members/15 files,14 anchors and26
+bindings are checked. Three complete source files differ only byCRLF versusLF.
+Raw identity is false; equality after that declared conversion is established.
+Build requirements remain setuptools>=42 andpybind11>=2.2 with conditional
+compiler flags; exact binary/build identity stays open. No runtime or row closure.
+
+The bounded pybind11 dispatcher inquiry is complete at
+ data/accounting-master/r06-pybind-dispatch-20261020/: four acquired Git blobs,
+32 anchors and28 bindings trace the single pylcs signature to nominal
+TypeError after a rejected string conversion. The codec error is cleared;
+LCS is not called. Diagnostic construction is conditional: newer repr catches
+are absent in the older terminal branch. No native outcome or actual build
+version is inferred. Source/protection checks pass; no whole-row closure.
+
+The independent Tamer publisher-source inquiry is complete at
+ data/accounting-master/r04-tamer-recovery-20261020/: the exact retained DOI
+redirects to a publisher challenge. Both ordinary and trusted requests return
+HTTP403; two attempts at one route, fourteen bindings and six anchors.
+No technical source was recovered or read. Earlier Harvard access barriers
+remain preserved; SOURCE_BLOCKED supplies no technical claim or E3 choice.
+Six additive ledgers and an R08 supplement close no row.
+
+The R03/R04 reserve-risk inquiry is complete at
+ data/accounting-master/r04-reserve-risk-20261020/: sections5–7 and Appendices2–3,
+six inspected rendered pages,21 anchors,13 source bindings and50 exact assertions.
+The accepted manuscript reverses the empirical PH-weight subtraction; the local
+corrected weights agree with the survival integral. The variance bound concerns
+expected future SD,not a pathwise or quantile guarantee. A three-atom example
+specifies expected-shortfall boundary mass and separates CDF coverage from exact
+VaR equivalence. Five PH cases and45 reference dispositions are retained.
+A semantic line-anchor bug was repaired with the first attempt preserved.
+No final-journal/code/calibration claim follows; six ledgers/R08 close no row.
+
+The finite reserve-risk integration is now delivered in Version 3.45; see the
+current integration entry above. Next complete actual 3.45 regression, then
+continue the consequential original-source inquiries. Wang1995,
+Merz/Wüthrich2014,current authority and entity choices remain named dependencies;
+no new default or empirical admission follows.
+Do not repeat completed string/dispatcher/source-release inquiries or claim
+completeness from counts. Preserve original88(b)/89(b) OCI
+origins and the unsupported mixed-origin termination disposition. Historical
+currency intervals,full validation and
+actual installed/build identity remain open. Do not repeat completed finite checks. Keep the E3 direction
+question pending, with future origin law, regime, margin, confidence, sample
+size and inference unselected. Forecast interval and issuer weights are
+selected by the successor protocol. Do not repeat completed metric inquiries or hold all
+independent internal work for that answer. Exact historical experiment identity,dataset
+IDs/overlap,failure/merging protocol,nonfinite coordinate validation and installed
+native correspondence remain separate gaps. Only bounded metadata/documentary/
+code acquisition is admitted; no package install or upstream execution.
+EDD parallel/helper runtime and exact dependency semantics remain unadmitted.
+The content-only recipe disables the separately identified bbox optimizer
+argument defect. Preserve3.45,401 pages,**not_ready**,53/6/46 and zero whole-row
+closures. Safe replay for completed units: verify.py without flags. No
+runtime, installation, dataset/model acquisition, empirical run, commit, outreach,
+publication or fees are admitted. R06 unitless semantics and all four core
+schema-copy inquiries are complete within their recorded scopes; do not repeat.
+
+
+Historical 19 October 2026 candidate: **Version 3.44, 396 pages; not_ready**.
+Exact PDF/hash: [master checkpoint](accounting-master-checkpoint.md).
+
+The rebuilt candidate integrates the inspected BDO section 4.5 interpretation
+for an unchanged original equity-classified holder right. All 37 independent
+exact-arithmetic checks pass: 9,200 transfers to equity, remaining interest 400
+is not accelerated, and fully diluted EPS is preserved. Tax effects remain
+supplied facts. The separate company exchange still tests maturity conversion.
+Actual-company applicability and independent/domain/human acceptance remain open.
+Plan: `accounting-early-conversion-integration-20261018.md`.
+
+## Goal and phase ownership
+
+Deliver the detailed, readable, implementation-governing proposal for preserving
+company disclosures, reconstructing jointly compatible histories, and producing
+scenario-dependent journals and financial statements with traceable uncertainty.
+Whole-company, IFRS/US GAAP/ASBE, group, bank and insurance obligations remain.
+The eventual engine and empirical validation are separate later deliverables.
+Mission authority is `MISSION_CONTROL.md` and the unchanged MC01–MC35 register.
+
+P15 maintains requirements and gaps; P16 maintains architecture and shared
+contracts; P17 completes methods, sources, literature and reuse; P18 integrates
+and reviews the manuscript; P19 assesses the exact candidate. R01–R08 are
+repair workstreams within these phases. P00–P14 runtime work, the former
+controller, empirical campaigns and installations remain held. Do not restart
+them because a historical catalog or checkpoint suggests execution.
+
+## Current evidence
+
+Version 3.42's ordered author regression is complete: all 395 physical pages,
+659 structural judgments, 208 equation rubrics, 17 chapter/appendix judgments
+and ordered prefixes 2/4/6/8/10/12/14/16. D001–D007 are author-regressed.
+D008 was the only further confirmed defect: a forward pointer at the end of
+9.8 still described foundations that had moved earlier. The immutable 3.42
+record retains that open finding; a successful validator does not close it.
+Evidence: `data/accounting-master/readability-repair-20261017/regression/`.
+
+Version 3.43 repaired D008's directional clause. Its actual reading covered
+local 1/164/165 and ordered chapter 113–130; pending chapter/full completion is
+superseded by the substantive 3.44 integration, never marked passed. The frozen
+navigation-repair evidence and complete 3.42 regression remain unchanged.
+
+Version 3.44 passes 143 source bindings. Four files change; all 208 displays,
+716 earlier citation occurrences, earlier labels and qualifications remain.
+Two citations and a dedicated actual-conversion subsection label are added.
+References resolve; build warnings and text-bound diagnostics are empty. The
+appendix's visible 10.2.6 reference and PDF link now reach physical page 185.
+The first build and its old pointer are preserved under `attempt-01/`.
+Its former ordered-reading claim was retracted; those observations are local.
+Current local inspections cover 1/182/185/186/374/386. The separate chapter-10
+ordered author review is complete: physical 177–243, 67 pages in twelve bound
+segments. Appendix A is complete locally: physical 364–374, eleven pages in
+two bound segments. Their unit-specific syntheses found no new confirmed
+defect; `local-review-supplement.json` binds the ledgers and syntheses without
+whole-document credit. The separate whole-document author regression is now
+complete: physical 1–396 in 68 ordered segments, all 659 structural judgments,
+208 equation rubrics, 17 chapter/appendix syntheses and cumulative prefixes
+2/4/6/8/10/12/14/16. The document synthesis is bound in
+`regression/synthesis-ledger.json`; strict diagnosis validation passes.
+No new confirmed manuscript defect was found. The final argument preserves
+source meaning, joint histories, accounting lifecycles, shared transaction
+contracts and distinct engineering/accounting/scientific evidence. This is
+author evidence; independent implementability, domain and human acceptance
+remain pending. `regression/completion-bindings.json` and the additive
+`author-regression-supplement.json` bind the completion without rewriting
+frozen assessments or granting inherited-page reading credit.
+Evidence: `data/accounting-master/early-conversion-integration-20261018/`.
+
+R08 binds the exact rebuilt 3.44 PDF and preserves all 53 obligations, six
+interactions and 46 operation rows. All 55 assessment and 46 operation
+preservation checks pass. The bounded source/arithmetic/navigation evidence is
+added without closing a whole row. A separate local-review supplement records
+the completed affected-chapter author reviews; frozen assessment and integration
+bindings are unchanged. The separate whole-document author supplement now
+records completed regression while preserving the historical pending-author
+statements. Other domain judgments are inherited, not freshly reviewed.
+Independent technical/domain and human acceptance are pending.
+
+Delivered method evidence remains protected: 3.41's finite origin-matched
+cessation passes 1,846 deterministic numerical checks and 431 document checks;
+the 188-check frozen delta and 141 prior sources remain unchanged. The aligned
+zero-cost collar and participating-tax allocation are delivered. C1/C2 finite
+company/tax methods, F1's bounded rights-dependent EPS, B1's dated cash/fees,
+write-off and certified rate intervals, I1's finite service/finance and frozen
+OCI methods, I2's finite full/modified transition and acquisition/recovery
+origins, and J1's bounded sector composition are delivered within their stated
+scope. Do not restart these as missing work.
+
+R05's documentary target map is refreshed through 3.44 in
+`data/accounting-master/protocol-delta-refresh-20261018/`. All eight transitions
+after 3.36 are classified; five substantive targets have exact comparators,
+vintages, criteria, diagnostic roles and output records. The E1–E6 contracts
+remain distinct. The supplement's input/output hashes are checked; no numeric
+campaign, empirical work, manuscript edit or whole-requirement closure follows.
+
+R05's selected-panel vintage/exposure reconciliation is now complete at
+data/accounting-master/r05-vintage-admission-20261018/: 192 ordered active
+reports, 591 input bindings, 5,267 checks and fifteen rejected corruptions.
+The original 56 filing-date/136 unverified assessments remain intact; twelve
+later SEC events and 35 attributed publication declarations are separate,
+disjoint additions. Their three-role union covers 103 reports; 89 have none
+in this inquiry. All 192 selected-byte availability values remain null.
+Thirty-one pilot annotations join four exact selected versions; forty JPMorgan
+semantic assertions concern four different complete 10-Ks, with both identities
+retained. Exposure is nonexhaustive and all issuer roles remain unpromoted.
+The E1–E6/B0–B3 admission note names missing inputs and next internal actions.
+The additive R08 r05-vintage-admission-supplement.json and 21 completion
+bindings preserve 3.44 and close no whole row.
+
+R05's finite dependent-loss inquiry is now delivered at
+`data/accounting-master/r05-dependent-loss-source-20261018/`: one matching
+45-page ForeComp preprint, selected authors-linked CRAN mirror code, six
+literature ledgers, 82 retained source files from 21 acquisitions, 232 checks
+and an exact covariance counterexample with 256 enumerated assignments.
+DM1995/HLN1997/Diebold2015 remain full-text blocked; the unrelated arXiv
+acquisition is excluded. Scalar two-sided equal-loss tests do not establish
+E3's one-sided panel margin bound. Default nonfinite-to-zero preprocessing
+is a reuse constraint, not an adopted policy. The admission note retains
+unset population/weights/margin/procedure and all byte-vintage gaps. The
+separate R08 r05-dependent-loss-source-supplement.json adds no whole-row
+closure. Safe replay is complete.py; never repeat --record. This finite
+source inquiry is complete.
+
+R03's exact EPS ordering discriminator is delivered at
+`data/accounting-master/r03-eps-order-discriminator-20261018/`: 110 checks,
+eight complete worlds and six prescribed permutations. Fixed standalone
+ordering gives 54/77; recomputed marginal ordering gives 7/10, a strict
+gap of 1/770. The analytic interval, n=73 case and additive control distinguish
+the candidates without admitting a general IAS 33 selector. The exactly-two-
+series interface, manuscript and 3.44 not_ready assessment are unchanged.
+The separate R08 r03-eps-order-discriminator-supplement.json closes no row.
+Safe read-only replay: verify.py; never repeat --prepare/--calculate/--record.
+The retained unmatched/signed hedge-attribution audit and its finite
+discriminator are now delivered at
+`data/accounting-master/r03-hedge-attribution-discriminator-20261018/`:
+182 checks, nine hand-authored cases and three decomposition witnesses.
+The proof characterizes the nonnegative per-origin-minimum defect exactly;
+relationship18 versus origin-sum14 and signed1 versus2 reject that general
+shortcut. Aggregate conservation under the stated weak analytical caps still
+allows stopped releases5 or6; these are not established IFRS alternatives.
+No allocation, signed scope extension or manuscript change is admitted.
+The separate R08 r03-hedge-attribution-discriminator-supplement.json closes
+no row. Safe replay: verify.py; never repeat its one-time stages.
+The subsequent original-OCI supporting-text follow-up is delivered at
+`data/accounting-master/r03-insurance-termination-basis-20261018/`: the actual
+AASB-linked IASB support index redirects to an explicit Australia-only access
+restriction. One acquisition and three inspected spans are bound. No Basis
+or matching example was acquired, and the combined91/B135 disposition remains
+unestablished. Do not repeat this blocked route or admit its dependent calculator.
+The separate R08 supplement closes no row; safe replay is verify.py without
+one-time flags. R05's target/sampling/overlap specification is now delivered at
+`data/accounting-master/r05-target-overlap-20261018/`: three unselected target
+sheets, a proposed observation/availability/realization/failure contract, six
+fictional observations, fifteen overlap pairs, 72 exact checks and sixteen
+rejected invalid fixtures. Equal-cell versus equal-issuer synthetic effects
+are -1/4 versus +3/2; neither objective is selected. The graph is not a covariance
+or effective-sample-size estimator. All 192 byte-vintage admissions remain false;
+population, weights, margin, confidence level, sample size and inference procedure
+remain unselected. The additive R08 supplement closes no row. Safe replay:
+verify.py without flags; never repeat its one-time stages. R06's historical normative-schema inquiry is delivered at
+data/accounting-master/r06-normative-schema-20261018/ (completed 19 October).
+Official historical navigation reaches the expressly named normative RTF.
+The retained instance schema equals its Appendix A text after CRLF conversion,
+leading notice-comment removal and one final LF: 22,141 characters, with
+355 ordered XML elements and namespace bindings also agreeing. Five URLs/six
+acquisition receipts and thirteen rejected mutations are bound. No filing,
+lexical/XSD validation, installed correspondence or rights admission follows.
+The separate R08 supplement preserves 3.44 not_ready and closes no row.
+Safe replay: verify.py without flags; never repeat one-time stages. The source-only XML Schema 1.0 unit is also delivered at
+data/accounting-master/r06-unitless-semantics-20261019/: three official
+sources, fourteen bounded passages, seven joined facts, 22 examples and 76
+explicit assertions. Four string-valued declarations and three gYear declarations
+reject a digits-only Int interpretation; full validity and financial meaning
+remain unadmitted. Eight selected corruption/conclusion fixtures are rejected;
+three valid year forms outside the illustrative subset retain unknown results.
+All frozen Values remain Unknown. Its separate R08 supplement closes no row;
+safe replay is verify.py without flags, never repeating one-time stages.
+The companion-schema inquiry is delivered at
+data/accounting-master/r06-companion-schemas-20261019/: linkbase/XLink/XL,
+383 ordered elements, twelve rejected mutations and no new acquisition.
+Structural equality passes; byte equality and the earlier three-adjustment
+text test do not. All remaining text differences are recorded ASCII indentation,
+tabs and blank lines; 435/89/218 nonblank content lines match under the explicit
+presentation comparison. The additive R08 supplement closes no row. Safe replay:
+verify.py without flags; never repeat its one-time stages. Four core schema-copy
+questions are now answered within their precise scopes. The next EPS analytical unit is delivered at
+data/accounting-master/r03-marginal-eps-stability-20261019/: eight exact worlds,
+five traces, 107 assertions and six rejected corruptions. Marginal re-ranking
+returns ABC=4740/12179, but deleting A gives840/2179, lower by98100/26538041.
+This rejects a universal final-deletion-stability claim, not an accounting
+interpretation. The alternate order and subset minimum remain unadmitted;
+P80, the prior ordering discriminator and this new instability must all be
+addressed by a future source-supported selector. The additive R08 supplement
+closes no row; safe replay is verify.py without flags. R04's consequential-claim refresh is now delivered at
+data/accounting-master/r04-claim-refresh-20261019/: all eight3.36→3.44 transitions,
+five substantive claim families, eleven later supplemental units,32 exact bindings
+and72 structural assertions. The secondary early-conversion interpretation,
+local proofs, supplied facts and source-copy equality scopes remain distinct.
+No new contradiction was established in the inspected correspondence; this is
+not a fresh complete literature/primary-source audit. The four blocked originals,
+broad competitor/forward coverage and independent/human acceptance remain open.
+The separate R08 supplement closes no row. Safe replay: verify.py without flags;
+never repeat one-time stages. The finite ULDB competitor inquiry is recorded at
+data/accounting-master/r04-uldb-competitor-20261019/: five trusted requests,
+two official navigation pages and three bound spans. VLDB directory403 and
+no-route failures on author-linked paper/Trio HTTPS endpoints leave the technical
+paper/code unread. The author bibliography identifies the2006 conference and2008
+journal versions; technical equivalence remains unchecked. No theorem admission
+or literature-absence conclusion follows. Do not repeat these exact failed routes;
+original HTTP endpoints were not tested. The separate R08 supplement closes no
+row; safe replay is verify.py without one-time flags. The distinct recovery inquiry is also recorded at
+data/accounting-master/r04-uldb-primary-recovery-20261019/: publisher paper-level
+request403; original HTTP record redirects to an explicit database/internal-error
+page despite status200. No primary PDF or code was obtained. Seven receipts across
+the two inquiries now preserve these routes; no theorem/technical read is claimed.
+Safe replay: verify.py without one-time flags. A genuinely new accessible primary
+source is required for this ULDB technical comparison. Continue another independent
+retained lead rather than repeat the exhausted routes. Do not invent an EPS
+selector, E3 population/weights or runtime environment. All empirical,
+installed-runtime, installation, commit, outreach/publication and fee holds persist.
+
+## Remaining execution
+
+R06's proposed native-XBRL translation is delivered in
+`data/accounting-master/native-xbrl-translation-20261018/`. The current P16
+envelope carries 80 authored records and 653 mappings for six contexts, three
+units and nineteen facts. All 3,710 checks pass; 44 corruptions are rejected
+and signed Int is accepted. Exact replay passes. Original XML/packet bytes,
+occurrences, unit sides, dimensions and unknown financial meaning remain
+separate. The profile is proposed, not registered; no upstream runtime ran.
+`native-xbrl-translation-supplement.json` binds this evidence additively.
+`completion-validation.json` verifies the preserved completion and corrects
+its operational metadata reader and conda-environment label; no bound evidence
+was rewritten. Full retained-instance documentary translation is now delivered
+below; taxonomy/lexical validation, dependency closure and runtime acceptance
+remain open. The following offline prerequisite
+unit is now complete within its static scope.
+
+R06's offline-resolution supplement at
+`data/accounting-master/native-offline-resolution-20261018/` preserves the
+27-resource map and checks 3,551 reference receipts against source XML. All
+21 altered cases are rejected; exact replay and six pinned source-file
+bindings pass. Twelve environment/runtime lock duties remain unresolved.
+`native-offline-resolution-supplement.json` adds evidence without closing rows.
+The pinned loader follow-up is now delivered; actual opens and installed
+compatibility remain unverified.
+
+R06's source delta at `data/accounting-master/native-loader-source-20261018/`
+retains ten pinned files and thirty inspected spans; all 100 checks and exact
+replay pass. It distinguishes original bytes from decoded/declaration-stripped
+parser input, records recovery/entity settings, additional schema discovery and
+mapping precedence, and narrows the non-GUI configuration-loading finding.
+The additive `native-loader-source-supplement.json` preserves twelve unresolved
+runtime-lock duties. The selected real native byte/text examples are now
+complete, without implementing or running an Arelle adapter.
+
+R06's selected native source unit at
+`data/accounting-master/native-occurrence-bytes-20261018/` supplies twelve
+facts, four contexts, two units and eighteen exact byte slices. All 153 checks,
+nineteen corruption rejections and exact replay pass. R08's additive
+`native-occurrence-bytes-supplement.json` closes no row. Its selected evidence
+is now translated in `data/accounting-master/native-selected-portable-20261018/`:
+54 proposed records, 419 field mappings, 153 source and 2,554 portable checks,
+and 23 rejected semantic/structural corruptions. Exact replay passes. The
+additive `native-selected-portable-supplement.json` preserves the separate
+packet/source identities, nil, repeated occurrences, markup caveat and unknown
+financial time. The complete structural inventory is now delivered at
+native-shape-inventory-20261018: all 1,328 elements, 3,988 checks and twelve
+corruption rejections, with exact replay. It exposes four typed dimensions,
+seven unitless numeric-looking facts and one ID-less schemaRef. Their finite
+portable repair is now bound at native-hazard-portable-20261018: 39 records,
+283 mappings, 1,584 checks and twelve corruption rejections, with exact replay.
+Original typed subtrees, unknown values, leading zeros and null source ID survive.
+The full-file successor is now delivered at native-full-portable-20261018:
+3,788 proposed records and 34,883 mappings cover all 1,127 facts, 193 contexts,
+seven units and schemaRef. All 196,348 checks, twelve corruption rejections
+and exact replay pass. It preserves 961 Decimal candidates, two Nil values,
+seven Unknown unitless tokens and 157 explicitly unvalidated Text values.
+The seven unitless declaration chains are now delivered at
+unitless-type-evidence-20261018: 63 checks and eight rejected corruptions;
+the separate corrected read-only replay preserves the original recording.
+R06's twelve-duty reconciliation is delivered at r06-duty-reconciliation-20261018:
+ten evidence units and 549 binding occurrences verify, preserving all original
+fields, reasons and nulls. Source inspection and documentary translation have
+advanced; all installed conditions remain held and unverified.
+Full fact-concept declaration coverage is now delivered at
+native-concept-type-coverage-20261018: all 1,127 ordered fact occurrences join
+382 explicit global declarations in 22 schema roots, with 52 type nodes and
+no unresolved joins/paths. All 4,253 source/preservation checks and thirteen
+structural fixtures pass; twenty completion bindings verify. The additive R08
+native-concept-type-coverage-supplement.json binds the result. All frozen
+961 Decimal/two Nil/157 Text/seven Unknown Values remain unchanged.
+R05's selected-panel vintage/exposure reconciliation is complete as recorded
+above. No upstream runtime, lexical/taxonomy
+validation, accounting admission or complete report meaning follows.
+
+R06's static accessor-boundary supplement is delivered in
+`data/accounting-master/reuse-field-boundary-20261018/`. Eight exact-source
+spans distinguish original occurrences from defaulted/resolved metadata,
+transformed values and display strings, with explicit refusal/fallbacks.
+Pinned source/candidate and excerpt hashes pass. The native selection and all
+eleven earlier exchanges remain unchanged; inline observations admit no new
+path. Installed portable correspondence, exact dependency closure, runtime compatibility
+and component terms remain open. No manuscript repair was required.
+
+R06's new static native-boundary supplement is delivered in
+`data/accounting-master/native-reuse-boundary-20261018/`. The exact lower-bound
+pypdfium2 5.9.0 archive declares a normal prebuilt pin of PDFium7869; it does
+not identify an installed or selected native binary. Twelve selected members,
+27 inspected spans and protected inputs pass 73 checks. Build mode/flags,
+binary/bindings identity, conditional attestations and build-specific component
+notices now have explicit remaining-lock fields. The 28-file notice inventory
+alone does not complete terms review; the later 5+23 readings are recorded below.
+No manuscript or frozen selection/exchange
+change, installation, compatibility or rights clearance follows.
+
+R06’s bounded component-notice inquiry is delivered in
+`data/accounting-master/component-notice-inquiry-20261018/`. Five complete
+notices representing FreeType, JPEG, PNG and zlib have been inspected; all
+60 static checks pass. Mandatory retention/credits are distinguished from
+optional acknowledgment and explanatory text. Raw bytes, including a
+lossless Latin-1 FreeType inspection view, are preserved. The additive R08
+`component-notice-supplement.json` binds that result. The separate complement
+at `data/accounting-master/component-notice-complement-20261018/` now completes
+author reading of the other 23 texts: 19 direct readings and four complete
+Apache-body comparisons, with 64 clause anchors. All 209 initial static checks
+pass; read-only replay also verifies the recorded check set. Together the two
+inquiries cover exactly this archive's 28 notices. The separate additive R08
+`component-notice-complement-supplement.json` binds this completion. Actual
+build/component identities, incorporated per-file terms, exact dependencies,
+installed portable correspondence, compatibility and rights clearance remain open. The
+PDFium7869 pin is documentary only.
+
+The bounded zero-weight CGU source inquiry is preserved in
+`data/accounting-master/zero-weight-cgu-source-20261018/`. The historical
+AASB 136 compilation repeats carrying weights; its reversal example has
+positive eligible carrying amounts and does not resolve the zero denominator.
+Two technical-source routes failed with 403/404; discovery responses were
+unusable. Six response records and 14 source-file bindings are preserved.
+No allocation fallback or manuscript change follows. The publisher-index
+follow-up is now recorded in `data/accounting-master/zero-weight-cgu-publisher-followup-20261018/`:
+the actual article and linked PDF were retrieved in a trusted context and
+inspected. Their CGU example has positive eligible carrying amount; its zero
+goodwill does not resolve zero non-goodwill weights. An unrelated rendered
+316/288 arithmetic discrepancy is retained. Six response records, 22 source
+bindings and 27 checks pass. The additive R08
+`publisher-source-followup-supplement.json` preserves the unsupported-method
+disposition; next source work needs an explicit fully written-down non-goodwill
+multi-asset treatment. Independent manuscript review continues.
+
+| Workstream | Remaining gap | Next discriminating work |
+|---|---|---|
+| R03 corporate/company | Wider company/closing joins, actual applicability of the bounded early-conversion policy and zero-weight CGU reversal authority | Preserve BDO's interpretation versus AG32's maturity wording; inspect applicable authority for IAS36.122's zero denominator |
+| R03 financing | General nonadditive/dependent diluted-EPS selection; unmatched/signed heterogeneous hedge allocation | Preserve finite cases, both strict EPS discriminators and relationship-level lower-of; obtain a selection/allocation argument addressing the actual counterexamples |
+| R03 bank/insurance/FX | Wider bank/company joins; original-OCI termination during unfinished policy-switch runoff; insurance discount/VFA/OCI valuation and wider joins | Retain original 88(b)/89(b) identities and the unresolved 91/B135 interaction; no unsupported dependent calculator |
+| R04 literature | Claim map now reaches3.44; consequential competitors/theorems, backward/forward coverage and four blocked originals remain open | Inspect specific new primary-source leads; a row reconciliation is not a comprehensive survey |
+| R05 validation preparation | Target-specific empirical admission, exact-byte vintages, uncertainty/cost design and downstream evidence remain open; target map, vintage reconciliation, dependent-loss inquiry and alternative target/overlap sheets are complete | Choose the substantive prediction question before matched primary inference theory; preserve unselected population/weights/margin/procedure and full failure denominators. Empirical execution remains held |
+| R06 reuse | Exact transitive/native/build identities, taxonomy/lexical validation, installed portable correspondence and build-specific terms | Preserve completed translation/declaration coverage, exact historical instance-schema correspondence, notices and twelve-duty reconciliation; preserve completed unitless built-in and companion-schema inquiries; installed validation remains open |
+| R07 integration | Exact 3.44 author regression complete; independent implementability/domain/human evidence remains pending | Preserve all bound judgments and syntheses; integrate only confirmed source/method repairs, with a new exact-candidate review when required |
+| R08 assessment | Exact review packet and independent technical/domain/human acceptance | Maintain all 53 obligations/six interactions and exact evidence hashes; finish feasible internal work before any referral |
+
+The historical 16 October inventory is
+`data/accounting-master/method-residual-reconciliation-20261016/repair-queue.md`.
+Its execution order is superseded by the delivered evidence above. All 46
+original operation rows still govern: 13 corporate, 10 financing/group/currency,
+7 bank, 8 insurance and 8 shared-contract rows. R01 corporate wiring and R02
+real-package connection retain bounded results and broader runtime/source gaps.
+
+## Executable frontier
+
+1. Preserve complete 3.42 reading, actual 3.43 observations, and first-build
+   3.44 local evidence. Continue the rebuilt 3.44 integration plan, not an
+   obsolete predecessor read or a frozen closeout.
+2. Preserve completed local author reviews and the separate complete 3.44
+   whole-document chain: 396 pages, 68 segments, 659 structural judgments,
+   208 equation rubrics, 17 chapter/appendix syntheses, eight cumulative
+   prefixes and final document synthesis. Strict diagnosis validation passes;
+   independent/domain/human acceptance remains pending. No reread is required
+   merely to repeat completed work. Future review retains the three-image
+   call and six-page segment bounds.
+3. Continue independently ready R03–R06 source, protocol and dependency work.
+   The remaining 23 PDFium notice readings are complete and bound; do not
+   repeat that inquiry. The native-XBRL proposed field translation is now
+   checked and bound; preserve its 80 records, 653 mappings and explicit
+   runtime limits. Offline-resolution prerequisites are now checked for the
+   retained graph: 27 resources, 3,551 edges and 21 rejected altered cases.
+   The pinned loader/parser/helper source follow-up also passes, with ten
+   retrieved files, thirty spans and 100 source checks. Selected actual byte/text
+   correspondence now also passes: twelve facts/eighteen slices, 153 checks
+   and nineteen corruptions rejected. Full retained-instance documentary
+   translation now also passes: 3,788 records, 34,883 mappings and 196,348 checks.
+   Seven unitless declaration chains, the twelve-duty reconciliation and full
+   fact-concept declaration coverage now also pass. The latter covers 1,127
+   occurrences/382 declarations/52 type nodes, with 4,253 checks and thirteen
+   structural fixtures. R05's selected-panel vintage/exposure reconciliation
+   also passes: 192 ordered reports, 591 input bindings, 5,267 checks and
+   fifteen rejected corruptions. The finite dependent-loss source inquiry also
+   passes: six ledgers, 82 source files/21 acquisitions and 232 checks; no panel
+   inference or empirical admission follows. EPS ordering and hedge attribution
+   discriminators are delivered; the new IASB supporting-text route is access-
+   restricted and recorded. R05's three alternative target/sampling/overlap
+   sheets and proposed records now pass 72 exact checks/sixteen invalid fixtures.
+   No inferential design or empirical admission follows. The historical normative-instance-schema comparison now passes:
+   exact Appendix A correspondence under three declared notice/line-ending
+   adjustments, 355 ordered elements and thirteen rejected mutations. The seven-chain XML
+   Schema 1.0 interpretation now also passes: three sources, fourteen passages,
+   22 examples and 76 assertions; frozen Values remain Unknown. The three companion-schema comparisons now
+   also pass their qualified structural/presentation tests: 383 elements and
+   twelve rejected mutations, with every text difference retained. The new marginal EPS
+   discriminator also passes: strict ABC versus deletion-to-BC, eight worlds,
+   107 assertions. General selection stays unevaluated. R04 now maps all eight transitions to3.44,
+   five substantive claims and eleven later supplemental units with32 bindings.
+   The finite ULDB inquiry now records its exact source barrier and
+   successor bibliographic lead; no technical claim is admitted. The separate paper-level/original-HTTP recovery also failed
+   identity checks (403 and a200 error page). Continue a distinct independent
+   retained lead; seven recorded routes/attempts supply no technical paper.
+   Preserve runtime and schema/XBRL validation as pending; no installation or
+   upstream execution is implied.
+   The narrow original-term early-conversion source inquiry is provisionally
+   repaired; do not repeat it as missing. Use the named residuals above and
+   inspect prior source attempts before selecting a new technical lead.
+4. Feed confirmed source/method defects back to their owning workstream; bind
+   later results to R08 without rewriting original obligations or frozen hashes.
+
+Continuation audit: protected 3.43 is the exact integration comparator; complete
+3.42 reading is inherited evidence only. BDO's bounded interpretation does not
+admit current law, actual terms or tax facts. Counts, render identity, arithmetic
+and builds cannot establish comprehension, accounting validity or readiness.
+Pending independent acceptance and source gaps block their dependent claims,
+not other ready internal work. No global continuation veto has fired.
+
+Live controls are this file, the master checkpoint and
+`data/accounting-master/next-plan.md`. Previous controls are snapshotted under
+the current repair evidence. Preserve unrelated work/index and all frozen
+release evidence. No commit, runtime/controller campaign, installation,
+empirical execution, outreach, publication or fees are part of this work unit.

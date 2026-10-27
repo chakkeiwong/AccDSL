@@ -1,0 +1,108 @@
+\chapter[Continuous families and exact bounds]{Continuous history families: projection, optimization, and threshold refinement}
+\label{sim:continuous-methods}
+
+A finite list of histories is often an inadequate description even of a small company. Unknown rate exposure, customer allocation, asset age and settlement timing can vary continuously. The right question is frequently whether a conclusion holds over a constrained region. This chapter develops several exact small calculations and shows where they cease to be adequate. The methods are proposals for bounded profiles, not a claim that every company reconstruction is a linear program.
+
+\section{An affine exposure family}
+Let $x$ be foreign-currency debt maturing soon and $a$ the floating share of total debt. Suppose disclosed margins imply $0\leq x\leq50$ and $0\leq a\leq1$. A simplified next-period cash requirement under currency depreciation $d$ and rate increase $r$ is
+\begin{equation}
+ Q(x,a)=Q_0+dx+100ra.
+\end{equation}
+If $d$ and $r$ are nonnegative and the two unknowns are jointly unconstrained beyond their bounds, the maximum is $Q_0+50d+100r$ and minimum is $Q_0$. These extrema occur at feasible corners. No grid is needed.
+
+Now add a disclosure that the floating portion is entirely within the foreign-currency debt maturing soon, so $100a\leq x$. The feasible family is no longer a rectangle. The minimum remains $Q_0$, but the maximum floating share is one half, giving maximum $Q_0+50d+50r$. The relation changes the worst case even though debt total remains 100.
+
+The condition is a stipulated example, not an inference from the margins alone. It illustrates why exact bounds must optimize over the joint constraints. Independently maximizing every marginal amount can overstate or understate the relevant result depending on signs and relationships. A constraint-aware bound carries the assumptions that make its corner feasible.
+
+If the query includes a hedge whose receipt increases with $x$, the coefficient on $x$ can change sign. Monotonicity should be derived from the full expression, not assumed from a variable's label. A larger foreign-currency exposure can have a smaller net cash effect when a linked hedge changes at the same time.
+
+\section{Linear programs as a bounded exact method}
+When observations, bridges and query are linear in continuous unknowns, a bound can be formulated as a linear program. Let $z$ collect amounts and let $Az\leq b$, $Ez=e$ define the family. The minimum cash query is
+\begin{equation}
+ m=\inf\{c^{\mathsf T}z+c_0:Az\leq b, Ez=e\}.
+\end{equation}
+The formulation separates a mathematical target from a solver. A solver can return an optimum, infeasibility, unboundedness or an unresolved numerical status. Each requires interpretation. Unboundedness may reveal a missing economic constraint rather than a truly unlimited company exposure.
+
+A dual certificate can support a bound when its assumptions and numerical accuracy are checked. For a simple example, constraints $x\geq0$, $y\geq0$ and $x+y\leq10$ imply $2x+y\leq20$ because $2x+y\leq2(x+y)\leq20$. Equality is attained at $(10,0)$, so the maximum is exactly 20. The inequality proof and feasible witness establish both sides.
+
+A reported optimum without a feasible witness or trustworthy bound is weaker. Floating-point tolerances can matter near a covenant. Rational reconstruction or validated interval checks may be appropriate for a small certificate. The economic model should not change its threshold merely to accommodate solver tolerance.
+
+Linear programming does not resolve categorical interpretations, nonlinear prices or integer security units automatically. Those additions can require mixed-integer, nonlinear or hybrid methods. The profile should identify which relations remain outside the exact solver and how their unresolved regions are retained.
+
+\section{Projection can preserve a useful small relation}
+Suppose receivables satisfy $A_1=A_0+S-K-W$, with nonnegative write-offs $W$, collections $K$ and known credit sales $S$. If only $A_0,A_1,S$ matter to a future query, eliminating $K$ and $W$ leaves $K+W=A_0+S-A_1$. That sum is determined while its allocation is not.
+
+A credit-loss stress depends on $W$ or surviving customer exposure; a pure cash-history query depends on $K$. Eliminating both into an unnamed residual can make neither query answerable. A better compressed record retains the identified sum and the feasible allocation interval.
+
+If $A_0=30$, $S=40$ and $A_1=20$, then $K+W=50$. With a note limiting write-offs to at most 5, collections lie in $[45,50]$. A cash-flow disclosure of collections 48 then identifies write-offs 2 within this simplified bridge. Each additional source narrows the joint relation.
+
+If currency movements or acquisitions are later admitted, the relation changes. A cached inference $W=2$ must be invalidated unless those terms are established zero. This is an example of model expansion changing an earlier identified quantity. The system should preserve the old inference with its premises rather than silently rewriting its meaning.
+
+\section{Intervals and dependence}
+Interval arithmetic can bound expressions quickly, but repeated variables can cause overestimation. If $x\in[0,1]$, the expression $x-x$ is exactly zero. Treating its two occurrences independently gives interval $[-1,1]$. The dependency loss is entirely computational.
+
+For the financial expression $C=95-I$ with $I\in[5,7]$, interval evaluation correctly gives $C\in[88,90]$. But evaluating $C+I$ from separate intervals gives $[93,97]$ instead of exact 95. A relational representation or symbolic substitution preserves the identity.
+
+Overestimation can be acceptable for an outer bound if it is labeled and used with the correct direction. It can become useless near a threshold or create spurious defaults. Refinement can retain shared symbols, affine forms or polyhedral constraints rather than independently widening every intermediate amount.
+
+Nonlinear functions add further issues. A naive interval for $x(1-x)$ on $[0,1]$ is $[0,1]$, while the exact range is $[0,1/4]$. Completing the square, $x(1-x)=1/4-(x-1/2)^2$, identifies the maximum. A small analytic reformulation can be more valuable than a large random sample.
+
+\section{Piecewise contract payoffs}
+A floating coupon with floor $l$ and cap $u$ can be written $N\delta\min(u,\max(l,r+s))$ under a stated schedule. Unknown reference rate $r$ partitions into floor, interior and cap regions. The function is continuous but has slope changes.
+
+Suppose principal is 100, year fraction one, spread zero, floor 3 per cent and cap 6 per cent. For $r\in[0.02,0.08]$, interest ranges from 3 to 6. A linear approximation using the midpoint rate five per cent and an unconstrained slope predicts 2 to 8, missing both contractual limits.
+
+If the query is only the interest range, monotonicity gives exact endpoints. If the query includes a refinancing choice triggered by interest above 5.5, a split at $r=0.055$ is needed in the interior region. If the cap changes after a covenant event, contract state must retain that dependence.
+
+A piecewise formula can therefore represent many paths compactly. The implementation needs complete and disjoint guards, correct boundary inclusion and a record of the clause version. A missing cap is an economic-model error; an incorrect inequality at the cap boundary is an implementation error. Their repairs differ.
+
+\section{Nonmonotone outcomes}
+Many financial outputs are not monotone in a primitive shock. A rate increase raises floating interest but can increase income on cash, reduce a fixed-rate debt's market value or trigger a favorable option exercise. A customer demand increase can improve revenue while creating a working-capital funding need.
+
+Consider cash after a profitable sale with collection delay. Producing $q$ units costs $4q$ immediately, while revenue $6q$ is collected later. Current cash falls as $q$ rises even though eventual profit rises. A solver maximizing profit may select a quantity that violates interim liquidity.
+
+If financing capacity is $B$ and opening cash $C_0$, feasible production satisfies $4q\leq C_0+B$ before collection. The eventual profit objective $2q$ does not remove this constraint. Aggregating the period so that revenue and cost net immediately changes the feasible set.
+
+A query-driven method must therefore include intermediate constraints and not rely on a generic sign assumption. Monotonicity can be proved locally within a regime and fail when a guard changes. The method should partition or return a qualified bound rather than extrapolate the local result globally.
+
+\section{Integer quantities and minimum lots}
+Shares, bond lots and physical units may be discrete. If a company needs net cash 10 and shares sell for 3 with no fees, a continuous calculation requires $10/3$ shares. If only whole shares can be issued, four shares raise 12. The excess cash and dilution are real consequences of the lot constraint.
+
+A minimum issuance size can make a small funding need expensive or infeasible. A fixed fee can make splitting one issue into two change net proceeds. These effects break the proportional invariance that holds for a simple linear loan.
+
+The model should specify whether quantities are continuous approximations or exact units. For large public share counts, a continuous approximation may be immaterial for some queries. For a closely held company or indivisible asset, it may dominate the decision. The approximation needs a bound tied to the question.
+
+\section{Branch-and-bound interpretation}
+A mixed discrete-continuous family can be explored through bounds on regions. If a region's best possible result cannot improve the incumbent for an optimization query, it can be pruned under the method's correctness conditions. If a region is infeasible, it can be removed with evidence.
+
+Pruning for computational convenience is different. A low-probability region cannot be removed from a worst-case query merely because it is unlikely. A region far from current data may still be admissible if the observation model permits it. The pruning reason belongs in the result record.
+
+For a safety query, an outer lower cash bound above the requirement can close a region as safe. A feasible witness below it establishes possible failure. Regions whose bounds straddle the threshold remain unresolved and receive refinement priority. This approach can concentrate work where it changes the answer.
+
+The procedure may still face exponential growth. Resource exhaustion should preserve the incumbent witnesses, certified bounds and unresolved regions. Reporting only the best found point hides the remaining uncertainty and can reverse the meaning of a worst-case result.
+
+\section{Sensitivity of identified sets}
+A small source revision can change a feasible family discontinuously when constraints meet at a boundary. Suppose exact observations require $x=1$ and an interpretation requires $x\leq1$. The family is nonempty. Revising the observation to $x=1.001$ makes it empty if no tolerance or other interpretation is admitted.
+
+This does not mean the company changed abruptly. It may reveal that exact equality was too strong for a rounded report. Observation precision and numerical tolerance should be audited before interpreting a discontinuity economically.
+
+Conversely, a small genuine change can cross a contractual threshold and have a large effect. Smoothing it away would hide a real mechanism. The analyst must distinguish measurement uncertainty from contractual discontinuity. Both can occur near the same number but require different treatment.
+
+A useful sensitivity report varies source precision, interpretation choices and economic shocks separately. It identifies whether a conclusion is driven by evidence, modeling assumptions or a threshold in the contract. This is more informative than a single generic tolerance parameter.
+
+\section{A bounded implementation profile}
+An initial exact profile can support rational linear constraints, finite interpretation choices and piecewise affine event rules. It can return feasible witnesses, exact or certified bounds, and guarded outcome formulas. Nonlinear valuation and unsupported clauses remain explicit extensions.
+
+The profile should reject incompatible units, unbound variables and missing event premises before solving. It should preserve unknown amounts as variables with justified domains. Arbitrary large bounds inserted to make a solver finite should be labeled as computational assumptions and tested for sensitivity.
+
+A later nonlinear profile can use interval methods, constrained optimization or sampling, but must retain the original query target and distinguish local from global results. A local minimum of cash is not a global worst case. A successful solver exit code is not a proof of completeness.
+
+The practical advantage of a bounded profile is that its claims can be checked. It does not redefine the whole mission to exclude difficult contracts. Instead, it provides a reliable core and a precise account of which additional methods are needed for broader company simulation.
+
+\input{simulation/continuous-guards}
+
+\input{simulation/two-date-memory}
+
+\input{simulation/guarded-memory}
+
+\input{simulation/symbolic-regions}

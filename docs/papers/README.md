@@ -1,6 +1,11 @@
 # AccDSL research paper library
 
-32 verified PDFs support the [product design](../design/accounting-product-design.pdf). The collection includes seven preserved copies from the original user collection and additional external sources. The original files remain unchanged.
+The library supports the [current governing document](../AccDSL-latest.pdf).
+The initial catalogue below records 32 verified PDFs, including seven copies
+from the original user collection; subsequent research adds further sources.
+The [simulation-volume source record](../../data/accounting-master/simulation-monograph-20261026/source-support.json)
+identifies all 26 sources cited in its new chapters, with exact retained versions,
+inspected passages and qualifications. Original files remain unchanged.
 
 Filenames use `Title First-author-surname (year).pdf`. Publication years are used when a working version underlies a later article; the actual archived version is identified below. Local copies are for research; their availability does not imply redistribution rights.
 

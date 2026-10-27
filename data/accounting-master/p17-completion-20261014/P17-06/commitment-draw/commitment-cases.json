@@ -1,0 +1,43 @@
+{
+  "schema_version": "commitment-draw-documentary.v1",
+  "case_scope": "synthetic Australian for-profit2024 immediate ordered commitment/draw snapshots; no elapsed interest",
+  "contract": {"limit": "100", "due": "121", "years_to_due": 2, "original_eir": "1/10", "recovery": "1089/10", "initial_fv": "100", "funded_class": "non-POCI amortised cost", "irrevocable": true, "revolving": false},
+  "opening": {"Cash": "200", "Deposits": "-180", "Capital": "-20"},
+  "joint_initial": [
+    {"draw": false, "default_year": null, "probability": "1/2"},
+    {"draw": true, "default_year": 1, "probability": "1/20"},
+    {"draw": true, "default_year": 2, "probability": "1/20"},
+    {"draw": true, "default_year": null, "probability": "2/5"}
+  ],
+  "joint_sicr": [
+    {"draw": false, "default_year": null, "probability": "1/2"},
+    {"draw": true, "default_year": 1, "probability": "1/10"},
+    {"draw": true, "default_year": 2, "probability": "1/10"},
+    {"draw": true, "default_year": null, "probability": "3/10"}
+  ],
+  "credit_history": {"initial_date": "2024-01-01:event1", "sicr_date": "2024-01-01:event2", "funding_date": "2024-01-01:event3", "sicr_supported": true, "credit_impaired": false, "funded_initial_risk_ref": "joint_initial conditional on draw", "stage_after_draw": 2},
+  "expected_ecl": {"loss_pv_if_default": "10", "initial_twelve_month": "1/2", "initial_lifetime": "1", "sicr_twelve_month": "1", "sicr_lifetime": "2", "funded_lifetime": "4", "funded_twelve_month_wrong_horizon": "2"},
+  "common_journals": [
+    {"id": "initial-provision", "lines": [["Impairment", "1/2"], ["Commitment provision", "-1/2"]]},
+    {"id": "sicr-lifetime", "lines": [["Impairment", "3/2"], ["Commitment provision", "-3/2"]]}
+  ],
+  "routes": {
+    "direct_external": [
+      {"id": "fund-loan", "lines": [["Gross loan", "100"], ["Cash", "-100"]]},
+      {"id": "transfer-and-remeasure", "lines": [["Commitment provision", "2"], ["Impairment", "2"], ["Loan allowance", "-4"]]}
+    ],
+    "deposit_then_external": [
+      {"id": "credit-borrower-deposit", "lines": [["Gross loan", "100"], ["Deposits", "-100"]]},
+      {"id": "transfer-and-remeasure", "lines": [["Commitment provision", "2"], ["Impairment", "2"], ["Loan allowance", "-4"]]},
+      {"id": "external-transfer", "lines": [["Deposits", "100"], ["Cash", "-100"]]}
+    ],
+    "lapse": [
+      {"id": "release-at-expiry", "lines": [["Commitment provision", "2"], ["Impairment", "-2"]]}
+    ]
+  },
+  "expected_final": {
+    "direct_external": {"cash": "100", "gross": "100", "allowance": "4", "provision": "0", "deposits": "180", "equity": "16", "profit": "-4"},
+    "deposit_then_external": {"cash": "100", "gross": "100", "allowance": "4", "provision": "0", "deposits": "180", "equity": "16", "profit": "-4"},
+    "lapse": {"cash": "200", "gross": "0", "allowance": "0", "provision": "0", "deposits": "180", "equity": "20", "profit": "0"}
+  }
+}

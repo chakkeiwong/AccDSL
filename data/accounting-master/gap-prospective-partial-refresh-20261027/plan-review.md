@@ -1,0 +1,1 @@
+Exact prospective/partial-policy evidence does not close general domains,horizons or whole-language requirements. Preserve local acquisition evidence blocker and continue integration. Counts are not promotion proxies.

@@ -1,0 +1,39 @@
+{
+  "assumptions": [
+    "Review is limited to the supplied packet; no tools or external files were used.",
+    "Trusted workers remain within their initial process group. Deliberate detachment and uncatchable termination during registration are excluded.",
+    "The omitted exclusive_lock, reload_state and refresh implementations must enforce their stated interfaces. The packet does not establish a campaign-wide exclusion rule for ordinary run invocations."
+  ],
+  "checks": [
+    "Traced campaign admission, invocation accounting, interruption recovery, progress detection and terminal decisions.",
+    "Inspected phase repair, reviewed-plan renewal, bounded retries and acceptance conditions.",
+    "Treated the reported 197 passing tests and supplied test names as supporting evidence, without assuming unprovided test assertions."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py",
+    "docs/plans/accounting-master-program.md",
+    "docs/plans/accounting-master-campaign-20261005.md"
+  ],
+  "issues": [
+    "R1 — Campaign invocation accounting is not recoverable across ordinary interruption. In Master.campaign, the pre-run write records next_invocation_seconds but no pending invocation identity or progress baseline. self.run durably records its run separately; only after it returns does campaign append the invocation and update consecutive_no_progress. A handled interruption after the run finishes but before that campaign update leaves a completed run absent from campaign accounting. Resume neither reconciles that run nor restores its no-progress contribution. For example, interrupting after a second non-progressing run but before its campaign update allows a third invocation despite the two-invocation stop rule. Repair by persisting a pending invocation identity and baseline before execution, binding the run to that identity, and reconciling unfinished campaign accounting on resume exactly once. Preserve the run's terminal outcome when deciding whether another invocation is permitted.",
+    "R2 — Campaign progress uses a baseline captured outside the runner lock and before reloading state. Master.campaign reads before_accepted and previous_runs from self.state; Master.run acquires runner.lock and reloads state afterward. An ordinary serialized run can therefore finish between campaign invocations, or after this Master instance loaded its state, without violating the runner lock. Its accepted phases are then counted as new acceptance by the campaign invocation even if that invocation made no progress. This can incorrectly reset consecutive_no_progress. Campaign also reads next-plan.json after releasing runner.lock, so the continuation decision can refer to another invocation's plan. Repair by capturing the baseline after reload under runner.lock and returning or persisting the resulting run-specific progress and next-plan decision before releasing that lock. Campaign should consume that immutable result. Alternatively, enforce and document mutual exclusion between campaign orchestration and all ordinary state-mutating entrypoints."
+  ],
+  "next_actions": [
+    "Add durable pending-invocation reconciliation and make campaign accounting idempotent.",
+    "Bind progress baselines and continuation decisions to the same locked invocation.",
+    "Add focused regression coverage for interruption between run completion and campaign accounting, and for an intervening ordinary run. Rerun controller verification and independent review."
+  ],
+  "residuals": [
+    "campaign_progress counts observed file deltas, including changes subsequently reverted. This remains a coarse liveness signal, not substantive progress or acceptance.",
+    "Process cleanup, approval installation and several validation helpers are supplied as interfaces rather than complete implementations; their internals were not independently verified.",
+    "The visible readiness gate keeps implementation disabled and human acceptance pending. The 192-report source panel and scoped phase acceptance do not close accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Compared the supplied scheduler paths with the reviewed interruption, resumption and no-progress contracts.",
+    "Identified two campaign bookkeeping defects without extending the stated containment threat model."
+  ],
+  "summary": "REVISE: phase acceptance remains explicitly scoped, but campaign bookkeeping can lose completed invocations on interruption and misattribute progress from another serialized run.",
+  "verdict": "REVISE"
+}

@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "RetainedStatementContextDraft/1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "enum": [
+            "CompanyOperationsDraft/1",
+            "RetainedCompanyProgramDraft/1"
+          ]
+        },
+        "view": {
+          "enum": [
+            "annual",
+            "interim",
+            "combined"
+          ]
+        },
+        "request_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "result_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "target",
+        "view",
+        "request_sha256",
+        "result_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "alias": {
+            "type": "string",
+            "minLength": 1
+          },
+          "collection": {
+            "enum": [
+              "annual_refs",
+              "interim_refs",
+              "annual_opening_refs",
+              "interim_comparison_refs"
+            ]
+          },
+          "observation_ref": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "minLength": 1
+              },
+              "schema": {
+                "type": "string",
+                "minLength": 1
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "measurement_time": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "instant"
+                  },
+                  "at": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "period"
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "end_exclusive": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "start",
+                  "end_exclusive"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "alias",
+          "collection",
+          "observation_ref",
+          "measurement_time",
+          "unit"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "relations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "group": {
+            "enum": [
+              "annual",
+              "interim"
+            ]
+          },
+          "source_pointer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_record_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "kind": {
+            "enum": [
+              "snapshot_sum",
+              "period_sum",
+              "stock_flow_bridge",
+              "same_date_endpoint",
+              "same_period_measurement",
+              "displayed_population_comparison",
+              "endpoint_difference",
+              "derived_subtotal",
+              "explanatory_difference",
+              "cross_period_endpoint"
+            ]
+          },
+          "lhs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "coefficient": {
+                  "type": "string",
+                  "pattern": "^(?:0|-?[1-9][0-9]*)/[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "alias",
+                "coefficient"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rhs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "coefficient": {
+                  "type": "string",
+                  "pattern": "^(?:0|-?[1-9][0-9]*)/[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "alias",
+                "coefficient"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "comparison": {
+            "enum": [
+              "zero",
+              "terms",
+              "derived_only"
+            ]
+          },
+          "omitted_source_rows": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "id",
+          "group",
+          "source_pointer",
+          "source_record_sha256",
+          "kind",
+          "lhs",
+          "rhs",
+          "comparison",
+          "omitted_source_rows"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "requirement_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "required": [
+    "profile",
+    "name",
+    "source",
+    "observations",
+    "relations",
+    "requirement_ids"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,174 @@
+\section{Ask what follows from the complete family}
+\label{sec:family-outcome-queries}
+
+The retained histories answer a financial question that a single simulated
+path cannot settle: which amounts could occur, and which amounts must occur
+under the supplied assumptions? In the preceding example, inventory of
+65 dollars after settlement is possible. Inventory of 60 dollars after the
+whole-lot sale is necessary. The distinction depends on all admissible paths,
+including paths that a first witness does not select.
+
+\subsection{Separate a question from an observation}
+
+An observation of inventory of 65 dollars restricts the historical family. Asking whether
+inventory of 65 dollars is possible leaves that family unchanged. The query therefore
+carries no additional source assertion. It retains the original opening,
+event order, branch conditions, funding restrictions, observations and premises.
+It also retains unresolved obligations concerning the actual company.
+
+Write \(\mathcal H\) for this complete conditional family and \(h\) for one
+history within it. At a chosen prefix \(t\in\{1,2\}\), let
+\(A_{a,t}(h)\) be the signed balance of account \(a\) after that event.
+The query asks about the scalar amount
+\begin{equation}
+\label{eq:family-outcome-amount}
+ f_t(h)=\sum_{a\in\mathcal A}c_a A_{a,t}(h),
+ \qquad h\in\mathcal H.
+\end{equation}
+Here \(\mathcal A\) is the set of distinct queried accounts, and each
+\(c_a\) is an exact rational, dimensionless coefficient. Every account must
+have the same full monetary type at that prefix: entity, legal book, date,
+currency, dimensions and scale. A threshold has that same monetary type.
+This is a same-date account sum, not permission to add differently dated or
+differently denominated amounts. The retained profit query applies the signed
+account convention to revenue, cost of goods sold and selling expense.
+
+\path{SequentialOutcomeQuery/1} contains the full \path{family}, the chosen
+\path{prefix}, the complete \path{type}, the account \path{terms}, an
+\path{operator} and a rational \path{threshold}, alongside its \path{profile}
+identifier. The five comparisons are equality, strict less or greater, and
+weak less or greater. Arbitrary callbacks and compound expressions are outside
+this first interface.
+
+\subsection{Distinguish possible, necessary and empty}
+
+Let \(Q(h)\) denote the selected comparison of \(f_t(h)\) with its threshold.
+The implementation asks two existence questions on the unchanged family:
+\begin{equation}
+\label{eq:family-outcome-partition}
+ \mathcal H_Q=\{h\in\mathcal H:Q(h)\},\qquad
+ \mathcal H_{\neg Q}=\{h\in\mathcal H:\neg Q(h)\}.
+\end{equation}
+A checked member of \(\mathcal H_Q\) establishes possibility. A checked
+member of \(\mathcal H_{\neg Q}\) is a counterexample to necessity. If both
+exist, the comparison is contingent. If the first exists and the second is
+proved empty, it is necessary within this family. If the first is proved empty
+and the second exists, it is impossible. When both sets are empty, the answer
+is \path{empty_family}; necessity is not applicable. In particular, an
+unfunded settlement does not make every financial assertion meaningfully true.
+
+For inventory of 65 dollars after settlement, a path with \(V=5\) is a satisfying
+witness and a path with \(V=20\) is a counterexample. For terminal inventory of 60 dollars,
+equation~\eqref{eq:native-sequence-balances} supplies the invariant, while
+the complete branch check proves that no counterexample meets the original
+conditions. Inventory of 64 dollars after settlement is impossible in this example.
+Adding the observation inventory of 65 dollars first would instead make that amount
+necessary in the smaller, observed family. These are different questions with
+different conditioning information.
+
+Every witness replays both original native transitions. The verifier computes
+the account sum independently with exact rational arithmetic and checks which
+side of the comparison it satisfies. An empty region requires complete
+infeasibility evidence and a separately checked unsatisfiable constraint core.
+The checker accepts a different valid witness or a different valid core;
+reproducing the solver's first choice is not the criterion.
+
+Search is divided into elementary regions. For equality, the regions are
+equal, less and greater; for each inequality, its complement uses the exact
+opposite strict or weak comparison. One shared cell-count and elapsed-time budget spans all
+regions of all parent branches. An unvisited region cannot prove emptiness.
+A found counterexample can already refute necessity, even if the search is
+otherwise incomplete; the result preserves that fact while leaving unproved
+conclusions unknown. The number of witnesses supplies no probability.
+
+\subsection{Bound the amount without selecting a history}
+
+The closed \path{SequentialOutcomeRange/1} request contains its \path{profile},
+\path{family}, \path{prefix}, \path{type} and account \path{terms}. It asks
+for the tight lower and upper endpoints instead of a comparison. For a
+nonempty family these are
+\begin{equation}
+\label{eq:family-outcome-envelope}
+ L=\inf_{h\in\mathcal H} f_t(h),\qquad
+ U=\sup_{h\in\mathcal H} f_t(h).
+\end{equation}
+An endpoint is reported as attained only if an original admissible history
+reaches it. Thus an open interval has valid finite endpoints without supplying
+executable states at those endpoints.
+
+The supported fragment has finitely many affine branches with explicitly
+finite numeric input domains. Each feasible branch is a convex region defined
+by rational linear equalities and strict or weak inequalities. Within a
+nonempty such branch, a closure point can be approached from an original
+feasible point: their convex combinations satisfy every strict inequality
+until the limiting closure point is reached. Optimizing over the closure can
+therefore locate its infimum or supremum. Certification additionally checks
+that the endpoint is feasible in that closure, no original value is better,
+and the original strict constraints either admit or exclude endpoint equality.
+An attained endpoint must also pass complete native replay.
+
+The global lower endpoint is the smallest certified branch infimum; the upper
+is the largest certified branch supremum. This aggregation requires every
+original branch to be either checked infeasible or certified at both endpoints.
+A partial search returns local branch evidence with no certified global bounds.
+An empty family has no bounds. An unbounded answer is invalid in this explicitly
+finite fragment, rather than an authorized infinity result.
+
+The amounts in the example follow directly from the shared carrying value.
+With returned quantity fixed at two, \(V=\min(20,N)\). The supplied recoverable
+value domain is \(5\leq N\leq30\), so it permits both minimum branches and the carrying
+envelope is \([5,20]\). Substituting into
+equations~\eqref{eq:native-sequence-balances} and
+\eqref{eq:native-sequence-profit} gives
+\begin{align}
+\label{eq:family-outcome-example}
+ I_1&=60+V\in[65,80], & I_2&=60,\\
+ \pi_1&=V-24\in[-19,-4], & \pi_2&=P-24.
+\end{align}
+At proceeds \(P=40\), cumulative terminal profit is 16 dollars before tax
+closing. If proceeds instead range over \([0,100]\), its envelope is
+\([-24,76]\). Opening inventory of 60 dollars is included in both inventory queries.
+These equalities use the original signed postings; selecting two convenient
+witnesses would not establish the bounds.
+
+If recoverable value is restricted to \(5<N<20\), then \(V=N\), and the
+intermediate inventory envelope becomes \((65,80)\): neither endpoint is
+attained. In the original two-branch family, both branches support the upper
+bound of 80 dollars, but only the branch with \(V=20\) attains it. The other approaches 80
+from below. Accordingly, \path{supporting_branches} and
+\path{attaining_branches} are different result fields. Global attainment
+requires at least one attaining branch at the global endpoint.
+
+Even a tight outer envelope need not describe every feasible amount. A union
+of branches could permit only 65 and 80, leaving the intervening values
+unattainable while retaining the same endpoints. The range interface therefore
+reports an envelope and endpoint membership, not a general proof of interior
+feasibility. A predicate query can separately test a particular interior amount.
+
+The reference definitions and saved complete requests/results are in
+\path{data/accounting-master/}:
+\begin{quote}\small
+\path{sequential-outcome-query-20261024}\\
+\path{sequential-outcome-range-20261024}
+\end{quote}
+Both interfaces preserve missing premises and unresolved target obligations.
+Where those obligations remain, an answer concerns the candidate family and
+the actual outcome stays unknown. Their states are hypothetical and uncommitted;
+source admission, accounting admission and method eligibility remain false.
+General histories, nonlinear or integer-lot methods, actual-company state
+reconstruction and independent implementations remain outside these checked
+references.
+
+\input{sections/simulator-evidence-archive}
+
+\input{sections/lease-shared-book}
+
+\input{sections/lease-allocation-family}
+
+\input{sections/henkel-lease-measurements}
+
+\input{sections/shared-return-lease-book}
+
+\input{sections/recorded-shared-statements}
+
+\input{sections/shared-book-authoring}

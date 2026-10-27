@@ -1,0 +1,111 @@
+{
+  "status": "non-executable preparation hypotheses; not ready for execution",
+  "provenance": "25 source anchors and 91 unevaluated upstream field expressions",
+  "common": {
+    "backend": "ThreadedDoclingParseDocumentBackend",
+    "pipeline": "StandardPdfPipeline",
+    "backend_options": {
+      "parser_threads": 1,
+      "render_pages": true,
+      "render_scale": 1.0
+    },
+    "accelerator_options": {
+      "device": "cpu",
+      "num_threads": 1
+    },
+    "enable_remote_services": false,
+    "allow_external_plugins": false,
+    "artifacts_path": "<retained-asset-root-required>",
+    "layout_options": {
+      "type": "LayoutObjectDetectionOptions",
+      "repo_id": "docling-project/docling-layout-heron",
+      "revision": null,
+      "engine": "TransformersObjectDetectionEngineOptions",
+      "torch_dtype": "float32",
+      "compile_model": false,
+      "score_threshold": 0.3
+    },
+    "do_table_structure": true,
+    "table_structure_options": {
+      "type": "TableStructureOptions",
+      "mode": "accurate",
+      "do_cell_matching": true
+    },
+    "do_code_enrichment": false,
+    "do_formula_enrichment": false,
+    "do_picture_classification": false,
+    "do_picture_description": false,
+    "do_chart_extraction": false,
+    "document_timeout": null,
+    "timeout_status": "target-specific budget not selected",
+    "ocr_batch_size": 1,
+    "layout_batch_size": 1,
+    "table_batch_size": 1
+  },
+  "arms": [
+    {
+      "id": "native_text",
+      "do_ocr": false,
+      "purpose": "Separate native-text/backend/layout/table behavior; scanned-only text remains unprocessed",
+      "promotion_status": "baseline hypothesis, no empirical support"
+    },
+    {
+      "id": "english_ocr",
+      "do_ocr": true,
+      "ocr_options": {
+        "type": "EasyOcrOptions",
+        "lang": [
+          "en"
+        ],
+        "mode": "full_page",
+        "scale": 3.0,
+        "confidence_threshold": 0.5,
+        "download_enabled": false,
+        "model_storage_directory": "<retained-asset-root-required>/EasyOcr",
+        "recog_network": "standard",
+        "use_gpu": null
+      },
+      "purpose": "Explicit English OCR alternative, with GPU choice governed by CPU accelerator setting",
+      "promotion_status": "baseline hypothesis, no accuracy ranking or multilingual coverage"
+    }
+  ],
+  "default_audit": [
+    {
+      "choice": "CPU, one thread/batch, float32 and compilation off",
+      "origin": "local diagnostic convenience",
+      "risk": "not throughput-optimal; differs from production environment",
+      "early_check": "separate later numerical/output equivalence and resource protocol",
+      "status": "hypothesis"
+    },
+    {
+      "choice": "Heron, accurate TableFormer, score threshold 0.3",
+      "origin": "upstream defaults",
+      "risk": "missed/merged financial rows or competing cells",
+      "early_check": "manual located cell/context reference against native baseline; no loss-only promotion",
+      "status": "unreviewed target-specific suitability"
+    },
+    {
+      "choice": "EasyOCR English, scale 3.0 and confidence 0.5",
+      "origin": "explicit language scope plus inherited scale/threshold",
+      "risk": "other scripts and faint text omitted; unknown asset selection",
+      "early_check": "resolve Reader file selection first; later per-language transcription and omission checks",
+      "status": "hypothesis"
+    },
+    {
+      "choice": "asset directories supplied; remote services/plugins false; downloads false in EasyOCR",
+      "origin": "proposed retained-source processing contract",
+      "risk": "directory exists but wrong revision or downstream override",
+      "early_check": "bind asset hashes and inspect overrides; later isolated network-denied execution",
+      "status": "proposed constraint, no runtime proof"
+    }
+  ],
+  "unresolved_before_execution": [
+    "Immutable layout model revision and every weight/config hash",
+    "Table model tag-to-commit resolution and exact config/weight list",
+    "EasyOCR package/Reader/config version and recognition/detection asset selection",
+    "Exact dependency resolution including markers, transitive/native packages and eager imports",
+    "Each component/model notice and intended-use conditions",
+    "Target-specific page/deadline/resource limits and downstream quality protocol"
+  ],
+  "evidence_class": "source-only; no installation, imports, inference, asset download or ranking"
+}

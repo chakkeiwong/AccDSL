@@ -1,0 +1,184 @@
+\subsection{Preserve payment history when financing and remedies change}
+\label{sec:selected-financing-history}
+
+A company that pays late can end with the same cash, debt and equity as a
+company that pays on time. The ending balance sheet does not distinguish the
+two histories. A simulator must retain what was due, what remained unpaid
+when payment was missed, what was subsequently paid, and which contractual
+consequences were actually established. Otherwise a successful funding decision
+can silently make a past failure disappear.
+
+Consider the supplied zero-coupon promise used in the financing comparison.
+The opening book contains cash of 60, inventory of 100, debt with a carrying
+amount of 80 and equity of 80. Contractual face is 100, due on 30 June 2027.
+A single explicit measurement interval increases carrying debt and interest
+expense by 20 at maturity. Forty new shares are subscribed for 40 in cash.
+There are no fees, taxes, penalties or modification effects in this example;
+the price and funding date are supplied scenario assumptions. These choices
+make payment timing visible without requiring a financing equilibrium.
+
+If the subscription settles on 29 June, the company pays all 100 at maturity.
+If it settles on 2 July, the company first pays its available 60 at maturity,
+records the unpaid 40 on 1 July, and pays the remaining 40 on 3 July. Both
+paths finish with cash and debt equal to zero, inventory of 100 and equity of
+100 after the interest expense. Only the second path has a missed-payment
+history. The signed journal convention records debt as a credit balance;
+the following table displays its positive carrying amount.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Late-funding path & Cash & Debt & Unpaid claim & Past miss \\
+\midrule
+Opening & 60 & 80 & 100 & 0 \\
+Maturity, before payment & 60 & 100 & 100 & 0 \\
+Partial payment, 30 June & 0 & 40 & 40 & 0 \\
+Observation, 1 July & 0 & 40 & 40 & 40 \\
+Share subscription, 2 July & 40 & 40 & 40 & 40 \\
+Final payment, 3 July & 0 & 0 & 0 & 40 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The historical amount in the last column is the amount recorded at the
+missed-payment observation. It is not the current unpaid balance, and payment
+does not reduce it. Neither that amount nor the missed flag is, by itself,
+a finding that a particular legal event of default occurred.
+
+\paragraph{Check the state and the change separately.}
+The selected financing declaration uses the existing typed requirement
+evaluator for 26 snapshot conditions. Face, remaining claim, recorded arrears,
+historical missed amount and share counts must be nonnegative. The remaining
+claim cannot exceed face. Before maturity the unpaid claim remains face while
+the carrying amount may differ; after the selected maturity operation, carrying
+debt equals the remaining claim. A recorded miss requires a matured promise,
+an observation after its due date and a positive historical missed amount.
+The recorded arrears equal the remaining claim in this selected post-observation
+state. An unpaid state observed after the due date cannot pass without the
+explicit missed-payment observation.
+
+These conditions are useful but insufficient. After full payment, a snapshot
+with a historical missed amount of 50 could satisfy the inequalities even
+though the recorded amount was 40. Likewise, a nonnegative share count can
+remain unchanged when a subscription should have increased it. The transition
+declaration therefore binds the old state, typed event inputs and new state.
+For a late payment of amount \(p\), let \(U\) be the remaining claim,
+\(A\) the recorded arrears and \(H\) the historical missed amount. The
+selected change requires
+\[
+  U_{\mathrm{after}}=U_{\mathrm{before}}-p,\qquad
+  A_{\mathrm{after}}=A_{\mathrm{before}}-p,\qquad
+  H_{\mathrm{after}}=H_{\mathrm{before}}.
+\]
+Cash falls by \(p\), the signed debt balance increases by \(p\), and the
+missed flag remains true. Original face, due date and old shares are preserved.
+A subscription has a different relation: new shares increase by the supplied
+share quantity, while cash and capital change by quantity times issue price.
+Money and shares have different dimensions, so a money-typed value cannot be
+used as a share count merely because both are exact rationals.
+
+The five declared transitions cover maturity, subscription, due-date payment,
+missed-payment observation and late payment. They also preserve unrelated
+memory, account balances and prior cash-flow records. Deliberately removing
+the share-memory or historical-miss write can still yield a balanced proposal
+from the generic engine. The selected transition relation rejects both. The
+failed proposal remains available for diagnosis, while the accepted current
+state and unexecuted command suffix retain the last valid prefix.
+
+\paragraph{An internally consistent history still needs an opening premise.}
+Opening assessment binds the selected method registry, schemas, reporting map,
+account roles and typed financial state. A separate supplied history record
+names the exact opening book and its debt-term fields, with nonblank provenance.
+Missing or partial history is unresolved. A paid opening that erases the missed
+flag and amount can be internally consistent, but it conflicts with the retained
+history record and is refused. A caller who supplies the same false account
+in both records can still satisfy this consistency test; source evidence must
+establish the historical facts.
+
+A valid intermediate snapshot is also not automatically a fiscal opening.
+The existing statement engine requires the opening date to equal the fiscal
+period start, an empty current-period cash-flow sequence and zero temporary
+account balances. The first verification attempt incorrectly expected an
+intermediate funded state to qualify as an opening. Its refusal exposed the
+test error. The corrected comparison checks snapshot and supplied-history
+consistency separately while preserving the fiscal-opening restrictions.
+Closing and carrying the financing history require an explicit further step.
+
+\paragraph{Keep current contractual findings apart from economic history.}
+The conditional remedy examples introduce a separate record for an identified
+hypothetical series. It contains the selected clause finding, its observation
+date, the acceleration finding and the evidence identifier. The applicability
+of the selected clause is a supplied premise. A known unpaid principal amount
+must agree with the outstanding claim in the economic book; an unknown
+applicability finding remains unresolved rather than becoming false.
+
+The retained conditional reference distinguishes seven kinds of question:
+clause satisfaction, authorized notice, new acceleration, remaining acceleration
+after rescission, protected-change consent, majority waiver and a finding about
+another series. Explicit typed predicates reproduce its 58 hypothetical
+classifications, including unknown facts and unresolved boundary-day order.
+Only three of these routes are composed into state updates here: a clause
+observation, a new acceleration assessment and a rescission assessment. The
+classification table is not a complete contract execution system.
+
+In the composed example, the funded but still unpaid company first receives
+a supplied conditional principal-clause finding. That observation changes no
+cash and does not itself accelerate the obligation. A separate, supported
+declaration establishes acceleration. The existing typed settlement then pays
+the 40. A fresh paid-clause observation becomes unsatisfied, but a lack of a
+new acceleration trigger leaves the earlier acceleration finding intact.
+The selected rescission assessment changes that state only when all of its
+supplied conditions are resolved as required. The historical missed amount
+remains 40 throughout. These operations record conditional contractual status;
+priority, penalties, accelerated cash amounts and insolvency consequences need
+their own economic and accounting methods.
+
+The initial contract-status record and its schema extension are explicit
+synthetic premises. They do not establish that the retained issuer description
+governs this promise. The source-dependent conditions retain their original
+scope and unresolved operative-instrument dependencies. Known automatic and
+declaration routes also keep their different information requirements: the
+automatic branch does not require a notice finding that it does not use.
+
+\paragraph{A matching date does not establish that a finding is current.}
+The first composed candidate required a clause finding from the same date as
+the proposed acceleration. Its original trace passed, but a further comparison
+found a failure: record the unpaid clause, pay the full claim later in the same
+dated sequence, then request acceleration from the old finding. The date still
+matches although the economic state has changed. That candidate incorrectly
+accepts the stale finding relative to its own current-clause requirement.
+
+The successor records a digest of a fixed economic-state projection with each
+resolved clause observation. The projection contains the book's identity and
+period, account definitions, balances, cash account, cash-flow history,
+non-contract memory and its types. Conditional-status memory and seen-event
+bookkeeping are excluded, so recording a remedy does not invalidate itself.
+The selected schema and types are checked separately. A new acceleration
+requires both the date and economic-state digest to match the stored observation.
+
+The same-day payment now makes the stale request unresolved before any accepted
+write. A new observation of the paid claim supports the consistent assessment
+that there is no new trigger. Balanced account changes, changes to unrelated
+economic memory and revisions to cash-flow evidence also invalidate the old
+observation. This conservative rule avoids guessing which economic changes
+matter. Matching digests establish equality of the supplied record, not truth
+of the evidence or persistence of external legal facts. The relevant external
+findings still have to be supplied for the event.
+
+The selected financing contract reproduces four complete financing paths on
+two account charts, including their statements. The repaired remedy composition
+reproduces eight complete transitions, with separate same-day failure and repair
+evidence. These checks support the stated finite declarations and preserve the
+rejected predecessor. Wider financing decisions, carry, changed rights, actual
+series admission and independent review remain necessary for the full design.
+
+\begingroup\raggedright
+The independent settlement and conditional-source records are retained under
+\path{data/accounting-master/gap-program-20261026/}.
+The selected financial conditions and opening checks are under
+\path{data/accounting-master/financing-opening-invariants-20261026/}.
+The date-only failure and its preserved comparator are under
+\path{data/accounting-master/financing-remedy-binding-20261026/};
+the checked successor is under
+\path{data/accounting-master/financing-remedy-state-binding-20261026/}.
+\par\endgroup

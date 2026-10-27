@@ -1,0 +1,272 @@
+[
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/FileSource.py",
+    "sha256": "0cb9f05cc0ff333195c2736f45954a707c00163c5356dbdd12124b5a9701ea95",
+    "start_line": 494,
+    "end_line": 511,
+    "purpose": "source-first-prefix-plus-disclosure",
+    "excerpt_utf8": "    def isMappedUrl(self, url: str) -> bool:\n        if self.mappedPaths is not None:\n            if any(url.startswith(mapFrom)\n                       for mapFrom in self.mappedPaths):\n                return True\n        if self.cntlr and self.cntlr.modelManager.disclosureSystem.isMappedUrl(url):\n            return True\n        return False\n\n    def mappedUrl(self, url: str) -> str:\n        if self.mappedPaths:\n            for mapFrom, mapTo in self.mappedPaths.items():\n                if url.startswith(mapFrom):\n                    url = mapTo + url[len(mapFrom):]\n                    break\n        if self.cntlr:\n            return self.cntlr.modelManager.disclosureSystem.mappedUrl(url)\n        return url\n",
+    "excerpt_sha256": "afc8e998c5538443ac4de0c87104ceee33b8df9220b8026319522ed557505ee6"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/FileSource.py",
+    "sha256": "0cb9f05cc0ff333195c2736f45954a707c00163c5356dbdd12124b5a9701ea95",
+    "start_line": 544,
+    "end_line": 588,
+    "purpose": "archive-bytes-to-text",
+    "excerpt_utf8": "    def file(\n        self,\n        filepath: str,\n        binary: bool = False,\n        stripDeclaration: bool = False,\n        encoding: str | None = None,\n    ) -> tuple[io.BytesIO | IO[Any]] | tuple[TextIO, str | None]:\n        \"\"\"\n            for text, return a tuple of (open file handle, encoding)\n            for binary, return a tuple of (open file handle, )\n        \"\"\"\n        archiveFileSource = self.fileSourceContainingFilepath(filepath)\n        if archiveFileSource is not None:\n            assert isinstance(archiveFileSource.basefile, str)\n            archiveFileName = _archiveFileName(archiveFileSource, filepath)\n            if archiveFileSource.isZip:\n                try:\n                    f = _zipMemberName(archiveFileSource, archiveFileName)\n                    assert isinstance(archiveFileSource.fs, zipfile.ZipFile)\n                    b = archiveFileSource.fs.read(f)\n                    if binary:\n                        return (io.BytesIO(b), )\n                    if encoding is None:\n                        encoding = XmlUtil.encoding(b)\n                    if stripDeclaration:\n                        b = stripDeclarationBytes(b, encoding)\n                    return (FileNamedTextIOWrapper(filepath, io.BytesIO(b), encoding=encoding),\n                            encoding)\n                except KeyError as err:\n                    raise ArchiveFileIOError(self, errno.ENOENT, archiveFileName) from err\n            elif archiveFileSource.isTarGz:\n                try:\n                    assert isinstance(archiveFileSource.fs, tarfile.TarFile)\n                    fh = archiveFileSource.fs.extractfile(archiveFileName)\n                    assert fh is not None\n                    b = fh.read()\n                    fh.close() # doesn't seem to close properly using a with construct\n                    if binary:\n                        return (io.BytesIO(b), )\n                    if encoding is None:\n                        encoding = XmlUtil.encoding(b)\n                    if stripDeclaration:\n                        b = stripDeclarationBytes(b, encoding)\n                    return (FileNamedTextIOWrapper(filepath, io.BytesIO(b), encoding=encoding),\n                            encoding)\n",
+    "excerpt_sha256": "96e2e2bf73adf436e88d72d9467b41955ef4c5853cbec0c2adada01d7646de6c"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/FileSource.py",
+    "sha256": "0cb9f05cc0ff333195c2736f45954a707c00163c5356dbdd12124b5a9701ea95",
+    "start_line": 652,
+    "end_line": 662,
+    "purpose": "file-hook",
+    "excerpt_utf8": "        # custom overrides for decription, etc\n        for pluginMethod in self.hooks(\"FileSource.File\"):\n            fileResult = pluginMethod(self.cntlr, filepath, binary, stripDeclaration)\n            if fileResult is not None:\n                return fileResult # type: ignore[no-any-return]\n        if binary:\n            return (openFileStream(self.cntlr, filepath, \"rb\"), )\n        elif encoding:\n            return (openFileStream(self.cntlr, filepath, \"rt\", encoding=encoding), )\n        else:\n            return openXmlFileStream(self.cntlr, filepath, stripDeclaration)\n",
+    "excerpt_sha256": "139af0f172a0fedf092059a93330e230566c46ecdff0c58652972471c87df9c6"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/FileSource.py",
+    "sha256": "0cb9f05cc0ff333195c2736f45954a707c00163c5356dbdd12124b5a9701ea95",
+    "start_line": 856,
+    "end_line": 878,
+    "purpose": "hook-and-member-separator",
+    "excerpt_utf8": "    def hooks(self, className: str) -> Iterator[Callable[..., Any]]:\n        if self.cntlr and self.cntlr.plugins:\n            yield from self.cntlr.plugins.hooks(className)\n            return\n        yield from iter(())\n\n\ndef _archiveFileName(archiveFileSource: FileSource, filepath: str) -> str:\n    \"\"\"The path of a file inside an archive.\"\"\"\n    assert isinstance(archiveFileSource.basefile, str)\n    if filepath.startswith(archiveFileSource.basefile):\n        return filepath[len(archiveFileSource.basefile) + 1:]\n    # filepath.startswith(archiveFileSource.baseurl)\n    assert isinstance(archiveFileSource.baseurl, str)\n    return filepath[len(archiveFileSource.baseurl) + 1:]\n\n\ndef _zipMemberName(archiveFileSource: FileSource, archiveFileName: str) -> str:\n    \"\"\"The name of a zip member, with the separators that zip uses.\"\"\"\n    if archiveFileSource.isZipBackslashed:\n        return archiveFileName.replace(\"/\", \"\\\\\")\n    return archiveFileName.replace(\"\\\\\", \"/\")\n\n",
+    "excerpt_sha256": "7241b09226780f91cc76a425e4b4d84b84876c88398bdd1248561c80ae6a5ae5"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/FileSource.py",
+    "sha256": "0cb9f05cc0ff333195c2736f45954a707c00163c5356dbdd12124b5a9701ea95",
+    "start_line": 880,
+    "end_line": 929,
+    "purpose": "second-mapping-and-server-cache-open",
+    "excerpt_utf8": "def openFileStream(\n    cntlr: Cntlr | None, filepath: str, mode: str = \"r\", encoding: str | None = None\n) -> io.BytesIO | IO[Any]:\n    filestream: io.IOBase | FileNamedStringIO | None\n    if PackageManager.isMappedUrl(filepath):\n        filepath = PackageManager.mappedUrl(filepath) or filepath\n    elif (\n            cntlr\n            and hasattr(cntlr, \"modelManager\")\n        ): # may be called early in initialization for PluginManager\n        filepath = cntlr.modelManager.disclosureSystem.mappedUrl(filepath)\n    if archiveFilenameParts(filepath): # file is in an archive\n        return openFileSource(filepath, cntlr).file(filepath, binary=\"b\" in mode, encoding=encoding)[0]\n    if isHttpUrl(filepath) and cntlr:\n        _cacheFilepath = cntlr.webCache.getfilename(\n            cntlr.modelManager.disclosureSystem.mappedUrl(filepath), normalize=True) # normalize is separate step in ModelDocument retrieval, combined here\n        if _cacheFilepath is None:\n            raise OSError(_(\"Unable to open file: {0}.\").format(filepath))\n        filepath = _cacheFilepath\n    if not filepath and cntlr:\n        raise OSError(_('Unable to open file: \"{0}\".').format(filepath))\n    # file path may be server (or memcache) or local file system\n    if filepath.startswith(SERVER_WEB_CACHE) and cntlr:\n        filestream = None\n        cacheKey = filepath[len(SERVER_WEB_CACHE) + 1:].replace(\"\\\\\",\"/\")\n        if cntlr.isGAE: # check if in memcache\n            cachedBytes = gaeGet(cacheKey)\n            if cachedBytes:\n                filestream = io.BytesIO(cachedBytes)\n        if filestream is None:\n            filestream = io.BytesIO()\n            cntlr.webCache.retrieve(cntlr.webCache.cacheFilepathToUrl(filepath),\n                                    filestream=filestream)\n            if cntlr.isGAE:\n                gaeSet(cacheKey, filestream.getvalue())\n        if mode.endswith(\"t\") or encoding:\n            contents = filestream.getvalue()\n            filestream.close()\n            filestream = FileNamedStringIO(filepath, contents.decode(encoding or \"utf-8\"))\n        return filestream\n    # local file system\n    elif encoding is None and \"b\" not in mode:\n        openedFileStream = io.open(filepath, mode=\"rb\")\n        hdrBytes = openedFileStream.read(512)\n        encoding = XmlUtil.encoding(hdrBytes)\n        openedFileStream.close()\n        return io.open(filepath, mode=mode, encoding=encoding)\n    else:\n        # local file system\n        return io.open(filepath, mode=mode, encoding=encoding)\n",
+    "excerpt_sha256": "951bf894120fdf43cbb2eee3f53aacb222fb27bc8769c0876dcd843957a5bd74"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/FileSource.py",
+    "sha256": "0cb9f05cc0ff333195c2736f45954a707c00163c5356dbdd12124b5a9701ea95",
+    "start_line": 931,
+    "end_line": 980,
+    "purpose": "decode-and-declaration",
+    "excerpt_utf8": "def openXmlFileStream(\n    cntlr: Cntlr | None, filepath: str, stripDeclaration: bool = False\n) -> tuple[TextIO, str]:\n    # returns tuple: (fileStream, encoding)\n    openedFileStream = openFileStream(cntlr, filepath, \"rb\")\n\n    # check encoding\n    hdrBytes = openedFileStream.read(512)\n    encoding = XmlUtil.encoding(hdrBytes,\n                                default=cntlr.modelManager.disclosureSystem.defaultXmlEncoding\n                                        if cntlr else \"utf-8\")\n    # encoding default from disclosure system could be None\n    if encoding.lower() in (\"utf-8\",\"utf8\",\"utf-8-sig\") and (cntlr is None or not cntlr.isGAE) and not stripDeclaration:\n        text = None\n        openedFileStream.close()\n    else:\n        openedFileStream.seek(0)\n        text = openedFileStream.read().decode(encoding or \"utf-8\")\n        openedFileStream.close()\n        # allow filepath to close\n    # this may not be needed for Mac or Linux, needs confirmation!!!\n    if text is None:  # ok to read as utf-8\n        return open(filepath, encoding=encoding or \"utf-8\"), encoding\n    else:\n        if stripDeclaration:\n            text = stripDeclarationText(text)\n        return (FileNamedStringIO(filepath, initial_value=text), encoding)\n\ndef stripDeclarationBytes(xml: bytes, encoding: str | None) -> bytes:\n    if encoding is not None and not encoding.lower().startswith(\"utf-8\"):\n        text = xml.decode(encoding)\n        text = stripDeclarationText(text)\n        return text.encode(encoding)\n    xmlStart = xml[0:120]\n    indexOfDeclaration = xmlStart.find(b\"<?xml\")\n    if indexOfDeclaration >= 0:\n        indexOfDeclarationEnd = xmlStart.find(b\"?>\", indexOfDeclaration)\n        if indexOfDeclarationEnd >= 0:\n            return xml[indexOfDeclarationEnd + 2:]\n    return xml\n\n\ndef stripDeclarationText(text: str) -> str:\n    xmlDeclarationMatch = XmlUtil.xmlDeclarationPattern.match(text)\n    if xmlDeclarationMatch:  # remove it for lxml\n        if xmlDeclarationMatch.group(1) is not None:\n            raise XmlUtil.XmlDeclarationLocationException\n        start,end = xmlDeclarationMatch.span(2)\n        text = text[0:start] + text[end:]\n    return text\n",
+    "excerpt_sha256": "d8a192d123e0fd5880c0b4a9938188cb9ba6ae5f792cac93c9cfb250850541d0"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/ModelObjectFactory.py",
+    "sha256": "d76952f6cddad3ce0d1500919112de3cfad73309c6160aeb8b9d16294e08fe8a",
+    "start_line": 44,
+    "end_line": 62,
+    "purpose": "explicit-parser-options",
+    "excerpt_utf8": "def parser(\n        modelXbrl: ModelXbrl,\n        baseUrl: str | None,\n        target: None = None\n) -> tuple[etree.XMLParser[etree._Element], KnownNamespacesModelObjectClassLookup, DiscoveringClassLookup]:\n    _parser = etree.XMLParser(recover=True, huge_tree=True, target=target,  # type: ignore[call-overload]\n                               resolve_entities=False)\n    return setParserElementClassLookup(_parser, modelXbrl, baseUrl)\n\n\ndef setParserElementClassLookup(\n        _parser: etree.XMLParser[etree._Element],\n        modelXbrl: ModelXbrl,\n        baseUrl: str | None = None,\n) -> tuple[etree.XMLParser[etree._Element], KnownNamespacesModelObjectClassLookup, DiscoveringClassLookup]:\n    classLookup = DiscoveringClassLookup(modelXbrl, baseUrl)\n    nsNameLookup = KnownNamespacesModelObjectClassLookup(modelXbrl, fallback=classLookup)\n    _parser.set_element_class_lookup(nsNameLookup)\n    return _parser, nsNameLookup, classLookup\n",
+    "excerpt_sha256": "007ec97aac7b7e8c4fe91c97fb28fdc444bf7b099220fb1ee0b9bd5d33661d44"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/ModelObjectFactory.py",
+    "sha256": "d76952f6cddad3ce0d1500919112de3cfad73309c6160aeb8b9d16294e08fe8a",
+    "start_line": 171,
+    "end_line": 202,
+    "purpose": "parse-time-schema-discovery",
+    "excerpt_utf8": "class DiscoveringClassLookup(etree.PythonElementClassLookup):\n    def __init__(self, modelXbrl: ModelXbrl, baseUrl: str | None, fallback: etree.ElementClassLookup | None = None) -> None:\n        super(DiscoveringClassLookup, self).__init__(fallback)\n        self.modelXbrl = modelXbrl\n        self.streamingOrSkipDTS = modelXbrl.skipDTS or getattr(modelXbrl, \"isStreamingMode\", False)\n        self.baseUrl = baseUrl\n        self.discoveryAttempts: set[str] = set()\n        global ModelFact, ModelDocument\n        if ModelDocument is None:\n            from arelle import ModelDocument\n        if self.streamingOrSkipDTS and ModelFact is None:\n            from arelle.ModelInstanceObject import ModelFact\n\n    def lookup(self, document: object, proxyElement: etree._Element) -> type[etree._Element] | None:\n        # check if proxyElement's namespace is not known\n        ns: str | None\n        tag = cast(str, proxyElement.tag)\n        ns, sep, ln = tag.partition(\"}\")\n        if sep:\n            ns = ns[1:]\n        else:\n            ln = ns\n            ns = None\n        if (ns and\n            ns not in self.discoveryAttempts and\n            ns not in self.modelXbrl.namespaceDocs):\n            # is schema loadable?  requires a schemaLocation\n            relativeUrl = XmlUtil.schemaLocation(proxyElement, ns)\n            self.discoveryAttempts.add(ns)\n            if relativeUrl:\n                ModelDocument.loadSchemalocatedSchema(self.modelXbrl, proxyElement, relativeUrl, ns, self.baseUrl)\n\n",
+    "excerpt_sha256": "54709a3bcddbe9943242a5d41e67dba8d8b87042f6233f9c6572736fcd81de47"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/UrlUtil.py",
+    "sha256": "16b6550bc0b84a8ae588b9dc860703e636e5ab29eede26a5605e8d87aa5d45c4",
+    "start_line": 58,
+    "end_line": 62,
+    "purpose": "fragment-decode",
+    "excerpt_utf8": "def splitDecodeFragment(url: str) -> tuple[str, str]:\n    if url is None: # urldefrag returns byte strings for none, instead of unicode strings\n        return \"\", \"\"\n    urlPart, fragPart = url.split(\"#\", 1) if \"#\" in url else (url, \"\")\n    return (urlPart, unquote(fragPart, \"utf-8\"))\n",
+    "excerpt_sha256": "59ccb3ba313d2184918d7c6a6813526256c123107a618cdbc43de24f5e0a3e28"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/PackageManager.py",
+    "sha256": "7b72dc01d5bed727eb029e6b6f315e4ef67faf1121c447e24c7c129d1583aa6b",
+    "start_line": 10,
+    "end_line": 30,
+    "purpose": "package-wrapper",
+    "excerpt_utf8": "from arelle.packages._package_manager import PackageManager\n\nif TYPE_CHECKING:\n    from arelle.Cntlr import Cntlr\n    from arelle.FileSource import FileSource\n\n\n# ---------------------------------------------------------------------------\n# Backward-compatible module-level API\n#\n# These wrappers delegate to a module-level PackageManager singleton so that\n# existing callers (e.g. ``from arelle.PackageManager import isMappedUrl``)\n# continue to work without modification.\n# ---------------------------------------------------------------------------\n\n\n_singleton: PackageManager = PackageManager()\n\n\ndef getInstance() -> PackageManager:\n    return _singleton\n",
+    "excerpt_sha256": "a1af87f031cab7fc0137cf1a6c55e7941827137419d0c2816b7b942965811169"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/PluginManager.py",
+    "sha256": "dd64e5fe58108bfe69a955040b86bec336b2420585dfc2991d16a21d520699c4",
+    "start_line": 12,
+    "end_line": 35,
+    "purpose": "plugin-wrapper",
+    "excerpt_utf8": "from arelle.plugin_system._plugin_manager import PluginManager\n\nif TYPE_CHECKING:\n    # Prevent potential circular import error\n    from arelle.Cntlr import Cntlr\n\n\n# ---------------------------------------------------------------------------\n# Backward-compatible module-level API\n#\n# These wrappers delegate to a module-level PluginManager singleton so that\n# existing callers (e.g. ``from arelle.PluginManager import pluginClassMethods``)\n# continue to work without modification.\n# ---------------------------------------------------------------------------\n\n\n# Temporarily re-export for backwards compatability\nfrom arelle.plugin_system.entry_point_ref import EntryPointRef as EntryPointRef  # noqa: F401\n\n\n_singleton: PluginManager = PluginManager()\n\ndef getInstance() -> PluginManager:\n    return _singleton\n",
+    "excerpt_sha256": "4f0abf1094296e28231058f1f9295bbfc1c33c9e68735a5c62152802e71d62d0"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/package_manager.py",
+    "sha256": "6b54582c6c7e5a3a2b3beb258f84f4521f8d1b5f4bbb99e29fdf4e3e6d818bc9",
+    "start_line": 381,
+    "end_line": 404,
+    "purpose": "package-config-load-reset",
+    "excerpt_utf8": "    def init(self, cntlr: Cntlr, loadPackagesConfig: bool = True) -> None:\n        if loadPackagesConfig:\n            try:\n                self.packagesJsonFile = cntlr.userAppDir + os.sep + \"taxonomyPackages.json\"\n                with open(self.packagesJsonFile, encoding=\"utf-8\") as f:\n                    self.packagesConfig = json.load(f)\n                self.packagesConfigChanged = False\n            except Exception:\n                pass # on GAE no userAppDir, will always come here\n        if not self.packagesConfig:\n            self.packagesConfig = {  # savable/reloadable package configuration\n                \"packages\": [], # list taxonomy packages loaded and their remappings\n                \"remappings\": {}  # dict by prefix of remappings in effect\n            }\n            self.packagesConfigChanged = False # don't save until something is added to packagesConfig\n        self._cntlr = cntlr\n\n    def reset(self) -> None:\n        if self.packagesConfig:\n            self.packagesConfig.clear()\n        if self.packagesMappings:\n            self.packagesMappings.clear()\n\n    def orderedPackagesConfig(self) -> dict[str, Any]:\n",
+    "excerpt_sha256": "20d36e7c7ab804102888008a936092bd39231e6f9c00ca17f39d57284f06a13d"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/package_manager.py",
+    "sha256": "6b54582c6c7e5a3a2b3beb258f84f4521f8d1b5f4bbb99e29fdf4e3e6d818bc9",
+    "start_line": 447,
+    "end_line": 448,
+    "purpose": "package-close",
+    "excerpt_utf8": "    def close(self) -> None:\n        self.reset()\n",
+    "excerpt_sha256": "5ce3ec368c4f5b45d28f2442cebef597b98f3131a268a674bd580887c38b7a04"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/package_manager.py",
+    "sha256": "6b54582c6c7e5a3a2b3beb258f84f4521f8d1b5f4bbb99e29fdf4e3e6d818bc9",
+    "start_line": 675,
+    "end_line": 729,
+    "purpose": "package-remapping",
+    "excerpt_utf8": "    def rebuildRemappings(self, cntlr: Cntlr | None = None) -> None:\n        cntlr = cntlr or self._getCntlr()\n        remappings = self._getPackagesConfig()[\"remappings\"]\n        remappings.clear()\n        remapOverlapUrls: list[tuple[str, str, str]] = []  # (prefix, packageURL, rewriteString)\n        for _packageInfo in self._getPackagesConfig()[\"packages\"]:\n            _packageInfoURL = _packageInfo[\"URL\"]\n            if _packageInfo[\"status\"] == \"enabled\":\n                for prefix, remapping in _packageInfo[\"remappings\"].items():\n                    remappings[prefix] = remapping\n                    remapOverlapUrls.append( (prefix, _packageInfoURL, remapping) )\n        remapOverlapUrls.sort()\n        for i, _remap in enumerate(remapOverlapUrls):\n            _prefix, _packageURL, _rewrite = _remap\n            for j in range(i-1, -1, -1):\n                _prefix2, _packageURL2, _rewrite2 = remapOverlapUrls[j]\n                if (_packageURL != _packageURL2 and _prefix and _prefix2 and\n                    (_prefix.startswith(_prefix2) or _prefix2.startswith(_prefix))):\n                    _url1 = os.path.basename(_packageURL)\n                    _url2 = os.path.basename(_packageURL2)\n                    if _url1 == _url2: # use full file names\n                        _url1 = _packageURL\n                        _url2 = _packageURL2\n                    cntlr.error(\n                        codes=\"tpe:packageRewriteOverlap\",\n                        level=\"WARNING\",\n                        msg=_(\"Packages overlap the same rewrite start string %(rewriteStartString)s\")\n                            if _prefix == _prefix2 else\n                            _(\"Packages overlap rewrite start strings %(rewriteStartString)s and %(rewriteStartString2)s\"),\n                        rewriteStartString=_prefix,\n                        rewriteStartString2=_prefix2,\n                        file=(_url1, _url2),\n                    )\n\n    def isMappedUrl(self, url: str | None) -> bool:\n        return (self.packagesConfig is not None and url is not None and\n                any(url.startswith(mapFrom) and not url.startswith(mapTo) # prevent recursion in mapping for url hosted Packages\n                    for mapFrom, mapTo in self.packagesConfig.get(\"remappings\", {}).items()))\n\n    def mappedUrl(self, url: str | None) -> str | None:\n        if self.packagesConfig is not None and url is not None:\n            longestPrefix = 0\n            mapped: str | None = None\n            for mapFrom, mapTo in self.packagesConfig.get(\"remappings\", {}).items():\n                if url.startswith(mapFrom):\n                    if url.startswith(mapTo):\n                        return url # recursive mapping, this is already mapped\n                    prefixLength = len(mapFrom)\n                    if prefixLength > longestPrefix:\n                        mapped = mapTo + url[prefixLength:]\n                        longestPrefix = prefixLength\n            if longestPrefix:\n                return mapped\n        return url\n\n",
+    "excerpt_sha256": "c4af5629df1335f40affe2f861709f9c8c1d6b903071ed9d74e24d6ce87cbee9"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/plugin_manager.py",
+    "sha256": "220224f697688fd3408c0a9caa9761b8eb9ff01a8a8db1bccfd14f00bb0be389",
+    "start_line": 57,
+    "end_line": 100,
+    "purpose": "plugin-config-load-reset",
+    "excerpt_utf8": "    def init(self, cntlr: Cntlr, loadPluginConfig: bool = True) -> None:\n        # PluginManager.init is called inside Cntlr.__init__, so cntlr is a live object but its\n        # attributes are only assigned as __init__ progresses. Plugin loading uses the\n        # WebCache, so cntlr.webCache must already be assigned.\n        assert hasattr(cntlr, \"webCache\"), \"cntlr.webCache must be assigned\"\n        self._isInitialized = True\n        self.pluginJsonFile: str | None = None\n        self._cntlr: Cntlr = cntlr\n        self.pluginConfigChanged = False\n        self.pluginTraceFileLogger: logging.Logger | None = None\n        self.modulePluginInfos = {}\n        self.pluginMethodsForClasses = {}\n        self._pluginBase: str = cntlr.pluginDir + os.sep\n        self._entryPointRefCache: list[EntryPointRef] | None = None\n        self._entryPointRefAliasCache: dict[str, list[EntryPointRef]] | None = None\n\n        if PLUGIN_TRACE_FILE:\n            self.pluginTraceFileLogger = logging.getLogger(__name__)\n            self.pluginTraceFileLogger.propagate = False\n            handler = logging.FileHandler(PLUGIN_TRACE_FILE)\n            formatter = logging.Formatter(\"%(asctime)s.%(msecs)03dz [%(levelname)s] %(message)s\", datefmt=\"%Y-%m-%dT%H:%M:%S\")\n            handler.setFormatter(formatter)\n            handler.setLevel(PLUGIN_TRACE_LEVEL)\n            self.pluginTraceFileLogger.addHandler(handler)\n        if loadPluginConfig:\n            try:\n                self.pluginJsonFile = cntlr.userAppDir + os.sep + \"plugins.json\"\n                with open(self.pluginJsonFile, encoding=\"utf-8\") as f:\n                    self.pluginConfig = json.load(f)\n                self.freshenModuleInfos()\n            except Exception:\n                pass # on GAE no userAppDir, will always come here\n        if not self.pluginConfig:\n            self.pluginConfig = {  # savable/reloadable plug in configuration\n                \"modules\": {}, # dict of moduleInfos by module name\n                \"classes\": {}  # dict by class name of list of class modules in execution order\n            }\n            self.pluginConfigChanged = False # don't save until something is added to pluginConfig\n\n    def reset(self) -> None:  # force reloading modules and plugin infos\n        if self.modulePluginInfos:\n            self.modulePluginInfos.clear()  # dict of loaded module pluginInfo objects by module names\n        if self.pluginMethodsForClasses:\n            self.pluginMethodsForClasses.clear() # dict by class of list of ordered callable function objects\n",
+    "excerpt_sha256": "2e442288b58dc48ee1d074965218dbe1f236568e12026fec9ef400a7860e97e5"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/plugin_manager.py",
+    "sha256": "220224f697688fd3408c0a9caa9761b8eb9ff01a8a8db1bccfd14f00bb0be389",
+    "start_line": 138,
+    "end_line": 148,
+    "purpose": "plugin-close",
+    "excerpt_utf8": "        if self.pluginConfigChanged and cntlr.hasFileSystem and not cntlr.disablePersistentConfig:\n            pluginJsonFile = cntlr.userAppDir + os.sep + \"plugins.json\"\n            with open(pluginJsonFile, \"w\", encoding=\"utf-8\") as f:\n                jsonStr = json.dumps(self.orderedPluginConfig(), ensure_ascii=False, indent=2)\n                f.write(jsonStr)\n            self.pluginConfigChanged = False\n\n    def close(self) -> None:  # close all loaded methods\n        if self.pluginConfig is not None:\n            self.pluginConfig.clear()\n        self.reset()\n",
+    "excerpt_sha256": "c5bc50906111b27c82788a02090f0341c80c64dfd46b809ec52975b1e03bf6b8"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/plugin_manager.py",
+    "sha256": "220224f697688fd3408c0a9caa9761b8eb9ff01a8a8db1bccfd14f00bb0be389",
+    "start_line": 675,
+    "end_line": 698,
+    "purpose": "enabled-hooks",
+    "excerpt_utf8": "    def pluginClassMethods(self, className: str) -> Iterator[Callable[..., Any]]:\n        if self.pluginConfig:\n            try:\n                pluginMethodsForClass = self.pluginMethodsForClasses[className]\n            except KeyError:\n                # load all modules for class\n                pluginMethodsForClass = []\n                modulesNamesLoaded = set()\n                if className in self.pluginConfig[\"classes\"]:\n                    for moduleName in self.pluginConfig[\"classes\"].get(className):\n                        if moduleName and moduleName in self.pluginConfig[\"modules\"] and moduleName not in modulesNamesLoaded:\n                            modulesNamesLoaded.add(moduleName) # prevent multiply executing same class\n                            moduleInfo = self.pluginConfig[\"modules\"][moduleName]\n                            if moduleInfo[\"status\"] == \"enabled\":\n                                if moduleName not in self.modulePluginInfos:\n                                    self.loadModule(moduleInfo)\n                                if moduleName in self.modulePluginInfos:\n                                    pluginInfo = self.modulePluginInfos[moduleName]\n                                    if className in pluginInfo:\n                                        pluginMethodsForClass.append(pluginInfo[className])\n                self.pluginMethodsForClasses[className] = pluginMethodsForClass\n            yield from pluginMethodsForClass\n\n\n",
+    "excerpt_sha256": "61cf9f8bbc96140209a8d17af414033233513dc56356a96c09c50f4f1e604faa"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/package_registry.py",
+    "sha256": "659c80bb628e42fe5150679409e3f63af91d1482b8391896c36f77f8d1b99454",
+    "start_line": 29,
+    "end_line": 52,
+    "purpose": "registry-forwarding",
+    "excerpt_utf8": "    def get_mappings(self) -> dict[str, str]:\n        config = self._package_manager.orderedPackagesConfig()\n        return {\n            prefix: remapping\n            for prefix, remapping in config.get(\"remappings\", {}).items()\n            if isinstance(prefix, str) and isinstance(remapping, str)\n        }\n\n    def get_packages(self) -> tuple[PackageMeta, ...]:\n        config = self._package_manager.orderedPackagesConfig()\n        package_configs = config.get(\"packages\", [])\n        return tuple(\n            PackageMeta.from_config(package_config)\n            for package_config in package_configs\n        )\n\n    def is_mapped(self, url: str | None) -> bool:\n        return self._package_manager.isMappedUrl(url)\n\n    def map(self, url: str | None) -> str | None:\n        return self._package_manager.mappedUrl(url)\n\n    def rebuild(self) -> None:\n        return self._package_manager.rebuildRemappings()\n",
+    "excerpt_sha256": "26034805c19205319ea779d1c777f3c41627a020788af5eb662afebbda21dee6"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/plugin_provider.py",
+    "sha256": "c9a8bf87b24a6d7285d9a892f867d31672a532d248c9f06ca84b5dd1f5e7ea80",
+    "start_line": 39,
+    "end_line": 46,
+    "purpose": "provider-forwarding",
+    "excerpt_utf8": "    def hooks(self, hook_name: str) -> Iterator[Callable[..., Any]]:\n        yield from self._plugin_manager.pluginClassMethods(hook_name)\n\n    def get_plugins(self) -> dict[str, PluginMeta]:\n        plugin_infos = {}\n        for name, module_info in self._plugin_manager.pluginConfig.get(\"modules\", {}).items():\n            plugin_infos[name] = PluginProvider._parse_module_info(module_info)\n        return plugin_infos\n",
+    "excerpt_sha256": "02b5d28e68804577bfc07b0ee535937daca075b57cf4f079829aaf397d4a7677"
+  },
+  {
+    "path": "data/accounting-master/native-loader-source-20261018/sources/DisclosureSystem.py",
+    "sha256": "20b686bb3057560d973a922d511af847b74ccbf3bcae395e43c84757282d9334",
+    "start_line": 493,
+    "end_line": 529,
+    "purpose": "disclosure-map-and-xinclude",
+    "excerpt_utf8": "    def loadMappings(self) -> None:\n        basename = os.path.basename(self.mappingsUrl)\n        self.modelManager.cntlr.showStatus(_(\"parsing {0}\").format(basename))\n        try:\n            xmldoc = etree.parse(self.mappingsUrl)\n            xmldoc.xinclude()\n            for elt in xmldoc.iter(tag=\"mapFile\"):\n                self.mappedFiles[elt.get(\"from\")] = elt.get(\"to\")  # type: ignore[index,assignment]\n            for elt in xmldoc.iter(tag=\"mapPath\"):\n                self.mappedPaths.append((elt.get(\"from\"), elt.get(\"to\")))  # type: ignore[arg-type]\n        except (EnvironmentError,\n                etree.LxmlError) as err:\n            self.modelManager.cntlr.addToLog(_('Disclosure System \"%(name)s\" import %(importFile)s, error: %(error)s'),\n                                             messageCode=\"arelle:disclosureSystemImportError\",\n                                             messageArgs={\"error\": str(err), \"name\": self.name, \"importFile\": basename},\n                                             level=logging.ERROR)\n            etree.clear_error_log()\n\n    def mappedUrl(self, url: str) -> str:\n        if url in self.mappedFiles:\n            mappedUrl = self.mappedFiles[url]\n        else:  # handle mapped paths\n            mappedUrl = url\n            for mapFrom, mapTo in self.mappedPaths:\n                if url.startswith(mapFrom):\n                    mappedUrl = mapTo + url[len(mapFrom):]\n                    break\n        return mappedUrl\n\n    def isMappedUrl(self, url: str) -> bool:\n        if url in self.mappedFiles:\n            return True\n        else:  # handle mapped paths\n            for mapFrom, mapTo in self.mappedPaths:\n                if url.startswith(mapFrom):\n                    return True\n        return False\n",
+    "excerpt_sha256": "209e3aebc1cfa18147c5147d2e13b1338e1af2646950ac9cf687c6b7f0b41473"
+  },
+  {
+    "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__XmlUtil.py",
+    "sha256": "d8591db3a2fd394521cbeb719daa0ae397f92188c2a732554843935bb36c4418",
+    "start_line": 29,
+    "end_line": 29,
+    "purpose": "declaration-pattern",
+    "excerpt_utf8": "xmlDeclarationPattern = re.compile(r\"(\\s+)?(<\\?xml[^><\\?]*\\?>)\", re.DOTALL)\n",
+    "excerpt_sha256": "9187ccbd5607928c9b5dc2a501bcff899a2c49ced4827ec02c95fe8b6d2be234"
+  },
+  {
+    "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__XmlUtil.py",
+    "sha256": "d8591db3a2fd394521cbeb719daa0ae397f92188c2a732554843935bb36c4418",
+    "start_line": 146,
+    "end_line": 170,
+    "purpose": "encoding-branch-order",
+    "excerpt_utf8": "def encoding(xml: str | bytes, default: str = \"utf-8\") -> str:\n    if isinstance(xml,bytes):\n        s = xml[0:120]\n        if s.startswith(b\"\\xef\\xbb\\xbf\"):\n            return \"utf-8-sig\"\n        if s.startswith(b\"\\xff\\xfe\"):\n            return \"utf-16\"\n        if s.startswith(b\"\\xfe\\xff\"):\n            return \"utf-16\"\n        if s.startswith(b\"\\xff\\xfe\\x00\\x00\"):\n            return \"utf-32\"\n        if s.startswith(b\"\\x00\\x00\\xfe\\xff\"):\n            return \"utf-32\"\n        if s.startswith(b\"# -*- coding: utf-8 -*-\"):\n            return \"utf-8\"  # python utf=encoded\n        if b\"x\\0m\\0l\" in s:\n            str = s.decode(\"utf-16\")\n        else:\n            str = s.decode(\"latin-1\")\n    else:\n        str = xml[0:80]\n    match = xmlEncodingPattern.match(str)\n    if match and match.lastindex == 1:\n        return match.group(1)\n    return default\n",
+    "excerpt_sha256": "b68e712f8f9f627b97d46109196de9533a08b945aa60b81b2854b70e674aa93d"
+  },
+  {
+    "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__ModelDocument.py",
+    "sha256": "a1ef25aa35948ae6820824058b1e1fadc868ae6666f85ec0ea08fb5e2ba1a1e2",
+    "start_line": 185,
+    "end_line": 208,
+    "purpose": "parser-stream-and-errors",
+    "excerpt_utf8": "                return modelDocument\n        if (modelXbrl.modelManager.validateDisclosureSystem and (\n            (isEntry and modelXbrl.modelManager.disclosureSystem.validateEntryText) or\n            (modelXbrl.modelManager.disclosureSystem.validateFileText and\n             not normalizedUri in modelXbrl.modelManager.disclosureSystem.standardTaxonomiesDict))):\n            file, _encoding = ValidateFilingText.checkfile(modelXbrl,filepath)\n        else:\n            file, _encoding = modelXbrl.fileSource.file(filepath, stripDeclaration=True)  # type: ignore[misc,assignment]\n        xmlDocument = None\n        isPluginParserDocument = False\n        for pluginMethod in modelXbrl.modelManager.cntlr.plugins.hooks(\"ModelDocument.CustomLoader\"):\n            modelDocument = pluginMethod(modelXbrl, file, mappedUri, filepath)\n            if modelDocument is not None:\n                file.close()  # type: ignore[union-attr]\n                return modelDocument\n        _parser, _parserLookupName, _parserLookupClass = parser(modelXbrl,normalizedUri)\n        xmlDocument = etree.parse(file,parser=_parser,base_url=filepath)  # type: ignore[arg-type]\n        for error in _parser.error_log:\n            modelXbrl.error(\"xmlSchema:syntax\",\n                    _(\"%(error)s, %(fileName)s, line %(line)s, column %(column)s\"),\n                    modelObject=(referringElement, os.path.basename(uri)),\n                    fileName=os.path.basename(uri),\n                    error=error.message, line=error.line, column=error.column)\n        file.close()  # type: ignore[union-attr]\n",
+    "excerpt_sha256": "8036ea314f165c8e78c16e618f3a2b20a12fb637e78c1e6ee906e421617de922"
+  },
+  {
+    "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__ModelDocument.py",
+    "sha256": "a1ef25aa35948ae6820824058b1e1fadc868ae6666f85ec0ea08fb5e2ba1a1e2",
+    "start_line": 457,
+    "end_line": 469,
+    "purpose": "schemalocated-load",
+    "excerpt_utf8": "def loadSchemalocatedSchema(modelXbrl: ModelXbrl, element: ModelObject, relativeUrl: str, namespace: str, baseUrl: str) -> ModelDocument | None:\n    if namespace == XbrlConst.xhtml: # block loading xhtml as a schema (e.g., inline which is xsd validated instead)\n        return None\n    doc = load(modelXbrl, relativeUrl, isIncluded=False, isDiscovered=False, namespace=namespace, referringElement=element, base=baseUrl)\n    if doc:\n        if doc.targetNamespace != namespace:\n            modelXbrl.error(\"xmlSchema1.4.2.3:refSchemaNamespace\",\n                _(\"SchemaLocation of %(fileName)s expected namespace %(namespace)s found targetNamespace %(targetNamespace)s\"),\n                modelObject=element, fileName=baseUrl,\n                namespace=namespace, targetNamespace=doc.targetNamespace)\n        else:\n            doc.inDTS = False\n    return doc\n",
+    "excerpt_sha256": "d0e35943c5f74e5a24101a14bcb16560c2a8c6b6cff6e10dac23aa1478ebd66e"
+  },
+  {
+    "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__api__Session.py",
+    "sha256": "90666a44f4f74a2a2a00822655677b53b081283aa23e90c38485010e550cf0c1",
+    "start_line": 141,
+    "end_line": 161,
+    "purpose": "session-new-controller",
+    "excerpt_utf8": "        :return: True if the run was successful, False otherwise.\n        \"\"\"\n        if isinstance(logFileName, Path):\n            logFileName = str(logFileName)\n        with _session_lock:\n            self._check_thread()\n            PackageManager.getInstance().close()\n            PluginManager.getInstance().close()\n            if self._cntlr is None:\n                # Certain options must be passed into the controller constructor to have the intended effect\n                self._cntlr = createCntlrAndPreloadPlugins(\n                    uiLang=options.uiLang,\n                    disablePersistentConfig=options.disablePersistentConfig,\n                    arellePluginModules={},\n                )\n            else:\n                # Certain options passed into the controller constructor need to be updated\n                if self._cntlr.uiLang != options.uiLang:\n                    self._cntlr.setUiLanguage(options.uiLang)\n                self._cntlr.disablePersistentConfig = options.disablePersistentConfig or False\n            logRefObjectProperties = True\n",
+    "excerpt_sha256": "9ee24649d1c5f8e1cfdb77770ec6cafe86158df1811a5712f445b8cbf2ede07d"
+  },
+  {
+    "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlr-trusted.body",
+    "sha256": "4833393ffdfa9fc27767d2ce25029c3c8c7c42d2f57ad362f4083318f88cd431",
+    "start_line": 280,
+    "end_line": 322,
+    "purpose": "persistent-versus-gui-config",
+    "excerpt_utf8": "        # assert that app dir must exist\n        config = None\n        if self.hasFileSystem and not self.disablePersistentConfig:\n            os.makedirs(self.userAppDir, exist_ok=True)\n            # load config if it exists\n            self.configJsonFile = self.userAppDir + os.sep + \"config.json\"\n            if os.path.exists(self.configJsonFile):\n                try:\n                    with io.open(self.configJsonFile, \"rt\", encoding=\"utf-8\") as f:\n                        config = json.load(f)\n                except Exception as ex:\n                    config = None # restart with a new config\n        self.config = config or {\n            \"fileHistory\": [],\n            \"windowGeometry\": \"{0}x{1}+{2}+{3}\".format(800, 500, 200, 100),\n        }\n\n        # start language translation for domain\n        self.setUiLanguage(uiLang or self.config.get(\"userInterfaceLangOverride\",None), fallbackToDefault=True)\n        Locale.setDisableRTL(self.config.get(\"disableRtl\", False))\n\n        # Order is load-bearing:\n        # PluginManager initialization can load plugins using the WebCache, but the WebCache uses plugin hooks.\n        # We first create the PluginManager and PluginProvider so that initial plugin hook lookups in the WebCache\n        # won't find anything, but also won't crash on AttributeError. We then create the WebCache before calling\n        # PluginManager.init() so that plugin paths can be loaded via the WebCache. Lastly, we call\n        # webCache.resetProxies() to pick up plugin hook defined proxy settings that weren't available when WebCache\n        # was first created.\n        from arelle.PluginManager import getInstance as _getPluginManagerInstance\n        self._pluginManager = _getPluginManagerInstance()\n        self.plugins = PluginProvider(self._pluginManager)\n        self.webCache = WebCache(self, ProxyTuple.coerce(self.config.get(\"proxySettings\")))\n        self._pluginManager.init(self, loadPluginConfig=hasGui)\n        self.webCache.resetProxies(self.webCache._httpProxyTuple)\n\n        # requires plug ins initialized\n        self.modelManager = ModelManager.initialize(self)\n\n        # start taxonomy package server (requres web cache initialized, but not logger)\n        from arelle.PackageManager import getInstance as _getPackageManagerInstance\n        self._packageManager = _getPackageManagerInstance()\n        self._packageManager.init(self, loadPackagesConfig=hasGui)\n        self.packages = PackageRegistry(self._packageManager)\n",
+    "excerpt_sha256": "aa0a108a21aef0fbbcbed8357c5f5f0cc97b958aa464af7f0fc912a537918dd2"
+  },
+  {
+    "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlrcmdline-trusted.body",
+    "sha256": "36a23a60896f919021fe982c7ab9d0758be65c4d152d9e74fe2c0409e50210f8",
+    "start_line": 1471,
+    "end_line": 1488,
+    "purpose": "preload-construction",
+    "excerpt_utf8": "def createCntlrAndPreloadPlugins(\n        uiLang: str | None,\n        disablePersistentConfig: bool,\n        arellePluginModules: dict[str, Any]\n        ) -> CntlrCmdLine:\n    \"\"\"\n    This function creates a cntlr and preloads all the necessary plugins.\n    :param uiLang: The UI Language\n    :param disablePersistentConfig: flag to determine if persistent configs should be ignored\n    :param arellePluginModules: a dictionary of commands and moduleInfos\n    :return: cntlr\n    \"\"\"\n    cntlr = CntlrCmdLine(uiLang=uiLang, disable_persistent_config=disablePersistentConfig)\n    if arellePluginModules:\n        for cmd, moduleInfo in arellePluginModules.items():\n            cntlr.preloadedPlugins[cmd] = moduleInfo\n    return cntlr\n\n",
+    "excerpt_sha256": "f7661bb20be9b4d26efe171bf74abeccedd934d74cf31ee77d6dd53745d36be8"
+  },
+  {
+    "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlrcmdline-trusted.body",
+    "sha256": "36a23a60896f919021fe982c7ab9d0758be65c4d152d9e74fe2c0409e50210f8",
+    "start_line": 1599,
+    "end_line": 1611,
+    "purpose": "non-gui-controller",
+    "excerpt_utf8": "    def __init__(\n            self,\n            logFileName: TypeLogFileName | None = None,\n            uiLang: str | None = None,\n            disable_persistent_config: bool = False\n        ) -> None:\n        super().__init__(\n            hasGui=False,\n            uiLang=uiLang,\n            disable_persistent_config=disable_persistent_config,\n            logFileName=logFileName\n        )\n        self.preloadedPlugins: dict[str, Any] = {}\n",
+    "excerpt_sha256": "cb076ced65d3e2ba41f1ae29850f4c253d820dea750e35175d69f3931471d39e"
+  },
+  {
+    "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlrcmdline-trusted.body",
+    "sha256": "36a23a60896f919021fe982c7ab9d0758be65c4d152d9e74fe2c0409e50210f8",
+    "start_line": 1718,
+    "end_line": 1730,
+    "purpose": "empty-plugin-option",
+    "excerpt_utf8": "            for matchPattern, replaceFormat in options.redirectFallbacks.items():\n                self.webCache.redirectFallback(matchPattern, replaceFormat)\n        if options.cacheDirectory:\n            self.webCache.cacheDir = options.cacheDirectory\n        if options.plugins:\n            resetPlugins = False\n            savePluginChanges = True\n            showPluginModules = False\n            loadPluginOptions = False\n            for pluginCmd in options.plugins.split(\"|\"):\n                cmd = pluginCmd.strip()\n                if cmd == \"show\":\n                    showPluginModules = True\n",
+    "excerpt_sha256": "7860df83971cff73053a38ecb1620007eb971675767bfa02ad35a86267d654a5"
+  },
+  {
+    "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlrcmdline-trusted.body",
+    "sha256": "36a23a60896f919021fe982c7ab9d0758be65c4d152d9e74fe2c0409e50210f8",
+    "start_line": 1785,
+    "end_line": 1792,
+    "purpose": "empty-package-option",
+    "excerpt_utf8": "                    self.addToLog(_(\"Plug-in: {0}; author: {1}; version: {2}; status: {3}; date: {4}; description: {5}; license {6}.\").format(\n                        name, plugin.author, plugin.version, plugin.status,\n                        plugin.file_date, plugin.description, plugin.license),\n                        messageCode=\"info\", file=plugin.module_url)\n\n        if options.packages:\n            self.loadPackages(options.packages, options.packageManifestName or \"\")\n\n",
+    "excerpt_sha256": "f824404bcd9e6718b2c513d168ef860e667cff6efcbc6f46a02fa7b614a6ac9e"
+  }
+]

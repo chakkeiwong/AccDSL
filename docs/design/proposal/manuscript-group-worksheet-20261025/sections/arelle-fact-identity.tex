@@ -1,0 +1,92 @@
+\subsection{Equal amounts still have separate source occurrences}
+
+Suppose an issuer repeats one tagged amount in a statement and a note. A query
+may need a single amount, but an auditor still needs both locations and the
+evidence that they agree. These are different requirements. The proposed
+exchange preserves each occurrence before constructing a view that groups
+facts for a particular question. The inspected Arelle methods make the reason
+for that separation precise: displaying a value, comparing two values,
+grouping facts with matching aspects and removing repeated facts perform
+different operations \citep{arellefactidentity2026}.
+
+A displayed value is particularly unsuitable as the retained amount. The
+\code{effectiveValue} property produces a view: it rounds and formats numbers,
+represents nil with a string, and can return an error description. Even a
+convenient numeric property needs scrutiny. The inspected \code{vEqValue}
+converts numeric text to a binary floating-point number. The distinct integers
+$2^{53}=9{,}007{,}199{,}254{,}740{,}992$ and $2^{53}+1$ then have the same
+floating-point representation. This constructed example does not describe an
+issuer error; it shows why that conversion cannot establish exact identity.
+The adapter therefore keeps the source literal, the typed value and the
+displayed reading as distinct fields, with the transformation between them
+recorded \citep{arellefactidentity2026}.
+
+The same caution applies to a method whose name contains \emph{equal}. In the
+inspected \code{isVEqualTo}, the ordinary numeric comparison checks context
+and unit and follows the selected rounding mode, but the method does not itself
+compare concept names. Its nil branch returns whether the other fact is nil
+before comparing contexts. A caller needing facts about the same accounting
+quantity must establish that condition separately. Conversely, the item branch
+of \code{isDuplicateOf} checks concept, parent, context and numeric unit
+without comparing the item values. It can identify candidates for investigating
+a disagreement; its result does not resolve that disagreement. The tuple
+branch has additional child comparisons and must not be described as the same
+test \citep{arellefactidentity2026}.
+
+The dedicated duplicate-fact module supplies more explicit grouping. It checks
+concept, context and unit after forming hash buckets, and includes language
+for the relevant text-fact types. Its value tests nevertheless remain specific
+to the operation. Consider two hypothetical valid numeric occurrences with the
+same concept, context, unit and declared decimals of zero, whose value strings
+are \code{1} and \code{1.0}. In the inspected code, the ordinary value-equality
+key retains those strings, so the all-complete classification distinguishes
+them. The complete-subset reduction instead keys on declared decimals and the
+typed value; decimal one equals decimal one, so it retains the first occurrence.
+Thus even within this module, the classification and reduction do not share
+one universal equality key. The source strings and membership of a reduced
+view must remain recoverable \citep{arellefactidentity2026}.
+
+Reported accuracy creates a second distinction. For a finite declared decimal
+accuracy $d$, the inspected non-truncating interval helper assigns a numeric
+value $v$ the inclusive bounds $v-\tfrac12 10^{-d}$ and
+$v+\tfrac12 10^{-d}$. These are the helper's comparison bounds, not a confidence
+interval for the true economic amount. Values zero and one, both declared to
+zero decimals, have bounds $[-0.5,0.5]$ and $[0.5,1.5]$. They touch. The
+interval option of \code{isVEqualTo} therefore admits overlap under its other
+required conditions. The duplicate-set consistency check rejects the pair
+because unequal typed values with the same declared decimal accuracy fail its
+additional condition. Substituting one test for the other would change the
+question being answered \citep{arellefactidentity2026}.
+
+Pairwise agreement also differs from agreement of the whole set. Take three
+constructed observations of the same quantity: 100 at zero decimals, and 99.6
+and 100.4 at one decimal. The first has bounds $[99.5,100.5]$; the other two
+have bounds $[99.55,99.65]$ and $[100.35,100.45]$. Each precise observation
+overlaps the coarse one, but the precise observations disagree and the three
+intervals have no common point. The inspected consistent-pairs reduction can
+remove the coarse occurrence while leaving both precise occurrences. The
+consistent-set path instead reports the inconsistent set and falls back to
+complete-subset reduction. Neither operation establishes which precise
+observation the accounting analysis should accept \citep{arellefactidentity2026}.
+
+These paths require their own admission checks. The initial grouping considers
+validation state and the availability of a concept, type and context; a
+singleton bucket is not itself a validity verdict. The numeric consistency
+path also expects an inferred decimal accuracy from its helper, which returns
+no value when the fact's decimals attribute is absent. An adapter must not
+silently reinterpret an unsupported or unvalidated case as an ordinary
+consistent numeric fact. It retains the declared decimals and precision,
+validation state, nil state, concept, full context and unit, together with the
+particular comparison operation and its options \citep{arellefactidentity2026}.
+
+Finally, the inspected deduplicated-instance export removes fact nodes from
+the model's underlying tree before saving. The controller performs it at the
+end and warns that subsequent use of the modified model can be unreliable.
+The proposed exchange therefore copies every original occurrence and its
+diagnostics before constructing any optional reduced view. A view records
+its input members and selection rule; it does not replace the source record.
+This preserves disagreement for review while allowing a query to avoid
+counting an accepted repeated amount twice. These are requirements derived
+from pinned source inspection and independently checked constructed arithmetic;
+an executed adapter and actual-filing validation remain to be established
+\citep{arellefactidentity2026}.

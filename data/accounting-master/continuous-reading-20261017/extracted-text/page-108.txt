@@ -1,0 +1,51 @@
+CHAPTER 8.
+RECONSTRUCTION AND EXECUTION PROCEDURES
+99
+lots, cash follows settlement, share counts follow ownership events and debt face amount remains
+distinct from carrying value.
+The commit arguments have exactly four references:
+AccountingCommitArguments/v1 {
+basis_ref, authorization_ref, journal_ref, delta_ref
+}
+The expected opening state and branch generation appear once, in the outer operation request.
+A reference to a native assessment in the authorization field fails its reference type. False posting
+permission fails authorization. An unknown posting schema returns unsupported operation
+with no journal commit. All bindings are checked before looking up a prior receipt.
+Economic event
+and opening state
+Eligible method
+and permission
+Journal and
+economic delta
+Atomic state
+and receipt
+Figure 8.1: Each step answers a different question. Accounting assessment may inform the
+permission decision, but only the final transaction changes the book.
+For a delivery, the basis identifies the exact performance obligation, quantity, allocation and
+control finding. The opening state contains cumulative revenue, billing, collection and inventory.
+The selected method derives the recognition and lot movements; the report later consumes that
+same committed path. Combining a journal from one method version with a delta or opening
+state from another is invalid even if the totals happen to balance.
+8.5
+A lost acknowledgement must not create a second sale
+Suppose a sale commits but the response is lost. The client knows the request, but cannot
+tell whether the server committed it. Retrying under a new event ID could duplicate revenue.
+Retrying the original request must instead return the original immutable receipt.
+The lookup key is
+(entity, book, branch, business event).
+Payload, event version, opening state and request settings belong to the complete fingerprint,
+not this key. A renamed run or bumped event version cannot evade a conflict. A separately
+commissioned hypothetical projection uses a new branch namespace; reopening the same
+projection uses its existing one.
+A correction of an already committed event is a new business event linked to its predecessor
+and an admitted correction method, such as reversal and replacement or a dated adjustment.
+It preserves the original receipt. The accounting treatment must apply to the actual correction;
+absent treatment authority leaves it unresolved rather than licensing a generic reversal.
+Commit first validates input shape, closure, bindings and authorization in the requested historical
+view. It then looks up the stable event key. An equal fingerprint returns the old receipt with no
+additional commit; a different fingerprint returns an event-identity conflict. Only an absent
+key proceeds to the expected-state and generation comparison. This order is essential: after a
+successful sale the current head has changed, so checking freshness before replay would reject
+the very retry needed to resolve the lost response.
+A new candidate is assessed and constructed without mutation. One transaction then rechecks
+key absence and the expected head, inserts journal, delta, closing state, dependencies and

@@ -1,0 +1,111 @@
+\chapter[Reference computations and diagnostic experiments]{Reference computations that distinguish a useful approximation from a wrong answer}
+\label{sim:computation-cases}
+
+A method can be tested most clearly when a small version of its target is known exactly. This chapter constructs such targets for cash bounds, breach probabilities, policy comparison and residual minimization. The calculations are analytic reference cases. They are not a benchmark ranking and do not supply empirical evidence about a real company. Their role is to expose errors that a large simulation can conceal behind apparently stable averages.
+
+\section{An exact distribution from a declared prior}
+Return to cash $C=90-2\alpha$, and now deliberately assume $\alpha$ is uniform on $[0,1]$. This assumption is not inferred from the financial statements. It creates a transparent probabilistic reference. Cash is uniform on $[88,90]$, with mean 89 and variance $4/12=1/3$.
+
+For a covenant requiring cash at least 89.4, breach occurs when $\alpha>0.3$. Its probability is 0.7. The expected cash conditional on breach is the mean of the interval $[88,89.4)$, namely 88.7. These quantities answer different questions: unconditional mean, breach frequency and severity conditional on breach.
+
+A simulation with the right mean but the wrong breach probability is not accurate for covenant analysis. For example, a two-point approximation placing equal mass at 88 and 90 has mean 89 but breach probability one half. Matching the first moment does not preserve threshold events.
+
+The exact distribution also gives quantiles. Under the usual left-continuous generalized-inverse convention, the $p$-quantile is $88+2p$ for $0<p<1$, with endpoint values defined by continuous extension. The convention should be explicit when discrete mass points are introduced, because quantile definitions can differ at jumps.
+
+\section{A discrete grid with known bias}
+Approximate $\alpha$ by equally weighted midpoints $(i-1/2)/n$, for $i=1,\ldots,n$. The mean of the grid remains one half, so mean cash is exactly 89 for every $n$. Breach frequency is the fraction of midpoints above 0.3. For $n=4$, midpoints are 0.125, 0.375, 0.625 and 0.875, giving breach probability 0.75.
+
+The mean check passes perfectly while the breach estimate differs from 0.7. Increasing $n$ improves the discretization in this example, but its error depends on the threshold's location relative to the grid. A convergence study should examine the queried event, not only smooth moments.
+
+If the threshold lies exactly on a grid point, strict versus inclusive inequality changes the finite approximation. The continuous reference assigns zero probability to one point, but a discrete approximation assigns positive mass. This is a concrete reason to preserve boundary semantics during discretization.
+
+A deterministic grid is not an independent random sample. Standard Monte Carlo standard errors do not describe its quadrature error. Its uncertainty should be assessed through analytic bounds or refinement, not by treating grid points as independent observations.
+
+\section{A nonlinear guard with a narrow region}
+Let $\alpha$ remain uniform on $[0,1]$, but suppose a special covenant fails only when $|\alpha-0.5|<0.01$. The exact probability is 0.02. A coarse endpoint or midpoint grid can miss this region entirely.
+
+A random sample of size 100 has probability $0.98^{100}$, about 0.133, of observing no failures. A deterministic grid can have either zero or several hits depending on alignment. The two methods fail for different reasons: sampling variation versus systematic discretization geometry.
+
+A query-aware method should detect the guard and refine around its roots. If the guard is known analytically, solving its boundary is more efficient than hoping random paths discover it. Sampling remains useful when the region is complex, but the model should exploit available structure.
+
+The example also warns against dropping a region because its volume is small. A two per cent event can dominate expected loss if severity is large. Probability and consequence must be evaluated together.
+
+\section{A rare-loss mean}
+Suppose loss is zero with probability 0.999 and 1,000 with probability 0.001. Expected loss is 1, while the most common observed loss is zero. In 100 independent draws, the chance of no loss is $0.999^{100}$, about 0.905. Most such short runs report a sample mean of zero.
+
+The variance is $0.001(1000^2)-1^2=999$. The standard error of the sample mean at $n=100$ is $\sqrt{999/100}$, about 3.16. A single observed mean cannot support a precise estimate. A normal approximation is also questionable in a sample with very few tail events.
+
+This target can test whether a simulator reports uncertainty honestly. A zero-event run should not declare zero risk. A rare-event method should be checked against the known probability and mean, including its weighting and interval procedure.
+
+The example does not establish how rare real defaults are. Its parameters are chosen to make sampling failure visible. A real application needs an admitted event law and severity model, with model uncertainty separate from Monte Carlo error.
+
+\section{Importance sampling on the rare event}
+For the same two-state target, choose a proposal that samples the loss state with probability 0.1 instead of 0.001. The target-to-proposal weight is 0.01 in the loss state and $0.999/0.9=1.11$ in the zero state. The ordinary weighted loss contribution is therefore 10 in the loss state and zero otherwise.
+
+Its expectation under the proposal is $0.1(10)=1$, the correct target mean. Its variance is $0.1(10^2)-1=9$, much smaller than 999 in this constructed example. The reduction follows because the proposal deliberately visits the only important rare state.
+
+This is a mathematical comparison for a known finite distribution, not a general performance claim for importance sampling. In a high-dimensional model, a poor proposal can create extreme weights or miss support. A proposal tuned to one failure mode may neglect another. The finite case provides a correctness test for the weighting formula.
+
+If the implementation averages the unweighted sampled loss, it obtains expectation 100 under the proposal, not target expectation 1. If it reports the proportion of sampled defaults as the target probability, it reports 0.1 instead of 0.001. These large errors can look stable as sample size grows because the wrong quantity is being estimated accurately.
+
+\section{Paired policy differences}
+Suppose two policies have costs $Y_A=Z+2$ and $Y_B=Z+1$, where $Z$ is a common random operating cost. The true difference $Y_A-Y_B$ is exactly 1 in every world. Using the same draw of $Z$ gives zero sampling variance for the difference. Independent draws add unnecessary noise.
+
+This is an ideal illustration of common random numbers. In a real policy comparison, the policies can change transition probabilities or event timing. The coupling must preserve each policy's correct marginal distribution. Reusing a random seed alone does not guarantee that corresponding random draws represent the same economic shock after control flow diverges.
+
+A stable shock identity can help: demand innovation for a named period and customer should remain associated with that economic event rather than the next call to a global random-number generator. Otherwise adding a harmless diagnostic draw can change all subsequent scenarios.
+
+The paired comparison should also hold the initial history fixed. Subtracting policy A on one reconstructed company from policy B on another confounds policy and history. If the goal is a range of policy differences, optimize the paired difference over the same family.
+
+\section{A sampled minimum and a true minimum}
+Let $C(\alpha)=90-2\alpha$ on $[0,1]$. The true minimum is 88 at $\alpha=1$. A sample whose largest value is 0.9 has minimum cash 88.2. This is an upper bound on the true minimum because the sample is a subset of the family.
+
+If a payment requirement is 88.1, the sampled minimum suggests no sampled failure while the true family contains failure. An optimization or analytic monotonicity argument identifies it immediately. More random sampling may eventually approach the endpoint, but no finite sample alone proves the exact bound.
+
+Conversely, a relaxed outer model allowing $\alpha\in[0,1.1]$ gives minimum cash 87.8. That is a lower bound on the original minimum, but its witness is not a feasible original company. Inner and outer methods can bracket the answer. The bracket's width, not a single attractive number, describes unresolved computation.
+
+\section{A local optimizer misses another basin}
+Consider an illustrative cash function $C(x)=(x^2-1)^2+0.1x$ on $[-2,2]$. It has regions near both negative and positive one where cash is relatively low. A local optimizer initialized near one basin may not find the global minimum.
+
+The function is a numerical diagnostic, not a proposed cash-flow mechanism. Its purpose is to test whether a method labels a local result honestly. A global claim requires exhaustive interval bounds, verified comparison of all stationary and boundary candidates, or another suitable certificate.
+
+In a financial model, analogous nonconvexity can arise from fixed issuance fees, default options, tax thresholds or discrete investment. Repeated random starts can find more candidates but do not automatically prove completeness. The result should distinguish found local solutions from a verified global bound.
+
+A benchmark should include such a case only if the target profile admits nonconvexity. Requiring a linear solver to solve it would be an unfair capability test. Conversely, describing a general solver while testing only convex examples leaves a material gap.
+
+\section{Residual scaling can alter a compromise}
+Suppose an approximation cannot satisfy two residuals simultaneously: $r_1(\theta)=\theta$ and $r_2(\theta)=\theta-1$. Minimizing $r_1^2+r_2^2$ gives $\theta=1/2$. If the first residual is multiplied by 100 because currency units changed, minimizing $10000\theta^2+(\theta-1)^2$ gives $\theta=1/10001$.
+
+The different result is caused by weighting, not new economic information. In a well-specified exact system with sufficient capacity, both residuals may be zero and scaling would not change the exact solution. Under approximation, inconsistency or finite optimization, scaling affects the compromise.
+
+This diagnostic motivates reporting component residuals in original units and testing unit invariance. A normalized aggregate loss can be useful for training, but it should not hide a cash pricing error or constraint violation. A single loss threshold needs an economic interpretation.
+
+\section{Expected residual versus mean squared contribution}
+The earlier example $r=\theta-1+\theta\varepsilon$ with mean-zero unit-variance innovation gives desired squared expected residual $(\theta-1)^2$ and single-draw squared objective $(\theta-1)^2+\theta^2$. Their minimizers are one and one half.
+
+A reference implementation can evaluate both objectives analytically and by Monte Carlo. It should verify that independent paired draws estimate the former expectation and identical draws estimate the latter. The test should compare the target functions, not merely whether training loss decreases.
+
+A gradient check can add another layer. The desired derivative is $2(\theta-1)$; the other derivative is $4\theta-2$. At $\theta=1/2$, the second vanishes while the first is negative one. Automatic differentiation can return the correct derivative of the wrong implemented objective.
+
+This case is particularly relevant to learned equilibrium conditions because it separates stochastic estimation from target definition. Increasing batch size makes the wrong objective estimate more precise; it does not repair the missing expectation structure.
+
+\section{A boundary optimum}
+Minimize $(a+1)^2$ subject to $a\geq0$. The answer is $a=0$, objective 1. An interior first-order condition gives $a=-1$, objective zero, which is infeasible. A constrained solver should return the boundary with the appropriate multiplier.
+
+A penalty objective $(a+1)^2+\rho\min(a,0)^2$ has a negative optimum for every finite positive $\rho$, namely $a=-1/(1+\rho)$. The violation shrinks as the penalty grows but is not exactly zero. Reporting the penalized optimum as a feasible original solution without checking the constraint is wrong.
+
+Penalty methods can be useful algorithms. Their residual feasibility must be assessed against the original constraint and the required tolerance. A small violation may be immaterial for some economic quantities and decisive when it represents issuing more shares than authorized or paying cash that does not exist.
+
+\section{Designing a fair method comparison}
+A comparison should use the same evidence family, objective, policy class, timing, terminal condition and accuracy target. A faster method that omits a recovery term is not a faster solution of the original pricing model. A method trained on a smaller domain should not be compared as though it covers the full stress region.
+
+The baseline ladder can include exact finite enumeration, a refined classical numerical method, the plain proposed approximation and any enhanced version. Tuning budgets and stopping criteria should be declared. A deliberately weak comparator can establish only a narrow improvement over that comparator.
+
+For stochastic methods, use replications and uncertainty analysis appropriate to the claim. If several candidates pass hard validity screens but differences are not statistically resolved, describe them as viable under current evidence. Runtime, tail error and objective values from a few seeds remain descriptive unless the predeclared analysis supports ranking.
+
+\section{What to retain from a run}
+A run should preserve the model and data version, command, environment, seeds, hardware mode, wall time, outputs and the plan defining the question. It should record which diagnostics are validity vetoes, which trigger repair and which merely explain behavior.
+
+The result note should identify whether a failure invalidated the harness, implementation, target or candidate. A candidate failing a planned stress can motivate a repair phase. It does not automatically reject the broader research direction. A broken harness, by contrast, prevents interpreting the candidate comparison.
+
+For the present manuscript, these are proposed experiments and exact reference calculations. No stochastic ranking is claimed. The accompanying arithmetic script checks the deterministic examples and records its scope. Future numerical runs should use these cases to establish semantics before making claims about scalable performance.

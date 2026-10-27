@@ -1,0 +1,52 @@
+CHAPTER 6.
+HISTORICAL COMPATIBILITY AND FUTURE SIMULATION
+81
+6.8
+A solver formulation for ordinary rounded disclosures
+The debt example used an exact principal. Real disclosures often do not. Suppose debt is
+shown as 100 and interest as 5, each rounded to the nearest unit with the declared half-open
+intervals D ∈[99.5, 100.5) and I0 ∈[4.5, 5.5). Using an unknown fraction α and unknown total
+D would introduce the product αD. That expression is bilinear and is outside the promised
+linear fragment.
+Instead use principal amounts F and V . The compatible family satisfies
+F, V ≥0,
+99.5 ≤F + V < 100.5,
+4.5 ≤0.05(F + V ) < 5.5.
+(6.11)
+Future interest is I1 = 0.05F + 0.07V . Its infimum is 0.05 × 99.5 = 4.975, attained with
+F = 99.5, V = 0. Its supremum is 0.07 × 100.5 = 7.035, approached as F = 0 and V tends
+to 100.5 from below, but not attained. A closed interval is a valid enclosure, but its upper
+endpoint must not be reported as attainable. The exact solver check separately tests that no
+better value exists and whether each endpoint is attainable.
+For D > 0, the amount representation is equivalent to the fraction representation through
+D = F + V and α = F/D. At zero principal the fraction is undefined and must be omitted
+or treated as irrelevant, not recovered. A known fraction restriction α ≥a becomes F ≥aD
+when D > 0 and a is fixed. If both a and D are unknown, that product remains nonlinear.
+Reformulation has a domain of validity; it is not permission to send arbitrary formulas to a
+linear solver.
+The supported exact fragment contains rational linear equalities, weak and strict inequalities, and
+finite Boolean or enumeration choices. Guard partitions become finite disjunctions. Posting in
+integer cents introduces a different integer problem if performed before bounding. Consequently
+the request specifies whether bounds apply before quantisation, after a monotone declared
+rounding map, or to a bounded integer model. Approximate numerical valuations carry error
+metadata outside the exact rational kernel. Solver timeout, unsupported theory and unbounded
+objective have distinct responses; none is relabelled as infeasibility.
+6.9
+Building the family with explicit templates
+The reconstruction input is a model-scope record, not an invitation to invent unlimited journals.
+It lists event templates, slots per entity and period, allowed contract classes, source mappings,
+opening-state domains, calendars, resolution and excluded operations. A template gives an
+incidence vector for postings and a transition for economic state. Northstar’s annual bridges
+arise by substituting its collection, purchase and payment templates into opening-plus-movement
+identities.
+For each allowed slot, create an activity flag and nonnegative amount; an inactive slot has zero
+amount. Instantiate the template’s posting and state constraints, unify variables referring to
+the same observation or economic contract, and match report expressions to source domains
+through validated context mappings. Add cross-note restrictions and choice-group dependencies
+to this same formula. No separate account-by-account reconstruction is allowed. Mark every
+constraint with its evidence, rule or assumption origin.
+Enumerate the finite structural choices in a deterministic order. For each cell, ask for feasibility
+and retain the continuous formula, rather than enumerating real-valued solutions. An infeasible
+cell preserves a sufficient conflicting subset; an undecided cell preserves its formula and reason.
+Search is complete within the declared scope only when every finite cell has been decided, every
+applicable observation has been matched or explicitly qualified, and no resource truncation

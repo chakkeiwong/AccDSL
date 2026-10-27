@@ -1,0 +1,321 @@
+{
+  "profile": "OrderedEventEligibility/1",
+  "context": {
+    "entity": "Operating-beta",
+    "book": "legal-beta",
+    "currency": "USD",
+    "case_id": "synthetic-cycle-beta",
+    "mode": "synthetic"
+  },
+  "operation": "sale",
+  "input_types": {
+    "approved": {
+      "kind": "boolean",
+      "context": {}
+    },
+    "units": {
+      "kind": "rational",
+      "context": {
+        "entity": "Operating-beta",
+        "book": "legal-beta",
+        "case_id": "synthetic-cycle-beta",
+        "mode": "synthetic"
+      },
+      "dimensions": {
+        "goods:unit": 1
+      },
+      "scale": "1/1"
+    },
+    "consideration": {
+      "kind": "rational",
+      "context": {
+        "entity": "Operating-beta",
+        "book": "legal-beta",
+        "case_id": "synthetic-cycle-beta",
+        "mode": "synthetic"
+      },
+      "dimensions": {
+        "currency:USD": 1
+      },
+      "scale": "1/1"
+    },
+    "claim_id": {
+      "kind": "text",
+      "context": {}
+    },
+    "customer": {
+      "kind": "text",
+      "context": {}
+    },
+    "due": {
+      "kind": "date",
+      "context": {}
+    }
+  },
+  "stages": [
+    {
+      "id": "approval",
+      "reason": "applicability_not_selected",
+      "bindings": {
+        "approved": {
+          "kind": "event_input",
+          "name": "approved"
+        }
+      },
+      "manifest": {
+        "profile": "MethodRequirements/3",
+        "method_id": "eligibility.approval",
+        "version": "1",
+        "inputs": {
+          "approved": {
+            "type": {
+              "kind": "boolean",
+              "context": {}
+            },
+            "role": "state",
+            "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+          }
+        },
+        "requirements": [
+          {
+            "id": "approval",
+            "guard": {
+              "op": "const",
+              "type": {
+                "kind": "boolean",
+                "context": {}
+              },
+              "value": true
+            },
+            "guard_requires": [],
+            "predicate": {
+              "op": "ref",
+              "id": "approved"
+            },
+            "requires": [
+              "approved"
+            ],
+            "admission_refs": [],
+            "on_false": "unsupported",
+            "on_unknown": "unresolved"
+          }
+        ],
+        "required_known": [],
+        "capabilities": [],
+        "residual_prerequisites": [
+          "Selected synthetic contract; lifecycle invariants and accounting admission remain separate"
+        ]
+      }
+    },
+    {
+      "id": "unsealed_day",
+      "reason": "assessment_day_sealed",
+      "bindings": {
+        "cursor": {
+          "kind": "memory_leaf",
+          "pointer": "/collection_clock/cursor"
+        },
+        "day": {
+          "kind": "event_metadata",
+          "field": "date"
+        }
+      },
+      "manifest": {
+        "profile": "MethodRequirements/3",
+        "method_id": "eligibility.unsealed_day",
+        "version": "1",
+        "inputs": {
+          "cursor": {
+            "type": {
+              "kind": "date",
+              "context": {}
+            },
+            "role": "state",
+            "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+          },
+          "day": {
+            "type": {
+              "kind": "date",
+              "context": {}
+            },
+            "role": "state",
+            "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+          }
+        },
+        "requirements": [
+          {
+            "id": "unsealed_day",
+            "guard": {
+              "op": "const",
+              "type": {
+                "kind": "boolean",
+                "context": {}
+              },
+              "value": true
+            },
+            "guard_requires": [],
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "ref",
+                "id": "cursor"
+              },
+              "right": {
+                "op": "ref",
+                "id": "day"
+              }
+            },
+            "requires": [
+              "cursor",
+              "day"
+            ],
+            "admission_refs": [],
+            "on_false": "invalid",
+            "on_unknown": "unresolved"
+          }
+        ],
+        "required_known": [],
+        "capabilities": [],
+        "residual_prerequisites": [
+          "Selected synthetic contract; lifecycle invariants and accounting admission remain separate"
+        ]
+      }
+    },
+    {
+      "id": "sale_due",
+      "reason": "due_before_sale",
+      "bindings": {
+        "day": {
+          "kind": "event_metadata",
+          "field": "date"
+        },
+        "due": {
+          "kind": "event_input",
+          "name": "due"
+        }
+      },
+      "manifest": {
+        "profile": "MethodRequirements/3",
+        "method_id": "eligibility.sale_due",
+        "version": "1",
+        "inputs": {
+          "day": {
+            "type": {
+              "kind": "date",
+              "context": {}
+            },
+            "role": "state",
+            "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+          },
+          "due": {
+            "type": {
+              "kind": "date",
+              "context": {}
+            },
+            "role": "state",
+            "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+          }
+        },
+        "requirements": [
+          {
+            "id": "sale_due",
+            "guard": {
+              "op": "const",
+              "type": {
+                "kind": "boolean",
+                "context": {}
+              },
+              "value": true
+            },
+            "guard_requires": [],
+            "predicate": {
+              "op": "le",
+              "left": {
+                "op": "ref",
+                "id": "day"
+              },
+              "right": {
+                "op": "ref",
+                "id": "due"
+              }
+            },
+            "requires": [
+              "day",
+              "due"
+            ],
+            "admission_refs": [],
+            "on_false": "invalid",
+            "on_unknown": "unresolved"
+          }
+        ],
+        "required_known": [],
+        "capabilities": [],
+        "residual_prerequisites": [
+          "Selected synthetic contract; lifecycle invariants and accounting admission remain separate"
+        ]
+      }
+    },
+    {
+      "id": "claim_absent",
+      "reason": "duplicate_claim",
+      "bindings": {
+        "exists": {
+          "kind": "map_contains",
+          "pointer": "/claims",
+          "key_input": "claim_id"
+        }
+      },
+      "manifest": {
+        "profile": "MethodRequirements/3",
+        "method_id": "eligibility.claim_absent",
+        "version": "1",
+        "inputs": {
+          "exists": {
+            "type": {
+              "kind": "boolean",
+              "context": {}
+            },
+            "role": "state",
+            "source_ref": "Explicit binding evaluated against the current full intent and typed book"
+          }
+        },
+        "requirements": [
+          {
+            "id": "claim_absent",
+            "guard": {
+              "op": "const",
+              "type": {
+                "kind": "boolean",
+                "context": {}
+              },
+              "value": true
+            },
+            "guard_requires": [],
+            "predicate": {
+              "op": "not",
+              "arg": {
+                "op": "ref",
+                "id": "exists"
+              }
+            },
+            "requires": [
+              "exists"
+            ],
+            "admission_refs": [],
+            "on_false": "invalid",
+            "on_unknown": "unresolved"
+          }
+        ],
+        "required_known": [],
+        "capabilities": [],
+        "residual_prerequisites": [
+          "Selected synthetic contract; lifecycle invariants and accounting admission remain separate"
+        ]
+      }
+    }
+  ],
+  "residuals": [
+    "Finite declared lifecycle; full state invariants are separate prerequisites",
+    "No accounting, source or general language admission"
+  ]
+}

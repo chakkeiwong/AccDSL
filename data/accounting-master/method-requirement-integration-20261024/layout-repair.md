@@ -1,0 +1,1 @@
+The first build passed content checks but split the short authoring example across PDF pages 401–402. The complete first build, PDF and section source are preserved in before-layout-repair/. A minipage keeps the introduction and example together; no financial or semantic content changes. Rebuild and inspect the affected pages before recording acceptance.

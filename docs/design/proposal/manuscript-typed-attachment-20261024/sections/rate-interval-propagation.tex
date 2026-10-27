@@ -1,0 +1,92 @@
+\subsection{A rate bracket must travel with the loan}
+\label{sec:credit-rate-interval}
+
+The preceding dated examples have a convenient property: their initial cash
+flows identify an exactly representable effective rate. Ordinary schedules
+need not do so. Consider an asset acquired on 1 January 2025 for 98 with
+integral acquisition costs of 2. Expected receipts are 50 on 1 January 2026
+and 60 on 1 January 2027. Its initial carrying amount is 100, including those
+costs. For a supplied POCI classification, the original credit-adjusted rate
+discounts these initial expected receipts; subsequent interest applies that
+rate to amortised cost \citep[IFRS~9.5.4.1(a),B5.4.1--2,B5.4.7--8]{eu20231803}.
+
+Retain the supplied ACT/365F convention and annual compounding. Both intervals
+here are exactly 365 days. Write \(x=1+r\), where \(r>-1\) is the original
+annual rate. The initial measurement requires
+\[
+ 100=\frac{50}{x}+\frac{60}{x^2},\qquad
+ 100x^2-50x-60=0,\qquad
+ x=\frac{5+\sqrt{265}}{20}.
+\]
+The positive solution gives a rate of about 6.3941\%. That decimal is useful
+for reading the result; substituting it for the original rate would change
+every later valuation. An implementation must carry a justified numerical
+bound instead of presenting the rounded rate as exact.
+
+More generally, let \(c_i\geq0\) be initial expected receipts at strictly
+positive ACT/365F times \(t_i\), with at least one positive receipt. Their
+present value is
+\[
+ P(r)=\sum_i\frac{c_i}{(1+r)^{t_i}},\qquad
+ P'(r)=-\sum_i\frac{t_i c_i}{(1+r)^{t_i+1}}<0.
+\]
+Thus present value is continuous and strictly decreasing on \(r>-1\).
+Certified endpoint values \(P(r_-)\geq100\) and \(P(r_+)\leq100\)
+enclose the unique original rate. Mixed-sign receipts do not have this
+guarantee and are outside this particular method. The bracket expresses
+computational uncertainty about one rate, not different economic histories
+or probabilities assigned to them.
+
+The same rate must govern every later date. For elapsed days \(d\geq0\),
+define the accumulation factor \(F(r,d)=(1+r)^{d/365}\). It increases with
+\(r\), so
+\[
+ F(r_-,d)\leq F(r,d)\leq F(r_+,d).
+\]
+Each endpoint factor is itself enclosed by the integer-power calculation
+used in the preceding dated method. Adding, subtracting and multiplying
+these intervals, and taking reciprocals only of positive factors, encloses
+the corresponding financial calculation. Starting with exact gross carrying
+100 and allowance zero, the argument applies successively to accrual,
+receipts, credit revisions, non-credit catch-ups and equal gross/allowance
+write-offs. The original rate is never refitted when expected credit changes.
+
+The POCI example makes the distinction concrete. Supply contractual receipts
+of 60 and 75, separate from the initial expectations of 50 and 60. After
+181 days, let \(f=x^{181/365}\). Reducing expected receipts to 40 and 48
+reduces net carrying from \(100f\) to \(80f\), a loss of \(20f\).
+A supported finding that one fifth of the entire claim has no reasonable
+recovery prospect writes off gross and allowance of \(20f\) together.
+Remaining gross and net are both \(80f\); the contractual terminal receipt
+remaining after the write-off is 60. That contractual ceiling matters even
+though the accounting write-off does not itself establish legal forgiveness
+\citep[IFRS~9.5.4.4,B5.4.9]{eu20231803}.
+
+At the first annual date, collect 40. The initial quadratic implies
+\(80x-40=48/x\), so remaining gross is \(48/x\). If the supported expected
+terminal receipt then improves to 60, net carrying is \(60/x\) and signed
+allowance is \(-12/x\). Favorable changes in a POCI asset's lifetime loss
+expectations can produce this negative allowance
+\citep[IFRS~9.5.5.13--14]{eu20231803}. One year later, gross is 48, allowance
+is \(-12\), and net is 60. Collecting 60 and clearing the remaining gross
+and allowance closes the asset without another gain. Opening cash 300 becomes
+\(300-98-2+40+60=300\); cumulative profit is zero.
+
+For this calculation, a certified rate bracket of width \(2^{-40}\) gives
+monetary intervals narrower than \(5.38\times10^{-10}\) currency units.
+The profit interval contains zero, while cash is exactly 300. These are
+bounds under the declared numerical budget. A wider rate interval can make
+the financial result too imprecise; the method then reports that failure
+instead of silently rounding a balanced result.
+
+The returned bounds share the same original rate and cash history. Their
+separate endpoints cannot be freely combined into a journal or a set of
+jointly attainable statements. The documentary report therefore retains the
+root certificate, its original cash-flow target, all dated origins and the
+width of each amount. It proposes no postings from interval endpoints.
+Direct remaining-cash present values and compounded gross origins check the
+same history through different expressions. This extends the numerical
+admission of the finite performing and POCI profiles; their supplied
+classification, recovery, day-count and information-date requirements remain.
+Floating rates, mixed-sign root selection and general modification or
+write-off allocation methods require their own treatment.

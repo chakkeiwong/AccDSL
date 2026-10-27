@@ -1,0 +1,35 @@
+{
+  "assumptions": [
+    "The supplied helper interfaces are authoritative; their omitted implementations were not inspected.",
+    "Workers are trusted and remain in their initial process group. Deliberate detachment and uncatchable termination during registration are outside this review.",
+    "The CLI must restrict require_review=False to a path that already establishes current controller approval; that caller-side condition is not supplied."
+  ],
+  "checks": [
+    "Reviewed the supplied scheduler, recovery, phase-execution and support code without tools.",
+    "Checked exception boundaries, stop/resume behavior, terminal outcome publication and acceptance limits.",
+    "The reported 104 passing tests support control-plane verification; test bodies were not supplied and the count does not establish accounting correctness."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "tests/test_accounting_master.py"
+  ],
+  "issues": [
+    "Terminal integrity failure is not reflected in the run outcome. In Master.run's finally block, the manifest is finalized before self.refresh(). If refresh raises ContinuationVeto, ValueError or OSError, the fallback writes next-plan.json with status='continuation_veto', but leaves outcome and the finalized manifest unchanged. run_finished and the return value can therefore report 'catalog_slices_accepted_mission_open' or another ordinary outcome while the executable plan records an integrity veto. Repair: resolve final refresh and its failure classification before publishing the terminal manifest/event; on fallback set outcome='continuation_veto', preserve the reason, and return that same outcome. Verify agreement among the manifest, next plan, event and returned outcome when final refresh fails.",
+    "Run initialization leaves an ordinary-interruption gap in durable bookkeeping. After the run manifest is written and the run is appended to self.state['runs'], the initial self.refresh() executes outside the try/finally. A handled SIGTERM/KeyboardInterrupt or refresh error there bypasses run_stopped, finished_at, outcome and final state publication entirely. Depending on where refresh stops, the state may reference an unfinished manifest or the manifest may never become linked from saved state. This is ordinary initialization failure, not the excluded fork-registration kill window. Repair: establish terminal bookkeeping before the first fallible operation after creating the run record, and enclose initial refresh in the same guarded lifecycle as execution. Preserve an explicit interrupted/veto outcome without publishing an executable plan when initialization fails."
+  ],
+  "next_actions": [
+    "Fix terminal publication ordering and extend the guarded lifecycle to initial refresh.",
+    "Add targeted scheduler coverage for initial-refresh interruption and final-refresh integrity failure, then rerun controller verification and review."
+  ],
+  "residuals": [
+    "Lock ownership, bounded process cleanup, approval-rule enforcement and persisted-state validation depend on omitted helpers; this packet supports interface-level assessment rather than independent verification of those implementations.",
+    "Scoped acceptance remains explicitly distinct from mission completion. Source checks over the accepted 192-report panel and passing engineering tests cannot close accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Apply the bounded packet-only review to scheduler behavior and its stated interfaces.",
+    "Separate demonstrated lifecycle defects from limitations of the supplied evidence."
+  ],
+  "summary": "REVISE: initialization can escape terminal bookkeeping, and final refresh failures can publish contradictory run outcomes.",
+  "verdict": "REVISE"
+}

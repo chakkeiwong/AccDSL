@@ -1,0 +1,66 @@
+\paragraph{Declare the company book before applying its methods.}
+The preceding native examples use a fixed company context and chart of accounts.
+A reusable calendar does not remove that restriction. A company may keep its cash
+under account \texttt{101}, another under \texttt{bank.alpha}; their contract
+records may also have different structures. The optional
+\texttt{CompanyBook/1} reference makes those choices explicit before a method
+reads balances or proposes an entry. It declares the entity, book, currency,
+conditional case, period, account classifications and selected cash account.
+Balances use the existing debit-positive convention and sum to zero. Each scalar
+in the method's memory has a declared type and an address within a closed schema.
+
+The payment example separates the accounting relation from those local names.
+One synthetic company maps the cash and liability roles to
+\texttt{bank.alpha} and \texttt{note.alpha}, with the outstanding amount under
+\texttt{loan}. Another maps the roles to \texttt{101} and \texttt{230}, with the
+amount under \texttt{contracts/obligation}. Both start with cash of USD~100 and an
+outstanding liability of USD~30. A payment of USD~3.50 credits cash and debits
+the liability by the same amount, leaving cash of USD~96.50 and a liability of
+USD~26.50. The contract record falls to USD~26.50 and its cumulative payments
+rise to USD~3.50. A second payment of USD~26.50 extinguishes the liability and
+leaves cash of USD~70. Other accounts and unrelated contract records are unchanged.
+The example assumes sufficient cash and a positive payment no larger than the
+outstanding amount; the generic book does not impose a universal funding policy.
+
+\texttt{CompanyBookMethod/1} declares an injective mapping from account roles to
+the book's accounts, prerequisite predicates, monetary calculations, memory
+replacements and postconditions. Bindings select declared account balances,
+typed memory values or supplied event inputs. Their company, dimensions and
+scale must agree exactly with the method's input declarations. A dollar amount
+cannot become an inventory quantity merely because both are rational numbers.
+The existing monetary interpreter derives the journal and separate gross cash
+flows. The memory interpreter then replaces the specified scalar fields; this
+profile rejects dynamic paths, new collection members and container writes.
+Nested prerequisite and monetary definitions carry the enclosing method's
+identity and version. A literal memory replacement is interpreted in the
+destination's declared type.
+
+\texttt{CompanyBookTransition/1} checks the entire request before assessing its
+prerequisites. It derives monetary effects, stages memory changes and constructs
+a new book from the same starting state. Only then does it evaluate the
+postconditions against that proposed book. In the payment case, a postcondition
+requires the credit balance of the liability account to equal the outstanding
+contract amount. A failed postcondition returns no applied book, although the
+staged calculation remains available for diagnosis. An unknown applicability
+finding remains unresolved; a false finding can make the chosen method
+unsupported. An inactive guarded prerequisite does not, by itself, cancel the
+economic event: a separate decision determines whether an event should occur.
+
+The request identifies both the starting book and the complete method by digest.
+Application recomputes the proposal and compares its canonical JSON representation,
+including Boolean and numeric types. Changing a saved journal, memory value or
+authorization flag therefore cannot pass merely by replacing its digest. Event
+identities cannot repeat, dates cannot precede the current book, and each event
+must fall within the declared period. This is an atomic construction of a
+provisional value; the separate posting-authorization and durable-storage rules
+still govern any admitted or persisted transaction.
+
+Five comparisons connect this reference to the retained native methods. Two
+current-tax payments and three complete-lot sales reproduce their native journals,
+gross flows and entire resulting states through explicit mappings. The mappings
+retain every native field outside the declared changes; both payment cases also
+reproduce the complete native financial reports. These checks concern the selected
+synthetic cases. General reporting and closing, source admission, dynamic contract
+collections, currency conversion and the broader corporate package still require
+their own methods. The declared book supplies a common place to compose those
+methods without weakening the older profiles' invariants.

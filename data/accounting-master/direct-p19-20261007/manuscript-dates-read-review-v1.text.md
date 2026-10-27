@@ -1,0 +1,1 @@
+BLOCK_PACKET — The scope includes "distinction from the later tax treatment," and the prose asserts the income-tax treatment has a different application date, but the packet supplies no tax-treatment source clause (the trailing note references an Interpretation 16 page-1 extraction without including its text), so that scope element cannot be checked from the packet alone.

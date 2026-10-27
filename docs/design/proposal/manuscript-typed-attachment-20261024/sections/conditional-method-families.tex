@@ -1,0 +1,166 @@
+\section{A balanced return still needs a quantity limit}
+\label{sec:conditional-method-families}
+
+A return can be described by balanced monetary postings even when its quantity
+exceeds the number of units sold. The preceding histories preserve unknown
+amounts and explicit stock conditions. Applying an accounting method to those
+amounts also requires a connection between its monetary calculations and its
+selected economic prerequisites. This section develops that connection for a
+restricted, exact example of returned goods.
+
+The example retains an authored settlement dated 1 February 2025. Let \(n\)
+be the returned quantity, \(p\) the refund price per unit, \(c\) the original
+unit cost, \(d\) the reduction in value per unit and \(h\) the handling cost
+per unit. Quantities are in units of goods; unit amounts are in dollars per
+unit. Let \(N\) be the total recoverable amount of the returned goods in
+dollars. The assumed calculations give refund cash \(R\), handling cash \(H\)
+and inventory carrying amount \(V\):
+\begin{align}
+\label{eq:method-family-amounts}
+ R&=np, & H&=nh, & V&=\min\{n(c-d),N\}.
+\end{align}
+These are the retained synthetic method's calculations. Its applicability to
+an actual company's policy and contract still requires the corresponding facts
+and authority. The purpose here is to preserve all conditional amounts within
+this specified method and test its selected prerequisites.
+
+\subsection{Keep both sides of the carrying-value minimum}
+
+Suppose \(p=20\), \(c=12\), \(d=2\) and \(h=4\) dollars per unit. The
+authored domains permit \(0\leq n\leq12\) units and \(5\leq N\leq30\)
+dollars, with endpoints included. Refund and handling cash are linear in
+\(n\). The minimum is represented by two disjoint cases:
+\begin{equation}
+\label{eq:method-family-minimum}
+ \begin{cases}
+  V=10n, & 10n\leq N,\\
+  V=N,   & N<10n.
+ \end{cases}
+\end{equation}
+Equality belongs to the first case. Every possible pair \((n,N)\) belongs
+to exactly one case, so the compiler neither drops equality nor counts it as a
+separate alternative. Each case retains the entire original input domain and
+all monetary calculations. Nested minima retain the combinations of their
+cases, subject to the declared finite branch limit.
+
+The complete \path{PiecewiseMethodFamily/1} definition includes the selected
+\path{MethodMonetaryEffects/1} record and its digest, one explicit interval and
+premise for every input, output measurements, target obligations and the branch
+limit. Entity, book, date, dimensions and scale are checked before arithmetic
+is lowered to rational formulas. A closed singleton domain can supply a fixed
+coefficient while its original declaration remains in the definition. Thus an
+unknown \(n\) multiplied by the fixed \(p=20\) is supported. If both \(n\)
+and \(p\) vary, their product is outside this affine profile; it is reported
+as unsupported, rather than replaced by a guessed price.
+
+The postings provide a separate algebraic check. Let \(L\) be the refund
+liability amount being released and \(A\) the recovery asset being removed,
+both expressed as positive dollar amounts. With debit-positive signs, the
+retained method posts \(L\) to the refund liability, \(-A\) to the recovery
+asset, \(V\) to inventory, \(R-L\) to revenue, \(A-V\) to cost of goods
+sold, \(H\) to selling expense and \(-R-H\) to cash. Their sum is
+\begin{equation}
+\label{eq:method-family-balance}
+ L-A+V+(R-L)+(A-V)+H-R-H=0.
+\end{equation}
+Each term cancels regardless of the proposed return quantity. The compiler
+requires this balance, and the cash-flow reconciliation, to simplify exactly;
+it does not add a balancing amount. Equation~\eqref{eq:method-family-balance}
+also explains why balance cannot supply the missing quantity restriction.
+
+\subsection{Intersect the amounts with selected prerequisites}
+
+The selected \path{MethodRequirements/3} definition supplies that restriction
+through the sold quantity \(s\), as well as conditions on dates, component
+identity, settlement state and rights. The joined
+\path{PrerequisiteMethodFamily/1} embeds both complete definitions. Every
+requirement input maps either to a shared monetary input or to an explicit
+external known or unknown value. A shared mapping requires exactly the same
+complete type and the original source reference on each side. Its proposed
+premise explains the correspondence; matching labels alone does not establish
+that two reported quantities refer to the same goods.
+
+For the retained example, the relevant quantity and cash conditions include
+\begin{equation}
+\label{eq:method-family-selected-conditions}
+ 0<n\leq s,\qquad np=R_{\mathrm{cash}},\qquad
+ nh=H_{\mathrm{cash}},
+\end{equation}
+where \(R_{\mathrm{cash}}\) and \(H_{\mathrm{cash}}\) are the supplied
+external cash facts. With \(s=10\), \(R_{\mathrm{cash}}=40\),
+\(H_{\mathrm{cash}}=8\), \(p=20\) and \(h=4\), the refund condition
+requires \(20n=40\), hence \(n=2\). The handling condition independently
+agrees: \(4n=8\). The quantity limit is also satisfied.
+
+Both cases in equation~\eqref{eq:method-family-minimum} survive. For
+\(20\leq N\leq30\), carrying amount is 20 dollars; for
+\(5\leq N<20\), it equals \(N\). The result therefore retains a family
+of possible carrying amounts and their dependence on recoverable value, even
+though refund cash has fixed the returned quantity. Neither the two cases nor
+the number of retained witnesses supplies a probability distribution.
+
+Now fix \(n=11\), keep \(s=10\), and supply consistent refund and handling
+cash of 220 and 44 dollars. Also fix \(N=20\), \(L=40\) and \(A=16\).
+The method gives \(V=\min\{110,20\}=20\). Its eight posting amounts are
+40, \(-16\), 20, 180, \(-4\), 44, \(-220\) and \(-44\) dollars;
+they sum to zero. The monetary family consequently contains a balanced
+assignment. The selected quantity predicate requires \(11\leq10\), so
+the joined conditional family is empty. All inputs are singleton in this
+counterexample, and constant evaluation leaves one minimum case to check.
+A hypothetical quantity inconsistent with an imposed constraint makes this
+intersection empty; it does not make the supplied record structurally malformed.
+
+External findings retain a different role. In the selected settlement, a known
+false finding that all return rights have closed yields the original
+\path{unsupported} consequence. An unknown finding remains unresolved.
+The solver cannot choose either finding to rescue an otherwise attractive
+monetary assignment. Known dates and component identifiers likewise retain
+the exact original comparisons. Across fixed findings the original consequence
+priority is invalid, then unsupported, then unresolved.
+
+The first joined profile evaluates fixed guards with the original evaluator.
+An inactive body adds no condition, while the separate requirement that an
+input be known still applies. A guard with unknown external support is
+unresolved; a guard depending on a varying monetary input is unsupported in
+this version. Numeric equalities and inequalities, conjunctions and products
+with at most one varying operand can restrict the shared quantities.
+General symbolic disjunctions and products of two varying quantities need
+further methods.
+
+A value in a feasible assignment is known \emph{within that hypothetical
+assignment}. This satisfies the selected requirement's known-value test during
+replay, but does not turn an unknown actual transaction into an observed fact.
+Missing external facts, missing mapping premises and residual source or native
+state obligations remain visible. A feasible numerical candidate with such
+target obligations cannot establish that the intended actual history exists.
+
+\subsection{Check the complete assignment and preserve unresolved search}
+
+Every feasible branch is replayed through the unchanged monetary evaluator and
+the unchanged prerequisite evaluator, using the same exact input assignment.
+The checker also substitutes that assignment into every generated constraint.
+It retains the parent branch identities, external values and reasons, mappings,
+original expressions and source references. Another valid witness is acceptable;
+reproducing the solver's first chosen value is not the membership criterion.
+An infeasibility result retains named conflicting constraints and rechecks their
+joint inconsistency.
+
+A global finite cell budget and elapsed-time policy apply across the retained
+branches. A witness from one visited branch establishes candidate existence,
+while unvisited branches still prevent a complete-search claim. Conditional
+emptiness requires every retained branch to be checked infeasible. Zero or
+exhausted budgets leave the search unknown. Bounded Python validation and exact
+replay are not hard-preempted at the elapsed deadline, and repeated searches near
+that boundary can report different coverage.
+
+The executable specifications, complete synthetic inputs and adverse cases are
+retained under \path{data/accounting-master/}:
+\begin{quote}\small
+\path{piecewise-method-family-20261024}\\
+\path{prerequisite-method-family-20261024}
+\end{quote}
+The intersection strengthens a
+conditional method family without selecting one history. Applying such methods
+through a complete economic history, recovering actual legal and operational
+state, admitting source interpretations, integer lots and broader nonlinear
+methods remain substantive simulator work.

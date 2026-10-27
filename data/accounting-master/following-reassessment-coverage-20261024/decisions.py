@@ -1,0 +1,13 @@
+EVIDENCE={'reassessment':'following-tax-reassessment-20261024','manuscript':'following-reassessment-integration-20261024'}
+UPDATES={}
+def add(ids,advance,residual,next_action):
+    for key in ids.split():UPDATES[key]={'evidence':['reassessment','manuscript'],'advance':advance,'residual':residual,'next_action':next_action,'full_requirement_closed':False,'acceptance':'not_promoted'}
+add('MC05','Cumulative interval covers continued events and permits same-endpoint corrections only with complete coverage.','Fresh deferred measurement and repeated carry remain incomplete.','Bind post-current-journal measurement state and date.')
+add('MC11 MC13 I05','Full predecessor and stable tax-vintage identity retain all settlements and superseded assessment history.','General annual state interfaces and repeated replacement absent.','Retain these histories through a compatible deferred caller.')
+add('MC16 G4 P17-04.10','Cumulative tax replaces only current expense; old payable never conceals unsupported current credit.','Actual law,credit/refund handling and fresh deferred recognition remain unadmitted.','Require fresh bases,recognition findings and recovery capacity.')
+add('MC24 G2','Closed reassessment request and full apply preserve original loss opening and exact current book.','General authoring and annual execution remain incomplete.','Specify post-current-tax deferred measurement without old-interface projection.')
+add('MC26','639 checks across40 cases,13 focused and24 regression methods validate cumulative replacement.','Synthetic checks do not establish actual company/accounting admission.','Check post-journal bases,recorded allocations and shared capacity independently.')
+add('MC28','Tax5 to7 after current payments2 gives payable35/4,profit-19,cash715/2;original loss19 is not consumed twice.','Selected hypothetical book is not a complete historical company.','Measure desired deferred balances from fresh explicit premises.')
+add('MC32','Version3.89 preserves174 sources,286 prior displays and739 citations;bounded actual rendered review recorded.','Dense navigation and whole-document/domain/human acceptance remain open.','Preserve prior sources and explain fresh measurement assumptions.')
+add('MC33 MC34 MC35','Post-carry cumulative replacement repaired and all prior coverage preserved.','No whole phase closes;S6 held,S7 deferred.','Continue deferred compatibility and source-completeness work internally.')
+add('P17-04.11','One cumulative following-period replacement preserves actual carried/new settlements and original loss inventory.','New deferred recognition,repeated replacement/carry and annual acceptance remain open.','Complete compatible conditional deferred assessment before another boundary.')

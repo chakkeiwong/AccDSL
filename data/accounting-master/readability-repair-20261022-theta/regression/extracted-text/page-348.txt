@@ -1,0 +1,51 @@
+CHAPTER 13.
+IMPLEMENTATION CONTRACTS
+339
+substitute a newer taxonomy. Original schemas remain unchanged; an external resolver or
+isolated cache associates their declared addresses with the retained bytes. Any built-in cache
+fallback must belong to the same checked source set (Arelle contributors, 2026c).
+Nor is a successful API return necessarily a validation verdict. In the same source version,
+the controller’s return value takes accumulated validation errors into account only when
+validationExitCode is enabled. The proposed adapter sets it explicitly, requests validation,
+disables automatic formula execution, and examines the returned status, diagnostic messages
+and model errors together. It keeps the model open while copying the necessary facts, contexts,
+units and original occurrence references, then closes the session. One session runs at a time in
+its owning thread within a process; the inspected API uses shared package and plugin state.
+These are source-grounded interface requirements for a later implementation, not results from
+an executed Arelle adapter (Arelle contributors, 2026c).
+13.13.1
+An inline value is already a transformed reading
+Return to the source spelling 1,234. At the inspected Arelle version, an inline fact’s value
+property first obtains assembled text and applies the selected transformation. In the ordinary
+non-nil numeric path, it then converts that result to a decimal number, applies the declared
+scale and applies the sign. Both textValue and stringValue delegate to this transformed value.
+Reading any of those three properties and applying scale again would therefore change the
+reported amount (Arelle contributors, 2026b).
+For a concrete constructed case, select numdotdecimal from the transformation registry dated
+31 July 2011, scale −3 and a minus sign. The inspected function accepts 1,234 and removes
+the grouping comma, giving 1234. Scaling gives 1.234; applying the sign gives −1.234. If a
+consumer treats that returned value as the original literal and reapplies both scale and sign, it
+obtains +0.001234. The difference is a consumer error relative to the selected source path. The
+format’s namespace and function name matter: the dispatcher selects a registry by namespace
+and can also invoke a custom transformation. The example establishes no equivalence among
+those choices (Arelle contributors, 2026b).
+Nor does rawValue recover the original source spelling in every case. The inspected property
+assembles inner text, omits inline excluded content, can follow nonnumeric continuation links,
+and collapses XML whitespace when a format is present. An original spelling containing
+surrounding spaces and a line break can consequently yield the same 1,234 reading. Escaped
+content follows an additional markup-generation path with URI handling; one inspected branch
+can modify an object element’s codebase attribute in the parsed tree. Original retained bytes and
+occurrence locators are therefore needed even when assembled text or a later tree serialization
+is available (Arelle contributors, 2026b).
+Consider an unescaped nonnumeric fact containing text A, an excluded child containing X, and
+text B after that child, with a continuation containing C. Under the stated traversal conditions,
+its assembled text is ABC. The excluded X remains part of the source document, while B
+survives as the child’s tail text. The helper follows continuation links already attached by the
+loader; it does not resolve the source’s continuation identifier itself. If the link is absent, a
+nonempty AB can still be returned. The loader separately records missing-target, wrong-target
+and cycle diagnostics. Nonempty text alone cannot establish that the disclosure was completely
+assembled (Arelle contributors, 2026b).
+The proposed adapter thus preserves the original bytes and nodes, the ordered text fragments
+and exclusions, the continuation identifiers and outcomes, and the assembled and transformed
+readings. It records transform identity, scale, sign and validation state so that each step can
+be reconstructed. Computing a value is distinct from validating it: the inspected property

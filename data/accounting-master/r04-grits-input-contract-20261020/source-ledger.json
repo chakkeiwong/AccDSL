@@ -1,0 +1,216 @@
+{
+  "date": "2026-10-20",
+  "constructed_utc": "2026-10-20T00:29:29.155478+00:00",
+  "new_acquisitions": 0,
+  "repository": "kensho-technologies/grits",
+  "commit": "8a281a3e2fd4cfa600d1c1f70f33b5eccc6294f1",
+  "bindings": [
+    {
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4"
+    },
+    {
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/06-conversion.py",
+      "sha256": "d5f6ab8ddc758de0a9a0f94f9c41ecca1307183886d3a3de7707d8a55579c432"
+    },
+    {
+      "path": "data/accounting-master/r04-grits-geometry-20261020/sources/02-bbox.body",
+      "sha256": "44c9657e00e35d93e50844fbd2c7b151ad4368950b98a431a801706e0d3abe9d"
+    },
+    {
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/source-ledger.json",
+      "sha256": "f248f5c8dea03755a75c7c244c9544b7b8144fcba72ffe4513a5ff1e06b2d0e3"
+    },
+    {
+      "path": "data/accounting-master/r04-grits-geometry-20261020/source-ledger.json",
+      "sha256": "00e92a1c231465d288dcd75d4256a67b629c50af35846eee657ff7d4bb4429b1"
+    },
+    {
+      "path": "data/accounting-master/r04-pybind-strings-20261020/completion.json",
+      "sha256": "b948a8a1591d73619d5b897319a7adc6968715107d6673e143bb298c5da215d4"
+    }
+  ],
+  "anchors": [
+    {
+      "id": "cell_fields",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/06-conversion.py",
+      "sha256": "d5f6ab8ddc758de0a9a0f94f9c41ecca1307183886d3a3de7707d8a55579c432",
+      "first_line": 10,
+      "last_line": 40,
+      "excerpt": "@dataclasses.dataclass(frozen=True, slots=True)\nclass TableCell:\n    \"\"\"A single cell in a table.\n\n    Attributes:\n        row_nums: Row indices occupied by this cell.\n        column_nums: Column indices occupied by this cell.\n        cell_text: Text content of the cell.\n        bbox: Bounding box [x_min, y_min, x_max, y_max] of the cell.\n        is_column_header: Whether this cell is a column header.\n        is_row_header: Whether this cell is a row header.\n    \"\"\"\n\n    row_nums: list[int]\n    column_nums: list[int]\n    cell_text: str = \"\"\n    bbox: list[float] | None = None\n    is_column_header: bool = False\n    is_row_header: bool = False\n\n    @classmethod\n    def from_dict(cls, d: dict[str, Any]) -> \"TableCell\":\n        \"\"\"Create a TableCell from a cell dict. Extra keys are ignored.\"\"\"\n        return cls(\n            row_nums=d[\"row_nums\"],\n            column_nums=d[\"column_nums\"],\n            cell_text=d.get(\"cell_text\", \"\"),\n            bbox=d.get(\"bbox\"),\n            is_column_header=d.get(\"is_column_header\", False),\n            is_row_header=d.get(\"is_row_header\", False),\n        )",
+      "supports": "Declared cell types and direct from_dict defaults; no validation method."
+    },
+    {
+      "id": "html_types",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/06-conversion.py",
+      "sha256": "d5f6ab8ddc758de0a9a0f94f9c41ecca1307183886d3a3de7707d8a55579c432",
+      "first_line": 81,
+      "last_line": 153,
+      "excerpt": "def html_to_cell_list(table_html: str) -> list[TableCell] | None:\n    \"\"\"Parse an HTML representation of a table into a list of cells, tolerant of common HTML quirks.\n\n    HTML conversion is provided for convenience and is not part of the GriTS metric; it may change\n    between versions (see the README).\n\n    Args:\n        table_html: HTML string of the table to parse. If it contains more than one table, only\n            the first is used.\n\n    Returns:\n        A list of TableCell objects with row_nums, column_nums, is_column_header, and cell_text,\n        or None if the HTML contains no table (including empty input).\n    \"\"\"\n    try:\n        # Comments are removed so that text on either side of one joins, as in xml.etree\n        doc = html.fromstring(table_html, parser=html.HTMLParser(remove_comments=True))\n    except etree.ParserError:\n        return None\n\n    table = doc if doc.tag == \"table\" else doc.find(\".//table\")\n    if table is None:\n        return None\n\n    table_cells = []\n\n    occupied_columns_by_row: defaultdict[int, set[int]] = defaultdict(set)\n    current_row = -1\n    # Cells outside a tr are placed in an implied row, one per run of cells with the same parent,\n    # as a browser would display them\n    implied_row_parent = None\n\n    stack: list[tuple] = [(table, False)]\n    while stack:\n        current, in_header = stack.pop()\n\n        if current.tag == \"tr\":\n            current_row += 1\n            implied_row_parent = None\n\n        if current.tag in (\"td\", \"th\"):\n            parent = current.getparent()\n            if parent.tag != \"tr\" and parent is not implied_row_parent:\n                current_row += 1\n                implied_row_parent = parent\n            colspan = _parse_span(current.attrib.get(\"colspan\"), _MAX_COLSPAN)\n            rowspan = _parse_span(current.attrib.get(\"rowspan\"), _MAX_ROWSPAN)\n            row_nums = list(range(current_row, current_row + rowspan))\n            try:\n                max_occupied_column = max(occupied_columns_by_row[current_row])\n                current_column = min(\n                    set(range(max_occupied_column + 2)).difference(\n                        occupied_columns_by_row[current_row]\n                    )\n                )\n            except ValueError:\n                current_column = 0\n            column_nums = list(range(current_column, current_column + colspan))\n            for row_num in row_nums:\n                occupied_columns_by_row[row_num].update(column_nums)\n\n            cell = TableCell(\n                row_nums=row_nums,\n                column_nums=column_nums,\n                is_column_header=current.tag == \"th\" or in_header,\n                cell_text=\" \".join(current.itertext()),\n            )\n            table_cells.append(cell)\n\n        for child in reversed(list(current)):\n            stack.append((child, in_header or current.tag in (\"th\", \"thead\")))\n\n    return table_cells",
+      "supports": "HTML conversion extracts joined text, but no location box; selected converter path."
+    },
+    {
+      "id": "grid_extent_overwrite",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/06-conversion.py",
+      "sha256": "d5f6ab8ddc758de0a9a0f94f9c41ecca1307183886d3a3de7707d8a55579c432",
+      "first_line": 156,
+      "last_line": 179,
+      "excerpt": "def _cell_list_to_grid(cell_list: list[TableCell], key: str, default_value: Any) -> list[list[Any]]:\n    \"\"\"Convert from a list of TableCells to a matrix of grid cell features.\n\n    This matrix representation is the input to GriTS.\n\n    Args:\n        cell_list: List of TableCell objects.\n        key: The cell attribute to extract ('bbox' for GriTS_Loc, 'cell_text' for GriTS_Con).\n        default_value: Value used to initialize grid cells that are not covered by any cell.\n\n    Returns:\n        A 2D list (grid) of cell features indexed by [row][column].\n    \"\"\"\n    if len(cell_list) == 0:\n        return [[]]\n    num_rows = max([max(cell.row_nums) for cell in cell_list]) + 1\n    num_columns = max([max(cell.column_nums) for cell in cell_list]) + 1\n    cell_grid = [[default_value for _ in range(num_columns)] for _ in range(num_rows)]\n    for cell in cell_list:\n        for row_num in cell.row_nums:\n            for column_num in cell.column_nums:\n                cell_grid[row_num][column_num] = getattr(cell, key)\n\n    return cell_grid",
+      "supports": "Max index extents, default fill and direct assignment overwrite."
+    },
+    {
+      "id": "content_location_defaults",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/06-conversion.py",
+      "sha256": "d5f6ab8ddc758de0a9a0f94f9c41ecca1307183886d3a3de7707d8a55579c432",
+      "first_line": 182,
+      "last_line": 205,
+      "excerpt": "def cell_list_to_grid_con(cell_list: list[TableCell]) -> list[list[Any]]:\n    \"\"\"Convert from a list of TableCells to a matrix of cell text, used for computing GriTS_Con.\n\n    Args:\n        cell_list: List of TableCell objects with row_nums, column_nums, and cell_text.\n\n    Returns:\n        A 2D list (grid) of cell text strings indexed by [row][column].\n    \"\"\"\n    default_value = \"\"\n    return _cell_list_to_grid(cell_list, key=\"cell_text\", default_value=default_value)\n\n\ndef cell_list_to_grid_loc(cell_list: list[TableCell]) -> list[list[Any]]:\n    \"\"\"Convert from a list of TableCells to a matrix of cell bounding boxes, used for computing GriTS_Loc.\n\n    Args:\n        cell_list: List of TableCell objects with row_nums, column_nums, and bbox.\n\n    Returns:\n        A 2D list (grid) of bounding boxes indexed by [row][column].\n    \"\"\"\n    default_value = [0.0, 0.0, 0.0, 0.0]\n    return _cell_list_to_grid(cell_list, key=\"bbox\", default_value=default_value)",
+      "supports": "Empty content and zero-box defaults; explicit None is assigned unchanged."
+    },
+    {
+      "id": "topology_span",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/06-conversion.py",
+      "sha256": "d5f6ab8ddc758de0a9a0f94f9c41ecca1307183886d3a3de7707d8a55579c432",
+      "first_line": 208,
+      "last_line": 250,
+      "excerpt": "def cell_list_to_grid_top(cell_list: list[TableCell]) -> list[list[Any]]:\n    \"\"\"Convert from a list of TableCells to the matrix/grid of relative spans (boxes), used for computing GriTS_Top.\n\n    For the cell at grid location (i,j), let a(i,j) be its rowspan,\n    let \u03b2(i,j) be its colspan, let p(i,j) be the minimum row it occupies,\n    and let \u03b8(i,j) be the minimum column it occupies. Its relative span is\n    bounding box [\u03b8(i,j)-j, p(i,j)-i, \u03b8(i,j)-j+\u03b2(i,j), p(i,j)-i+a(i,j)].\n\n    It gives the size and location of the cell each grid cell belongs to\n    relative to the current grid cell location, in grid coordinate units.\n    Note that for a non-spanning cell this will always be [0, 0, 1, 1].\n\n    Args:\n        cell_list: List of TableCell objects with row_nums and column_nums.\n\n    Returns:\n        A 2D list (grid) of relative span values indexed by [row][column].\n    \"\"\"\n    if len(cell_list) == 0:\n        return [[]]\n    num_rows = max([max(cell.row_nums) for cell in cell_list]) + 1\n    num_columns = max([max(cell.column_nums) for cell in cell_list]) + 1\n\n    # Initialize grid with [0, 0, 1, 1] (non-spanning cells) instead of 0.0\n    # This handles cases where HTML tables have missing cells\n    default_value = [0, 0, 1, 1]\n    cell_grid = [[default_value for _ in range(num_columns)] for _ in range(num_rows)]\n\n    for cell in cell_list:\n        min_row_num = min(cell.row_nums)\n        min_column_num = min(cell.column_nums)\n        max_row_num = max(cell.row_nums) + 1\n        max_column_num = max(cell.column_nums) + 1\n        for row_num in cell.row_nums:\n            for column_num in cell.column_nums:\n                cell_grid[row_num][column_num] = [\n                    min_column_num - column_num,\n                    min_row_num - row_num,\n                    max_column_num - column_num,\n                    max_row_num - row_num,\n                ]\n\n    return cell_grid",
+      "supports": "Min/max span boxes; holes receive unit-box default."
+    },
+    {
+      "id": "bbox_guard",
+      "path": "data/accounting-master/r04-grits-geometry-20261020/sources/02-bbox.body",
+      "sha256": "44c9657e00e35d93e50844fbd2c7b151ad4368950b98a431a801706e0d3abe9d",
+      "first_line": 33,
+      "last_line": 54,
+      "excerpt": "class BBox(BBoxProtocol):\n    \"\"\"Bounding box.\n\n    The bounding box is defined by four numbers (x0, y0, x1, y1).\n    In a 2D coordinate with the left-to-right x-axis and the top-to-bottom y-axis,\n    the (x0, y0) point is the top-left corner of the bounding box and the (x1, y1) point is the\n    bottom-right corner of the bounding box.\n\n    This representation of a bounding box assumes that x0 <= x1 and y0 <= y1.\n    \"\"\"\n\n    x0: Number\n    y0: Number\n    x1: Number\n    y1: Number\n\n    def __post_init__(self) -> None:\n        \"\"\"Validate the bbox coordinates.\"\"\"\n        if self.x0 > self.x1:\n            raise ValueError(f\"x0 ({self.x0}) is greater than x1 ({self.x1}).\")\n        if self.y0 > self.y1:\n            raise ValueError(f\"y0 ({self.y0}) is greater than y1 ({self.y1}).\")",
+      "supports": "Only reversed-axis checks in BBox constructor."
+    },
+    {
+      "id": "bbox_area",
+      "path": "data/accounting-master/r04-grits-geometry-20261020/sources/02-bbox.body",
+      "sha256": "44c9657e00e35d93e50844fbd2c7b151ad4368950b98a431a801706e0d3abe9d",
+      "first_line": 61,
+      "last_line": 74,
+      "excerpt": "    @property\n    def width(self) -> Number:\n        \"\"\"The width of the BBox.\"\"\"\n        return self.x1 - self.x0\n\n    @property\n    def height(self) -> Number:\n        \"\"\"The height of the BBox.\"\"\"\n        return self.y1 - self.y0\n\n    @property\n    def area(self) -> Number:\n        \"\"\"The area of the BBox.\"\"\"\n        return self.width * self.height",
+      "supports": "Widths/heights/products unguarded by finiteness or numeric-range checks."
+    },
+    {
+      "id": "bbox_overlap",
+      "path": "data/accounting-master/r04-grits-geometry-20261020/sources/02-bbox.body",
+      "sha256": "44c9657e00e35d93e50844fbd2c7b151ad4368950b98a431a801706e0d3abe9d",
+      "first_line": 77,
+      "last_line": 111,
+      "excerpt": "def is_horizontal_overlap(source: BBoxProtocol, target: BBoxProtocol) -> bool:\n    \"\"\"Is there a horizontal overlap between the source and the target.\"\"\"\n    return source.x0 <= target.x1 and target.x0 <= source.x1\n\n\ndef get_horizontal_overlap(source: BBoxProtocol, target: BBoxProtocol) -> Number:\n    \"\"\"Get the horizontal overlap distance between the two boxes.\n\n    The ordering of the source and the target doesn't matter, as this returns an absolute value.\n    \"\"\"\n    if not is_horizontal_overlap(source, target):\n        return 0\n    else:\n        return min(source.x1, target.x1) - max(source.x0, target.x0)\n\n\ndef is_vertical_overlap(source: BBoxProtocol, target: BBoxProtocol) -> bool:\n    \"\"\"Is there a vertical overlap between the source and the target.\"\"\"\n    return source.y0 <= target.y1 and target.y0 <= source.y1\n\n\ndef get_vertical_overlap(source: BBoxProtocol, target: BBoxProtocol) -> Number:\n    \"\"\"Get the vertical overlap distance between the two boxes.\n\n    The ordering of the source and the target doesn't matter, as this returns an absolute value.\n    \"\"\"\n    if not is_vertical_overlap(source, target):\n        return 0\n    else:\n        return min(source.y1, target.y1) - max(source.y0, target.y0)\n\n\ndef get_overlap_area(source: BBoxProtocol, target: BBoxProtocol) -> Number:\n    \"\"\"Calculate the overlap area between the source and the target.\"\"\"\n    return get_horizontal_overlap(source, target) * get_vertical_overlap(source, target)",
+      "supports": "Overlap comparisons and products."
+    },
+    {
+      "id": "ragged_guard",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 246,
+      "last_line": 260,
+      "excerpt": "def _get_n_cols(grid: list[list[Any]]) -> int:\n    \"\"\"Determine the number of columns in a 2D grid.\n\n    Args:\n        grid: A list of lists representing a 2D grid.\n\n    Returns:\n        The number of columns in the grid.\n    \"\"\"\n    if len(grid) == 0:\n        return 0\n    n_cols = len(grid[0])\n    if any(len(row) != n_cols for row in grid[1:]):\n        raise ValueError(\"grid must have the same number of columns in each row\")\n    return n_cols",
+      "supports": "Explicit equal-row-length validation exists."
+    },
+    {
+      "id": "metric_input_shape",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 274,
+      "last_line": 319,
+      "excerpt": "def factored_2dmss(\n    true_grid: np.ndarray, pred_grid: np.ndarray, reward_function: Callable\n) -> GritsMatchingResult:\n    \"\"\"Factored 2D-MSS: Factored two-dimensional most-similar substructures\n\n    This is a polynomial-time heuristic to computing the 2D-MSS of two matrices,\n    which is NP hard.\n\n    A substructure of a matrix is a subset of its rows and its columns.\n\n    The most similar substructures of two matrices, A and B, are the substructures\n    A' and B', where the sum of the similarity over all corresponding entries\n    A'(i, j) and B'(i, j) is greatest.\n\n    Args:\n        true_grid: Ground truth grid\n        pred_grid: Predicted grid\n        reward_function: Function to compute similarity between cells\n\n    Returns:\n        GritsMatchingResult with the scoring results.\n    \"\"\"\n    true_grid_n_rows = len(true_grid)\n    true_grid_n_cols = _get_n_cols(true_grid.tolist())\n    num_true_cells = true_grid_n_rows * true_grid_n_cols\n    pred_grid_n_rows = len(pred_grid)\n    pred_grid_n_cols = _get_n_cols(pred_grid.tolist())\n    num_pred_cells = pred_grid_n_rows * pred_grid_n_cols\n\n    true_shape = (true_grid_n_rows, true_grid_n_cols)\n    pred_shape = (pred_grid_n_rows, pred_grid_n_cols)\n\n    # Early exit: if matrices are the same shape and the elementwise (identity)\n    # alignment score exceeds the maximum possible score from any smaller\n    # submatrix, the identity alignment is provably optimal\u2014skip the full DP.\n    if true_shape == pred_shape:\n        grid_scores = np.zeros((true_grid_n_rows, true_grid_n_cols))\n        true_positive_score = 0.0\n        for true_row, true_col in itertools.product(range(true_shape[0]), range(true_shape[1])):\n            cell_score = reward_function(\n                true_grid[true_row][true_col], pred_grid[true_row][true_col]\n            )\n            grid_scores[true_row, true_col] = cell_score\n            true_positive_score += cell_score\n        if true_positive_score >= (max(true_shape) - 1) * min(true_shape):\n            is_exact_match = true_positive_score == num_true_cells == num_pred_cells",
+      "supports": "Pair grid shape, reward invocation and shortcut setup."
+    },
+    {
+      "id": "metric_reward_storage",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 320,
+      "last_line": 370,
+      "excerpt": "            return GritsMatchingResult(\n                true_positive_score=true_positive_score,\n                true_positive_score_upper_bound=true_positive_score,\n                true_grid_scores=grid_scores,\n                pred_grid_scores=grid_scores,\n                is_exact_match=is_exact_match,\n            )\n\n    pre_computed_rewards = {}\n    transpose_rewards = {}\n    for true_row, true_col, pred_row, pred_col in itertools.product(\n        range(true_shape[0]), range(true_shape[1]), range(pred_shape[0]), range(pred_shape[1])\n    ):\n        reward = reward_function(true_grid[true_row][true_col], pred_grid[pred_row][pred_col])\n\n        pre_computed_rewards[(true_row, true_col, pred_row, pred_col)] = reward\n        transpose_rewards[(true_col, true_row, pred_col, pred_row)] = reward\n\n    true_row_nums, pred_row_nums, row_alignment_score = _align_2d_outer(\n        true_shape, pred_shape, pre_computed_rewards\n    )\n\n    # If matrices have the same number of columns, then after matching/selecting rows,\n    # if the resulting match score is already greater than it could be if we removed\n    # a row or column from the most similar submatrix, then stop.\n    if true_shape[1] == pred_shape[1]:\n        true_grid_scores = np.zeros((true_grid_n_rows, true_grid_n_cols))\n        pred_grid_scores = np.zeros((pred_grid_n_rows, pred_grid_n_cols))\n        true_positive_score = 0.0\n        for aligned_row_idx, col in itertools.product(\n            range(len(true_row_nums)), range(true_shape[1])\n        ):\n            true_row = true_row_nums[aligned_row_idx]\n            pred_row = pred_row_nums[aligned_row_idx]\n            cell_score = reward_function(\n                true_grid[true_row][col],\n                pred_grid[pred_row][col],\n            )\n            true_grid_scores[true_row, col] = cell_score\n            pred_grid_scores[pred_row, col] = cell_score\n            true_positive_score += cell_score\n        if true_positive_score >= len(true_row_nums) * true_shape[1] - 1:\n            is_exact_match = true_positive_score == num_true_cells == num_pred_cells\n            return GritsMatchingResult(\n                true_positive_score=true_positive_score,\n                true_positive_score_upper_bound=true_positive_score,\n                true_grid_scores=true_grid_scores,\n                pred_grid_scores=pred_grid_scores,\n                is_exact_match=is_exact_match,\n            )\n",
+      "supports": "Reward values enter lookup/alignments; no range/finiteness guard in this path."
+    },
+    {
+      "id": "text_reward",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 399,
+      "last_line": 415,
+      "excerpt": "def lcs_similarity(string1: str, string2: str) -> float:\n    \"\"\"Compute similarity between two strings using the longest common subsequence (LCS).\n\n    Args:\n        string1: First string to compare.\n        string2: Second string to compare.\n\n    Returns:\n        float: Similarity score between 0 and 1, computed as\n            2 * len(LCS) / (len(string1) + len(string2)).\n    \"\"\"\n    if string1 == string2:\n        return 1.0\n\n    lcs_length = pylcs.lcs_sequence_length(string1, string2)\n\n    return 2 * lcs_length / (len(string1) + len(string2))",
+      "supports": "Type annotation and equality shortcut, no text-domain runtime guard."
+    },
+    {
+      "id": "iou_arithmetic",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 418,
+      "last_line": 436,
+      "excerpt": "def iou(bbox_1_and_area_1: tuple[BBox, float], bbox_2_and_area_2: tuple[BBox, float]) -> float:\n    \"\"\"Compute the intersection-over-union of two bounding boxes.\n\n    Args:\n        bbox_1_and_area_1: First bounding box paired with its precomputed area.\n        bbox_2_and_area_2: Second bounding box paired with its precomputed area.\n\n    Returns:\n        IoU score between 0 and 1.\n    \"\"\"\n    bbox1, area_1 = bbox_1_and_area_1\n    bbox2, area_2 = bbox_2_and_area_2\n\n    intersection = get_overlap_area(bbox1, bbox2)\n\n    if intersection == 0:\n        return 0.0\n    union = area_1 + area_2 - intersection\n    return intersection / union",
+      "supports": "Zero-intersection shortcut, sum-minus-intersection union and division."
+    },
+    {
+      "id": "box_grid_conversion",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 439,
+      "last_line": 455,
+      "excerpt": "def _convert_grid_elements_to_bbox_and_area(grid: list[list]) -> list[list[tuple[BBox, float]]]:\n    \"\"\"Convert grid elements to BBox and area tuples.\n\n    Args:\n        grid: Input grid of bounding box coordinates\n\n    Returns:\n        Grid of (BBox, area) tuples\n    \"\"\"\n    new_grid = []\n    for row in grid:\n        new_row = []\n        for bbox_coords in row:\n            bbox = BBox(*bbox_coords)\n            new_row.append((bbox, bbox.area))\n        new_grid.append(new_row)\n    return new_grid",
+      "supports": "BBox and area construction before array conversion."
+    },
+    {
+      "id": "location_entry",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 477,
+      "last_line": 496,
+      "excerpt": "def grits_loc_matching(\n    true_grid_loc: list[list[list[int | float]]], pred_grid_loc: list[list[list[int | float]]]\n) -> GritsMatchingResult:\n    \"\"\"Compute the GriTS_Loc true positive score, given two matrices of cell bounding boxes.\n\n    This calculates the spatial location similarity.\n\n    Args:\n        true_grid_loc: Ground truth bounding box grid.\n        pred_grid_loc: Predicted bounding box grid.\n\n    Returns:\n        GritsMatchingResult with the scoring results.\n    \"\"\"\n\n    return factored_2dmss(\n        np.array(_convert_grid_elements_to_bbox_and_area(true_grid_loc)),\n        np.array(_convert_grid_elements_to_bbox_and_area(pred_grid_loc)),\n        reward_function=iou,\n    )",
+      "supports": "Location arrays enter factored metric."
+    },
+    {
+      "id": "content_entry",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 535,
+      "last_line": 551,
+      "excerpt": "def grits_con_matching(\n    true_grid_con: list[list[str]], pred_grid_con: list[list[str]]\n) -> GritsMatchingResult:\n    \"\"\"Compute the GriTS_Con true positive score, given two matrices of cell text strings.\n\n    Args:\n        true_grid_con: Ground truth text grid\n        pred_grid_con: Predicted text grid\n\n    Returns:\n        GritsMatchingResult with the scoring results.\n    \"\"\"\n    return factored_2dmss(\n        np.array(true_grid_con, dtype=object),\n        np.array(pred_grid_con, dtype=object),\n        reward_function=lcs_similarity,\n    )",
+      "supports": "Object array preserves supplied text values."
+    },
+    {
+      "id": "per_metric_accumulation",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 785,
+      "last_line": 804,
+      "excerpt": "        true_positive_score = result.true_positive_score\n        true_grid_scores = result.true_grid_scores\n        num_exact_grid_matches = result.num_exact_grid_matches\n        num_true_cells = sum([len(true_grid) * _get_n_cols(true_grid) for true_grid in true_grids])\n        num_pred_cells = sum([len(pred_grid) * _get_n_cols(pred_grid) for pred_grid in pred_grids])\n        num_exact_cell_matches = sum(int((scores == 1).sum()) for scores in true_grid_scores)\n        self.true_positive_scores.append(true_positive_score)\n        self.num_true_cells.append(num_true_cells)\n        self.num_pred_cells.append(num_pred_cells)\n        self.num_true_grids.append(len(true_grids))\n        self.num_pred_grids.append(len(pred_grids))\n        self.num_exact_grid_matches.append(num_exact_grid_matches)\n        self.num_exact_cell_matches.append(num_exact_cell_matches)\n\n    def compute_counts(self) -> dict[str, int]:\n        \"\"\"Compute the counts of samples, tables, and cells.\n\n        Returns:\n            Dict with keys num_samples, num_true_tables, num_pred_tables,\n            num_true_cells, and num_pred_cells.",
+      "supports": "Appends after per-metric call; no shared transaction."
+    },
+    {
+      "id": "evaluator_defaults",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 908,
+      "last_line": 940,
+      "excerpt": "class GritsEvaluator:\n    \"\"\"Evaluates a set of GriTS metrics one-sample-at-a-time and computes aggregate metrics over all samples.\"\"\"\n\n    def __init__(self, metrics: list[str] | None = None) -> None:\n        \"\"\"Initialize the evaluator with the specified metrics.\n\n        Args:\n            metrics: List of metric names to track from among [\"con\", \"top\", \"loc\"]. Defaults to [\"con\", \"top\"].\n        \"\"\"\n        if metrics is None:\n            metrics = [\"con\", \"top\"]\n        self._evaluators = {metric: _GritsMetricEvaluator(metric=metric) for metric in metrics}\n\n    @property\n    def metrics(self) -> list[str]:\n        \"\"\"Return the list of metric names being tracked.\"\"\"\n        return list(self._evaluators)\n\n    def eval_grids_by_metric(\n        self,\n        true_grids: dict[str, list],\n        pred_grids: dict[str, list],\n    ) -> None:\n        \"\"\"Evaluate two table collections, with each table represented in grid format.\n\n        Each input is a dict with keys matching the metrics tracked by the evaluator.\n\n        Args:\n            true_grids: Dict mapping metric name to list of ground truth grids.\n            pred_grids: Dict mapping metric name to list of predicted grids.\n        \"\"\"\n        for metric, evaluator in self._evaluators.items():\n            evaluator.eval_grids(true_grids[metric], pred_grids[metric])",
+      "supports": "Default con/top; explicit grid-by-metric loop."
+    },
+    {
+      "id": "html_rejections",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 966,
+      "last_line": 1008,
+      "excerpt": "\n    def eval_htmls(self, true_htmls: list[str], pred_htmls: list[str]) -> None:\n        \"\"\"Evaluate two table collections, with each table represented in HTML format.\n\n        HTML conversion is provided for convenience and is not part of the GriTS metric; it may\n        change between versions (see the README).\n\n        HTML tables do not contain bounding box information, so the 'loc' metric\n        cannot be evaluated with this method.\n\n        Args:\n            true_htmls: List of HTML strings of ground truth tables.\n            pred_htmls: List of HTML strings of predicted tables.\n\n        Raises:\n            TypeError: If a bare string is passed instead of a list of strings.\n            ValueError: If any HTML string cannot be parsed, or if the evaluator\n                is tracking the 'loc' metric.\n        \"\"\"\n        if isinstance(true_htmls, str) or isinstance(pred_htmls, str):  # type: ignore[unreachable]\n            raise TypeError(\"eval_htmls expects lists of HTML strings, not a single string.\")\n        if \"loc\" in self._evaluators:\n            raise ValueError(\n                \"eval_htmls cannot evaluate the 'loc' metric because HTML tables \"\n                \"do not contain bounding box information. \"\n                \"Initialize GritsEvaluator() without 'loc' to proceed with evaluation.\"\n            )\n\n        true_cell_lists = []\n        for true_html in true_htmls:\n            cell_list = html_to_cell_list(true_html)\n            if cell_list is None:\n                raise ValueError(f\"Failed to parse true_html: {true_html!r}\")\n            true_cell_lists.append(cell_list)\n\n        pred_cell_lists = []\n        for pred_html in pred_htmls:\n            cell_list = html_to_cell_list(pred_html)\n            if cell_list is None:\n                raise ValueError(f\"Failed to parse pred_html: {pred_html!r}\")\n            pred_cell_lists.append(cell_list)\n\n        self.eval_table_cell_lists(true_cell_lists, pred_cell_lists)",
+      "supports": "Bare string, location HTML and failed parse are explicitly rejected."
+    },
+    {
+      "id": "cell_list_entry",
+      "path": "data/accounting-master/r04-pubtablesv2-20261019/sources/05-metric.py",
+      "sha256": "b490a734c6db38996747c57d552fbb73dfa9d0007537fa07760d3066ac79eaf4",
+      "first_line": 1016,
+      "last_line": 1045,
+      "excerpt": "    def eval_table_cell_lists(\n        self,\n        true_cell_lists: list[list[TableCell]],\n        pred_cell_lists: list[list[TableCell]],\n    ) -> None:\n        \"\"\"Evaluate two table collections, with each table represented in the list[TableCell] format.\n\n        Args:\n            true_cell_lists: A list of lists of TableCells, one list of TableCells per ground truth table.\n            pred_cell_lists: A list of lists of TableCells, one list of TableCells per predicted table.\n\n        Raises:\n            TypeError: If a flat list of TableCells is passed instead of a list of lists.\n        \"\"\"\n        if true_cell_lists and isinstance(true_cell_lists[0], TableCell):  # type: ignore[unreachable]\n            raise TypeError(\n                \"eval_table_cell_lists expects a list of lists of TableCells, \"\n                \"not a single list of TableCells.\"\n            )\n        if pred_cell_lists and isinstance(pred_cell_lists[0], TableCell):  # type: ignore[unreachable]\n            raise TypeError(\n                \"eval_table_cell_lists expects a list of lists of TableCells, \"\n                \"not a single list of TableCells.\"\n            )\n\n        for metric, evaluator in self._evaluators.items():\n            to_grid = self._GRID_CONVERSION_FUNCTIONS[metric]\n            true_grids = [to_grid(cd) for cd in true_cell_lists]\n            pred_grids = [to_grid(cd) for cd in pred_cell_lists]\n            evaluator.eval_grids(true_grids, pred_grids)",
+      "supports": "Flat-list rejection then sequential per-metric conversion/evaluation."
+    }
+  ],
+  "read_scope": "Listed source spans only; no library execution."
+}

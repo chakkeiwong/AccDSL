@@ -1,0 +1,209 @@
+[
+  {
+    "line": 46,
+    "condition": "type(s) is dict and set(s) == fields",
+    "reason": "closed state fields",
+    "native_category": "invalid",
+    "disposition": "residual_structure",
+    "case_evidence": []
+  },
+  {
+    "line": 47,
+    "condition": "s['profile'] == PROFILE and s['conditional'] is True",
+    "reason": "state profile",
+    "native_category": "invalid",
+    "disposition": "residual_structure",
+    "case_evidence": []
+  },
+  {
+    "line": 48,
+    "condition": "set(b) == set(ACCOUNTS)",
+    "reason": "closed account registry",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "missing_account",
+      "extra_zero_account"
+    ]
+  },
+  {
+    "line": 49,
+    "condition": "set(ASSETS + LIABILITIES + EQUITY + INCOME) == set(ACCOUNTS)",
+    "reason": "account classification coverage",
+    "native_category": "invalid",
+    "disposition": "pinned_implementation_constants",
+    "case_evidence": []
+  },
+  {
+    "line": 50,
+    "condition": "len(ASSETS + LIABILITIES + EQUITY + INCOME) == len(ACCOUNTS)",
+    "reason": "account classification overlap",
+    "native_category": "invalid",
+    "disposition": "pinned_implementation_constants",
+    "case_evidence": []
+  },
+  {
+    "line": 51,
+    "condition": "sum((q(v) for v in b.values())) == 0",
+    "reason": "book balance",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "book_imbalance"
+    ]
+  },
+  {
+    "line": 52,
+    "condition": "q(b['cash']) >= 0",
+    "reason": "cash shortfall",
+    "native_category": "funding_failure",
+    "disposition": "selected",
+    "case_evidence": [
+      "balanced_cash_shortfall",
+      "funding_and_duplicate_seen"
+    ]
+  },
+  {
+    "line": 53,
+    "condition": "q(s['other_inventory']) >= 0",
+    "reason": "negative other inventory",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "negative_other_inventory"
+    ]
+  },
+  {
+    "line": 54,
+    "condition": "q(b['inventory']) == q(s['other_inventory']) + sum((q(l['carrying']) for l in s['lots'].values()))",
+    "reason": "inventory allocation",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "inventory_allocation"
+    ]
+  },
+  {
+    "line": 55,
+    "condition": "q(b['refund_liability']) == -q(c['refund'])",
+    "reason": "refund allocation",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "refund_component"
+    ]
+  },
+  {
+    "line": 56,
+    "condition": "q(b['recovery_asset']) == q(c['recovery'])",
+    "reason": "recovery allocation",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "recovery_component"
+    ]
+  },
+  {
+    "line": 57,
+    "condition": "type(c['settled']) is bool",
+    "reason": "unknown settlement memory",
+    "native_category": "unresolved",
+    "disposition": "selected",
+    "case_evidence": [
+      "unknown_settlement"
+    ]
+  },
+  {
+    "line": 58,
+    "condition": "q(c['refund']) == q(c['recovery']) == 0",
+    "reason": "settled rights remain",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "settled_outstanding_rights"
+    ]
+  },
+  {
+    "line": 60,
+    "condition": "key == lot['id'] and lot['component_id'] == c['id']",
+    "reason": "lot identity",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "lot_stored_identity",
+      "lot_component_identity"
+    ]
+  },
+  {
+    "line": 61,
+    "condition": "q(lot['units']) >= 0 and q(lot['carrying']) >= 0",
+    "reason": "lot amount domain",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "negative_units",
+      "negative_lot_carrying"
+    ]
+  },
+  {
+    "line": 62,
+    "condition": "q(lot['tax_base']) == q(lot['carrying'])",
+    "reason": "lot tax method",
+    "native_category": "unsupported",
+    "disposition": "selected",
+    "case_evidence": [
+      "lot_tax_basis"
+    ]
+  },
+  {
+    "line": 63,
+    "condition": "type(lot['disposed']) is bool",
+    "reason": "lot disposition type",
+    "native_category": "invalid",
+    "disposition": "explicit_unknown_extension",
+    "case_evidence": [
+      "unknown_disposition"
+    ]
+  },
+  {
+    "line": 64,
+    "condition": "q(lot['units']) == q(lot['carrying']) == q(lot['tax_base']) == 0",
+    "reason": "disposed stock remains",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "disposed_stock_remains"
+    ]
+  },
+  {
+    "line": 65,
+    "condition": "q(lot['units']) > 0",
+    "reason": "empty live lot",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "empty_live_lot"
+    ]
+  },
+  {
+    "line": 66,
+    "condition": "len(s['seen']) == len(set(s['seen']))",
+    "reason": "duplicate lifetime event",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "duplicate_seen"
+    ]
+  },
+  {
+    "line": 68,
+    "condition": "len(ids) == len(set(ids)) and set(ids) <= set(s['seen'])",
+    "reason": "tax adjustment identity",
+    "native_category": "invalid",
+    "disposition": "selected",
+    "case_evidence": [
+      "duplicate_adjustment",
+      "adjustment_unseen"
+    ]
+  }
+]

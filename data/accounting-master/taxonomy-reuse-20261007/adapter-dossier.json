@@ -1,0 +1,460 @@
+{
+  "status": "source_inspected_proposed_exchange_not_executed",
+  "code_commit": "01f6a4656c2c6551d2f05f31c9d74366d133ee7e",
+  "scope": "Local source analysis and a proposed optional offline Arelle native-instance adapter",
+  "source_anchors": {
+    "api_lifecycle": {
+      "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__api__Session.py",
+      "sha256": "90666a44f4f74a2a2a00822655677b53b081283aa23e90c38485010e550cf0c1",
+      "first_line": 1,
+      "last_line": 116,
+      "quote": "\"\"\"\nSee COPYRIGHT.md for copyright information.\n\nThe `arelle.api` module is the supported method for integrating Arelle into other Python applications.\n\"\"\"\nfrom __future__ import annotations\n\nfrom pathlib import Path\n\nimport logging\nimport threading\nfrom types import TracebackType\nfrom typing import Any, BinaryIO, TypeVar, Literal\n\nfrom arelle import PackageManager, PluginManager\nfrom arelle.Cntlr import TypeLogFileName\nfrom arelle.CntlrCmdLine import CntlrCmdLine, createCntlrAndPreloadPlugins\nfrom arelle.FileSource import FileNamedBytesIO\nfrom arelle.ModelXbrl import ModelXbrl\nfrom arelle.RuntimeOptions import RuntimeOptions\nfrom arelle.logging.handlers.LogToXmlHandler import LogToXmlHandler\n\n_session_lock = threading.Lock()\n\n# typing.Self can be used once Python 3.10 support is dropped.\nSelf = TypeVar(\"Self\", bound=\"Session\")\n\n\nclass Session:\n    \"\"\"\n    CRITICAL THREAD SAFETY WARNING:\n\n    Arelle uses shared global state (PackageManager, PluginManager) which is NOT thread-safe.\n    Only ONE Session can run at a time across the entire process.\n\n    Safe usage:\n    - Use one Session at a time per process\n    - Use a process pool instead of thread pool for parallelism\n\n    Unsafe usage:\n    - Running multiple Sessions concurrently in any threads\n    - Threading.Thread with Session.run()\n    \"\"\"\n\n    def __init__(self) -> None:\n        self._cntlr: CntlrCmdLine | None = None\n        self._thread_id = threading.get_ident()\n\n    def _check_thread(self) -> None:\n        \"\"\"Ensure session is only used from the thread that created it.\"\"\"\n        if threading.get_ident() != self._thread_id:\n            raise RuntimeError(\n                \"Session objects cannot be shared between threads. Create a new Session instance in each thread.\"\n            )\n\n    def __enter__(self: Self) -> Self:\n        return self\n\n    def __exit__(\n        self,\n        exc_type: type[BaseException],\n        exc_val: BaseException,\n        exc_tb: TracebackType | None\n    ) -> None:\n        self.close()\n\n    def clear_logs(self) -> None:\n        \"\"\"\n        Clears the log buffer (if the current log handler supports buffering, e.g., LogToXmlHandler).\n        \"\"\"\n        if self._cntlr and isinstance(self._cntlr.logHandler, LogToXmlHandler):\n            self._cntlr.logHandler.clearLogBuffer()\n\n    def close(self) -> None:\n        with _session_lock:\n            self._check_thread()\n            if self._cntlr is not None:\n                self._cntlr.close()\n            PluginManager.getInstance().close()\n\n    def get_log_messages(self) -> list[dict[str, Any]]:\n        \"\"\"\n        Returns structured log messages from the session's log handler if it supports structured messages (e.g., StructuredMessageLogHandler).\n        :return: Structured log messages from the session.\n        \"\"\"\n        if not self._cntlr or not self._cntlr.logHandler:\n            return []\n        return getattr(self._cntlr.logHandler, \"messages\", [])\n\n    def get_logs(self, log_format: Literal[\"json\", \"text\", \"xml\"], clear_logs: bool = False) -> str:\n        \"\"\"\n        Retrieve logs as a string in the configured format.\n        Raises a `ValueError` if the log format is not supported by the current log handler.\n        Optionally clear the log buffer after retrieving.\n        :param log_format: The format to retrieve logs in. Supported formats are 'json', 'text', and 'xml'.\n        :param clear_logs: If enabled, clears the log buffer after retrieving logs.\n        :return:\n        \"\"\"\n        if self._cntlr:\n            handler = self._cntlr.logHandler\n            if log_format == \"json\" and hasattr(handler, \"getJson\"):\n                return str(handler.getJson(clearLogBuffer=clear_logs))\n            if log_format == \"text\" and hasattr(handler, \"getText\"):\n                return str(handler.getText(clearLogBuffer=clear_logs))\n            if log_format == \"xml\" and hasattr(handler, \"getXml\"):\n                return str(handler.getXml(clearLogBuffer=clear_logs, includeDeclaration=False))\n            raise ValueError(\"Unsupported log format for {}: {}\".format(type(handler).__name__, log_format))\n        return \"\"\n\n    def get_models(self) -> list[ModelXbrl]:\n        \"\"\"\n        Retrieve a list of loaded models.\n        \"\"\"\n        if self._cntlr is None:\n            return []\n        return self._cntlr.modelManager.loadedModelXbrls\n",
+      "quote_sha256": "9ef124543775b28c5f9d54bb02f334c71a2be67400951dc466e2b414fe0f2639"
+    },
+    "api_return": {
+      "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__api__Session.py",
+      "sha256": "90666a44f4f74a2a2a00822655677b53b081283aa23e90c38485010e550cf0c1",
+      "first_line": 191,
+      "last_line": 202,
+      "quote": "                        logRefObjectProperties=logRefObjectProperties,\n                        logXmlMaxAttributeLength=options.logXmlMaxAttributeLength,\n                        logPropagate=options.logPropagate,\n                    )\n                    self._cntlr.postLoggingInit()  # Cntlr options after logging is started\n                return self._cntlr.run(\n                    options,\n                    sourceZipStream=sourceZipStream,\n                    responseZipStream=responseZipStream,\n                )\n",
+      "quote_sha256": "547f4a55350b8df3d45931f6f032b3d4d30d56e9fcd6482b2cd85560baa0257e"
+    },
+    "offline_early": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlrcmdline-trusted.body",
+      "sha256": "36a23a60896f919021fe982c7ab9d0758be65c4d152d9e74fe2c0409e50210f8",
+      "first_line": 1678,
+      "last_line": 1689,
+      "quote": "            self.addToLog(f\"sys.argv {sys.argv}\", messageCode=\"info\")\n\n        setDisableRTL(options.disableRtl) # not saved to config\n\n        # Some options below (e.g. `packages`) may trigger web requests,\n        # so the `workOffline` flag needs to be set early on.\n        if options.internetConnectivity == \"offline\":\n            self.webCache.workOffline = True\n        elif options.internetConnectivity == \"online\":\n            self.webCache.workOffline = False\n\n        if options.proxy:\n",
+      "quote_sha256": "a2698f816ba3da1db93afc7b7703b183231a95150665f4a9c6f1c2c2a2ca27d0"
+    },
+    "offline_cache": {
+      "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__WebCache.py",
+      "sha256": "9049bebf4ad4c8071ae42c49f996ab7ba49768a3f7b09ca46d9a71ed3fbd5c4e",
+      "first_line": 591,
+      "last_line": 615,
+      "quote": "        # Generate cache filepath from url\n        filepath = self.urlToCacheFilepath(url)\n\n        # Handle server web cache\n        if self.cacheDir == SERVER_WEB_CACHE:\n            # server web-cached files are downloaded when opening to prevent excessive memcache api calls\n            return filepath\n\n        # Make any necessary transformations to filepath\n        filepath = self.normalizeFilepath(filepath, url)\n        filepathExists = os.path.exists(filepath)\n\n        # If cache filepath does not exist, try built-in cache\n        if self.workOffline and not filepathExists:\n            builtInFilepath = self.normalizeFilepath(self.urlToCacheFilepath(url, cacheDir=self.builtInCacheDir), url)\n            if os.path.exists(builtInFilepath):\n                return builtInFilepath\n\n        # Return filepath now if configured not to download\n        if self.workOffline or filenameOnly:\n            return filepath\n\n        # Download without checking age if configured to do so or file does not exist\n        if reload or not filepathExists:\n            return filepath if self._downloadFileWithLock(url, filepath) else None\n",
+      "quote_sha256": "2e604be6e969c1b6be446f7d8b7c859868f6ba8cf85a37e1e0a044cb183be3c1"
+    },
+    "missing_file": {
+      "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__ModelDocument.py",
+      "sha256": "a1ef25aa35948ae6820824058b1e1fadc868ae6666f85ec0ea08fb5e2ba1a1e2",
+      "first_line": 208,
+      "last_line": 220,
+      "quote": "        file.close()  # type: ignore[union-attr]\n    except FileNotFoundError as err:\n        if file:\n            file.close()\n        msg = _(\"Could not load file from local filesystem.\")\n        offlineMode = modelXbrl.modelManager.cntlr.webCache.workOffline\n        if offlineMode:\n            msg += _(\" Disable offline mode to attempt download.\")\n        msg += \" file: %(url)s\"\n        modelXbrl.error(\"IOerror\", msg,\n            modelObject=referringElement, url=uri, error=str(err))\n        if modelXbrl.modelManager.abortOnMajorError and (isEntry or isDiscovered):\n            raise LoadingException() from err\n",
+      "quote_sha256": "f3162ca665ca8625df2e8aad34c5615af5acb49398dc5426f74a79d51d010e15"
+    },
+    "validation_errors": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlrcmdline-trusted.body",
+      "sha256": "36a23a60896f919021fe982c7ab9d0758be65c4d152d9e74fe2c0409e50210f8",
+      "first_line": 2289,
+      "last_line": 2302,
+      "quote": "                    modelXbrl.logProfileStats()\n\n                if modelDiffReport and modelDiffReport.errors:\n                    hasValidationErrors = True\n\n                if modelXbrl and modelXbrl.errors:\n                    hasValidationErrors = True\n\n                if not options.keepOpen:\n                    if modelDiffReport:\n                        self.modelManager.close(modelDiffReport)\n                    elif modelXbrl:\n                        self.modelManager.close(modelXbrl)\n\n",
+      "quote_sha256": "b6f1ff6e0b1f90b12967a46aabc257ef03a62f1b04997f4ccd048eed3eca02ce"
+    },
+    "run_return": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlrcmdline-trusted.body",
+      "sha256": "36a23a60896f919021fe982c7ab9d0758be65c4d152d9e74fe2c0409e50210f8",
+      "first_line": 2327,
+      "last_line": 2327,
+      "quote": "        return success and not (options.validationExitCode and (hasValidationErrors or self.errors))\n",
+      "quote_sha256": "0f1cd13dd039f4532f92b55699ce0469db57c6c265cf68b8f68c266ce3d13871"
+    },
+    "validation_default": {
+      "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/arelle__RuntimeOptions.py",
+      "sha256": "9a1fcf540e50787e25a8a641ea174e65ba7e59cc629966eb43b0599c56a25d72",
+      "first_line": 151,
+      "last_line": 164,
+      "quote": "    validate: Optional[bool] = None\n    validateDuplicateFacts: Optional[str] = None\n    validateXmlOim: bool = False\n    validateTableConstraintsSkipLoading: bool = False\n    validateEFM: Optional[bool] = None\n    validateEFMCalcTree: Optional[bool] = None\n    validateHMRC: Optional[bool] = None\n    validateTestcaseSchema: Optional[bool] = None\n    versReportFile: Optional[str | FileNamedStringIO] = None\n    viewArcrole: Optional[str] = None\n    viewFile: Optional[str | FileNamedStringIO] = None\n    webserver: Optional[str] = None\n    xdgConfigHome: Optional[str] = None\n    validationExitCode: bool = False\n",
+      "quote_sha256": "cd7f4d076328cc021d73bc574fc078ea7edaf6f45d5953ae4a269b6e37f8dbed"
+    },
+    "structured_logging": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-cntlr-trusted.body",
+      "sha256": "4833393ffdfa9fc27767d2ce25029c3c8c7c42d2f57ad362f4083318f88cd431",
+      "first_line": 423,
+      "last_line": 432,
+      "quote": "        elif logFileName: # use default logging\n            self.logger = logging.getLogger(\"arelle\")\n            if logFileName in (\"logToPrint\", \"logToStdErr\") and not logToBuffer:\n                self.logHandler = LogToPrintHandler(logFileName)\n            elif logFileName == \"logToBuffer\":\n                self.logHandler = LogToBufferHandler(self)\n                setattr(self.logger, \"logRefObjectProperties\", logRefObjectProperties)\n            elif logFileName == \"logToStructuredMessage\":\n                self.logHandler = StructuredMessageLogHandler(self)\n                setattr(self.logger, \"logRefObjectProperties\", logRefObjectProperties)\n",
+      "quote_sha256": "036110a7784247dab3f4c0cc4748bcb1b77c12edd0b2681fba8b1badec9bf31d"
+    },
+    "fact_container": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/arelle-modelxbrl-trusted.body",
+      "sha256": "0cf0e4a94c6f85f64f1d55357071e6c65d950c482a58ab7bb8fb95a1678f3699",
+      "first_line": 337,
+      "last_line": 345,
+      "quote": "        self.qnameTypes: dict[QName, ModelType] = {}  # contains ModelTypes by qname key of type\n        self.baseSets: defaultdict[tuple[str, str | None, QName | None, QName | None], list[ModelLink | LinkPrototype]] = defaultdict(list)  # contains ModelLinks for keys arcrole, arcrole#linkrole\n        self.relationshipSets: dict[tuple[str] | tuple[tuple[str, ...] | str, tuple[str, ...] | str | None, QName | None, QName | None, bool], ModelRelationshipSetClass] = {}  # contains ModelRelationshipSets by bas set keys\n        self.qnameDimensionDefaults: dict[QName, QName] = {}  # contains qname of dimension (index) and default member(value)\n        self.facts: list[ModelFact] = []\n        self.factsInInstance: set[ModelFact] = set()\n        self.undefinedFacts: list[ModelFact] = []  # elements presumed to be facts but not defined\n        self.contexts: dict[str, ModelContext] = {}\n        self.ixdsUnmappedContexts: dict[str, ModelContext] = {}\n",
+      "quote_sha256": "6709c9a8b047282cf74cc4b544b1bebb8c42a7c5b68c3433a866fd1bdcf67a74"
+    },
+    "base_dependencies": {
+      "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/pyproject.toml",
+      "sha256": "9170262f992c187fde58b9e3723ace7ad128d32a231d3cbf2128044f8facf2cb",
+      "first_line": 1,
+      "last_line": 80,
+      "quote": "[build-system]\nrequires = [\"setuptools>=82,<85\", \"wheel>=0.46,<0.49\", \"setuptools_scm>=10.0,<11.0\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"arelle-release\"\ndynamic = ['version']\nreadme = \"README.md\"\nlicense = \"Apache-2.0\"\ndescription = \"An open source XBRL platform.\"\nauthors = [\n    {name = \"arelle.org\", email = \"support@arelle.org\"}\n]\nkeywords = [\"xbrl\"]\nclassifiers = [\n    'Development Status :: 5 - Production/Stable',\n    'Intended Audience :: End Users/Desktop',\n    'Intended Audience :: Developers',\n    'Natural Language :: English',\n    'Programming Language :: Python :: 3',\n    'Programming Language :: Python :: 3.10',\n    'Programming Language :: Python :: 3.11',\n    'Programming Language :: Python :: 3.12',\n    'Programming Language :: Python :: 3.13',\n    'Programming Language :: Python :: 3.14',\n    'Operating System :: OS Independent',\n    'Topic :: Text Processing :: Markup :: XML'\n]\nrequires-python = \">=3.10\"\ndependencies = [\n    'bottle>=0.13,<0.14',\n    'certifi',\n    'filelock',\n    'isodate>=0,<1',\n    'jaconv>=0,<1',\n    'jsonschema>=4,<5',\n    'lxml>=4,<7,!=6.0.0',\n    'numpy>=1,<3',\n    'openpyxl>=3,<4',\n    'pillow>=10,<13',\n    'pyparsing>=3,<4',\n    'python-dateutil>=2,<3',\n    'regex',\n    'truststore>=0,<1',\n    'typing-extensions>=4,<5',\n]\n\n[project.optional-dependencies]\nCrypto = [\n    'pycryptodome>=3,<4',\n]\nDB = [\n    'oracledb>=3,<27',\n    'pg8000>=1,<2',\n    'PyMySQL>=1,<2',\n    'pyodbc>=4,<6',\n    'rdflib>=5,<8',\n]\nEFM = [\n    'aniso8601>=10,<11',\n    'holidays>=0,<1',\n    'matplotlib>=3,<4',\n    'pytz',\n    'pythonmonkey>=1,<2',\n]\nESEF = [\n    'tinycss2>=1,<2',\n]\nGUI = [\n    'pywin32>=300,<400 ; sys_platform == \"win32\"',\n]\nObjectMaker = [\n    'graphviz>=0,<1',\n]\nViewer = [\n    'ixbrl-viewer>=1,<2',\n]\nWebServer = [\n    'cheroot>=8,<12',\n    'tornado>=6,<7',\n",
+      "quote_sha256": "766130c7d6f61e5611128944ce211b1ef0c600e9130a35aacfc3dbf797d2bbf9"
+    },
+    "code_license": {
+      "path": "docs/design/proposal/methods/preparation-20261005-v1/03-adapters/sources/upstream/arelle/LICENSE.md",
+      "sha256": "0ab43a73de0e0501e081917a98bee744a2973f933514eb276da7900b304ced0f",
+      "first_line": 1,
+      "last_line": 17,
+      "quote": "# License\n\nCopyright © 2011-present Workiva, Inc.\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n<http://www.apache.org/licenses/LICENSE-2.0>\n\nUnless required by applicable law or agreed to in writing, software distributed\nunder the License is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR\nCONDITIONS OF ANY KIND, either express or implied. See the License for the\nspecific language governing permissions and limitations under the License.\n\nArelle includes a number of libraries with separate copyright notices and/or\nlicense terms. Your use of the source code for these libraries is subject to the\nterms and conditions of the following licenses:\n",
+      "quote_sha256": "b03050c703cb8d18d0a7a9c86bbf04bd86d601bb120095b71240f1c9460fc734"
+    },
+    "fasb_us_notice": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/terms-usgaap.txt",
+      "sha256": "c8c3c50795e2f1aa0a505b6cd6e7a2e56d9afb9860975c0ceec38c0355cc2b0f",
+      "span": [
+        168,
+        1167
+      ],
+      "quote": "To\nmeet the mission requirements of the U.S. Securities and Exchange Commission\n(the “\nCommission\n”), the US GAAP Financial Reporting Taxonomy\n[i]\n(the “\nTaxonomy\n”) may be\nused by the public, royalty-free, in reporting financial statements under U.S.\ngenerally accepted accounting principles (“\nGAAP\n”), and may be\nincorporated without change, in whole or in part, in other works (the “\nPermitted\nWorks\n”) that comment on, explain, or assist in the use or\nimplementation of the Taxonomy. Permitted Works may be copied, published and\ndistributed by its creator without restriction of any kind imposed hereby;\nprovided\n,\nthis Authorized Uses notice is included on the first page thereof. Under no\ncircumstances may the Taxonomy, or any part of it, be modified in any way, such\nas by removing the copyright notice or references to the copyright holder,\nexcept as required to translate it into languages other than English or with\nthe prior written consent of Financial Accounting Foundation (“\nFAF\n”).",
+      "quote_sha256": "e948fc6e791a92659b4d8644866c74420edd4959ce1f591ac32b3f8ea4c6ea1d"
+    },
+    "fasb_srt_notice": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/terms-srt.txt",
+      "sha256": "367eaeb79c9a69c051b7a2e2966c5618e77cceb43fec7da8a82ba3549a4ccc69",
+      "span": [
+        117,
+        1159
+      ],
+      "quote": "To meet the mission requirements of the U.S. Securities and Exchange Commission\n(the “\nCommission\n”), the SEC Reporting Taxonomy (the “\nSRT\n”)\nmay be used by the public, royalty-free, for reporting purposes in connection\nwith financial statements under U.S. generally accepted accounting principles\n(“\nGAAP\n”) or as otherwise provided for by the Commission, and may\nbe incorporated without change, in whole or in part, in other works (the “\nPermitted\nWorks\n”) that comment on, explain, or assist in the use or\nimplementation of the SRT. Permitted Works may be copied, published and\ndistributed by its creator without restriction of any kind imposed hereby;\nprovided\n,\nthis Authorized Uses notice is included on the first page thereof. Under no\ncircumstances may the SRT, or any part of it, be modified in any way, such as\nby removing the copyright notice or references to the copyright holder, except\nas required to translate it into languages other than English or with the prior\nwritten consent of Financial Accounting Foundation (“\nFAF\n”).",
+      "quote_sha256": "5674e5067261ab00c11ce7a907cd80f2238eb620fd019aa8802e1efac12faa98"
+    },
+    "xbrl_document_vs_software": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/terms-xbrl-copyright.txt",
+      "sha256": "11c80a7d997aae97ec36855816a667778ea88d00951d7b3f2b3c9ce6ad8f14fa",
+      "span": [
+        1487,
+        2993
+      ],
+      "quote": "Public documents on the XBRL.ORG site are provided by the XBRL International under the following license. The software, Document Type Definitions (DTDs) or schemas associated with XBRL specifications are governed by the Software Notice. By using and/or copying this document, or the XBRL document from which this statement is linked, you (the licensee) agree that you have read, understood, and will comply with the following terms and conditions:\nPermission to use, copy, and distribute the contents of this document, or the XBRL document from which this statement is linked, in any medium for any purpose and without fee or royalty is hereby granted, provided that you include the following on ALL copies of the document, or portions thereof, that you use:\nA link or URL to the original XBRL document.\nThe pre-existing copyright notice of the original author, or if it doesn’t exist, a notice of the form: “Copyright © 2002 XBRL International. All Rights Reserved. http://www.XBRL.org/legal/” (Hypertext is preferred, but a textual representation is permitted.)\nIf it exists, the STATUS of the XBRL document.\nWhen space permits, inclusion of the full text of this NOTICE should be provided. We request that authorship attribution be provided in any software, documents, or other items or products that you create pursuant to the implementation of the contents of this document, or any portion thereof.\nNo right to create modifications or derivatives of XBRL documents is granted pursuant to this license.",
+      "quote_sha256": "3d3301e8b7efa95c6bf992834f4a89f17a829721f88a987677e7e65a655d6a61"
+    },
+    "xbrldt_notice": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-07-trusted.body",
+      "sha256": "caf850f08d74c087c7946e6ea6d9fb5c0e9f8edf63bf639ccb9143e77e3390c7",
+      "first_line": 2,
+      "last_line": 9,
+      "quote": "<!-- (c) 2005 XBRL International. All Rights Reserved. http://www.XBRL.org/legal/ \n     This document may be copied and furnished to others, and derivative works that \n     comment on or otherwise explain it or assist in its implementation may be \n     prepared, copied, published and distributed, in whole or in part, without \n     restriction of any kind, provided that the above copyright notice and this\n     paragraph are included on all such copies and derivative works. XBRL(r), is a\n     trademark or service mark of XBRL International, Inc., registered in the\n     United States and in other countries. -->\n",
+      "quote_sha256": "f3c416c77e0d929d547a41408b3449c3e9ce087554d39afcf7877cb16f5752ba"
+    },
+    "sec_notice": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-09-trusted.body",
+      "sha256": "711827776f8044cc71a9c274f4695f9e0327c39814e0205845c0a6d03b1074e4",
+      "first_line": 2,
+      "last_line": 4,
+      "quote": "<!-- This schema was created by staff of the U.S. Securities and Exchange Commission. -->\n<!-- Data and content created by government employees within the scope of their employment -->\n<!-- are not subject to domestic copyright protection. 17 U.S.C. 105. -->\n",
+      "quote_sha256": "069fd76e2c4593239ca1bcef2f979f295110fd5d71b09ce3561b5489d845d846"
+    },
+    "schema_version_notice": {
+      "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-03-trusted.body",
+      "sha256": "5dbad94cecf42918b976449a8e1cb800d57e96442a9d0f5c00ca77e4da831827",
+      "first_line": 2,
+      "last_line": 18,
+      "quote": "<!-- (c) XBRL International.  See www.xbrl.org/legal  \n \nThis version is non-normative - it should be identical to the normative\nversion that is contained in Appendix A of the specification RECOMMENDATION\nwith errata corrections to 2008-07-02 except for this comment.\n\nFollowing the schema maintenance policy of XBRL International, this version's \nlocation on the web will be as follows:\n\n1) While it is the most current RECOMMENDED version of the schema and until it is \nsuperseded by any additional errata corrections it will reside on the web at\n\nhttp://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd \n\n2) It will be archived in perpetuity at \n\nhttp://www.xbrl.org/2003/2008-07-02/xbrl-instance-2003-12-31.xsd\n",
+      "quote_sha256": "09a37ab9bbba204abc30ad9db34108914bfb3b11f30655d0c66d8acc030772a2"
+    }
+  },
+  "source_dependency_snapshot": {
+    "graph": "data/accounting-master/taxonomy-reuse-20261007/graph-final.json",
+    "sha256": "8b0912fe406807297a4c6cbfabdfceae9f034dde58e172e7cb7fccfa57344491",
+    "summary": {
+      "nodes": 27,
+      "external_nodes": 21,
+      "edges": 3551,
+      "statuses": {
+        "resolved": 3551
+      },
+      "frontier_resources": 0,
+      "errors": 0
+    },
+    "status": "static_recorded_references_resolved; schema_and_xbrl_validation_not_run"
+  },
+  "proposed_runtime_options": {
+    "entrypointFile": "archive/aapl-20240928_htm.xml",
+    "internetConnectivity": "offline",
+    "disablePersistentConfig": true,
+    "validate": true,
+    "validationExitCode": true,
+    "formulaAction": "none",
+    "keepOpen": true,
+    "plugins": "",
+    "packages": [],
+    "logFile": "logToStructuredMessage",
+    "deduplicateFacts": null,
+    "saveDeduplicatedInstance": false
+  },
+  "proposed_environment": {
+    "python_requirement": ">=3.10",
+    "base_requirements": [
+      "bottle>=0.13,<0.14",
+      "certifi",
+      "filelock",
+      "isodate>=0,<1",
+      "jaconv>=0,<1",
+      "jsonschema>=4,<5",
+      "lxml>=4,<7,!=6.0.0",
+      "numpy>=1,<3",
+      "openpyxl>=3,<4",
+      "pillow>=10,<13",
+      "pyparsing>=3,<4",
+      "python-dateutil>=2,<3",
+      "regex",
+      "truststore>=0,<1",
+      "typing-extensions>=4,<5"
+    ],
+    "build_requirements": [
+      "setuptools>=82,<85",
+      "wheel>=0.46,<0.49",
+      "setuptools_scm>=10.0,<11.0"
+    ],
+    "optional_groups_selected": [],
+    "optional_groups_available": {
+      "Crypto": [
+        "pycryptodome>=3,<4"
+      ],
+      "DB": [
+        "oracledb>=3,<27",
+        "pg8000>=1,<2",
+        "PyMySQL>=1,<2",
+        "pyodbc>=4,<6",
+        "rdflib>=5,<8"
+      ],
+      "EFM": [
+        "aniso8601>=10,<11",
+        "holidays>=0,<1",
+        "matplotlib>=3,<4",
+        "pytz",
+        "pythonmonkey>=1,<2"
+      ],
+      "ESEF": [
+        "tinycss2>=1,<2"
+      ],
+      "GUI": [
+        "pywin32>=300,<400 ; sys_platform == \"win32\""
+      ],
+      "ObjectMaker": [
+        "graphviz>=0,<1"
+      ],
+      "Viewer": [
+        "ixbrl-viewer>=1,<2"
+      ],
+      "WebServer": [
+        "cheroot>=8,<12",
+        "tornado>=6,<7"
+      ],
+      "XULE": [
+        "aniso8601>=10,<11"
+      ]
+    },
+    "exact_dependency_lock": null,
+    "models_required_by_this_source_profile": "No ML models declared in this selected core role; not a claim about all plugins",
+    "distribution": "No external distribution in this task; dependency licence/lock and applicable historical taxonomy terms remain incomplete"
+  },
+  "proposed_input": {
+    "archive_sha256": "572133ac5a2d0ec22d78cf02b9d6ae40d226087d980ddf1ecb0d02b4772e54d1",
+    "entry_member": "aapl-20240928_htm.xml",
+    "uri_map": {
+      "archive/aapl-20240928.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/archive/aapl-20240928.xsd",
+        "sha256": "2504defd7ca7ae71738ea48ab46827d86653ae3d476fa34470bae1e9fd9b1e89"
+      },
+      "archive/aapl-20240928_cal.xml": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/archive/aapl-20240928_cal.xml",
+        "sha256": "228155213ac81c8a70010d34f4e9554241e9e4dff4518ac023eee4e5ed021adb"
+      },
+      "archive/aapl-20240928_def.xml": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/archive/aapl-20240928_def.xml",
+        "sha256": "be59b6a7a15d3356d35a6142194aaefcda3c4457fbb8fe9118dc5628e63b3b7a"
+      },
+      "archive/aapl-20240928_lab.xml": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/archive/aapl-20240928_lab.xml",
+        "sha256": "be7d4d132b060fc054cdf9cfe5ea0ec19756c658c41e2092bb0661634859d7f6"
+      },
+      "archive/aapl-20240928_pre.xml": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/archive/aapl-20240928_pre.xml",
+        "sha256": "96a24d7c76223eed66300c1ff60fc4f6071fb6dff92a9dba90fca3c3e60b1d21"
+      },
+      "archive/aapl-20240928_htm.xml": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/archive/aapl-20240928_htm.xml",
+        "sha256": "e92b4267ed5015cb6136aa00c48a73c00ac12e0cbfec18686811436cde898f2d"
+      },
+      "http://www.xbrl.org/2006/ref-2006-02-27.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-18c9a960da0a-trusted.body",
+        "sha256": "fae0144a41edf741c3b74c866988f64d24714dba4ca822258dea8b490b7904b7"
+      },
+      "http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-2bc96ed9042a-trusted.body",
+        "sha256": "b6b3fdd3bb93dad157f13586b5b9f14998b4940875c78af3f29d28116cc0092a"
+      },
+      "http://www.xbrl.org/2003/xl-2003-12-31.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-53c316b3dbf3-trusted.body",
+        "sha256": "e28b0965d34f4879833b433a62d0d1e86e8b1f22e6b7642bab861983f5bb5818"
+      },
+      "https://xbrl.fasb.org/srt/2024/elts/srt-types-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-56d026f5a123-trusted.body",
+        "sha256": "1884ab69b9d51ce6e807070d92b3ba14530a18699481024887c851b8ab3b1686"
+      },
+      "https://xbrl.fasb.org/srt/2024/elts/srt-roles-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-9b959ac78a22-trusted.body",
+        "sha256": "45cbc230f5225a8583b58a70031ba314193d09385fdf5fccdd5abc420d54c1bb"
+      },
+      "http://www.xbrl.org/lrr/role/net-2009-12-16.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-9cd5d482bbb5-trusted.body",
+        "sha256": "de7db88c29983dab5668dd437fdf659f9b66c1235e1e0240b79573305982a446"
+      },
+      "https://www.xbrl.org/2020/extensible-enumerations-2.0.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-9df3cb7629b1-trusted.body",
+        "sha256": "17a021e3e3fd5ca2ff0cde05988c78f12a6cadd71077347e0ae4376a78b586e8"
+      },
+      "https://xbrl.fasb.org/us-gaap/2024/elts/us-types-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-9efa30589a70-trusted.body",
+        "sha256": "d337b63047992f8ce9cbe741d214711d77e664361b52fa99907ebe1ed7a97842"
+      },
+      "https://xbrl.fasb.org/us-gaap/2024/elts/us-roles-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-af0d01b6b938-trusted.body",
+        "sha256": "84881bab38bea0bbc6d0d9bdf4f2bebb01d7809eebd9762e132084821a2092e7"
+      },
+      "https://xbrl.sec.gov/stpr/2024/stpr-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-d765040388f4-trusted.body",
+        "sha256": "3d6f5a2093d6360788961cbe4daabb3e3c4673ad5fba7addd2c08e2aa9fd2d6b"
+      },
+      "http://www.xbrl.org/2003/xlink-2003-12-31.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/dep-e31dcebaf73e-trusted.body",
+        "sha256": "5ffa8cb747ccd11e0d6420cf5668b60e3b7a64e20915d0e1774e5559d3343971"
+      },
+      "https://xbrl.fasb.org/srt/2024/elts/srt-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-01-trusted.body",
+        "sha256": "537bc31cff572d88a840bc61640c6c9e79972a1d4511ae4df67bbba08dd20d97"
+      },
+      "https://xbrl.fasb.org/us-gaap/2024/elts/us-gaap-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-02-trusted.body",
+        "sha256": "6a5daf96dc96edf69876ac9a34a3cb076f23eec3e2899e88ae92c1cecae0d70f"
+      },
+      "http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-03-trusted.body",
+        "sha256": "5dbad94cecf42918b976449a8e1cb800d57e96442a9d0f5c00ca77e4da831827"
+      },
+      "http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-04-trusted.body",
+        "sha256": "f906cd30bc47a81bd1c97e24447f4917b21eb3d8a8b4fc520129ce2534ac5bca"
+      },
+      "https://www.xbrl.org/dtr/type/2020-01-21/types.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-05-trusted.body",
+        "sha256": "a62f1f3635bc6b6cddd1422ab2c9ba00ebbe73cefc3500e207fa0e9c12ee0293"
+      },
+      "https://www.xbrl.org/dtr/type/2022-03-31/types.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-06-trusted.body",
+        "sha256": "e7eb1bef6a68845cc0dd5d370d18ceda92978dd54a6809a22286d4e6af87ca4b"
+      },
+      "http://www.xbrl.org/2005/xbrldt-2005.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-07-trusted.body",
+        "sha256": "caf850f08d74c087c7946e6ea6d9fb5c0e9f8edf63bf639ccb9143e77e3390c7"
+      },
+      "https://xbrl.sec.gov/country/2024/country-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-08-trusted.body",
+        "sha256": "f03371d53118f676c78eb1cafbafcef5a3aac0cefc6d77edebb3726d8db98079"
+      },
+      "https://xbrl.sec.gov/dei/2024/dei-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-09-trusted.body",
+        "sha256": "711827776f8044cc71a9c274f4695f9e0327c39814e0205845c0a6d03b1074e4"
+      },
+      "https://xbrl.sec.gov/ecd/2024/ecd-2024.xsd": {
+        "path": "data/accounting-master/taxonomy-reuse-20261007/sources/import-10-trusted.body",
+        "sha256": "8db96ac449485078c0133a0bd4c7a523e7c86782387a98551c610de3aff8b9f9"
+      }
+    },
+    "publication_byte_vintage": "unestablished",
+    "taxonomies": "Actual 2024 imports, not substituted current taxonomies"
+  },
+  "adapter_procedure": [
+    "Verify archive/member and URI-map hashes before invoking a library; do not rewrite the original schemas to change locations.",
+    "Populate only an isolated source cache/resolver from the declared URI map; validate all materialized paths and their hashes, including built-in fallback resources if used. The mapping into Arelle cache/resolver is a later implementation obligation.",
+    "Create one Session in its owning thread in one process. Use explicit offline/validation/error-sensitive options; retain original occurrences, no deduplication export.",
+    "Select logToStructuredMessage explicitly and retrieve Session.get_log_messages before close; the default print handler would not supply that buffer. After run, inspect the boolean, structured logs, loaded models and model.errors before any validation status. False return or a missing/invalid dependency cannot yield an admitted valid package.",
+    "Copy required native facts/contexts/units and occurrence/relationship sidecars while keepOpen retains the model; then close the session. factsInInstance is a set at this pin, so use original occurrence identity/order rather than set iteration for deterministic output.",
+    "Submit proposed evidence for review. File validation cannot admit accounting interpretation or historical availability."
+  ],
+  "exchanges": [
+    {
+      "id": "all_recorded_sources",
+      "input": "Actual graph-final.json and original annual instance",
+      "expected_design_result": {
+        "source_dependency_status": "static_references_resolved",
+        "library_execution": "not_run",
+        "xml_schema_validation": "not_run",
+        "xbrl_validation": "not_run",
+        "accounting_admission": "pending"
+      },
+      "rationale": "Current checked source inventory is not an Arelle output."
+    },
+    {
+      "id": "missing_us_gaap_schema",
+      "input_delta": "Withhold URI https://xbrl.fasb.org/us-gaap/2024/elts/us-gaap-2024.xsd from a copy of the proposed URI map; originals stay retained",
+      "expected_design_result": {
+        "status": "unresolved_dependency",
+        "dependency_uri": "https://xbrl.fasb.org/us-gaap/2024/elts/us-gaap-2024.xsd",
+        "network_fallback": false,
+        "valid_package": false,
+        "preserve_available_source_bytes": true
+      },
+      "rationale": "An offline cache pathname can exist as a string while the resource is absent; preflight must test the file/hash. If loading reaches it, preserve IOerror and affected concepts. This is a fixture design, not an executed Arelle experiment."
+    },
+    {
+      "id": "schema_wrong_namespace",
+      "input_delta": "Map the us-gaap URI to the retained srt schema in a proposed input only",
+      "expected_design_result": {
+        "status": "invalid_dependency_identity",
+        "valid_package": false
+      },
+      "rationale": "Both files are valid XML and HTTP 200 responses; the namespace differs, so identity fails."
+    },
+    {
+      "id": "validator_error_boolean",
+      "input_delta": "Hypothetical completed library run with success=True, model.errors nonempty",
+      "expected_design_result": {
+        "default_validationExitCode_false_boolean": true,
+        "proposed_validationExitCode_true_boolean": false,
+        "valid_package": false,
+        "retain_logs_and_errors": true
+      },
+      "rationale": "Derived directly from the pinned controller return and error accumulation; not an observed run."
+    }
+  ],
+  "distribution_dispositions": [
+    {
+      "component": "Arelle source",
+      "inspected_terms": "Apache-2.0 source declaration; full Apache text retained",
+      "proposed_obligation": "Retain licence/notices and modification attribution where required; separate every dependency and plugin term",
+      "status": "source_terms_inspected; distribution_not_authorised_or_cleared"
+    },
+    {
+      "component": "FASB US GAAP / SRT",
+      "inspected_terms": "Named Authorized Uses notices permit specified reporting and unchanged incorporation in works explaining/assisting implementation, with notice on first page; restrict changes and retain third-party terms",
+      "proposed_obligation": "Keep original bytes; resolver maps externally; carry full source-specific notices if a permitted-work distribution is later chosen",
+      "status": "current_retrieved_notice_inspected; page displays 2027 and is unversioned; applicability/history for 2024 package not established"
+    },
+    {
+      "component": "SEC-authored schemas",
+      "inspected_terms": "Individual headers state staff-created content is not subject to domestic copyright under 17 U.S.C. 105",
+      "proposed_obligation": "Preserve source notice and provenance; do not extend this statement to FASB/XBRL/issuer content or foreign rights",
+      "status": "bounded_header_statement_only"
+    },
+    {
+      "component": "XBRL specifications/schemas",
+      "inspected_terms": "Dimensions schema carries its own notice; public document copyright page expressly refers schemas to a separate Software Notice; 2007/2009 IP policies and XBRL US policy retained",
+      "proposed_obligation": "Check each component-specific notice and the actual applicable software terms. Participant contribution grants do not automatically licence this application. Candidate Software Notice URL returned 404.",
+      "status": "software_notice_and_component_applicability_open"
+    },
+    {
+      "component": "Arelle required dependencies",
+      "inspected_terms": "Fifteen declared base requirements plus three build ranges; no installed exact dependency resolution",
+      "proposed_obligation": "Resolve versions and transitive terms for the actual environment before any production/distribution claim",
+      "status": "requirements_inventory_only; no lock_or_licence_clearance"
+    }
+  ],
+  "acceptance": {
+    "E01": "open; this static taxonomy frontier repaired only",
+    "E14": "open; broader tools, exact dependency/model locks, terms and actual interfaces remain",
+    "whole_proposal": "not_ready"
+  }
+}

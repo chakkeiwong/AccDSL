@@ -1,0 +1,127 @@
+\section{Ordered multi-series EPS report records}
+\label{sec:ordered-eps-records}
+
+\code{OrderedEPS/1} specifies the report taught in
+Sections~\ref{sec:ordered-eps-method}--\ref{sec:ordered-eps-report}.
+Its closed Draft 2020-12 JSON schemas are retained as
+\code{ordered-eps/record-schemas.json} in the continuation evidence directory.
+Every field below is required; unknown fields reject. Braces denote objects,
+brackets arrays, and alternatives distinct shapes. No migration from
+\code{FinancingComponents/2} is inferred.
+
+\begin{lstlisting}
+Request {
+  wire: "OrderedEPS/1", operation: "report",
+  context, context_ref, inventory, scope, basic, series
+}
+context {
+  entity, book, head, view, population,
+  period: {start, end_exclusive}, ordinary_class, share_basis,
+  currency, currency_scale, rule_version
+}
+support {path, sha256, anchor}
+inventory {status: complete | incomplete, ids: [id], support}
+scope {
+  nonparticipating_rights, independent_additive_effects,
+  fixed_effects, support
+}
+basic (ready) {
+  status: ready, context_ref, support, continuing_numerator,
+  total_numerator, denominator,
+  attribution_complete, chronology_complete
+}
+basic (unresolved) {
+  status: unresolved, context_ref, support, reason
+}
+\end{lstlisting}
+
+Names and reasons are nonempty strings, findings are Booleans, dates are
+valid ISO calendar dates, and intervals include their start but exclude their
+end. A reporting period has positive length. Digests are 64 lower-case
+hexadecimal characters. The context reference is SHA256 of UTF-8 JSON with
+keys sorted, compact separators, ASCII escaping and no trailing newline.
+Every basic or series record must carry that reference. A support reference
+identifies exact local bytes and a nonempty anchor. Source resolution checks
+the bytes; a caller must separately interpret the anchor and the finding.
+
+Quantities are reduced rational strings: \code{0}, a signed nonzero integer,
+or a reduced numerator/positive-denominator fraction. Leading zeros, plus
+signs, negative zero, decimals, exponents and a redundant denominator of one
+reject. The basic denominator is positive. The context binds units and scale
+before arithmetic; the report performs no currency or share-basis conversion.
+Both completeness findings in a ready basic record must be true to return
+basic EPS. The inventory and series IDs must agree bijectively, with no
+duplicates. A complete empty inventory is permitted with support.
+
+\begin{lstlisting}
+series (candidate) {
+  id, resolution: candidate, context_ref, support,
+  continuing_increment, total_increment, share_increment,
+  earnings_complete, time_weighting_complete,
+  potential_windows: [{start, end_exclusive}],
+  actual_windows: [{start, end_exclusive}],
+  end_kind: period_end | lapsed | converted, actual_in_basic
+}
+series (no effect) {
+  id, resolution: no_effect, context_ref, support,
+  continuing_increment, total_increment, share_increment,
+  reason
+}
+series (unresolved or unsupported) {
+  id, resolution: unresolved | unsupported,
+  context_ref, support, reason
+}
+\end{lstlisting}
+
+A candidate has a positive, already weighted share increment; earnings
+increments may be signed. Both completeness findings must be true for diluted
+calculation. It has at least one potential window. All windows have positive
+length, lie within the reporting period and do not overlap within that series.
+For a conversion, actual windows are nonempty, follow the potential windows,
+and \code{actual\_in\_basic} is true. For lapse or period-end treatment, actual
+windows are empty and that finding is false. A period-end series' final
+potential window ends at the period boundary. A no-effect record has all three
+increments zero. Reasons retain missing facts or the further method required;
+they never stand for a silently omitted series.
+
+\begin{lstlisting}
+Result {
+  wire: "OrderedEPS/1", request_sha256, context_ref,
+  status, basic: EPSBundle | null, diluted: EPSBundle | null,
+  trace: [Comparison], issues: [{code, path, series_id}],
+  mutations: [], acceptance: "conditional_documentary_only"
+}
+EPSBundle {
+  continuing_numerator, total_numerator,
+  discontinued_numerator, denominator,
+  continuing_eps, total_eps, discontinued_eps
+}
+Comparison {
+  id, resolution: candidate | no_effect,
+  continuing_increment, total_increment, share_increment,
+  incremental_ratio,
+  before: {continuing_numerator, denominator},
+  after_if_included: {continuing_numerator, denominator},
+  included, reason: strictly_dilutive | neutral |
+                    antidilutive | no_effect
+}
+\end{lstlisting}
+
+Result quantities remain reduced rational strings. The request digest uses
+the same serialization over the complete request. The context reference is
+null only when no valid reference can be read. An issue identifies its code,
+JSON path and series ID or null. A no-effect comparison has a null ratio and
+unchanged amounts. Candidates appear in exact increasing-ratio order, IDs
+breaking ties; no-effect items follow in ID order. The schema permits null
+comparison states; the completed reference report supplies them.
+
+\code{conditional\_complete} returns both bundles, the complete trace and no
+issues. \code{unresolved} records missing findings or source bytes, incomplete
+inventory or unresolved items. \code{unsupported} records unsupported scope
+or series; \code{blocked} records both obstacles. These three statuses retain
+independently ready basic EPS, with null diluted EPS and an empty trace.
+\code{rejected} takes precedence for structural, binding, rational, sign,
+inventory, date or source-hash violations and returns neither bundle. Issues
+sort by path, code and series ID; mutations are always empty. Application
+methods remain responsible for live head freshness, source truth, accounting
+admission and future publication.

@@ -1,0 +1,41 @@
+{
+  "assumptions": [
+    "This review uses only the supplied packet; no tools, files or project history were consulted.",
+    "Workers and controller are trusted. Deliberate detachment, hostile same-user activity and uncatchable termination during registration are outside scope.",
+    "The omitted process wrapper must enforce deadlines, cleanup and protection checks as stated in the interfaces. Test names alone do not independently establish those implementations."
+  ],
+  "checks": [
+    "Inspected protection, evidence hashing, controller-test admission, change attribution and proposal-readiness code.",
+    "Inspected deterministic built-in validation, preservation, recovery and the proposal checker with its supplied current tests.",
+    "The supplied verification reports 218 passing tests with matching supplied controller hashes; this is reported control-plane evidence, not independently executed verification or accounting correctness.",
+    "Confirmed that proposal readiness retains human_acceptance=pending and implementation_enabled=false, and that source operations explicitly preserve mission limitations."
+  ],
+  "evidence": [
+    "scripts/run_accounting_master.py",
+    "scripts/accounting_master_support.py",
+    "scripts/check_accounting_proposal.py",
+    "tests/test_accounting_proposal_current.py",
+    "docs/plans/accounting-master-program.md"
+  ],
+  "issues": [
+    "R1 — scripts/run_accounting_master.py, Master.ensure_controller_tests: required-suite execution is checked only through the combined unittest summary. If discovery finds zero tests in test_accounting_proposal_current.py, the master suite can still supply a positive aggregate count and produce passed=true. Likewise, every proposal test can be skipped while executed master tests make skipped < tests. This permits startup to report current controller verification without executing either required suite independently. Repair: retain discovery and execution counts per required suite, require each suite to execute at least one non-skipped test successfully, and save structured per-suite outcomes rather than deriving admission solely from one aggregate log regex. Add regressions for an empty required suite and an entirely skipped required suite alongside a passing companion suite.",
+    "R2 — scripts/check_accounting_proposal.py, P18 render validation: rendered_pages is required to be nonempty and uniquely named, but its completeness relative to the PDF is never checked. A successful render command restricted accidentally to page 1 of a multipage manuscript can supply matching page hashes, render records and review records and pass every shown render check. P19 recursively accepts that structural result. The supplied tests verify freshness and hash binding, but do not establish page coverage. Repair: bind the PDF page count and page-number mapping to the render record, validate that the required inspection set is complete, and bind the review to that set. If selected-page inspection is intentionally permitted, declare that bounded scope explicitly and prevent it from satisfying a whole-manuscript inspection requirement. Add a multipage regression where one omitted page keeps P18 incomplete."
+  ],
+  "next_actions": [
+    "Require successful non-skipped execution separately for both startup suites.",
+    "Define and enforce the P18 page-coverage contract, then add the focused regressions described above.",
+    "Rerun the current suites and obtain a fresh controller review after repair."
+  ],
+  "residuals": [
+    "The exact intended P18 inspection coverage is a missing interface assumption: the packet specifies manuscript inspection but supplies no all-pages or selected-pages policy.",
+    "Lifecycle enforcement, locking, approval-rule publication and repair scheduling are principally supplied as interface statements and test names; their implementations are not fully present in this evidence packet.",
+    "The source-register count is checked against the coverage manifest rather than independently against 192. This relies on frozen coverage provenance preserving the accepted panel definition.",
+    "Passing structural checks and internal reviews cannot close the remaining accounting, scientific or human-acceptance gaps."
+  ],
+  "steps": [
+    "Performed a static, packet-only review of the assigned evidence scope.",
+    "Separated concrete acceptance gaps from omitted-interface assumptions and nonblocking limitations."
+  ],
+  "summary": "REVISE: startup verification can pass without executing a required suite, and P18 can accept incomplete rendered-page coverage.",
+  "verdict": "REVISE"
+}

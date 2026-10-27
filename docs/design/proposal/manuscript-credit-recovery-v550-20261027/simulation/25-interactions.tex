@@ -1,0 +1,136 @@
+\chapter[Failures at the joins between methods]{Failures at the joins: how individually plausible methods produce a wrong simulation}
+\label{sim:interactions}
+
+Many serious errors occur where two reasonable methods meet. A contract engine can calculate coupons correctly while an accounting adapter treats them as expense under an incompatible basis. A particle filter can implement its weights correctly while a policy sees hidden future state. A consolidation routine can balance while a liquidity engine spends cash in the wrong entity. This chapter examines these joins and proposes checks that target the interaction rather than one isolated module.
+
+\section{Reconstruction followed by valuation}
+Suppose historical debt carrying amount is 100 and an analyst reconstructs face as 100. A valuation engine then prices the promise correctly. If the carrying amount included an unamortized discount or accrued interest, the promise was misidentified before pricing began. The valuation solver can return a precise answer to the wrong contract.
+
+The interface should require a distinction among observed carrying amount, inferred face and supplied valuation terms. If face is unknown, pricing should operate conditionally over its feasible values or request a supported mapping. A test should include face 110, carrying amount 100 and proceeds different from both.
+
+The repair is at the reconstruction boundary, not by adjusting the discount rate until price matches book value. Such calibration would hide the missing contractual amount and could distort every later scenario. A book-to-contract bridge should explain the difference with admitted movements and measurement rules.
+
+\section{Valuation followed by cash forecasting}
+A bond's market value falls after rates rise. A cash forecast that treats the decline as a cash inflow because the liability became cheaper creates money unless the company actually repurchases or settles the debt. The valuation change is not itself a financing event.
+
+If repurchase is allowed, it requires a market offer, available cash, quantity and settlement date. The company may realize an economic benefit by paying less than face, but it still spends cash to do so. Accounting gain or loss depends on carrying amount and the applicable treatment.
+
+A discriminating test changes market rates while holding contractual payments and policy fixed. Cash should not change merely from revaluation unless a contract or collateral clause creates a payment. A second test enables repurchase and checks the explicit transaction.
+
+\section{A hedge followed by accounting classification}
+An economic hedge can offset cash exposure while failing a particular hedge-accounting designation. Conversely, a qualifying designation does not guarantee perfect economic offset. A simulator that equates the two can misstate both cash and reported income.
+
+The contract layer should calculate the underlying and derivative cash flows separately, including basis and timing. The accounting layer applies designation, effectiveness and measurement rules under the admitted basis. Unknown designation affects reporting, while unknown notional or reset terms affect economic exposure.
+
+A test can use equal notionals but different reset dates. Annual net interest may appear small while interim collateral or coupon cash differs. Another can hold economic cash fixed and vary the accounting designation to show that reporting changes without inventing a new cash flow.
+
+\section{A credit loss followed by a funding rule}
+An impairment model may reduce receivable value after customer deterioration. A funding model may continue using the old gross receivable as collateral. Each module can pass its own local checks while the joined model overstates borrowing capacity.
+
+The interface should distinguish accounting allowance, contractual eligibility and realized collection. A borrowing base may exclude overdue invoices regardless of allowance, or apply a separate haircut. These relations need explicit terms. The correct funding reduction is not automatically equal to the accounting impairment.
+
+Use a case where an invoice becomes ineligible before an accounting loss is recognized, and another where an allowance changes but eligibility does not. The tests prevent accidental identification of two different quantities. The repair is a shared event and state relation, not a single reused field called net receivables.
+
+\section{A source update followed by a cached policy}
+A new note reveals a near-term maturity. The reconstruction updates debt timing, but a cached financing policy was optimized for a later maturity. Reusing it can produce an infeasible payment path while all displayed balances use the new source.
+
+Cache invalidation must follow semantic dependencies. A policy depends on contract schedule, offers, information, horizon and objective. A hash of the displayed statement totals is insufficient because the totals may be unchanged.
+
+A regression test changes only the maturity clause while preserving current balances. The policy and relevant scenario result should be recomputed or marked stale. Unaffected historical arithmetic may remain cached. This tests precise invalidation rather than indiscriminate recomputation.
+
+\section{A restatement followed by backtesting}
+A current data pipeline supplies restated historical earnings to a forecast evaluation that claims to use information available at the time. The forecasting code can be correct while the data view leaks later knowledge.
+
+The evaluation needs source versions and publication cutoffs, including parameter-estimation inputs. A restatement can be used as a later target if that is the defined outcome, but it cannot silently become an earlier predictor.
+
+A test should run an old forecast before and after adding a later restatement. The frozen as-published prediction remains identical, while a separately named restated analysis can change. This is a direct check of evidence semantics at the validation boundary.
+
+\section{A particle filter followed by robust optimization}
+A particle approximation may retain only a small subset of plausible contract types. A robust optimizer then treats those particles as the entire feasible family and reports a worst case. The filter approximated a distribution; it did not prove that discarded histories were impossible.
+
+The optimizer should receive the retained family for robust queries, or explicitly report a sample-restricted worst case. Particle witnesses can supply an incumbent adverse case, while symbolic constraints or other methods bound the unexplored region.
+
+A test deliberately gives a low-weight but feasible history a severe cash outcome. Resampling may remove it. The robust result should remain sensitive to it unless evidence excludes it. A probabilistic expected-value result can weight it according to the admitted measure, but that is a different target.
+
+\section{Scenario reduction followed by policy optimization}
+A reduced scenario set can preserve mean revenue while removing a signal pattern that changes the optimal financing decision. Optimizing on the reduced set can then produce a policy that fails on omitted paths.
+
+Reduction should preserve or bound decision-relevant outcomes and information structure. A representative scenario is not merely a nearby vector of shocks. Its observation timing, feasible actions and threshold events matter.
+
+A useful test has two close rate paths on opposite sides of a covenant and a refinancing action available only before the breach is observed. A reduction that merges them must either retain conditional behavior or report an approximation bound that covers the decision loss. Mean matching alone is insufficient.
+
+\section{A policy optimizer followed by event execution}
+An optimizer can choose an issue amount based on continuous shares and immediate settlement. The event engine enforces integer lots and a two-day settlement lag. The optimized plan is no longer feasible. Rounding and delaying it after optimization can alter the objective materially.
+
+The optimization problem should include the same action domain and timing as execution, or explicitly account for a projection and its effect. A post hoc repair that borrows the residual cash is another policy and needs its own feasibility.
+
+A test can use a funding need just above a lot boundary and a maturity before settlement. It should reject the original plan or reoptimize under the correct constraints. Reporting the optimizer's objective before execution repair would overstate achieved value.
+
+\section{An accounting rule followed by an economic policy}
+A dividend policy based on book profit may distribute cash that is unavailable because profit includes noncash gains or uncollected sales. The accounting calculation can be correct; the policy is infeasible without a cash constraint.
+
+Conversely, a cash-rich company can have accounting restrictions on distributions under the applicable rules. A cash-only policy can violate those restrictions. The feasible action set should combine cash, legal, contractual and class-right constraints where admitted.
+
+A test should include positive profit with negative operating cash and another with positive cash but a binding distribution restriction. Neither a profit ratio nor a cash balance alone defines feasible dividends. The policy must receive the relevant state and rules jointly.
+
+\section{Consolidation followed by credit analysis}
+A consolidated group can eliminate an intercompany loan while a creditor's claim remains against one legal entity. A credit model using only consolidated net assets can assign support that the creditor cannot access.
+
+The credit analysis needs borrower, guarantor, security and transfer relationships. Consolidated reporting remains useful but is not a legal recovery waterfall. The same assets can support different claims under different entity structures.
+
+A fixture should compare two groups with identical consolidated statements but different guarantees or asset ownership. Recovery and payment capacity should differ where the stipulated rights differ. If the model returns the same result, it has probably compressed away a material legal-entity relation.
+
+\section{A default model followed by accounting close}
+A default indicator can trigger an accounting routine that zeros every liability and equity balance. This makes the balance sheet close neatly while erasing continuing obligations, recovery claims and operating assets.
+
+The economic default event should create a process state. Accounting consequences follow actual or stipulated modification, impairment, settlement and extinguishment events under the basis. Default alone does not supply every measurement.
+
+A test should leave unpaid debt outstanding during a cure period, then compare repayment, waiver and restructuring paths. Another should include delayed recovery. The system should preserve obligations until the admitted event changes them, even if a value function assigns zero to shareholders.
+
+\section{A pricing measure followed by a risk report}
+A debt price may be computed under a pricing measure, while a risk report asks for real-world default frequency. Reusing pricing probabilities as forecasts confuses valuation with statistical prediction.
+
+The measure identity should travel with every expectation. A risk-neutral probability can be useful for price consistency, but does not automatically describe actual event frequency. A physical probability model can estimate frequency but requires a risk adjustment to price claims unless special assumptions apply.
+
+A test with different physical and pricing probabilities should produce different expected losses while preserving the declared price. The report should refuse an unlabeled probability when the measure is ambiguous. This is a semantic type check with direct financial consequences.
+
+\section{A numerical tolerance followed by a legal threshold}
+A solver treats a constraint violation of $10^{-6}$ as acceptable. A downstream routine interprets the approximate value as exact compliance with a strict contractual threshold. The numerical convention has silently become a legal conclusion.
+
+The result should carry an error interval or tolerance. If the interval crosses the threshold, classification is unresolved unless another calculation determines the sign. The contract's inclusive or strict comparison remains unchanged.
+
+A test at equality and on both sides by less than the solver tolerance reveals this interaction. Exact rational cases can establish intended boundary semantics. Floating-point production methods then need an explicit policy for translating their error into a classification.
+
+\section{A language model followed by evidence admission}
+A language model can propose a plausible missing journal or summarize a contract. Those outputs are interpretations or hypotheses until supported. If they are inserted into the evidence store as facts, subsequent inference can become circular: the model later cites its own generated explanation.
+
+The admission layer should retain source anchors and distinguish extracted text, normalized interpretation and generated suggestion. Unsupported suggestions can be useful search leads or candidate templates. They should not narrow the family merely because the text is fluent.
+
+A test should submit a plausible but unanchored maturity date. The system should preserve it as a proposed assumption or reject factual admission. If a genuine source later supports it, the new assertion can narrow the family with traceable provenance.
+
+\section{A user interface followed by decision interpretation}
+An interface may display one attractive central path while hiding unresolved regions. Users can reasonably interpret it as the forecast even when the calculation produced a family. The presentation then overstates certainty without any numerical bug.
+
+The default display should identify conditional paths, ranges, measures and unresolved cases in proportion to their importance. It should not label an arbitrary witness most likely. A central estimate needs a stated selection rule or probability model.
+
+A useful review asks whether the reader can identify the history driving a shortfall, the assumption that could remove it and the status of the computation. If those answers require searching internal logs, the explanation is insufficient even if the underlying data are preserved.
+
+\section{Composition contracts}
+Each boundary should specify input meaning, units, timing, information, allowed uncertainty and failure behavior. A contract engine returns obligations and payoffs; an accounting engine returns postings under a basis; a policy engine returns admissible actions; an inference engine returns families or measures.
+
+These interfaces should be tested end to end with the worked cases. A local adapter can be mechanically correct while mapping the wrong concept. The test must compare the resulting economic and accounting consequences, not only schema validity.
+
+Version compatibility also matters. A changed rule can alter event order or measurement. Results should identify the exact component versions and invalidate dependent caches. A stable interface name does not establish semantic compatibility across versions.
+
+\input{simulation/lit-25-interactions-7}
+
+\section{Prioritizing interaction tests}
+The highest-value interactions are those that can create cash, remove obligations, leak information or drop adverse histories. They should be tested early because they can make every downstream chart look plausible. Positive-recovery pricing, settlement timing, ownership conversion and joint-history preservation are examples.
+
+Other interactions can be staged according to the active company and query. A bank capital rule may be irrelevant to a simple industrial-company fixture but essential to a bank funding scenario. The full mission retains these domains without forcing every first implementation to solve all of them at once.
+
+The catalogue remains extensible. Each newly discovered failure should identify the target, actual behavior, mechanism, discriminating case and repair. That practice turns failures into durable knowledge and prevents the same convenient shortcut from reappearing under another module name.
+
+\input{simulation/credit-claim}
+
+\input{simulation/credit-recovery}

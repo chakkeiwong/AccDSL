@@ -1,0 +1,4889 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_ids": {
+    "Obligation": "accdsl.real.obligation.v1",
+    "EvidenceFile": "accdsl.real.evidencefile.v1",
+    "SourceVersion": "accdsl.real.sourceversion.v1",
+    "Context": "accdsl.real.context.v1",
+    "Observation": "accdsl.real.observation.v1",
+    "InventoryItem": "accdsl.real.inventoryitem.v1",
+    "Assertion": "accdsl.real.assertion.v1",
+    "Package": "accdsl.real.package.v1",
+    "View": "accdsl.real.view.v1",
+    "FamilyQuestion": "accdsl.real.familyquestion.v1",
+    "StatementReport": "accdsl.real.statementreport.v1",
+    "ConditionalBasis": "accdsl.real.conditionalbasis.v1",
+    "ConditionalHistory": "accdsl.real.conditionalhistory.v1",
+    "DifferenceReport": "accdsl.real.differencereport.v1",
+    "SettlementResult": "accdsl.real.settlementresult.v1",
+    "NamedQueryResult": "accdsl.real.namedqueryresult.v1",
+    "ConnectedResult": "accdsl.real.connectedresult.v1",
+    "ConflictSource": "accdsl.real.conflictsource.v1",
+    "ConflictProposal": "accdsl.real.conflictproposal.v1",
+    "SchemaLock": "accdsl.real.schemalock.v1",
+    "Profile": "accdsl.real.profile.v1",
+    "OperationSignature": "accdsl.real.operationsignature.v1",
+    "Environment": "accdsl.real.environment.v1",
+    "Decoder": "accdsl.real.decoder.v1",
+    "Submission": "accdsl.real.submission.v1",
+    "Domain": "accdsl.real.domain.v1",
+    "Region": "accdsl.real.region.v1",
+    "OperationRequest": "accdsl.operation.request.v1",
+    "OperationResult": "accdsl.operation.result.v1",
+    "Arguments.source.prepare@1": "accdsl.real.arguments.source.prepare@1.v1",
+    "Arguments.history.query@1": "accdsl.real.arguments.history.query@1.v1",
+    "Arguments.scenario.project@1": "accdsl.real.arguments.scenario.project@1.v1",
+    "Arguments.report.build@1": "accdsl.real.arguments.report.build@1.v1",
+    "Arguments.review.propose@1": "accdsl.real.arguments.review.propose@1.v1"
+  },
+  "$defs": {
+    "Obligation": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "affected_queries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "support_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "schema": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "issuer",
+        "code",
+        "affected_queries",
+        "reason",
+        "support_refs"
+      ],
+      "additionalProperties": false
+    },
+    "EvidenceFile": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "role",
+        "blob"
+      ],
+      "additionalProperties": false
+    },
+    "SourceVersion": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "original_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "reading_file_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EvidenceFile"
+            },
+            "schema": {
+              "const": "accdsl.real.evidencefile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "public_at": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligation_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "Obligation"
+                  },
+                  "schema": {
+                    "const": "accdsl.real.obligation.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tag",
+            "reason",
+            "obligation_refs"
+          ],
+          "additionalProperties": false
+        },
+        "ingested_at": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligation_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "Obligation"
+                  },
+                  "schema": {
+                    "const": "accdsl.real.obligation.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tag",
+            "reason",
+            "obligation_refs"
+          ],
+          "additionalProperties": false
+        },
+        "reviewed_at": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligation_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "Obligation"
+                  },
+                  "schema": {
+                    "const": "accdsl.real.obligation.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tag",
+            "reason",
+            "obligation_refs"
+          ],
+          "additionalProperties": false
+        },
+        "supersedes_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "SourceVersion"
+              },
+              "schema": {
+                "const": "accdsl.real.sourceversion.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "issuer",
+        "version",
+        "original_blob",
+        "reading_file_ref",
+        "public_at",
+        "ingested_at",
+        "reviewed_at",
+        "supersedes_refs"
+      ],
+      "additionalProperties": false
+    },
+    "Context": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "perimeter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measurement_kind": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "issuer",
+        "perimeter",
+        "basis",
+        "period",
+        "unit",
+        "measurement_kind"
+      ],
+      "additionalProperties": false
+    },
+    "Observation": {
+      "type": "object",
+      "properties": {
+        "source_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "SourceVersion"
+            },
+            "schema": {
+              "const": "accdsl.real.sourceversion.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "reading_file_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EvidenceFile"
+            },
+            "schema": {
+              "const": "accdsl.real.evidencefile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "pointer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "row_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Context"
+            },
+            "schema": {
+              "const": "accdsl.real.context.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "literal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "known_displayed"
+                },
+                "amount": {
+                  "type": "object",
+                  "properties": {
+                    "n": {
+                      "type": "string",
+                      "pattern": "^(0|-?[1-9][0-9]*)$"
+                    },
+                    "d": {
+                      "type": "string",
+                      "pattern": "^[1-9][0-9]*$"
+                    }
+                  },
+                  "required": [
+                    "n",
+                    "d"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "amount"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "reported_dash"
+                },
+                "literal": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "tag",
+                "literal"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "precision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admission": {
+          "const": "author_reading_no_human_admission"
+        }
+      },
+      "required": [
+        "source_ref",
+        "reading_file_ref",
+        "pointer",
+        "row_id",
+        "context_ref",
+        "literal",
+        "value",
+        "precision",
+        "admission"
+      ],
+      "additionalProperties": false
+    },
+    "InventoryItem": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EvidenceFile"
+            },
+            "schema": {
+              "const": "accdsl.real.evidencefile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "pointer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "disposition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "remaining_facts": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "category",
+        "item_id",
+        "file_ref",
+        "pointer",
+        "disposition",
+        "remaining_facts"
+      ],
+      "additionalProperties": false
+    },
+    "Assertion": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "SourceVersion"
+            },
+            "schema": {
+              "const": "accdsl.real.sourceversion.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "extraction_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        },
+        "span_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "note_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "proposed_consequence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "obligation_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Obligation"
+            },
+            "schema": {
+              "const": "accdsl.real.obligation.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "admission": {
+          "const": "proposed_only"
+        }
+      },
+      "required": [
+        "issuer",
+        "source_ref",
+        "extraction_blob",
+        "start",
+        "end",
+        "quote",
+        "span_sha256",
+        "note_id",
+        "proposed_consequence",
+        "obligation_ref",
+        "admission"
+      ],
+      "additionalProperties": false
+    },
+    "Package": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "SourceVersion"
+              },
+              "schema": {
+                "const": "accdsl.real.sourceversion.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "evidence_file_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "EvidenceFile"
+              },
+              "schema": {
+                "const": "accdsl.real.evidencefile.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "inventory_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "InventoryItem"
+              },
+              "schema": {
+                "const": "accdsl.real.inventoryitem.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "assertion_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Assertion"
+              },
+              "schema": {
+                "const": "accdsl.real.assertion.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "recursive_closure": {
+          "const": false
+        },
+        "semantics_complete": {
+          "const": false
+        },
+        "obligation_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Obligation"
+              },
+              "schema": {
+                "const": "accdsl.real.obligation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "issuer",
+        "source_refs",
+        "evidence_file_refs",
+        "inventory_refs",
+        "assertion_refs",
+        "recursive_closure",
+        "semantics_complete",
+        "obligation_refs"
+      ],
+      "additionalProperties": false
+    },
+    "View": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "view_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "SourceVersion"
+              },
+              "schema": {
+                "const": "accdsl.real.sourceversion.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "parent_ref": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "View"
+                },
+                "schema": {
+                  "const": "accdsl.real.view.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "named_retained_sources"
+        },
+        "historical_admission": {
+          "const": false
+        }
+      },
+      "required": [
+        "issuer",
+        "view_id",
+        "source_refs",
+        "parent_ref",
+        "mode",
+        "historical_admission"
+      ],
+      "additionalProperties": false
+    },
+    "FamilyQuestion": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Package"
+            },
+            "schema": {
+              "const": "accdsl.real.package.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "target": {
+          "const": "actual_whole_company_histories_compatible_with_sources"
+        },
+        "obligation_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Obligation"
+              },
+              "schema": {
+                "const": "accdsl.real.obligation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "formulation_complete": {
+          "const": false
+        },
+        "feasibility": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligation_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "Obligation"
+                  },
+                  "schema": {
+                    "const": "accdsl.real.obligation.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tag",
+            "reason",
+            "obligation_refs"
+          ],
+          "additionalProperties": false
+        },
+        "measure_ref": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "issuer",
+        "package_ref",
+        "view_ref",
+        "target",
+        "obligation_refs",
+        "formulation_complete",
+        "feasibility",
+        "measure_ref"
+      ],
+      "additionalProperties": false
+    },
+    "StatementReport": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Package"
+            },
+            "schema": {
+              "const": "accdsl.real.package.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "annual_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Observation"
+              },
+              "schema": {
+                "const": "accdsl.real.observation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "annual_opening_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Observation"
+              },
+              "schema": {
+                "const": "accdsl.real.observation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "interim_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Observation"
+              },
+              "schema": {
+                "const": "accdsl.real.observation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "interim_comparison_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Observation"
+              },
+              "schema": {
+                "const": "accdsl.real.observation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "relation_file_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "EvidenceFile"
+              },
+              "schema": {
+                "const": "accdsl.real.evidencefile.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 2
+        },
+        "amount_meaning": {
+          "const": "reported_displayed_tokens"
+        },
+        "history_admission": {
+          "const": false
+        },
+        "obligation_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Obligation"
+              },
+              "schema": {
+                "const": "accdsl.real.obligation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "issuer",
+        "package_ref",
+        "view_ref",
+        "annual_refs",
+        "annual_opening_refs",
+        "interim_refs",
+        "interim_comparison_refs",
+        "relation_file_refs",
+        "amount_meaning",
+        "history_admission",
+        "obligation_refs"
+      ],
+      "additionalProperties": false
+    },
+    "ConditionalBasis": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "FamilyQuestion"
+            },
+            "schema": {
+              "const": "accdsl.real.familyquestion.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "asset_evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EvidenceFile"
+            },
+            "schema": {
+              "const": "accdsl.real.evidencefile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "repair_evidence_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EvidenceFile"
+            },
+            "schema": {
+              "const": "accdsl.real.evidencefile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "note_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Assertion"
+              },
+              "schema": {
+                "const": "accdsl.real.assertion.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "hypothetical_q": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "alpha_lower": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "alpha_upper": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "base_feasibility": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligation_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "Obligation"
+                  },
+                  "schema": {
+                    "const": "accdsl.real.obligation.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tag",
+            "reason",
+            "obligation_refs"
+          ],
+          "additionalProperties": false
+        },
+        "posting_permission": {
+          "const": false
+        }
+      },
+      "required": [
+        "issuer",
+        "family_ref",
+        "asset_evidence_ref",
+        "repair_evidence_ref",
+        "note_refs",
+        "assumptions",
+        "hypothetical_q",
+        "alpha_lower",
+        "alpha_upper",
+        "base_feasibility",
+        "posting_permission"
+      ],
+      "additionalProperties": false
+    },
+    "ConditionalHistory": {
+      "type": "object",
+      "properties": {
+        "basis_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConditionalBasis"
+            },
+            "schema": {
+              "const": "accdsl.real.conditionalbasis.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "branch": {
+          "enum": [
+            "H1",
+            "H2"
+          ]
+        },
+        "journals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "lines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "account": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                    },
+                    "signed_amount": {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "account",
+                    "signed_amount"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "event",
+              "lines"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "capital_liability": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "expense_liability": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "actual_history_admission": {
+          "const": false
+        }
+      },
+      "required": [
+        "basis_ref",
+        "branch",
+        "journals",
+        "capital_liability",
+        "expense_liability",
+        "actual_history_admission"
+      ],
+      "additionalProperties": false
+    },
+    "DifferenceReport": {
+      "type": "object",
+      "properties": {
+        "basis_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConditionalBasis"
+            },
+            "schema": {
+              "const": "accdsl.real.conditionalbasis.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "history_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "ConditionalHistory"
+              },
+              "schema": {
+                "const": "accdsl.real.conditionalhistory.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 2
+        },
+        "alpha": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "row_differences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "row_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "string",
+                    "pattern": "^(0|-?[1-9][0-9]*)$"
+                  },
+                  "d": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]*$"
+                  }
+                },
+                "required": [
+                  "n",
+                  "d"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "row_id",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 102
+        },
+        "all_displayed_rows_equal": {
+          "type": "boolean"
+        },
+        "absolute_feasibility": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligation_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "Obligation"
+                  },
+                  "schema": {
+                    "const": "accdsl.real.obligation.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tag",
+            "reason",
+            "obligation_refs"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "basis_ref",
+        "history_refs",
+        "alpha",
+        "row_differences",
+        "all_displayed_rows_equal",
+        "absolute_feasibility"
+      ],
+      "additionalProperties": false
+    },
+    "SettlementResult": {
+      "type": "object",
+      "properties": {
+        "basis_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConditionalBasis"
+            },
+            "schema": {
+              "const": "accdsl.real.conditionalbasis.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "history_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConditionalHistory"
+            },
+            "schema": {
+              "const": "accdsl.real.conditionalhistory.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "capital_period": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expense_period": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "period": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "journals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "event": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                    },
+                    "lines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "account": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                          },
+                          "signed_amount": {
+                            "type": "object",
+                            "properties": {
+                              "n": {
+                                "type": "string",
+                                "pattern": "^(0|-?[1-9][0-9]*)$"
+                              },
+                              "d": {
+                                "type": "string",
+                                "pattern": "^[1-9][0-9]*$"
+                              }
+                            },
+                            "required": [
+                              "n",
+                              "d"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "account",
+                          "signed_amount"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "event",
+                    "lines"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0
+              },
+              "effects": {
+                "type": "object",
+                "properties": {
+                  "profit": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "oci": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "comprehensive_income": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "equity": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "cash": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "assets": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "liabilities": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "capital_liability_close": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "expense_liability_close": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "operating": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "investing": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "financing": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "cash_change": {
+                    "type": "object",
+                    "properties": {
+                      "n": {
+                        "type": "string",
+                        "pattern": "^(0|-?[1-9][0-9]*)$"
+                      },
+                      "d": {
+                        "type": "string",
+                        "pattern": "^[1-9][0-9]*$"
+                      }
+                    },
+                    "required": [
+                      "n",
+                      "d"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "profit",
+                  "oci",
+                  "comprehensive_income",
+                  "equity",
+                  "cash",
+                  "assets",
+                  "liabilities",
+                  "capital_liability_close",
+                  "expense_liability_close",
+                  "operating",
+                  "investing",
+                  "financing",
+                  "cash_change"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "period",
+              "journals",
+              "effects"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 2
+        },
+        "funding": {
+          "const": "conditional_sufficient_unrestricted_cash"
+        },
+        "base_feasibility": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligation_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "Obligation"
+                  },
+                  "schema": {
+                    "const": "accdsl.real.obligation.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tag",
+            "reason",
+            "obligation_refs"
+          ],
+          "additionalProperties": false
+        },
+        "forecast_admission": {
+          "const": false
+        }
+      },
+      "required": [
+        "basis_ref",
+        "history_ref",
+        "capital_period",
+        "expense_period",
+        "periods",
+        "funding",
+        "base_feasibility",
+        "forecast_admission"
+      ],
+      "additionalProperties": false
+    },
+    "NamedQueryResult": {
+      "type": "object",
+      "properties": {
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "tag": {
+                        "const": "known_displayed"
+                      },
+                      "amount": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "tag",
+                      "amount"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "tag": {
+                        "const": "reported_dash"
+                      },
+                      "literal": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "tag",
+                      "literal"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "tag": {
+                        "const": "unknown"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "obligation_refs": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "const": "Obligation"
+                            },
+                            "schema": {
+                              "const": "accdsl.real.obligation.v1"
+                            },
+                            "digest": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "schema",
+                            "digest"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "minItems": 1
+                      }
+                    },
+                    "required": [
+                      "tag",
+                      "reason",
+                      "obligation_refs"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "tag": {
+                        "const": "conditional_derived"
+                      },
+                      "amount": {
+                        "type": "object",
+                        "properties": {
+                          "n": {
+                            "type": "string",
+                            "pattern": "^(0|-?[1-9][0-9]*)$"
+                          },
+                          "d": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "d"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "basis_ref": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "ConditionalBasis"
+                          },
+                          "schema": {
+                            "const": "accdsl.real.conditionalbasis.v1"
+                          },
+                          "digest": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "schema",
+                          "digest"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "tag",
+                      "amount",
+                      "basis_ref"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "observation_ref": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Observation"
+                      },
+                      "schema": {
+                        "const": "accdsl.real.observation.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "value",
+              "observation_ref"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "obligation_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Obligation"
+              },
+              "schema": {
+                "const": "accdsl.real.obligation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "target_layer": {
+          "enum": [
+            "source_content",
+            "actual_history",
+            "conditional_difference",
+            "conditional_settlement"
+          ]
+        }
+      },
+      "required": [
+        "view_ref",
+        "query",
+        "items",
+        "obligation_refs",
+        "target_layer"
+      ],
+      "additionalProperties": false
+    },
+    "ConnectedResult": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Package"
+            },
+            "schema": {
+              "const": "accdsl.real.package.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "family_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "FamilyQuestion"
+            },
+            "schema": {
+              "const": "accdsl.real.familyquestion.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "statement_report_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "StatementReport"
+            },
+            "schema": {
+              "const": "accdsl.real.statementreport.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "conditional_basis_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConditionalBasis"
+            },
+            "schema": {
+              "const": "accdsl.real.conditionalbasis.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "difference_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "DifferenceReport"
+              },
+              "schema": {
+                "const": "accdsl.real.differencereport.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 3
+        },
+        "settlement_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "SettlementResult"
+              },
+              "schema": {
+                "const": "accdsl.real.settlementresult.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 6
+        },
+        "later_view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "later_comparative_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Observation"
+              },
+              "schema": {
+                "const": "accdsl.real.observation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "actual_history": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "const": "unknown"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligation_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "Obligation"
+                  },
+                  "schema": {
+                    "const": "accdsl.real.obligation.v1"
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "schema",
+                  "digest"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "tag",
+            "reason",
+            "obligation_refs"
+          ],
+          "additionalProperties": false
+        },
+        "obligation_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Obligation"
+              },
+              "schema": {
+                "const": "accdsl.real.obligation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "issuer",
+        "package_ref",
+        "view_ref",
+        "family_ref",
+        "statement_report_ref",
+        "conditional_basis_ref",
+        "difference_refs",
+        "settlement_refs",
+        "later_view_ref",
+        "later_comparative_refs",
+        "actual_history",
+        "obligation_refs"
+      ],
+      "additionalProperties": false
+    },
+    "ConflictSource": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "support_file_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EvidenceFile"
+            },
+            "schema": {
+              "const": "accdsl.real.evidencefile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "anchor_blobs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "blob"
+              },
+              "algorithm": {
+                "const": "sha256"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "byte_length": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "kind",
+              "algorithm",
+              "digest",
+              "byte_length"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 4
+        },
+        "review_file_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EvidenceFile"
+            },
+            "schema": {
+              "const": "accdsl.real.evidencefile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "issuer",
+        "original_blob",
+        "support_file_ref",
+        "anchor_blobs",
+        "review_file_ref"
+      ],
+      "additionalProperties": false
+    },
+    "ConflictProposal": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConflictSource"
+            },
+            "schema": {
+              "const": "accdsl.real.conflictsource.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "action": {
+          "enum": [
+            "propose_navigation",
+            "reject_refuted_alternative",
+            "supersede_counterfactual_prior"
+          ]
+        },
+        "literal_page": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "navigation_printed_page": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "navigation_physical_page": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stale_nodes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 0
+        },
+        "reusable_nodes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 0
+        },
+        "counterfactual_prior": {
+          "type": "boolean"
+        },
+        "old_view_preserved": {
+          "const": true
+        },
+        "accounting_permission": {
+          "const": false
+        },
+        "human_admission": {
+          "const": false
+        }
+      },
+      "required": [
+        "issuer",
+        "source_ref",
+        "action",
+        "literal_page",
+        "navigation_printed_page",
+        "navigation_physical_page",
+        "stale_nodes",
+        "reusable_nodes",
+        "counterfactual_prior",
+        "old_view_preserved",
+        "accounting_permission",
+        "human_admission"
+      ],
+      "additionalProperties": false
+    },
+    "SchemaLock": {
+      "type": "object",
+      "properties": {
+        "schema_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "semantic_blob": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_blob",
+        "semantic_blob"
+      ],
+      "additionalProperties": false
+    },
+    "Profile": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "const": "RealDisclosureConnection/1"
+        },
+        "lock_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "SchemaLock"
+            },
+            "schema": {
+              "const": "accdsl.real.schemalock.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 1
+        },
+        "effects": {
+          "const": "candidate_or_read_only"
+        }
+      },
+      "required": [
+        "name",
+        "lock_ref",
+        "operations",
+        "effects"
+      ],
+      "additionalProperties": false
+    },
+    "OperationSignature": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "profile_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Profile"
+            },
+            "schema": {
+              "const": "accdsl.real.profile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "argument_definition": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "payload_kinds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@/-]+$"
+          },
+          "minItems": 1
+        },
+        "effect": {
+          "const": "candidate_or_read_only"
+        }
+      },
+      "required": [
+        "operation",
+        "profile_ref",
+        "argument_definition",
+        "payload_kinds",
+        "effect"
+      ],
+      "additionalProperties": false
+    },
+    "Environment": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "documentary_exact_rational"
+        },
+        "runtime_executed": {
+          "const": false
+        }
+      },
+      "required": [
+        "mode",
+        "runtime_executed"
+      ],
+      "additionalProperties": false
+    },
+    "Decoder": {
+      "type": "object",
+      "properties": {
+        "encoding": {
+          "const": "accdsl.portable.v1"
+        }
+      },
+      "required": [
+        "encoding"
+      ],
+      "additionalProperties": false
+    },
+    "Submission": {
+      "type": "object",
+      "properties": {
+        "blob_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "blob"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "algorithm",
+            "digest",
+            "byte_length"
+          ],
+          "additionalProperties": false
+        },
+        "media_type": {
+          "const": "application/json"
+        },
+        "transport": {
+          "const": "authored_fixture"
+        },
+        "decoder_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Decoder"
+            },
+            "schema": {
+              "const": "accdsl.real.decoder.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "blob_ref",
+        "media_type",
+        "transport",
+        "decoder_ref"
+      ],
+      "additionalProperties": false
+    },
+    "Domain": {
+      "type": "object",
+      "properties": {
+        "request_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationRequest"
+            },
+            "schema": {
+              "const": "accdsl.operation.request.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "meaning": {
+          "const": "requested_claim_scope_not_history_mass"
+        }
+      },
+      "required": [
+        "request_ref",
+        "meaning"
+      ],
+      "additionalProperties": false
+    },
+    "Region": {
+      "type": "object",
+      "properties": {
+        "domain_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Domain"
+            },
+            "schema": {
+              "const": "accdsl.real.domain.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "scope": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        }
+      },
+      "required": [
+        "domain_ref",
+        "scope"
+      ],
+      "additionalProperties": false
+    },
+    "OperationRequest": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "enum": [
+            "source.prepare@1",
+            "history.query@1",
+            "scenario.project@1",
+            "report.build@1",
+            "review.propose@1"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "workspace_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:@/-]+$"
+        },
+        "profile_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Profile"
+            },
+            "schema": {
+              "const": "accdsl.real.profile.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "signature_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "OperationSignature"
+            },
+            "schema": {
+              "const": "accdsl.real.operationsignature.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "arguments": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "source.prepare@1"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "package_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "Package"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.package.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "view_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "View"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.view.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "package_ref",
+                    "view_ref"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "history.query@1"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "family_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "FamilyQuestion"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.familyquestion.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "view_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "View"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.view.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "query": {
+                      "enum": [
+                        "connected_result",
+                        "reported_statements",
+                        "segment_components",
+                        "actual_history",
+                        "probability",
+                        "conditional_difference"
+                      ]
+                    },
+                    "information_mode": {
+                      "enum": [
+                        "named_sources",
+                        "investor_information",
+                        "system_as_of"
+                      ]
+                    },
+                    "cutoff": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "alpha": {
+                      "type": "object",
+                      "properties": {
+                        "n": {
+                          "type": "string",
+                          "pattern": "^(0|-?[1-9][0-9]*)$"
+                        },
+                        "d": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]*$"
+                        }
+                      },
+                      "required": [
+                        "n",
+                        "d"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "issuer": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "family_ref",
+                    "view_ref",
+                    "query",
+                    "information_mode",
+                    "cutoff",
+                    "alpha",
+                    "issuer"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "scenario.project@1"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "basis_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "ConditionalBasis"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.conditionalbasis.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "history_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "ConditionalHistory"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.conditionalhistory.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "view_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "View"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.view.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "query": {
+                      "enum": [
+                        "settlement",
+                        "depreciation"
+                      ]
+                    },
+                    "capital_period": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "expense_period": {
+                      "oneOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "issuer": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "basis_ref",
+                    "history_ref",
+                    "view_ref",
+                    "query",
+                    "capital_period",
+                    "expense_period",
+                    "issuer"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "report.build@1"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "connected_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "ConnectedResult"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.connectedresult.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "view_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "View"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.view.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "issuer": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "connected_ref",
+                    "view_ref",
+                    "issuer"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "const": "review.propose@1"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "source_ref": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "ConflictSource"
+                        },
+                        "schema": {
+                          "const": "accdsl.real.conflictsource.v1"
+                        },
+                        "digest": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "schema",
+                        "digest"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "action": {
+                      "enum": [
+                        "propose_navigation",
+                        "reject_refuted_alternative",
+                        "supersede_counterfactual_prior"
+                      ]
+                    },
+                    "issuer": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "source_ref",
+                    "action",
+                    "issuer"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "execution": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "const": "specification_example"
+            },
+            "budget": {
+              "type": "object",
+              "properties": {
+                "operation_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "elapsed_seconds": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "operation_count",
+                "elapsed_seconds"
+              ],
+              "additionalProperties": false
+            },
+            "environment_ref": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "Environment"
+                },
+                "schema": {
+                  "const": "accdsl.real.environment.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "mode",
+            "budget",
+            "environment_ref"
+          ],
+          "additionalProperties": false
+        },
+        "expected_head": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "operation",
+        "request_id",
+        "workspace_key",
+        "profile_ref",
+        "signature_ref",
+        "view_ref",
+        "arguments",
+        "execution",
+        "expected_head"
+      ],
+      "additionalProperties": false
+    },
+    "OperationResult": {
+      "type": "object",
+      "properties": {
+        "submission_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Submission"
+            },
+            "schema": {
+              "const": "accdsl.real.submission.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "request_ref": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "OperationRequest"
+                },
+                "schema": {
+                  "const": "accdsl.operation.request.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operation": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:@/-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_view_ref": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "View"
+                },
+                "schema": {
+                  "const": "accdsl.real.view.v1"
+                },
+                "digest": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "schema",
+                "digest"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disposition": {
+          "enum": [
+            "completed",
+            "partial",
+            "unsupported",
+            "rejected"
+          ]
+        },
+        "statuses": {
+          "type": "object",
+          "properties": {
+            "structural_validity": {
+              "enum": [
+                "valid",
+                "invalid"
+              ]
+            },
+            "mathematical_status": {
+              "enum": [
+                "defined",
+                "unresolved"
+              ]
+            },
+            "computation_status": {
+              "enum": [
+                "complete",
+                "partial",
+                "not_computed"
+              ]
+            },
+            "empirical_justification": {
+              "const": "not_established"
+            },
+            "capability_status": {
+              "const": "specified_only_no_runtime"
+            },
+            "accounting_validity": {
+              "const": "not_assessed"
+            },
+            "forecast_validity": {
+              "const": "not_assessed"
+            },
+            "product_readiness": {
+              "const": "not_implemented"
+            },
+            "human_acceptance": {
+              "const": "pending"
+            }
+          },
+          "required": [
+            "structural_validity",
+            "mathematical_status",
+            "computation_status",
+            "empirical_justification",
+            "capability_status",
+            "accounting_validity",
+            "forecast_validity",
+            "product_readiness",
+            "human_acceptance"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "result_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "additional_commit": {
+                  "const": false
+                }
+              },
+              "required": [
+                "tag",
+                "result_refs",
+                "additional_commit"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:@/-]+$"
+              },
+              "stage": {
+                "type": "string",
+                "minLength": 1
+              },
+              "record_ref": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "schema": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source_locator": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "field_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "affected_query_branch_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "minItems": 0
+              },
+              "dependency_path": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                    },
+                    "schema": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "schema",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0
+              },
+              "observed": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retry_advice": {
+                "type": "string",
+                "minLength": 1
+              },
+              "blocking_diagnostic_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:@/-]+$"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "code",
+              "stage",
+              "record_ref",
+              "source_locator",
+              "field_path",
+              "affected_query_branch_ids",
+              "dependency_path",
+              "observed",
+              "expected_rule",
+              "retry_advice",
+              "blocking_diagnostic_ids"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "coverage": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "domain_ref": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "const": "Domain"
+                    },
+                    "schema": {
+                      "const": "accdsl.real.domain.v1"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "schema",
+                    "digest"
+                  ],
+                  "additionalProperties": false
+                },
+                "completed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.real.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "unresolved": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.real.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "unsupported": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.real.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "infeasible": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.real.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "cancelled": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "Region"
+                      },
+                      "schema": {
+                        "const": "accdsl.real.region.v1"
+                      },
+                      "digest": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "schema",
+                      "digest"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0
+                },
+                "relation": {
+                  "const": "disjoint_exhaustive"
+                }
+              },
+              "required": [
+                "domain_ref",
+                "completed",
+                "unresolved",
+                "unsupported",
+                "infeasible",
+                "cancelled",
+                "relation"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "Obligation"
+              },
+              "schema": {
+                "const": "accdsl.real.obligation.v1"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "schema",
+              "digest"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "continuation_ref": {
+          "type": "null"
+        },
+        "commit_observation": {
+          "const": "not_committed"
+        },
+        "receipt_ref": {
+          "type": "null"
+        },
+        "evidence_mode": {
+          "const": "specification_example"
+        }
+      },
+      "required": [
+        "submission_ref",
+        "request_ref",
+        "operation",
+        "input_view_ref",
+        "disposition",
+        "statuses",
+        "payload",
+        "diagnostics",
+        "coverage",
+        "unresolved",
+        "continuation_ref",
+        "commit_observation",
+        "receipt_ref",
+        "evidence_mode"
+      ],
+      "additionalProperties": false
+    },
+    "Arguments.source.prepare@1": {
+      "type": "object",
+      "properties": {
+        "package_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "Package"
+            },
+            "schema": {
+              "const": "accdsl.real.package.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "package_ref",
+        "view_ref"
+      ],
+      "additionalProperties": false
+    },
+    "Arguments.history.query@1": {
+      "type": "object",
+      "properties": {
+        "family_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "FamilyQuestion"
+            },
+            "schema": {
+              "const": "accdsl.real.familyquestion.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "enum": [
+            "connected_result",
+            "reported_statements",
+            "segment_components",
+            "actual_history",
+            "probability",
+            "conditional_difference"
+          ]
+        },
+        "information_mode": {
+          "enum": [
+            "named_sources",
+            "investor_information",
+            "system_as_of"
+          ]
+        },
+        "cutoff": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "alpha": {
+          "type": "object",
+          "properties": {
+            "n": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            },
+            "d": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "required": [
+            "n",
+            "d"
+          ],
+          "additionalProperties": false
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "family_ref",
+        "view_ref",
+        "query",
+        "information_mode",
+        "cutoff",
+        "alpha",
+        "issuer"
+      ],
+      "additionalProperties": false
+    },
+    "Arguments.scenario.project@1": {
+      "type": "object",
+      "properties": {
+        "basis_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConditionalBasis"
+            },
+            "schema": {
+              "const": "accdsl.real.conditionalbasis.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "history_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConditionalHistory"
+            },
+            "schema": {
+              "const": "accdsl.real.conditionalhistory.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "enum": [
+            "settlement",
+            "depreciation"
+          ]
+        },
+        "capital_period": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expense_period": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "basis_ref",
+        "history_ref",
+        "view_ref",
+        "query",
+        "capital_period",
+        "expense_period",
+        "issuer"
+      ],
+      "additionalProperties": false
+    },
+    "Arguments.report.build@1": {
+      "type": "object",
+      "properties": {
+        "connected_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConnectedResult"
+            },
+            "schema": {
+              "const": "accdsl.real.connectedresult.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "view_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "View"
+            },
+            "schema": {
+              "const": "accdsl.real.view.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "connected_ref",
+        "view_ref",
+        "issuer"
+      ],
+      "additionalProperties": false
+    },
+    "Arguments.review.propose@1": {
+      "type": "object",
+      "properties": {
+        "source_ref": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ConflictSource"
+            },
+            "schema": {
+              "const": "accdsl.real.conflictsource.v1"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "kind",
+            "schema",
+            "digest"
+          ],
+          "additionalProperties": false
+        },
+        "action": {
+          "enum": [
+            "propose_navigation",
+            "reject_refuted_alternative",
+            "supersede_counterfactual_prior"
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "source_ref",
+        "action",
+        "issuer"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

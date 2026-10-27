@@ -1,0 +1,476 @@
+{
+  "schema_version": "accdsl.p08.authority-methods.v1",
+  "phase": "P08",
+  "authority_register_path": "docs/design/research/p08-v1/authority-register.json",
+  "access_blocks": [
+    {
+      "id": "fasb2020_06",
+      "status": "partially_inspected",
+      "url": "https://storage.fasb.org/ASU%202020-06_0.pdf",
+      "reason": "The earlier _0.pdf route returned 403. The official ASU was subsequently retained and selected amendments inspected; complete current Codification eligibility and lifecycle authority remain uninspected.",
+      "recovery": "Official ASU 2020-06 retained; selected amended provisions inspected. Complete eligibility/lifecycle/current-period authority remains uninspected.",
+      "missing_provisions": [
+        "Complete ASC 815-15-25-1 and ASC 815-40 indexing/equity eligibility including 25-39 through 25-41; the ASU cross-references but does not reproduce all applicable provisions.",
+        "General debt initial/subsequent measurement and maturity extinguishment authority; complete ASC 470/835/405/470-50 as applicable.",
+        "Check subsequent amendments and issuer category/adoption history before 2024/2025 treatment admission."
+      ],
+      "historical_reason": "HTTP 403; ASC 470/815 and ASU 2020-06 remain uninspected."
+    },
+    {
+      "id": "mof22_candidate",
+      "status": "unavailable",
+      "url": "https://kjs.mof.gov.cn/zhengcefabu/201704/t20170406_2579238.htm",
+      "reason": "HTTP 502; official ASBE/CAS 22/37 edition and transition remain uninspected."
+    },
+    {
+      "id": "eu2023_1803",
+      "status": "uninspected",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R1803",
+      "reason": "EUR-Lex returned HTTP 202 with zero retained bytes; no endorsed IAS 32/IFRS 9 treatment inferred."
+    }
+  ],
+  "operations": [
+    {
+      "id": "issuer_compound_convertible_bond_v1",
+      "status": "supported_bounded",
+      "jurisdiction": "AU",
+      "basis": "AASB",
+      "tier": "Tier 1",
+      "entity_scope": "for-profit",
+      "period_applicability": {
+        "start_inclusive": "2023-01-01",
+        "start_exclusive": "2026-07-01",
+        "edition": "31 December 2022 compilation; amendments through 15 December 2022"
+      },
+      "preconditions": [
+        "Issuer is party to contractual provisions at issue.",
+        "Proceeds equal whole-instrument fair value; no transaction costs, fees or tax.",
+        "Fixed number of ordinary shares exchanges for a fixed cash amount (fixed-for-fixed).",
+        "Non-puttable maturity-only conversion; functional and presentation currency are AUD.",
+        "Ordinary liability is subsequently measured at amortised cost using the supplied comparable yield.",
+        "Annual 1 January issue and 31 December periods; exact rational inputs; sufficient cash for redemption."
+      ],
+      "recognition": {
+        "event": "issue",
+        "effect": "debit cash for proceeds; credit financial liability for the discounted contractual cash flows; credit residual conversion equity.",
+        "authority_claims": [
+          "recognition",
+          "fair_value",
+          "classification",
+          "split",
+          "residual_equity",
+          "measurement"
+        ]
+      },
+      "measurement": {
+        "initial": "Present value of coupons and principal discounted at the comparable non-convertible yield; residual proceeds are conversion equity.",
+        "subsequent": "Opening liability multiplied by the exact annual effective yield, followed by coupon and principal settlement.",
+        "authority_claims": [
+          "fair_value",
+          "measurement",
+          "interest",
+          "amortised_cost"
+        ]
+      },
+      "state_effects": {
+        "issue": "cash increases by proceeds; liability and conversion equity are recognised; principal outstanding is set.",
+        "accrue": "interest expense increases and liability carrying amount increases.",
+        "coupon": "cash decreases and liability carrying amount decreases.",
+        "redeem": "liability is extinguished against cash at principal; no gain/loss in the exact maturity case.",
+        "convert": "liability is reclassified to share equity at principal; original conversion equity remains; shares increase."
+      },
+      "posting_templates": {
+        "sign_convention": "postings_debit_positive; sum of each entry and total ledger must equal zero.",
+        "issue": {
+          "cash": "+proceeds",
+          "liability": "-initial_liability",
+          "conversion_equity": "-(proceeds-initial_liability)"
+        },
+        "accrue": {
+          "interest_expense": "+opening_liability*yield",
+          "liability": "-interest_expense"
+        },
+        "coupon": {
+          "liability": "+coupon",
+          "cash": "-coupon"
+        },
+        "redeem": {
+          "liability": "+principal",
+          "cash": "-principal"
+        },
+        "convert": {
+          "liability": "+principal",
+          "share_equity": "-principal"
+        }
+      },
+      "note_links": {
+        "financing_carrying": [
+          "note_carrying",
+          "measurement"
+        ],
+        "financing_interest": [
+          "note_interest",
+          "interest"
+        ],
+        "financing_equity": [
+          "split",
+          "residual_equity",
+          "conversion"
+        ]
+      },
+      "authority_claims": [
+        "recognition",
+        "fair_value",
+        "classification",
+        "split",
+        "residual_equity",
+        "measurement",
+        "amortised_cost",
+        "interest",
+        "redemption",
+        "conversion",
+        "note_carrying",
+        "note_interest"
+      ],
+      "excluded_features": [
+        "revenue allocation",
+        "current/deferred tax",
+        "lease terms and remeasurement",
+        "foreign currency",
+        "control/consolidation",
+        "transaction costs",
+        "fair-value designation",
+        "derivatives",
+        "guarantees",
+        "cash options",
+        "early conversion or repurchase",
+        "modification",
+        "default",
+        "inducement",
+        "rounding and real-market yield estimation"
+      ],
+      "event_authority_claims": {
+        "issue": [
+          "recognition",
+          "fair_value",
+          "classification",
+          "split",
+          "residual_equity",
+          "measurement"
+        ],
+        "accrue": [
+          "measurement",
+          "amortised_cost",
+          "interest"
+        ],
+        "coupon": [
+          "measurement",
+          "amortised_cost",
+          "redemption"
+        ],
+        "redeem": [
+          "redemption",
+          "residual_equity"
+        ],
+        "convert": [
+          "conversion",
+          "residual_equity"
+        ]
+      }
+    }
+  ],
+  "evidence_contract": {
+    "question": "Can applicable primary authority support a parameterized exact issuer compound-convertible-bond lifecycle and a same-fact comparison?",
+    "comparator": "Existing compound-bond dossier arithmetic, independently recomputed present values and cash flows.",
+    "primary_criterion": "Applicable inspected primary anchors, complete atomic lifecycle, independent exact arithmetic and full stored-case replay; criterion 3 additionally requires a fully supported matched cross-standard lifecycle.",
+    "vetoes": [
+      "source applicability or anchor failure for a claimed treatment",
+      "invalid chronology or unsupported terms",
+      "unbalanced journal/state",
+      "negative settlement funding",
+      "note roll-forward mismatch"
+    ],
+    "explanatory_diagnostics": [
+      "alternative principal/rate case",
+      "three-period case",
+      "zero-rate case",
+      "unresolved comparison cells",
+      "ACTUS scheduling source boundary"
+    ],
+    "nonclaims": [
+      "No professional accounting opinion, forecast validity, production readiness, superiority, or whole MC01-MC35/G1-G18 closure.",
+      "Synthetic eligibility and yield are not real contract or market evidence."
+    ],
+    "artifact": "authority-and-methods.json plus result.md and deterministic checker output.",
+    "diagnostic_roles": {
+      "promotion_criteria": [
+        "inspected applicable authority",
+        "complete operation semantics and exact cases",
+        "supported matched comparator for criterion 3"
+      ],
+      "promotion_vetoes": [
+        "missing authority for the affected treatment",
+        "incorrect arithmetic, admission or stored evidence"
+      ],
+      "continuation_vetoes": [
+        "corrupted source bytes or invalid harness for dependent checks"
+      ],
+      "repair_triggers": [
+        "missing comparator authority triggers internal source preparation",
+        "failed mutation or replay test triggers implementation repair"
+      ],
+      "explanatory_only": [
+        "alternative parameters",
+        "zero-rate fixture",
+        "ACTUS deferral"
+      ],
+      "not_concluded": [
+        "The AASB slice is a bounded implementation under inspected Australian primary text, not a universal IFRS or multi-jurisdiction treatment.",
+        "Unavailable ASC/ASBE/EU authority is not replaced by company practice or an assumed treatment.",
+        "Balanced synthetic journals do not establish source truth, contract eligibility, valuation evidence, or professional accounting validity.",
+        "Revenue, tax, leases, FX, complex groups and excluded bond features remain queued follow-up work."
+      ]
+    }
+  },
+  "default_audit": [
+    {
+      "choice": "annual calendar schedule and two coupons",
+      "provenance": "reviewed P08 plan and synthetic compound-bond dossier",
+      "justification": "keeps the issuer lifecycle exact and bounded to dated periods",
+      "failure_mode": "irregular calendars or day-count terms could change interest and eligibility",
+      "early_diagnostic": "Contract.validate rejects non-1 January issue dates; three-period test exercises the parameter",
+      "promotion_status": "bounded hypothesis"
+    },
+    {
+      "choice": "10% comparable yield",
+      "provenance": "synthetic reviewed example",
+      "justification": "supports an exact rational present-value case",
+      "failure_mode": "a wrong market yield gives balanced but wrong carrying amount",
+      "early_diagnostic": "independent Fraction PV oracle and second principal/rate case",
+      "promotion_status": "synthetic input, not market evidence",
+      "diagnostic_limit": "Independent PV checks arithmetic only; no market-yield estimate or empirical eligibility evidence is supplied."
+    },
+    {
+      "choice": "Australian for-profit Tier 1 AASB basis",
+      "provenance": "retained AASB 132/9/7 31 December 2022 compilations",
+      "justification": "all selected primary anchors and period limits are inspectable",
+      "failure_mode": "AASB adoption is not universal IFRS authority and later editions may differ",
+      "early_diagnostic": "AuthorityBook checks issuer, tier, entity scope and period start",
+      "promotion_status": "reviewed bounded scope"
+    },
+    {
+      "choice": "opening cash/equity of 20",
+      "provenance": "reviewed synthetic plan",
+      "justification": "permits redemption while making funding explicit",
+      "failure_mode": "insufficient funding can make redemption invalid even when journals balance",
+      "early_diagnostic": "zero-opening-cash atomicity test",
+      "promotion_status": "synthetic fixture"
+    },
+    {
+      "choice": "exact Fraction arithmetic",
+      "provenance": "existing Python standard library",
+      "justification": "avoids unrecorded rounding in the conformance cases",
+      "failure_mode": "does not validate currency rounding or production valuation",
+      "early_diagnostic": "independent rational recomputation",
+      "promotion_status": "engineering convenience"
+    },
+    {
+      "choice": "Whole-instrument proceeds equal fair value; no fees, taxes or derivative features",
+      "provenance": "Reviewed synthetic contract facts",
+      "justification": "Defines the bounded admitted instrument",
+      "failure_mode": "Balanced entries can apply the wrong classification to a real contract",
+      "early_diagnostic": "Contract rejection tests and mandatory fair_value/classification/measurement source claims",
+      "promotion_status": "synthetic hypothesis"
+    },
+    {
+      "choice": "Opening cash 20 (second case 30)",
+      "provenance": "Existing synthetic funding fixtures",
+      "justification": "Makes both maturity outcomes fundable",
+      "failure_mode": "Hidden capital funding masks settlement shortfall",
+      "early_diagnostic": "Zero-opening-cash redemption fails atomically; opening equity and cash included in replay and comparison economics",
+      "promotion_status": "synthetic hypothesis"
+    },
+    {
+      "choice": "EU original regulation plus retained amendments as preparation only",
+      "provenance": "Official OJ source preparation and Regulation 1606/2002 Article 4",
+      "justification": "Allows paragraph-level inspection without assuming edition completeness",
+      "failure_mode": "Uninspected amendment or corrigendum could change treatment or period applicability",
+      "early_diagnostic": "Admission requires complete applicability; currently fails for specific missing documents",
+      "promotion_status": "unadmitted hypothesis"
+    }
+  ],
+  "implementation": {
+    "engine": "scripts/corporate_financing_v1.py",
+    "tests": "tests/test_accounting_p08.py",
+    "checker": "scripts/check_accounting_p08.py",
+    "source_register": "docs/design/research/p08-v1/authority-register.json",
+    "eu_preparation": "scripts/corporate_authority_eu_v1.py; validates source pins, claim namespaces, applicability records and rejects EU admission before state mutation",
+    "historical_implementation_files": [
+      "data/accounting-master/deliverables/P08/authority-and-methods.json",
+      "data/accounting-master/deliverables/P08/progress.md",
+      "data/accounting-master/deliverables/P08/result.md",
+      "docs/design/research/p08-v1/aasb7.pdf",
+      "docs/design/research/p08-v1/aasb7.txt",
+      "docs/design/research/p08-v1/aasb9.pdf",
+      "docs/design/research/p08-v1/aasb9.txt",
+      "docs/design/research/p08-v1/access-records.json",
+      "docs/design/research/p08-v1/authority-register.json",
+      "docs/design/research/p08-v1/eu-access.json",
+      "docs/design/research/p08-v1/eu2023_1803.html",
+      "docs/design/research/p08-v1/unittest-output.txt",
+      "docs/design/research/p08-v2/access-records.json",
+      "docs/design/research/p08-v2/eu-oj.html",
+      "docs/design/research/p08-v2/eu-pdf.html",
+      "docs/design/research/p08-v2/fasb-storage.pdf",
+      "docs/design/research/p08-v2/fasb-storage.txt",
+      "docs/design/research/p08-v2/source-inspection.json",
+      "scripts/check_accounting_p08.py",
+      "scripts/corporate_financing_v1.py",
+      "tests/test_accounting_p08.py"
+    ],
+    "builder": "scripts/build_accounting_p08.py"
+  },
+  "nonclaims": [
+    "The AASB slice is a bounded implementation under inspected Australian primary text, not a universal IFRS or multi-jurisdiction treatment.",
+    "Unavailable ASC/ASBE/EU authority is not replaced by company practice or an assumed treatment.",
+    "Balanced synthetic journals do not establish source truth, contract eligibility, valuation evidence, or professional accounting validity.",
+    "Revenue, tax, leases, FX, complex groups and excluded bond features remain queued follow-up work."
+  ],
+  "case_inputs": [
+    {
+      "case_id": "redeem-default",
+      "facts": {
+        "entity": "SyntheticIssuer",
+        "book": "statutory",
+        "currency": "AUD",
+        "functional_currency": "AUD",
+        "jurisdiction": "AU",
+        "basis": "AASB",
+        "tier": "Tier 1",
+        "entity_scope": "for-profit",
+        "issue_date": "2024-01-01",
+        "years": 2,
+        "principal": "100",
+        "proceeds": "100",
+        "instrument_fair_value": "100",
+        "annual_coupon": "5",
+        "comparable_yield": "1/10",
+        "conversion_shares": 10,
+        "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+        "measurement": "amortised_cost",
+        "unsupported_features": []
+      },
+      "settlement": "redeem",
+      "opening_cash": "20"
+    },
+    {
+      "case_id": "convert-default",
+      "facts": {
+        "entity": "SyntheticIssuer",
+        "book": "statutory",
+        "currency": "AUD",
+        "functional_currency": "AUD",
+        "jurisdiction": "AU",
+        "basis": "AASB",
+        "tier": "Tier 1",
+        "entity_scope": "for-profit",
+        "issue_date": "2024-01-01",
+        "years": 2,
+        "principal": "100",
+        "proceeds": "100",
+        "instrument_fair_value": "100",
+        "annual_coupon": "5",
+        "comparable_yield": "1/10",
+        "conversion_shares": 10,
+        "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+        "measurement": "amortised_cost",
+        "unsupported_features": []
+      },
+      "settlement": "convert",
+      "opening_cash": "20"
+    },
+    {
+      "case_id": "second-parameters-redeem",
+      "facts": {
+        "entity": "SyntheticIssuer",
+        "book": "statutory",
+        "currency": "AUD",
+        "functional_currency": "AUD",
+        "jurisdiction": "AU",
+        "basis": "AASB",
+        "tier": "Tier 1",
+        "entity_scope": "for-profit",
+        "issue_date": "2024-01-01",
+        "years": 2,
+        "principal": "240",
+        "proceeds": "245",
+        "instrument_fair_value": "245",
+        "annual_coupon": "12",
+        "comparable_yield": "2/25",
+        "conversion_shares": 24,
+        "conversion_right": "maturity_only_fixed_for_fixed_nonputtable_ordinary",
+        "measurement": "amortised_cost",
+        "unsupported_features": []
+      },
+      "settlement": "redeem",
+      "opening_cash": "30"
+    }
+  ],
+  "source_inputs": [
+    "docs/design/research/p08-v1/aasb7.pdf",
+    "docs/design/research/p08-v1/aasb7.txt",
+    "docs/design/research/p08-v1/aasb9.pdf",
+    "docs/design/research/p08-v1/aasb9.txt",
+    "docs/design/research/p08-v1/access-records.json",
+    "docs/design/research/p08-v1/authority-register.json",
+    "docs/design/research/p08-v1/eu-access.json",
+    "docs/design/research/p08-v1/eu2023_1803.html",
+    "docs/design/research/p08-v1/unittest-output.txt",
+    "docs/design/research/p08-v2/access-records.json",
+    "docs/design/research/p08-v2/eu-oj.html",
+    "docs/design/research/p08-v2/eu-pdf.html",
+    "docs/design/research/p08-v2/fasb-storage.pdf",
+    "docs/design/research/p08-v2/fasb-storage.txt",
+    "docs/design/research/p08-v2/source-inspection.json",
+    "docs/design/research/p08-v3-preparation/archive-manifest.json",
+    "docs/design/research/p08-v3-preparation/eu-2023-1803-date-corrigendum.pdf",
+    "docs/design/research/p08-v3-preparation/eu-2023-1803-date-corrigendum.txt",
+    "docs/design/research/p08-v3-preparation/eu-2023-1803-metadata.rdf",
+    "docs/design/research/p08-v3-preparation/eu-2023-1803-original.pdf",
+    "docs/design/research/p08-v3-preparation/eu-2023-1803-original.txt",
+    "docs/design/research/p08-v3-preparation/eu-202302468.pdf",
+    "docs/design/research/p08-v3-preparation/eu-202302468.txt",
+    "docs/design/research/p08-v3-preparation/eu-202302579.pdf",
+    "docs/design/research/p08-v3-preparation/eu-202302579.txt",
+    "docs/design/research/p08-v3-preparation/eu-202302822.pdf",
+    "docs/design/research/p08-v3-preparation/eu-202302822.txt",
+    "docs/design/research/p08-v3-preparation/eu-202401317.pdf",
+    "docs/design/research/p08-v3-preparation/eu-202401317.txt",
+    "docs/design/research/p08-v3-preparation/source-preparation.json",
+    "docs/design/research/p08-v3/20242862.response",
+    "docs/design/research/p08-v3/202490443.response",
+    "docs/design/research/p08-v3/202490562.response",
+    "docs/design/research/p08-v3/20250572.response",
+    "docs/design/research/p08-v3/20250768.response",
+    "docs/design/research/p08-v3/20251047.response",
+    "docs/design/research/p08-v3/20251266.response",
+    "docs/design/research/p08-v3/20251331.response",
+    "docs/design/research/p08-v3/20251358.response",
+    "docs/design/research/p08-v3/202590214.response",
+    "docs/design/research/p08-v3/202590863.response",
+    "docs/design/research/p08-v3/access-records-second.json",
+    "docs/design/research/p08-v3/access-records.json",
+    "docs/design/research/p08-v3/authority-register.json",
+    "docs/design/research/p08-v3/scope.pdf",
+    "docs/design/research/p08-v3/scope.txt",
+    "docs/design/research/standards/aasb132.pdf",
+    "docs/design/research/standards/aasb132.txt",
+    "docs/design/research/standards/actus-techspecs.tex",
+    "scripts/check_accounting_p08.py",
+    "scripts/corporate_authority_eu_v1.py",
+    "scripts/corporate_financing_v1.py",
+    "tests/test_accounting_p08.py",
+    "docs/design/research/p08-v6/applicability-disposition.json",
+    "scripts/corporate_authority_eu_applicability_v1.py"
+  ]
+}

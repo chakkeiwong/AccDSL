@@ -1,0 +1,268 @@
+{
+  "verdict": "REVISE",
+  "issues": [
+    "worker-boundary: Verification reserve can be consumed by worker startup. In Master._worker_result, editable-worker seconds is calculated as deadline - time.monotonic() - reserve before recovery preparation and two sequential subprocess.run configuration queries, each permitting 30 seconds. That stale duration is later passed to self.process, which calls self.remaining(seconds) without subtracting the reserve again. For example, with 100 seconds remaining, a 40-second reserve, and a nominal worker limit of at least 60 seconds, the worker receives a 60-second allowance. If preparation and queries consume 30 seconds, the worker can still run for 60 seconds, leaving only 10 seconds for supervisor verification. The fixed query timeouts can themselves exhaust a short remaining run budget. Repair by using an absolute editable-work cutoff of self.deadline - reserve, bounding each query by the remaining preparation/work allowance, and recalculating the worker allowance immediately before launch. Refuse launch once that cutoff is reached and refresh the reported budget to reflect actual availability. Add focused regression coverage for delayed configuration queries and an exhausted cutoff.",
+    "state-refresh: Persisted acceptance is not bound to the accepted phase contract. Master.__init__ snapshots the current controller/catalog hashes, while validate_state checks only that phase IDs match. Master.refresh reuses accepted_internal whenever recorded file hashes survive and current dependencies are accepted. Changing criteria, checker arguments, deliverables or dependencies while retaining IDs can therefore reuse acceptance earned under a different contract. The catalog hash in input_fingerprint affects blocked/deferred eligibility, not accepted phases; publishing the current catalog hash in next-plan does not repair this. Persist a canonical phase-contract digest and the prerequisite evidence identity at acceptance, compare both during refresh, and mark mismatches or missing legacy bindings stale. Add a regression where a contract changes without changing phase IDs or output bytes and verify that acceptance is invalidated.",
+    "scheduler: Terminal integrity failure is not reflected in the run outcome. In Master.run's finally block, the manifest is finalized before self.refresh(). If refresh raises ContinuationVeto, ValueError or OSError, the fallback writes next-plan.json with status='continuation_veto', but leaves outcome and the finalized manifest unchanged. run_finished and the return value can therefore report 'catalog_slices_accepted_mission_open' or another ordinary outcome while the executable plan records an integrity veto. Repair: resolve final refresh and its failure classification before publishing the terminal manifest/event; on fallback set outcome='continuation_veto', preserve the reason, and return that same outcome. Verify agreement among the manifest, next plan, event and returned outcome when final refresh fails.",
+    "scheduler: Run initialization leaves an ordinary-interruption gap in durable bookkeeping. After the run manifest is written and the run is appended to self.state['runs'], the initial self.refresh() executes outside the try/finally. A handled SIGTERM/KeyboardInterrupt or refresh error there bypasses run_stopped, finished_at, outcome and final state publication entirely. Depending on where refresh stops, the state may reference an unfinished manifest or the manifest may never become linked from saved state. This is ordinary initialization failure, not the excluded fork-registration kill window. Repair: establish terminal bookkeeping before the first fallible operation after creating the run record, and enclose initial refresh in the same guarded lifecycle as execution. Preserve an explicit interrupted/veto outcome without publishing an executable plan when initialization fails.",
+    "phase-plan-repair: High — Ordinary repairs execute under the original plan without fresh plan review. In Master.execute_phase, failed checks, result-review REVISE and caught execution errors populate packet['repair_findings'], then fall through to the next loop iteration. That iteration calls worker('repair', ...) with the original approved plan and hash. Only the partial-work branch calls approve_phase_plan again. Consequently, repair instructions can change the authorized work without a plan incorporating those findings being reviewed. Repair: route every transition to editable repair through a refreshed packet and a fresh approve_phase_plan call, persist that approval, and stop if approval is unavailable or blocked. Add regression coverage for failed checks, result-review REVISE and execution errors, asserting that reviewed replanning precedes the repair worker.",
+    "phase-plan-repair: High — A BLOCKED verdict from partial result review is ignored as a control decision. In the partial-work branch of Master.execute_phase, partial_review is stored in repair_findings, but its verdict is never inspected. With progress, execution can replan and launch another editable worker; without progress, it records needs_plan_repair instead of the external block. This differs from both plan review and full result review, which explicitly preserve BLOCKED. Repair: after evidence-integrity verification, handle partial_review['verdict'] == 'BLOCKED' by preserving its issues, residuals and next actions, marking blocked_external and returning through the normal external-block persistence path. Add coverage for a passing partial check followed by review BLOCKED, ensuring no subsequent editable worker starts.",
+    "evidence: Preservation and deletion detection silently omit editable files. In scripts/accounting_master_support.py, editable_files inventories only selected directories and suffixes; for example, source files ending in .yaml or .sql under src are omitted, as are root-level configuration files. preserve_editable, changes_since and contributed_changes all inherit this omission. An ordinary worker edit or deletion of such a file therefore has no preserved original and no reported delta or deletion obligation. The supplied workspace-write interface does not enforce this inventory boundary. Repair by inventorying every file within the authorised editable scope, with explicit exclusions for generated/supervisor/frozen material, or enforce an equally narrow write scope and detect writes outside it. Verify preservation and deletion reporting for a previously omitted source/configuration file.",
+    "evidence: Recovery can abort on the malformed response it is supposed to recover from. In scripts/accounting_master_support.py, phase_recovery selects recent structured records and calls load_json(path) without exception handling. A malformed implement/repair response can remain after an ordinary worker failure; on resume it is selected as work_response and raises ValueError. Valid JSON with the wrong top-level shape also fails at value.get. The continuation-record branch already handles invalid records, but recent_records does not. Repair by retaining the record path, recording a bounded invalid-record diagnostic, and continuing recovery with an explicit recheck/replan obligation; do not treat that record as acceptance evidence. Cover truncated JSON and structurally invalid JSON left by a failed attempt."
+  ],
+  "scope_reviews": [
+    {
+      "scope": "process-lifecycle",
+      "assumptions": [
+        "The supplied lifecycle excerpts are complete for process creation, interruption, cleanup, recovery, and lock handling.",
+        "Workers remain within the initial process group as explicitly specified; hostile detachment and uncatchable termination between fork and durable registration are outside the guarantee.",
+        "The host provides the stated Linux /proc process identity semantics and, for recovered-group cleanup, Python pidfd signalling support."
+      ],
+      "checks": [
+        "Reviewed bounded launch, signal deferral, process-group identity checks, escalation, reaping, recovery fencing, PID-reuse handling, and single-writer locking in the supplied packet.",
+        "Checked the stated lifecycle tests as supporting control-plane evidence only; no accounting or scientific correctness conclusion is inferred."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "The packet does not establish containment for workers that deliberately detach descendants or for an uncatchable supervisor kill before durable registration.",
+        "The packet does not establish accounting completeness, scientific validity, or human acceptance; the 192-report source panel and phase test counts cannot close those gaps.",
+        "Recovery depends on the stated platform capability for pidfd signalling; unsupported environments remain a deliberate continuation veto."
+      ],
+      "steps": [
+        "Conclude the assigned process-lifecycle review as passing within the explicitly stated trust and platform boundaries."
+      ],
+      "summary": "No concrete lifecycle defect was found in the supplied controller, support helpers, or relevant tests. The implementation preserves single-writer locking, defers handled interruption through registration and cleanup, validates process-group identity before signalling, bounds escalation and quiescence, and fences recovered workers against PID reuse. The remaining limitations are explicit interface assumptions and do not constitute defects within this packet scope.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "permissions-install",
+      "assumptions": [
+        "The initial install-and-run invocation has the explicit upfront authorization described in the packet; the generated authorization record documents that approval rather than independently granting permission.",
+        "The active Codex installation loads ~/.codex/rules/*.rules. A custom configuration home or additional policy sources require separate effective-policy verification.",
+        "The supplied interfaces for writer locking, process recovery, atomic state writes, controller protection and execution review hold. Their implementations are not included in this packet."
+      ],
+      "checks": [
+        "The rule permits only the fixed Python entrypoint prefix. Its inline examples are correctly described as tests rather than an action allowlist.",
+        "Installation checks all public actions, unrelated negative commands and compatibility with existing local rule files before publication.",
+        "Publication uses a fully written temporary file and an atomic hard link without replacing a conflicting target.",
+        "Pending installation recovery checks candidate bytes, controller hashes, target location and original authorization before continuing.",
+        "Internal helpers require matching supervisor identity, capability, phase, output, inherited lock and an unconsumed grant; existing results cannot be overwritten.",
+        "The supplied 104-test pass is supporting control-plane evidence only. Test bodies were not supplied or independently inspected."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py"
+      ],
+      "issues": [],
+      "next_actions": [],
+      "residuals": [
+        "The review action constructs Master before acquiring the writer lock and does not explicitly call reload_state afterward. Whether controller_review refreshes or avoids cached mutable state is an unspecified interface detail; confirm that behavior before relying on review after another invocation finishes.",
+        "The grant issuer is not supplied, and validate_internal does not compare the requested helper action with an action recorded in the grant. Operation-specific binding is therefore not established by this packet; the trusted supervisor must select the intended helper.",
+        "If publication is interrupted after linking the target but before syncing its directory, a retry returns early when identical bytes already exist. That retry does not complete the directory durability barrier. Syncing the directory on the identical-target path would strengthen power-loss durability; ordinary process interruption leaves the published target available.",
+        "Scoped internal acceptance and source checks cannot establish accounting correctness, scientific validity, human acceptance or mission completion for the 192-report panel."
+      ],
+      "steps": [
+        "Reviewed only the supplied permissions-install code and stated interfaces; used no tools, commands, files or project history."
+      ],
+      "summary": "AGREE for the bounded permissions-install scope: no blocking defect is established by the supplied packet. Installation preserves conflicting rules and original authorization, supports interrupted installation recovery, and separately guards internal helper execution.",
+      "verdict": "AGREE"
+    },
+    {
+      "scope": "worker-boundary",
+      "assumptions": [
+        "The supplied interfaces are authoritative; controller and workers are trusted, and containment covers only the initial process group.",
+        "Master.remaining(seconds) caps execution at the remaining run deadline. Its implementation is not supplied, and no interface states that it independently preserves the editable-worker verification reserve."
+      ],
+      "checks": [
+        "Reviewed worker configuration isolation, role-specific verdict validation, response freshness, failure-path integrity checks, and budget propagation from the supplied snippets only.",
+        "The packet reports 104 passing tests; test bodies were not supplied, so their names do not establish coverage of the finding below.",
+        "No tools, files, commands, or project history were accessed."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py"
+      ],
+      "issues": [
+        "Verification reserve can be consumed by worker startup. In Master._worker_result, editable-worker seconds is calculated as deadline - time.monotonic() - reserve before recovery preparation and two sequential subprocess.run configuration queries, each permitting 30 seconds. That stale duration is later passed to self.process, which calls self.remaining(seconds) without subtracting the reserve again. For example, with 100 seconds remaining, a 40-second reserve, and a nominal worker limit of at least 60 seconds, the worker receives a 60-second allowance. If preparation and queries consume 30 seconds, the worker can still run for 60 seconds, leaving only 10 seconds for supervisor verification. The fixed query timeouts can themselves exhaust a short remaining run budget. Repair by using an absolute editable-work cutoff of self.deadline - reserve, bounding each query by the remaining preparation/work allowance, and recalculating the worker allowance immediately before launch. Refuse launch once that cutoff is reached and refresh the reported budget to reflect actual availability. Add focused regression coverage for delayed configuration queries and an exhausted cutoff."
+      ],
+      "next_actions": [
+        "Enforce the absolute editable-work cutoff across preparation, configuration inspection, and worker execution.",
+        "Rerun focused budget tests and the controller suite, then obtain a fresh read-only review of the changed controller."
+      ],
+      "residuals": [
+        "Definitions of bounded_process, remaining, defer_shutdown, integrity helpers, and the CLI override parser are not supplied. Their detailed behavior remains an interface assumption rather than independently reviewed implementation.",
+        "The packet does not include phase scheduling or repair-loop implementations; this worker-boundary review cannot independently establish the complete sequential execution and acceptance workflow.",
+        "Source-panel checks and scoped internal acceptance do not close accounting, scientific, or human-acceptance gaps. The reported test count is control-plane evidence only."
+      ],
+      "steps": [
+        "Traced worker setup through process launch and compared elapsed-time accounting with the promised supervisor verification reserve."
+      ],
+      "summary": "REVISE: editable-worker startup uses a stale duration, allowing configuration inspection and execution to consume the promised verification reserve.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "state-refresh",
+      "assumptions": [
+        "The stated worker, review, locking and protection interfaces are trusted. Their implementations are outside this packet.",
+        "No supplied interface binds persisted phase acceptance to the phase contract and prerequisite evidence used when acceptance occurred.",
+        "Review was limited to the supplied packet; no tools or commands were used."
+      ],
+      "checks": [
+        "Inspected state validation, reload, evidence invalidation, dependency propagation, eligibility and next-plan publication.",
+        "The supplied verification reports 104 passing tests. Test bodies were not supplied, so their names do not establish coverage of the findings below.",
+        "The visible validation and refresh paths preserve mission_complete=false and all G1–G18 as open."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py: Master.__init__, Master.reload_state, validate_state, Master.refresh and Master.input_fingerprint.",
+        "tests/test_accounting_master.py: supplied test names and verification metadata only."
+      ],
+      "issues": [
+        "Persisted acceptance is not bound to the accepted phase contract. Master.__init__ snapshots the current controller/catalog hashes, while validate_state checks only that phase IDs match. Master.refresh reuses accepted_internal whenever recorded file hashes survive and current dependencies are accepted. Changing criteria, checker arguments, deliverables or dependencies while retaining IDs can therefore reuse acceptance earned under a different contract. The catalog hash in input_fingerprint affects blocked/deferred eligibility, not accepted phases; publishing the current catalog hash in next-plan does not repair this. Persist a canonical phase-contract digest and the prerequisite evidence identity at acceptance, compare both during refresh, and mark mismatches or missing legacy bindings stale. Add a regression where a contract changes without changing phase IDs or output bytes and verify that acceptance is invalidated."
+      ],
+      "next_actions": [
+        "Bind accepted records to their reviewed contract and prerequisite evidence, then invalidate incompatible acceptance before selecting work.",
+        "Make reload_state fail closed when previously observed canonical state disappears.",
+        "Add focused regression coverage and rerun controller verification and packet review."
+      ],
+      "residuals": [
+        "Master.reload_state silently retains its in-memory state if state.json disappears. If this method is the authoritative reload after lock acquisition, a previously constructed instance can subsequently save an obsolete snapshot or initial pending state. Distinguish first initialization from disappearance of previously observed state and raise ContinuationVeto for the latter. The lock/reload call sites are absent, so whether this becomes a reachable overwrite cannot be established from this packet.",
+        "Atomic-write durability, lock coverage, actual repair execution and process cleanup cannot be independently verified from the supplied function excerpts.",
+        "The accepted 192-report source panel and controller test results do not establish accounting correctness, scientific completeness or human acceptance."
+      ],
+      "steps": [
+        "Compared acceptance reuse and refresh behavior with the stated stale-state and honest-acceptance requirements.",
+        "Separated a visible acceptance-binding defect from limitations requiring omitted caller implementations."
+      ],
+      "summary": "Refresh can retain internal acceptance after a phase contract changes because acceptance is checked against surviving files, not the contract that earned it.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "scheduler",
+      "assumptions": [
+        "The supplied helper interfaces are authoritative; their omitted implementations were not inspected.",
+        "Workers are trusted and remain in their initial process group. Deliberate detachment and uncatchable termination during registration are outside this review.",
+        "The CLI must restrict require_review=False to a path that already establishes current controller approval; that caller-side condition is not supplied."
+      ],
+      "checks": [
+        "Reviewed the supplied scheduler, recovery, phase-execution and support code without tools.",
+        "Checked exception boundaries, stop/resume behavior, terminal outcome publication and acceptance limits.",
+        "The reported 104 passing tests support control-plane verification; test bodies were not supplied and the count does not establish accounting correctness."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py"
+      ],
+      "issues": [
+        "Terminal integrity failure is not reflected in the run outcome. In Master.run's finally block, the manifest is finalized before self.refresh(). If refresh raises ContinuationVeto, ValueError or OSError, the fallback writes next-plan.json with status='continuation_veto', but leaves outcome and the finalized manifest unchanged. run_finished and the return value can therefore report 'catalog_slices_accepted_mission_open' or another ordinary outcome while the executable plan records an integrity veto. Repair: resolve final refresh and its failure classification before publishing the terminal manifest/event; on fallback set outcome='continuation_veto', preserve the reason, and return that same outcome. Verify agreement among the manifest, next plan, event and returned outcome when final refresh fails.",
+        "Run initialization leaves an ordinary-interruption gap in durable bookkeeping. After the run manifest is written and the run is appended to self.state['runs'], the initial self.refresh() executes outside the try/finally. A handled SIGTERM/KeyboardInterrupt or refresh error there bypasses run_stopped, finished_at, outcome and final state publication entirely. Depending on where refresh stops, the state may reference an unfinished manifest or the manifest may never become linked from saved state. This is ordinary initialization failure, not the excluded fork-registration kill window. Repair: establish terminal bookkeeping before the first fallible operation after creating the run record, and enclose initial refresh in the same guarded lifecycle as execution. Preserve an explicit interrupted/veto outcome without publishing an executable plan when initialization fails."
+      ],
+      "next_actions": [
+        "Fix terminal publication ordering and extend the guarded lifecycle to initial refresh.",
+        "Add targeted scheduler coverage for initial-refresh interruption and final-refresh integrity failure, then rerun controller verification and review."
+      ],
+      "residuals": [
+        "Lock ownership, bounded process cleanup, approval-rule enforcement and persisted-state validation depend on omitted helpers; this packet supports interface-level assessment rather than independent verification of those implementations.",
+        "Scoped acceptance remains explicitly distinct from mission completion. Source checks over the accepted 192-report panel and passing engineering tests cannot close accounting, scientific or human-acceptance gaps."
+      ],
+      "steps": [
+        "Apply the bounded packet-only review to scheduler behavior and its stated interfaces.",
+        "Separate demonstrated lifecycle defects from limitations of the supplied evidence."
+      ],
+      "summary": "REVISE: initialization can escape terminal bookkeeping, and final refresh failures can publish contradictory run outcomes.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "phase-plan-repair",
+      "assumptions": [
+        "This review uses only the supplied packet; no tools, files or project history were consulted.",
+        "Workers are trusted and obey the stated execution modes. Deliberate detachment and uncatchable termination during registration remain outside scope.",
+        "The packet supplies test names and a reported passing result, but not test bodies. Those names do not establish coverage of the findings below."
+      ],
+      "checks": [
+        "Traced initial planning, ordinary failed verification, partial-work replanning and checked-work resume.",
+        "Checked how partial result-review verdicts affect subsequent execution.",
+        "Compared editable-file preservation with the stated source/manuscript preservation interface.",
+        "Confirmed that explicit incomplete criteria veto acceptance and that builtin results retain bounded acceptance qualifications."
+      ],
+      "evidence": [
+        "scripts/run_accounting_master.py",
+        "scripts/accounting_master_support.py",
+        "tests/test_accounting_master.py"
+      ],
+      "issues": [
+        "High — Ordinary repairs execute under the original plan without fresh plan review. In Master.execute_phase, failed checks, result-review REVISE and caught execution errors populate packet['repair_findings'], then fall through to the next loop iteration. That iteration calls worker('repair', ...) with the original approved plan and hash. Only the partial-work branch calls approve_phase_plan again. Consequently, repair instructions can change the authorized work without a plan incorporating those findings being reviewed. Repair: route every transition to editable repair through a refreshed packet and a fresh approve_phase_plan call, persist that approval, and stop if approval is unavailable or blocked. Add regression coverage for failed checks, result-review REVISE and execution errors, asserting that reviewed replanning precedes the repair worker.",
+        "High — A BLOCKED verdict from partial result review is ignored as a control decision. In the partial-work branch of Master.execute_phase, partial_review is stored in repair_findings, but its verdict is never inspected. With progress, execution can replan and launch another editable worker; without progress, it records needs_plan_repair instead of the external block. This differs from both plan review and full result review, which explicitly preserve BLOCKED. Repair: after evidence-integrity verification, handle partial_review['verdict'] == 'BLOCKED' by preserving its issues, residuals and next actions, marking blocked_external and returning through the normal external-block persistence path. Add coverage for a passing partial check followed by review BLOCKED, ensuring no subsequent editable worker starts."
+      ],
+      "next_actions": [
+        "Require a fresh reviewed plan before every editable repair driven by new verification or review findings.",
+        "Honor BLOCKED consistently for partial result reviews and retain the checked continuation.",
+        "Clarify the editable-file coverage contract and add focused regression cases for the identified transitions."
+      ],
+      "residuals": [
+        "Preservation coverage needs an explicit interface assumption. editable_files inventories selected directories and suffixes only; bibliography files, stylesheet files, YAML configuration, root-level source files and symlinks are excluded. If workers may edit such files, their prior bytes and deletions are not covered by this mechanism. Either constrain authorized editable paths to the inventory or expand preservation to the actual edit scope.",
+        "Process cleanup, lock enforcement, capability validation, approval-rule installation and outer state persistence are represented chiefly by interfaces and test names in this packet. Their implementations cannot be independently approved from these excerpts.",
+        "The reported 104 passing tests support control-plane verification only. They do not establish accounting correctness, scientific validity or human acceptance for the 192-report panel."
+      ],
+      "steps": [
+        "Performed a bounded static review of the supplied phase-plan-repair code and interfaces.",
+        "Separated concrete control-flow defects from missing interface assumptions and unreviewed implementation areas."
+      ],
+      "summary": "Two control-flow defects require repair: ordinary failures bypass fresh reviewed replanning, and partial result-review BLOCKED verdicts do not stop editable work.",
+      "verdict": "REVISE"
+    },
+    {
+      "scope": "evidence",
+      "assumptions": [
+        "The stated process, lock, protection and fresh-plan interfaces are accepted as contracts; their omitted implementations were not independently reviewed.",
+        "No supplied interface restricts editable worker output to the directories and extensions enumerated by editable_files.",
+        "The accepted source panel contains 192 reports. Test counts establish supporting controller evidence only."
+      ],
+      "checks": [
+        "Reviewed only the supplied code and evidence; used no tools or external project history.",
+        "Checked preservation coverage, recovery from malformed records, builtin validation and test-result handling against the stated interfaces.",
+        "The supplied verification reports 104 passing tests with hashes matching the supplied controller hashes. Test names alone do not establish their assertions or coverage."
+      ],
+      "evidence": [
+        "scripts/accounting_master_support.py",
+        "scripts/run_accounting_master.py",
+        "tests/test_accounting_master.py"
+      ],
+      "issues": [
+        "Preservation and deletion detection silently omit editable files. In scripts/accounting_master_support.py, editable_files inventories only selected directories and suffixes; for example, source files ending in .yaml or .sql under src are omitted, as are root-level configuration files. preserve_editable, changes_since and contributed_changes all inherit this omission. An ordinary worker edit or deletion of such a file therefore has no preserved original and no reported delta or deletion obligation. The supplied workspace-write interface does not enforce this inventory boundary. Repair by inventorying every file within the authorised editable scope, with explicit exclusions for generated/supervisor/frozen material, or enforce an equally narrow write scope and detect writes outside it. Verify preservation and deletion reporting for a previously omitted source/configuration file.",
+        "Recovery can abort on the malformed response it is supposed to recover from. In scripts/accounting_master_support.py, phase_recovery selects recent structured records and calls load_json(path) without exception handling. A malformed implement/repair response can remain after an ordinary worker failure; on resume it is selected as work_response and raises ValueError. Valid JSON with the wrong top-level shape also fails at value.get. The continuation-record branch already handles invalid records, but recent_records does not. Repair by retaining the record path, recording a bounded invalid-record diagnostic, and continuing recovery with an explicit recheck/replan obligation; do not treat that record as acceptance evidence. Cover truncated JSON and structurally invalid JSON left by a failed attempt."
+      ],
+      "next_actions": [
+        "Repair inventory coverage and malformed-record recovery, then rerun focused regression checks and the controller suite.",
+        "Obtain a fresh read-only review of the repaired code and current verification evidence before controller execution resumes."
+      ],
+      "residuals": [
+        "verify_builtin checks deliverable existence but validates the supplied result dictionary rather than explicitly comparing it with the saved baseline/register JSON. The missing caller assumption is that result is loaded from, or checked against, the exact persisted deliverable subsequently hashed for acceptance.",
+        "Source counts are compared with current coverage metadata rather than independently requiring 192. This is sufficient only if the frozen input contract independently binds that metadata to the accepted 192-report panel; that binding is not demonstrated in this packet.",
+        "baseline permits a successful regression suite with some skipped tests, whereas verify_builtin requires a bare OK line and rejects unittest's OK (skipped=N). Align the policies to avoid rejecting an otherwise permitted run.",
+        "The broader controller lifecycle and approval implementation are outside the supplied executable excerpts. No conclusion here certifies accounting correctness, scientific validity, mission completion or human acceptance."
+      ],
+      "steps": [
+        "Completed a bounded static review of the supplied evidence-handling functions and stated interfaces."
+      ],
+      "summary": "Two repairable defects remain: incomplete preservation coverage and recovery that can fail repeatedly on malformed worker records.",
+      "verdict": "REVISE"
+    }
+  ],
+  "controller_hashes": {
+    "scripts/run_accounting_master.py": "35d77a43dc80b03b3ee9463d0c1eae9f7fb256abe9316c15befdaa0ea5abf2cf",
+    "scripts/accounting_master_support.py": "3966c35c90b0438c861f5daf2847b490fee4327687c402e3eb195bc060e163bc",
+    "scripts/accounting_master_catalog.json": "a4c2b5617600b81f7f247994e235e5e006664fc8c01a3a209fbb2482a2dec37e",
+    "scripts/accounting_master_response.schema.json": "4b492e3495e6a64bf8e74d0798362b3c52073aef182c06dd9a06a658184f1269",
+    "tests/test_accounting_master.py": "5a149ecdb176ad592a5e66918ff9aa08a62d02391cd53decf032bed2387b2120",
+    "docs/plans/accounting-master-program.md": "7263ccf2aee2635cfb043ea21820adf36ab77f3e2bd29dae239a5bc221f45e8c"
+  },
+  "reviewed_at": "2026-10-03T11:34:45.527659+00:00"
+}

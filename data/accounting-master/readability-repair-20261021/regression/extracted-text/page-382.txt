@@ -1,0 +1,54 @@
+APPENDIX B. CORE GRAMMAR, RECORDS AND EXECUTION DETAILS
+373
+For example, these selected records reproduce the schema’s field names. Each field is required;
+a nullable link is represented by explicit null.
+EvidenceView {
+id, cutoff, system_as_of, mode,
+documents[], observations[], decisions[],
+conflict_sets[][], transforms[]
+}
+Context {
+id, entity, perimeter, concept, basis, measurement,
+time, unit, currency, taxonomy_version, dimensions[]
+}
+Symbol {
+id, type, context, domain, uncertainty_kind,
+scope, dependencies[], admission, provenance[]
+}
+Journal {
+id, event, book, date, accrual_period,
+postings[], rule, measurements[], assumptions[],
+precondition_hash, explanation
+}
+ResultCell {
+id, context, history_condition, scenario, path, kind,
+value, expression, lower, upper,
+lower_attained, upper_attained, sample_ref,
+certificate, reason, dependencies[]
+}
+A value is a reduced rational, or a typed symbolic/domain reference. A posting is nonnegative
+with its side carrying the sign, in the book’s functional currency. Original units and the valuation
+reference survive conversion. Monetary contexts require currency; a period flow requires a
+calendar and exclusive end boundary. Historical zero postings may preserve traceability but
+establish no economic event. New portable proposals omit zero lines and retain their explanation
+in the event and findings instead. The amount may have finer precision before the declared
+posting-rounding operation.
+Schema validation rejects unknown fields but cannot prove that a treatment is permitted, a
+reference points to the correct kind of record, or two periods are comparable. Those semantic
+checks precede solver or runtime dispatch. The structural fixture and complete demonstration
+source/package are supplied separately so that a future implementation can check both layers
+explicitly. fixtures/core-ir-demo.json supplies an authored expected lowering; the reference
+checker evaluates its selected debt expressions. A general source-to-IR compiler and complete
+external-registry validation remain to be implemented. Domain records retain disclosed display
+text and rounding rules alongside their exact bounds.
+B.3
+Typing and partial-information rules
+For expressions x and y in the same currency C, the money addition rule is
+x : Money⟨C⟩
+y : Money⟨C⟩
+x + y : Money⟨C⟩
+.
+Context compatibility is a separate premise for observations. There is no analogous implicit
+rule for different currencies. Explicit conversion uses a dated measurement and records its rate
+and purpose. A rate-times-principal calculation is typed through a declared accrual convention;
+the example’s annual simple rate and year fraction produce money in the principal’s currency.

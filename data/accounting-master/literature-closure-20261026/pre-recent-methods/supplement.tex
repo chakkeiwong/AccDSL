@@ -1,0 +1,786 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=27mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,longtable,array}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{proposition}{Proposition}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Prob}{\mathbb P}
+\newcommand{\ind}{\mathbf 1}
+\title{Financial statements do not determine a company:  learning, compression and financing in scenario simulation}
+\author{AccDSL research supplement}
+\date{26 October 2026\\Provisional technical synthesis; source and implementation limits stated locally}
+\begin{document}
+\maketitle
+\begin{abstract}
+Financial statements constrain the history of a company without identifying all
+its transactions, contractual exposures or future decisions. A simulator must
+preserve those distinctions, including differences that later information may
+never resolve. The computational problem is therefore to share representations
+and calculations while retaining the information needed for future decisions.
+This supplement develops conditions for exact sharing, explains why approximate
+sharing needs separate policy and threshold arguments, and distinguishes hard
+evidence from probabilistic learning. It then connects debt proceeds, promised
+payments, recovery and shareholder dilution to dated financing choices. Primary
+work on accounting representations, adapted transport, sequential inference,
+disclosure and corporate finance supplies both useful methods and precise
+reasons that some tempting transfers fail. Exact synthetic cases and inspected
+author code support the local conclusions. They do not establish empirical
+forecast validity or completion of the general company simulator.
+\end{abstract}
+\tableofcontents
+
+\section{The company behind the reported numbers}
+A company can report the same debt balance under a fixed-rate loan and a
+floating-rate loan. It can even have recorded the same historical interest
+payments if the floating rate has not yet reset. A future rate shock separates
+their cash flows. Two different sequences of purchases and disposals can also
+produce the same closing asset balance while leaving different assets available
+for production or sale. The first example conceals contractual state beyond
+the journal; the second conceals transactions within an accounting aggregate.
+Neither ambiguity is removed by constructing one balanced journal.
+
+For a fixed linear reporting map, write reported amounts as $y=Az$, where $z$
+contains transaction or account movements. If $Av=0$, then $z$ and $z+v$ have
+the same reports. They are both admissible only if they also satisfy the
+nonnegativity restrictions, dates, notes, contractual conditions and accounting
+rules in the declared model. The null space alone is not a generator of
+economically possible companies. More generally, let $h$ contain opening state,
+dated events, outstanding contracts, recognition and measurement choices, and
+source support. With reporting map $R$ and observed evidence $e$, define
+\begin{equation}
+\mathcal H(e)=\{h:R(h)\text{ agrees with }e
+\text{ and }h\text{ satisfies the declared economic restrictions}\}.
+\end{equation}
+Agreement includes units, rounding, dates and reporting perimeter. An assertion
+that a loan is floating rate is as relevant as a reported numeric total. A
+missing note is recorded as missing evidence; its contents are not inferred
+from the convenience of a candidate reconstruction.
+
+McCarthy's REA model provides a useful architectural antecedent. Resources,
+events and agents, linked through stock-flow, duality and control relations,
+organise economic activity before particular accounting views are produced
+\cite[pp.~560--570]{mccarthy}. Double entry can be one external view. Claims
+can be derived from imbalances or retained as base records when their uses
+warrant it. The paper also recognises the practical need for aggregation and
+the fact that measurement and periodicity are not settled by a database schema
+\cite[pp.~568--576]{mccarthy}. These distinctions support an event-and-contract
+representation with journal views. They do not imply that disclosures identify
+a unique event history, or supply the likelihood of observing a disclosure.
+
+The proposed history family is therefore a family of hypothetical explanations,
+not multiple legal books asserted to belong to the issuer. Revisions to actual
+reports form a separate version history. Future behaviour is another separate
+choice: even complete historical contracts do not identify how management will
+respond to a new liquidity shock. A run binds a history, a behavioural model,
+an economic scenario and accounting rules, and retains that combination in its
+results. Without defensible weights over histories, the result is a family of
+conditional laws or feasible outcomes. Counting equivalent encodings of one
+history must not make that history more probable.
+
+\section{Possibilities do not need individual tree nodes}
+Suppose twenty contractual clauses are unknown binary facts. The number of
+assignments is $2^{20}$, but twenty variables and their joint restrictions need
+not require a million copies of the company. Common events can be stored once;
+uncertain rates can remain symbolic; alternative clauses can be guards on a
+shared calculation. This saves representation and repeated computation. It
+does not guarantee that every query is easy: some queries genuinely require
+exploring many combinations, and continuous uncertainty is not a finite list.
+
+A tree is useful when showing what is observed and decided over time. A stored
+node may represent a region of feasible histories, with outgoing edges denoting
+observations or economically meaningful events. A graph can share common
+prefixes and equivalent continuations. Distinct provenance is retained even
+when execution is shared. The meaning of an edge matters: logical dependence,
+source support and stochastic transition are different relations. Drawing the
+same graph for them does not establish conditional independence.
+
+Consider a loan whose unknown fixed coupon is either 5 or 7 in each of two
+periods. The admissible payment paths are $(5,5)$ and $(7,7)$. Taking the
+Cartesian product of the marginal possibilities $\{5,7\}$ at each date adds
+$(5,7)$ and $(7,5)$. Those extra paths are wrong for this contract. A change of
+terms requires a modification or refinancing event. The same error arises if a
+robust dynamic program allows a new adversarial choice of an otherwise fixed
+contract each period. A rectangular family can be appropriate for a different
+model, but it changes this one. Dynamic consistency of preferences and factual
+persistence of a contract must be assessed separately; the learning-under-
+ambiguity literature makes updating and restrictions on priors substantive
+assumptions \cite{epstein}.
+
+\subsection{Exact sharing must preserve information as well as cash}
+Assume a fixed finite horizon and a transition model that is Markov in the
+augmented economic state, including persistent terms and time. Let $s$ be
+such a finite state and $a$ an action available to a specified
+actor. Write $K_s^a(B,o,z)$ for the joint probability that the next state lies
+in block $B$, the actor observes $o$, and the requested current output is $z$.
+Two states can be placed in the same block when they have the same feasible
+actions, the same already available information, the same current outputs,
+and the same $K_s^a$ for every admitted action. Any terminal output must also
+be constant on each terminal block. Persistent unweighted alternatives are
+kept as separate types, with this comparison performed within the relevant
+conditional model rather than by inventing a distribution over types.
+
+For a common policy that depends only on the preserved observation history,
+these conditions preserve the joint law of future observations and outputs.
+To see why, begin at the last date: the terminal output agrees within each
+block. One step earlier, the common policy chooses the same action distribution
+at indistinguishable histories, and the joint transition into successor block,
+observation and output agrees. Summing the common successor law gives the same
+continuation law. Backward induction repeats that argument to the starting
+date. This is a finite-state argument under the stated joint-kernel condition;
+it is not a general theorem that equal balance sheets imply equivalent states.
+
+The observation-quotient work already present in AccDSL supplies exact finite
+path comparisons and deliberately rejected partitions for this restriction.
+The present supplement reuses that work. A query that adds another output,
+policy, horizon or observation can invalidate a previously justified merge.
+An analyst may not know the loan type even though management does; policies
+then use management's information. Conversely, sampling next year's shock
+inside the simulator must not reveal it to management today.
+
+\subsection{A small example exposes the cost of lost information}
+Let tomorrow's payoff driver $Z$ be a fair binary variable. Today an actor
+chooses $a\in\{0,1\}$ and receives $\ind\{a=Z\}$. In one model, today's
+signal reveals $Z$; in another, the signal is constant. Both models have the
+same distribution of $Z$. The optimal expected payoff is 1 in the revealing
+model and $1/2$ in the uninformative model. A distance that compares only the
+terminal distribution reports no discrepancy while the decision problem
+changes substantially. The exact diagnostic enumerates every feasible policy
+in both models; it does not allow a separate action for a hidden state.
+
+Nested and adapted transport distances address the temporal issue by
+restricting couplings so that matching paths cannot depend on information
+that is unavailable at the relevant date. Pflug and Pichler's stability
+argument uses convex decision sets, convex loss in decisions and uniform
+regularity in uncertainty \cite[Definition~5.1, Theorem~6.1 and proof]{pflug}.
+A projected action is formed by conditional averaging. If the only permitted
+issuance sizes are 0 and 1, an average of $1/2$ is infeasible. The theorem
+therefore does not automatically justify merging discrete issuance choices.
+
+Backhoff-Veraguas and coauthors obtain related stability results for financial
+optimization with bounded predictable strategies and regular payoffs
+\cite[Theorem~1.5; Lemma~3.7; Theorem~3.10]{adapted}. Their weak transfer
+permits a different strategy in the other model. Reusing the same strategy
+needs additional regularity. Their semimartingale distance also has a
+different cost functional from a simple sum of discrete path deviations; the
+paper explains why time refinement matters. Its examples of discontinuous
+strategies and exact superhedging delimit the guarantee. These are useful
+reasons to formulate the company decision problem precisely, rather than
+reasons to attach one distance to every accounting query.
+
+\section{Approximation needs the error relevant to the decision}
+\subsection{Thresholds require control near the boundary}
+Default, covenant breach and a margin call are threshold events. Let $X$ be
+exact cash at a decision date, $Y$ its approximation under a specified joint
+coupling, and $c$ the contractual threshold. All three are in the same currency
+and date basis. A cash approximation of $-\epsilon$ by $+\epsilon$ has error
+$2\epsilon$, yet changes $\ind\{X<0\}$ from one to zero. Small cash error
+alone does not imply small default-probability error.
+
+\begin{proposition}
+If $\E|X-Y|<\infty$, then for every $\delta>0$,
+\begin{equation}\label{eq:threshold}
+|\Prob(X<c)-\Prob(Y<c)|
+\leq \Prob(|X-c|\leq\delta)+\frac{\E|X-Y|}{\delta}.
+\end{equation}
+\end{proposition}
+\begin{proof}
+The absolute difference in event probabilities is at most the probability
+that their indicators disagree. If $|X-c|>\delta$ and $|X-Y|<\delta$, $X$
+and $Y$ lie on the same side of $c$. Consequently disagreement is contained
+in $\{|X-c|\leq\delta\}\cup\{|X-Y|\geq\delta\}$. The union bound
+and Markov's inequality give (\ref{eq:threshold}).
+\end{proof}
+The first term is probability mass close to the covenant; the second is the
+probability allowed for a sufficiently large approximation error. This local
+derivation is independent of any claim that a particular algorithm supplies
+the required coupling error. Write $e=\E|X-Y|$. If $e=0$, then $X=Y$ almost surely and the threshold probabilities agree.
+For $e>0$, if $X$ has a density bounded by $M>0$ near $c$,
+the first term is at most $2M\delta$. Choosing
+$\delta=\sqrt{e/(2M)}$, when that choice lies within the neighborhood where
+the density bound holds, gives $2\sqrt{2Me}$. Atoms at the threshold and
+uncontrolled conditional distributions prevent this simplification.
+
+For several dates, a union bound can bound the probability that any breach
+indicator differs by the sum of the per-date bounds, provided the relevant
+coupling and cash errors are supplied. If a different breach decision changes
+subsequent actions and cash flows, those cash errors must already account for
+that feedback; an open-loop cash comparison does not establish them. When
+there are no weights over histories, the appropriate output is instead an
+uncertain boundary region or certified feasible-set containment. A probability
+bound cannot be manufactured from the proportion of enumerated witnesses.
+
+\subsection{Close optimal values do not validate a transferred policy}
+Let $J(\pi)$ and $\widetilde J(\pi)$ be expected costs in two models, with
+the same admissible policy class $\Pi$, finite expected costs and finite optimal values. This comparison presupposes that a
+policy can be implemented with the information and feasible actions in both
+models. Suppose a uniform bound
+$\sup_{\pi\in\Pi}|J(\pi)-\widetilde J(\pi)|\leq\varepsilon$ holds.
+If $\widehat\pi$ is $\eta$-optimal for the approximate problem, then
+\begin{align}
+J(\widehat\pi)&\leq\widetilde J(\widehat\pi)+\varepsilon\nonumber\\
+&\leq\inf_{\pi\in\Pi}\widetilde J(\pi)+\eta+\varepsilon\nonumber\\
+&\leq\inf_{\pi\in\Pi}J(\pi)+\eta+2\varepsilon.
+\end{align}
+The last step follows by applying the uniform bound to an arbitrarily
+near-optimal policy of the exact problem, so attainment is unnecessary.
+The result is a regret bound for a common feasible policy. If one only knows
+that the two infima are close, the first inequality is missing. If a policy
+lift changes the policy class, a bound for that lift and the relevant comparison
+class is needed. This is why reporting a small optimized residual or close
+portfolio value alone does not establish that a compressed financing policy
+will work in the original company.
+
+\subsection{Even sampling can accidentally reveal the future}
+With continuous first-period observations, independent sampled paths typically
+have distinct first values. If each stored first value has only its single
+sampled continuation, that value becomes an identifier for the sampled future.
+An optimizer can exploit this unintended information. More paths do not by
+themselves repair the information structure of the empirical measure.
+Backhoff and coauthors give an explicit optimal-stopping counterexample
+\cite[Example~7.1]{estimation}. Their adapted empirical measure quantizes
+observations so that paths share histories. Strong consistency applies to
+iid complete paths on a fixed finite horizon and bounded state space;
+quantitative rates additionally require Lipschitz conditional kernels
+\cite[Definitions~1.1--1.2, Theorems~1.3, 1.5, 1.7]{estimation}.
+
+A Markov modification improves the horizon exponent only when the process
+is in fact Markov \cite[Theorem~6.1]{estimation}; constants still depend on
+the horizon. A company's current balance sheet generally is not a sufficient
+Markov state when hidden debt terms or asset vintages matter. Nor are reports
+from one issuer an iid sample of complete company paths. The method suggests
+how a deliberately generated simulation sample can retain information. Its
+rates cannot simply be assigned to an observed issuer panel.
+
+\section{Learning without erasing persistent possibilities}
+Let $\theta$ denote fixed but unknown contract terms and $X_t$ the evolving
+economic state. Their roles differ. The transition for $X_t$ can depend on
+$\theta$, but absence of evidence does not authorize resampling $\theta$
+as a new physical contract. Management, lenders and the analyst can have
+different observation histories $I_t^a$; each action must be measurable with
+respect to the information of the actor choosing it. The simulator keeps
+physical state separate from what each actor believes about that state.
+
+For hard evidence $e_{t+1}$ that concerns the same uncorrected historical
+assertions, update the feasible family by intersection:
+\begin{equation}
+\mathcal H_{t+1}=\{h\in\mathcal H_t:h\text{ agrees with }e_{t+1}\}.
+\end{equation}
+Empty intersection exposes conflict, model misspecification or invalid
+evidence. It is not a request to replace the result with the nearest convenient
+history. A correction is different: rebuild the evidence view after
+superseding the erroneous assertion, preserve the old view, and recompute.
+Conjoining both versions can create a false contradiction.
+
+For a probabilistic model, first propagate the joint law of state and fixed
+terms under the declared action and transition model. If $\mu^-_{t+1}$ is
+that predicted law and $L(o\mid x,\theta,I_t)$ is the observation likelihood,
+the update is
+\begin{equation}\label{eq:bayes}
+\mu_{t+1}(dx,d\theta)=
+\frac{L(o_{t+1}\mid x,\theta,I_t)\,\mu^-_{t+1}(dx,d\theta)}
+{\int L(o_{t+1}\mid u,\vartheta,I_t)\,\mu^-_{t+1}(du,d\vartheta)}.
+\end{equation}
+The denominator must be positive and finite. Densities for exact continuous
+observations require the corresponding conditional model; treating a
+zero-probability point as an ordinary positive-probability event is invalid.
+If the likelihood is constant across admissible types, posterior odds are
+unchanged. An uninformative sequence need never resolve the uncertainty.
+
+A set of priors or likelihoods produces a set of updates by applying
+(\ref{eq:bayes}) to each admissible joint model. Coupled parameter and
+likelihood restrictions remain coupled. For a binary type with prior
+$p\in[1/4,3/4]$ and likelihoods $4/5$ and $1/5$, the posterior is
+$4p/(1+3p)$. Its derivative $4/(1+3p)^2$ is positive, so the posterior range
+is $[4/7,12/13]$. These are derived bounds for this specified likelihood,
+not confidence bounds inferred from financial reports. With no likelihood
+justified, hard-compatible families and sensitivity analysis remain available.
+
+\subsection{A recursive worst case can describe a different company}
+Bayesian conditioning and a fresh worst-case choice at every date answer
+different questions. Suppose a persistent binary type $\theta$ is either zero
+or one, and tomorrow a fair binary signal $X$ unrelated to that type is observed.
+The admitted laws are $Q_0$ and $Q_1$: under $Q_i$, $\theta=i$ with certainty
+and $X$ remains fair. For the loss $Z=\ind\{X=\theta\}$, either law gives
+expected loss $1/2$, so
+\begin{equation}
+\max_{Q\in\{Q_0,Q_1\}}\E_Q[Z]=\tfrac12,\qquad
+\E_X\!\left[\max_{i\in\{0,1\}}\E_{Q_i}[Z\mid X]\right]=1.
+\end{equation}
+The second expression selects type zero after signal zero and type one after
+signal one. It therefore evaluates a new law with $\theta=X$. That law is
+absent even from the convex hull of the original two laws: every mixture
+retains independence between the signal and type. No type has physically
+changed along a realized path, yet dependence has changed across possible
+paths. Preserving path support alone would miss the error.
+
+Shapiro defines rectangularity through equality between static worst-case
+evaluation and its nested conditional counterpart
+\cite[Definition~2.1, Theorem~2.1 and proof, Section~5]{shapiro}.
+His finite construction pastes conditional distributions across histories; it
+can enlarge the family. A dynamic program for that enlarged family solves
+a changed robustness question. Its convenience cannot justify claiming that
+it solved the original persistent-type problem.
+
+Terminology also requires care. Pichler and Shapiro call a product family a
+rectangular setting, but explicitly show that its original worst-case
+functional and its composite conditional functional can differ
+\cite[Section~4.2, Example~4.7]{pichlershapiro}. Computing a conditional
+law-based risk measure can also differ from conditioning an unconditional
+ambiguity set. Take six equiprobable states and an observed three-state
+group with losses $0,1,2$. Conditional expected shortfall at level $1/2$
+within that group is $5/3$. The unconditional six-state risk envelope permits
+probabilities at most $1/3$ per state. It can assign $1/6$ to the loss-2 state,
+zero to the other two group members, and $5/18$ to each state outside the
+group. This is an admissible probability law; after conditioning on the group
+it assigns probability one to loss 2. The conditional worst case over that
+envelope is therefore 2. The difference is between two precise conditional
+risk definitions, not an arithmetic error
+\cite[Example~3.2 and equations~(3.1)--(3.5)]{pichlershapiro}.
+
+Policy consistency and equality of risk values are distinct as well. Xin and
+Goldberg give moment-constrained inventory examples in which an initially
+optimal policy ceases to be optimal after reoptimization, and another in which
+the optimal policy sets agree although the two optimal values differ
+\cite[Definitions~3.1--3.3, Observations~5--7, proofs in Sections~6.3--6.5]{xingoldberg}.
+The company model must specify whether management can commit to a policy,
+what information each later decision uses, and which family of joint laws is
+retained. For a finite reference problem, enumerate complete admissible laws
+and observation-measurable policies before choosing an approximation. For
+larger problems, a set of beliefs over persistent types or an explicit
+precommitment formulation can retain those restrictions, but its recursive
+sufficiency and computational cost need a separate derivation. Repeated
+worst-case optimization remains useful as a stress test when the changed
+family is stated explicitly.
+
+\subsection{Sequential Monte Carlo is an approximation to a stated model}
+A particle approximation can reduce computation after a probability model is
+chosen. It does not create that model. A type with probability $0.01$ has
+probability $0.99^{100}>1/3$ of disappearing from 100 independent multinomial
+resampling draws. No new evidence is involved in this loss. Rare but material
+types therefore need explicit support checks, stratification or separate
+conditional computations, with the resulting approximation stated.
+
+For state-space models with persistent unknown parameters, SMC$^2$ combines
+parameter particles and state filters, with particle-MCMC rejuvenation
+\cite[Section~3.2, equation~(7), Proposition~1, Appendix~A]{smc2}. Its
+extended target has the desired parameter posterior as a marginal under the
+source assumptions. Finite particles still approximate that posterior; exactness
+of a target marginal does not mean that one finite run represents every
+possible type. The unbiased full particle likelihood estimate used in this
+construction must be distinguished from an arbitrary estimated likelihood
+ratio.
+
+The inspected author-linked modern implementation creates a state filter for
+each parameter particle, runs that filter through the current observation date
+when evaluating a proposed parameter, and incorporates a likelihood correction
+when increasing the state-particle count. These operations have real time and
+memory costs. Retaining only filtering arrays differs from retaining complete
+genealogies. This is a candidate for explicitly probabilistic filtering, not
+a replacement for symbolic unweighted historical ambiguity.
+
+\section{Financing must connect cash, promises and choices}
+A financing transaction has three different descriptions. A contract creates
+rights and promises; a market or bargaining model determines whether and on
+what terms it is available; accounting rules determine recognition and later
+measurement. A posting that debits cash and credits debt answers only the
+last description for an assumed executed transaction. It does not establish
+that lenders would advance the required cash.
+
+\subsection{A consistent one-period debt convention}
+Let $F$ be the promised payment at date $t+1$ and $B_t$ the cash advanced at
+date $t$. The gross risk-free return is $R_f>0$. In this illustrative model
+lenders are risk neutral and competitive under the specified probability
+measure $Q$, the solvent probability is $1-d$, and default recovery paid at
+$t+1$ is $R_D$. With no additional fees,
+\begin{equation}\label{eq:debt}
+B_t=\frac{(1-d)F+dR_D}{R_f},\qquad
+q_t=\frac{B_t}{F},\qquad 1+y_t=\frac{F}{B_t}.
+\end{equation}
+The rate $y_t$ is a derived promised yield when $F$ and $B_t$ are positive.
+Recovery and solvent payment are mutually exclusive states. Recovery paid
+later requires discounting to its actual payment date. With a stochastic
+discount factor under a physical measure, the corresponding general relation
+is $B_t=\E_t[M_{t,t+1}\{(1-D)F+DR_D\}]$ under the stated pricing
+assumptions. Physical default frequencies cannot be substituted for
+risk-adjusted pricing probabilities without justification.
+
+Take $F=100$, $d=0.1$, $R_D=40$ and $R_f=1.05$. Expected repayment is 94,
+so $B_t=1880/21\simeq89.524$, $q_t\simeq0.89524$ and
+$y_t=11/94\simeq11.702\%$. These numbers do not provide 95 of cash,
+even though the promised repayment is 100. The simulator must return a
+funding shortfall, search another admitted issue, reduce expenditure or invoke
+a stated distress policy. Raising face value may change default probability
+and recovery; it cannot be treated as a costless balancing operation.
+
+A principal-based notation is also valid. If $b$ denotes cash advanced,
+$F=b(1+y)$ and lender break-even reads
+\begin{equation}
+bR_f=(1-d)b(1+y)+dR_D.
+\end{equation}
+The problem in the supplied risky-debt note is the simultaneous use of $b$
+as face in $b/(1+y)$ and as principal in this break-even equation. Those
+statements do not define the same quantity. In the example, solving the
+principal equation with $b=100$ and then treating that same 100 as face
+gives cash $9000/101$. Its risk-free accumulation differs from 94 by
+$-44/101$. The mismatch is wrong relative to lender break-even. Either
+convention is repairable by defining face, proceeds and recovery consistently.
+The local correction does not establish an erratum in the source edition of
+Strebulaev and Whited \cite{strebulaev}; that version question remains open.
+
+\subsection{Prices depend on the policy that follows issuance}
+For longer-lived debt, lender receipts depend on future issuance, investment,
+priority changes and default choices. A candidate policy $\pi$ produces a
+price $q^\pi$. If management optimizes while holding an incompatible price
+fixed, the resulting policy may not be the one lenders priced. A simultaneous
+solution must make the chosen policy optimal under its price and make the
+price value that policy's promised and default-state payments. A constrained
+contract-price input is a useful alternative for mechanical stress testing,
+but its interpretation is conditional on that price and availability.
+
+Benzoni and coauthors make this distinction explicit in a dynamic model with
+fixed issuance costs \cite[Section~2, Propositions~1--2, Appendix~A]{benzoni}.
+Their debt quantity is face value, its price is per unit of face, and
+shareholders choose default, issuance or inaction. Value matching and smooth
+pasting generate a candidate barrier policy; off-policy deviations and a
+supermartingale condition are required for equilibrium verification. The
+retained model assumes zero default recovery and risk-neutral agents. It
+therefore illustrates the policy-price consistency problem, but is not the
+positive-recovery solution required by the preceding example.
+
+The alternative managerial model of Lambrecht and Myers places investment,
+borrowing, payout and rents in a dated sources-and-uses constraint and imposes
+a no-Ponzi restriction \cite[Sections~2--4]{lambrecht}. Its safe-debt
+solutions depend strongly on managerial preferences and governance. In its
+exponential-utility example, the liquidation covenant protects lenders under
+the stated diffusion dynamics. A jump across the boundary, delayed liquidation
+or costly asset disposal would require a different recovery analysis. A
+closed-form policy derived under those restrictions is a competitor to
+consider, not an identified default policy for every issuer.
+
+\subsection{Recovery, conversion and creditor disagreement}
+Suppose a liquidation estate has value $A\geq0$, senior promised payment $S$
+and junior promised payment $J$. Under an expressly assumed strict priority
+contract with no liquidation costs or other claims,
+\begin{equation}
+R_S=\min(A,S),\quad
+R_J=\min((A-R_S)^+,J),\quad
+R_E=(A-R_S-R_J)^+.
+\end{equation}
+At $A=70$, $S=60$, $J=50$, creditors receive 60 and 10 and equity receives
+zero. Applying $\min(A,J)$ independently to the junior claim would allocate
+the same estate twice. This waterfall is a contractual illustration; actual
+priority, collateral, netting and insolvency costs require the applicable
+facts and authority. Consolidation does not make assets of every subsidiary
+available to every creditor.
+
+Conversion changes rights before a subsequent payoff is allocated. If junior
+debt of face 50 converts into 40\% of residual equity, and the remaining
+enterprise value is 100 subject to senior debt of 60, equity is worth 40.
+The converted holder receives value 16 and the prior equity receives 24.
+The junior debt has been extinguished. Paying the old 50 promise as well as
+the new shares would double count the conversion. A covenant trigger, an
+exercise decision and the register update must be dated separately; a
+contract may specify a different conversion ratio or priority.
+
+Recovery conservation does not settle bargaining. Consider an explicitly
+authored restructuring example: liquidation yields 50 to a secured creditor
+and zero to an unsecured creditor; continuation is worth 70 in total. An
+offer of 45 to the secured creditor and 25 to the unsecured creditor has
+higher total value than liquidation but will be rejected by a secured creditor
+that can obtain 50 by refusing. Whether the offer can proceed depends on
+voting, enforcement, bargaining and financing rules, which this arithmetic
+does not supply. Thus a simulator must not choose the maximum-total-value
+allocation and call it an implementable restructuring.
+
+Dewatripont, Legros and Matthews provide a primary contracting comparison
+\cite[Sections~2--6 and Appendix~B]{dewat}. Their environment has observable
+but noncontractible effort, limited liability, monotone investor receipts and
+efficient renegotiation. Under entrepreneur-offer renegotiation, a debt
+contract can dominate a more general contract in the stated pure-strategy
+class. Their appendix also supplies cases in which changed bargaining power,
+third parties or mixed messages change that conclusion. Even their investor
+conversion option need not be an ordinary equity security, as footnote 16
+explains. Contract labels cannot replace the exact contingent payments and
+exercise rights in the company model.
+
+\subsection{New equity is a transfer of ownership as well as cash}
+Let the pre-issue equity value be $V$, gross new subscription be $I$ and an
+issue cost paid by the company be $f$. Assume homogeneous shares, immediate
+execution, no other valuation effect and fairly priced new shares. Post-issue
+equity value is $V+I-f$. If new investors receive fraction $\alpha$, fairness
+requires
+\begin{equation}
+\alpha(V+I-f)=I,\qquad
+\alpha=\frac{I}{V+I-f}.
+\end{equation}
+Old investors retain value $(1-\alpha)(V+I-f)=V-f$. For $V=80$, $I=20$
+and $f=2$, the new fraction is $10/49$ and old equity is worth 78. With
+100 old shares, a common post-issue price is $0.78$ and new investors receive
+$1000/39$ shares. Their value is 20 and total equity is 98.
+
+This result places the issue cost on incumbent shareholders under the stated
+fair-pricing convention. It is not the universal price convention for an
+offer announced before costs are known. If $f\geq V$, a positive common
+share price and this issuance convention cannot be maintained. Preferential
+rights, discounts, control premiums, warrants, convertibles, restrictions on
+fractional shares and bargaining need explicit terms. Book equity, market
+equity value and share count must remain distinct.
+
+\subsection{A rate shock changes both market access and ownership}
+An exact combined example shows why the financing steps must be dated. Two
+possible companies each start with cash 16 and loan face 100. One pays a
+fixed coupon of 5; the other pays 7 after the specified floating-rate reset.
+Each then makes an operating payment of 6. A covenant tests cash of at least
+5 immediately after these payments and before financing. Breach forbids new
+borrowing but permits an equity cure. Management requires closing cash 8.
+These are assumed contract terms, not a claim about a standard covenant.
+
+The fixed-rate company has cash $16-5-6=5$, meets the covenant and needs 3.
+A candidate debt issue with maximum face 5, conditional solvency probability
+$4/5$, recovery 2 and gross risk-free return $21/20$ has proceeds $88/21$.
+Holding that quoted per-face price fixed for this conditional stress, issuing
+face $315/88$ raises exactly 3. The floating-rate company has cash
+$16-7-6=3$, breaches the covenant and needs 5. Debt is unavailable; even an
+improper borrowing override at the maximum face would raise only $88/21<5$.
+
+Suppose the permitted equity cure has fee 1, pre-issue economic equity value
+20 and 100 incumbent shares. A gross subscription of 6 provides net cash 5.
+The post-issue equity value is 25, new investors own $6/25$, and the common
+share price is $19/100$. Their $600/19$ new shares have value 6, while
+incumbents retain value 19. Both companies finish with cash 8, but their new
+debt and ownership differ. Merging them on closing cash would conceal those
+differences. Testing the covenant only after the cure would erase the earlier
+breach and wrongly admit the borrowing alternative.
+
+This example holds quoted financing prices and the pre-issue equity valuation
+fixed to expose event ordering and allocation. It does not solve the feedback
+from financing to default and prices. A source correction introduces another
+interaction: withdrawing an unsupported fixed-rate classification can reopen
+the floating-rate history, invalidating an earlier single-history result.
+If management later receives a rate notice, its admissible policies can change
+even when the analyst's reported balances do not. Shared computations must
+therefore depend on evidence version, actor information, contracts and the
+requested outcomes, as well as current cash.
+
+\section{What is disclosed is part of the observation model}
+Imagine equal prior probabilities of a good and bad type. If good types
+disclose with probability $0.9$ and bad types with probability $0.1$, then
+disclosure raises the probability of a good type to $0.9$, while silence
+reduces it to $0.1$. Treating a missing disclosure as no information would
+retain $0.5$ in both cases. The discrepancy comes from omitting the selection
+mechanism, not from numerical approximation. These probabilities are an
+authored example, not estimates of actual issuer disclosure behaviour.
+
+Let $Y$ denote potentially observable information, $M$ the pattern of
+observed components, $f_\theta(Y)$ its model and $g_\phi(M\mid Y)$ the
+publication or missingness mechanism. The likelihood of the realised data is
+\begin{equation}
+L(\theta,\phi)=\int
+f_\theta(y_{\rm obs},y_{\rm mis})
+g_\phi(m\mid y_{\rm obs},y_{\rm mis})\,dy_{\rm mis}.
+\end{equation}
+Here the realised pattern $m$ fixes which coordinates are observed; the
+integration is over the missing coordinates only. Discrete missing components
+use a sum instead. If, for the realised observation, $g_\phi(m\mid y)$ is constant over
+all compatible missing components, it factors out of this integral. Together
+with distinct parameter spaces this yields the relevant likelihood
+proportionality; a Bayesian factorisation also needs the appropriate prior
+independence. Seaman and coauthors distinguish these realised-MAR conditions
+from the everywhere-MAR conditions relevant to repeated-sampling comparisons
+\cite[Theorems~1--3, Section~5.4 and Appendix]{seaman}. These are sufficient
+conditions for specified inferential equivalences. They do not demonstrate
+that corporate missingness satisfies them.
+
+\subsection{A simple equilibrium of silence}
+A separate local illustration makes non-disclosure endogenous. Let value $V$
+be uniform on $[0,1]$. A manager knows $V$ with probability $1/2$, independently
+of value; otherwise the manager cannot disclose it. Informed disclosure is
+truthful and costless, the manager maximizes the contemporaneous price, and
+risk-neutral investors price at conditional expected value. Suppose an informed
+manager discloses above cutoff $a$. Silence occurs with probability
+$(1+a)/2$. Its unconditional value contribution is
+$1/4+a^2/4$, giving silence price
+\begin{equation}
+P_{\rm silence}(a)=\frac{1+a^2}{2(1+a)}.
+\end{equation}
+An informed manager at the cutoff is indifferent, so $a=P_{\rm silence}(a)$.
+Multiplying through and collecting terms gives $a^2+2a-1=0$, hence
+$a=\sqrt2-1\simeq0.4142$. Types above that value disclose and those below
+it prefer the silence price. The uninformed manager explains why silence
+does not identify the worst type. This derivation is a local example; the
+blocked Dye original is not claimed to have been reproduced.
+
+Nor is favorable selection universal. Suijs models a firm that knows its
+return but is uncertain how investors compare it with an outside opportunity
+\cite[Sections~3--4, Proposition~2 and Appendices~A--B]{suijs}. Under the
+stated conditions a profitable firm can disclose lower returns and withhold
+higher returns. Multiple partial-disclosure equilibria are possible. The
+implication for AccDSL is to represent alternative disclosure mechanisms and
+test their consequences, rather than hard-code one direction of selection.
+
+\subsection{Mechanical shocks, conditioning and intervention}
+A mechanical rate stress replaces an input while holding specified other
+relations fixed. A conditional forecast computes outcomes among states where
+an observed rate has a chosen value. A causal intervention changes the
+mechanism generating the rate and then propagates the remaining structural
+relations. These calculations can disagree.
+
+For a finite counterexample, let $U$ be a fair binary variable and observe
+$X=U$, $Y=U$. An alternative structural model has $X=U$, $Y=X$. Both give
+exactly the same observed joint distribution. Under an intervention setting
+$X=1$, the first model retains $\E[Y]=1/2$ while the second gives
+$\E[Y]=1$. Observational agreement does not identify the intervention
+response. A forecast labelled as causal therefore needs the structural
+assumptions that distinguish these possibilities, or must retain the set of
+responses. Source corrections and simulated observations also have different
+time meanings: a hypothetical future disclosure updates an actor inside that
+run, not the analyst's actual present evidence.
+
+\section{Contract algorithms and learned solvers have narrower jobs}
+\subsection{What a contract engine establishes}
+A contract engine can generate scheduled events and payoffs from supplied
+terms, calendars and risk observations. It need not determine which financing
+is available, choose management's action, infer undisclosed terms or price
+endogenous default. The retained ACTUS specification identifies itself as
+v1.1, revision 843f7a3, dated 8 June 2020, aligned with dictionary v1.2
+\cite{actus}. That historical pairing is more precise than treating a current
+website download as the latest compatible runtime.
+
+Independent arithmetic on the retained official PAM examples checks two
+simple schedules. A principal of 3000 at 10\% over 31 actual days with A365
+pays $3000(0.1)(31/365)=25.479452\ldots$. The discounted-issue A360 case
+advances 2800 against face 3000 and pays $3000(0.1)(59/360)$ on its first
+two-month interest date. Initial interest of zero and interest-before-maturity
+ordering are retained from the explicit schedules. These calculations match
+24 listed events within the stated decimal-serialization tolerance.
+
+This does not execute ACTUS. The inspected service requires ACTUS core version 1.1.0;
+its Dockerfile copies and builds a local
+core directory. The attempted public core repository and Maven lookup did
+not yield the matching implementation. A historically matched dictionary and
+specification therefore remain insufficient to claim runtime conformance.
+Rate resets, business-day adjustment, missing observations and other contract
+types need their own implementation traces and comparisons before adoption.
+
+\subsection{The equation being minimized matters}
+Suppose an economic equation is $\E[r(\theta,\epsilon)\mid s]=0$. The
+squared conditional mean and conditional mean square are different:
+\begin{equation}
+\E[r^2\mid s]=\{\E[r\mid s]\}^2+\operatorname{Var}(r\mid s).
+\end{equation}
+The variance can depend on the policy parameters. In the exact example
+$r=\theta-1+\theta\epsilon$, with independent fair $\epsilon\in\{-1,1\}$,
+the intended loss is $(\theta-1)^2$, minimized at 1. The mean square is
+$(\theta-1)^2+\theta^2$, minimized at $1/2$. Training can successfully
+optimize the wrong quantity.
+
+Conditionally independent draws $\epsilon_a,\epsilon_b$ give
+\begin{equation}
+\E[r(\theta,\epsilon_a)r(\theta,\epsilon_b)\mid s]
+=\{\E[r(\theta,\epsilon)\mid s]\}^2.
+\end{equation}
+Conditional independence, the conditioning state and differentiation
+assumptions matter. Reusing the same draw returns the mean square. A finite
+product estimate can be negative even though its expectation is nonnegative.
+Maliar, Maliar and Winant discuss solving economic equations with deep
+learning \cite{maliar}; the inspected author-linked Krusell--Smith notebook
+uses the product of residuals from two future draws. That code is evidence
+for its equation construction, not evidence that it solves a risky-debt
+issuance and recovery system.
+
+Gradients require the same care. If $F(\theta,q)=\theta q$ and
+$q(\theta)=\theta$, the total derivative is $2\theta$. Differentiating
+with $q$ detached gives $\theta$. A deliberate alternating-price algorithm
+may use the latter as one step, but it is wrong if described as the total
+gradient of the coupled objective. Boundary default decisions and discrete
+issuance choices add feasibility and nonsmoothness issues beyond this example.
+
+The notebook also contains differences between explanatory markdown and
+executed parameter values and initialization, along with clipping and
+cross-sectional normalization of shocks. Those change the problem being
+computed and must be included in a reproduction. The separate audit retains
+exact cells and hashes. No neural training has been promoted here. The
+Duarte paper's announced replication library has not been matched to an
+author-linked implementation in the inspected sources \cite{duarte}.
+
+\section{What would establish an estimated company policy?}
+Historical fit is only one restriction on a model. If two policies take the
+same action on every observed state but diverge after refinancing is refused,
+the historical sample cannot distinguish their response to that refusal.
+The observation model can create another equivalence: infrequent disclosure
+of losses can resemble a lower loss frequency. A source-to-parameter map
+should therefore identify what is measured, what is inferred under a model,
+and what remains set-identified or a sensitivity assumption.
+
+A credible evaluation uses information as it was available at each forecast
+origin. Later restatements and later-known covenant breaches remain unavailable
+to earlier forecasts. Issuer exit and default must be retained rather than
+dropping failed companies from the comparison. The benchmark ladder should
+include a naive persistence/accounting baseline, a tuned classical policy or
+state-space model, the plain proposed model and any enhanced version, using
+the same information, feasible actions and evaluation periods.
+
+The primary criterion must match the proposed use. For a probabilistic
+forecast of default, the Brier loss $(q-D)^2$ has expectation
+$p(1-q)^2+(1-p)q^2=p(1-p)+(q-p)^2$, uniquely minimized by $q=p$. This
+identity is useful but does not validate the estimated $p$. Proper scoring
+rules assess distributional forecasts under specified outcomes
+\cite{gneiting}; unweighted sets require coverage and sharpness questions
+appropriate to sets, not arbitrary probabilities added to permit scoring.
+Decisions additionally need realized cost or regret evaluation under a
+defensible comparison.
+
+Repeated forecasts from one issuer and common macroeconomic shocks are
+dependent. Paired comparisons, issuer/time blocking and an uncertainty method
+appropriate to that dependence must be specified before ranking methods.
+Rare defaults may make precise tail comparisons impossible in the available
+panel. Such results remain descriptive. Conservation and feasibility errors
+can veto a candidate regardless of its predictive score; a good score does
+not repair a wrong accounting or financing quantity.
+
+\section{A method with explicit limits}
+The resulting design retains joint economic histories, dated evidence and
+actor-specific information. It uses symbolic constraints and shared records
+before approximation; exact merging requires equality of the relevant
+continuation law. Where approximation is needed, cash, threshold events and
+policy regret receive different error arguments. Probabilistic filters operate
+only after prior, transition and observation models have been stated.
+Financing connects proceeds to contingent creditor payments, management
+decisions and ownership changes before generating the corresponding journal.
+
+Several residuals are substantive. The historical planning sources still
+need source-specific access and edition comparison. The full ACTUS runtime
+has not been matched. General creditor bargaining, broad hybrid-state
+approximation and empirical issuer-policy identification remain open.
+The acquired follow-up literature also contains work awaiting technical
+inspection. These limitations prevent an all-gap closure claim. They do not
+erase the exact corrections, source-supported restrictions and counterexamples
+that can already govern the next implementation.
+
+\begingroup
+\raggedright
+\begin{thebibliography}{99}
+\bibitem{mccarthy} W. E. McCarthy (1982). The REA Accounting Model: A Generalized Framework for Accounting Systems in a Shared Data Environment. \emph{The Accounting Review} 57(3), 554--578. Retained author-hosted scan.
+\bibitem{pflug} G. C. Pflug and A. Pichler (2012). A Distance for Multistage Stochastic Optimization Models. \emph{SIAM Journal on Optimization} 22(1), 1--23. doi:10.1137/110825054.
+\bibitem{adapted} J. Backhoff-Veraguas, D. Bartl, M. Beiglböck and M. Eder (2020). Adapted Wasserstein distances and stability in mathematical finance. \emph{Finance and Stochastics} 24, 601--632. doi:10.1007/s00780-020-00426-3.
+\bibitem{estimation} J. Backhoff, D. Bartl, M. Beiglböck and J. Wiesel (2022). Estimating processes in adapted Wasserstein distance. \emph{Annals of Applied Probability} 32(1), 529--550. doi:10.1214/21-AAP1687. Technical anchors refer to retained arXiv:2002.07261.
+\bibitem{epstein} L. G. Epstein and M. Schneider (2007). Learning under ambiguity. \emph{Review of Economic Studies} 74, 1275--1303. doi:10.1111/j.1467-937X.2007.00464.x. Retained technical reading in the preceding dossier.
+\bibitem{smc2} N. Chopin, P. E. Jacob and O. Papaspiliopoulos (2013). SMC$^2$: an efficient algorithm for sequential analysis of state space models. \emph{Journal of the Royal Statistical Society B} 75, 397--426. doi:10.1111/j.1467-9868.2012.01046.x. Technical anchors refer to retained arXiv:1101.1528.
+\bibitem{strebulaev} I. A. Strebulaev and T. M. Whited (2012). Dynamic Models and Structural Estimation in Corporate Finance. \emph{Foundations and Trends in Finance} 6(1--2), 1--163. Retained edition and local risky-debt convention comparison; correction correspondence unresolved.
+\bibitem{benzoni} L. Benzoni, L. Garlappi, R. S. Goldstein and C. Ying (2023). Debt Dynamics with Fixed Issuance Costs. Federal Reserve Bank of Chicago Working Paper WP 2023-01. doi:10.21033/wp-2023-01. Retained file includes the online appendix by J. Hugonnier.
+\bibitem{lambrecht} B. M. Lambrecht and S. C. Myers. The Dynamics of Investment, Payout and Debt. Retained Cambridge manuscript dated 26 January 2017; journal identity doi:10.1093/rfs/hhx081.
+\bibitem{dewat} M. Dewatripont, P. Legros and S. A. Matthews (2003). Moral Hazard and Capital Structure Dynamics. PIER Working Paper 03-006, January 29 version. Journal identity doi:10.1162/154247603322493186; no edition-equivalence assertion.
+\bibitem{seaman} S. Seaman, J. Galati, D. Jackson and J. Carlin (2013). What Is Meant by ``Missing at Random''? \emph{Statistical Science} 28(2), 257--268. doi:10.1214/13-STS415. Retained electronic reprint arXiv:1306.2812.
+\bibitem{suijs} J. Suijs (2007). Voluntary disclosure of information when firms are uncertain of investor response. \emph{Journal of Accounting and Economics} 43, 391--410. doi:10.1016/j.jacceco.2006.10.002. Retained Tilburg repository copy.
+\bibitem{actus} ACTUS Financial Research Foundation. Technical Specifications v1.1, revision 843f7a3, 8 June 2020; declared alignment with dictionary v1.2. Official specification, dictionary, fixture and service snapshots retained separately.
+\bibitem{maliar} L. Maliar, S. Maliar and P. Winant (2021). Deep learning for solving dynamic economic models. \emph{Journal of Monetary Economics} 122, 76--101. doi:10.1016/j.jmoneco.2021.07.004. Author-linked Krusell--Smith notebook audited at commit 4f086d9a2586969406a00f88d3b036ba1413b8d3.
+\bibitem{duarte} V. Duarte and J. Fonseca (2026). AI for Structural Estimation. NBER Working Paper 35283, May. Retained paper and author page. The announced replication package is not matched to inspected author-linked code; technical claims remain limited to the preceding paper reading.
+\bibitem{gneiting} T. Gneiting and A. E. Raftery (2007). Strictly Proper Scoring Rules, Prediction, and Estimation. \emph{Journal of the American Statistical Association} 102, 359--378. doi:10.1198/016214506000001437. Retained technical reading in the future-validation dossier.
+\bibitem{shapiro} A. Shapiro. Rectangular Sets of Probability Measures. Retained 24-page Optimization Online manuscript; journal identity: \emph{Operations Research} 64(2), 528--541 (2016), doi:10.1287/opre.2015.1466. Technical anchors refer to the retained manuscript; edition equivalence is not asserted.
+\bibitem{pichlershapiro} A. Pichler and A. Shapiro (2021). Mathematical Foundations of Distributionally Robust Multistage Optimization. arXiv:2101.02498v2, 13 May 2021. Technical anchors refer to this retained version.
+\bibitem{xingoldberg} L. Xin and D. A. Goldberg. Time (in)consistency of multistage distributionally robust inventory models with moment constraints. Retained 43-page Optimization Online manuscript. Journal identity: \emph{European Journal of Operational Research} (2021), doi:10.1016/j.ejor.2020.07.041. Technical anchors refer to the retained two-author version, not the earlier three-author preprint.
+\end{thebibliography}
+\endgroup
+\end{document}

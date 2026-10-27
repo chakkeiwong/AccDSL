@@ -1,0 +1,178 @@
+\section{Different histories can explain the same closing report}
+\label{sec:conditional-history-families}
+
+Knowing a closing balance does not determine the opening balance or the events
+that produced it. Consider a deliberately authored monetary example with
+closing cash of 15. An opening of 10 followed by receipts of 2 and 3 reaches
+that balance. So does an opening of 8 followed by receipts of 3 and 4. The
+closing report agrees, but the amounts received during the year are 5 and 7,
+and the intermediate balances differ. A simulator that keeps only closing
+cash loses information that a later question may require.
+
+The example is a finite representation test. Its two supplied events use an
+authored linear template that increases cash, decreases a debit-positive equity
+account by the same amount, and increases a monetary cumulative-sales memory
+field. The template is not a claim about how an actual issuer should recognize
+sales. It makes the distinction between an observed balance and a complete
+history explicit while allowing every calculation to be checked by hand.
+
+\subsection{Keep the opening as a shared unknown}
+
+Let \(c_0\) be opening cash at 31 December 2023, and let \(a\) and \(b\)
+be the amounts of the supplied events on 30 June and 31 December 2024.
+The authored scope gives \(8\leq c_0\leq12\) and
+\(0\leq a,b\leq5\). Opening equity is the signed counterpart
+\(-c_0\), and cumulative sales start at zero. Under the declared incidence,
+the dated states satisfy
+\begin{align}
+\label{eq:conditional-history-example}
+ c_{\mathrm{June}}&=c_0+a, & c_{\mathrm{December}}&=c_0+a+b,\\
+ z_{\mathrm{December}}&=a+b, & c_{\mathrm{December}}&=15.
+\end{align}
+The same \(c_0\) appears at both dates. It cannot be chosen independently
+for each observation. Substituting \((c_0,a,b)=(10,2,3)\) gives June cash
+12 and cumulative sales 5; substituting \((8,3,4)\) gives June cash 11 and
+cumulative sales 7. Both have December cash 15. These are two members of a
+continuous conditional family, not two equally likely scenarios or an
+enumeration of every possible member.
+
+More generally, let \(x_0\) collect the declared opening account balances
+and monetary memory fields. For each supplied event \(j\), let \(u_j\)
+be its nonnegative unknown amount, \(t_j\) its date and \(b_j\) its fixed
+incidence vector. A snapshot at date \(t\) is
+\begin{equation}
+\label{eq:conditional-history-affine-state}
+ x(t)=x_0+\sum_{j:\,t_j\leq t}b_j u_j.
+\end{equation}
+The posting components of each \(b_j\) sum to zero, and the opening account
+balances also sum to zero. These conditions preserve the balance of the
+authored book. The memory components retain the specified monetary movements
+without treating them as additional accounts. A snapshot measurement applies
+its declared linear form to \(x(t)\) and requires the result to lie within
+its supplied interval.
+
+The reference \path{ConditionalMonetaryHistory/1} keeps \(x_0\), event
+amounts, domains, templates, dates, measurements and proposed premises in the
+family definition. It accepts symbolic opening intervals rather than requiring
+one fixed opening assignment. Civil dates must be valid and chronological;
+events on the same date retain their supplied order for replay. The finite
+additive equations do not establish order-dependent liquidity or recognition
+preconditions. Supplied event slots and exclusions define the search scope;
+they are not evidence that other transactions did not occur.
+
+Every reported witness is replayed independently with exact fraction arithmetic.
+The check starts from the original opening domains, applies each template to
+its event amount, verifies balanced postings and account totals, and recomputes
+every requested snapshot measurement. An altered after-state cannot substitute
+for that replay. The constant-opening fragment also agrees with the preceding
+finite reconstruction reference under identical supplied dates, templates,
+amounts and measurements.
+
+This first profile uses a single explicit monetary dimension and scale for its
+accounts and memory. Inventory units, interest rates, nonlinear valuations and
+general contract or cohort structures require richer types and methods. An
+affine balanced history can also violate legal or operational conditions that
+its supplied constraints do not express. The reference therefore reports no
+native execution or accounting admission merely because its equations fit.
+
+\subsection{Attach a measurement family without choosing its witness}
+
+The measurement network from the preceding sections is a family of possible
+quantities, not a list of constants waiting to be copied into an opening book.
+Let \(\mathcal M\) denote its complete set of assignments \(m\), and let
+\(\mathcal H\) denote the authored history family. Explicit mappings
+\(g_k\) connect selected measurements to the corresponding history quantities.
+The attachment asks for
+\begin{equation}
+\label{eq:conditional-history-attachment}
+ \mathcal J=\left\{(h,m)\in\mathcal H\times\mathcal M:
+ m_k=g_k(h)\ \text{for every supplied mapping }k\right\}.
+\end{equation}
+Both parent formulas remain in this set. The mapping equations add constraints;
+they do not replace either parent by a solver-selected assignment. Parent
+variables have separate namespaces until a declared equation relates them.
+Identical text identifiers in different parents do not create an implicit join.
+
+Suppose the measurement family permits opening cash between 8 and 12, a period
+cash change between 3 and 7, closing cash 15, and the opening-plus-change
+identity. The assignment \((8,7,15)\) satisfies that family. If a candidate
+history instead fixes opening cash at 10, choosing \((8,7,15)\) first would
+make the attachment appear impossible. Keeping the full measurement formula
+allows the compatible assignment \((10,5,15)\). A feasible parent witness
+is therefore insufficient as the input to this join.
+
+The opposite failure is also possible. Keep the history opening fixed at 10,
+but constrain the measurement opening to 8. Each parent can separately have a
+witness, yet the explicit opening mapping requires \(10=8\). The attached
+system is conditionally infeasible. Separate feasibility cannot establish
+joint compatibility, just as separate residual intervals could not establish
+the earlier measurement network's compatibility.
+
+\subsection{Distinguish a snapshot mapping from a movement mapping}
+
+A snapshot mapping evaluates a declared account or monetary-memory linear form
+at the observation's exact instant. A movement mapping instead collects the
+signed contributions of events in the observation's half-open period. For
+an account component with incidence coefficient \(b_{ij}\), that movement is
+\begin{equation}
+\label{eq:conditional-history-movement}
+ \Delta_i([s,e))=\sum_{j:\,s\leq t_j<e}b_{ij}u_j.
+\end{equation}
+It excludes the opening balance. In the first authored history, the annual
+cash movement is \(2+3=5\), opening cash is 10 and closing cash is 15.
+Replacing the movement by the closing snapshot would answer a different
+question even though both are monetary quantities.
+
+The mapping must match the observation's value context, dimension, scale and
+named quantity. Its snapshot date, or both period endpoints, must be present
+in the declared history timeline. A named proposed mapping premise states the
+intended population interpretation. Equal amounts or dates do not establish
+that interpretation. The checked reference rejects an attempted attachment
+of the retained real-source cash-flow context to this synthetic book; no
+legal-book cash mapping is inferred from consolidated captions.
+
+The \path{HistoryMeasurementAttachment/1} reference reconstructs both parent
+formulas, adds the supplied mappings and solves the resulting conjunction.
+Independent verification checks the original temporal measurement equations,
+the original history replay and every mapping. Snapshot and period-flow checks
+use their respective definitions. Alternative valid joint witnesses are allowed;
+their different openings, events and memory remain visible.
+
+\subsection{A candidate witness need not be an admitted history}
+
+Three questions remain separate: does the declared numerical formulation have
+a candidate, has its requested search been completed, and are the target's
+economic and evidentiary requirements satisfied? Missing proposed premises
+leave the numerical question unresolved before solving. An explicit unresolved
+source or state obligation can instead permit a witness for the relaxed
+formulation while leaving target existence unknown. For example, satisfying
+the authored cash equations does not supply an admitted opening or the contract
+state needed by a native company method.
+
+An observation without a supplied history mapping stays in the measurement
+parent and appears as an unresolved target obligation. It is not removed to
+make the attachment complete. Likewise, the history parent's unresolved
+obligations and the attachment's additional obligations survive the join.
+A complete solver search over the declared linear system cannot discharge
+those missing conditions. With all declared mappings and premises supplied,
+the result can establish a conditional witness for that limited model while
+source admission, accounting admission and native execution remain separate.
+
+The recorded references exercise strict intervals, conflicting measurements,
+wrong chronology, unbalanced incidence, unknown premises, unmapped observations,
+namespace collisions, altered formulas and forged completeness. Zero computational
+budgets return unknown. Infeasibility uses the existing exact solver and its
+conflict recheck, which remains distinct from an independent formal proof.
+The definitions, complete cases and replay evidence are under
+\path{data/accounting-master/}:
+\begin{quote}\small
+\path{conditional-history-family-20261024}\\
+\path{history-measurement-attachment-20261024}
+\end{quote}
+
+These steps specify a concrete conditional connection between measurements and
+supplied linear histories. General candidate generation, dimensional economic
+state, nonlinear method conditions, legal-book mappings and source or treatment
+admission still require their own evidence. The retained issuer's actual history
+remains unknown. Its missing contracts, inventory cohorts, tax attributes and
+usable liquidity cannot be replaced by either of the authored examples.
