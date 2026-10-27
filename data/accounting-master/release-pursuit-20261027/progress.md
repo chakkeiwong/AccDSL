@@ -43,3 +43,7 @@ reading reaches 252; no node-level or independent acceptance inferred.
 Remaining work: data/accounting-master/release-pursuit-20261027/final-reconciliation/remaining-program.md. Objective achieved: false.
 
 2026-10-27T15:21:16.749425+00:00: ordered author reading of protected 5.52-R2 reaches physical page 252; resume at 253. Segment continuity and PDF identity checked; no independent or whole-document acceptance inferred. Selected candidate and active work unit preserved.
+
+2026-10-27T17:14:58.150838+00:00: ordered author reading of protected 5.52-R2 reaches physical page 258; resume at 259. Segment continuity and PDF identity checked; no independent or whole-document acceptance inferred. Selected candidate and active work unit preserved.
+
+2026-10-27T17:20:30.638200+00:00: ordered author reading of protected 5.52-R2 reaches physical page 264; resume at 265. Segment continuity and PDF identity checked; no independent or whole-document acceptance inferred. Selected candidate and active work unit preserved.

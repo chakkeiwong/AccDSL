@@ -1,5 +1,35 @@
 # Historical corpus and initial-design checkpoint
 
+## Supervised continuation — 28 October 2026
+
+The user renewed execution and authorised commit/push. Commit 455dfd8 was
+pushed to origin/main. Git is usable; the old timed window remains concluded.
+Selected 5.55-R1 remains not_ready; its 452-file package is unchanged.
+
+Current compatibility has an 18-profile index with 16 edges and a five-profile
+sector annex. The term-program and selected-reading attachment gaps were stale:
+they are delivered. Two bounded runs pass 2,211 and 1,059 checks, preserving
+complete term/PAA results, 21 opening/report/carry cases, 21 PAA controls, all
+180 issuer obligations and five historical US bank capital cases. No source
+admission, current-rule finding or broad requirement closure follows.
+
+Current reference: data/accounting-master/compatibility-current-20261028/compatibility.md.
+Sector annex: data/accounting-master/sector-compatibility-current-20261028/compatibility.md.
+Results: the result.md in each directory.
+Company-case continuation: data/accounting-master/company-cases-current-20261028/result.md.
+All fifteen issuer dependency rows are preserved; the 253-check synthetic
+reference reproduces. Ordered review reaches 264/831 main pages, with 52 exact
+local arithmetic checks; separate node/source and independent review remain open.
+Current remaining queue: data/accounting-master/resume-20261028/remaining-program.md.
+Reset memo: data/accounting-master/resume-20261028/reset-memo.md.
+
+Next: reconcile connected known-history and named-company cases against the
+current interfaces, preserving missing issuer facts; then same-basis joins,
+sources/dependencies and ordered review from main physical page 265. All original
+35 MC provisions/114 acceptance rows/156 clauses remain; S1–S5 partial, S6 held,
+E3 deferred. Historical conclusions below remain dated evidence.
+
+
 ## PDF build repair — 28 October 2026
 
 The canonical source aliases now build through python3 scripts/build_pdf.py.
