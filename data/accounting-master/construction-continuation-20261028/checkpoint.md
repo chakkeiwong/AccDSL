@@ -1,5 +1,20 @@
 # Construction continuation checkpoint
 
+## Financing survey and plan repair — 28 October 2026
+
+S06 is now in_progress. Its stale request to repeat section3.6/Maliar work
+is replaced with direct primary financing/maturity comparisons and version/
+code checks. The new reading covers reduced investment, cash, debt and
+identification models. Twenty exact checks establish two conditional source
+equation mismatches; affected formulas are withheld from direct import.
+Result: data/accounting-master/company-state-dynamic-financing-reading-20261028/result.md.
+
+All40 task criteria/dependencies persist. S06 is not complete; no financing
+default or empirical forecast is promoted. Main review remains288/831;
+resume289. Fifteen original failure rows are reviewed,186 outside this pass.
+Selected5.55-R1 and unselected5.56-D1 remain not_ready; E3 remains deferred.
+
+
 ## Exact funding failure constraints — 28 October2026
 
 SIM-F022/023/024 have98 passing checks across14 finite cases and3

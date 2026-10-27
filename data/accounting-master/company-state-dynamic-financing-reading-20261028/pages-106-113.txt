@@ -1,0 +1,255 @@
+PHYSICAL PAGE 106
+has allowed researchers to bring better models to the data. Although many diﬀerent simulation
+estimators are used in other ﬁelds such as industrial organization, macroeconomics, and labor
+economics, we review the two main types that have been used in corporate ﬁnance. The ﬁrst is
+simulated method of moments (SMM) and the second is simulated maximum likelihood. The rest
+of this section outlines how to do an SMM estimation and reviews the literature that uses this
+technique.
+4.2.1
+Outline
+SMM is conceptually simple. As detailed in Section 3.1.2, discrete-time dynamic models typically
+have a solution in the form of a rule that prescribes optimal policy tomorrow, given the ﬁrm’s state
+today (such as its levels of debt and capital) and a random shock received today. This rule can be
+used to generate a panel of simulated data by simulating a series of shocks and tracing out the ﬁrm’s
+optimal choices. The researcher then calculates interesting moments using both the simulated data
+and a real data set and then methodically searches for model parameters that make the simulated
+moments as close as possible to their corresponding real moments. Estimation requires at least as
+many moments as model parameters. Examples of parameters in the models in Section 3 include
+proﬁt function curvature, the serial correlation and variance of the z shock, etc.
+An SMM estimation usually proceeds in two separate set of steps.
+First Set of Steps:
+1. Choose a set of moments to match.
+The list can include means, variances, covariances,
+regression coeﬃcients, and so on, but one must have at least as many moments as parameters
+to estimate.
+2. Calculate these moments with real data and stack them in a vector. We denote the estimated
+vector of real moments as M(x), in which x is an i.i.d. data sample.
+3. Calculate the covariance matrix of the moments. Invert it. This matrix is the GMM weight
+matrix. We denote the estimated weight matrix as W.
+Second Set of Steps:
+103
+
+PHYSICAL PAGE 107
+1. Pick starting values for the set of parameters, which we call β0.
+2. Using β0, solve the model, create simulated data using the policy function, and calculate
+the same moments that were calculated with the real data. Stack them in a vector. We
+denote the simulated moments as m(y, β), in which y is a simulated data sample. Note that
+the simulated moments are a function of the parameter vector, β, and can change when β
+changes.
+3. Form the SMM moment vector as the stack of simulated moments minus the stack of real
+moments.
+4. Form the SMM objective function exactly as one would form a GMM objective function, that
+is, as a weighted sum of squared errors, in which the “errors” are given by the moment vector,
+and the weights are given by the weight matrix. Let the objective function be denoted as
+Q(x, y, β):
+Q(x, y, β) ≡(M(x) −m(y, β))′ W (M(x) −m(y, β)) .
+(4.1)
+5. Find the parameter vector, ˆβ, that minimizes the SMM objective function.
+6. Adjust the standard errors and test statistics for simulation error. Let J be the ratio of the
+number of observations in the simulated data set to the number observations in the real data
+set, which we denote as N. Then the covariance matrix of
+√
+N(ˆβ −β) is given by:
+
+1 + 1
+J
+ 
+(∂m(y, β)/∂β)′ W (∂m(y, β)/∂β)
+−1
+(4.2)
+The term 1 + 1/J is the adjustment for simulation error, which approaches 1 as J −→∞.
+The rest is a standard GMM covariance matrix.
+7. Use either a general test of the overidentifying restrictions of the model as a speciﬁcation
+test or, as in DeAngelo, DeAngelo, and Whited (2011), test the equality of the moments
+individually. The test of the overidentifying restrictions can be written as:
+104
+
+PHYSICAL PAGE 108
+NJ
+1 + J Q(x, y, β)
+(4.3)
+The t-statistics on the individual moment conditions are calculated exactly as pricing errors
+in a standard GMM framework. See, for example, Cochrane (2005).
+From this recipe, it is clear that the “data” part of SMM can be done separately from any
+computations involving the model. Thus, the hardest part of doing SMM is solving the economic
+model. Once one is armed with a solution, it is straightforward to simulate data and calculate
+simulated moments. Nonetheless, SMM can be time intensive because one has to solve the model
+with every step of the econometric minimization routine.
+4.2.2
+Identiﬁcation
+The success of SMM relies fundamentally on picking moments that can identify the structural
+parameter vector, β. “Identiﬁcation” means something diﬀerent in this context than it does in
+an instrumental variables setting, so it is useful to elaborate on this diﬀerence. In an IV setting,
+“identiﬁcation” typically means ﬁnding a source of exogenous variation in the data. This exogenous
+variation allows one to ascribe a causal interpretation to any regression coeﬃcients one obtains.
+In other words, because IV or OLS can ﬁt lines through most data scatters, identiﬁcation in this
+context can be thought of as making enough assumptions about the source of data variation to
+interpret estimated elasticities as causal relations. In other words, it amounts to ﬁnding a suitable
+lens through which to interpret the data. In structural estimation, ﬁnding a suitable lens involves
+writing down a model, and the word “identiﬁcation” is used in the econometric sense that an
+econometric objective function have a unique minimum.
+Both the mathematical and intuitive conditions for identiﬁcation of an SMM estimator are
+similar to those for GMM. We focus on the intuitive aspect, which requires that the moments be
+informative about the structural parameters, or equivalently, that the sensitivity of the moments
+to the parameters be high. This requirement is obviously analogous to the importance of using
+high quality instruments in a standard IV framework, that is, instruments highly correlated with
+105
+
+PHYSICAL PAGE 109
+the endogenous regressors.
+Ideally, each parameter would be identiﬁed by a single moment. Changing that parameter would
+cause that moment, and only that moment, to vary. Of course, this hurdle is very high and not
+actually necessary. In fact, if it were, then an economic model probably would not be necessary.
+What is much more likely to occur can be intuitively described as staggered identiﬁcation, which is
+what we exploit whenever we solve linear systems of equations. A simple example helps illustrate
+how identiﬁcation works. Suppose we are using three moments (a, b, c) to identify three parameters
+(x, y, z), and that the economic model implies the following moment conditions:
+a
+=
+x + y
+b
+=
+y + z
+c
+=
+x + z
+If we know a, b and c, we can uniquely identify the (x, y, z), even though each moment is aﬀected by
+several parameters and each parameter aﬀects several moments. SMM exploits this same feature
+in a non-linear way.
+How does one ensure that the model is identiﬁed? First, check the parameter standard errors.
+If one has chosen bad moments, the standard errors will be large because the sensitivity of the
+moments to the parameters enters into the calculation of the standard errors. Second, and similarly,
+if the estimation does not converge, the model parameters are likely not identiﬁed.
+Third, and most important, the best way to pick good moments is to understand the economic
+forces that drive the model, just as the best way to pick good instruments is to understand the
+economics of the question being asked.
+The economic intuition behind SMM thus comes from
+the identiﬁcation conditions, which can only come from a careful understanding of the model.
+Understanding the economics of a model that has no closed form solution requires time because
+it requires conducting comparative statics exercises and plotting moments versus parameters. The
+ideal moment has a steep, monotonic relation to a parameter, and moments should move in diﬀerent
+directions for diﬀerent parameters. Ensuring meaningful identiﬁcation thus entails an attempt to
+106
+
+PHYSICAL PAGE 110
+disentangle which parameters aﬀect which moments. Finally, it is important not to “cherry pick”
+moments. A model should be able to make sense of many features of the data, and it is useful and
+often instructive to determine where the model does and does not do a good job of matching the
+data.
+To understand the importance of identiﬁcation, we construct a simple counterexample of an
+unidentiﬁed parameter as follows. Suppose one were to add operating leverage to the simple model
+from section 3.1 and remove capital adjustment costs so that the sources and uses of funds identity
+(3.1) becomes
+e(k, k′, z) ≡π(k, z) −(k′ −(1 −δ)k) −ϕk,
+(4.4)
+in which the term, ϕk, is operating leverage. It is straightforward to see that it impossible to
+identify the parameters δ and ϕ separately using data on the capital stock. It is only possible to
+estimate their sum, δ + ϕ. However, if one were to ﬁnd separate data on capital depreciation, it
+might be possible to identify ϕ using data on proﬁtability.
+To close our discussion of identiﬁcation, we add one word of caution. Just as there does not
+exist any perfectly exogenous source of data variation in observational studies, structural estima-
+tion does not magically solve all endogeneity problems. Structural estimation accounts for any
+endogeneity within the model. However, just as any linear econometric model suﬀers from omit-
+ted variables problems to one degree or another, there will always be elements omitted from an
+estimated structural model. Therefore, one needs to worry about whether omitting those elements
+biases the parameter estimates. If one understands the model one is estimating, this type of im-
+portant thought experiment is usually feasible, and it often opens doors for future research.
+4.2.3
+Practical Advice
+Several pieces of practical advice are in order. The ﬁrst is to use real data to estimate the weight
+matrix. In both GMM and SMM, the weight matrix is the inverse of the covariance matrix of
+the moment conditions. In this type of an SMM exercise, the weight matrix is therefore just the
+107
+
+PHYSICAL PAGE 111
+covariance matrix of the data moments alone. This weight matrix (roughly) puts the most weight
+on the most precisely estimated moments.
+It is not necessary to use any model simulations to estimate this covariance matrix. Instead, it
+can be estimated by calculating all of the moments jointly as a large GMM system. Another, often
+computationally simpler, method is to calculate the moments separately, calculate the inﬂuence
+function for each moment, stack the inﬂuence functions of the moments, and take their inner
+product.30 Heuristically speaking, an inﬂuence function of an estimator is a function of the data
+whose mean has the same asymptotic distribution as the estimator. For example, suppose an i.i.d.
+sample of a random variable, x, has a sample average ¯x. Then the inﬂuence function is trivially
+x−¯x. See Newey and McFadden (1994) for more precise deﬁnitions of inﬂuence functions. One ﬁnal
+important issue is accounting for time-series dependence in the data when estimating the weight
+matrix. In panel data, this issue is usually accomplished via a clustering algorithm.
+The second piece of advice is not to use an identity matrix as a weight matrix because it
+mechanically puts the most weight on the moment that is largest in absolute value. This advice lies
+in contrast to that given in Cochrane (2005) regarding tests of asset pricing models. The diﬀerence
+is that returns on diﬀerent portfolios are all of the same order of magnitude. In contrast, moments
+used in a corporate ﬁnance simulated moments exercise can be of very diﬀerent magnitudes.
+The third piece of advice is a set of small pointers concerning the minimization of the SMM
+objective function. It is computationally infeasible to use gradient based methods such as Newton-
+Raphson. One can use a grid search if one is only estimating one or two parameters. For more
+complex problems, other alternatives include various linear-programming algorithms such as Nelder-
+Meade or simulation based algorithms such as Metropolis-Hastings or the closely related simulated
+annealing.
+As a general rule, simulation based algorithms do a good job of eﬃciently getting
+close to a global minimum, but their ﬁnal convergence is often glacial. On the other hand, linear-
+programming based algorithms work much more quickly but are also more likely to get stuck in
+a local minimum. Therefore, a useful approach is to start with a simulation based algorithm and
+30See Erickson and Whited (2012).
+108
+
+PHYSICAL PAGE 112
+then switch to a linear-programming algorithm when the estimation is near convergence. A formal
+switching rule can be cast in terms of a loose convergence criterion. Next, it is important to pick a
+good starting value for the minimization algorithm. This choice is often a byproduct of comparative
+statics exercises that one should do. It is equally important to try several starting values to increase
+the probability of ﬁnding a global minimum of the SMM objective function. Next, one must use
+the same pseudo-random draws for each simulation of the artiﬁcial data. Otherwise, it is possible
+to attribute a change in the SMM objective function to a change in a parameter, when it is actually
+due to a change in the pseudo-random draws. Finally, simulate data sets that are several times as
+large as the size of one’s actual data set. The simulation step is computationally cheap, so it makes
+sense to lower one’s standard errors as much as possible by using large simulations to remove as
+much simulation error as possible.
+The fourth piece of advice concerns heterogeneity. The models we have considered here are
+usually of a single ﬁrm or at best of an industry equilibrium, in which heterogeneity comes from
+realizations of shocks. Thus, SMM estimates the parameters of an average ﬁrm, not the average
+parameter across ﬁrms. These two quantities are equal in linear models, but not necessarily in
+the nonlinear models considered here. However, corporate ﬁnance data are generated by heteroge-
+neous ﬁrms in diﬀerent industries with diﬀerent technologies, diﬀerent sources of uncertainty, and
+diﬀerential access to ﬁnancial markets. Thus, interpretation of any results is easiest on relatively
+homogeneous subpopulations in ﬁrms. For example, DeAngelo, DeAngelo, and Whited (2011) es-
+timate their model on diﬀerent industries. Whether this type of sample splitting is feasible or not,
+it is nonetheless important to extract as much heterogeneity from the data as possible, usually
+by removing ﬁxed eﬀects. Often in estimating dynamic models, it is natural to use autoregressive
+coeﬃcients as moments. In this case, one cannot, of course, demean data on a ﬁrm by ﬁrm basis.
+A feasible alternative is the double diﬀerencing method in Han and Phillips (2010).
+4.2.4
+Model Design
+The most important piece of advice concerns model design. It is essential to write down a realistic
+model that can shed light on the questions one wants to answer. To illustrate this point, we turn
+109
+
+PHYSICAL PAGE 113
+to the careful model design in Taylor (2010). This paper asks three related questions. It asks
+why so few CEOS are ﬁred every year (2%). It also asks how much ﬁring one should expect from
+a well-functioning board, and how much shareholder value is destroyed if boards do not function
+well. The second two questions are particularly well suited to structural estimation because they
+require calculating a counterfactual, that is, asking what would happen if the model parameters
+were diﬀerent from the estimated parameters.
+The paper then postulates four possible reasons for the low ﬁring rate. The costs to shareholders
+of turning over the CEO may be large. If the next best CEO is as good as the current one, why
+bother? Boards can learn slowly about CEO ability. CEOs can be entrenched. What makes this
+paper useful is that the model is tailored speciﬁcally to answer these questions.
+The model can be summarized as follows. In each period the board decides whether or not
+to ﬁre the CEO. The CEO also retires or quits with a certain probability, and the ﬁrm generates
+proﬁts. These proﬁts are the sum of three components: industry proﬁts, ﬁrm-speciﬁc proﬁts, and
+CEO turnover costs if the CEO is ﬁred. Firm speciﬁc proﬁtability can be aﬀected by the CEO’s
+ability, but the board cannot distinguish the industry and ﬁrm-speciﬁc components of proﬁts.
+New CEOs are drawn from a talent pool characterized by normally distributed ability. The
+board of directors has priors over this distribution, so that when the CEO starts, the board at-
+tributes mean CEO talent to the CEO. However, the board updates its beliefs about CEO ability
+each period when it observes proﬁtability. The board then maximizes its utility, which consists of
+the expected discounted value of future proﬁt ﬂows minus any personal costs incurred if the board
+ﬁres the CEO. The board optimally ﬁres the CEO as soon as posterior mean skill drops below an
+endogenous threshold
+The model’s parameters capture the four possible reasons for ﬁring CEOs. This feature of the
+design of the model implies that estimating these parameters sheds light on the importance of
+the diﬀerent reasons. The model contains an entrenchment parameter that takes the form of the
+board’s personal costs (loss of a golf partner) of ﬁring the CEO. It contains a parameter quantifying
+the costs to shareholders of CEO turnover. Lack of better possible replacement CEOs is measured
+110
+
