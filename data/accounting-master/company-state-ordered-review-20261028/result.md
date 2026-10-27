@@ -1,4 +1,39 @@
-# Ordered reading reaches physical page276
+# Ordered reading reaches physical page288
+
+## Continuation through288 — 28 October2026
+
+The next twelve actual rendered pages277–288 are read and recorded in order.
+Their127 additional exact checks pass:53 for the joined tax/ownership carry
+and74 for the sector-company and historical Apple examples. Across265–288
+this continuation has24 read pages and183 checks. Verification-0288.json
+binds279 baseline sources,831 page texts, the complete ordered chain and all24
+new render identities. Resume289/831;543 main pages remain.
+
+The parent/subsidiary example preserves intragroup margin, deferred tax, dated
+ownership and subsequent loss use without rewriting earlier estimates. The
+bank/insurer close derives translation OCI separately from cash FX and retains
+three taxpayers. Apple's debt and cash totals leave instrument, liquidity and
+settlement dependencies unresolved; its13-week stress is explicitly conditional.
+The five-statement explanation begins on288 and continues across the boundary.
+
+The recovery summary transcribed quarterly investing cash as7992. The actual
+manuscript says9792, which reconciles29935+9792-39371=356. The summary was
+wrong; this is not a manuscript defect. No authoritative source was newly
+read and no accounting applicability or forecast claim is advanced.
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Retain author reading277–288 | Actual per-page reading and specific observations | Hashes and continuous entry/exit chain pass |543 unread pages plus separate review layers | Continue289 | Independent reader acceptance |
+| Preserve local derivations |127 exact checks and stated assumptions | No confirmed substantive error in this slice | External source applicability and later interactions | Continue source and node reviews independently | General implementation or accounting correctness |
+
+The skeptical re-audit preserves the correct831-page baseline and original
+task criteria. Counts verify local consistency only; they cannot promote a
+release. T01 remains definition-complete; R04 remains in progress, both releases
+not_ready and E3 deferred. The strongest alternative explanation is a later
+contradiction or a source premise that does not apply; neither is excluded by
+this local reading. All frozen manuscript files are unchanged.
+
+## Earlier continuation through276
 
 28 October2026. R04; MC32/33. The retained5.52-R2 main PDF is unchanged.
 Twelve pages265–276 were inspected individually at readable resolution, in

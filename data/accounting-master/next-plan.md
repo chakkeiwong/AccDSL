@@ -1,5 +1,21 @@
 # Current AccDSL master program
 
+## Ordered manuscript review through288 — 28 October2026
+
+Actual rendered reading advances from276 to288/831 on the retained5.52-R2
+main PDF. Twelve more individual pages and127 exact local arithmetic checks cover
+the joined tax/ownership carry, sector-company FX/NCI and historical Apple
+measurement and conditional-stress examples.279 source
+hashes,831 page-text hashes, exact exit/entry continuity and24 render bindings across265–288
+verify. R04 is in_progress; node/equation, simulation, successor-delta and
+independent review remain separate. No manuscript or release is changed.
+
+Resume physical289. The current original-failure supplement covers11/201
+rows; T01 is complete as a definition task, with common caller304 checks and
+four original debt targets37 checks. The release remains not_ready and E3
+deferred. Result: data/accounting-master/company-state-ordered-review-20261028/result.md.
+
+
 ## Ordered manuscript review through276 — 28 October2026
 
 Actual rendered reading advances from264 to276/831 on the retained5.52-R2
