@@ -1,11 +1,14 @@
-# Original failure dispositions after population construction
+# Current original failure dispositions
 
-28 October 2026. Eight original rows inspected individually;193 others remain outside this continuation. Original statuses and all201 rows are unchanged.
+28 October2026. Eleven individually inspected rows;190 remain outside this continuation. Original statuses and all201 records are unchanged.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
 | SIM-F004 | Unknown control transfer and useful life are retained as unresolved; no missing-guarantee case was executed in this continuation. | Execute the original omitted guarantee field through an applicable guarantee method, preserving the unresolved amount and structural omission. |
-| SIM-F005 | The same aggregate journals/reports admit different claim allocations. The original fixed/floating debt and interest discriminator is not this claim case. | Locate or execute the original fixed/floating joint-history case and compare its actual observation set before claiming that row covered. |
+| SIM-F005 | Both fixed/floating endpoints and an interior mixture satisfy principal100 and historical interest5; the continuous native family remains explicit. | Continue actual-contract/source admission and complete financial history execution separately; three witness points do not exhaust the family. |
+| SIM-F007 | Interest7 and cash90 each occur marginally but are jointly infeasible; the complete declared family satisfies cash+interest=95. | Extend only with explicit extra flows or changed templates; this scoped debt relation cannot stand in for whole-company cash. |
+| SIM-F009 | The same feasible family under zero max_cells returns PartialSearch/Unknown with the full unvisited formula, never infeasible. | Inspect other resource/timeout/backend cases separately; no wall-clock timeout was induced. |
+| SIM-F014 | Repeated pre-reset interest5 equalities retain fixed, floating and interior feasible mixtures; no posterior is assigned. | New rate-reset observations and probability updates need their own declared source and likelihood assumptions. |
 | SIM-F019 | The policy probe preserves its exact parent, first-year history and every non-target input. It is a deterministic paired-path comparison, not a study across heterogeneous worlds. | Pair the same policies across each retained joint history using one declared information set; preserve the full conditional outcome table. |
 | SIM-F043 | The exact Machine20 case now executes: identical first-close reports and carrying value20, then next charges10 and20 under supplied lives2 and1. All native years complete. | Retain this native annual-method evidence; broader asset methods, industry applicability and package acceptance remain open. |
 | SIM-F066 | Year-qualified event IDs and the saved policy-parent hash are checked. The original refinancing and tax/ownership-cache invalidation case was not executed here. | Trace the original refinancing operation through tax and ownership cache dependencies; reject stale identities and compare the complete rebuilt path. |
@@ -13,6 +16,4 @@
 | X20 | The original retained continuous-guards result explicitly checks refusal_retains_due and forgotten_payable_is_wrong. New trade over-settlement is related, not a replacement for accrued-interest preservation. | Retain the exact original accrued-payable evidence; extend to additional payment/default methods only under their own declared inputs and source support. |
 | X32 | The retained symbolic certificate refuses wrong bindings, parameter substitution and unused parameters. The new policy-parent rejection checks a related path identity, not all parameter occurrences. | Use the exact symbolic occurrence certificate for its selected profile; inspect new method declarations separately before broader composition. |
 
-SIM-F043 now has its exact original numerical discriminator in the native annual profile. The broader packages remain open. Related checks are explicitly distinguished from original-case coverage. No stochastic ranking or release acceptance follows.
-
-Post-review risk: similar wording can conceal different targets. The preserved original rows and exact comparisons prevent new claim or cohort tests being substituted for guarantee, refinancing, source-admission or parameter-certificate obligations.
+SIM-F005/007/009/014 now have exact scoped solver evidence in company-state-original-debt-failures-20261028/result.md under data/accounting-master. The earlier eight-row review is preserved in that directory navigation-before. Counts do not close C04 or the broader packages.

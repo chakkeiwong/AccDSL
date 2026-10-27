@@ -1,0 +1,7 @@
+domain:alpha: (and (<= 0.0 alpha) (>= 1.0 alpha))
+template:principal: (= 100.0 (+ |amount:fixed| |amount:floating|))
+template:fixed: (= |amount:fixed| (* 100.0 alpha))
+template:amounts: (and (>= |amount:fixed| 0.0) (>= |amount:floating| 0.0))
+original:historical-interest: (= 5.0 (* (/ 1.0 20.0) (+ |amount:fixed| |amount:floating|)))
+original:repeated-interest:second_pre_reset_period: (= 5.0 (* (/ 1.0 20.0) (+ |amount:fixed| |amount:floating|)))
+original:repeated-interest:third_pre_reset_period: (= 5.0 (* (/ 1.0 20.0) (+ |amount:fixed| |amount:floating|)))

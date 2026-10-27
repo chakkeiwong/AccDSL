@@ -1,5 +1,38 @@
 # AccDSL: company state, connected research, and release completion
 
+## Ordered manuscript review through276 — 28 October2026
+
+Actual rendered reading advances from264 to276/831 on the retained5.52-R2
+main PDF. Twelve individual pages and56 exact local arithmetic checks cover
+creditor impairment/disposal, acquisition-component scope, the Part II product
+decision and Northstar history/scenario/information distinctions.279 source
+hashes,831 page-text hashes, exact exit/entry continuity and12 render bindings
+verify. R04 is in_progress; node/equation, simulation, successor-delta and
+independent review remain separate. No manuscript or release is changed.
+
+Resume physical277. The current original-failure supplement covers11/201
+rows; T01 is complete as a definition task, with common caller304 checks and
+four original debt targets37 checks. The release remains not_ready and E3
+deferred. Result: data/accounting-master/company-state-ordered-review-20261028/result.md.
+
+
+## Original debt-family failures — 28 October2026
+
+SIM-F005/007/009/014 now have37 passing checks over13 exact native solver
+queries: nonidentified fixed/floating composition, joint cash/interest rather
+than marginal recombination, unresolved search-budget remainder, and repeated
+uninformative observations. Two harness failures and their repairs are retained;
+native compiler/adapter/solver code is unchanged. This is synthetic engineering
+evidence, not empirical forecasting. Result:
+data/accounting-master/company-state-original-debt-failures-20261028/result.md.
+
+The current individual failure supplement covers11 original rows;190 remain
+outside this pass. All201 original records/statuses and task criteria remain.
+T01 is complete as a definition task; C04 remains in_progress. Continue exact
+failure review, remaining survey and ordered reading. Release holds and E3
+deferral remain unchanged. Common-caller commit680234a6 is pushed.
+
+
 ## Common native request and T01 definition review — 28 October 2026
 
 T01 is complete against its unchanged definition criterion: economic/contract
