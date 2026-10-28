@@ -1,5 +1,19 @@
 # AccDSL: company state, connected research, and release completion
 
+## Ordered main reading through336 — 28 October2026
+
+Twelve further pages325–336 are individually read with43 exact checks.
+Partition mappings, rounding, source clocks, corrections and literature
+transfer limits remain distinct.279 source hashes,831 page texts, complete
+ordered continuity and12 renders verify. Resume337;495 main pages remain.
+Result: company-state-ordered-review-20261028/result.md under data/accounting-master.
+
+Twenty-seven original failures reviewed;174 outside this pass. All original
+criteria/dependencies/statuses and frozen releases persist. Independent/human,
+hierarchy, simulation and successor-delta reviews remain open. E3 deferred.
+Continue ready source/construction/failure work and ordered reading.
+
+
 ## Borrowing recognition discrimination — 28 October2026
 
 SIM-F035 passes129 exact checks across11 native programs. Borrowing100 and

@@ -1,4 +1,51 @@
-# Ordered reading reaches physical page 324
+# Ordered reading reaches physical page336
+
+## Continuation through336 — 28 October2026
+
+Twelve individually rendered pages325–336 are read in two ordered six-page
+segments.30 and13 exact checks pass. The continuation265–336 now contains72
+pages and453 local checks; these counts describe coverage, not acceptance.
+
+Chapter29 distinguishes mapping partitions from populations, transcription
+from an accepted interpretation, document coverage from economic completeness,
+and public availability from possession and reviewed use. The revenue example
+has two partitions summing260; adding both gives520. Two feasible joint tables
+show that margins alone do not identify cross-cells. Nearest rounding gives
+99.5–100.5 under a supplied assumption; positive truncation gives100–101 with
+upper endpoint excluded. Neither rule follows from display precision alone.
+The same-vintage half-year difference is260−110=150; using original120 mixes
+vintages even though260−120=140 is arithmetically correct.
+
+The treaty case preserves different initial measurements under different
+contract order despite equal terminal cash. Later evidence changes a
+conditional reconstruction without rewriting committed events. Candidate-set
+membership, negative search results and full dependency ancestry affect reuse;
+a correction still needs its accounting treatment before a journal can follow.
+
+Chapter30 separates accounting identities, economic behavior and dated events.
+The normalized identity S+N+O−C=0 is consistent with different financing choices.
+An exact finite example shows that no row can be individually certain even
+when every history contains some row. Database provenance, robust priors,
+model averaging and intervention retain their source-specific assumptions;
+no paper theorem is newly certified or transferred by this reading.
+
+| Ledger | Verdict |
+| --- | --- |
+| Reader comprehension | Concrete cases explain why source meaning, date, measurement and posting are separate; independent reader pending |
+| Mathematical integrity |43 conditional local checks pass; cited insurance and research derivations remain source-specific obligations |
+| Source fidelity | Original versus interpretation and historical manuscript versus current survey status stay distinct; no new authority certification |
+| Typography/rendering | All12 pages inspected individually; rounding display continuation, figure and short chapter end are readable |
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Record author reading325–336 | Individual images and exact entry/exit continuity |279 source/831 text hashes and12 renders match |495 unread main pages and other review layers | Continue337 | Independent/human acceptance |
+| Retain local comparisons | Conditional arithmetic/finite examples agree | No local substantive defect confirmed | Actual source facts, method assumptions and runtime admission | Continue source/construction work | Complete company model or legal/accounting authority |
+
+Post-run red team: successful normalized reconciliation cannot identify a
+financing decision; unchanged cash cannot identify recognition timing; source
+availability cannot prove system or investor knowledge. These distinctions
+remain explicit. No frozen manuscript source changes were made. This is
+whole-document diagnosis in progress, not a finished prose repair or release.
 
 ## Continuation through 324 — 28 October 2026
 
