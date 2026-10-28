@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. 42 original rows reviewed;159 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. 43 original rows reviewed;158 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -41,6 +41,7 @@
 | SIM-F038 | Native borrowing100/repayment40 yields financing60 and operating0 under an explicit classification. Balanced operating-category mutation passes generic reconciliation but fails the independent principal-category criterion. | Actual measurement, rights, applicable standards/perimeter and source authority remain open; synthetic full-state checks do not admit accounting treatment. |
 | SIM-F039 | Exact cap10 limits parent cash5 to15 below maturity20 despite group35. Cap15 boundary, cumulative6+6 refusal, unknown permission and matched conditional legal-book legs retained; atomic group execution unclaimed. | Actual entity/transfer/FX authority, cap vintages and atomic linked settlement remain open; conditional feasibility does not establish company insolvency. |
 | SIM-F040 | Native EUR receipt before/after maturity, explicit same-day orders and future-reordering refusal retain intermediate cash needs. Wrong currency/entity types refuse; supplied extra EUR30 cannot be justified by pooled USD cash. | Actual entity/transfer/FX authority, cap vintages and atomic linked settlement remain open; conditional feasibility does not establish company insolvency. |
+| SIM-F042 | Retained engine preserves40->10->0 under income30/30, taxable20 and conditional tax5; negative10 adds a distinct vintage. Duplicate/expiry/unknown controls and independent prior-state binding detect double use and coherent invented history. | Actual eligibility/cap/expiry, source-backed taxable income, immutable predecessor binding and native financial carry remain open; conditional conservation is not authenticity. |
 | SIM-F043 | The exact Machine20 case now executes: identical first-close reports and carrying value20, then next charges10 and20 under supplied lives2 and1. All native years complete. | Retain this native annual-method evidence; broader asset methods, industry applicability and package acceptance remain open. |
 | SIM-F066 | Year-qualified event IDs and the saved policy-parent hash are checked. The original refinancing and tax/ownership-cache invalidation case was not executed here. | Trace the original refinancing operation through tax and ownership cache dependencies; reject stale identities and compare the complete rebuilt path. |
 | X07 | Synthetic relationship/asset records explicitly retain unknown identities and no actual-source admission. No partial actual issuer claim disclosure was passed through method admission here. | Bind one source-backed partial population to method admission and prove that missing counterparties/instruments and unknown completeness survive the join. |

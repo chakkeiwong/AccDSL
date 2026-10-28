@@ -1,5 +1,19 @@
 # AccDSL mission control
 
+## Loss identity and dated carryforward — 28 October 2026
+
+SIM-F042 passes211 checks over28 proposals and11 apply checks. Loss40 carries
+through income30/30 as40->10->0; negative10 creates a separate vintage. Unknowns,
+expiry and double-use controls retain their meanings. A coherent invented
+history requires independent prior-state/source binding. Result:
+company-state-loss-vintages-20261028/result.md under data/accounting-master.
+Actual tax admission and native annual financial carry remain open.
+
+43 original failures reviewed;158 outside this pass. Main reading336/831,
+resume337. Original criteria/statuses/releases persist;E3 deferred.
+Continue collateral/contractual-clock cases, source and ordered review.
+
+
 ## Entity cash and settlement timing — 28 October 2026
 
 SIM-F039/040 pass244 checks across34 native programs and seven solver cases.
