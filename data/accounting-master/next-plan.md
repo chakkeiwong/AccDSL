@@ -1,5 +1,21 @@
 # Current AccDSL master program
 
+## Face, proceeds and pricing scope — 28 October2026
+
+SIM-F021 passes198 checks across13 native cases. Face100 with default1/10,
+recovery40 and gross return21/20 yields proceeds1880/21, stored separately
+from face. Inconsistent supplied quotes refuse; a self-consistent wrong quote
+still requires the independent lender-law check. This is the native method's
+explicit conditional-input limit, not admitted pricing. T07 remains planned.
+Result: company-state-face-proceeds-failure-20261028/result.md under
+data/accounting-master. Failed harness attempt01 is retained; attempt02 passes.
+
+Eighteen original rows reviewed;183 outside this pass. All201 original rows,
+40 task criteria/dependencies and frozen releases persist. Main reading300/831,
+resume301; source/survey/construction/review work remains. E3 stays deferred.
+Continue ready work; no global continuation veto.
+
+
 ## Existing policy caller audit — 28 October2026
 
 The existing source-bound observation caller already protects complete

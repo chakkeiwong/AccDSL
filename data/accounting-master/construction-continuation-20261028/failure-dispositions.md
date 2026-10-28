@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. Seventeen original rows reviewed;184 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. Eighteen original rows reviewed;183 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -13,6 +13,7 @@
 | SIM-F012 | Future demand changed with current information fixed: hidden/late exact-match policy set is empty; early information changes the problem. Viable overstock and independent targets preserve common first actions. Full native/oracle/hand sets agree across18 cases. | Actual actor/source admission and broader policies remain open. Use externally bound complete requests; raw observable-cell coverage does not establish all hidden world/action rows. |
 | SIM-F014 | Repeated pre-reset interest5 equalities retain fixed, floating and interior feasible mixtures; no posterior is assigned. | New rate-reset observations and probability updates need their own declared source and likelihood assumptions. |
 | SIM-F019 | The policy probe preserves its exact parent, first-year history and every non-target input. It is a deterministic paired-path comparison, not a study across heterogeneous worlds. | Pair the same policies across each retained joint history using one declared information set; preserve the full conditional outcome table. |
+| SIM-F021 | Face100/default1/10/recovery40/gross21/20 yields proceeds1880/21. Native issue records proceeds and face separately; three inconsistent quote inputs refuse. A self-consistent wrong quote passes native identity but fails the independent lender law by11. | Bind justified pricing measure, payoffs, dates and actual offers at an appropriate T07 caller; supplied quote arithmetic does not establish market pricing. |
 | SIM-F022 | Bridge principal cap30 less fee1 supplies29 for need30; the declared family is infeasible. Removing the fee changes the answer. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
 | SIM-F023 | No admitted bridge/term offer constrains its draw to zero; an absent offer cannot finance the payment. Real offer authentication remains outside this synthetic case. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
 | SIM-F024 | A day5 term issue cannot fund the day4 payment; every dated cash prefix is required even where final cash is positive. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
