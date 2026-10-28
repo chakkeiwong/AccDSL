@@ -1,5 +1,20 @@
 # Accounting master checkpoint
 
+## Primary financing draft reviewed — 28 October2026
+
+The26-page Whited20May2008 pension-shortfalls draft is fully read.15 exact
+checks confirm literal treatment-sign, reward and labor-calibration mismatches;
+its real-firm conclusion lacks the corresponding empirical section. This
+version is quarantined from model/empirical import. Published/code comparison
+and Rauh/related threshold work remain open. Source denial does not halt
+other ready work. Result: company-state-financing-shortfalls-reading-20261028/result.md
+under data/accounting-master. All six survey ledgers retain the findings.
+
+S06/S02 remain in_progress. The40-task criteria/dependencies and original
+acceptance/failure populations persist. Main reading300/831; resume301.
+Releases remain not_ready; E3 deferred. Continue independent ready work.
+
+
 ## Ordered main reading through300 — 28 October2026
 
 Twelve further rendered pages289–300 are read in order with144 exact local
