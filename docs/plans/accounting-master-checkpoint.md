@@ -1,5 +1,20 @@
 # Accounting master checkpoint
 
+## Persistent contract and reset failures — 28 October2026
+
+SIM-F011/018 pass216 checks across13 solver cases,9 native programs and18
+schedule/negative cases. Exact persistent paths(5,5)/(7,7) survive native
+annual carry; mixed paths reject. Dated reset arithmetic distinguishes fixed
+coupon, reference rate, spread and applicable days. Semantic shock aliases
+remain a caller obligation. Result: company-state-persistent-rate-failures-20261028/result.md
+under data/accounting-master. Native floating schedule admission is not claimed.
+
+Twenty-five original rows reviewed;176 outside this pass. S09 next action
+now connects retained software evidence to these limits. Main reading312/831,
+resume313; all40 criteria/dependencies/statuses and frozen releases persist.
+E3 deferred. Continue software/source synthesis and independent ready work.
+
+
 ## Gross equity histories and current-count repair — 28 October2026
 
 SIM-F006 passes197 checks across15 native executions and11 finite-note cases.
