@@ -1,5 +1,19 @@
 # AccDSL mission control
 
+## Entity cash and settlement timing — 28 October 2026
+
+SIM-F039/040 pass244 checks across34 native programs and seven solver cases.
+Parent5 plus capped transfer10 cannot pay20 despite group35; EUR receipts
+after maturity cannot fund earlier payments. Cumulative limits, typed context
+and explicit same-day order retain their meaning. Result:
+company-state-location-timing-20261028/result.md under data/accounting-master.
+Actual rights/FX admission and atomic cross-book settlement remain open.
+
+42 original failures reviewed;159 outside this pass. Main reading336/831,
+resume337. Original criteria/statuses/releases persist. E3 deferred.
+Continue loss-vintage, collateral and contractual-clock cases, sources and review.
+
+
 ## Measurement, rights and cash categories — 28 October 2026
 
 SIM-F037/038 pass249 checks across34 native programs. Supplied DTA10 to4
