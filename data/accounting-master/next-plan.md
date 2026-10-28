@@ -1,5 +1,19 @@
 # Current AccDSL master program
 
+## Measurement, rights and cash categories — 28 October 2026
+
+SIM-F037/038 pass249 checks across34 native programs. Supplied DTA10 to4
+records expense6 without cash or legal-right changes. Principal financing60
+remains distinct from reported OCF0. Balanced cash/rights/category defects are
+detected independently. Result: company-state-measurement-cash-20261028/result.md
+under data/accounting-master. Actual tax/measurement/authority admission is open.
+
+40 original failures reviewed;161 outside this pass. Main reading336/831,
+resume337. Original criteria/statuses and releases persist. E3 deferred.
+Continue entity/currency/timing cases, source dependencies and ordered review.
+
+
+
 ## Pricing policy and numerical outcomes — 28 October 2026
 
 SIM-F025/028/029 pass109 checks across39 solver cases and two native programs.
