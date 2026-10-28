@@ -1,4 +1,40 @@
-# Ordered reading reaches physical page312
+# Ordered reading reaches physical page 324
+
+## Continuation through 324 — 28 October 2026
+
+Twelve individual rendered pages313–324 are read in two ordered six-page
+segments.23 and27 exact checks pass. The continuation265–324 now records
+60 pages and410 local arithmetic checks; counts are navigation, not acceptance.
+
+Product compatibility, supplier capacity, defective stock, purchase commitments
+and service rights create different feasible responses despite equal balances.
+Development, shipment, service delivery and cash dates remain distinct. Two
+conditional asset histories preserve equal net property under different gross
+transactions, and an independently assumed expense liability offsets the extra
+capital payable/loss. Alpha allocates two indirect-cash-flow rows; their sum
+is unchanged. Future settlement retains joint operating/investing pairs,
+not independently selectable minima, and six paths preserve branch and date.
+The exact paired total is-3082; mixed marginal minima fabricate-4082.
+
+The text then moves from partial connected answers to immutable source
+assertions, context/value/meaning/time/review fields, changing perimeters and
+separate document/semantic/simulation coverage. A source reading can finish
+while historical clocks or economic families remain unresolved. No substantive
+manuscript defect is confirmed in this slice. Current legal/accounting authority
+and cited technical papers were not newly certified. Chapter28's short final
+page and the Chapter29 table continuation are readable, not missing text.
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Retain author reading313–324 | Individual readable images and exact segment continuity |279 source/831 text hashes and12 renders verify |507 unread main pages plus separate review layers | Continue325 | Independent/human acceptance |
+| Retain conditional arithmetic |50 exact checks; scope/premises explicit | No local arithmetic veto | Source-supported actual states and dates | Continue source and company-state construction | Exhaustive real-company history family |
+
+Post-run red-team: balanced totals might conceal different liabilities or
+settlement dates. The joint table and six timing paths expose that error;
+context and information chapters preserve the remaining uncertainty. Success
+of local calculations cannot close later chapters or source obligations.
+Frozen manuscript and releases remain unchanged; independent/human review,
+node/equation layer, simulation volume and successor changes remain open.
 
 ## Continuation through312 — 28 October2026
 

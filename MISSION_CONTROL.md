@@ -1,5 +1,20 @@
 # AccDSL mission control
 
+## Ordered main reading through 324 — 28 October 2026
+
+Twelve further pages313–324 are individually read in order, with50 exact
+checks. Supply/product/service constraints, conditional asset/liability
+histories, joint cash settlements and source/evidence-view distinctions remain
+separate.279 source hashes,831 page texts, ordered continuity and12 new renders
+verify. Resume325;507 main pages remain. Result:
+company-state-ordered-review-20261028/result.md under data/accounting-master.
+
+S09 is in_progress;25 original failures reviewed and176 outside this pass.
+All original criteria, dependencies and releases persist. R04 remains
+in_progress, independent/human and other review layers open. E3 deferred.
+Continue ready source/construction/failure work and ordered reading.
+
+
 ## Connected software comparison — 28 October 2026
 
 S09 is in_progress after a primary-code comparison of Arelle, QuantLib,
