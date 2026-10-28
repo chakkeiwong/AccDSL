@@ -1,5 +1,18 @@
 # AccDSL: company state, connected research, and release completion
 
+## Actor information and joint stress — 28 October2026
+
+SIM-F013/017/020 pass170 exact checks with seven saved full results and22
+refusal controls. Private loan terms permit different policies; conditioning
+and intervention answer different questions; joint scenarios retain economic
+dependence. Actual knowledge, causal structure and source admission remain open.
+Result: company-state-actor-causal-stress-20261028/result.md under data/accounting-master.
+
+71 original failures reviewed;130 outside this pass. Main reading360/831,
+resume361. Original criteria/statuses/releases persist;E3 deferred.
+Continue literature-case reconciliation, connected sources and ordered review.
+
+
 ## Ordered main reading through360 — 28 October2026
 
 Pages355–360 are individually read;41 rational checks cover rates, Bayesian
