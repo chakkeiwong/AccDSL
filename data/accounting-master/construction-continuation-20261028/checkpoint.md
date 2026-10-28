@@ -1,17 +1,17 @@
 # Construction continuation checkpoint
 
-## Support feedback and allocation-aware cure — 28 October2026
+## Projection, dependence and sampled bounds — 28 October2026
 
-SIM-F041/044 pass193 checks across18 native programs and15 separate timing
-assessments. Support2 resolves subsidiary deficiency6 but leaves parent3
-against payment4. Payment priority and remaining arrears determine cure.
-Attempt01's amount-only cure defect is retained and repaired. Result:
-company-state-support-cure-20261028/result.md under data/accounting-master.
-Actual rights/accounting, atomic group and native intraday execution stay open.
+SIM-F047/048/050/051 pass87 checks across25 solver calls plus direct affine
+elimination. Implied x bounds, persistent paths, shared variables and unsampled
+endpoints remain distinct from dropped/rectangular/independent/sample shortcuts.
+Zero-budget Unknown retains the question. Result:
+company-state-relational-bounds-20261028/result.md under data/accounting-master.
+Broad projection/query services and actual source relations remain open.
 
-45 original failures reviewed;156 outside this pass. Main reading348/831,
+49 original failures reviewed;152 outside this pass. Main reading348/831,
 resume349. Original criteria/statuses/releases persist;E3 deferred.
-Continue quiet rights/query/dependence cases, source and ordered review.
+Continue quiet rights/information/cache cases, source and ordered review.
 
 Live program: data/accounting-master/unified-program-20261028/program.json.
 40 tasks,114 acceptance rows,156 clauses,18 packages,201 original failures.
@@ -19,10 +19,10 @@ T01 definition complete; construction/research/acceptance remain incomplete.
 S1–S5 partial,S6 held,E3 deferred. Selected5.55-R1/provisional5.56-D1 not_ready.
 Main reading348/831;resume349. No global continuation veto.
 
-Next: audit original SIM-F045 quiet call rights; SIM-F047 projection x=z+1,
-z in[0,2]; SIM-F048 persistent paths(0,10)/(10,0); SIM-F050 linked x-x;
-SIM-F051 sample endpoint. Reuse exact solver and retained method evidence,
-preserving unknowns and scope. Continue source and ordered review in parallel
-only where independent. Do not rerun completed one-shot refresh scripts.
+Next: original SIM-F045 quiet call rights, SIM-F046 same immediate output but
+different later signal quality, SIM-F049 cache invalidation when horizon or
+covenants change. Inspect retained sources/implementations before auditing
+next plan; preserve all original populations. Continue independent source
+research and ordered review. Do not rerun completed one-shot refresh scripts.
 Concurrent research edits remain separately owned; stage only exact changes.
-Prior checkpoint: company-state-support-cure-20261028/checkpoint-before.md.
+Prior checkpoint: company-state-relational-bounds-20261028/checkpoint-before.md.

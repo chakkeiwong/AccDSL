@@ -1,5 +1,19 @@
 # AccDSL mission control
 
+## Projection, dependence and sampled bounds — 28 October2026
+
+SIM-F047/048/050/051 pass87 checks across25 solver calls plus direct affine
+elimination. Implied x bounds, persistent paths, shared variables and unsampled
+endpoints remain distinct from dropped/rectangular/independent/sample shortcuts.
+Zero-budget Unknown retains the question. Result:
+company-state-relational-bounds-20261028/result.md under data/accounting-master.
+Broad projection/query services and actual source relations remain open.
+
+49 original failures reviewed;152 outside this pass. Main reading348/831,
+resume349. Original criteria/statuses/releases persist;E3 deferred.
+Continue quiet rights/information/cache cases, source and ordered review.
+
+
 ## Support feedback and allocation-aware cure — 28 October2026
 
 SIM-F041/044 pass193 checks across18 native programs and15 separate timing
