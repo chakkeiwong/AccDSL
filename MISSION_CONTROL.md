@@ -1,5 +1,18 @@
 # AccDSL mission control
 
+## Policy feasibility and approximation boundaries — 28 October2026
+
+LIT-F006–009 pass288 exact checks with18 result groups,16 refusal controls
+and162 finite policy comparisons. Fractional actions, threshold errors, close
+minima and sampled future information remain distinct. General approximation,
+source-backed policies and adapted-estimation guarantees remain open.
+Result: company-state-policy-boundaries-20261028/result.md under data/accounting-master.
+
+79 original failures reviewed;122 outside this pass. Main reading360/831,
+resume361. Original criteria/statuses/releases persist;E3 deferred.
+Continue ordered review and remaining literature/source work.
+
+
 ## Literature histories and explicit amendment — 28 October2026
 
 LIT-F001/002/003/005 pass316 checks with14 saved native results,18 refusal

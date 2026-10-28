@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. 75 original rows reviewed;126 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. 79 original rows reviewed;122 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -9,6 +9,10 @@
 | LIT-F003 | Explicit prospective amendment changes coupon5 to7 with revision1, leaves prior records unchanged and final cash8 rather than10. Date/approval/revision controls and scoped carry-policy validation refuse silent changes. | Actual modification accounting, authenticated histories and general nonrectangular control remain open; generic carry can accept declared resets. |
 | LIT-F004 | Future demand changed with current information fixed: hidden/late exact-match policy set is empty; early information changes the problem. Viable overstock and independent targets preserve common first actions. Full native/oracle/hand sets agree across18 cases. | Actual actor/source admission and broader policies remain open. Use externally bound complete requests; raw observable-cell coverage does not establish all hidden world/action rows. |
 | LIT-F005 | Saved complete joint successor/observation/output laws distinguish equal marginals with policy values7/10 and-1/2; exact full-path oracle reused. | Large-state runtime, actual observation/transition laws and broad integration remain open. |
+| LIT-F006 | Exact binary issuance refuses a fractional action; explicit feasible lifts preserve cash/unpaid consequences and refuse hidden-history dependence. | General discrete-action approximation and source-backed feasible lifts remain open. |
+| LIT-F007 | Tiny cash errors can flip default. Supplied finite couplings satisfy boundary-mass plus coupling-error bounds; unweighted histories retain a boundary set. | Actual approximation algorithms must justify coupling/error premises. |
+| LIT-F008 | Equal optimized values conceal exact regret100. Common-class uniform bounds pass162 finite comparisons; missing policies/classes and false bounds refuse. | Production feasibility, information preservation and policy transfer remain open. |
+| LIT-F009 | Distinct sampled observations yield stopping cost-1/2, pooled histories0; independent-increment comparator gives0 for every feasible policy. Future-conditioned actions refuse. | Local finite illustration only; source Example7.1 is Gaussian. General adapted estimation and dependent issuer data remain open. |
 | SIM-F001 | Eight actual repeated concept occurrences preserve dates, units and dimensions. Existing native context/temporal code refuses wrong unit/currency/scale/sign/date/period; selected total duplicates retain provenance without addition. | General ambiguity-preserving extraction and source-to-quantity/contract admission remain open; the selected historical card is not a general extractor. |
 | SIM-F002 | Synthetic raster-only incorporated debt80 covenant: missing retrieval/parsing/modeling prevents execution; native cap refuses100 and40+41, accepts80 and40+40. Two account maps and15 tamper cases preserve source and cumulative meanings. | Actual-source document recovery, interpretation and complete reference discovery remain open; do not promote fixed synthetic semantics into general OCR or contract admission. |
 | SIM-F003 | Correction published220 is excluded at219; public/system/actor clocks remain distinct. Future amount changes preserve earlier assertions and full native history. | Actual publication, ingestion and actor receipt still need source-specific evidence. |
