@@ -1,5 +1,21 @@
 # AccDSL mission requirements and acceptance evidence
 
+## Original source failures and conflict-aware consumer — 28 October2026
+
+SIM-F003/015/016 pass255 checks across22 cases and15 full history replays.
+Late corrections preserve earlier knowledge; duplicate providers retain source
+identity without invented probabilities; all-history contradiction stays a
+conflict. A separate consumer passes315 checks, retaining all22 native results
+and carrying conflict status with observable assertions. No actual source or
+actor admission follows. Result: company-state-evidence-failures-20261028/result.md
+under data/accounting-master.
+
+Twenty-one original rows reviewed;180 outside this pass. All201 inherited rows,
+40 task criteria/dependencies and frozen releases persist. Main reading300/831,
+resume301; surveys, construction and release review remain incomplete. E3 deferred.
+Continue ready work; no global continuation veto.
+
+
 ## Face, proceeds and pricing scope — 28 October2026
 
 SIM-F021 passes198 checks across13 native cases. Face100 with default1/10,
