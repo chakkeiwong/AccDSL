@@ -1,4 +1,49 @@
-# Ordered reading reaches physical page336
+# Ordered reading reaches physical page348
+
+## Continuation through348 — 28 October2026
+
+Twelve individually rendered pages337–348 are read in two ordered six-page
+segments, with7 and24 exact local checks. The continuation265–348 now has84
+pages and484 local checks. These are coverage counts, not acceptance scores.
+
+Chapter30 separates DSL/compiler semantics, contract events and extraction
+metrics from accounting admission. The46-hour example gives one complete
+elapsed day versus two calendar days; its simple-interest factor differs by2.
+No ACTUS version, paper result or current licence is newly certified here.
+Chapter31 retains a serious typed-schema/SQL/Python baseline and a shared IR.
+Reported borrowing100 does not turn assumed loans60/40 into disclosed facts;
+70/30 fits the same aggregate. Adapter outputs remain subject to accounting
+and source checks.
+
+Chapter32 introduces scoped compatible histories and explicit rounding before
+querying them. A payable100 owed to A or B has a certain total and existence,
+but no certain creditor row. Intersection loses that existence; union produces
+a false total200. Empty histories change the result. Imported incomplete-
+database theorems retain their information-order, genericity and representation
+conditions. An undecided evaluator need not imply opposite feasible answers.
+The null-space derivation and receivables bridge preserve alternative movements;
+bookkeeping induction preserves balance without establishing economic meaning.
+Reporting additionally needs classified movements, context and economic state.
+
+| Ledger | Verdict |
+| --- | --- |
+| Reader comprehension | Concrete examples explain context, answer-family and adapter distinctions; independent reader remains pending |
+| Mathematical integrity |31 local timing, set and rational checks pass; imported theorems are not newly certified |
+| Source fidelity | Historical source/code/licence inspections remain scoped and distinct from present admission or integration |
+| Typography/rendering | All12 pages viewed individually; continuing tables, diagrams, short chapter ends and displayed equations are legible |
+
+No confirmed local manuscript defect is added by this slice. Frozen texts and
+release hashes remain unchanged. The7/24 check counts do not replace the
+actual per-page judgments in main-0337-0342.json and main-0343-0348.json.
+
+| Decision | Primary criterion | Veto status | Uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Record author reading337–348 | Actual ordered images, reader state and local checks |279 source/831 text hashes, continuity and12 renders match |483 unread main pages; independent/hierarchy/simulation/successor reviews | Resume349 and continue source/construction work | Whole-document or human acceptance |
+
+Post-run red team: correct local definitions do not establish a complete
+company-history implementation, and cited source boundaries are not substitutes
+for technical primary-source review. Those acceptance obligations remain open.
+
 
 ## Continuation through336 — 28 October2026
 

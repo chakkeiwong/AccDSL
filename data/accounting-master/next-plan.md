@@ -1,5 +1,19 @@
 # Current AccDSL master program
 
+## Ordered main reading through348 — 28 October2026
+
+Twelve further pages337–348 are individually read;31 exact local checks pass.
+Language/extraction/contract boundaries, typed-library baseline, scoped history
+families, certain liabilities and signed-book invariants remain distinct.
+279 source hashes,831 page texts, continuity and12 renders verify. Resume349;
+483 main pages remain. Result: company-state-ordered-review-20261028/result.md
+under data/accounting-master. Independent/human and other review layers remain open.
+
+43 original failures reviewed;158 outside this pass. Original criteria/statuses
+and frozen releases persist. E3 deferred. Continue source/construction work
+and ordered reading. No global continuation veto.
+
+
 ## Loss identity and dated carryforward — 28 October 2026
 
 SIM-F042 passes211 checks over28 proposals and11 apply checks. Loss40 carries
