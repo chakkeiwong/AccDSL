@@ -1,5 +1,20 @@
 # Accounting master checkpoint
 
+## Eight source-bound Apple note series — 28 October 2026
+
+Exhibit4.1 mapping passes264 checks for eight series and24 native temporal
+measurements;15 altered semantic cards and wrong currency/date relations refuse.
+Twelve source pages retain governing-document and payment qualifications.
+October18 EUR/GBP issuer-summary principals remain separate from September28
+consolidated USD carrying debt. Result: company-state-note-instruments-20261028/result.md
+under data/accounting-master. Governing instruments, IDs, holdings and
+currency/carrying/hedge allocations remain open; all admission flags stay false.
+
+Twenty-eight original failures reviewed;173 outside this pass. Main reading
+336/831, resume337. Original criteria/statuses and frozen releases persist.
+E3 deferred. Continue governing-source matching and independent ready work.
+
+
 ## Book debt and contractual promise — 28 October2026
 
 SIM-F026 passes109 exact checks across21 solver and6 native report cases.
