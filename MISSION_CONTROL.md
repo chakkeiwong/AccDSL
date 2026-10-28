@@ -1,5 +1,19 @@
 # AccDSL mission control
 
+## Approximation and funding boundaries — 28 October2026
+
+SIM-F052/053/054/055 pass80 exact checks and15 solver calls. ESS100 can hide
+lost persistent types; weighted target loss1 differs from proposal loss100.
+Empty samples retain rare-event uncertainty; threshold-touching intervals
+preserve safe/unsafe/unresolved meanings. Result:
+company-state-approximation-boundaries-20261028/result.md under data/accounting-master.
+Actual probability/error assumptions and broader approximation remain open.
+
+56 original failures reviewed;145 outside this pass. Main reading348/831,
+resume349. Original criteria/statuses/releases persist;E3 deferred.
+Continue numerical-objective/derivative cases, source research and ordered review.
+
+
 ## Quiet rights, information and query scope — 28 October2026
 
 SIM-F045/046/049 pass169 exact checks across26 finite models,25 full-path
