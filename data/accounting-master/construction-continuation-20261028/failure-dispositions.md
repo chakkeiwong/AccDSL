@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. 79 original rows reviewed;122 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. 85 original rows reviewed;116 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -13,6 +13,12 @@
 | LIT-F007 | Tiny cash errors can flip default. Supplied finite couplings satisfy boundary-mass plus coupling-error bounds; unweighted histories retain a boundary set. | Actual approximation algorithms must justify coupling/error premises. |
 | LIT-F008 | Equal optimized values conceal exact regret100. Common-class uniform bounds pass162 finite comparisons; missing policies/classes and false bounds refuse. | Production feasibility, information preservation and policy transfer remain open. |
 | LIT-F009 | Distinct sampled observations yield stopping cost-1/2, pooled histories0; independent-increment comparator gives0 for every feasible policy. Future-conditioned actions refuse. | Local finite illustration only; source Example7.1 is Gaussian. General adapted estimation and dependent issuer data remain open. |
+| LIT-F010 | Saved quiet-coupon histories share current cash but contract rights change actions; cash-only merge refuses and augmented-state full-path equality remains. | Issuer-specific sufficient state and general Markov justification remain open. |
+| LIT-F011 | Twelve equal-likelihood updates preserve three priors and both persistent types; expected coupon26/5 replaces neither coupon5 nor7. | Actual observation model identification remains open. |
+| LIT-F012 | Zero evidence retains a structured conflict. Separately identified repair proposals retain the original; revised likelihood may resolve or retain conflict without automatic admission. | Real source/model diagnosis and general repair integration remain open. |
+| LIT-F013 | Exact(.99)^100 extinction remains positive; conditional strata keep common/distress types with supplied masses and explicit finite scope. | Within-type approximation, SMC integration and actual rare-type evidence remain open. |
+| LIT-F014 | Retained replacement and full-history evidence selects6 before correction,5 at publication,6 in original view; independent conflicting aliases survive. | Corpus-wide source meaning, lineage and correction authority remain open. |
+| LIT-F015 | Hypothetical fixed/floating branches preserve the actual unavailable view. Later supplied receipt resolves floating; conflicting fixed assumption refuses overwrite. | General actor/context integration, actual access and source admission remain open. |
 | SIM-F001 | Eight actual repeated concept occurrences preserve dates, units and dimensions. Existing native context/temporal code refuses wrong unit/currency/scale/sign/date/period; selected total duplicates retain provenance without addition. | General ambiguity-preserving extraction and source-to-quantity/contract admission remain open; the selected historical card is not a general extractor. |
 | SIM-F002 | Synthetic raster-only incorporated debt80 covenant: missing retrieval/parsing/modeling prevents execution; native cap refuses100 and40+41, accepts80 and40+40. Two account maps and15 tamper cases preserve source and cumulative meanings. | Actual-source document recovery, interpretation and complete reference discovery remain open; do not promote fixed synthetic semantics into general OCR or contract admission. |
 | SIM-F003 | Correction published220 is excluded at219; public/system/actor clocks remain distinct. Future amount changes preserve earlier assertions and full native history. | Actual publication, ingestion and actor receipt still need source-specific evidence. |

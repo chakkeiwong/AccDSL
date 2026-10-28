@@ -1,5 +1,18 @@
 # AccDSL mission control
 
+## Persistent types and information contexts — 28 October2026
+
+LIT-F010–015 pass165 exact checks with16 result groups,12 refusal controls
+and four retained evidence units. Equal likelihood preserves uncertainty;
+zero evidence retains conflict through proposed repair; hypothetical branches
+leave actual dated views unchanged. Real source and inference premises stay open.
+Result: company-state-information-reconciliation-20261028/result.md under data/accounting-master.
+
+85 original failures reviewed;116 outside this pass. Main reading366/831,
+resume367. Original criteria/statuses/releases persist;E3 deferred.
+Continue finance literature cases, connected sources and ordered review.
+
+
 ## Ordered main reading through366 — 28 October2026
 
 Pages361–366 are individually read;42 local exact checks cover the shared debt
