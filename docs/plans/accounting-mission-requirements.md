@@ -1,5 +1,19 @@
 # AccDSL mission requirements and acceptance evidence
 
+## Numerical targets and solution scope — 28 October2026
+
+SIM-F056–060 pass138 checks,11 direct polynomial SMT cases and five retained
+pricing-result checks. Expected-residual objectives, constrained optima, total
+derivatives, original funding capacity and multiple roots retain their distinct
+targets. Existing F059 pricing evidence is reused explicitly. Result:
+company-state-numerical-targets-20261028/result.md under data/accounting-master.
+Actual economic models and broad numerical services remain open.
+
+61 original failures reviewed;140 outside this pass. Main reading348/831,
+resume349. Original criteria/statuses/releases persist;E3 deferred.
+Continue unit/horizon/evaluation distinctions, source research and ordered review.
+
+
 ## Approximation and funding boundaries — 28 October2026
 
 SIM-F052/053/054/055 pass80 exact checks and15 solver calls. ESS100 can hide
