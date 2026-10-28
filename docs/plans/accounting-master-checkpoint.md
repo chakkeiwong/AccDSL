@@ -1,5 +1,33 @@
 # Accounting master checkpoint
 
+## Existing policy caller audit — 28 October2026
+
+The existing source-bound observation caller already protects complete
+support:62 checks preserve968 rows and4 policies and reject10 corrupted
+prior/family/map cases. The new bare-entrypoint support-loss finding does
+not require replacing that caller. Failed audit attempt01 compared cold
+and reused metadata; attempt02 repairs that expectation and preserves full
+semantic equality. Result: company-state-future-demand-failures-20261028/caller-result.md
+under data/accounting-master. Continue the remaining original failures and
+source/actor admission; existing protected code remains unchanged.
+
+
+## Future information and finite-policy admission — 28 October2026
+
+SIM-F012/LIT-F004 pass79 checks across18 full-set native/oracle/hand cases.
+A later missing-refusal probe exposes false feasibility at the bare input
+boundary. BoundFinitePolicyRequest/1 now preserves all18 cases and rejects12
+altered requests under69 checks, using an externally held complete-request
+identity. Native code stays unchanged; real-source and general caller
+admission remain open. Result: company-state-future-demand-failures-20261028/result.md
+under data/accounting-master. The new support-loss gap is retained separately.
+
+Seventeen original failure rows reviewed;184 outside this pass. Original201
+rows/statuses and40 task criteria persist. Main reading300/831, resume301;
+S06/S02 and C04 remain in_progress. Releases not_ready; E3 deferred.
+Continue independent ready work; no global continuation veto.
+
+
 ## Primary financing draft reviewed — 28 October2026
 
 The26-page Whited20May2008 pension-shortfalls draft is fully read.15 exact

@@ -1,0 +1,1 @@
+28 October2026. Failed caller attempt01 compared cold metadata with a reused saved result. Only reused/binding_changed differ; full binding/rows/policies match. Attempt02 compares all semantic fields and separately checks cold flags. Native code unchanged. Failed writer and verdict preserved.
