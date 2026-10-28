@@ -1,5 +1,18 @@
 # AccDSL mission requirements and acceptance evidence
 
+## Literature histories and explicit amendment — 28 October2026
+
+LIT-F001/002/003/005 pass316 checks with14 saved native results,18 refusal
+controls and three separate authored measures. A dated amendment preserves the
+prior year and changes final cash10 to8; generic carry and provenance limits
+remain explicit. Four retained units are reused by content and source hashes.
+Result: company-state-literature-history-20261028/result.md under data/accounting-master.
+
+75 original failures reviewed;126 outside this pass. Main reading360/831,
+resume361. Original criteria/statuses/releases persist;E3 deferred.
+Continue discrete-action/policy-information cases, sources and ordered review.
+
+
 ## Actor information and joint stress — 28 October2026
 
 SIM-F013/017/020 pass170 exact checks with seven saved full results and22

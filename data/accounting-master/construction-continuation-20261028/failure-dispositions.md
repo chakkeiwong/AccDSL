@@ -1,10 +1,14 @@
 # Current original failure dispositions
 
-28 October2026. 71 original rows reviewed;130 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. 75 original rows reviewed;126 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
+| LIT-F001 | Exact saved fixed/floating/interior histories share debt100 and historical interest5 but retain different futures; full nonjournal terms persist. | Source-backed real-company construction and population completeness remain open. |
+| LIT-F002 | Separate support-bound authored weights retain provenance. Correct duplicate splitting preserves the full law and mean80; equal syntax weights give260/3. Absent measures stay unweighted. | Provenance labels do not justify an issuer prior; broader measure semantics remain open. |
+| LIT-F003 | Explicit prospective amendment changes coupon5 to7 with revision1, leaves prior records unchanged and final cash8 rather than10. Date/approval/revision controls and scoped carry-policy validation refuse silent changes. | Actual modification accounting, authenticated histories and general nonrectangular control remain open; generic carry can accept declared resets. |
 | LIT-F004 | Future demand changed with current information fixed: hidden/late exact-match policy set is empty; early information changes the problem. Viable overstock and independent targets preserve common first actions. Full native/oracle/hand sets agree across18 cases. | Actual actor/source admission and broader policies remain open. Use externally bound complete requests; raw observable-cell coverage does not establish all hidden world/action rows. |
+| LIT-F005 | Saved complete joint successor/observation/output laws distinguish equal marginals with policy values7/10 and-1/2; exact full-path oracle reused. | Large-state runtime, actual observation/transition laws and broad integration remain open. |
 | SIM-F001 | Eight actual repeated concept occurrences preserve dates, units and dimensions. Existing native context/temporal code refuses wrong unit/currency/scale/sign/date/period; selected total duplicates retain provenance without addition. | General ambiguity-preserving extraction and source-to-quantity/contract admission remain open; the selected historical card is not a general extractor. |
 | SIM-F002 | Synthetic raster-only incorporated debt80 covenant: missing retrieval/parsing/modeling prevents execution; native cap refuses100 and40+41, accepts80 and40+40. Two account maps and15 tamper cases preserve source and cumulative meanings. | Actual-source document recovery, interpretation and complete reference discovery remain open; do not promote fixed synthetic semantics into general OCR or contract admission. |
 | SIM-F003 | Correction published220 is excluded at219; public/system/actor clocks remain distinct. Future amount changes preserve earlier assertions and full native history. | Actual publication, ingestion and actor receipt still need source-specific evidence. |
