@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. Twenty-two original rows reviewed;179 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. Twenty-three original rows reviewed;178 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -9,6 +9,7 @@
 | SIM-F003 | Correction published220 is excluded at219; public/system/actor clocks remain distinct. Future amount changes preserve earlier assertions and full native history. | Actual publication, ingestion and actor receipt still need source-specific evidence. |
 | SIM-F004 | Exact omitted guarantee fields refuse without zero imputation. The separate inspector preserves omitted/null pointers and entire native outcomes; explicit zero stays known. Native null ECL/service inputs remain unsupported. | Connect disclosed unknowns to a declared reconstruction family; the finite inspector neither admits sources nor constructs unknown contracts. |
 | SIM-F005 | Both fixed/floating endpoints and an interior mixture satisfy principal100 and historical interest5; the continuous native family remains explicit. | Continue actual-contract/source admission and complete financial history execution separately; three witness points do not exhaust the family. |
+| SIM-F006 | Both original gross equity histories execute with equal net cash60/shares20, distinct gross flows and complete native states/reports. A separately authored synthetic retirement method reuses unchanged typed execution. Missing share write is detected independently. | General repurchase rights, accounting treatment and source/history admission remain open; retain nonmonetary update checks beyond balanced statements. |
 | SIM-F007 | Interest7 and cash90 each occur marginally but are jointly infeasible; the complete declared family satisfies cash+interest=95. | Extend only with explicit extra flows or changed templates; this scoped debt relation cannot stand in for whole-company cash. |
 | SIM-F009 | The same feasible family under zero max_cells returns PartialSearch/Unknown with the full unvisited formula, never infeasible. | Inspect other resource/timeout/backend cases separately; no wall-clock timeout was induced. |
 | SIM-F010 | A disclosed external guarantee with no settlement cash retains opening6 and liabilities7/3. This does not test adding a hidden guarantee to an admissible history family. | Execute the original hidden-contract alternative within a declared company family and retain structural completeness limits. |

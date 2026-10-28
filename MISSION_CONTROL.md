@@ -1,5 +1,20 @@
 # AccDSL mission control
 
+## Gross equity histories and current-count repair — 28 October2026
+
+SIM-F006 passes197 checks across15 native executions and11 finite-note cases.
+Issue20 at3 and issue30 at4 followed by retirement10 at6 preserve equal net
+cash/shares and distinct gross histories. A separate synthetic retirement
+method uses unchanged typed execution. Balanced statements miss a deleted
+share-memory update; the independent share oracle detects it. Result:
+company-state-gross-equity-history-20261028/result.md under data/accounting-master.
+
+Twenty-three original rows reviewed;178 outside this pass. C04's stale eight-row
+remaining field is repaired. All40 criteria/dependencies/statuses and original
+failure records persist. Main reading312/831, resume313. Releases not_ready;
+E3 deferred. Continue persistent-type/reset and independent ready work.
+
+
 ## Ordered main reading through312 — 28 October2026
 
 Twelve further pages301–312 are individually read in order, with33 exact local
