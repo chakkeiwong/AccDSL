@@ -1,5 +1,19 @@
 # Construction continuation checkpoint
 
+## Pricing policy and numerical outcomes — 28 October 2026
+
+SIM-F025/028/029 pass109 checks across39 solver cases and two native programs.
+Exact S/R arithmetic exposes commitment/price mismatch. Whole-domain debt pricing
+cannot fund110 from capacity100, including unlimited face. A zero-budget Unknown
+does not invalidate an explicit conditional offer or create default. Result:
+company-state-pricing-policy-failures-20261028/result.md under data/accounting-master.
+Dynamic equilibrium/service integration and actual economic admission remain open.
+
+Thirty-eight original failures reviewed;163 outside this pass. Main reading
+336/831, resume337. All original criteria/statuses and releases persist.
+E3 deferred. Continue measurement/information failures, source and ordered review.
+
+
 ## Conversion and competing claims — 28 October 2026
 
 SIM-F027/031/032 pass136 checks over12 native programs and29 solver cases.
