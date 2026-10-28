@@ -1,5 +1,20 @@
 # Accounting master checkpoint
 
+## Quiet rights, information and query scope — 28 October2026
+
+SIM-F045/046/049 pass169 exact checks across26 finite models,25 full-path
+comparisons and19 refusal controls. Quiet coupons preserve future call rights;
+equal immediate output preserves neither signal quality nor later policy law.
+Horizon/covenant changes invalidate stale reuse; structural certificates and
+policy-specific results have different scopes. Result:
+company-state-quiet-rights-scope-20261028/result.md under data/accounting-master.
+Actual rights, source/observation laws and broad native integration remain open.
+
+52 original failures reviewed;149 outside this pass. Main reading348/831,
+resume349. Original criteria/statuses/releases persist;E3 deferred.
+Continue approximation/numerical cases, source research and ordered review.
+
+
 ## Projection, dependence and sampled bounds — 28 October2026
 
 SIM-F047/048/050/051 pass87 checks across25 solver calls plus direct affine
