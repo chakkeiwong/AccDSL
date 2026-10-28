@@ -1,5 +1,19 @@
 # AccDSL: company state, connected research, and release completion
 
+## Ordered main reading through354 — 28 October2026
+
+Six further pages349–354 are individually read;447 exact local checks include
+all206 rounded-display witnesses. Law families/mixtures, scoped construction,
+half-open bounds, input quantization and unresolved mass remain distinct.
+279 source hashes,831 page texts, continuity and six renders verify. Resume355;
+477 main pages remain. Result: company-state-ordered-review-20261028/result.md
+under data/accounting-master. Independent/human and other review layers remain open.
+
+61 original failures reviewed;140 outside this pass. Original criteria/statuses
+and frozen releases persist. E3 deferred. Continue source/construction work
+and ordered reading. No global continuation veto.
+
+
 ## Numerical targets and solution scope — 28 October2026
 
 SIM-F056–060 pass138 checks,11 direct polynomial SMT cases and five retained

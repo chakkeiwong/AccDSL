@@ -1,4 +1,51 @@
-# Ordered reading reaches physical page348
+# Ordered reading reaches physical page354
+
+## Continuation through354 — 28 October2026
+
+Six individual pages349–354 continue from the exact prior reader state. The
+continuation265–354 now covers90 pages with931 local arithmetic checks. The447
+new checks include separate feasibility and equality checks for each of206
+rounded-display witnesses; counts describe coverage, not acceptance quality.
+
+The event architecture distinguishes policy information, event generation,
+accounting and atomic state update. Date-limited measurement expectations and
+probability-measure declarations remain explicit. A family of conditional laws
+is different from a mixture under a supplied measure. Total variance requires
+that measure; sample extrema and interval enclosures retain distinct meanings.
+
+Rounded debt uses principal amounts rather than unknown-share products. The
+interest image[4.975,7.035) has an attained lower endpoint and excluded upper
+endpoint. Rounded displays4.98–7.03 cover206 cents, whereas cent-grid principal
+has raw maximum7.0343. Equal displays do not identify the same latent domain.
+All206 explicit witnesses and signed/tie/operation-order controls check exactly.
+
+Construction remains scoped and preserves unfinished cells. Additive grouping
+is conditional on transitions and reports under every admitted driver; changed
+query scope requires renewed sufficiency. Identical terminal cash does not
+erase treaty or bank-commitment memory. Posterior3/11,8/11 gives complete mean77
+only when both branch equities are available; unresolved mass stays attached.
+The effective-rate equation starts a new precision discussion to continue355.
+
+| Ledger | Verdict |
+| --- | --- |
+| Reader comprehension | Concrete interval and treaty examples explain why query identity includes domain, memory and conditional mass; independent reading remains pending |
+| Mathematical integrity |447 local finite/rational controls pass, including206 display witnesses; no imported theorem newly certified |
+| Source fidelity | Hypothetical measures and supplied treaty values remain distinct from source admission and cross-referenced derivations |
+| Typography/rendering | All six pages viewed individually; dense353 is legible, continued sentences and displays have no confirmed clipping |
+
+No confirmed local defect is added. Policy notation containing full state is
+explicitly subject to the permitted-information rule; law equality remains
+relative to the declared policy/scenario question. Those are implementation
+obligations, not permissions to expose hidden state or reuse altered queries.
+
+| Decision | Primary criterion | Veto status | Uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Record author reading349–354 | Actual ordered images, reader state and local arithmetic |279 source/831 text hashes, continuity and six renders match |477 unread main pages and other review layers | Resume355; continue construction/research independently | Whole-document or human acceptance |
+
+Post-run red team: the local witness calculation does not establish a general
+query solver, actual history coverage or admitted weights. Remaining review and
+construction obligations persist. Frozen manuscripts are unchanged.
+
 
 ## Continuation through348 — 28 October2026
 
