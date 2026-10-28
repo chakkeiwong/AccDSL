@@ -1,5 +1,21 @@
 # AccDSL mission control
 
+## Connected software comparison — 28 October 2026
+
+S09 is in_progress after a primary-code comparison of Arelle, QuantLib,
+ACTUS service and the local Z3 wrapper. Forty source-identity checks pass;
+four source records and nine claims extend all six survey ledgers while
+preserving prior rows. Context/value/occurrence, reset/pricer, observer/horizon
+and joint-family limits now have concrete follow-on tests. Result:
+company-state-software-reuse-20261028/result.md under data/accounting-master.
+
+No external runtime, latest-version or software adoption claim. Wider reuse,
+source/dependency matching and other surveys remain incomplete. Twenty-five
+original failures reviewed;176 outside this pass. Main reading312/831, resume313.
+Only S09 status advances; all criteria/dependencies and frozen releases persist.
+E3 deferred. Continue ordered review and independent ready construction/research.
+
+
 ## Persistent contract and reset failures — 28 October2026
 
 SIM-F011/018 pass216 checks across13 solver cases,9 native programs and18
