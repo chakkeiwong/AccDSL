@@ -1,5 +1,19 @@
 # AccDSL mission requirements and acceptance evidence
 
+## Units, terminal obligations and evaluation — 28 October2026
+
+SIM-F061–065 pass194 checks across eight native programs and four carry
+tamper controls. Unit normalization preserves targets; year-end borrowing20
+retains repayment22. Historical reconciliation, threshold probability and
+conditional successful execution remain different evidence. Result:
+company-state-units-horizon-evaluation-20261028/result.md under data/accounting-master.
+Actual terms/laws and broader interactions remain open; no E3 forecast occurs.
+
+66 original failures reviewed;135 outside this pass. Main reading354/831,
+resume355. Original criteria/statuses/releases persist;E3 deferred.
+Continue module interaction/model-family cases, source research and ordered review.
+
+
 ## Ordered main reading through354 — 28 October2026
 
 Six further pages349–354 are individually read;447 exact local checks include
