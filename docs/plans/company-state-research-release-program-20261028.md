@@ -1,5 +1,20 @@
 # AccDSL: company state, connected research, and release completion
 
+## Equity authority, settlement and value — 28 October 2026
+
+SIM-F030/033/034 pass249 checks across37 native cases. Cap15, accepted offer,
+approval and receipt prerequisites preserve atomic refusal and unknowns under
+two account maps. Equal ownership20/23 at issue10 or8 has different conditional
+value consequences; book equity does not determine issue price. Failed harness
+attempt01 and its schema-safeguard repair remain retained. Result:
+company-state-equity-authorization-20261028/result.md under data/accounting-master.
+All real source/rights/receipt/valuation admission remains open.
+
+Thirty-two original failures reviewed;169 outside this pass. Main reading
+336/831, resume337. All original criteria/statuses and releases persist.
+E3 deferred. Continue conversion/preference/priority, source and ordered review.
+
+
 ## Missing incorporated-document discriminator — 28 October 2026
 
 SIM-F002 passes179 checks across19 cases and15 tamper controls. A synthetic
