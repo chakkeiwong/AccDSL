@@ -1,5 +1,18 @@
 # AccDSL: company state, connected research, and release completion
 
+## Refinancing interactions — 28 October2026
+
+SIM-F066 now passes293 checks across11 native programs and13 dependency
+controls. Complete debt/cash/tax/share sequences preserve cash40.5, tax3.5
+and old ownership10/11; stale results refuse. The tax adapter is explicitly
+narrow, not the incompatible shared lease/tax book. Result:
+company-state-refinancing-interactions-20261028/result.md under data/accounting-master.
+
+66 original failures reviewed;135 outside this pass. Main reading354/831,
+resume355. Original criteria/statuses/releases persist;E3 deferred.
+Continue omitted model mechanisms, duplicate encodings, sources and ordered review.
+
+
 ## Units, terminal obligations and evaluation — 28 October2026
 
 SIM-F061–065 pass194 checks across eight native programs and four carry
