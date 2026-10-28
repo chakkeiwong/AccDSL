@@ -1,5 +1,19 @@
 # Current AccDSL master program
 
+## Borrowing recognition discrimination — 28 October2026
+
+SIM-F035 passes129 exact checks across11 native programs. Borrowing100 and
+repayment40 preserve zero profit, debt60 and separate financing cash origins.
+Balanced revenue-credit mutations remain economically wrong despite valid
+replay, consistent debt memory and reconciled statements. Result:
+company-state-borrowing-recognition-failure-20261028/result.md under data/accounting-master.
+
+Twenty-seven original rows reviewed;174 outside this pass. All original task
+criteria/statuses and frozen releases persist. Main reading324/831, resume325;
+S09/R04 in_progress, E3 deferred. Continue sourced construction, remaining
+failure cases and ordered reading. No global continuation veto.
+
+
 ## Accrual and following-period settlement — 28 October2026
 
 SIM-F036 passes221 exact checks across14 native programs and one carry-tamper
