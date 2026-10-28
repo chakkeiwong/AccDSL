@@ -1,5 +1,19 @@
 # Current AccDSL master program
 
+## Support feedback and allocation-aware cure — 28 October2026
+
+SIM-F041/044 pass193 checks across18 native programs and15 separate timing
+assessments. Support2 resolves subsidiary deficiency6 but leaves parent3
+against payment4. Payment priority and remaining arrears determine cure.
+Attempt01's amount-only cure defect is retained and repaired. Result:
+company-state-support-cure-20261028/result.md under data/accounting-master.
+Actual rights/accounting, atomic group and native intraday execution stay open.
+
+45 original failures reviewed;156 outside this pass. Main reading348/831,
+resume349. Original criteria/statuses/releases persist;E3 deferred.
+Continue quiet rights/query/dependence cases, source and ordered review.
+
+
 ## Ordered main reading through348 — 28 October2026
 
 Twelve further pages337–348 are individually read;31 exact local checks pass.
