@@ -1,5 +1,20 @@
 # AccDSL mission control
 
+## Repeated source contexts and phase refresh — 28 October2026
+
+SIM-F001 passes51 checks across8 retained repeated-concept occurrences and20
+native results. Dates, units, scale, sign and dimensional scope stay distinct;
+selected duplicate totals keep both provenance pointers without double counting.
+The failed generic-error-code expectation is retained and repaired. Result:
+company-state-context-failure-20261028/result.md under data/accounting-master.
+
+T05 next action now names the current27-profile owner review, replacing a stale
+18-profile reference. S09 now reuses the retained official-code audit and retains
+ACTUS matched-runtime limitations. No criterion, dependency or status changes.
+Twenty-two original failure rows reviewed;179 outside this pass. Main reading
+300/831, resume301. Releases remain not_ready; E3 deferred. Continue ready work.
+
+
 ## Original source failures and conflict-aware consumer — 28 October2026
 
 SIM-F003/015/016 pass255 checks across22 cases and15 full history replays.
