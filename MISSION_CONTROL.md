@@ -1,5 +1,18 @@
 # AccDSL mission control
 
+## Model scope and duplicate measures — 28 October2026
+
+SIM-F067/008 pass105 exact checks across13 models and16 path/scope results.
+Expanded supplied mechanisms preserve shortfalls10/15 and private covenant
+restrictions. Correct duplicate mass splitting preserves mean80; equal encoding
+weights instead produce260/3. Real population completeness remains unproved.
+Result: company-state-model-scope-20261028/result.md under data/accounting-master.
+
+68 original failures reviewed;133 outside this pass. Main reading354/831,
+resume355. Original criteria/statuses/releases persist;E3 deferred.
+Continue information/causal/dependent-stress cases, sources and ordered review.
+
+
 ## Refinancing interactions — 28 October2026
 
 SIM-F066 now passes293 checks across11 native programs and13 dependency

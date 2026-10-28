@@ -1,0 +1,1 @@
+Setup syntax repair: a pre-run newline normalization incorrectly inserted a literal newline in a Python string. No model ran or result was produced. The defective fragment is preserved in setup-syntax-before.txt. Use chr(10) in the writer to avoid layered transport escaping.
