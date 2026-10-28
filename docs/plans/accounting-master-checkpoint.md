@@ -1,5 +1,19 @@
 # Accounting master checkpoint
 
+## Ordered main reading through312 — 28 October2026
+
+Twelve further pages301–312 are individually read in order, with33 exact local
+checks. Product/region margins, legal entities, litigation, later disclosure,
+indemnities, insurance and operating restrictions retain their separate source,
+date and population meanings.279 source hashes,831 page texts, complete segment
+continuity and12 new renders verify. Resume313;519 main pages remain.
+Result: company-state-ordered-review-20261028/result.md under data/accounting-master.
+
+Twenty-two original failure rows are individually reviewed;179 remain outside
+this pass. All original task criteria/releases persist. R04 stays in_progress;
+independent/human review and other layers remain open. E3 deferred. Continue.
+
+
 ## Repeated source contexts and phase refresh — 28 October2026
 
 SIM-F001 passes51 checks across8 retained repeated-concept occurrences and20

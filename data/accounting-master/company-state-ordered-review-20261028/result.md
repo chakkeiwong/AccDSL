@@ -1,4 +1,31 @@
-# Ordered reading reaches physical page300
+# Ordered reading reaches physical page312
+
+## Continuation through312 — 28 October2026
+
+Twelve individual rendered pages301–312 are read in two ordered six-page
+segments.27 and6 exact local checks pass; the continuation265–312 now records
+48 pages and360 arithmetic checks. Counts support navigation, not acceptance.
+
+Country/segment/product margins do not locate legal sellers or identify the
+joint exposure table. The two product-region witnesses preserve all margins.
+Ownership, incorporation, functional currency and tax residence require separate
+facts. Legal proceedings, contractual indemnities, defense, settlements and
+insurance are distinct channels. Later comparative expense disclosures add
+historical information without proving past availability or new transactions.
+Regulation can restrict the feasible operating plan; disclosed risks do not
+supply the joint demand/supply law. No substantive manuscript defect is
+confirmed in this slice. Source authority/current law was not newly inspected.
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Retain author reading301–312 | Individual readable images and exact segment continuity |279 source/831 text hashes and12 renders verify |519 unread main pages plus separate review layers | Continue313 | Independent or human acceptance |
+| Retain local math |33 exact checks and explicit assumptions | No local arithmetic veto | Source scope and connected whole-company construction | Continue source and full-document work | Actual contract identification or forecasting |
+
+Post-run red-team: later detail could look like data available at an earlier
+forecast cutoff. The text explicitly rejects that inference. The substantial
+remaining uncertainty is whether all later chapters and source obligations
+preserve the same distinctions; this bounded read cannot establish it. Frozen
+manuscript/release files remain unchanged.
 
 ## Continuation through300 — 28 October2026
 
