@@ -1,5 +1,20 @@
 # Construction continuation checkpoint
 
+## Accrual and following-period settlement — 28 October2026
+
+SIM-F036 passes221 exact checks across14 native programs and one carry-tamper
+case. Expense5 and payable5 arise in2027; annual carry preserves the payable,
+and January1,2028 payment clears it without a second expense. Two account maps
+and two explicit cash classifications agree. A balanced re-expensing mutation
+is rejected by independent economic expectations. Result:
+company-state-accrual-settlement-failure-20261028/result.md under data/accounting-master.
+
+Twenty-six original rows reviewed;175 outside this pass. All original criteria,
+statuses and frozen releases persist. Main reading324/831, resume325; S09 and
+R04 remain in_progress, E3 deferred. Continue borrowing-classification failure,
+source/construction work and ordered reading. No global continuation veto.
+
+
 ## Ordered main reading through 324 — 28 October 2026
 
 Twelve further pages313–324 are individually read in order, with50 exact

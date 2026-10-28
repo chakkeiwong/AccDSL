@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. Twenty-five original rows reviewed;176 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. Twenty-six original rows reviewed;175 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -24,6 +24,7 @@
 | SIM-F022 | Bridge principal cap30 less fee1 supplies29 for need30; the declared family is infeasible. Removing the fee changes the answer. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
 | SIM-F023 | No admitted bridge/term offer constrains its draw to zero; an absent offer cannot finance the payment. Real offer authentication remains outside this synthetic case. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
 | SIM-F024 | A day5 term issue cannot fund the day4 payment; every dated cash prefix is required even where final cash is positive. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
+| SIM-F036 | Unchanged methods accrue5 without cash, preserve payable and retained loss on annual carry, then pay5 without new expense; two account maps and two explicit cash classifications agree. Balanced re-expensing mutation fails independent economic criterion. | Source/treatment admission and broader contracts remain open; payment-date2028 report is partial. Continue borrowing classification and remaining original failures. |
 | SIM-F043 | The exact Machine20 case now executes: identical first-close reports and carrying value20, then next charges10 and20 under supplied lives2 and1. All native years complete. | Retain this native annual-method evidence; broader asset methods, industry applicability and package acceptance remain open. |
 | SIM-F066 | Year-qualified event IDs and the saved policy-parent hash are checked. The original refinancing and tax/ownership-cache invalidation case was not executed here. | Trace the original refinancing operation through tax and ownership cache dependencies; reject stale identities and compare the complete rebuilt path. |
 | X07 | Synthetic relationship/asset records explicitly retain unknown identities and no actual-source admission. No partial actual issuer claim disclosure was passed through method admission here. | Bind one source-backed partial population to method admission and prove that missing counterparties/instruments and unknown completeness survive the join. |
