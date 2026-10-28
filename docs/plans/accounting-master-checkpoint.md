@@ -1,5 +1,19 @@
 # Accounting master checkpoint
 
+## Ordered main reading through360 — 28 October2026
+
+Pages355–360 are individually read;41 rational checks cover rates, Bayesian
+updates, Gaussian moments and the supplied intervention example. One concrete
+language-chapter navigation issue is recorded as READ-0358-0360-01 for successor
+repair after diagnosis. Frozen manuscripts remain unchanged. Result:
+company-state-ordered-review-20261028/result.md under data/accounting-master.
+279 source hashes,831 page texts, continuity and six renders verify. Resume361;
+471 main pages remain. Independent/human and other review layers stay open.
+
+68 original failures reviewed;133 outside this pass. Original criteria/statuses
+and releases persist;E3 deferred. Continue information/causal cases and sources.
+
+
 ## Model scope and duplicate measures — 28 October2026
 
 SIM-F067/008 pass105 exact checks across13 models and16 path/scope results.

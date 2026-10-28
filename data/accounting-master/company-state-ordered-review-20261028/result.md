@@ -1,4 +1,44 @@
-# Ordered reading reaches physical page354
+# Ordered reading reaches physical page360
+
+## Continuation through360 — 28 October2026
+
+Six pages355–360 are read as individual images in order. The continuation265–360
+now covers96 pages and972 local arithmetic checks. The41 new controls reproduce
+the positive-payment rate examples, a mixed-sign two-root counterexample,
+rounding-boundary uncertainty, Bayes normalization, Gaussian square completion
+and the supplied conditioning/intervention distinction. These are exact local
+checks, not certification of imported source claims or an inference service.
+
+Pages355–357 state assumptions before the key displays and distinguish numerical
+precision, information reuse and causal mechanisms. Page358 opens the accounting
+language chapter with clear distinctions, but its overview then becomes a long
+sequence of appendix extensions across358–360. The reader must leave the local
+argument to reconstruct how to express a company model. READ-0358-0360-01 in
+finding-0358-0360.json records this specific navigation issue and a repair that
+organizes the overview around a sourced balance, an unresolved contract and a
+conditional operation, retaining exact references in a separate reference layer.
+
+The finding is unresolved successor work. No frozen manuscript has been edited,
+and this diagnosis is not a completed prose repair. The whole-document plan
+requires diagnosis before successor reconstruction. Current language limitations,
+common-book compatibility and source/semantic identity distinctions must survive
+that repair. The Money<C> table begins on360 and continues beyond this slice.
+
+| Ledger | Verdict |
+| --- | --- |
+| Reader comprehension | Precision/update/causal examples are locally interpretable;33.1 needs the recorded navigation repair; independent and human reading pending |
+| Mathematical integrity |41 exact controls pass; displayed scalar targets and domain distinctions checked; imported source results not newly certified |
+| Source fidelity | Stuart, Giacomini–Kitagawa and Pearl remain source anchors with explicit transfer limits; this review makes no new external authority claim |
+| Typography/rendering | Six full pages individually inspected; no clipping confirmed;360 begins a continuing type table |
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Record author reading355–360 | Actual images, carried reader state and specific local judgments |279 source/831 text hashes and six renders match |471 unread main pages, navigation repair and other review layers | Continue361, source and construction work | Complete manuscript or human acceptance |
+
+Post-run red-team: correct scalar mathematics does not establish a usable
+whole-company language. The confirmed appendix-navigation burden remains open
+rather than being concealed by successful arithmetic or hash checks.
+
 
 ## Continuation through354 — 28 October2026
 
