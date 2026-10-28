@@ -1,5 +1,18 @@
 # AccDSL mission requirements and acceptance evidence
 
+## Ordered main reading through366 — 28 October2026
+
+Pages361–366 are individually read;42 local exact checks cover the shared debt
+fraction, decimal identity and balanced posting illustrations. The language
+chapter states its authoring/compiler limits and distinguishes source identity,
+meaning and admission. Prior navigation finding READ-0358-0360-01 stays open.
+279 source hashes,831 page texts, continuity and six renders verify. Resume367;
+465 main pages remain. Independent/human and other review layers stay open.
+
+79 original failures reviewed;122 outside this pass. Original criteria/statuses
+and releases persist;E3 deferred. Continue original literature/source work.
+
+
 ## Policy feasibility and approximation boundaries — 28 October2026
 
 LIT-F006–009 pass288 exact checks with18 result groups,16 refusal controls

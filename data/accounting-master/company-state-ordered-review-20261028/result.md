@@ -1,4 +1,45 @@
-# Ordered reading reaches physical page360
+# Ordered reading reaches physical page366
+
+## Continuation through366 — 28 October2026
+
+Six pages361–366 are read individually and in order. The continuation265–366
+covers102 pages and1014 local exact checks. The42 new checks reproduce the
+shared debt partition, fixed/floating-share substitution, rate endpoints,
+exact decimal and simple-interest posting illustrations. They are local
+checks, not portable-codec conformance or a complete compiler test.
+
+The type table distinguishes unweighted choices, shared symbols and explicit
+measures; missingness and NotApplicable stay separate from zero. Portable
+record identity is motivated by cross-frontend exchange, with rational,
+Unicode and dependency rules defined before the digest. Source-byte identity
+and financial admission remain separate. The profile explicitly admits that
+whole-company authoring is broader than the matched debt frontend.
+
+The worked debt listing makes one shared alpha concrete. It preserves the
+continuous family rather than only the named endpoints; a probability measure
+requires another premise. The InterestPaid example makes same-date settlement,
+rounding and negative-interest limits explicit before explaining override
+conflicts and unresolved applicability. Package and IR migration rules close
+the chapter without treating syntax as recognition authority.
+
+The later examples improve the reader route but do not repair the earlier
+appendix-reference overview. READ-0358-0360-01 remains unresolved successor
+work after diagnosis. No frozen manuscript was changed.
+
+| Ledger | Verdict |
+| --- | --- |
+| Reader comprehension | Shared debt and posting examples become locally reconstructable; prior overview repair and independent/human reading remain open |
+| Mathematical integrity |42 local exact checks pass; schema digest read as a definition, not a cryptographic or compiler proof |
+| Source fidelity | Historical grammar, supplied demo assumptions and present authoring limits stay explicit; no new external theorem certification |
+| Typography/rendering | Six full pages individually inspected; code boxes and type table fit; no clipping confirmed |
+
+| Decision | Primary criterion | Veto status | Main uncertainty | Next action | Not concluded |
+| --- | --- | --- | --- | --- | --- |
+| Record author reading361–366 | Actual images and specific continuous reader judgments |279 source/831 text hashes and six renders match |465 unread main pages and pending repair/independent layers | Continue367 plus source/construction work | Complete design, compiler or human acceptance |
+
+Post-run red team: clear local examples are narrower than an implementable
+whole-company language. The manuscript itself retains that distinction.
+
 
 ## Continuation through360 — 28 October2026
 
