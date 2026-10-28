@@ -1,5 +1,23 @@
 # Construction continuation checkpoint
 
+## Missing incorporated-document discriminator — 28 October 2026
+
+SIM-F002 passes179 checks across19 cases and15 tamper controls. A synthetic
+raster-only debt80 covenant separates retrieval, parsing and modeling; missing
+coverage cannot reach execution. Native enforcement rejects100 and40+41,
+accepts80 and40+40, and preserves atomic refusal across two account maps.
+Result: company-state-reference-coverage-failure-20261028/result.md under
+data/accounting-master. No automatic source or contract admission follows.
+
+The governing-source unit passes60 index/identity checks for eight Apple series,
+five certificate references and two indentures. No governing body recovered:
+exact2019 SEC403/trusted403 and mirror timeout retained. Other sources remain
+open; this is a local access blocker. Continue independent ready work.
+
+Twenty-nine original failures reviewed;172 outside this pass. Main reading
+336/831, resume337. Original criteria/statuses/releases persist; E3 deferred.
+
+
 ## Eight source-bound Apple note series — 28 October 2026
 
 Exhibit4.1 mapping passes264 checks for eight series and24 native temporal
