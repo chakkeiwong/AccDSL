@@ -1,5 +1,20 @@
 # Construction continuation checkpoint
 
+## Conversion and competing claims — 28 October 2026
+
+SIM-F027/031/032 pass136 checks over12 native programs and29 solver cases.
+Conversion creates16 shares beside100 and clears debt without cash. Claims40/30
+share one50 pool under explicit priorities; nonparticipating preference preserves
+exclusive choices, including equal-payoff ties. Unsupported arithmetic and budget
+limits remain Unknown. Failed harness/encoding attempts are retained. Result:
+company-state-claims-conversion-20261028/result.md under data/accounting-master.
+No actual rights, priorities, accounting treatment or whole-company admission.
+
+Thirty-five original failures reviewed;166 outside this pass. Main reading
+336/831, resume337. All original criteria/statuses and releases persist.
+E3 deferred. Continue pricing/measurement failures, source and ordered review.
+
+
 ## Equity authority, settlement and value — 28 October 2026
 
 SIM-F030/033/034 pass249 checks across37 native cases. Cap15, accepted offer,
