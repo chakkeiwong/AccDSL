@@ -1,0 +1,298 @@
+[
+  {
+    "name": "original creditor law",
+    "inputs": {
+      "face": "100",
+      "recovery": "40",
+      "default_weight": "1/10",
+      "gross": "21/20"
+    },
+    "result": {
+      "expected_payoff": "94",
+      "proceeds": "1880/21",
+      "promised_yield": "11/94"
+    }
+  },
+  {
+    "name": "original refusal",
+    "inputs": {
+      "proceeds": "1880/21",
+      "need": "95",
+      "mode": "require_full"
+    },
+    "result": {
+      "status": "refused_insufficient_offer",
+      "available": "1880/21",
+      "required": "95",
+      "paid": "0",
+      "closing_cash": "1880/21",
+      "unpaid": "95",
+      "funding_gap": "115/21"
+    }
+  },
+  {
+    "name": "explicit smaller replan",
+    "inputs": {
+      "proceeds": "1880/21",
+      "need": "89",
+      "mode": "require_full"
+    },
+    "result": {
+      "status": "conditional_full_payment",
+      "available": "1880/21",
+      "required": "89",
+      "paid": "89",
+      "closing_cash": "11/21",
+      "unpaid": "0"
+    }
+  },
+  {
+    "name": "partial distress",
+    "inputs": {
+      "proceeds": "1880/21",
+      "need": "95",
+      "mode": "partial_payment"
+    },
+    "result": {
+      "status": "conditional_partial_payment",
+      "available": "1880/21",
+      "required": "95",
+      "paid": "1880/21",
+      "closing_cash": "0",
+      "unpaid": "115/21"
+    }
+  },
+  {
+    "name": "strict waterfall70",
+    "inputs": {
+      "estate": "70",
+      "claims": {
+        "senior": "60",
+        "junior": "50"
+      },
+      "priority": [
+        "senior",
+        "junior"
+      ]
+    },
+    "result": {
+      "status": "conditional_priority_allocation",
+      "payments": {
+        "senior": "60",
+        "junior": "10"
+      },
+      "equity_residual": "0",
+      "estate": "70",
+      "legal_priority_verified": false
+    }
+  },
+  {
+    "name": "strict waterfall130",
+    "inputs": {
+      "estate": "130",
+      "claims": {
+        "senior": "60",
+        "junior": "50"
+      },
+      "priority": [
+        "senior",
+        "junior"
+      ]
+    },
+    "result": {
+      "status": "conditional_priority_allocation",
+      "payments": {
+        "senior": "60",
+        "junior": "50"
+      },
+      "equity_residual": "20",
+      "estate": "130",
+      "legal_priority_verified": false
+    }
+  },
+  {
+    "name": "unknown priority retains alternatives",
+    "inputs": {
+      "estate": "70",
+      "priority": null
+    },
+    "result": {
+      "status": "unweighted_priority_alternatives",
+      "alternatives": [
+        {
+          "status": "conditional_priority_allocation",
+          "payments": {
+            "senior": "60",
+            "junior": "10"
+          },
+          "equity_residual": "0",
+          "estate": "70",
+          "legal_priority_verified": false
+        },
+        {
+          "status": "conditional_priority_allocation",
+          "payments": {
+            "junior": "50",
+            "senior": "20"
+          },
+          "equity_residual": "0",
+          "estate": "70",
+          "legal_priority_verified": false
+        }
+      ],
+      "probabilities": null
+    }
+  },
+  {
+    "name": "full junior conversion",
+    "inputs": {
+      "state": {
+        "id": "supplied-conversion-state",
+        "estate": "100",
+        "senior_claim": "60",
+        "junior_claim": "50",
+        "junior_active": true,
+        "old_equity_fraction": "1",
+        "converted_fraction": "0",
+        "events": [],
+        "source_admission": false
+      },
+      "event": {
+        "id": "conversion.1",
+        "fraction": "2/5",
+        "approved": true
+      }
+    },
+    "result": {
+      "status": "conditional_conversion",
+      "before_sha256": "48a9db53acdaf1a85088908b837257cd295e39267a1d9397126700464b6e0b25",
+      "current": {
+        "id": "supplied-conversion-state",
+        "estate": "100",
+        "senior_claim": "60",
+        "junior_claim": "0",
+        "junior_active": false,
+        "old_equity_fraction": "3/5",
+        "converted_fraction": "2/5",
+        "events": [
+          "conversion.1"
+        ],
+        "source_admission": false
+      },
+      "estate_change": "0",
+      "cash_flow": "0",
+      "accounting_admission": false
+    }
+  },
+  {
+    "name": "original60-16-24 distribution",
+    "inputs": {
+      "id": "supplied-conversion-state",
+      "estate": "100",
+      "senior_claim": "60",
+      "junior_claim": "0",
+      "junior_active": false,
+      "old_equity_fraction": "3/5",
+      "converted_fraction": "2/5",
+      "events": [
+        "conversion.1"
+      ],
+      "source_admission": false
+    },
+    "result": {
+      "status": "conditional_converted_distribution",
+      "estate": "100",
+      "senior": "60",
+      "junior_debt": "0",
+      "converted_equity": "16",
+      "old_equity": "24",
+      "source_admission": false
+    }
+  },
+  {
+    "name": "balanced wrong remaining debt",
+    "inputs": {
+      "estate": "100"
+    },
+    "result": {
+      "senior": "60",
+      "junior_debt": "40",
+      "converted_equity": "0",
+      "old_equity": "0",
+      "total": "100",
+      "valid": false
+    }
+  },
+  {
+    "name": "approvalFalse",
+    "inputs": {
+      "state": {
+        "id": "supplied-conversion-state",
+        "estate": "100",
+        "senior_claim": "60",
+        "junior_claim": "50",
+        "junior_active": true,
+        "old_equity_fraction": "1",
+        "converted_fraction": "0",
+        "events": [],
+        "source_admission": false
+      },
+      "event": {
+        "id": "conversion.1",
+        "fraction": "2/5",
+        "approved": false
+      }
+    },
+    "result": {
+      "status": "unsupported",
+      "reason": "conversion_not_approved",
+      "current": {
+        "id": "supplied-conversion-state",
+        "estate": "100",
+        "senior_claim": "60",
+        "junior_claim": "50",
+        "junior_active": true,
+        "old_equity_fraction": "1",
+        "converted_fraction": "0",
+        "events": [],
+        "source_admission": false
+      }
+    }
+  },
+  {
+    "name": "approvalNone",
+    "inputs": {
+      "state": {
+        "id": "supplied-conversion-state",
+        "estate": "100",
+        "senior_claim": "60",
+        "junior_claim": "50",
+        "junior_active": true,
+        "old_equity_fraction": "1",
+        "converted_fraction": "0",
+        "events": [],
+        "source_admission": false
+      },
+      "event": {
+        "id": "conversion.1",
+        "fraction": "2/5",
+        "approved": null
+      }
+    },
+    "result": {
+      "status": "unresolved",
+      "reason": "conversion_authority_unknown",
+      "current": {
+        "id": "supplied-conversion-state",
+        "estate": "100",
+        "senior_claim": "60",
+        "junior_claim": "50",
+        "junior_active": true,
+        "old_equity_fraction": "1",
+        "converted_fraction": "0",
+        "events": [],
+        "source_admission": false
+      }
+    }
+  }
+]

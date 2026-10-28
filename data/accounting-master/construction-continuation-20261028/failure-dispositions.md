@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. 85 original rows reviewed;116 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. 90 original rows reviewed;111 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -19,6 +19,11 @@
 | LIT-F013 | Exact(.99)^100 extinction remains positive; conditional strata keep common/distress types with supplied masses and explicit finite scope. | Within-type approximation, SMC integration and actual rare-type evidence remain open. |
 | LIT-F014 | Retained replacement and full-history evidence selects6 before correction,5 at publication,6 in original view; independent conflicting aliases survive. | Corpus-wide source meaning, lineage and correction authority remain open. |
 | LIT-F015 | Hypothetical fixed/floating branches preserve the actual unavailable view. Later supplied receipt resolves floating; conflicting fixed assumption refuses overwrite. | General actor/context integration, actual access and source admission remain open. |
+| LIT-F016 | Original law gives face100, proceeds1880/21, yield11/94 and mixed-law lender gap-44/101. Retained native cash/carrying and face memory are distinct. | Source edition/erratum correspondence and actual pricing/recognition remain open. |
+| LIT-F017 | Need95 leaves115/21 gap: full-payment request refuses, explicit payment89 replans, partial-payment policy retains arrears115/21. | Actual market access, legal priority and distress choices remain open. |
+| LIT-F018 | Retained S/R exact conditional stress distinguishes safe price80/equity20 from risky price40/equity50; committed risky face160 raises80/equity10. | General coupled pricing/policy solver and actual commitment remain open. |
+| LIT-F019 | Estate70 allocates60/10 under supplied senior priority; estate130 gives60/50/20. Unknown rank retains alternatives; independent recovery overdraws. | Actual collateral/claim population and legal priority remain open. |
+| LIT-F020 | Junior claim extinguishes before original estate100 allocation60/16/24. Stale debt and duplicate conversion refuse; separate native160/16 evidence retains full books. | Rich security rights and source-backed accounting remain open. |
 | SIM-F001 | Eight actual repeated concept occurrences preserve dates, units and dimensions. Existing native context/temporal code refuses wrong unit/currency/scale/sign/date/period; selected total duplicates retain provenance without addition. | General ambiguity-preserving extraction and source-to-quantity/contract admission remain open; the selected historical card is not a general extractor. |
 | SIM-F002 | Synthetic raster-only incorporated debt80 covenant: missing retrieval/parsing/modeling prevents execution; native cap refuses100 and40+41, accepts80 and40+40. Two account maps and15 tamper cases preserve source and cumulative meanings. | Actual-source document recovery, interpretation and complete reference discovery remain open; do not promote fixed synthetic semantics into general OCR or contract admission. |
 | SIM-F003 | Correction published220 is excluded at219; public/system/actor clocks remain distinct. Future amount changes preserve earlier assertions and full native history. | Actual publication, ingestion and actor receipt still need source-specific evidence. |

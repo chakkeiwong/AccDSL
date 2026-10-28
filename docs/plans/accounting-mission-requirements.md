@@ -1,5 +1,18 @@
 # AccDSL mission requirements and acceptance evidence
 
+## Finance identities and exclusive claims — 28 October2026
+
+LIT-F016–020 pass219 exact checks with12 result groups,11 refusal controls
+and four retained evidence units. Need95 preserves its115/21 shortfall;
+explicit conversion extinguishes junior debt before allocation60/16/24.
+Actual prices, access, priorities and accounting remain unverified.
+Result: company-state-finance-reconciliation-20261028/result.md under data/accounting-master.
+
+90 original failures reviewed;111 outside this pass. Main reading366/831,
+resume367. Original criteria/statuses/releases persist;E3 deferred.
+Continue equity/control literature cases, connected sources and ordered review.
+
+
 ## Persistent types and information contexts — 28 October2026
 
 LIT-F010–015 pass165 exact checks with16 result groups,12 refusal controls
