@@ -1,6 +1,6 @@
 # Current original failure dispositions
 
-28 October2026. Twenty-seven original rows reviewed;174 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
+28 October2026. Twenty-eight original rows reviewed;173 outside this pass. All201 original rows/statuses persist. Coverage is not closure.
 
 | Original row | Current comparison | Residual / next action |
 | --- | --- | --- |
@@ -24,6 +24,7 @@
 | SIM-F022 | Bridge principal cap30 less fee1 supplies29 for need30; the declared family is infeasible. Removing the fee changes the answer. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
 | SIM-F023 | No admitted bridge/term offer constrains its draw to zero; an absent offer cannot finance the payment. Real offer authentication remains outside this synthetic case. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
 | SIM-F024 | A day5 term issue cannot fund the day4 payment; every dated cash prefix is required even where final cash is positive. | Connect real admission, nonanticipative policy and full typed event/accounting execution separately; this is an explicit finite solver encoding. |
+| SIM-F026 | Finite supplied book100 bridge retains face100/discount0 and face110/discount10 until evidence selects. Two native account maps report identical books but retain different promises. Under supplied gross21/20, face110 values at2200/21; book-as-face is wrong by200/21. | Inspect supported issuer principal/carrying/adjustment evidence. Real source, contract population and measurement admission remain open; no native amortization or repayment inferred. |
 | SIM-F035 | Unchanged methods borrow100 and repay40 with zero profit, full liability/memory preservation and distinct financing receipt/payment origins. Balanced revenue-credit variants pass generic reconciliation but fail independent debt/profit expectations for two account maps. | Source-to-contract/recognition admission remains open; internal balance, replay and cash classification cannot establish economic meaning. Continue sourced construction and ordered review. |
 | SIM-F036 | Unchanged methods accrue5 without cash, preserve payable and retained loss on annual carry, then pay5 without new expense; two account maps and two explicit cash classifications agree. Balanced re-expensing mutation fails independent economic criterion. | Source/treatment admission and broader contracts remain open; payment-date2028 report is partial. Continue borrowing classification and remaining original failures. |
 | SIM-F043 | The exact Machine20 case now executes: identical first-close reports and carrying value20, then next charges10 and20 under supplied lives2 and1. All native years complete. | Retain this native annual-method evidence; broader asset methods, industry applicability and package acceptance remain open. |

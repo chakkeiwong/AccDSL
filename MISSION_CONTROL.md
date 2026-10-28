@@ -1,5 +1,19 @@
 # AccDSL mission control
 
+## Book debt and contractual promise — 28 October2026
+
+SIM-F026 passes109 exact checks across21 solver and6 native report cases.
+Book100 retains face100/discount0 or face110/discount10 in the supplied finite
+bridge. With gross21/20, face110 values at2200/21; substituting book as promise
+misprices by200/21. Native reports preserve different contract memory behind
+identical statements. Result: company-state-book-contract-failure-20261028/result.md
+under data/accounting-master. No actual contract or native repayment admission.
+
+Twenty-eight original rows reviewed;173 outside this pass. Main reading336/831,
+resume337. Original criteria/statuses and releases persist. E3 deferred.
+Continue T03 issuer principal/carrying/adjustment mapping and independent ready work.
+
+
 ## Ordered main reading through336 — 28 October2026
 
 Twelve further pages325–336 are individually read with43 exact checks.
